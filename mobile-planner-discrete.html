@@ -1,0 +1,1432 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discrete (Grid-based) planners &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=006115fc" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Map classes" href="mobile-planner-map.html" />
+    <link rel="prev" title="Continuous configuration-space planners" href="mobile-planner-continuous.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle.html">Motion models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="mobile-planner.html">Path planning</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-continuous.html">Continuous configuration-space planners</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Discrete (Grid-based) planners</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#distance-transform-planner">Distance transform planner</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner"><code class="docutils literal notranslate"><span class="pre">DistanceTransformPlanner</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#d-planner">D* planner</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner"><code class="docutils literal notranslate"><span class="pre">DstarPlanner</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#lattice-planner">Lattice planner</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner"><code class="docutils literal notranslate"><span class="pre">LatticePlanner</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-map.html">Map classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-base.html">Supporting classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="mobile.html">Mobile robots</a></li>
+          <li class="breadcrumb-item"><a href="mobile-planner.html">Path planning</a></li>
+      <li class="breadcrumb-item active">Discrete (Grid-based) planners</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="discrete-grid-based-planners">
+<h1>Discrete (Grid-based) planners<a class="headerlink" href="#discrete-grid-based-planners" title="Link to this heading"></a></h1>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Planner</p></th>
+<th class="head"><p>Plans in</p></th>
+<th class="head"><p>Discrete/Continuous</p></th>
+<th class="head"><p>Obstacle avoidance</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="mobile-reactive.html#roboticstoolbox.mobile.Bug2" title="roboticstoolbox.mobile.Bug2"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bug2</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span></p></td>
+<td><p>discrete</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner" title="roboticstoolbox.mobile.DistanceTransformPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistanceTransformPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span></p></td>
+<td><p>discrete</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner" title="roboticstoolbox.mobile.DstarPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">DstarPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span></p></td>
+<td><p>discrete</p></td>
+<td><p>yes</p></td>
+</tr>
+</tbody>
+</table>
+<section id="distance-transform-planner">
+<h2>Distance transform planner<a class="headerlink" href="#distance-transform-planner" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DistanceTransformPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DistanceTransformPlanner.html#DistanceTransformPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
+<p>Distance transform path planner</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>occgrid</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOccGrid</span></code> or ndarray(h,w)) – occupancy grid</p></li>
+<li><p><strong>metric</strong> (<em>str optional</em>) – distane metric, one of: “euclidean” [default], “manhattan”</p></li>
+<li><p><strong>kwargs</strong> – common planner options, see <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p>Capability</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Plan</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span>, discrete</p></td>
+</tr>
+<tr class="row-odd"><td><p>Obstacle avoidance</p></td>
+<td><p>Yes, occupancy grid</p></td>
+</tr>
+<tr class="row-even"><td><p>Curvature</p></td>
+<td><p>Discontinuous</p></td>
+</tr>
+<tr class="row-odd"><td><p>Motion</p></td>
+<td><p>Omnidirectional</p></td>
+</tr>
+</tbody>
+</table>
+<p>Creates a planner that finds the path between two points in the 2D grid
+using omnidirectional motion and avoiding occupied cells.  The path
+comprises a set of 4- or -way connected points in adjacent cells.  Also
+known as the wavefront, grassfire or brushfire planning algorithm.</p>
+<p>The map is described by a 2D occupancy <code class="docutils literal notranslate"><span class="pre">occgrid</span></code> whose elements are zero
+if traversable of nonzero if untraversable, ie. an obstacle.</p>
+<p>The cells are assumed to be unit squares. Crossing the cell horizontally or
+vertically is a travel distance of 1, and for the Euclidean distance
+measure, the crossing the cell diagonally is a distance of <span class="math notranslate nohighlight">\(\sqrt{2}\)</span>.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">DistanceTransformPlanner</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simplegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">));</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">simplegrid</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">DistanceTransformPlanner</span><span class="p">(</span><span class="n">simplegrid</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">distance</span><span class="o">=</span><span class="s2">&quot;manhattan&quot;</span><span class="p">);</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="go">[[5 5 5 4 3 2 1]</span>
+<span class="go"> [4 3 2 1 1 1 1]]</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The distance planner is iterative and implemented in Python, will
+be slow for very large occupancy grids.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Peter Corke</p>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plan" title="roboticstoolbox.mobile.DistanceTransformPlanner.plan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plan()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.query" title="roboticstoolbox.mobile.DistanceTransformPlanner.query"><code class="xref py py-meth docutils literal notranslate"><span class="pre">query()</span></code></a> <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.metric">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">metric</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.metric" title="Link to this definition"></a></dt>
+<dd><p>Get the distance metric</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Get the metric, either “euclidean” or “manhattan”</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.distancemap">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">distancemap</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.distancemap" title="Link to this definition"></a></dt>
+<dd><p>Get the distance map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>distance map</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(h,w)</p>
+</dd>
+</dl>
+<p>The 2D array, the same size as the passed occupancy grid, has elements
+equal to nan if they contain an obstacle, otherwise the minimum
+obstacle-free distance to the goal using the particular distance metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.plan">
+<span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DistanceTransformPlanner.html#DistanceTransformPlanner.plan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plan" title="Link to this definition"></a></dt>
+<dd><p>Plan path using distance transform</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span>, defaults to previously set value</p>
+</dd>
+</dl>
+<p>Compute the distance transform for all non-obstacle cells, which is the
+minimum obstacle-free distance to the goal using the particular distance
+metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.query" title="roboticstoolbox.mobile.DistanceTransformPlanner.query"><code class="xref py py-meth docutils literal notranslate"><span class="pre">query()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.next">
+<span class="sig-name descname"><span class="pre">next</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DistanceTransformPlanner.html#DistanceTransformPlanner.next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.next" title="Link to this definition"></a></dt>
+<dd><p>Find next point on the path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – current robot position</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – no plan has been computed</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>next robot position</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>Return the robot position that is one step closer to the goal. Called
+by <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.query" title="roboticstoolbox.mobile.DistanceTransformPlanner.query"><code class="xref py py-meth docutils literal notranslate"><span class="pre">query()</span></code></a> to find a path from start to goal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plan" title="roboticstoolbox.mobile.DistanceTransformPlanner.plan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plan()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.query" title="roboticstoolbox.mobile.DistanceTransformPlanner.query"><code class="xref py py-meth docutils literal notranslate"><span class="pre">query()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.plot_3d">
+<span class="sig-name descname"><span class="pre">plot_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DistanceTransformPlanner.html#DistanceTransformPlanner.plot_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot_3d" title="Link to this definition"></a></dt>
+<dd><p>Plot path on 3D cost surface</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – robot path, defaults to None</p></li>
+<li><p><strong>ls</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – dictionary of Matplotlib linestyle options, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Matplotlib 3D axes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Axes</p>
+</dd>
+</dl>
+<p>Creates a 3D plot showing distance from the goal as a cost surface.
+Overlays the path if given.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The visualization is poor because of Matplotlib’s poor hidden
+line/surface handling.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.goal">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.goal" title="Link to this definition"></a></dt>
+<dd><p>Set/get goal point or configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return goal pointor configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2) or ndarray(3)</p>
+</dd>
+<dt class="field-odd">Setter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set goal point or configuration</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like(2) or array_like(3)</p>
+</dd>
+</dl>
+<p>The goal is either a point <span class="math notranslate nohighlight">\((x, y)\)</span> or a configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.goal" title="roboticstoolbox.mobile.DistanceTransformPlanner.goal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">goal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.isoccupied">
+<span class="sig-name descname"><span class="pre">isoccupied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.isoccupied" title="Link to this definition"></a></dt>
+<dd><p>Test if point is occupied (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – world coordinate (x, y)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>occupancy status of corresponding grid cell</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p>The world coordinate is transformed and the status of the occupancy
+grid cell is returned.  If the point lies outside the bounds of
+the occupancy grid return True (obstacle)</p>
+<p>If there is no occupancy grid this function always returns False (free).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.occgrid" title="roboticstoolbox.mobile.DistanceTransformPlanner.occgrid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">occgrid()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.validate_endpoint" title="roboticstoolbox.mobile.DistanceTransformPlanner.validate_endpoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_endpoint()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">BinaryOccGrid.isoccupied()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.occgrid">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">occgrid</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.occgrid" title="Link to this definition"></a></dt>
+<dd><p>Occupancy grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>occupancy grid used for planning</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">OccGrid</span></code> or subclass or None</p>
+</dd>
+</dl>
+<p>Returns the occupancy grid that was optionally inflated at constructor time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.validate_endpoint" title="roboticstoolbox.mobile.DistanceTransformPlanner.validate_endpoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_endpoint()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.isoccupied" title="roboticstoolbox.mobile.DistanceTransformPlanner.isoccupied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">isoccupied()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_marker_reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_vehicle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_vehicle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bgargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot" title="Link to this definition"></a></dt>
+<dd><p>Plot vehicle path (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>(</em><em>N</em><em>, </em><em>2</em><em>) or </em><em>ndarray</em><em>(</em><em>N</em><em>, </em><em>3</em><em>)</em>) – path, defaults to None</p></li>
+<li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
+<li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
+<li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
+<li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg" title="roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plots the start and goal location/pose if they are specified by
+<code class="docutils literal notranslate"><span class="pre">start</span></code> or <code class="docutils literal notranslate"><span class="pre">goal</span></code> or were set by the object constructor or
+<code class="docutils literal notranslate"><span class="pre">plan</span></code> or <code class="docutils literal notranslate"><span class="pre">query</span></code> method.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> have length 2, planning in
+<span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span>, then markers are drawn using styles specified by
+<code class="docutils literal notranslate"><span class="pre">start_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">end_marker</span></code> which are dicts using Matplotlib
+keywords, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">planner</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If the <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> have length 3, planning in <span class="math notranslate nohighlight">\(\SE{2}\)</span>,
+and <code class="docutils literal notranslate"><span class="pre">configspace</span></code> is False, then direction-indicating markers are used
+to display start and goal configuration. These are also given as dicts
+but have two items: <code class="docutils literal notranslate"><span class="pre">'shape'</span></code> which is the shape of the polygonal
+marker and is either <code class="docutils literal notranslate"><span class="pre">'triangle'</span></code> or <code class="docutils literal notranslate"><span class="pre">'car'</span></code>.  The second item
+<code class="docutils literal notranslate"><span class="pre">'args'</span></code> is passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">base.plot_poly()</span></code> and Matplotlib and could
+have values such as <code class="docutils literal notranslate"><span class="pre">filled=True</span></code> or <code class="docutils literal notranslate"><span class="pre">color</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">configspace</span></code> is False then a 3D plot is created and the start and
+goal are indicated by Matplotlib markers specified by the dicts
+<code class="docutils literal notranslate"><span class="pre">start_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">end_marker</span></code></p>
+<p>Default values are provided for all markers:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the start point is a circle</p></li>
+<li><p>the goal point is a star</p></li>
+<li><p>the start vehicle style is a <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(shape='car')</span></code> as
+an unfilled outline</p></li>
+<li><p>the goal vehicle style is a <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(shape='car')</span></code> as
+a transparent filled shape</p></li>
+</ul>
+</div></blockquote>
+<p>If <code class="docutils literal notranslate"><span class="pre">background</span></code> is True then the background of the plot is either or
+both of:</p>
+<ul class="simple">
+<li><p>the occupancy grid</p></li>
+<li><p>the distance field of the planner</p></li>
+</ul>
+<p>Additional arguments <code class="docutils literal notranslate"><span class="pre">bgargs</span></code> can be passed through to <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg" title="roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">path</span></code> is specified it has one column per point and either 2 or 3 rows:</p>
+<ul class="simple">
+<li><p>2 rows describes motion in the <span class="math notranslate nohighlight">\(xy\)</span>-plane and a 2D plot  is created</p></li>
+<li><p>3 rows describes motion in the <span class="math notranslate nohighlight">\(xy\theta\)</span>-configuration space. By
+default only the <span class="math notranslate nohighlight">\(xy\)</span>-plane is plotted unless <code class="docutils literal notranslate"><span class="pre">configspace</span></code>
+is True in which case motion in <span class="math notranslate nohighlight">\(xy\theta\)</span>-configuration space
+is shown as a 3D plot.</p></li>
+</ul>
+<p>If the planner supports bi-directional motion then the <code class="docutils literal notranslate"><span class="pre">direction</span></code>
+option gives the direction for each point on the path.</p>
+<p>Forward motion segments are drawn using style information from <code class="docutils literal notranslate"><span class="pre">line</span></code>
+while reverse motion segments are drawn using style information from
+<code class="docutils literal notranslate"><span class="pre">line_r</span></code>. These are each a sequence of dicts of Matplotlib plot
+options which can draw an arbitrary number of lines on top of each
+other.  The default:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">{</span><span class="n">color</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">:</span><span class="mi">4</span><span class="p">},</span>
+        <span class="p">{</span><span class="n">color</span><span class="p">:</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="n">dashes</span><span class="p">:(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>will draw a blackline of width 4 with a dashed yellow line of width 3
+plotted on top, giving a line of alternating black and yellow dashes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg" title="roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a> <code class="xref py py-func docutils literal notranslate"><span class="pre">base.plot_poly()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg">
+<span class="sig-name descname"><span class="pre">plot_bg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inflated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg" title="Link to this definition"></a></dt>
+<dd><p>Plot background (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – override distance field, defaults to None</p></li>
+<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
+</ul>
+</dd>
+</dl>
+<p>Displays the background which is either the occupancy grid or a distance
+field.  The distance field encodes the distance of a point from the goal, small
+distance is dark, a large distance is bright.</p>
+<dl class="simple">
+<dt>If the planner has an occupancy grid then that will be displayed with:</dt><dd><ul class="simple">
+<li><p>free cells in white</p></li>
+<li><p>occupied cells in red</p></li>
+<li><p>inflated occupied cells in pink</p></li>
+</ul>
+</dd>
+</dl>
+<p>If distance is provided, or the planner has a distancemap attribute
+the the distance field will be used as the background and obstacle cells
+(actual or inflated) will be shown in red. A colorbar is added.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.query">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">movie</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.query" title="Link to this definition"></a></dt>
+<dd><p>Find a path from start to goal using planner (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value specified to constructor</p></li>
+<li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value specified to constructor</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>next</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – invoke <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.next" title="roboticstoolbox.mobile.DistanceTransformPlanner.next"><code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code></a> method of class, defaults to True</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – show the vehicle path, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>path from start to goal, one point <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span> per row</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(N,2) or ndarray(N,3)</p>
+</dd>
+</dl>
+<p>Find a path from <code class="docutils literal notranslate"><span class="pre">start</span></code> to <code class="docutils literal notranslate"><span class="pre">goal</span></code> using a previously computed plan.</p>
+<p>This is a generic method that works for any planner
+(<span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span> or <span class="math notranslate nohighlight">\(\SE{2}\)</span>) that can incrementally
+determine the next point on the path.  The method performs the following
+steps:</p>
+<ul class="simple">
+<li><p>Validate start and goal</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">animate</span></code>, visualize the environment using <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot" title="roboticstoolbox.mobile.DistanceTransformPlanner.plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+<li><p>Iterate on the class’s <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.next" title="roboticstoolbox.mobile.DistanceTransformPlanner.next"><code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code></a> method until the <code class="docutils literal notranslate"><span class="pre">goal</span></code> is
+achieved, and if <code class="docutils literal notranslate"><span class="pre">animate</span></code> plot points.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.next" title="roboticstoolbox.mobile.DistanceTransformPlanner.next"><code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plan" title="roboticstoolbox.mobile.DistanceTransformPlanner.plan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plan()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.start">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.start" title="Link to this definition"></a></dt>
+<dd><p>Set/get start point or configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return start point or configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2) or ndarray(3)</p>
+</dd>
+<dt class="field-odd">Setter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set start point or configuration</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like(2) or array_like(3)</p>
+</dd>
+</dl>
+<p>The start is either a point <span class="math notranslate nohighlight">\((x, y)\)</span> or a configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.goal" title="roboticstoolbox.mobile.DistanceTransformPlanner.goal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">goal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.validate_endpoint">
+<span class="sig-name descname"><span class="pre">validate_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.validate_endpoint" title="Link to this definition"></a></dt>
+<dd><p>Validate start or goal point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>The coordinate is tested to be a free cell in the occupancy grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.isoccupied" title="roboticstoolbox.mobile.DistanceTransformPlanner.isoccupied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">isoccupied()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.occgrid" title="roboticstoolbox.mobile.DistanceTransformPlanner.occgrid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">occgrid()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner.verbose">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner.verbose" title="Link to this definition"></a></dt>
+<dd><p>Get verbosity</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>verbosity</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
+message channel.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="d-planner">
+<h2>D* planner<a class="headerlink" href="#d-planner" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DstarPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">costmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DstarPlanner.html#DstarPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
+<p>D* path planner</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>costmap</strong> (<em>OccGrid</em><em> or </em><em>ndarray</em><em>(</em><em>w</em><em>,</em><em>h</em><em>)</em>) – traversability costmap</p></li>
+<li><p><strong>kwargs</strong> – common planner options, see <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p>Capability</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Plan</p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span>, discrete</p></td>
+</tr>
+<tr class="row-odd"><td><p>Obstacle avoidance</p></td>
+<td><p>Yes, occupancy grid</p></td>
+</tr>
+<tr class="row-even"><td><p>Curvature</p></td>
+<td><p>Discontinuous</p></td>
+</tr>
+<tr class="row-odd"><td><p>Motion</p></td>
+<td><p>Omnidirectional</p></td>
+</tr>
+</tbody>
+</table>
+<p>Creates a planner that finds the minimum-cost path between two points in the
+plane using omnidirectional motion.  The path comprises a set of 8-way
+connected points in adjacent cells.</p>
+<p>The map is described by a 2D <code class="docutils literal notranslate"><span class="pre">costmap</span></code> whose elements indicate the cost
+of traversing that cell.  The cost of diagonal traverse is <span class="math notranslate nohighlight">\(\sqrt{2}\)</span>
+the value of the cell.  An infinite cost indicates an untraversable cell
+or obstacle.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">DstarPlanner</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">costmap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">));</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">costmap</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">DstarPlanner</span><span class="p">(</span><span class="n">costmap</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">));</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="go">[[5 5 5 4 3 2 1]</span>
+<span class="go"> [4 3 2 1 1 1 1]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+<span class="go">_DstarStatus(cost=np.float64(6.414213562373095))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Thanks<span class="colon">:</span></dt>
+<dd class="field-odd"><p>based on D* grid planning included from <a class="reference external" href="https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning">Python Robotics</a></p>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.plan">
+<span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DstarPlanner.html#DstarPlanner.plan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.plan" title="Link to this definition"></a></dt>
+<dd><p>Plan D* path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span>, defaults to previously set value</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – animate the planning algorithm iterations, defaults to False</p></li>
+<li><p><strong>progress</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – show progress bar, defaults to True</p></li>
+</ul>
+</dd>
+</dl>
+<p>Compute the minimum-cost obstacle-free distance to the goal from all
+points in the grid.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.nexpand">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nexpand</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.nexpand" title="Link to this definition"></a></dt>
+<dd><p>Number of node expansions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>number of expansions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+</dd>
+</dl>
+<p>This number will increase during initial planning, and also if
+replanning is invoked during the <a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.query" title="roboticstoolbox.mobile.DstarPlanner.query"><code class="xref py py-meth docutils literal notranslate"><span class="pre">query()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.query">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DstarPlanner.html#DstarPlanner.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.query" title="Link to this definition"></a></dt>
+<dd><p>Find path with replanning</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – start position <span class="math notranslate nohighlight">\((x,y)\)</span></p></li>
+<li><p><strong>sensor</strong> (<em>callable</em><em>, </em><em>optional</em>) – sensor function, defaults to None</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – animate the motion of the robot, defaults to False</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – display detailed diagnostic information about D* operations, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>path from start to goal, one point <span class="math notranslate nohighlight">\((x, y)\)</span> per row</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(N,2)</p>
+</dd>
+</dl>
+<p>If <code class="docutils literal notranslate"><span class="pre">sensor</span></code> is None then the plan determined by the <code class="docutils literal notranslate"><span class="pre">plan</span></code> phase
+is used unaltered.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">sensor</span></code> is not None it must be callable, and is called at each
+step of the path with the current robot coordintes:</p>
+<blockquote>
+<div><p>sensor((x, y))</p>
+</div></blockquote>
+<p>and mimics the behaviour of a simple sensor onboard the robot which can
+dynamically change the costmap. The function return a list (0 or more)
+of 3-tuples (x, y, newcost) which are the coordinates of cells and their
+cost.  If the cost has changed this will trigger D* incremental
+replanning.  In this case the value returned by <a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.nexpand" title="roboticstoolbox.mobile.DstarPlanner.nexpand"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nexpand()</span></code></a> will
+increase, according to the severity of the replanning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.plan" title="roboticstoolbox.mobile.DstarPlanner.plan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plan()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.__str__" title="Link to this definition"></a></dt>
+<dd><p>Compact representation of the planner</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pretty printed representation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.goal">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.goal" title="Link to this definition"></a></dt>
+<dd><p>Set/get goal point or configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return goal pointor configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2) or ndarray(3)</p>
+</dd>
+<dt class="field-odd">Setter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set goal point or configuration</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like(2) or array_like(3)</p>
+</dd>
+</dl>
+<p>The goal is either a point <span class="math notranslate nohighlight">\((x, y)\)</span> or a configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.goal" title="roboticstoolbox.mobile.DstarPlanner.goal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">goal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.occgrid">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">occgrid</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.occgrid" title="Link to this definition"></a></dt>
+<dd><p>Occupancy grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>occupancy grid used for planning</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">OccGrid</span></code> or subclass or None</p>
+</dd>
+</dl>
+<p>Returns the occupancy grid that was optionally inflated at constructor time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.validate_endpoint" title="roboticstoolbox.mobile.DstarPlanner.validate_endpoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_endpoint()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">isoccupied()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_marker_reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_vehicle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_vehicle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bgargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.plot" title="Link to this definition"></a></dt>
+<dd><p>Plot vehicle path (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>(</em><em>N</em><em>, </em><em>2</em><em>) or </em><em>ndarray</em><em>(</em><em>N</em><em>, </em><em>3</em><em>)</em>) – path, defaults to None</p></li>
+<li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
+<li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
+<li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
+<li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.plot_bg" title="roboticstoolbox.mobile.DstarPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plots the start and goal location/pose if they are specified by
+<code class="docutils literal notranslate"><span class="pre">start</span></code> or <code class="docutils literal notranslate"><span class="pre">goal</span></code> or were set by the object constructor or
+<code class="docutils literal notranslate"><span class="pre">plan</span></code> or <code class="docutils literal notranslate"><span class="pre">query</span></code> method.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> have length 2, planning in
+<span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span>, then markers are drawn using styles specified by
+<code class="docutils literal notranslate"><span class="pre">start_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">end_marker</span></code> which are dicts using Matplotlib
+keywords, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">planner</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If the <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> have length 3, planning in <span class="math notranslate nohighlight">\(\SE{2}\)</span>,
+and <code class="docutils literal notranslate"><span class="pre">configspace</span></code> is False, then direction-indicating markers are used
+to display start and goal configuration. These are also given as dicts
+but have two items: <code class="docutils literal notranslate"><span class="pre">'shape'</span></code> which is the shape of the polygonal
+marker and is either <code class="docutils literal notranslate"><span class="pre">'triangle'</span></code> or <code class="docutils literal notranslate"><span class="pre">'car'</span></code>.  The second item
+<code class="docutils literal notranslate"><span class="pre">'args'</span></code> is passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">base.plot_poly()</span></code> and Matplotlib and could
+have values such as <code class="docutils literal notranslate"><span class="pre">filled=True</span></code> or <code class="docutils literal notranslate"><span class="pre">color</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">configspace</span></code> is False then a 3D plot is created and the start and
+goal are indicated by Matplotlib markers specified by the dicts
+<code class="docutils literal notranslate"><span class="pre">start_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">end_marker</span></code></p>
+<p>Default values are provided for all markers:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the start point is a circle</p></li>
+<li><p>the goal point is a star</p></li>
+<li><p>the start vehicle style is a <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(shape='car')</span></code> as
+an unfilled outline</p></li>
+<li><p>the goal vehicle style is a <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(shape='car')</span></code> as
+a transparent filled shape</p></li>
+</ul>
+</div></blockquote>
+<p>If <code class="docutils literal notranslate"><span class="pre">background</span></code> is True then the background of the plot is either or
+both of:</p>
+<ul class="simple">
+<li><p>the occupancy grid</p></li>
+<li><p>the distance field of the planner</p></li>
+</ul>
+<p>Additional arguments <code class="docutils literal notranslate"><span class="pre">bgargs</span></code> can be passed through to <a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.plot_bg" title="roboticstoolbox.mobile.DstarPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">path</span></code> is specified it has one column per point and either 2 or 3 rows:</p>
+<ul class="simple">
+<li><p>2 rows describes motion in the <span class="math notranslate nohighlight">\(xy\)</span>-plane and a 2D plot  is created</p></li>
+<li><p>3 rows describes motion in the <span class="math notranslate nohighlight">\(xy\theta\)</span>-configuration space. By
+default only the <span class="math notranslate nohighlight">\(xy\)</span>-plane is plotted unless <code class="docutils literal notranslate"><span class="pre">configspace</span></code>
+is True in which case motion in <span class="math notranslate nohighlight">\(xy\theta\)</span>-configuration space
+is shown as a 3D plot.</p></li>
+</ul>
+<p>If the planner supports bi-directional motion then the <code class="docutils literal notranslate"><span class="pre">direction</span></code>
+option gives the direction for each point on the path.</p>
+<p>Forward motion segments are drawn using style information from <code class="docutils literal notranslate"><span class="pre">line</span></code>
+while reverse motion segments are drawn using style information from
+<code class="docutils literal notranslate"><span class="pre">line_r</span></code>. These are each a sequence of dicts of Matplotlib plot
+options which can draw an arbitrary number of lines on top of each
+other.  The default:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">{</span><span class="n">color</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">:</span><span class="mi">4</span><span class="p">},</span>
+        <span class="p">{</span><span class="n">color</span><span class="p">:</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="n">dashes</span><span class="p">:(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>will draw a blackline of width 4 with a dashed yellow line of width 3
+plotted on top, giving a line of alternating black and yellow dashes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.plot_bg" title="roboticstoolbox.mobile.DstarPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a> <code class="xref py py-func docutils literal notranslate"><span class="pre">base.plot_poly()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.plot_bg">
+<span class="sig-name descname"><span class="pre">plot_bg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inflated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.plot_bg" title="Link to this definition"></a></dt>
+<dd><p>Plot background (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – override distance field, defaults to None</p></li>
+<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
+</ul>
+</dd>
+</dl>
+<p>Displays the background which is either the occupancy grid or a distance
+field.  The distance field encodes the distance of a point from the goal, small
+distance is dark, a large distance is bright.</p>
+<dl class="simple">
+<dt>If the planner has an occupancy grid then that will be displayed with:</dt><dd><ul class="simple">
+<li><p>free cells in white</p></li>
+<li><p>occupied cells in red</p></li>
+<li><p>inflated occupied cells in pink</p></li>
+</ul>
+</dd>
+</dl>
+<p>If distance is provided, or the planner has a distancemap attribute
+the the distance field will be used as the background and obstacle cells
+(actual or inflated) will be shown in red. A colorbar is added.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.start">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.start" title="Link to this definition"></a></dt>
+<dd><p>Set/get start point or configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return start point or configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2) or ndarray(3)</p>
+</dd>
+<dt class="field-odd">Setter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set start point or configuration</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like(2) or array_like(3)</p>
+</dd>
+</dl>
+<p>The start is either a point <span class="math notranslate nohighlight">\((x, y)\)</span> or a configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.goal" title="roboticstoolbox.mobile.DstarPlanner.goal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">goal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.validate_endpoint">
+<span class="sig-name descname"><span class="pre">validate_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.validate_endpoint" title="Link to this definition"></a></dt>
+<dd><p>Validate start or goal point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>The coordinate is tested to be a free cell in the occupancy grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">isoccupied()</span></code> <a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.occgrid" title="roboticstoolbox.mobile.DstarPlanner.occgrid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">occgrid()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner.verbose">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner.verbose" title="Link to this definition"></a></dt>
+<dd><p>Get verbosity</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>verbosity</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
+message channel.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="lattice-planner">
+<h2>Lattice planner<a class="headerlink" href="#lattice-planner" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">LatticePlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">costs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/LatticePlanner.html#LatticePlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
+<p>Lattice planner</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>costs</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – cost for straight, left-turn, right-turn, defaults to <span class="math notranslate nohighlight">\((1, \pi/2, \pi/2)\)</span></p></li>
+<li><p><strong>root</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – configuration of root node, defaults to (0,0,0)</p></li>
+<li><p><strong>kwargs</strong> – arguments passed to <code class="docutils literal notranslate"><span class="pre">PlannerBase</span></code> constructor</p></li>
+</ul>
+</dd>
+</dl>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p>Capability</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Plan</p></td>
+<td><p><span class="math notranslate nohighlight">\(\SE{2}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>Obstacle avoidance</p></td>
+<td><p>Yes, occupancy grid</p></td>
+</tr>
+<tr class="row-even"><td><p>Curvature</p></td>
+<td><p>Discontinuous</p></td>
+</tr>
+<tr class="row-odd"><td><p>Motion</p></td>
+<td><p>Forwards only</p></td>
+</tr>
+</tbody>
+</table>
+<p>The lattice planner incrementally builds a graph from the root vertex, at
+each iteration adding three edges to the graph:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>direction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘S’</p></td>
+<td><p>straight ahead</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘L’</p></td>
+<td><p>turn left</p></td>
+</tr>
+<tr class="row-even"><td><p>‘R’</p></td>
+<td><p>turn right</p></td>
+</tr>
+</tbody>
+</table>
+<p>If the configuration is already in the graph, the edge connects to that
+existing vertex.  The vertex is named after the sequence of moves required
+to reach it from the root.  This means, that any configuration, ie.
+<span class="math notranslate nohighlight">\((x, y, \theta)\)</span> can be reached by multiple paths and potentially have
+multiple names.  The first name assigned to a vertex is permanent and is not
+overriden.</p>
+<p>If an occupancy grid exists and the configuration is an obstacle, then
+the vertex is not added.</p>
+<p>The path through the lattice is found using A* graph search, and <code class="docutils literal notranslate"><span class="pre">costs</span></code>
+changes the weighting for path costs at query time.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">LatticePlanner</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lattice</span> <span class="o">=</span> <span class="n">LatticePlanner</span><span class="p">();</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lattice</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span><span class="n">iterations</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="go">[[0.     1.     1.    ]</span>
+<span class="go"> [0.     1.     2.    ]</span>
+<span class="go"> [0.     1.5708 1.5708]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+<span class="go">LatticeStatus(cost=2.5707963267948966, segments=[&#39;L&#39;, &#39;S&#39;], edges=[Edge{[0] -- [0L], cost=1.571}, Edge{[0L] -- [0LS], cost=1}])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner.plan" title="roboticstoolbox.mobile.LatticePlanner.plan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plan()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner.query" title="roboticstoolbox.mobile.LatticePlanner.query"><code class="xref py py-meth docutils literal notranslate"><span class="pre">query()</span></code></a> <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.plan">
+<span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/LatticePlanner.html#LatticePlanner.plan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.plan" title="Link to this definition"></a></dt>
+<dd><p>Create a lattice plan</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iterations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – number of iterations, defaults to None</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – show frontier and added vertices/edges at each iteration, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+<p>If an occupancy grid exists the if <code class="docutils literal notranslate"><span class="pre">iterations</span></code> is None the area of the
+grid will be completely filled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner.query" title="roboticstoolbox.mobile.LatticePlanner.query"><code class="xref py py-meth docutils literal notranslate"><span class="pre">query()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.query">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/LatticePlanner.html#LatticePlanner.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.query" title="Link to this definition"></a></dt>
+<dd><p>Find a path through the lattice</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>path and status</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(N,3), namedtuple</p>
+</dd>
+</dl>
+<p>The returned status value has elements:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p>Element</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cost</span></code></p></td>
+<td><p>path cost</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">segments</span></code></p></td>
+<td><p>a list containing the type of each path segment as
+a single letter code: either “L”, “R” or “S” for
+left turn, right turn or straight line respectively.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">edges</span></code></p></td>
+<td><p>successive edges of the graph <code class="docutils literal notranslate"><span class="pre">LatticeEdge</span></code> type</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner.plan" title="roboticstoolbox.mobile.LatticePlanner.plan"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plan()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/LatticePlanner.html#LatticePlanner.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.plot" title="Link to this definition"></a></dt>
+<dd><p>Plot vehicle path (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>(</em><em>N</em><em>, </em><em>2</em><em>) or </em><em>ndarray</em><em>(</em><em>N</em><em>, </em><em>3</em><em>)</em>) – path, defaults to None</p></li>
+<li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
+<li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
+<li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
+<li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plots the start and goal location/pose if they are specified by
+<code class="docutils literal notranslate"><span class="pre">start</span></code> or <code class="docutils literal notranslate"><span class="pre">goal</span></code> or were set by the object constructor or
+<code class="docutils literal notranslate"><span class="pre">plan</span></code> or <code class="docutils literal notranslate"><span class="pre">query</span></code> method.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> have length 2, planning in
+<span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span>, then markers are drawn using styles specified by
+<code class="docutils literal notranslate"><span class="pre">start_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">end_marker</span></code> which are dicts using Matplotlib
+keywords, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">planner</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If the <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> have length 3, planning in <span class="math notranslate nohighlight">\(\SE{2}\)</span>,
+and <code class="docutils literal notranslate"><span class="pre">configspace</span></code> is False, then direction-indicating markers are used
+to display start and goal configuration. These are also given as dicts
+but have two items: <code class="docutils literal notranslate"><span class="pre">'shape'</span></code> which is the shape of the polygonal
+marker and is either <code class="docutils literal notranslate"><span class="pre">'triangle'</span></code> or <code class="docutils literal notranslate"><span class="pre">'car'</span></code>.  The second item
+<code class="docutils literal notranslate"><span class="pre">'args'</span></code> is passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">base.plot_poly()</span></code> and Matplotlib and could
+have values such as <code class="docutils literal notranslate"><span class="pre">filled=True</span></code> or <code class="docutils literal notranslate"><span class="pre">color</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">configspace</span></code> is False then a 3D plot is created and the start and
+goal are indicated by Matplotlib markers specified by the dicts
+<code class="docutils literal notranslate"><span class="pre">start_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">end_marker</span></code></p>
+<p>Default values are provided for all markers:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the start point is a circle</p></li>
+<li><p>the goal point is a star</p></li>
+<li><p>the start vehicle style is a <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(shape='car')</span></code> as
+an unfilled outline</p></li>
+<li><p>the goal vehicle style is a <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(shape='car')</span></code> as
+a transparent filled shape</p></li>
+</ul>
+</div></blockquote>
+<p>If <code class="docutils literal notranslate"><span class="pre">background</span></code> is True then the background of the plot is either or
+both of:</p>
+<ul class="simple">
+<li><p>the occupancy grid</p></li>
+<li><p>the distance field of the planner</p></li>
+</ul>
+<p>Additional arguments <code class="docutils literal notranslate"><span class="pre">bgargs</span></code> can be passed through to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">path</span></code> is specified it has one column per point and either 2 or 3 rows:</p>
+<ul class="simple">
+<li><p>2 rows describes motion in the <span class="math notranslate nohighlight">\(xy\)</span>-plane and a 2D plot  is created</p></li>
+<li><p>3 rows describes motion in the <span class="math notranslate nohighlight">\(xy\theta\)</span>-configuration space. By
+default only the <span class="math notranslate nohighlight">\(xy\)</span>-plane is plotted unless <code class="docutils literal notranslate"><span class="pre">configspace</span></code>
+is True in which case motion in <span class="math notranslate nohighlight">\(xy\theta\)</span>-configuration space
+is shown as a 3D plot.</p></li>
+</ul>
+<p>If the planner supports bi-directional motion then the <code class="docutils literal notranslate"><span class="pre">direction</span></code>
+option gives the direction for each point on the path.</p>
+<p>Forward motion segments are drawn using style information from <code class="docutils literal notranslate"><span class="pre">line</span></code>
+while reverse motion segments are drawn using style information from
+<code class="docutils literal notranslate"><span class="pre">line_r</span></code>. These are each a sequence of dicts of Matplotlib plot
+options which can draw an arbitrary number of lines on top of each
+other.  The default:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">{</span><span class="n">color</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">:</span><span class="mi">4</span><span class="p">},</span>
+        <span class="p">{</span><span class="n">color</span><span class="p">:</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="n">dashes</span><span class="p">:(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>will draw a blackline of width 4 with a dashed yellow line of width 3
+plotted on top, giving a line of alternating black and yellow dashes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code> <code class="xref py py-func docutils literal notranslate"><span class="pre">base.plot_poly()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.goal">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.goal" title="Link to this definition"></a></dt>
+<dd><p>Set/get goal point or configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return goal pointor configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2) or ndarray(3)</p>
+</dd>
+<dt class="field-odd">Setter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set goal point or configuration</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like(2) or array_like(3)</p>
+</dd>
+</dl>
+<p>The goal is either a point <span class="math notranslate nohighlight">\((x, y)\)</span> or a configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner.goal" title="roboticstoolbox.mobile.LatticePlanner.goal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">goal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.occgrid">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">occgrid</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.occgrid" title="Link to this definition"></a></dt>
+<dd><p>Occupancy grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>occupancy grid used for planning</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">OccGrid</span></code> or subclass or None</p>
+</dd>
+</dl>
+<p>Returns the occupancy grid that was optionally inflated at constructor time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner.validate_endpoint" title="roboticstoolbox.mobile.LatticePlanner.validate_endpoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_endpoint()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">isoccupied()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.start">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.start" title="Link to this definition"></a></dt>
+<dd><p>Set/get start point or configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return start point or configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2) or ndarray(3)</p>
+</dd>
+<dt class="field-odd">Setter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set start point or configuration</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like(2) or array_like(3)</p>
+</dd>
+</dl>
+<p>The start is either a point <span class="math notranslate nohighlight">\((x, y)\)</span> or a configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner.goal" title="roboticstoolbox.mobile.LatticePlanner.goal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">goal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.validate_endpoint">
+<span class="sig-name descname"><span class="pre">validate_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.validate_endpoint" title="Link to this definition"></a></dt>
+<dd><p>Validate start or goal point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>The coordinate is tested to be a free cell in the occupancy grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">isoccupied()</span></code> <a class="reference internal" href="#roboticstoolbox.mobile.LatticePlanner.occgrid" title="roboticstoolbox.mobile.LatticePlanner.occgrid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">occgrid()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.verbose">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.verbose" title="Link to this definition"></a></dt>
+<dd><p>Get verbosity</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>verbosity</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
+message channel.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-Jun-2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

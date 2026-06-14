@@ -1,0 +1,1684 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roboticstoolbox.robot.IK &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=006115fc" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">roboticstoolbox.robot.IK</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roboticstoolbox.robot.IK</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author Jesse Haviland</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spatialmath</span><span class="w"> </span><span class="kn">import</span> <span class="n">SE3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox.tools.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">qpsolvers</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">qp</span>
+
+    <span class="n">_qp</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
+    <span class="n">_qp</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="IKSolution">
+<a class="viewcode-back" href="../../../IK/iksolution.html#roboticstoolbox.robot.IK.IKSolution">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IKSolution</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A dataclass for representing an IK solution</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q</span>
+<span class="sd">        The joint coordinates of the solution (ndarray). Note that these</span>
+<span class="sd">        will not be valid if failed to find a solution</span>
+<span class="sd">    success</span>
+<span class="sd">        True if a valid solution was found</span>
+<span class="sd">    iterations</span>
+<span class="sd">        How many iterations were performed</span>
+<span class="sd">    searches</span>
+<span class="sd">        How many searches were performed</span>
+<span class="sd">    residual</span>
+<span class="sd">        The final error value from the cost function</span>
+<span class="sd">    reason</span>
+<span class="sd">        The reason the IK problem failed if applicable</span>
+
+
+<span class="sd">    .. versionchanged:: 1.0.3</span>
+<span class="sd">        Added IKSolution dataclass to replace the IKsolution named tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">success</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">searches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">residual</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">success</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">searches</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">residual</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q_str</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array2string</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span>
+                <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="p">,</span>
+                <span class="n">formatter</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{:.4g}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-6</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span>
+                <span class="p">},</span>
+            <span class="p">)</span>  <span class="c1"># np.round(self.q, 4)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q_str</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">searches</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Check for analytic</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;IKSolution: q=</span><span class="si">{</span><span class="n">q_str</span><span class="si">}</span><span class="s2">, success=True&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;IKSolution: q=</span><span class="si">{</span><span class="n">q_str</span><span class="si">}</span><span class="s2">, success=False, reason=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Otherwise it is a numeric solution</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;IKSolution: q=</span><span class="si">{</span><span class="n">q_str</span><span class="si">}</span><span class="s2">, success=True,&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; iterations=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="si">}</span><span class="s2">, searches=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">searches</span><span class="si">}</span><span class="s2">,&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; residual=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">residual</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;IKSolution: q=</span><span class="si">{</span><span class="n">q_str</span><span class="si">}</span><span class="s2">, success=False, reason=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">,&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; iterations=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="si">}</span><span class="s2">, searches=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">searches</span><span class="si">}</span><span class="s2">,&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; residual=</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residual</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="IKSolver">
+<a class="viewcode-back" href="../../../IK/iksolver.html#roboticstoolbox.robot.IK.IKSolver">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IKSolver</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An abstract super class for numerical inverse kinematics (IK)</span>
+
+<span class="sd">    This class provides basic functionality to perform numerical IK. Superclasses</span>
+<span class="sd">    can inherit this class and implement the `solve` method and redefine any other</span>
+<span class="sd">    methods necessary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name</span>
+<span class="sd">        The name of the IK algorithm</span>
+<span class="sd">    ilimit</span>
+<span class="sd">        How many iterations are allowed within a search before a new search</span>
+<span class="sd">        is started</span>
+<span class="sd">    slimit</span>
+<span class="sd">        How many searches are allowed before being deemed unsuccessful</span>
+<span class="sd">    tol</span>
+<span class="sd">        Maximum allowed residual error E</span>
+<span class="sd">    mask</span>
+<span class="sd">        A 6 vector which assigns weights to Cartesian degrees-of-freedom</span>
+<span class="sd">        error priority</span>
+<span class="sd">    joint_limits</span>
+<span class="sd">        Reject solutions with joint limit violations</span>
+<span class="sd">    seed</span>
+<span class="sd">        A seed for the private RNG used to generate random joint coordinate</span>
+<span class="sd">        vectors</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    IK_NR</span>
+<span class="sd">        Implements this class using the Newton-Raphson method</span>
+<span class="sd">    IK_GN</span>
+<span class="sd">        Implements this class using the Gauss-Newton method</span>
+<span class="sd">    IK_LM</span>
+<span class="sd">        Implements this class using the Levemberg-Marquadt method</span>
+<span class="sd">    IK_QP</span>
+<span class="sd">        Implements this class using a quadratic programming approach</span>
+
+
+<span class="sd">    .. versionchanged:: 1.0.3</span>
+<span class="sd">        Added the abstract super class IKSolver</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;IK Solver&quot;</span><span class="p">,</span>
+        <span class="n">ilimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">slimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">joint_limits</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># Solver parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slimit</span> <span class="o">=</span> <span class="n">slimit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ilimit</span> <span class="o">=</span> <span class="n">ilimit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+
+        <span class="c1"># Random number generator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_private_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">We</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits</span> <span class="o">=</span> <span class="n">joint_limits</span>
+
+<div class="viewcode-block" id="IKSolver.solve">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IKSolver.solve.html#roboticstoolbox.robot.IK.IKSolver.solve">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span>
+        <span class="n">Tep</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SE3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">q0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IKSolution</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solves the IK problem</span>
+
+<span class="sd">        This method will attempt to solve the IK problem and obtain joint coordinates</span>
+<span class="sd">        which result the the end-effector pose `Tep`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ets</span>
+<span class="sd">            The ETS representing the manipulators kinematics</span>
+<span class="sd">        Tep</span>
+<span class="sd">            The desired end-effector pose</span>
+<span class="sd">        q0</span>
+<span class="sd">            The initial joint coordinate vector</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        q</span>
+<span class="sd">            The joint coordinates of the solution (ndarray). Note that these</span>
+<span class="sd">            will not be valid if failed to find a solution</span>
+<span class="sd">        success</span>
+<span class="sd">            True if a valid solution was found</span>
+<span class="sd">        iterations</span>
+<span class="sd">            How many iterations were performed</span>
+<span class="sd">        searches</span>
+<span class="sd">            How many searches were performed</span>
+<span class="sd">        residual</span>
+<span class="sd">            The final error value from the cost function</span>
+<span class="sd">        jl_valid</span>
+<span class="sd">            True if q is inbounds of the robots joint limits</span>
+<span class="sd">        reason</span>
+<span class="sd">            The reason the IK problem failed if applicable</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the largest jindex in the ETS. If this is greater than ETS.n</span>
+        <span class="c1"># then we need to pad the q vector with zeros</span>
+        <span class="n">max_jindex</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">ets</span><span class="o">.</span><span class="n">joints</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">j</span><span class="o">.</span><span class="n">jindex</span> <span class="o">&gt;</span> <span class="n">max_jindex</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+                <span class="n">max_jindex</span> <span class="o">=</span> <span class="n">j</span><span class="o">.</span><span class="n">jindex</span>  <span class="c1"># type: ignore</span>
+
+        <span class="n">q0_method</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">slimit</span><span class="p">,</span> <span class="n">max_jindex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q0_method</span><span class="p">[:,</span> <span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_q</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slimit</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">q0</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">q0_method</span><span class="p">[:,</span> <span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_q</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slimit</span><span class="p">)</span>
+
+            <span class="n">q0_method</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">=</span> <span class="n">q0</span>
+
+        <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">q0</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">q0_method</span><span class="p">[:,</span> <span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_q</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slimit</span><span class="p">)</span>
+
+            <span class="n">q0_method</span><span class="p">[:</span> <span class="n">q0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">=</span> <span class="n">q0</span>
+
+        <span class="n">q0</span> <span class="o">=</span> <span class="n">q0_method</span>
+
+        <span class="n">traj</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">methTep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Tep</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">traj</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">methTep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">Tep</span><span class="p">),</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Tep</span><span class="p">):</span>
+                    <span class="n">methTep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">A</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">methTep</span> <span class="o">=</span> <span class="n">Tep</span><span class="o">.</span><span class="n">A</span>
+        <span class="k">elif</span> <span class="n">Tep</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">traj</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">methTep</span> <span class="o">=</span> <span class="n">Tep</span>
+        <span class="k">elif</span> <span class="n">Tep</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Tep must be a 4x4 SE3 matrix&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">methTep</span> <span class="o">=</span> <span class="n">Tep</span>
+
+        <span class="k">if</span> <span class="n">traj</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">methTep</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">interations</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">searches</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">methTep</span><span class="p">):</span>
+                <span class="n">sol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">q</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">sol</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">reason</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">reason</span>
+                <span class="n">interations</span> <span class="o">+=</span> <span class="n">sol</span><span class="o">.</span><span class="n">iterations</span>
+                <span class="n">searches</span> <span class="o">+=</span> <span class="n">sol</span><span class="o">.</span><span class="n">searches</span>
+
+                <span class="k">if</span> <span class="n">sol</span><span class="o">.</span><span class="n">residual</span> <span class="o">&lt;</span> <span class="n">residual</span><span class="p">:</span>
+                    <span class="n">residual</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">residual</span>
+
+            <span class="k">return</span> <span class="n">IKSolution</span><span class="p">(</span>
+                <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span>
+                <span class="n">success</span><span class="o">=</span><span class="n">success</span><span class="p">,</span>
+                <span class="n">iterations</span><span class="o">=</span><span class="n">interations</span><span class="p">,</span>
+                <span class="n">searches</span><span class="o">=</span><span class="n">searches</span><span class="p">,</span>
+                <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+                <span class="n">reason</span><span class="o">=</span><span class="n">reason</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">methTep</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sol</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">Tep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">q0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IKSolution</span><span class="p">:</span>
+        <span class="c1"># Iteration count</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total_i</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Error flags</span>
+        <span class="n">found_with_limits</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">linalg_error</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Initialise variables</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">q0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">search</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slimit</span><span class="p">):</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q0</span><span class="p">[</span><span class="n">search</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ilimit</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c1"># Attempt a step</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">E</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">Tep</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+
+                <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+                    <span class="c1"># Abandon search and try again</span>
+                    <span class="n">linalg_error</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">break</span>
+
+                <span class="c1"># Check if we have arrived</span>
+                <span class="k">if</span> <span class="n">E</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">:</span>
+                    <span class="c1"># Wrap q to be within +- 180 deg</span>
+                    <span class="c1"># If your robot has larger than 180 deg range on a joint</span>
+                    <span class="c1"># this line should be modified in incorporate the extra range</span>
+                    <span class="n">q</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+                    <span class="c1"># Check if we have violated joint limits</span>
+                    <span class="n">jl_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_jl</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">jl_valid</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits</span><span class="p">:</span>
+                        <span class="c1"># Abandon search and try again</span>
+                        <span class="n">found_with_limits</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">IKSolution</span><span class="p">(</span>
+                            <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">],</span>
+                            <span class="n">success</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">iterations</span><span class="o">=</span><span class="n">total_i</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                            <span class="n">searches</span><span class="o">=</span><span class="n">search</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="n">residual</span><span class="o">=</span><span class="n">E</span><span class="p">,</span>
+                            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Success&quot;</span><span class="p">,</span>
+                        <span class="p">)</span>
+            <span class="n">total_i</span> <span class="o">+=</span> <span class="n">i</span>
+
+        <span class="c1"># If we make it here, then we have failed</span>
+        <span class="n">reason</span> <span class="o">=</span> <span class="s2">&quot;iteration and search limit reached&quot;</span>
+
+        <span class="k">if</span> <span class="n">linalg_error</span><span class="p">:</span>
+            <span class="n">reason</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, </span><span class="si">{</span><span class="n">linalg_error</span><span class="si">}</span><span class="s2"> numpy.LinAlgError encountered&quot;</span>
+
+        <span class="k">if</span> <span class="n">found_with_limits</span><span class="p">:</span>
+            <span class="n">reason</span> <span class="o">+=</span> <span class="s2">&quot;, solution found but violates joint limits&quot;</span>
+
+        <span class="k">return</span> <span class="n">IKSolution</span><span class="p">(</span>
+            <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span>
+            <span class="n">success</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">iterations</span><span class="o">=</span><span class="n">total_i</span><span class="p">,</span>
+            <span class="n">searches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">slimit</span><span class="p">,</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">E</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="n">reason</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="IKSolver.error">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IKSolver.error.html#roboticstoolbox.robot.IK.IKSolver.error">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Te</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the error between Te and Tep</span>
+
+<span class="sd">        Calculates the engle axis error between current end-effector pose Te and</span>
+<span class="sd">        the desired end-effector pose Tep. Also calulates the quadratic error E</span>
+<span class="sd">        which is weighted by the diagonal matrix We.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            E = \frac{1}{2} \vec{e}^{\top} \mat{W}_e \vec{e}</span>
+
+<span class="sd">        where :math:`\vec{e} \in \mathbb{R}^6` is the angle-axis error.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Te</span>
+<span class="sd">            The current end-effector pose</span>
+<span class="sd">        Tep</span>
+<span class="sd">            The desired end-effector pose</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        e</span>
+<span class="sd">            angle-axis error (6 vector)</span>
+<span class="sd">        E</span>
+<span class="sd">            The quadratic error weighted by We</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">angle_axis</span><span class="p">(</span><span class="n">Te</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">e</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">We</span> <span class="o">@</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">e</span><span class="p">,</span> <span class="n">E</span></div>
+
+
+<div class="viewcode-block" id="IKSolver.step">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IKSolver.step.html#roboticstoolbox.robot.IK.IKSolver.step">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">Tep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abstract step method</span>
+
+<span class="sd">        Superclasses will implement this method to perform a step of the</span>
+<span class="sd">        implemented IK algorithm</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ets</span>
+<span class="sd">            The ETS representing the manipulators kinematics</span>
+<span class="sd">        Tep</span>
+<span class="sd">            The desired end-effector pose</span>
+<span class="sd">        q</span>
+<span class="sd">            The current joint coordinate vector</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        numpy.LinAlgError</span>
+<span class="sd">            If a step is impossible due to a linear algebra error</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        E</span>
+<span class="sd">            The new error value</span>
+<span class="sd">        q</span>
+<span class="sd">            The new joint coordinate vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>  <span class="c1"># pragma: nocover</span></div>
+
+
+<div class="viewcode-block" id="IKSolver._random_q">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IKSolver._random_q.html#roboticstoolbox.robot.IK.IKSolver._random_q">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_random_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a random valid joint configuration using a private RNG</span>
+
+<span class="sd">        Generates a random q vector within the joint limits defined by</span>
+<span class="sd">        `ets.qlim`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ets</span>
+<span class="sd">            The ETS representing the manipulators kinematics</span>
+<span class="sd">        i</span>
+<span class="sd">            number of configurations to generate</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        q</span>
+<span class="sd">            An `i x n` ndarray of random valid joint configurations, where n</span>
+<span class="sd">            is the number of joints in the `ets`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_private_random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                    <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_private_random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                        <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                    <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">q</span></div>
+
+
+<div class="viewcode-block" id="IKSolver._check_jl">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IKSolver._check_jl.html#roboticstoolbox.robot.IK.IKSolver._check_jl">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_jl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the joints are within their respective limits</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ets</span>
+<span class="sd">            the ETS</span>
+<span class="sd">        q</span>
+<span class="sd">            the current joint coordinate vector</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        True if joints within feasible limits otherwise False</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Loop through the joints in the ETS</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="c1"># Get the corresponding joint limits</span>
+            <span class="n">ql0</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+            <span class="n">ql1</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+            <span class="c1"># Check if q exceeds the limits</span>
+            <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ql0</span> <span class="ow">or</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ql1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># If we make it here, all the joints are fine</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_null_Σ</span><span class="p">(</span><span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">ps</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pi</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formulates a relationship between joint limits and the joint velocity.</span>
+<span class="sd">    When this is projected into the null-space of the differential kinematics</span>
+<span class="sd">    to attempt to avoid exceeding joint limits</span>
+
+<span class="sd">    :param q: The joint coordinates of the robot</span>
+<span class="sd">    :param ps: The minimum angle/distance (in radians or metres) in which the joint is</span>
+<span class="sd">        allowed to approach to its limit</span>
+<span class="sd">    :param pi: The influence angle/distance (in radians or metres) in which the velocity</span>
+<span class="sd">        damper becomes active</span>
+
+<span class="sd">    :return: Σ</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="c1"># Add cost to going in the direction of joint limits, if they are within</span>
+    <span class="c1"># the influence distance</span>
+    <span class="n">Σ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">qi</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">ql0</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">ql1</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">qi</span> <span class="o">-</span> <span class="n">ql0</span> <span class="o">&lt;=</span> <span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">Σ</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(((</span><span class="n">qi</span> <span class="o">-</span> <span class="n">ql0</span><span class="p">)</span> <span class="o">-</span> <span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">ps</span> <span class="o">-</span> <span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ql1</span> <span class="o">-</span> <span class="n">qi</span> <span class="o">&lt;=</span> <span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">Σ</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(((</span><span class="n">ql1</span> <span class="o">-</span> <span class="n">qi</span><span class="p">)</span> <span class="o">-</span> <span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">ps</span> <span class="o">-</span> <span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="o">-</span><span class="n">Σ</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_calc_qnull</span><span class="p">(</span>
+    <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span>
+    <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">J</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">λΣ</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">λm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">ps</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">pi</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the desired null-space motion according to the gains λΣ and λm.</span>
+<span class="sd">    This is a helper method that is used within the `step` method of an IK solver</span>
+
+<span class="sd">    :return: qnull - the desired null-space motion</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">qnull_grad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">qnull</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="c1"># Add the joint limit avoidance if the gain is above 0</span>
+    <span class="k">if</span> <span class="n">λΣ</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Σ</span> <span class="o">=</span> <span class="n">_null_Σ</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="n">pi</span><span class="p">)</span>
+        <span class="n">qnull_grad</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">λΣ</span> <span class="o">*</span> <span class="n">Σ</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="c1"># Add the manipulability maximisation if the gain is above 0</span>
+    <span class="k">if</span> <span class="n">λm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Jm</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">jacobm</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">qnull_grad</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">λm</span> <span class="o">*</span> <span class="n">Jm</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="c1"># Calculate the null-space motion</span>
+    <span class="k">if</span> <span class="n">λΣ</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">λΣ</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">null_space</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span> <span class="o">@</span> <span class="n">J</span>
+        <span class="n">qnull</span> <span class="o">=</span> <span class="n">null_space</span> <span class="o">@</span> <span class="n">qnull_grad</span>
+
+    <span class="k">return</span> <span class="n">qnull</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="IK_NR">
+<a class="viewcode-back" href="../../../IK/ik_nr.html#roboticstoolbox.robot.IK.IK_NR">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IK_NR</span><span class="p">(</span><span class="n">IKSolver</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Newton-Raphson Numerical Inverse Kinematics Solver</span>
+
+<span class="sd">    A class which provides functionality to perform numerical inverse kinematics (IK)</span>
+<span class="sd">    using the Newton-Raphson method. See `step` method for mathematical description.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    When using this class with redundant robots (&gt;6 DoF), `pinv` must be set to `True`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name</span>
+<span class="sd">        The name of the IK algorithm</span>
+<span class="sd">    ilimit</span>
+<span class="sd">        How many iterations are allowed within a search before a new search</span>
+<span class="sd">        is started</span>
+<span class="sd">    slimit</span>
+<span class="sd">        How many searches are allowed before being deemed unsuccessful</span>
+<span class="sd">    tol</span>
+<span class="sd">        Maximum allowed residual error E</span>
+<span class="sd">    mask</span>
+<span class="sd">        A 6 vector which assigns weights to Cartesian degrees-of-freedom</span>
+<span class="sd">        error priority</span>
+<span class="sd">    joint_limits</span>
+<span class="sd">        Reject solutions with joint limit violations</span>
+<span class="sd">    seed</span>
+<span class="sd">        A seed for the private RNG used to generate random joint coordinate</span>
+<span class="sd">        vectors</span>
+<span class="sd">    pinv</span>
+<span class="sd">        If True, will use the psuedoinverse in the `step` method instead of</span>
+<span class="sd">        the normal inverse</span>
+<span class="sd">    kq</span>
+<span class="sd">        The gain for joint limit avoidance. Setting to 0.0 will remove this</span>
+<span class="sd">        completely from the solution</span>
+<span class="sd">    km</span>
+<span class="sd">        The gain for maximisation. Setting to 0.0 will remove this completely</span>
+<span class="sd">        from the solution</span>
+<span class="sd">    ps</span>
+<span class="sd">        The minimum angle/distance (in radians or metres) in which the joint is</span>
+<span class="sd">        allowed to approach to its limit</span>
+<span class="sd">    pi</span>
+<span class="sd">        The influence angle/distance (in radians or metres) in null space motion</span>
+<span class="sd">        becomes active</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following example gets the ``ets`` of a ``panda`` robot object, instantiates</span>
+<span class="sd">    the IK_NR solver class using default parameters, makes a goal pose ``Tep``,</span>
+<span class="sd">    and then solves for the joint coordinates which result in the pose ``Tep``</span>
+<span class="sd">    using the ``solve`` method.</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+<span class="sd">    &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">    &gt;&gt;&gt; panda = rtb.models.Panda().ets()</span>
+<span class="sd">    &gt;&gt;&gt; solver = rtb.IK_NR(pinv=True)</span>
+<span class="sd">    &gt;&gt;&gt; Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])</span>
+<span class="sd">    &gt;&gt;&gt; solver.solve(panda, Tep)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    When using the NR method, the initial joint coordinates :math:`q_0`, should correspond</span>
+<span class="sd">    to a non-singular manipulator pose, since it uses the manipulator Jacobian. When the</span>
+<span class="sd">    the problem is solvable, it converges very quickly. However, this method frequently</span>
+<span class="sd">    fails to converge on the goal.</span>
+
+<span class="sd">    This class supports null-space motion to assist with maximising manipulability and</span>
+<span class="sd">    avoiding joint limits. These are enabled by setting kq and km to non-zero values.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - J. Haviland, and P. Corke. &quot;Manipulator Differential Kinematics Part I:</span>
+<span class="sd">      Kinematics, Velocity, and Applications.&quot; arXiv preprint arXiv:2207.01796 (2022).</span>
+<span class="sd">    - J. Haviland, and P. Corke. &quot;Manipulator Differential Kinematics Part II:</span>
+<span class="sd">      Acceleration and Advanced Applications.&quot; arXiv preprint arXiv:2207.01794 (2022).</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    IKSolver</span>
+<span class="sd">        An abstract super class for numerical IK solvers</span>
+<span class="sd">    IK_GN</span>
+<span class="sd">        Implements the IKSolver class using the Gauss-Newton method</span>
+<span class="sd">    IK_LM</span>
+<span class="sd">        Implements the IKSolver class using the Levemberg-Marquadt method</span>
+<span class="sd">    IK_QP</span>
+<span class="sd">        Implements the IKSolver class using a quadratic programming approach</span>
+
+
+<span class="sd">    .. versionchanged:: 1.0.3</span>
+<span class="sd">        Added the Newton-Raphson IK solver class</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;IK Solver&quot;</span><span class="p">,</span>
+        <span class="n">ilimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">slimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">joint_limits</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pinv</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">kq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">km</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">ps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">pi</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">ilimit</span><span class="o">=</span><span class="n">ilimit</span><span class="p">,</span>
+            <span class="n">slimit</span><span class="o">=</span><span class="n">slimit</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">joint_limits</span><span class="o">=</span><span class="n">joint_limits</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pinv</span> <span class="o">=</span> <span class="n">pinv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">=</span> <span class="n">kq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">=</span> <span class="n">km</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps</span> <span class="o">=</span> <span class="n">ps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pi</span> <span class="o">=</span> <span class="n">pi</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;NR (pinv=</span><span class="si">{</span><span class="n">pinv</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot; Σ&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot; Jm&quot;</span>
+
+<div class="viewcode-block" id="IK_NR.step">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IK_NR.step.html#roboticstoolbox.robot.IK.IK_NR.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">Tep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a single iteration of the Newton-Raphson optimisation method</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ets</span>
+<span class="sd">            The ETS representing the manipulators kinematics</span>
+<span class="sd">        Tep</span>
+<span class="sd">            The desired end-effector pose</span>
+<span class="sd">        q</span>
+<span class="sd">            The current joint coordinate vector</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        numpy.LinAlgError</span>
+<span class="sd">            If a step is impossible due to a linear algebra error</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        E</span>
+<span class="sd">            The new error value</span>
+<span class="sd">        q</span>
+<span class="sd">            The new joint coordinate vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">Te</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">e</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Te</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
+
+        <span class="n">J</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="c1"># Null-space motion</span>
+        <span class="n">qnull</span> <span class="o">=</span> <span class="n">_calc_qnull</span><span class="p">(</span>
+            <span class="n">ets</span><span class="o">=</span><span class="n">ets</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">λΣ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kq</span><span class="p">,</span> <span class="n">λm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pinv</span><span class="p">:</span>
+            <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span> <span class="o">@</span> <span class="n">e</span> <span class="o">+</span> <span class="n">qnull</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span> <span class="o">@</span> <span class="n">e</span> <span class="o">+</span> <span class="n">qnull</span>
+
+        <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="IK_LM">
+<a class="viewcode-back" href="../../../IK/ik_lm.html#roboticstoolbox.robot.IK.IK_LM">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IK_LM</span><span class="p">(</span><span class="n">IKSolver</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Levemberg-Marquadt Numerical Inverse Kinematics Solver</span>
+
+<span class="sd">    A class which provides functionality to perform numerical inverse kinematics (IK)</span>
+<span class="sd">    using the Levemberg-Marquadt method. See ``step`` method for mathematical description.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name</span>
+<span class="sd">        The name of the IK algorithm</span>
+<span class="sd">    ilimit</span>
+<span class="sd">        How many iterations are allowed within a search before a new search</span>
+<span class="sd">        is started</span>
+<span class="sd">    slimit</span>
+<span class="sd">        How many searches are allowed before being deemed unsuccessful</span>
+<span class="sd">    tol</span>
+<span class="sd">        Maximum allowed residual error E</span>
+<span class="sd">    mask</span>
+<span class="sd">        A 6 vector which assigns weights to Cartesian degrees-of-freedom</span>
+<span class="sd">        error priority</span>
+<span class="sd">    joint_limits</span>
+<span class="sd">        Reject solutions with joint limit violations</span>
+<span class="sd">    seed</span>
+<span class="sd">        A seed for the private RNG used to generate random joint coordinate</span>
+<span class="sd">        vectors</span>
+<span class="sd">    k</span>
+<span class="sd">        Sets the gain value for the damping matrix Wn in the ``step`` method. See</span>
+<span class="sd">        notes</span>
+<span class="sd">    method</span>
+<span class="sd">        One of &quot;chan&quot;, &quot;sugihara&quot; or &quot;wampler&quot;. Defines which method is used</span>
+<span class="sd">        to calculate the damping matrix Wn in the ``step`` method</span>
+<span class="sd">    kq</span>
+<span class="sd">        The gain for joint limit avoidance. Setting to 0.0 will remove this</span>
+<span class="sd">        completely from the solution</span>
+<span class="sd">    km</span>
+<span class="sd">        The gain for maximisation. Setting to 0.0 will remove this completely</span>
+<span class="sd">        from the solution</span>
+<span class="sd">    ps</span>
+<span class="sd">        The minimum angle/distance (in radians or metres) in which the joint is</span>
+<span class="sd">        allowed to approach to its limit</span>
+<span class="sd">    pi</span>
+<span class="sd">        The influence angle/distance (in radians or metres) in null space motion</span>
+<span class="sd">        becomes active</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following example gets the ``ets`` of a ``panda`` robot object, instantiates</span>
+<span class="sd">    the IK_LM solver class using default parameters, makes a goal pose ``Tep``,</span>
+<span class="sd">    and then solves for the joint coordinates which result in the pose ``Tep``</span>
+<span class="sd">    using the `solve` method.</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+<span class="sd">    &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">    &gt;&gt;&gt; panda = rtb.models.Panda().ets()</span>
+<span class="sd">    &gt;&gt;&gt; solver = rtb.IK_LM()</span>
+<span class="sd">    &gt;&gt;&gt; Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])</span>
+<span class="sd">    &gt;&gt;&gt; solver.solve(panda, Tep)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are</span>
+<span class="sd">    using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,</span>
+<span class="sd">    ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``</span>
+
+<span class="sd">    When using the this method, the initial joint coordinates :math:`q_0`, should correspond</span>
+<span class="sd">    to a non-singular manipulator pose, since it uses the manipulator Jacobian.</span>
+
+<span class="sd">    This class supports null-space motion to assist with maximising manipulability and</span>
+<span class="sd">    avoiding joint limits. These are enabled by setting kq and km to non-zero values.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - J. Haviland, and P. Corke. &quot;Manipulator Differential Kinematics Part I:</span>
+<span class="sd">      Kinematics, Velocity, and Applications.&quot; arXiv preprint arXiv:2207.01796 (2022).</span>
+<span class="sd">    - J. Haviland, and P. Corke. &quot;Manipulator Differential Kinematics Part II:</span>
+<span class="sd">      Acceleration and Advanced Applications.&quot; arXiv preprint arXiv:2207.01794 (2022).</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    IKSolver</span>
+<span class="sd">        An abstract super class for numerical IK solvers</span>
+<span class="sd">    IK_NR</span>
+<span class="sd">        Implements the IKSolver class using the Newton-Raphson method</span>
+<span class="sd">    IK_GN</span>
+<span class="sd">        Implements the IKSolver class using the Gauss-Newton method</span>
+<span class="sd">    IK_QP</span>
+<span class="sd">        Implements the IKSolver class using a quadratic programming approach</span>
+
+
+<span class="sd">    .. versionchanged:: 1.0.3</span>
+<span class="sd">        Added the Levemberg-Marquadt IK solver class</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;IK Solver&quot;</span><span class="p">,</span>
+        <span class="n">ilimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">slimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">joint_limits</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;chan&quot;</span><span class="p">,</span>
+        <span class="n">kq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">km</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">ps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">pi</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">ilimit</span><span class="o">=</span><span class="n">ilimit</span><span class="p">,</span>
+            <span class="n">slimit</span><span class="o">=</span><span class="n">slimit</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">joint_limits</span><span class="o">=</span><span class="n">joint_limits</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sugi&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;Sugihara&quot;</span>
+        <span class="k">elif</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;wamp&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;Wampler&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;Chan&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">=</span> <span class="n">kq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">=</span> <span class="n">km</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps</span> <span class="o">=</span> <span class="n">ps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pi</span> <span class="o">=</span> <span class="n">pi</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;LM (</span><span class="si">{</span><span class="n">method_name</span><span class="si">}</span><span class="s2"> λ=</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot; Σ&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot; Jm&quot;</span>
+
+<div class="viewcode-block" id="IK_LM.step">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IK_LM.step.html#roboticstoolbox.robot.IK.IK_LM.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">Tep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a single iteration of the Levenberg-Marquadt optimisation</span>
+
+<span class="sd">        The operation is defined by the choice of `method` when instantiating the class.</span>
+
+<span class="sd">        The next step is deined as</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \vec{q}_{k+1}</span>
+<span class="sd">            &amp;=</span>
+<span class="sd">            \vec{q}_k +</span>
+<span class="sd">            \left(</span>
+<span class="sd">                \mat{A}_k</span>
+<span class="sd">            \right)^{-1}</span>
+<span class="sd">            \bf{g}_k \\</span>
+<span class="sd">            %</span>
+<span class="sd">            \mat{A}_k</span>
+<span class="sd">            &amp;=</span>
+<span class="sd">            {\mat{J}(\vec{q}_k)}^\top</span>
+<span class="sd">            \mat{W}_e \</span>
+<span class="sd">            {\mat{J}(\vec{q}_k)}</span>
+<span class="sd">            +</span>
+<span class="sd">            \mat{W}_n</span>
+
+<span class="sd">        where :math:`\mat{W}_n = \text{diag}(\vec{w_n})(\vec{w_n} \in \mathbb{R}^n_{&gt;0})` is a</span>
+<span class="sd">        diagonal damping matrix. The damping matrix ensures that :math:`\mat{A}_k` is</span>
+<span class="sd">        non-singular and positive definite. The performance of the LM method largely depends</span>
+<span class="sd">        on the choice of :math:`\mat{W}_n`.</span>
+
+<span class="sd">        **Chan&#39;s Method**</span>
+
+<span class="sd">        Chan proposed</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \mat{W}_n</span>
+<span class="sd">            =</span>
+<span class="sd">            λ E_k \mat{1}_n</span>
+
+<span class="sd">        where λ is a constant which reportedly does not have much influence on performance.</span>
+<span class="sd">        Use the kwarg `k` to adjust the weighting term λ.</span>
+
+<span class="sd">        **Sugihara&#39;s Method**</span>
+
+<span class="sd">        Sugihara proposed</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \mat{W}_n</span>
+<span class="sd">            =</span>
+<span class="sd">            E_k \mat{1}_n + \text{diag}(\hat{\vec{w}}_n)</span>
+
+<span class="sd">        where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,</span>
+<span class="sd">        and :math:`l` is the length of a typical link within the manipulator. We provide the</span>
+<span class="sd">        variable `k` as a kwarg to adjust the value of :math:`w_n`.</span>
+
+<span class="sd">        **Wampler&#39;s Method**</span>
+
+<span class="sd">        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ets</span>
+<span class="sd">            The ETS representing the manipulators kinematics</span>
+<span class="sd">        Tep</span>
+<span class="sd">            The desired end-effector pose</span>
+<span class="sd">        q</span>
+<span class="sd">            The current joint coordinate vector</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        numpy.LinAlgError</span>
+<span class="sd">            If a step is impossible due to a linear algebra error</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        E</span>
+<span class="sd">            The new error value</span>
+<span class="sd">        q</span>
+<span class="sd">            The new joint coordinate vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+        <span class="n">Te</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">e</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Te</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Sugihara&#39;s method</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># Wampler&#39;s method</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Chan&#39;s method</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">*</span> <span class="n">E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">J</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">We</span> <span class="o">@</span> <span class="n">e</span>
+
+        <span class="c1"># Null-space motion</span>
+        <span class="n">qnull</span> <span class="o">=</span> <span class="n">_calc_qnull</span><span class="p">(</span>
+            <span class="n">ets</span><span class="o">=</span><span class="n">ets</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">λΣ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kq</span><span class="p">,</span> <span class="n">λm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span>
+        <span class="p">)</span>
+
+        <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">We</span> <span class="o">@</span> <span class="n">J</span> <span class="o">+</span> <span class="n">Wn</span><span class="p">)</span> <span class="o">@</span> <span class="n">g</span> <span class="o">+</span> <span class="n">qnull</span>
+
+        <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="IK_GN">
+<a class="viewcode-back" href="../../../IK/ik_gn.html#roboticstoolbox.robot.IK.IK_GN">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IK_GN</span><span class="p">(</span><span class="n">IKSolver</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gauss-Newton Numerical Inverse Kinematics Solver</span>
+
+<span class="sd">    A class which provides functionality to perform numerical inverse kinematics (IK)</span>
+<span class="sd">    using the Gauss-Newton method. See `step` method for mathematical description.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    When using this class with redundant robots (&gt;6 DoF), ``pinv`` must be set to ``True``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name</span>
+<span class="sd">        The name of the IK algorithm</span>
+<span class="sd">    ilimit</span>
+<span class="sd">        How many iterations are allowed within a search before a new search</span>
+<span class="sd">        is started</span>
+<span class="sd">    slimit</span>
+<span class="sd">        How many searches are allowed before being deemed unsuccessful</span>
+<span class="sd">    tol</span>
+<span class="sd">        Maximum allowed residual error E</span>
+<span class="sd">    mask</span>
+<span class="sd">        A 6 vector which assigns weights to Cartesian degrees-of-freedom</span>
+<span class="sd">        error priority</span>
+<span class="sd">    joint_limits</span>
+<span class="sd">        Reject solutions with joint limit violations</span>
+<span class="sd">    seed</span>
+<span class="sd">        A seed for the private RNG used to generate random joint coordinate</span>
+<span class="sd">        vectors</span>
+<span class="sd">    pinv</span>
+<span class="sd">        If True, will use the psuedoinverse in the `step` method instead of</span>
+<span class="sd">        the normal inverse</span>
+<span class="sd">    kq</span>
+<span class="sd">        The gain for joint limit avoidance. Setting to 0.0 will remove this</span>
+<span class="sd">        completely from the solution</span>
+<span class="sd">    km</span>
+<span class="sd">        The gain for maximisation. Setting to 0.0 will remove this completely</span>
+<span class="sd">        from the solution</span>
+<span class="sd">    ps</span>
+<span class="sd">        The minimum angle/distance (in radians or metres) in which the joint is</span>
+<span class="sd">        allowed to approach to its limit</span>
+<span class="sd">    pi</span>
+<span class="sd">        The influence angle/distance (in radians or metres) in null space motion</span>
+<span class="sd">        becomes active</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following example gets the ``ets`` of a ``panda`` robot object, instantiates</span>
+<span class="sd">    the `IK_GN` solver class using default parameters, makes a goal pose ``Tep``,</span>
+<span class="sd">    and then solves for the joint coordinates which result in the pose ``Tep``</span>
+<span class="sd">    using the `solve` method.</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+<span class="sd">    &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">    &gt;&gt;&gt; panda = rtb.models.Panda().ets()</span>
+<span class="sd">    &gt;&gt;&gt; solver = rtb.IK_GN(pinv=True)</span>
+<span class="sd">    &gt;&gt;&gt; Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])</span>
+<span class="sd">    &gt;&gt;&gt; solver.solve(panda, Tep)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    When using the this method, the initial joint coordinates :math:`q_0`, should correspond</span>
+<span class="sd">    to a non-singular manipulator pose, since it uses the manipulator Jacobian. When the</span>
+<span class="sd">    the problem is solvable, it converges very quickly.</span>
+
+<span class="sd">    This class supports null-space motion to assist with maximising manipulability and</span>
+<span class="sd">    avoiding joint limits. These are enabled by setting kq and km to non-zero values.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - J. Haviland, and P. Corke. &quot;Manipulator Differential Kinematics Part I:</span>
+<span class="sd">      Kinematics, Velocity, and Applications.&quot; arXiv preprint arXiv:2207.01796 (2022).</span>
+<span class="sd">    - J. Haviland, and P. Corke. &quot;Manipulator Differential Kinematics Part II:</span>
+<span class="sd">      Acceleration and Advanced Applications.&quot; arXiv preprint arXiv:2207.01794 (2022).</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    IKSolver</span>
+<span class="sd">        An abstract super class for numerical IK solvers</span>
+<span class="sd">    IK_NR</span>
+<span class="sd">        Implements IKSolver using the Newton-Raphson method</span>
+<span class="sd">    IK_LM</span>
+<span class="sd">        Implements IKSolver using the Levemberg-Marquadt method</span>
+<span class="sd">    IK_QP</span>
+<span class="sd">        Implements IKSolver using a quadratic programming approach</span>
+
+
+<span class="sd">    .. versionchanged:: 1.0.3</span>
+<span class="sd">        Added the Gauss-Newton IK solver class</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;IK Solver&quot;</span><span class="p">,</span>
+        <span class="n">ilimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">slimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">joint_limits</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pinv</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">kq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">km</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">ps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">pi</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">ilimit</span><span class="o">=</span><span class="n">ilimit</span><span class="p">,</span>
+            <span class="n">slimit</span><span class="o">=</span><span class="n">slimit</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">joint_limits</span><span class="o">=</span><span class="n">joint_limits</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pinv</span> <span class="o">=</span> <span class="n">pinv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">=</span> <span class="n">kq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">=</span> <span class="n">km</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps</span> <span class="o">=</span> <span class="n">ps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pi</span> <span class="o">=</span> <span class="n">pi</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;GN (pinv=</span><span class="si">{</span><span class="n">pinv</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot; Σ&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot; Jm&quot;</span>
+
+<div class="viewcode-block" id="IK_GN.step">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IK_GN.step.html#roboticstoolbox.robot.IK.IK_GN.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">Tep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a single iteration of the Gauss-Newton optimisation method</span>
+
+<span class="sd">        The next step is defined as</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \vec{q}_{k+1} &amp;= \vec{q}_k +</span>
+<span class="sd">            \left(</span>
+<span class="sd">            {\mat{J}(\vec{q}_k)}^\top</span>
+<span class="sd">            \mat{W}_e \</span>
+<span class="sd">            {\mat{J}(\vec{q}_k)}</span>
+<span class="sd">            \right)^{-1}</span>
+<span class="sd">            \bf{g}_k \\</span>
+<span class="sd">            \bf{g}_k &amp;=</span>
+<span class="sd">            {\mat{J}(\vec{q}_k)}^\top</span>
+<span class="sd">            \mat{W}_e</span>
+<span class="sd">            \vec{e}_k</span>
+
+<span class="sd">        where :math:`\mat{J} = {^0\mat{J}}` is the base-frame manipulator Jacobian. If</span>
+<span class="sd">        :math:`\mat{J}(\vec{q}_k)` is non-singular, and :math:`\mat{W}_e = \mat{1}_n`, then</span>
+<span class="sd">        the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`</span>
+<span class="sd">        is singular, the above can not be computed and the GN solution is infeasible.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ets</span>
+<span class="sd">            The ETS representing the manipulators kinematics</span>
+<span class="sd">        Tep</span>
+<span class="sd">            The desired end-effector pose</span>
+<span class="sd">        q</span>
+<span class="sd">            The current joint coordinate vector</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        numpy.LinAlgError</span>
+<span class="sd">            If a step is impossible due to a linear algebra error</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        E</span>
+<span class="sd">            The new error value</span>
+<span class="sd">        q</span>
+<span class="sd">            The new joint coordinate vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+        <span class="n">Te</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">e</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Te</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
+
+        <span class="n">J</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="c1"># Null-space motion</span>
+        <span class="n">qnull</span> <span class="o">=</span> <span class="n">_calc_qnull</span><span class="p">(</span>
+            <span class="n">ets</span><span class="o">=</span><span class="n">ets</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">λΣ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kq</span><span class="p">,</span> <span class="n">λm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pinv</span><span class="p">:</span>
+            <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span> <span class="o">@</span> <span class="n">e</span> <span class="o">+</span> <span class="n">qnull</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span> <span class="o">@</span> <span class="n">e</span> <span class="o">+</span> <span class="n">qnull</span>
+
+        <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">jindices</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="IK_QP">
+<a class="viewcode-back" href="../../../IK/ik_qp.html#roboticstoolbox.robot.IK.IK_QP">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IK_QP</span><span class="p">(</span><span class="n">IKSolver</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Quadratic Progamming Numerical Inverse Kinematics Solver</span>
+
+<span class="sd">    A class which provides functionality to perform numerical inverse kinematics (IK)</span>
+<span class="sd">    using a quadratic progamming approach. See `step` method for mathematical</span>
+<span class="sd">    description.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name</span>
+<span class="sd">        The name of the IK algorithm</span>
+<span class="sd">    ilimit</span>
+<span class="sd">        How many iterations are allowed within a search before a new search</span>
+<span class="sd">        is started</span>
+<span class="sd">    slimit</span>
+<span class="sd">        How many searches are allowed before being deemed unsuccessful</span>
+<span class="sd">    tol</span>
+<span class="sd">        Maximum allowed residual error E</span>
+<span class="sd">    mask</span>
+<span class="sd">        A 6 vector which assigns weights to Cartesian degrees-of-freedom</span>
+<span class="sd">        error priority</span>
+<span class="sd">    joint_limits</span>
+<span class="sd">        Reject solutions with joint limit violations</span>
+<span class="sd">    seed</span>
+<span class="sd">        A seed for the private RNG used to generate random joint coordinate</span>
+<span class="sd">        vectors</span>
+<span class="sd">    kj</span>
+<span class="sd">        A gain for joint velocity norm minimisation</span>
+<span class="sd">    ks</span>
+<span class="sd">        A gain which adjusts the cost of slack (intentional error)</span>
+<span class="sd">    kq</span>
+<span class="sd">        The gain for joint limit avoidance. Setting to 0.0 will remove this</span>
+<span class="sd">        completely from the solution</span>
+<span class="sd">    km</span>
+<span class="sd">        The gain for maximisation. Setting to 0.0 will remove this completely</span>
+<span class="sd">        from the solution</span>
+<span class="sd">    ps</span>
+<span class="sd">        The minimum angle/distance (in radians or metres) in which the joint is</span>
+<span class="sd">        allowed to approach to its limit</span>
+<span class="sd">    pi</span>
+<span class="sd">        The influence angle/distance (in radians or metres) in null space motion</span>
+<span class="sd">        becomes active</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ImportError</span>
+<span class="sd">        If the package ``qpsolvers`` is not installed</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    The following example gets the ``ets`` of a ``panda`` robot object, instantiates</span>
+<span class="sd">    the `IK_QP` solver class using default parameters, makes a goal pose ``Tep``,</span>
+<span class="sd">    and then solves for the joint coordinates which result in the pose ``Tep``</span>
+<span class="sd">    using the `solve` method.</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+<span class="sd">    &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">    &gt;&gt;&gt; panda = rtb.models.Panda().ets()</span>
+<span class="sd">    &gt;&gt;&gt; solver = rtb.IK_QP()</span>
+<span class="sd">    &gt;&gt;&gt; Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])</span>
+<span class="sd">    &gt;&gt;&gt; solver.solve(panda, Tep)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    When using the this method, the initial joint coordinates :math:`q_0`, should correspond</span>
+<span class="sd">    to a non-singular manipulator pose, since it uses the manipulator Jacobian. When the</span>
+<span class="sd">    the problem is solvable, it converges very quickly.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - J. Haviland, and P. Corke. &quot;Manipulator Differential Kinematics Part II:</span>
+<span class="sd">      Acceleration and Advanced Applications.&quot; arXiv preprint arXiv:2207.01794 (2022).</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    IKSolver</span>
+<span class="sd">        An abstract super class for numerical IK solvers</span>
+<span class="sd">    IK_NR</span>
+<span class="sd">        Implements IKSolver class using the Newton-Raphson method</span>
+<span class="sd">    IK_GN</span>
+<span class="sd">        Implements IKSolver class using the Gauss-Newton method</span>
+<span class="sd">    IK_LM</span>
+<span class="sd">        Implements IKSolver class using the Levemberg-Marquadt method</span>
+
+
+<span class="sd">    .. versionchanged:: 1.0.3</span>
+<span class="sd">        Added the Quadratic Programming IK solver class</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;IK Solver&quot;</span><span class="p">,</span>
+        <span class="n">ilimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">slimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">joint_limits</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kj</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">ks</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">kq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">km</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">ps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">pi</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_qp</span><span class="p">:</span>  <span class="c1"># pragma: nocover</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;the package qpsolvers is required for this class. </span><span class="se">\n</span><span class="s2">Install using &#39;pip&quot;</span>
+                <span class="s2">&quot; install qpsolvers&#39;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">ilimit</span><span class="o">=</span><span class="n">ilimit</span><span class="p">,</span>
+            <span class="n">slimit</span><span class="o">=</span><span class="n">slimit</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">joint_limits</span><span class="o">=</span><span class="n">joint_limits</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kj</span> <span class="o">=</span> <span class="n">kj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ks</span> <span class="o">=</span> <span class="n">ks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">=</span> <span class="n">kq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">=</span> <span class="n">km</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps</span> <span class="o">=</span> <span class="n">ps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pi</span> <span class="o">=</span> <span class="n">pi</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;QP)&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot; Σ&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot; Jm&quot;</span>
+
+<div class="viewcode-block" id="IK_QP.step">
+<a class="viewcode-back" href="../../../IK/stubs/roboticstoolbox.robot.IK.IK_QP.step.html#roboticstoolbox.robot.IK.IK_QP.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="p">:</span> <span class="s2">&quot;rtb.ETS&quot;</span><span class="p">,</span> <span class="n">Tep</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a single iteration of the Gauss-Newton optimisation method</span>
+
+<span class="sd">        The next step is defined as</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \vec{q}_{k+1} = \vec{q}_{k} + \dot{\vec{q}}.</span>
+
+<span class="sd">        where the QP is defined as</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \min_x \quad f_o(\vec{x}) &amp;= \frac{1}{2} \vec{x}^\top \mathcal{Q} \vec{x}+ \mathcal{C}^\top \vec{x}, \\</span>
+<span class="sd">            \text{subject to} \quad \mathcal{J} \vec{x} &amp;= \vec{\nu},  \\</span>
+<span class="sd">            \mathcal{A} \vec{x} &amp;\leq \mathcal{B},  \\</span>
+<span class="sd">            \vec{x}^- &amp;\leq \vec{x} \leq \vec{x}^+</span>
+
+<span class="sd">        with</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \vec{x} &amp;=</span>
+<span class="sd">            \begin{pmatrix}</span>
+<span class="sd">                \dvec{q} \\ \vec{\delta}</span>
+<span class="sd">            \end{pmatrix} \in \mathbb{R}^{(n+6)}  \\</span>
+<span class="sd">            \mathcal{Q} &amp;=</span>
+<span class="sd">            \begin{pmatrix}</span>
+<span class="sd">                \lambda_q \mat{1}_{n} &amp; \mathbf{0}_{6 \times 6} \\ \mathbf{0}_{n \times n} &amp; \lambda_\delta \mat{1}_{6}</span>
+<span class="sd">            \end{pmatrix} \in \mathbb{R}^{(n+6) \times (n+6)} \\</span>
+<span class="sd">            \mathcal{J} &amp;=</span>
+<span class="sd">            \begin{pmatrix}</span>
+<span class="sd">                \mat{J}(\vec{q}) &amp; \mat{1}_{6}</span>
+<span class="sd">            \end{pmatrix} \in \mathbb{R}^{6 \times (n+6)} \\</span>
+<span class="sd">            \mathcal{C} &amp;=</span>
+<span class="sd">            \begin{pmatrix}</span>
+<span class="sd">                \mat{J}_m \\ \bf{0}_{6 \times 1}</span>
+<span class="sd">            \end{pmatrix} \in \mathbb{R}^{(n + 6)} \\</span>
+<span class="sd">            \mathcal{A} &amp;=</span>
+<span class="sd">            \begin{pmatrix}</span>
+<span class="sd">                \mat{1}_{n \times n + 6} \\</span>
+<span class="sd">            \end{pmatrix} \in \mathbb{R}^{(l + n) \times (n + 6)} \\</span>
+<span class="sd">            \mathcal{B} &amp;=</span>
+<span class="sd">            \eta</span>
+<span class="sd">            \begin{pmatrix}</span>
+<span class="sd">                \frac{\rho_0 - \rho_s}</span>
+<span class="sd">                        {\rho_i - \rho_s} \\</span>
+<span class="sd">                \vdots \\</span>
+<span class="sd">                \frac{\rho_n - \rho_s}</span>
+<span class="sd">                        {\rho_i - \rho_s}</span>
+<span class="sd">            \end{pmatrix} \in \mathbb{R}^{n} \\</span>
+<span class="sd">            \vec{x}^{-, +} &amp;=</span>
+<span class="sd">            \begin{pmatrix}</span>
+<span class="sd">                \dvec{q}^{-, +} \\</span>
+<span class="sd">                \vec{\delta}^{-, +}</span>
+<span class="sd">            \end{pmatrix} \in \mathbb{R}^{(n+6)},</span>
+
+<span class="sd">        where :math:`\vec{\delta} \in \mathbb{R}^6` is the slack vector,</span>
+<span class="sd">        :math:`\lambda_\delta \in \mathbb{R}^+` is a gain term which adjusts the</span>
+<span class="sd">        cost of the norm of the slack vector in the optimiser,</span>
+<span class="sd">        :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and</span>
+<span class="sd">        :math:`\dvec{\delta}^{-,+}` are the minimum and maximum slack velocities.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ets</span>
+<span class="sd">            The ETS representing the manipulators kinematics</span>
+<span class="sd">        Tep</span>
+<span class="sd">            The desired end-effector pose</span>
+<span class="sd">        q</span>
+<span class="sd">            The current joint coordinate vector</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        numpy.LinAlgError</span>
+<span class="sd">            If a step is impossible due to a linear algebra error</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        E</span>
+<span class="sd">            The new error value</span>
+<span class="sd">        q</span>
+<span class="sd">            The new joint coordinate vector</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+        <span class="n">Te</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">e</span><span class="p">,</span> <span class="n">E</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">Te</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="c1"># Quadratic component of objective function</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+
+        <span class="c1"># Joint velocity component of Q</span>
+        <span class="n">Q</span><span class="p">[:</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="p">:</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kj</span>
+
+        <span class="c1"># Slack component of Q</span>
+        <span class="n">Q</span><span class="p">[</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span> <span class="p">:,</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ks</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="c1"># The equality contraints</span>
+        <span class="n">Aeq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">J</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">6</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">beq</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">6</span><span class="p">,))</span>
+
+        <span class="c1"># The inequality constraints for joint limit avoidance</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kq</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">Ain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="nb">bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+
+            <span class="c1"># Form the joint limit velocity damper</span>
+            <span class="n">Ain_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+            <span class="n">Bin_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">ql0</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                <span class="n">ql1</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">ql1</span> <span class="o">-</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">Bin_l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">ql1</span> <span class="o">-</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">)</span>
+                    <span class="n">Ain_l</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ql0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">Bin_l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="p">(((</span><span class="n">ql0</span> <span class="o">-</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ps</span><span class="p">))</span>
+                    <span class="n">Ain_l</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+            <span class="n">Ain</span><span class="p">[:</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="p">:</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ain_l</span>
+            <span class="nb">bin</span><span class="p">[:</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">kq</span><span class="p">)</span> <span class="o">*</span> <span class="n">Bin_l</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Ain</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="nb">bin</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Manipulability maximisation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">km</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">Jm</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">jacobm</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">,))</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(((</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">km</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="n">Jm</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ets</span><span class="o">.</span><span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+
+        <span class="n">xd</span> <span class="o">=</span> <span class="n">qp</span><span class="o">.</span><span class="n">solve_qp</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">Aeq</span><span class="p">,</span> <span class="n">beq</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s2">&quot;quadprog&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">xd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: nocover</span>
+            <span class="k">raise</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">(</span><span class="s2">&quot;QP Unsolvable&quot;</span><span class="p">)</span>
+
+        <span class="n">q</span> <span class="o">+=</span> <span class="n">xd</span><span class="p">[:</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">q</span></div>
+</div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">IKSolution</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span> <span class="n">success</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">searches</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">residual</span><span class="o">=</span><span class="mf">0.1</span>
+    <span class="p">)</span>
+
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">sol</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-Jun-2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

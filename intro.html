@@ -1,0 +1,1004 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=006115fc" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Robot Arms" href="arm.html" />
+    <link rel="prev" title="Robotics Toolbox for Python" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-python-version">A Python version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spatial-math-layer">Spatial math layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#multiple-values">Multiple values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-constructors">Common constructors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-methods-and-operators">Common methods and operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance">Performance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#robotics-toolbox">Robotics Toolbox</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#robot-models">Robot models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#denavit-hartenberg-parameters">Denavit-Hartenberg parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ets-notation">ETS notation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#robot-rigid-body-tree-and-urdf-import">Robot: rigid-body tree and URDF import</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#trajectories">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#symbolic-manipulation">Symbolic manipulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#differential-kinematics">Differential kinematics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dynamics">Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#new-capability">New capability</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#branched-mechanisms">Branched mechanisms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#collision-checking">Collision checking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interfaces">Interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-engineering">Code engineering</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
+<section id="id1">
+<h2>Introduction<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>This is a modified version of a paper accepted to ICRA2021 <a class="reference internal" href="#corke21a" id="id2"><span>[corke21a]</span></a>.</p>
+<p>The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support
+Peter Corke’s PhD research and was first published in 1995-6 <a class="reference internal" href="#corke95" id="id3"><span>[Corke95]</span></a>
+<a class="reference internal" href="#corke96" id="id4"><span>[Corke96]</span></a>. It has evolved over 25 years to track changes and improvements to
+the MATLAB language and ecosystem, such as the addition of structures, objects,
+lists (cell arrays) and strings, myriad of other improvements to the language,
+new graphics and new tools such as IDE, debugger, notebooks (LiveScripts), apps
+and continuous integration.  An adverse consequence is that many poor (in
+retrospect) early design decisions hinder development.</p>
+<p>Over time additional functionality was added, in particular for vision, and two
+major refactorings led to the current state of three toolboxes: Robotics Toolbox
+for MATLAB and Machine Vision Toolbox for MATLAB (1999) both of which are built
+on the Spatial Math Toolbox for MATLAB (SMTB-M) in 2019.</p>
+<p>The code was formally open sourced to support its use for the third edition of
+John Craig’s book <a class="reference internal" href="#craig2005" id="id5"><span>[Craig2005]</span></a>. It was hosted on ftp sites, personal web
+servers, Google code and currently GitHub and maintained under a succession of
+version control tools including rcs, cvs, svn and git.  A support forum on
+Google Groups was established in 2008 and as of 2020 has over 1400 members.</p>
+</section>
+<section id="a-python-version">
+<h2>A Python version<a class="headerlink" href="#a-python-version" title="Link to this heading"></a></h2>
+<p>The imperative for a Python version has long existed and the first port was
+started in 2008 but ultimately failed for lack of ongoing resources to complete
+a sufficient subset of functionality. Subsequent attempts have all met the same
+fate.</p>
+<p>The design goals of this version can be summarised as new functionality:</p>
+<ul class="simple">
+<li><p>A superset of the MATLAB Toolbox functionality</p></li>
+<li><p>Build on the Spatial Math Toolbox for Python <a class="reference internal" href="#smtb-p" id="id6"><span>[SMTB-P]</span></a> which provides objects to
+represent rotations as SO(2) and SE(3) matrices as well as unit-quaternions;
+rigid-body motions as SE(2) and SE(3) matrices or twists in
+se(2) and se(3); and Featherstone’s spatial vectors <a class="reference internal" href="#featherstone87" id="id7"><span>[Featherstone87]</span></a>.</p></li>
+<li><p>Support models expressed using Denavit-Hartenberg notation (standard and
+modified), elementary transform sequences <a class="reference internal" href="#corke07" id="id8"><span>[Corke07]</span></a> <a class="reference internal" href="#haviland20" id="id9"><span>[Haviland20]</span></a>, and URDF-style
+rigid-body trees.  Support branched, but not closed-loop or parallel, robots</p></li>
+<li><p>Collision checking</p></li>
+</ul>
+<p>and improved software engineering:</p>
+<ul class="simple">
+<li><p>Use Python 3 (3.6 and greater)</p></li>
+<li><p>Utilize WebGL and Javascript graphics technologies</p></li>
+<li><p>Documentation in ReStructured Text using Sphinx and delivered via GitHub pages.</p></li>
+<li><p>Hosted on GitHub with continuous integration using GitHub actions</p></li>
+<li><p>High code-quality metrics for test coverage and automated code review and security analysis</p></li>
+<li><p>As few dependencies as possible, in particular being able to work with ROS but not be dependent on ROS. This sidesteps ROS constraints on operating system and Python versions.</p></li>
+<li><p>Modular approach to interfacing to different graphics libraries, simulators and physical robots.</p></li>
+<li><p>Support Python notebooks which allows publication of static notebooks (for example via GitHub) and interactive online notebooks (<a class="reference external" href="MyBinder.org">MyBinder.org</a>).</p></li>
+<li><p>Use of UniCode characters to make console output easier to read</p></li>
+</ul>
+</section>
+<section id="spatial-math-layer">
+<h2>Spatial math layer<a class="headerlink" href="#spatial-math-layer" title="Link to this heading"></a></h2>
+<p>Robotics and computer vision require us to describe position, orientation and
+pose in 3D space. Mobile robotics has the same requirement, but generally for 2D
+space. We therefore need tools to represent quantities such as rigid-body
+transformations (matrices <span class="math notranslate nohighlight">\(\in \SE{n}\)</span> or twists <span class="math notranslate nohighlight">\(\in \se{n}\)</span>),
+rotations (matrices <span class="math notranslate nohighlight">\(\in \SO{n}\)</span> or <span class="math notranslate nohighlight">\(\so{n}\)</span>, Euler or roll-pitch-yaw
+angles, or unit quaternions <span class="math notranslate nohighlight">\(\in \mathrm{S}^3\)</span>). Such capability is amongst the oldest in
+RTB-M and the equivalent functionality exists in RTB-P which makes use of the
+Spatial Maths Toolbox for Python (SMTB-P) <a class="reference internal" href="#smtb-p" id="id10"><span>[SMTB-P]</span></a>. For example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">spatialmath.base</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">transl</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">@</span> <span class="n">rpy2tr</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">)</span> <span class="o">@</span> <span class="n">trotx</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="go">[[ 0.9752 -0.1987 -0.0978  0.5   ]</span>
+<span class="go"> [ 0.1538  0.2896  0.9447  0.    ]</span>
+<span class="go"> [-0.1593 -0.9363  0.313   0.    ]</span>
+<span class="go"> [ 0.      0.      0.      1.    ]]</span>
+</pre></div>
+</div>
+<p>There is strong similarity to the equivalent MATLAB case apart from the use of
+the <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> operator, the use of keyword arguments instead of keyword-value pairs,
+and the format of the printed array. All the <em>classic</em> RTB-M functions are
+provided in the <code class="docutils literal notranslate"><span class="pre">spatialmath.base</span></code> package as well as additional functions for
+quaternions, vectors, twists and argument handling.  There are also functions to
+perform interpolation, plot and animate coordinate frames, and create movies,
+using matplotlib. The underlying datatypes in all cases are 1D and 2D NumPy
+arrays.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For a user transitioning from MATLAB the most significant difference is
+the use of 1D arrays – all MATLAB arrays have two dimensions, even if one of
+them is equal to one.</p>
+</div>
+<p>However some challenges arise when using arrays, whether native MATLAB matrices
+or NumPy arrays as in this case. Firstly, arrays are not typed and for example a
+<span class="math notranslate nohighlight">\(3 \times 3\)</span> array could be an element of <span class="math notranslate nohighlight">\(\SE{2}\)</span> or
+<span class="math notranslate nohighlight">\(\SO{3}\)</span> or an arbitrary matrix.</p>
+<p>Secondly, the operators we need for poses are a subset of those available for
+matrices, and some operators may need to be redefined in a specific way. For
+example, <span class="math notranslate nohighlight">\(\SE{3} * \SE{3} \rightarrow \SE{3}\)</span> but <span class="math notranslate nohighlight">\(\SE{3} + \SE{3} \rightarrow \mathbb{R}^{4 \times 4}\)</span>, and equality testing for a
+unit-quaternion has to respect the double mapping.</p>
+<p>Thirdly, in robotics we often need to represent time sequences of poses.  We
+could add an extra dimension to the matrices representing rigid-body
+transformations or unit-quaternions, or place them in a list.  The first
+approach is cumbersome and reduces code clarity, while the second cannot ensure
+that all elements of the list have the same type.</p>
+<p>We  use classes and data encapsulation to address all these issues. SMTB-P
+provides abstraction classes <code class="docutils literal notranslate"><span class="pre">SE3</span></code>, <code class="docutils literal notranslate"><span class="pre">Twist3</span></code>, <code class="docutils literal notranslate"><span class="pre">SO3</span></code>, <code class="docutils literal notranslate"><span class="pre">UnitQuaternion</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SE2</span></code>, <code class="docutils literal notranslate"><span class="pre">Twist2</span></code> and <code class="docutils literal notranslate"><span class="pre">SO2</span></code>. For example, the previous example could be written
+as:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">spatialmath</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="linenos"> 2</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="linenos"> 3</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="go">   0.9752   -0.1987   -0.09784   0.5       </span>
+<span class="linenos"> 5</span><span class="go">   0.1538    0.2896    0.9447    0         </span>
+<span class="linenos"> 6</span><span class="go">  -0.1593   -0.9363    0.313     0         </span>
+<span class="linenos"> 7</span><span class="go">   0         0         0         1</span>
+<span class="linenos"> 8</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">eul</span><span class="p">()</span>
+<span class="linenos"> 9</span><span class="go">array([ 1.674 ,  1.2525, -1.4022])</span>
+<span class="linenos">10</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">R</span>
+<span class="linenos">11</span><span class="go">array([[ 0.9752, -0.1987, -0.0978],</span>
+<span class="linenos">12</span><span class="go">       [ 0.1538,  0.2896,  0.9447],</span>
+<span class="linenos">13</span><span class="go">       [-0.1593, -0.9363,  0.313 ]])</span>
+<span class="linenos">14</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">t</span>
+<span class="linenos">15</span><span class="go">array([0.5, 0. , 0. ])</span>
+</pre></div>
+</div>
+<p>where composition is denoted by the <code class="docutils literal notranslate"><span class="pre">*</span></code> operator and the matrix is printed more elegantly (and elements are color
+coded at the console or in ipython).
+<code class="docutils literal notranslate"><span class="pre">SE3.RPY()</span></code> is a class method that acts like a constructor, creating an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance from a set of roll-pitch-yaw angles,
+and <code class="docutils literal notranslate"><span class="pre">SE3.Rx()</span></code> creates an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance from a pure rotation about the x-axis.
+Attempts to compose with a non <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance would result in a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p>
+<p>The orientation of the new coordinate frame may be expressed in terms of Euler angles (line 9)
+and components can be extracted such as the rotation submatrix (line 11) and translation (line 15).</p>
+<p>The pose <code class="docutils literal notranslate"><span class="pre">T</span></code> can also be displayed as a 3D coordinate frame:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Rotation can also be represented by a unit quaternion</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">spatialmath</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnitQuaternion</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">UnitQuaternion</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mf">0.3</span><span class="p">))</span>
+<span class="go"> 0.9888 &lt;&lt;  0.1494,  0.0000,  0.0000 &gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">UnitQuaternion</span><span class="o">.</span><span class="n">AngVec</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+<span class="go"> 0.9888 &lt;&lt;  0.1494,  0.0000,  0.0000 &gt;&gt;</span>
+</pre></div>
+</div>
+<p>which again demonstrates several alternative constructors.</p>
+<section id="multiple-values">
+<h3>Multiple values<a class="headerlink" href="#multiple-values" title="Link to this heading"></a></h3>
+<p>To support sequences of values each of these types inherits list properties from <code class="docutils literal notranslate"><span class="pre">collections.UserList</span></code></p>
+<figure class="align-default" id="id17">
+<a class="reference internal image-reference" href="_images/pose-values.png"><img alt="Any of the SMTB-P pose classes can contain a list of values" src="_images/pose-values.png" width="600" />
+</a>
+<figcaption>
+<p><span class="caption-text">Any of the SMTB-P pose classes can contain a list of values</span><a class="headerlink" href="#id17" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>We can index the values, iterate over the values, assign to values.
+Some constructors take an array-like argument allowing creation of multi-valued pose objects,
+for example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">spatialmath</span><span class="w"> </span><span class="kn">import</span> <span class="n">SE3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">R</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+<span class="go">100</span>
+</pre></div>
+</div>
+<p>where the instance <code class="docutils literal notranslate"><span class="pre">R</span></code> contains a sequence of 100 rotation matrices.
+Composition with a single-valued (scalar) pose instance  broadcasts the scalar
+across the sequence</p>
+<figure class="align-default" id="id18">
+<img alt="Overloaded operators support broadcasting" src="_images/broadcasting.png" />
+<figcaption>
+<p><span class="caption-text">Overloaded operators support broadcasting</span><a class="headerlink" href="#id18" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="common-constructors">
+<h3>Common constructors<a class="headerlink" href="#common-constructors" title="Link to this heading"></a></h3>
+<p>The Toolboxes classes are somewhat polymorphic and share many “variant constructors” that allow object construction:</p>
+<ul class="simple">
+<li><p>with orientation expressed in terms of canonic axis rotations, Euler vectors, angle-vector pair,
+Euler or roll-pitch-yaw angles or orientation- and approach-vectors.</p></li>
+<li><p>from random values <code class="docutils literal notranslate"><span class="pre">.Rand()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SE3</span></code>, <code class="docutils literal notranslate"><span class="pre">SE2</span></code>, <code class="docutils literal notranslate"><span class="pre">SO3</span></code> and <code class="docutils literal notranslate"><span class="pre">SO2</span></code> also support a matrix exponential constructor where the argument is the
+corresponding Lie algebra element.</p></li>
+<li><p>empty, i.e. having no values or a length of 0 <code class="docutils literal notranslate"><span class="pre">.Empty()</span></code></p></li>
+<li><p>an array of <code class="docutils literal notranslate"><span class="pre">N</span></code> values initialized to the object’s identity value <code class="docutils literal notranslate"><span class="pre">.Alloc(N)</span></code></p></li>
+</ul>
+</section>
+<section id="common-methods-and-operators">
+<h3>Common methods and operators<a class="headerlink" href="#common-methods-and-operators" title="Link to this heading"></a></h3>
+<p>The types all have an inverse method <code class="docutils literal notranslate"><span class="pre">.inv()</span></code> and support composition with the inverse using the <code class="docutils literal notranslate"><span class="pre">/</span></code> operator
+and integer exponentiation (repeated composition) using the <code class="docutils literal notranslate"><span class="pre">**</span></code> operator.
+Other overloaded operators include <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">*=</span></code>, <code class="docutils literal notranslate"><span class="pre">**</span></code>, <code class="docutils literal notranslate"><span class="pre">**=</span></code>, <code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">/=</span></code>, <code class="docutils literal notranslate"><span class="pre">==</span></code>, <code class="docutils literal notranslate"><span class="pre">!=</span></code>, <code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">-</span></code>.</p>
+<p>All of this allows for concise and readable code.
+The use of classes ensures type safety and that the matrices abstracted by the class are always valid members of
+the group.
+Operations such as addition, which are not group operations, yield a NumPy array rather than a class instance.</p>
+</section>
+<section id="performance">
+<h3>Performance<a class="headerlink" href="#performance" title="Link to this heading"></a></h3>
+<p>These benefits come at a price in terms of execution time due to the overhead of
+constructors, methods which wrap base functions, and type checking. The
+Toolbox supports SymPy which provides powerful symbolic support for Python and
+it works well in conjunction with NumPy, ie. a NumPy array can contain symbolic
+elements.  Many the Toolbox methods and functions contain extra logic to ensure
+that symbolic operations work as expected. While this adds to the overhead it
+means that for the user, working with symbols is as easy as working with
+numbers.</p>
+<table class="docutils align-default" id="id19">
+<caption><span class="caption-text">Performance on a 3.6GHz Intel Core i9</span><a class="headerlink" href="#id19" title="Link to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Function/method</p></th>
+<th class="head"><p>Execution time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">base.rotx()</span></code></p></td>
+<td><p>4.07 μs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">base.trotx()</span></code></p></td>
+<td><p>5.79 μs</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SE3.Rx()</span></code></p></td>
+<td><p>12.3 μs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SE3</span> <span class="pre">*</span> <span class="pre">SE3</span></code></p></td>
+<td><p>4.69 μs</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">4x4</span> <span class="pre">&#64;</span></code></p></td>
+<td><p>0.986 μs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SE3.inv()</span></code></p></td>
+<td><p>7.62 μs</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">base.trinv()</span></code></p></td>
+<td><p>4.19 μs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">np.linalg.inv()</span></code></p></td>
+<td><p>4.49 μs</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="robotics-toolbox">
+<h2>Robotics Toolbox<a class="headerlink" href="#robotics-toolbox" title="Link to this heading"></a></h2>
+<section id="robot-models">
+<h3>Robot models<a class="headerlink" href="#robot-models" title="Link to this heading"></a></h3>
+<p>The Toolbox ships with over 30 robot models, most of which are purely kinematic
+but some have inertial and frictional parameters. Kinematic models can be
+specified in a variety of ways:  standard or modified Denavit-Hartenberg (DH,
+MDH) notation, as an ETS string <a class="reference internal" href="#corke07" id="id11"><span>[Corke07]</span></a>, as a rigid-body tree, or from a URDF
+file.</p>
+</section>
+<section id="denavit-hartenberg-parameters">
+<h3>Denavit-Hartenberg parameters<a class="headerlink" href="#denavit-hartenberg-parameters" title="Link to this heading"></a></h3>
+<p>To specify a kinematic model using DH notation, we create a new subclass of <code class="docutils literal notranslate"><span class="pre">DHRobot</span></code> and pass the superclass constructor
+a list of link objects.  For example, a Puma560 is simply:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">DHRobot</span><span class="p">(</span>
+<span class="go">    [</span>
+<span class="go">        RevoluteDH(alpha=pi/2),</span>
+<span class="go">        RevoluteDH(a=0.4318),</span>
+<span class="go">        RevoluteDH(d=0.15005, a=0.0203, alpha=-pi/2),</span>
+<span class="go">        RevoluteDH(d=0.4318, alpha=pi/2)</span>
+<span class="go">        RevoluteDH(alpha=-pi/2),</span>
+<span class="go">        RevoluteDH()</span>
+<span class="go">    ], name=&quot;Puma560&quot;)</span>
+</pre></div>
+</div>
+<p>where only the non-zero parameters need to be specified. In this case we used
+<code class="docutils literal notranslate"><span class="pre">RevoluteDH</span></code> objects for a revolute joint described using standard DH
+conventions.  Other classes available are <code class="docutils literal notranslate"><span class="pre">PrismaticDH</span></code>, <code class="docutils literal notranslate"><span class="pre">RevoluteMDH</span></code> and
+<code class="docutils literal notranslate"><span class="pre">PrismaticMDH</span></code>. Other parameters such as mass,  CoG, link inertia, motor
+inertia, viscous friction, Coulomb friction, and joint limits can also be
+specified using additional keyword arguments.</p>
+<p>The toolbox provides such definitions wrapped as class definitions, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Puma560</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.4318</span><span class="p">),</span>
+                    <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.15005</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0203</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.4318</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                    <span class="n">RevoluteDH</span><span class="p">()</span>
+                <span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Puma560&quot;</span>
+                        <span class="p">)</span>
+</pre></div>
+</div>
+<p>We can now easily perform standard kinematic operations</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="linenos"> 2</span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>                  <span class="c1"># instantiate robot model</span>
+<span class="linenos"> 3</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="go">DHRobot: Puma 560 (by Unimation), 6 joints (RRRRRR), dynamics, geometry, standard DH parameters</span>
+<span class="linenos"> 5</span><span class="go">┌─────┬────────┬────────┬────────┬─────────┬────────┐</span>
+<span class="linenos"> 6</span><span class="go">│ θⱼ  │   dⱼ   │   aⱼ   │   ⍺ⱼ   │   q⁻    │   q⁺   │</span>
+<span class="linenos"> 7</span><span class="go">├─────┼────────┼────────┼────────┼─────────┼────────┤</span>
+<span class="linenos"> 8</span><span class="go">│  q1 │ 0.6718 │      0 │  90.0° │ -160.0° │ 160.0° │</span>
+<span class="linenos"> 9</span><span class="go">│  q2 │      0 │ 0.4318 │   0.0° │ -110.0° │ 110.0° │</span>
+<span class="linenos">10</span><span class="go">│  q3 │   0.15 │ 0.0203 │ -90.0° │ -135.0° │ 135.0° │</span>
+<span class="linenos">11</span><span class="go">│  q4 │ 0.4318 │      0 │  90.0° │ -266.0° │ 266.0° │</span>
+<span class="linenos">12</span><span class="go">│  q5 │      0 │      0 │ -90.0° │ -100.0° │ 100.0° │</span>
+<span class="linenos">13</span><span class="go">│  q6 │      0 │      0 │   0.0° │ -266.0° │ 266.0° │</span>
+<span class="linenos">14</span><span class="go">└─────┴────────┴────────┴────────┴─────────┴────────┘</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="go">┌──────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
+<span class="linenos">17</span><span class="go">│ name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
+<span class="linenos">18</span><span class="go">├──────┼─────┼──────┼───────┼─────┼──────┼─────┤</span>
+<span class="linenos">19</span><span class="go">│   qr │  0° │  90° │ -90°  │  0° │  0°  │  0° │</span>
+<span class="linenos">20</span><span class="go">│   qz │  0° │  0°  │  0°   │  0° │  0°  │  0° │</span>
+<span class="linenos">21</span><span class="go">│   qn │  0° │  45° │  180° │  0° │  45° │  0° │</span>
+<span class="linenos">22</span><span class="go">│   qs │  0° │  0°  │ -90°  │  0° │  0°  │  0° │</span>
+<span class="linenos">23</span><span class="go">└──────┴─────┴──────┴───────┴─────┴──────┴─────┘</span>
+<span class="linenos">24</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+<span class="linenos">25</span><span class="go">[ 0.      1.5708 -1.5708  0.      0.      0.    ]</span>
+<span class="linenos">26</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>  <span class="c1"># forward kinematics</span>
+<span class="linenos">27</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="linenos">28</span><span class="go">   0.1217   -0.6067   -0.7856    0.2478    </span>
+<span class="linenos">29</span><span class="go">   0.8184    0.5092   -0.2665   -0.1259    </span>
+<span class="linenos">30</span><span class="go">   0.5617   -0.6105    0.5584    1.146     </span>
+<span class="linenos">31</span><span class="go">   0         0         0         1</span>
+<span class="linenos">32</span><span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                          <span class="c1"># inverse kinematics</span>
+<span class="linenos">33</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+<span class="linenos">34</span><span class="go">IKSolution: q=[0.1, 0.2, 0.3, -2.742, -0.5, -2.542], success=True, iterations=10, searches=1, residual=3.04e-09</span>
+</pre></div>
+</div>
+<p>The Toolbox supports named joint configurations and these are shown in the table
+at lines 16-22.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ikine_LM</span></code> is a generalised iterative numerical solution based on
+Levenberg-Marquadt minimization, and additional status results are also
+returned as part of a named tuple.</p>
+<p>The default plot method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>uses matplotlib to produce a “noodle robot” plot like</p>
+<figure class="align-default" id="id20">
+<a class="reference internal image-reference" href="_images/noodle+ellipsoid.png"><img alt="Puma560, with a velocity ellipsoid, rendered using the default matplotlib visualizer" src="_images/noodle%2Bellipsoid.png" width="600" />
+</a>
+<figcaption>
+<p><span class="caption-text">Puma560, with a velocity ellipsoid, rendered using the default matplotlib visualizer.</span><a class="headerlink" href="#id20" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>and we can use the mouse to rotate and zoom the plot.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The initial joint configuration for the inverse-kinematic solution may be specified, but
+defaults to zero, and affects both the search time and the solution found, since in general
+a manipulator may have several multiple joint configurations which result in the same end-effector pose.
+For a redundant manipulator, a solution will be found but there is no
+explicit control over the null-space.  For a manipulator with <span class="math notranslate nohighlight">\(n &lt; 6\)</span> DOF
+an additional argument is required to indicate which of the
+<span class="math notranslate nohighlight">\(6-n\)</span> Cartesian DOF are to be unconstrained in the solution.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A solution is not possible if the specified transform describes
+a point out of reach of the manipulator – in such a case the function will
+return with an error.</p>
+</div>
+<p>The inverse kinematic procedure for most robots can
+be derived symbolically
+and an efficient closed-form solution obtained.
+Some provided robot models have an analytical solution coded, for example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>       <span class="c1"># instantiate robot model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">ikine_a</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;lun&quot;</span><span class="p">)</span>        <span class="c1"># analytic inverse kinematics</span>
+<span class="go">IKSolution(q=array([ 2.1012,  1.1163,  0.3   ,  0.9528, -1.6505, -0.986 ]), success=True, iterations=0, searches=0, residual=0.0, reason=&#39;&#39;)</span>
+</pre></div>
+</div>
+<p>where we have specified a left-handed, elbow up and wrist no-flip configuration.</p>
+</section>
+<section id="ets-notation">
+<h3>ETS notation<a class="headerlink" href="#ets-notation" title="Link to this heading"></a></h3>
+<p>A Puma robot can also be specified in ETS format <a class="reference internal" href="#corke07" id="id12"><span>[Corke07]</span></a> as a sequence of simple rigid-body transformations – pure translation
+or pure rotation – each with either a constant parameter or a free parameter which is a joint variable.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="linenos"> 2</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="linenos"> 3</span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Puma dimensions (m), see RVC2 Fig. 7.4 for details</span>
+<span class="linenos"> 4</span><span class="gp">&gt;&gt;&gt; </span><span class="n">l1</span> <span class="o">=</span> <span class="mf">0.672</span><span class="p">;</span> <span class="n">l2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.2337</span><span class="p">;</span> <span class="n">l3</span> <span class="o">=</span> <span class="mf">0.4318</span><span class="p">;</span> <span class="n">l4</span> <span class="o">=</span> <span class="mf">0.0203</span><span class="p">;</span> <span class="n">l5</span> <span class="o">=</span> <span class="mf">0.0837</span><span class="p">;</span> <span class="n">l6</span> <span class="o">=</span> <span class="mf">0.4318</span>
+<span class="linenos"> 5</span><span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">l4</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l5</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l6</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span>
+<span class="linenos"> 6</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="go">tz(0.672) ⊕ Rz(q0) ⊕ ty(-0.2337) ⊕ Ry(q1) ⊕ tz(0.4318) ⊕ tx(0.0203) ⊕ ty(0.0837) ⊕ Ry(q2) ⊕ tz(0.4318) ⊕ Rz(q3) ⊕ Ry(q4) ⊕ Rz(q5)</span>
+<span class="linenos"> 8</span><span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">Robot</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="linenos">10</span><span class="go">ERobot: , 6 joints (RRRRRR)</span>
+<span class="linenos">11</span><span class="go">┌──────┬────────┬───────┬────────┬───────────────────────────────────────────────┐</span>
+<span class="linenos">12</span><span class="go">│ link │  link  │ joint │ parent │              ETS: parent to link              │</span>
+<span class="linenos">13</span><span class="go">├──────┼────────┼───────┼────────┼───────────────────────────────────────────────┤</span>
+<span class="linenos">14</span><span class="go">│    0 │ link0  │     0 │ BASE   │ tz(0.672) ⊕ Rz(q0)                            │</span>
+<span class="linenos">15</span><span class="go">│    1 │ link1  │     1 │ link0  │ ty(-0.2337) ⊕ Ry(q1)                          │</span>
+<span class="linenos">16</span><span class="go">│    2 │ link2  │     2 │ link1  │ tz(0.4318) ⊕ tx(0.0203) ⊕ ty(0.0837) ⊕ Ry(q2) │</span>
+<span class="linenos">17</span><span class="go">│    3 │ link3  │     3 │ link2  │ tz(0.4318) ⊕ Rz(q3)                           │</span>
+<span class="linenos">18</span><span class="go">│    4 │ link4  │     4 │ link3  │ Ry(q4)                                        │</span>
+<span class="linenos">19</span><span class="go">│    5 │ @link5 │     5 │ link4  │ Rz(q5)                                        │</span>
+<span class="linenos">20</span><span class="go">└──────┴────────┴───────┴────────┴───────────────────────────────────────────────┘</span>
+</pre></div>
+</div>
+<p>Line 3 defines the unique lengths of the Puma robot, and line 4 defines the kinematic chain in
+terms of elementary transforms.
+In line 7 we pass this to the constructor for a <code class="docutils literal notranslate"><span class="pre">Robot</span></code> which partitions the
+elementary transform sequence into a series of links and joints – link frames are declared
+after each joint variable as well as the start and end of the sequence.
+The <code class="docutils literal notranslate"><span class="pre">Robot</span></code> can represent single-branched robots with any combination of revolute and prismatic joints, but
+can also represent more general branched mechanisms.</p>
+</section>
+<section id="robot-rigid-body-tree-and-urdf-import">
+<h3>Robot: rigid-body tree and URDF import<a class="headerlink" href="#robot-rigid-body-tree-and-urdf-import" title="Link to this heading"></a></h3>
+<p>The final approach to manipulator modeling is to an import a URDF file.  The Toolbox includes a parser with built-in xacro processor
+which makes many models from the ROS universe available.</p>
+<p>Provided models, such as for Panda or Puma, are again encapsulated as classes:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
+<span class="go">DHRobot: Panda (by Franka Emika), 7 joints (RRRRRRR), dynamics, geometry, modified DH parameters</span>
+<span class="go">┌─────────┬────────┬─────┬───────┬─────────┬────────┐</span>
+<span class="go">│  aⱼ₋₁   │  ⍺ⱼ₋₁  │ θⱼ  │  dⱼ   │   q⁻    │   q⁺   │</span>
+<span class="go">├─────────┼────────┼─────┼───────┼─────────┼────────┤</span>
+<span class="go">│     0.0 │   0.0° │  q1 │ 0.333 │ -166.0° │ 166.0° │</span>
+<span class="go">│     0.0 │ -90.0° │  q2 │   0.0 │ -101.0° │ 101.0° │</span>
+<span class="go">│     0.0 │  90.0° │  q3 │ 0.316 │ -166.0° │ 166.0° │</span>
+<span class="go">│  0.0825 │  90.0° │  q4 │   0.0 │ -176.0° │  -4.0° │</span>
+<span class="go">│ -0.0825 │ -90.0° │  q5 │ 0.384 │ -166.0° │ 166.0° │</span>
+<span class="go">│     0.0 │  90.0° │  q6 │   0.0 │   -1.0° │ 215.0° │</span>
+<span class="go">│   0.088 │  90.0° │  q7 │ 0.107 │ -166.0° │ 166.0° │</span>
+<span class="go">└─────────┴────────┴─────┴───────┴─────────┴────────┘</span>
+
+<span class="go">┌──────┬───────────────────────────────────────┐</span>
+<span class="go">│ tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │</span>
+<span class="go">└──────┴───────────────────────────────────────┘</span>
+
+<span class="go">┌──────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
+<span class="go">│ name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
+<span class="go">├──────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
+<span class="go">│   qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
+<span class="go">│   qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
+<span class="go">└──────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="go">   0.7071    0.7071    0         0.088     </span>
+<span class="go">   0.7071   -0.7071    0         0         </span>
+<span class="go">   0         0        -1         0.823     </span>
+<span class="go">   0         0         0         1</span>
+</pre></div>
+</div>
+<p>and kinematic operations are performed using methods with the same name
+as discussed above.
+For branched robots, with multiple end-effectors,  the name of the frame of interest must be provided.</p>
+<p>Some URDF models have multiple end-effectors, in which case the particular
+end-effector must be specified.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
+<span class="go">ERobot: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision</span>
+<span class="go">┌──────┬──────────────┬───────┬─────────────┬────────────────────────────────────────────────┐</span>
+<span class="go">│ link │     link     │ joint │   parent    │              ETS: parent to link               │</span>
+<span class="go">├──────┼──────────────┼───────┼─────────────┼────────────────────────────────────────────────┤</span>
+<span class="go">│    0 │ panda_link0  │       │ BASE        │ SE3()                                          │</span>
+<span class="go">│    1 │ panda_link1  │     0 │ panda_link0 │ SE3(0, 0, 0.333) ⊕ Rz(q0)                      │</span>
+<span class="go">│    2 │ panda_link2  │     1 │ panda_link1 │ SE3(-90°, -0°, 0°) ⊕ Rz(q1)                    │</span>
+<span class="go">│    3 │ panda_link3  │     2 │ panda_link2 │ SE3(0, -0.316, 0; 90°, -0°, 0°) ⊕ Rz(q2)       │</span>
+<span class="go">│    4 │ panda_link4  │     3 │ panda_link3 │ SE3(0.0825, 0, 0; 90°, -0°, 0°) ⊕ Rz(q3)       │</span>
+<span class="go">│    5 │ panda_link5  │     4 │ panda_link4 │ SE3(-0.0825, 0.384, 0; -90°, -0°, 0°) ⊕ Rz(q4) │</span>
+<span class="go">│    6 │ panda_link6  │     5 │ panda_link5 │ SE3(90°, -0°, 0°) ⊕ Rz(q5)                     │</span>
+<span class="go">│    7 │ panda_link7  │     6 │ panda_link6 │ SE3(0.088, 0, 0; 90°, -0°, 0°) ⊕ Rz(q6)        │</span>
+<span class="go">│    8 │ @panda_link8 │       │ panda_link7 │ SE3(0, 0, 0.107)                               │</span>
+<span class="go">└──────┴──────────────┴───────┴─────────────┴────────────────────────────────────────────────┘</span>
+
+<span class="go">┌──────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
+<span class="go">│ name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
+<span class="go">├──────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
+<span class="go">│   qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
+<span class="go">│   qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
+<span class="go">└──────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qz</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;panda_hand&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="go">   0.7071    0.7071    0         0.088     </span>
+<span class="go">   0.7071   -0.7071    0         0         </span>
+<span class="go">   0         0        -1         0.926     </span>
+<span class="go">   0         0         0         1</span>
+</pre></div>
+</div>
+<p>In the table above we see the end-effectors indicated by &#64; (determined automatically
+from the URDF file), so we specify one of these.  We can also specify any
+other link in order to determine the pose of that link’s coordinate frame.</p>
+<p>This URDF model comes with meshes provided as Collada file which provide
+detailed geometry and color.  This can be visualized using the Swift simulator:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">qz</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;swift&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which produces the 3-D plot</p>
+<figure class="align-default" id="id21">
+<a class="reference internal image-reference" href="_images/swift.png"><img alt="Panda robot rendered using the Toolbox’s Swift visualizer" src="_images/swift.png" width="600" />
+</a>
+<figcaption>
+<p><span class="caption-text">Panda robot rendered using the Toolbox’s Swift visualizer.</span><a class="headerlink" href="#id21" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>Swift is a web-based visualizer using three.js to provide high-quality 3D animations.
+It can produce vivid 3D effects using anaglyphs viewed with colored glasses.
+Animations can be recorded as MP4 files or animated GIF files which are useful for inclusion in GitHub markdown documents.</p>
+</section>
+</section>
+<section id="trajectories">
+<h2>Trajectories<a class="headerlink" href="#trajectories" title="Link to this heading"></a></h2>
+<p>A joint-space trajectory for the Puma robot from its zero angle
+pose to the upright (or READY) pose in 100 steps is</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">traj</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">jtraj</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">,</span> <span class="n">puma</span><span class="o">.</span><span class="n">qr</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">traj</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(100, 6)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">puma.qr</span></code> is an example of a named joint configuration.
+<code class="docutils literal notranslate"><span class="pre">traj</span></code> is named tuple with elements <code class="docutils literal notranslate"><span class="pre">q</span></code> = <span class="math notranslate nohighlight">\(\vec{q}_k\)</span>, <code class="docutils literal notranslate"><span class="pre">qd</span></code> = <span class="math notranslate nohighlight">\(\dvec{q}_k\)</span> and <code class="docutils literal notranslate"><span class="pre">qdd</span></code> = <span class="math notranslate nohighlight">\(\ddvec{q}_k\)</span>.
+Each element is an array with one row per time step, and each row is a joint coordinate vector.
+The trajectory is a fifth order polynomial which has continuous jerk.
+By default, the initial and final velocities are zero, but these may be specified by additional
+arguments.</p>
+<p>We could plot the joint coordinates as a function of time using the convenience
+function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">qplot</span><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Straight line (Cartesian) paths can be generated in a similar way between
+two points specified by a pair of poses in <span class="math notranslate nohighlight">\(\SE{3}\)</span></p>
+<p>At line 9 we see that the resulting trajectory, <code class="docutils literal notranslate"><span class="pre">Ts</span></code>, is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance with 200 values.</p>
+<p>At line 11 we compute the inverse kinematics of each pose in the trajectory
+using a single call to the <code class="docutils literal notranslate"><span class="pre">ikine_LM</span></code> method.
+The result is a list of named tuples, which gives the IK success status for
+each time step.
+At line 12 we convert this into an array, with one row per time step, and each
+row is a joint coordinate.
+The starting
+joint coordinates for each inverse kinematic solution
+is taken as the result of the solution at the previous time step.</p>
+</section>
+<section id="symbolic-manipulation">
+<h2>Symbolic manipulation<a class="headerlink" href="#symbolic-manipulation" title="Link to this heading"></a></h2>
+<p>As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. For example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">spatialmath.base</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">base</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;φ, ϴ, ψ&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base</span><span class="o">.</span><span class="n">rpy2r</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">psi</span><span class="p">)</span>
+<span class="go">array([[cos(ψ)*cos(ϴ), sin(φ)*sin(ϴ)*cos(ψ) - sin(ψ)*cos(φ),</span>
+<span class="go">        sin(φ)*sin(ψ) + sin(ϴ)*cos(φ)*cos(ψ)],</span>
+<span class="go">       [sin(ψ)*cos(ϴ), sin(φ)*sin(ψ)*sin(ϴ) + cos(φ)*cos(ψ),</span>
+<span class="go">        -sin(φ)*cos(ψ) + sin(ψ)*sin(ϴ)*cos(φ)],</span>
+<span class="go">       [-sin(ϴ), sin(φ)*cos(ϴ), cos(φ)*cos(ϴ)]], dtype=object)</span>
+</pre></div>
+</div>
+<p>The capability extends to forward kinematics</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="linenos">2</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">spatialmath.base</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">base</span>
+<span class="linenos">3</span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">(</span><span class="n">symbolic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">4</span><span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;q_:6&quot;</span><span class="p">)</span> <span class="c1"># q = (q_1, q_2, ... q_5)</span>
+<span class="linenos">5</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="linenos">6</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">7</span><span class="go">0.15005*sin(q_0) - 0.0203*sin(q_1)*sin(q_2)*cos(q_0) - 0.4318*sin(q_1)*cos(q_0)*cos(q_2) - 0.4318*sin(q_2)*cos(q_0)*cos(q_1) + 0.0203*cos(q_0)*cos(q_1)*cos(q_2) + 0.4318*cos(q_0)*cos(q_1)</span>
+</pre></div>
+</div>
+<p>If we display the value of <code class="docutils literal notranslate"><span class="pre">puma</span></code> we see that the <span class="math notranslate nohighlight">\(\alpha_j\)</span> values are
+now displayed in red to indicate that they are symbolic constants.  The
+x-coordinate of the end-effector is given by line 7.</p>
+<p>SymPy allows any expression to be converted to LaTeX or a variety of languages
+including C, Python and Octave/MATLAB.</p>
+</section>
+<section id="differential-kinematics">
+<h2>Differential kinematics<a class="headerlink" href="#differential-kinematics" title="Link to this heading"></a></h2>
+<p>The Toolbox computes Jacobians:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">J</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">J</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>in the base or end-effector frames respectively, as NumPy arrays.
+At a singular configuration</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">J</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+<span class="go">np.int64(5)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">jsingu</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+<span class="go">column 5 =2.6e-15 column_0 + 1 column_3</span>
+</pre></div>
+</div>
+<p>Jacobians can also be computed for symbolic joint variables as for forward kinematics above.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Robot</span></code> instances we can also compute the Hessians:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">H</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">H</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">hessiane</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>in the base or end-effector frames respectively, as 3D NumPy arrays in <span class="math notranslate nohighlight">\(\mathbb{R}^{6 \times n \times n}\)</span>.</p>
+<p>For all robot classes we can compute manipulability</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Yoshikawa manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<span class="go">Yoshikawa manipulability is 0.07861716534599998</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asada&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Asada manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<span class="go">Asada manipulability is 0.004374613728166498</span>
+</pre></div>
+</div>
+<p>for the Yoshikawa and Asada measures respectively, and</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;trans&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Yoshikawa manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<span class="go">Yoshikawa manipulability is 0.11118146146764128</span>
+</pre></div>
+</div>
+<p>is the Yoshikawa measure computed for just the task space translational degrees
+of freedom.
+For <code class="docutils literal notranslate"><span class="pre">Robot</span></code> instances we can also compute the manipulability
+Jacobian:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Jm</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipm</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>such that <span class="math notranslate nohighlight">\(\dot{m} = \mat{J}_m(\vec{q}) \dvec{q}\)</span>.</p>
+<section id="dynamics">
+<h3>Dynamics<a class="headerlink" href="#dynamics" title="Link to this heading"></a></h3>
+<p>The Python Toolbox supports several approaches to computing dynamics.
+For models defined using standard or modified DH notation we use a classical version of the recursive Newton-Euler
+algorithm implemented in Python or C.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The same C code as used by RTB-M is called directly from Python, and does not use NumPy.</p>
+</div>
+<p>For example, the inverse dynamics</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tau</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">rne</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span>
+<span class="go">[-0.     31.6399  6.0351  0.      0.0283  0.    ]</span>
+</pre></div>
+</div>
+<p>is the gravity torque for the robot in the configuration <code class="docutils literal notranslate"><span class="pre">qn</span></code>.</p>
+<p>Inertia, Coriolis/centripetal and gravity terms are computed by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">inertia</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">coriolis</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">gravload</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>respectively, using the method of Orin and Walker from the inverse dynamics.  These values include the effect of motor inertia and friction.</p>
+<p>Forward dynamics are given by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qdd</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">accel</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">qd</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can integrate this over time by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fdyn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">mycontrol</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which uses an RK45 numerical integration from the SciPy package to solve for the joint trajectory <code class="docutils literal notranslate"><span class="pre">q</span></code> given the
+optional control function called as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tau</span> <span class="o">=</span> <span class="n">mycontrol</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The fast C implementation is not capable of symbolic operation so a Python
+version of RNE <code class="docutils literal notranslate"><span class="pre">rne_python</span></code> has been implemented as well.  For a 6- or 7-DoF
+manipulator the torque expressions have thousands of terms yet are computed in
+less than a second. However, subsequent expression manipulation is slow.</p>
+<p>For the Puma560 robot the C version of inverse dynamics takes 23μs while the
+Python version takes 1.5ms (<span class="math notranslate nohighlight">\(65\times\)</span> slower).  With symbolic operands it
+takes 170ms (<span class="math notranslate nohighlight">\(113\times\)</span> slower) to produce the unsimplified torque
+expressions.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">Robot</span></code> subclasses there is also an implementation of Featherstone’s spatial vector
+method, <code class="docutils literal notranslate"><span class="pre">rne()</span></code>, and SMTB-P provides a set of classes for spatial
+velocity, acceleration, momentum, force and inertia.</p>
+</section>
+</section>
+<section id="new-capability">
+<h2>New capability<a class="headerlink" href="#new-capability" title="Link to this heading"></a></h2>
+<p>There are several areas of innovation compared to the MATLAB version of the Toolbox.</p>
+<section id="branched-mechanisms">
+<h3>Branched mechanisms<a class="headerlink" href="#branched-mechanisms" title="Link to this heading"></a></h3>
+<p>The RTB-M <code class="docutils literal notranslate"><span class="pre">SerialLink</span></code> class had no option to express branching. In RTB-P the
+equivalent class is <code class="docutils literal notranslate"><span class="pre">DHRobot</span></code> is similarly limited, but a new class <code class="docutils literal notranslate"><span class="pre">ERobot</span></code>
+is more general and allows for branching (but not closed kinematic loops). The
+robot is described by a set of <code class="docutils literal notranslate"><span class="pre">ELink</span></code> objects, each of which points to its
+parent link. The <code class="docutils literal notranslate"><span class="pre">ERobot</span></code> has references to the root and leaf <code class="docutils literal notranslate"><span class="pre">ELink</span></code> objects. This
+structure closely mirrors the URDF representation, allowing for easy import of
+URDF models.</p>
+</section>
+<section id="collision-checking">
+<h3>Collision checking<a class="headerlink" href="#collision-checking" title="Link to this heading"></a></h3>
+<p>RTB-M had a simple, contributed but unsupported, collision checking capability.
+This is dramatically improved in the Python version using <a class="reference internal" href="#pybullet" id="id13"><span>[PyBullet]</span></a>
+which supports primitive shapes such as Cylinders, Spheres and Boxes as well as
+mesh objects. Every robot link can have a collision shape in addition to the shape
+used for rendering.
+We can conveniently perform collision checks between links as well as between
+whole robots, discrete links, and objects in the world. For example a <span class="math notranslate nohighlight">\(1
+\times 1 \times 1\)</span> box centered at <span class="math notranslate nohighlight">\((1,0,0)\)</span> can be tested against all, or
+just one link, of the robot by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">obstacle</span> <span class="o">=</span> <span class="n">Cuboid</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">pose</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">iscollision</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">iscollided</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">obstacle</span><span class="p">)</span> <span class="c1"># boolean</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">iscollision</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iscollided</span><span class="p">(</span><span class="n">obstacle</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Additionally, we can compute the minimum Euclidean distance between whole
+robots, discrete links, or objects.  Each distance is the length of a line
+segment defined by two points in the world frame</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">closest_point</span><span class="p">(</span><span class="n">obstacle</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">closest_point</span><span class="p">(</span><span class="n">obstacle</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="interfaces">
+<h3>Interfaces<a class="headerlink" href="#interfaces" title="Link to this heading"></a></h3>
+<p>RTB-M could only animate a robot in a figure, and there was limited but
+not-well-supported ability to interface to V-REP and a physical robot. The
+Python version supports a simple, but universal API to a robot inspired by the
+simplicity and expressiveness of the OpenAI Gym API which was designed as a
+toolkit for developing and comparing reinforcement learning algorithms. Whether
+simulating a robot or controlling a real physical robot, the API operates in the
+same manner, providing users with a common interface which is not found among
+other robotics packages.</p>
+<p>By default the Toolbox behaves like the MATLAB version with a plot method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>which will plot the robot at the specified joint configurmation, or animate it if <code class="docutils literal notranslate"><span class="pre">q</span></code> is an <span class="math notranslate nohighlight">\(m \times 6\)</span> matrix, using
+the default <code class="docutils literal notranslate"><span class="pre">PyPlot</span></code> backend which draws a “noodle robot” using the PyPlot backend.</p>
+<p>The more general solution, and what is implemented inside <code class="docutils literal notranslate"><span class="pre">plot</span></code> in the example above, is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pyplot</span> <span class="o">=</span> <span class="n">roboticstoolbox</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">PyPlot</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyplot</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pyplot</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">puma</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This makes it possible to animate multiple robots in the one graphical window, or the one robot in various environments either graphical
+or real.</p>
+<figure class="align-default" id="id22">
+<a class="reference internal image-reference" href="_images/vp_ss_0000-2.png"><img alt="Puma560 rendered using the web-based VPython visualizer." src="_images/vp_ss_0000-2.png" width="600" />
+</a>
+<figcaption>
+<p><span class="caption-text">Puma560 rendered using the web-based VPython visualizer.</span><a class="headerlink" href="#id22" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The VPython backend provides browser-based 3D graphics based on WebGL.  This is advantageous for displaying on mobile
+devices. Still frames and animations can be recorded.</p>
+</section>
+<section id="code-engineering">
+<h3>Code engineering<a class="headerlink" href="#code-engineering" title="Link to this heading"></a></h3>
+<p>The code is implemented in Python <span class="math notranslate nohighlight">\(\ge 3.6\)</span> and all code is hosted on GitHub and
+unit-testing is performed using GitHub-actions. Test coverage is uploaded to
+<code class="docutils literal notranslate"><span class="pre">codecov.io</span></code> for visualization and trending, and we use <code class="docutils literal notranslate"><span class="pre">lgtm.com</span></code> to perform
+automated code review. The code is documented with ReStructured Text format
+docstrings which provides powerful markup including cross-referencing,
+equations, class inheritance diagrams and figures – all of which is converted
+to HTML documentation whenever a change is pushed, and this is accessible via
+GitHub pages. Issues can be reported via GitHub issues or patches submitted as
+pull requests.</p>
+<p>RTB-P, and its dependencies, can be installed simply by either of:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install roboticstoolbox-python
+
+$ conda install -c conda-forge roboticstoolbox-python
+</pre></div>
+</div>
+<p>which includes basic visualization using matplotlib.
+Options such as <code class="docutils literal notranslate"><span class="pre">vpython</span></code> can be used to specify additional dependencies to be installed.
+The Toolbox adopts a “when needed” approach to many dependencies and will only attempt
+to import them if the user attempts to exploit a functionality that requires it.</p>
+<p>If a dependency is not installed, a warning provides instructions on how to install it using <code class="docutils literal notranslate"><span class="pre">pip</span></code>.
+More details are given on the project home page.
+This applies to the visualizers Vpython and Swift, as well as pybullet and ROS.
+The Toolbox provides capability to import URDF-xacro files without ROS.
+The backend architecture allows a user to connect to a ROS environment if required, and only then does ROS have to be
+installed.</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>This article has introduced and demonstrated in tutorial form the principle
+features of the Robotics Toolbox for Python which runs on Mac, Windows and Linux
+using Python 3.6 or better. The code is free and open, and released under the
+MIT licence. It provides many of the essential tools necessary for robotic
+manipulator modelling, simulation and  control which is essential for robotics
+education  and research. It is familiar yet new, and we hope it will serve the
+community well for the next 25 years.</p>
+<p>A high-performance reactive motion controller, NEO, is based on this toolbox
+<a class="reference internal" href="#neo" id="id14"><span>[neo]</span></a>. Currently under development are backend interfaces for CoppeliaSim,
+Dynamixel servo chains, and ROS; symbolic dynamics, simplification and code
+generation; mobile robotics motion models, planners, EKF localization, map
+making and SLAM; and a minimalist block-diagram simulation tool <a class="reference internal" href="#bdsim" id="id15"><span>[bdsim]</span></a>.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="corke95" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">Corke95</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="http://www.petercorke.com/RTB/ARA95.pdf">P. Corke. “A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB”. In Proc. National Conf. Australian Robot Association, pages 319–330, Melbourne, July 1995.</a></p>
+</div>
+<div class="citation" id="corke96" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">Corke96</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://ieeexplore.ieee.org/document/486658">P. Corke. “A robotics toolbox for MATLAB”. IEEE Robotics and Automation Magazine, 3(1):24–32, Sept. 1996.</a></p>
+</div>
+<div class="citation" id="craig2005" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">Craig2005</a><span class="fn-bracket">]</span></span>
+<ol class="upperalpha simple" start="10">
+<li><p>Craig, “Introduction to Robotics”, Wiley, 2005.</p></li>
+</ol>
+</div>
+<div class="citation" id="featherstone87" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">Featherstone87</a><span class="fn-bracket">]</span></span>
+<ol class="upperalpha simple" start="18">
+<li><p>Featherstone, Robot Dynamics Algorithms. Kluwer Academic, 1987.</p></li>
+</ol>
+</div>
+<div class="citation" id="corke07" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Corke07<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id8">1</a>,<a role="doc-backlink" href="#id11">2</a>,<a role="doc-backlink" href="#id12">3</a>)</span>
+<ol class="upperalpha simple" start="16">
+<li><p>Corke, <a class="reference external" href="https://ieeexplore.ieee.org/document/4252158">“A simple and systematic approach to assigning Denavit- Hartenberg parameters,” IEEE transactions on robotics, vol. 23, no. 3, pp. 590–594, 2007, DOI 10.1109/TRO.2007.896765.</a>.</p></li>
+</ol>
+</div>
+<div class="citation" id="haviland20" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">Haviland20</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://arxiv.org/abs/2010.08696">J. Haviland and P. Corke, “A systematic approach to computing the manipulator Jacobian and Hessian using the elementary transform sequence,” arXiv preprint, 2020.</a></p>
+</div>
+<div class="citation" id="pybullet" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id13">PyBullet</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://pybullet.org/wordpress/">PyBullet</a></p>
+</div>
+<div class="citation" id="smtb-p" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>SMTB-P<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id6">1</a>,<a role="doc-backlink" href="#id10">2</a>)</span>
+<p><a class="reference external" href="https://github.com/petercorke/spatialmath-python">Spatial Math Toolbox for Python</a></p>
+</div>
+<div class="citation" id="bdsim" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id15">bdsim</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://github.com/petercorke/bdsim">Block diagram simulator for Python</a></p>
+</div>
+<div class="citation" id="neo" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id14">neo</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://jhavl.github.io/neo">NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators</a></p>
+</div>
+<div class="citation" id="corke21a" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">corke21a</a><span class="fn-bracket">]</span></span>
+<ol class="upperalpha simple" start="16">
+<li><p>Corke and J. Haviland, “Not your grandmother’s toolbox – the Robotics Toolbox reinvented for Python”, Proc. ICRA 2021.</p></li>
+</ol>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-Jun-2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

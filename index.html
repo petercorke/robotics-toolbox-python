@@ -1,0 +1,164 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robotics Toolbox for Python &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=006115fc" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Robotics Toolbox for Python</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="robotics-toolbox-for-python">
+<h1>Robotics Toolbox for Python<a class="headerlink" href="#robotics-toolbox-for-python" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#id1">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#a-python-version">A Python version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#spatial-math-layer">Spatial math layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#robotics-toolbox">Robotics Toolbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#trajectories">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#symbolic-manipulation">Symbolic manipulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#differential-kinematics">Differential kinematics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#new-capability">New capability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#conclusion">Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arm_models.html">Manipulator models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IK/ik.html">Inverse Kinematics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle.html">Motion models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner.html">Path planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="blocks-spatial.html">Spatial maths blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blocks-arm.html">Robot manipulator blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blocks-mobile.html">Mobile robot blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blocks-uav.html">UAV blocks</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-Jun-2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

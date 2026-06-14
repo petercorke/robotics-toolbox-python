@@ -1,0 +1,1465 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elementary transform sequence (ETS) models &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=006115fc" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ERobot models" href="arm_erobot.html" />
+    <link rel="prev" title="Denavit-Hartenberg models" href="arm_dh.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="arm.html">Robot Arms</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="arm_models.html">Manipulator models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Elementary transform sequence (ETS) models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ets-3d">ETS - 3D</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS"><code class="docutils literal notranslate"><span class="pre">ETS</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#ets-2d">ETS - 2D</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2"><code class="docutils literal notranslate"><span class="pre">ETS2</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_superclass.html">Superclasses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IK/ik.html">Inverse Kinematics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="arm.html">Robot Arms</a></li>
+          <li class="breadcrumb-item"><a href="arm_models.html">Manipulator models</a></li>
+      <li class="breadcrumb-item active">Elementary transform sequence (ETS) models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="elementary-transform-sequence-ets-models">
+<h1>Elementary transform sequence (ETS) models<a class="headerlink" href="#elementary-transform-sequence-ets-models" title="Link to this heading"></a></h1>
+<p><em>Code author: Jesse Haviland</em></p>
+<p>Elementary transforms are canonic rotations or translations about, or along,
+the x-, y- or z-axes.  The amount of rotation or translation can be a constant
+or a variable.  A variable amount corresponds to a joint.</p>
+<p>Consider the example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="linenos"> 2</span><span class="gp">&gt;&gt;&gt; </span><span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="linenos"> 3</span><span class="go">ET.Rx(eta=0.7853981633974483)</span>
+<span class="linenos"> 4</span><span class="gp">&gt;&gt;&gt; </span><span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="go">ET.tz(eta=0.75)</span>
+<span class="linenos"> 6</span><span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="go">Rx(17.19°) ⊕ tz(0.75)</span>
+<span class="linenos"> 9</span><span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">fkine</span><span class="p">([])</span>
+<span class="linenos">10</span><span class="go">SE3(array([[ 1.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="linenos">11</span><span class="go">           [ 0.    ,  0.9553, -0.2955, -0.2216],</span>
+<span class="linenos">12</span><span class="go">           [ 0.    ,  0.2955,  0.9553,  0.7165],</span>
+<span class="linenos">13</span><span class="go">           [ 0.    ,  0.    ,  0.    ,  1.    ]]))</span>
+</pre></div>
+</div>
+<p>In lines 2-5 we defined two elementary transforms.  Line 2 defines a rotation
+of 45° about the x-axis, and line 4 defines a translation of 0.75m along the z-axis.
+Compounding them in line 6, the result is the two elementary transforms in a
+sequence - an elementary transform sequence (ETS).  An ETS can be arbitrarily
+long.</p>
+<p>Line 8 <em>evaluates</em> the forward kinematics of the sequence, substituting in values,
+and the result is an SE(3) matrix encapsulated in an <code class="docutils literal notranslate"><span class="pre">4x4</span></code> numpy array.</p>
+<p>The real power comes from having variable arguments to the elementary transforms
+as shown in this example where we define a simple two link planar manipulator.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="linenos"> 2</span><span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 3</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1) ⊕ tx(1)</span>
+<span class="linenos"> 5</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="linenos"> 6</span><span class="go">4</span>
+<span class="linenos"> 7</span><span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="linenos"> 8</span><span class="go">[ET.tx(eta=1.0), ET.Rz(jindex=1)]</span>
+<span class="linenos"> 9</span><span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="linenos">10</span><span class="go">SE3(array([[1., 0., 0., 2.],</span>
+<span class="linenos">11</span><span class="go">           [0., 1., 0., 0.],</span>
+<span class="linenos">12</span><span class="go">           [0., 0., 1., 0.],</span>
+<span class="linenos">13</span><span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="linenos">14</span><span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">1.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.57</span><span class="p">])</span>
+<span class="linenos">15</span><span class="go">SE3(array([[1.    , 0.    , 0.    , 1.0008],</span>
+<span class="linenos">16</span><span class="go">           [0.    , 1.    , 0.    , 1.    ],</span>
+<span class="linenos">17</span><span class="go">           [0.    , 0.    , 1.    , 0.    ],</span>
+<span class="linenos">18</span><span class="go">           [0.    , 0.    , 0.    , 1.    ]]))</span>
+</pre></div>
+</div>
+<p>Line 2 succinctly describes the kinematics in terms of elementary transforms: a
+rotation around the z-axis by the first joint angle, then a translation in the
+x-direction, then a rotation around the z-axis by the second joint angle, and
+finally a translation in the x-direction.</p>
+<p>Line 3 creates the elementary transform sequence, with variable transforms.
+<code class="docutils literal notranslate"><span class="pre">e</span></code> is a single object that encapsulates a list of elementary transforms, and list like
+methods such as <code class="docutils literal notranslate"><span class="pre">len</span></code> as well as indexing and slicing as shown in lines 5-8.</p>
+<p>Lines 9-18 <em>evaluate</em> the sequence, and substitutes elements from the passed
+arrays as the joint variables.</p>
+<p>This approach is general enough to be able to describe any serial-link robot
+manipulator.  For a branched manipulator we can use ETS to describe the
+connections between every parent and child link pair.</p>
+<p>The ETS inherits list-like properties and has methods like <code class="docutils literal notranslate"><span class="pre">reverse</span></code> and <code class="docutils literal notranslate"><span class="pre">pop</span></code>.</p>
+<p><strong>Reference:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters">A simple and systematic approach to assigning Denavit-Hartenberg parameters</a>.
+Peter I. Corke, IEEE Transactions on Robotics, 23(3), pp 590-594, June 2007.</p></li>
+</ul>
+</div></blockquote>
+<section id="ets-3d">
+<h2>ETS - 3D<a class="headerlink" href="#ets-3d" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseETS</span></code></p>
+<p>This class implements an elementary transform sequence (ETS) for 3D</p>
+<p>An instance can contain an elementary transform (ET) or an elementary
+transform sequence (ETS). It has list-like properties by subclassing
+UserList, which means we can perform indexing, slicing pop, insert, as well
+as using it as an iterator over its values.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS()</span></code> an empty ETS list</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS(et)</span></code> an ETS containing a single ET</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS([et0,</span> <span class="pre">et1,</span> <span class="pre">et2])</span></code> an ETS consisting of three ET’s</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>arg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ET</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ET</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ET</span></code>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Function to compute ET value</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ETS</span><span class="p">,</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span> <span class="c1"># a single ET, rotation about z</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets1</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">ets1</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets2</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># an ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">ets2</span><span class="p">)</span>                    <span class="c1"># of length 2</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>                      <span class="c1"># an ET sliced from the ETS</span>
+<span class="go">ET.tx(eta=2.0)</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<ul>
+<li><ol class="upperalpha simple" start="10">
+<li><p>Haviland, and P. Corke. “Manipulator Differential Kinematics Part I:</p></li>
+</ol>
+<blockquote>
+<div><p>Kinematics, Velocity, and Applications.” arXiv preprint arXiv:2207.01796 (2022).</p>
+</div></blockquote>
+</li>
+<li><ol class="upperalpha simple" start="10">
+<li><p>Haviland, and P. Corke. “Manipulator Differential Kinematics Part II:</p></li>
+</ol>
+<blockquote>
+<div><p>Acceleration and Advanced Applications.” arXiv preprint arXiv:2207.01794 (2022).</p>
+</div></blockquote>
+</li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">rx()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ry()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">rz()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">tx()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ty()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">tz()</span></code></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.__mul__">
+<span class="sig-name descname"><span class="pre">__mul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.__mul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.__mul__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.compile">
+<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.compile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.compile" title="Link to this definition"></a></dt>
+<dd><p>Compile an ETS</p>
+<p>Perform constant folding for faster evaluation.  Consecutive constant
+ETs are compounded, leading to a constant ET which is denoted by
+<code class="docutils literal notranslate"><span class="pre">SE3</span></code> when displayed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optimised ETS</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a></span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span>
+<span class="go">[ET.tz(eta=0.333), ET.Rz(jindex=0), ET.Rx(eta=-1.5707963267948966), ET.Rz(jindex=1), ET.Rx(eta=1.5707963267948966), ET.tz(eta=0.316), ET.Rz(jindex=2), ET.tx(eta=0.0825), ET.Rx(eta=1.5707963267948966), ET.Rz(jindex=3), ET.tx(eta=-0.0825), ET.Rx(eta=-1.5707963267948966), ET.tz(eta=0.384), ET.Rz(jindex=4), ET.Rx(eta=1.5707963267948966), ET.Rz(jindex=5), ET.tx(eta=0.088), ET.Rx(eta=1.5707963267948966), ET.tz(eta=0.107), ET.Rz(jindex=6), ET.tz(eta=0.10300000000000001), ET.Rz(eta=-0.7853981633974483)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+<span class="go">[ET.SE3(T=array([[1.   , 0.   , 0.   , 0.   ],</span>
+<span class="go">       [0.   , 1.   , 0.   , 0.   ],</span>
+<span class="go">       [0.   , 0.   , 1.   , 0.333],</span>
+<span class="go">       [0.   , 0.   , 0.   , 1.   ]])), ET.Rz(jindex=0), ET.SE3(T=array([[ 1.,  0.,  0.,  0.],</span>
+<span class="go">       [ 0.,  0.,  1.,  0.],</span>
+<span class="go">       [ 0., -1.,  0.,  0.],</span>
+<span class="go">       [ 0.,  0.,  0.,  1.]])), ET.Rz(jindex=1), ET.SE3(T=array([[ 1.   ,  0.   ,  0.   ,  0.   ],</span>
+<span class="go">       [ 0.   ,  0.   , -1.   , -0.316],</span>
+<span class="go">       [ 0.   ,  1.   ,  0.   ,  0.   ],</span>
+<span class="go">       [ 0.   ,  0.   ,  0.   ,  1.   ]])), ET.Rz(jindex=2), ET.SE3(T=array([[ 1.    ,  0.    ,  0.    ,  0.0825],</span>
+<span class="go">       [ 0.    ,  0.    , -1.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  1.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  1.    ]])), ET.Rz(jindex=3), ET.SE3(T=array([[ 1.    ,  0.    ,  0.    , -0.0825],</span>
+<span class="go">       [ 0.    ,  0.    ,  1.    ,  0.384 ],</span>
+<span class="go">       [ 0.    , -1.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  1.    ]])), ET.Rz(jindex=4), ET.SE3(T=array([[ 1.,  0.,  0.,  0.],</span>
+<span class="go">       [ 0.,  0., -1.,  0.],</span>
+<span class="go">       [ 0.,  1.,  0.,  0.],</span>
+<span class="go">       [ 0.,  0.,  0.,  1.]])), ET.Rz(jindex=5), ET.SE3(T=array([[ 1.   ,  0.   ,  0.   ,  0.088],</span>
+<span class="go">       [ 0.   ,  0.   , -1.   , -0.107],</span>
+<span class="go">       [ 0.   ,  1.   ,  0.   ,  0.   ],</span>
+<span class="go">       [ 0.   ,  0.   ,  0.   ,  1.   ]])), ET.Rz(jindex=6), ET.SE3(T=array([[ 0.7071,  0.7071,  0.    ,  0.    ],</span>
+<span class="go">       [-0.7071,  0.7071,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  1.    ,  0.103 ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  1.    ]]))]</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">isconstant()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.insert" title="Link to this definition"></a></dt>
+<dd><p>Insert value</p>
+<p>Inserts an ET or ETS into the ET sequence.  The inserted value is at position
+<code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – insert an ET or ETS into the ETS, default is at the end</p></li>
+<li><p><strong>arg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ET</span></code>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a>]</span>) – the elementary transform or sequence to insert</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span>
+<span class="go">[ET.Rz(jindex=0), ET.tx(eta=1.0), ET.Ry(), ET.Rz(jindex=1), ET.tx(eta=1.0)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.fkine">
+<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.fkine" title="Link to this definition"></a></dt>
+<dd><p>Forward kinematics</p>
+<p><code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">ets.fkine(q)</span></code> evaluates forward kinematics for the ets at
+joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p>
+<p><strong>Trajectory operation</strong>:
+If <code class="docutils literal notranslate"><span class="pre">q</span></code> has multiple rows (mxn), it is considered a trajectory and the
+result is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance with <code class="docutils literal notranslate"><span class="pre">m</span></code> values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]]</span>) – Joint coordinates</p></li>
+<li><p><strong>base</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://spatialmath-python.rai-inst.com/3d_pose_SE3.html#spatialmath.pose3d.SE3" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE3</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – A base transform applied before the ETS</p></li>
+<li><p><strong>tool</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://spatialmath-python.rai-inst.com/3d_pose_SE3.html#spatialmath.pose3d.SE3" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE3</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – tool transform, optional</p></li>
+<li><p><strong>include_base</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – set to True if the base transform should be considered</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://spatialmath-python.rai-inst.com/3d_pose_SE3.html#spatialmath.pose3d.SE3" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE3</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The transformation matrix representing the pose of the
+end-effector</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example makes a <code class="docutils literal notranslate"><span class="pre">panda</span></code> robot object, gets the ets, and
+solves for the forward kinematics at the listed configuration.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="go">SE3(array([[ 0.995 , -0.    ,  0.0998,  0.484 ],</span>
+<span class="go">           [-0.    , -1.    ,  0.    ,  0.    ],</span>
+<span class="go">           [ 0.0998, -0.    , -0.995 ,  0.4126],</span>
+<span class="go">           [ 0.    ,  0.    ,  0.    ,  1.    ]]))</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>A tool transform, if provided, is incorporated into the result.</p></li>
+<li><p>Works from the end-effector link to the base</p></li>
+</ul>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part I:
+Kinematics, Velocity, and Applications.” arXiv preprint arXiv:2207.01796 (2022).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.jacob0">
+<span class="sig-name descname"><span class="pre">jacob0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacob0" title="Link to this definition"></a></dt>
+<dd><p>Manipulator geometric Jacobian in the base frame</p>
+<p><code class="docutils literal notranslate"><span class="pre">robot.jacobo(q)</span></code> is the manipulator Jacobian matrix which maps
+joint  velocity to end-effector spatial velocity expressed in the
+base frame.</p>
+<p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
+is related to joint velocity by <span class="math notranslate nohighlight">\({}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]]</span>) – Joint coordinate vector</p></li>
+<li><p><strong>tool</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://spatialmath-python.rai-inst.com/3d_pose_SE3.html#spatialmath.pose3d.SE3" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE3</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – a static tool transformation matrix to apply to the
+end of end, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Manipulator Jacobian in the base frame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example makes a <code class="docutils literal notranslate"><span class="pre">Puma560</span></code> robot object, and solves for the
+base-frame Jacobian at the zero joint angle configuration</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">jacob0</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">array([[ 0.1295, -0.4854, -0.4854, -0.    , -0.0533,  0.    ],</span>
+<span class="go">       [ 0.4318,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    ,  0.4318,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    , -1.    , -1.    ,  0.    , -1.    ,  0.    ],</span>
+<span class="go">       [ 1.    ,  0.    ,  0.    ,  1.    ,  0.    ,  1.    ]])</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>This is the geometric Jacobian as described in texts by</dt><dd><p>Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+described in terms of translational and angular velocity, not a
+velocity twist as per the text by Lynch &amp; Park.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part I:
+Kinematics, Velocity, and Applications.” arXiv preprint arXiv:2207.01796 (2022).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.jacobe">
+<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacobe" title="Link to this definition"></a></dt>
+<dd><p>Manipulator geometric Jacobian in the end-effector frame</p>
+<p><code class="docutils literal notranslate"><span class="pre">robot.jacobe(q)</span></code> is the manipulator Jacobian matrix which maps
+joint  velocity to end-effector spatial velocity expressed in the
+<code class="docutils literal notranslate"><span class="pre">end</span></code> frame.</p>
+<p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
+is related to joint velocity by <span class="math notranslate nohighlight">\({}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]]</span>) – Joint coordinate vector</p></li>
+<li><p><strong>end</strong> – the particular link or gripper whose velocity the Jacobian
+describes, defaults to the end-effector if only one is present</p></li>
+<li><p><strong>start</strong> – the link considered as the base frame, defaults to the robots’s base frame</p></li>
+<li><p><strong>tool</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://spatialmath-python.rai-inst.com/3d_pose_SE3.html#spatialmath.pose3d.SE3" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE3</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – a static tool transformation matrix to apply to the
+end of end, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Manipulator Jacobian in the <code class="docutils literal notranslate"><span class="pre">end</span></code> frame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example makes a <code class="docutils literal notranslate"><span class="pre">Puma560</span></code> robot object, and solves for the
+end-effector frame Jacobian at the zero joint angle configuration</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">jacobe</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">array([[ 0.1295, -0.4854, -0.4854, -0.    , -0.0533,  0.    ],</span>
+<span class="go">       [ 0.4318,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    ,  0.4318,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    , -1.    , -1.    ,  0.    , -1.    ,  0.    ],</span>
+<span class="go">       [ 1.    ,  0.    ,  0.    ,  1.    ,  0.    ,  1.    ]])</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>This is the geometric Jacobian as described in texts by</dt><dd><p>Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+described in terms of translational and angular velocity, not a
+velocity twist as per the text by Lynch &amp; Park.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part I:
+Kinematics, Velocity, and Applications.” arXiv preprint arXiv:2207.01796 (2022).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.hessian0">
+<span class="sig-name descname"><span class="pre">hessian0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.hessian0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.hessian0" title="Link to this definition"></a></dt>
+<dd><p>Manipulator Hessian</p>
+<p>The manipulator Hessian tensor maps joint acceleration to end-effector
+spatial acceleration, expressed in the base frame. This
+function calulcates this based on the ETS of the robot. One of J0 or q
+is required. Supply J0 if already calculated to save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J0</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span>) – The manipulator Jacobian in the base frame</p></li>
+<li><p><strong>tool</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://spatialmath-python.rai-inst.com/3d_pose_SE3.html#spatialmath.pose3d.SE3" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE3</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – a static tool transformation matrix to apply to the
+end of end, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The manipulator Hessian in the base frame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
+</dd>
+</dl>
+<p class="rubric">Synopsis</p>
+<p>This method computes the manipulator Hessian in the base frame.  If
+we take the time derivative of the differential kinematic relationship</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\nu    &amp;= \mat{J}(\vec{q}) \dvec{q} \\
+\alpha &amp;= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}\end{split}\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[\dmat{J} = \mat{H} \dvec{q}\]</div>
+<p>and <span class="math notranslate nohighlight">\(\mat{H} \in \mathbb{R}^{6\times n \times n}\)</span> is the
+Hessian tensor.</p>
+<p>The elements of the Hessian are</p>
+<div class="math notranslate nohighlight">
+\[\mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}\]</div>
+<p>where <span class="math notranslate nohighlight">\(u = \{t_x, t_y, t_z, r_x, r_y, r_z\}\)</span> are the elements
+of the spatial velocity vector.</p>
+<p>Similarly, we can write</p>
+<div class="math notranslate nohighlight">
+\[\mat{J}_{i,j} = \frac{d u_i}{d q_j}\]</div>
+<p class="rubric">Examples</p>
+<p>The following example makes a <code class="docutils literal notranslate"><span class="pre">Panda</span></code> robot object, and solves for the
+base frame Hessian at the given joint angle configuration</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">hessian0</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="go">array([[[-0.484 , -0.    , -0.486 , -0.    , -0.1547,  0.    , -0.    ],</span>
+<span class="go">        [ 0.    ,  0.0796,  0.    ,  0.2466,  0.    ,  0.2006,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    , -1.    , -0.    ,  1.    ,  0.    ,  1.    ,  0.    ],</span>
+<span class="go">        [ 0.    , -0.    , -0.2955, -0.    ,  0.9463, -0.    ,  0.0998],</span>
+<span class="go">        [ 0.    ,  0.    , -0.    , -0.    ,  0.    , -0.    ,  0.    ]],</span>
+
+<span class="go">       [[-0.    , -0.484 , -0.    ,  0.4986, -0.    ,  0.1086,  0.    ],</span>
+<span class="go">        [ 0.0796,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    , -0.0796, -0.    , -0.2466, -0.    , -0.2006, -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.9553,  0.    , -0.3233,  0.    , -0.995 ],</span>
+<span class="go">        [ 0.    ,  0.    , -0.    , -0.    ,  0.    , -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.2955,  0.    , -0.9463,  0.    , -0.0998]],</span>
+
+<span class="go">       [[-0.486 , -0.    , -0.4643, -0.    , -0.1478,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.383 ,  0.    ,  0.2237,  0.    ],</span>
+<span class="go">        [ 0.    , -0.    , -0.1436, -0.    , -0.0457, -0.    , -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.9553,  0.    ,  0.9553,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    , -0.    ,  0.8085, -0.    , -0.1987],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.2955,  0.    ,  0.2955,  0.    ]],</span>
+
+<span class="go">       [[-0.    ,  0.4986, -0.    , -0.4986,  0.    , -0.1086, -0.    ],</span>
+<span class="go">        [ 0.2466,  0.    ,  0.383 ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    , -0.2466, -0.    ,  0.2466,  0.    ,  0.2006,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.3233,  0.    ,  0.995 ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.9463,  0.    ,  0.0998]],</span>
+
+<span class="go">       [[-0.1547, -0.    , -0.1478,  0.    ,  0.05  , -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.1676, -0.    ],</span>
+<span class="go">        [ 0.    , -0.    , -0.0457,  0.    ,  0.1464,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.3233,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.    ,  0.9093],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.9463, -0.    ]],</span>
+
+<span class="go">       [[ 0.    ,  0.1086,  0.    , -0.1086, -0.    , -0.1086, -0.    ],</span>
+<span class="go">        [ 0.2006,  0.    ,  0.2237,  0.    , -0.1676,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    , -0.2006, -0.    ,  0.2006,  0.    ,  0.2006,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.995 ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.0998]],</span>
+
+<span class="go">       [[-0.    ,  0.    ,  0.    , -0.    ,  0.    , -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    , -0.    ,  0.    , -0.    ],</span>
+<span class="go">        [ 0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ]]])</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part I:
+Kinematics, Velocity, and Applications.” arXiv preprint arXiv:2207.01796 (2022).</p></li>
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part II:
+Acceleration and Advanced Applications.” arXiv preprint arXiv:2207.01794 (2022).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.hessiane">
+<span class="sig-name descname"><span class="pre">hessiane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Je</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.hessiane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.hessiane" title="Link to this definition"></a></dt>
+<dd><p>Manipulator Hessian</p>
+<p>The manipulator Hessian tensor maps joint acceleration to end-effector
+spatial acceleration, expressed in the end-effector coordinate frame. This
+function calulcates this based on the ETS of the robot. One of J0 or q
+is required. Supply J0 if already calculated to save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J0</strong> – The manipulator Jacobian in the end-effector frame</p></li>
+<li><p><strong>tool</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://spatialmath-python.rai-inst.com/3d_pose_SE3.html#spatialmath.pose3d.SE3" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE3</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – a static tool transformation matrix to apply to the
+end of end, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The manipulator Hessian in end-effector frame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
+</dd>
+</dl>
+<p class="rubric">Synopsis</p>
+<p>This method computes the manipulator Hessian in the end-effector frame.  If
+we take the time derivative of the differential kinematic relationship</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\nu    &amp;= \mat{J}(\vec{q}) \dvec{q} \\
+\alpha &amp;= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}\end{split}\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[\dmat{J} = \mat{H} \dvec{q}\]</div>
+<p>and <span class="math notranslate nohighlight">\(\mat{H} \in \mathbb{R}^{6\times n \times n}\)</span> is the
+Hessian tensor.</p>
+<p>The elements of the Hessian are</p>
+<div class="math notranslate nohighlight">
+\[\mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}\]</div>
+<p>where <span class="math notranslate nohighlight">\(u = \{t_x, t_y, t_z, r_x, r_y, r_z\}\)</span> are the elements
+of the spatial velocity vector.</p>
+<p>Similarly, we can write</p>
+<div class="math notranslate nohighlight">
+\[\mat{J}_{i,j} = \frac{d u_i}{d q_j}\]</div>
+<p class="rubric">Examples</p>
+<p>The following example makes a <code class="docutils literal notranslate"><span class="pre">Panda</span></code> robot object, and solves for the
+end-effector frame Hessian at the given joint angle configuration</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">hessiane</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="go">array([[[-0.4816, -0.    , -0.4835, -0.    , -0.1539, -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    , -0.0796,  0.    , -0.2466,  0.    , -0.2006,  0.    ],</span>
+<span class="go">        [-0.0483, -0.    , -0.0485, -0.    , -0.0154, -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    , -0.995 ,  0.    ,  0.995 , -0.    ,  0.995 , -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.2955, -0.    , -0.9463, -0.    , -0.0998],</span>
+<span class="go">        [ 0.    , -0.0998,  0.    ,  0.0998, -0.    ,  0.0998,  0.    ]],</span>
+
+<span class="go">       [[-0.    , -0.4896, -0.    ,  0.4715, -0.    ,  0.088 ,  0.    ],</span>
+<span class="go">        [-0.0796,  0.    ,  0.    , -0.    ,  0.    , -0.    ,  0.    ],</span>
+<span class="go">        [-0.    ,  0.0309,  0.    ,  0.2952,  0.    ,  0.2104, -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.9801,  0.    , -0.4161,  0.    , -1.    ],</span>
+<span class="go">        [ 0.    ,  0.    , -0.    , -0.    ,  0.    , -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    , -0.1987, -0.    ,  0.9093, -0.    ,  0.    ]],</span>
+
+<span class="go">       [[-0.4835, -0.    , -0.4763, -0.    , -0.1516, -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    , -0.383 ,  0.    , -0.2237,  0.    ],</span>
+<span class="go">        [-0.0485,  0.    ,  0.0965, -0.    ,  0.0307, -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.9801, -0.    ,  0.9801,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    , -0.    , -0.8085, -0.    ,  0.1987],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    , -0.1987, -0.    , -0.1987, -0.    ]],</span>
+
+<span class="go">       [[-0.    ,  0.4715, -0.    , -0.4715,  0.    , -0.088 ,  0.    ],</span>
+<span class="go">        [-0.2466, -0.    , -0.383 ,  0.    , -0.    ,  0.    , -0.    ],</span>
+<span class="go">        [-0.    ,  0.2952, -0.    , -0.2952, -0.    , -0.2104,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.4161,  0.    ,  1.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    , -0.    ,  0.    , -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    , -0.9093,  0.    ,  0.    ]],</span>
+
+<span class="go">       [[-0.1539, -0.    , -0.1516,  0.    ,  0.0644,  0.    , -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    , -0.    , -0.    ,  0.1676, -0.    ],</span>
+<span class="go">        [-0.0154,  0.    ,  0.0307, -0.    , -0.1407, -0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.4161, -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.9093],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.9093,  0.    ]],</span>
+
+<span class="go">       [[-0.    ,  0.088 , -0.    , -0.088 ,  0.    , -0.088 ,  0.    ],</span>
+<span class="go">        [-0.2006, -0.    , -0.2237,  0.    ,  0.1676,  0.    , -0.    ],</span>
+<span class="go">        [-0.    ,  0.2104, -0.    , -0.2104, -0.    , -0.2104,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  1.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    , -0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ]],</span>
+
+<span class="go">       [[ 0.    ,  0.    ,  0.    ,  0.    , -0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    , -0.    , -0.    , -0.    , -0.    ],</span>
+<span class="go">        [ 0.    , -0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">        [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ]]])</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part I:
+Kinematics, Velocity, and Applications.” arXiv preprint arXiv:2207.01796 (2022).</p></li>
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part II:
+Acceleration and Advanced Applications.” arXiv preprint arXiv:2207.01794 (2022).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.__getitem__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Overloads<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">BaseETS</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">int</span>) → <span class="sphinx_autodoc_typehints-type">BaseET</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">int</span>) → <span class="sphinx_autodoc_typehints-type">ET</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">slice</span>) → <span class="sphinx_autodoc_typehints-type">List[ET]</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS2</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">int</span>) → <span class="sphinx_autodoc_typehints-type">ET2</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS2</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">slice</span>) → <span class="sphinx_autodoc_typehints-type">List[ET2]</span></p></li>
+</ul>
+</dd>
+</dl>
+<p>Index or slice an ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>i</strong> – the index or slince</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Elementary transform</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>et</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">ET.Rz(jindex=0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">ET.tx(eta=1.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="go">[ET.tx(eta=1.0), ET.Rz(jindex=1)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.__str__" title="Link to this definition"></a></dt>
+<dd><p>Pretty prints the ETS</p>
+<p><code class="docutils literal notranslate"><span class="pre">q</span></code> controls how the joint variables are displayed:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>None, format depends on number of joint variables</dt><dd><ul>
+<li><p>one, display joint variable as q</p></li>
+<li><p>more, display joint variables as q0, q1, …</p></li>
+<li><p>if a joint index was provided, use this value</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>“”, display all joint variables as empty parentheses <code class="docutils literal notranslate"><span class="pre">()</span></code></p></li>
+<li><p>“θ”, display all joint variables as <code class="docutils literal notranslate"><span class="pre">(θ)</span></code></p></li>
+<li><p>format string with passed joint variables <code class="docutils literal notranslate"><span class="pre">(j,</span> <span class="pre">j+1)</span></code>, so “θ{0}”
+would display joint variables as θ0, θ1, … while “θ{1}” would
+display joint variables as θ1, θ2, …  <code class="docutils literal notranslate"><span class="pre">j</span></code> is either the joint
+index, if provided, otherwise a sequential value.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>) – control how joint variables are displayed</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pretty printed ETS</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+<span class="go">[ET.Rz(jindex=0), ET.tx(eta=1.0)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+<span class="go">Rz() ⊕ tx(1) ⊕ Rz()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">))</span>  <span class="c1"># numbering from 0</span>
+<span class="go">Rz(θ0) ⊕ tx(1) ⊕ Rz(θ1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="p">))</span>  <span class="c1"># numbering from 1</span>
+<span class="go">Rz(θ1) ⊕ tx(1) ⊕ Rz(θ2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># explicit joint indices</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">jindex</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">jindex</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q3) ⊕ tx(1) ⊕ Rz(q4)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">))</span>
+<span class="go">Rz(θ3) ⊕ tx(1) ⊕ Rz(θ4)</span>
+</pre></div>
+</div>
+<p>Angular parameters are converted to degrees, except if they
+are symbolic.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">spatialmath.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">symbol</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;theta, d&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">&#39;Rx(theta) ⊕ tx(2) ⊕ Rx(45°) ⊕ Ry(11.46°) ⊕ ty(d)&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.inv">
+<span class="sig-name descname"><span class="pre">inv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.inv" title="Link to this definition"></a></dt>
+<dd><p>Inverse of ETS</p>
+<p>The inverse of a given ETS.  It is computed as the inverse of the
+individual ETs in the reverse order.</p>
+<div class="math notranslate nohighlight">
+\[(\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Inverse of the ETS</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">T</span></code>, bound= BaseETS)</span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">jindex</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">jindex</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q2) ⊕ tx(1) ⊕ Rx(-q3) ⊕ tx(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>
+<span class="go">tx(-1) ⊕ Rx(q3) ⊕ tx(-1) ⊕ Rz(-q2)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>It is essential to use explicit joint indices to account for</dt><dd><p>the reversed order of the transforms.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.joints">
+<span class="sig-name descname"><span class="pre">joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.joints" title="Link to this definition"></a></dt>
+<dd><p>Get a list of the variable ETs with this ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of ETs that are joints</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ET</span></code>]</span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">joints</span><span class="p">()</span>
+<span class="go">[ET.Rz(jindex=0), ET.Rz(jindex=1)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.m">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">m</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.m" title="Link to this definition"></a></dt>
+<dd><p>Number of transforms</p>
+<p>Counts the number of transforms in the ETS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the number of transforms in the ETS</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.m" title="roboticstoolbox.robot.ETS.ETS.m">m</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">m</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.n">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">n</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.n" title="Link to this definition"></a></dt>
+<dd><p>Number of joints</p>
+<p>Counts the number of joints in the ETS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the number of joints in the ETS</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.n" title="roboticstoolbox.robot.ETS.ETS.n">n</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">n</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.joints" title="roboticstoolbox.robot.ETS.ETS.joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">joints()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.split" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Overloads<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS</span>) → <span class="sphinx_autodoc_typehints-type">List[‘ETS’]</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS2</span>) → <span class="sphinx_autodoc_typehints-type">List[‘ETS2’]</span></p></li>
+</ul>
+</dd>
+</dl>
+<p>Split ETS into link segments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a list of ETS, each one, apart from the last,
+ends with a variable ET.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>split</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.structure">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">structure</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.structure" title="Link to this definition"></a></dt>
+<dd><p>Joint structure string</p>
+<p>A string comprising the characters ‘R’ or ‘P’ which indicate the types
+of joints in order from left to right.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string indicating the joint types</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.structure" title="roboticstoolbox.robot.ETS.ETS.structure">structure</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">structure</span>
+<span class="go">&#39;PR&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="ets-2d">
+<h2>ETS - 2D<a class="headerlink" href="#ets-2d" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseETS</span></code></p>
+<p>This class implements an elementary transform sequence (ETS) for 2D</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>arg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS2</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ET2</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ET2</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS2</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ET2</span></code>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS2</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Function to compute ET value</p>
+</dd>
+</dl>
+<p>An instance can contain an elementary transform (ET) or an elementary
+transform sequence (ETS). It has list-like properties by subclassing
+UserList, which means we can perform indexing, slicing pop, insert, as well
+as using it as an iterator over its values.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS()</span></code> an empty ETS list</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ET2.XY(η)</span></code> is a constant elementary transform</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ET2.XY(η,</span> <span class="pre">'deg')</span></code> as above but the angle is expressed in degrees</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ET2.XY()</span></code> is a joint variable, the value is left free until evaluation
+time</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ET2.XY(j=J)</span></code> as above but the joint index is explicitly given, this
+might correspond to the joint number of a multi-joint robot.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ET2.XY(flip=True)</span></code> as above but the joint moves in the opposite sense</p></li>
+</ul>
+<p>where <code class="docutils literal notranslate"><span class="pre">XY</span></code> is one of <code class="docutils literal notranslate"><span class="pre">R</span></code>, <code class="docutils literal notranslate"><span class="pre">tx</span></code>, <code class="docutils literal notranslate"><span class="pre">ty</span></code>.</p>
+<p class="rubric">Example</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ETS2</span> <span class="k">as</span> <span class="n">ET2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET2</span><span class="o">.</span><span class="n">R</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># a single ET, rotation about z</span>
+<span class="go">!! AttributeError: type object &#39;ETS2&#39; has no attribute &#39;R&#39; [ERR robot/ETS.py:30:roboticstoolbox.robot.ETS.ETS2 (source/arm_ets.rst)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">!! NameError: name &#39;e&#39; is not defined [ERR robot/ETS.py:30:roboticstoolbox.robot.ETS.ETS2 (source/arm_ets.rst)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET2</span><span class="o">.</span><span class="n">R</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET2</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># an ETS</span>
+<span class="go">!! AttributeError: type object &#39;ETS2&#39; has no attribute &#39;R&#39; [ERR robot/ETS.py:30:roboticstoolbox.robot.ETS.ETS2 (source/arm_ets.rst)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>                      <span class="c1"># of length 2</span>
+<span class="go">!! NameError: name &#39;e&#39; is not defined [ERR robot/ETS.py:30:roboticstoolbox.robot.ETS.ETS2 (source/arm_ets.rst)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>                        <span class="c1"># an ET sliced from the ETS</span>
+<span class="go">!! NameError: name &#39;e&#39; is not defined [ERR robot/ETS.py:30:roboticstoolbox.robot.ETS.ETS2 (source/arm_ets.rst)]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform Sequence,
+J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">r()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">tx()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ty()</span></code></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.__getitem__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Overloads<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">BaseETS</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">int</span>) → <span class="sphinx_autodoc_typehints-type">BaseET</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">int</span>) → <span class="sphinx_autodoc_typehints-type">ET</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">slice</span>) → <span class="sphinx_autodoc_typehints-type">List[ET]</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS2</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">int</span>) → <span class="sphinx_autodoc_typehints-type">ET2</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS2</span>), <strong>i</strong> (<span class="sphinx_autodoc_typehints-type">slice</span>) → <span class="sphinx_autodoc_typehints-type">List[ET2]</span></p></li>
+</ul>
+</dd>
+</dl>
+<p>Index or slice an ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>i</strong> – the index or slince</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Elementary transform</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>et</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">ET.Rz(jindex=0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">ET.tx(eta=1.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="go">[ET.tx(eta=1.0), ET.Rz(jindex=1)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.__str__" title="Link to this definition"></a></dt>
+<dd><p>Pretty prints the ETS</p>
+<p><code class="docutils literal notranslate"><span class="pre">q</span></code> controls how the joint variables are displayed:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>None, format depends on number of joint variables</dt><dd><ul>
+<li><p>one, display joint variable as q</p></li>
+<li><p>more, display joint variables as q0, q1, …</p></li>
+<li><p>if a joint index was provided, use this value</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>“”, display all joint variables as empty parentheses <code class="docutils literal notranslate"><span class="pre">()</span></code></p></li>
+<li><p>“θ”, display all joint variables as <code class="docutils literal notranslate"><span class="pre">(θ)</span></code></p></li>
+<li><p>format string with passed joint variables <code class="docutils literal notranslate"><span class="pre">(j,</span> <span class="pre">j+1)</span></code>, so “θ{0}”
+would display joint variables as θ0, θ1, … while “θ{1}” would
+display joint variables as θ1, θ2, …  <code class="docutils literal notranslate"><span class="pre">j</span></code> is either the joint
+index, if provided, otherwise a sequential value.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>) – control how joint variables are displayed</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pretty printed ETS</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+<span class="go">[ET.Rz(jindex=0), ET.tx(eta=1.0)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+<span class="go">Rz() ⊕ tx(1) ⊕ Rz()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">))</span>  <span class="c1"># numbering from 0</span>
+<span class="go">Rz(θ0) ⊕ tx(1) ⊕ Rz(θ1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="p">))</span>  <span class="c1"># numbering from 1</span>
+<span class="go">Rz(θ1) ⊕ tx(1) ⊕ Rz(θ2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># explicit joint indices</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">jindex</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">jindex</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q3) ⊕ tx(1) ⊕ Rz(q4)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">))</span>
+<span class="go">Rz(θ3) ⊕ tx(1) ⊕ Rz(θ4)</span>
+</pre></div>
+</div>
+<p>Angular parameters are converted to degrees, except if they
+are symbolic.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">spatialmath.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">symbol</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;theta, d&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">&#39;Rx(theta) ⊕ tx(2) ⊕ Rx(45°) ⊕ Ry(11.46°) ⊕ ty(d)&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.inv">
+<span class="sig-name descname"><span class="pre">inv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.inv" title="Link to this definition"></a></dt>
+<dd><p>Inverse of ETS</p>
+<p>The inverse of a given ETS.  It is computed as the inverse of the
+individual ETs in the reverse order.</p>
+<div class="math notranslate nohighlight">
+\[(\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Inverse of the ETS</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">T</span></code>, bound= BaseETS)</span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">jindex</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">jindex</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q2) ⊕ tx(1) ⊕ Rx(-q3) ⊕ tx(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>
+<span class="go">tx(-1) ⊕ Rx(q3) ⊕ tx(-1) ⊕ Rz(-q2)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>It is essential to use explicit joint indices to account for</dt><dd><p>the reversed order of the transforms.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.joints">
+<span class="sig-name descname"><span class="pre">joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.joints" title="Link to this definition"></a></dt>
+<dd><p>Get a list of the variable ETs with this ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of ETs that are joints</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ET</span></code>]</span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">joints</span><span class="p">()</span>
+<span class="go">[ET.Rz(jindex=0), ET.Rz(jindex=1)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.m">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">m</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.m" title="Link to this definition"></a></dt>
+<dd><p>Number of transforms</p>
+<p>Counts the number of transforms in the ETS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the number of transforms in the ETS</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.m" title="roboticstoolbox.robot.ETS.ETS2.m">m</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">m</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.n">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">n</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.n" title="Link to this definition"></a></dt>
+<dd><p>Number of joints</p>
+<p>Counts the number of joints in the ETS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the number of joints in the ETS</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.n" title="roboticstoolbox.robot.ETS.ETS2.n">n</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">n</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.joints" title="roboticstoolbox.robot.ETS.ETS2.joints"><code class="xref py py-func docutils literal notranslate"><span class="pre">joints()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.split" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Overloads<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS</span>) → <span class="sphinx_autodoc_typehints-type">List[‘ETS’]</span></p></li>
+<li><p><strong>self</strong> (<span class="sphinx_autodoc_typehints-type">ETS2</span>) → <span class="sphinx_autodoc_typehints-type">List[‘ETS2’]</span></p></li>
+</ul>
+</dd>
+</dl>
+<p>Split ETS into link segments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a list of ETS, each one, apart from the last,
+ends with a variable ET.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>split</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.structure">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">structure</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.structure" title="Link to this definition"></a></dt>
+<dd><p>Joint structure string</p>
+<p>A string comprising the characters ‘R’ or ‘P’ which indicate the types
+of joints in order from left to right.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string indicating the joint types</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.structure" title="roboticstoolbox.robot.ETS.ETS2.structure">structure</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">structure</span>
+<span class="go">&#39;PR&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.__mul__">
+<span class="sig-name descname"><span class="pre">__mul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.__mul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.__mul__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS2</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.compile">
+<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.compile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.compile" title="Link to this definition"></a></dt>
+<dd><p>Compile an ETS2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS2</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>optimised ETS2</p>
+</dd>
+</dl>
+<p>Perform constant folding for faster evaluation.  Consecutive constant
+ETs are compounded, leading to a constant ET which is denoted by
+<code class="docutils literal notranslate"><span class="pre">SE3</span></code> when displayed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">isconstant()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.insert" title="Link to this definition"></a></dt>
+<dd><p>Insert value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – insert an ET or ETS into the ETS, default is at the end</p></li>
+<li><p><strong>arg</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ET2</span></code>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS2</span></code></a>]</span>) – the elementary transform or sequence to insert</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+<p>Inserts an ET or ETS into the ET sequence.  The inserted value is at position
+<code class="docutils literal notranslate"><span class="pre">i</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">roboticstoolbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">ET2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET2</span><span class="o">.</span><span class="n">R</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET2</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET2</span><span class="o">.</span><span class="n">R</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET2</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ET2</span><span class="o">.</span><span class="n">R</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span>
+<span class="go">[ET2.R(jindex=0), ET2.tx(eta=1.0), ET2.R(), ET2.R(jindex=1), ET2.tx(eta=1.0)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.fkine">
+<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.fkine" title="Link to this definition"></a></dt>
+<dd><p>Forward kinematics
+:param q: Joint coordinates
+:type q: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]]</span>
+:type base: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://spatialmath-python.rai-inst.com/2d_pose_SE2.html#spatialmath.pose2d.SE2" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE2</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>
+:param base: base transform, optional
+:type tool: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://spatialmath-python.rai-inst.com/2d_pose_SE2.html#spatialmath.pose2d.SE2" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE2</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>
+:param tool: tool transform, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://spatialmath-python.rai-inst.com/2d_pose_SE2.html#spatialmath.pose2d.SE2" title="(in Spatial Maths package v1.1.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE2</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformation matrix representing the pose of the
+end-effector</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">ets.fkine(q)</span></code> evaluates forward kinematics for the robot at
+joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p></li>
+</ul>
+<p><strong>Trajectory operation</strong>:
+If <code class="docutils literal notranslate"><span class="pre">q</span></code> has multiple rows (mxn), it is considered a trajectory and the
+result is an <code class="docutils literal notranslate"><span class="pre">SE2</span></code> instance with <code class="docutils literal notranslate"><span class="pre">m</span></code> values.
+.. note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">The</span> <span class="n">robot</span><span class="s1">&#39;s base tool transform, if set, is incorporated</span>
+  <span class="n">into</span> <span class="n">the</span> <span class="n">result</span><span class="o">.</span>
+<span class="o">-</span> <span class="n">A</span> <span class="n">tool</span> <span class="n">transform</span><span class="p">,</span> <span class="k">if</span> <span class="n">provided</span><span class="p">,</span> <span class="ow">is</span> <span class="n">incorporated</span> <span class="n">into</span> <span class="n">the</span> <span class="n">result</span><span class="o">.</span>
+<span class="o">-</span> <span class="n">Works</span> <span class="kn">from</span><span class="w"> </span><span class="nn">the</span> <span class="n">end</span><span class="o">-</span><span class="n">effector</span> <span class="n">link</span> <span class="n">to</span> <span class="n">the</span> <span class="n">base</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.jacob0">
+<span class="sig-name descname"><span class="pre">jacob0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.jacob0" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.jacobe">
+<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.jacobe" title="Link to this definition"></a></dt>
+<dd><p>Jacobian in base frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]]</span>) – joint coordinates</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Jacobian matrix</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">jacobe(q)</span></code> is the manipulator Jacobian matrix which maps joint
+velocity to end-effector spatial velocity.</p>
+<p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
+is related to joint velocity by <span class="math notranslate nohighlight">\({}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">jacob()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">hessian0()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-Jun-2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
