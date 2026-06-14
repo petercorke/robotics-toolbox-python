@@ -31,6 +31,7 @@
 # Maintainer: Morgan Quigley <morgan@osrfoundation.org>
 
 import xml.dom.minidom
+from xml.sax.saxutils import quoteattr
 
 
 def first_child_element(elt):
@@ -124,13 +125,7 @@ def fixed_writexml(
     a_names = sorted(attrs.keys())
 
     for a_name in a_names:
-        writer.write(' %s="' % a_name)
-        # Python 3.13 changed minidom._write_data signature to require `attr`.
-        try:
-            xml.dom.minidom._write_data(writer, attrs[a_name].value)
-        except TypeError:
-            xml.dom.minidom._write_data(writer, attrs[a_name].value, True)
-        writer.write('"')
+        writer.write(" %s=%s" % (a_name, quoteattr(attrs[a_name].value)))
     if self.childNodes:
         if (
             len(self.childNodes) == 1
