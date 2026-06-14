@@ -1,522 +1,757 @@
-from roboticstoolbox import ETS, ET
+#!/usr/bin/env python3
 import re
+import sys
+from collections import UserList
+
 import sympy
-import numpy as np
-from spatialmath import base
-
-pi2 = base.pi() / 2
-deg = base.pi() / sympy.Integer("180")
+import copy
 
 
-# PROGRESS
-# subs2z does a bad thing in first phase, 2 subs it shouldnt make
-class DHFactor(ET):
-    def __init__(self, axis=None, eta=None, **kwargs):
+class Element:
+    # Transform types
+    TX, TY, TZ = 0, 1, 2
+    RX, RY, RZ = 3, 4, 5
+    DH_STANDARD = 6
+    DH_MODIFIED = 7
 
-        super().__init__(axis=axis, eta=eta, **kwargs)
+    TYPE_NAMES = ["Tx", "Ty", "Tz", "Rx", "Ry", "Rz", "DH", "DHm"]
+    TYPE_NAMES_LC = ["tx", "ty", "tz", "rx", "ry", "rz", "dh", "dhm"]
 
-    @classmethod
-    def parse(cls, s):
-        et_re = re.compile(r"([RT][xyz])\(([^)]*)\)")
+    # Order of elementary transforms for DH conventions: (Type, IsJointPossible)
+    DH_STANDARD_ORDER = [(RZ, True), (TZ, True), (TZ, False), (RX, False)]
+    DH_MODIFIED_ORDER = [(RX, False), (TX, False), (RZ, True), (TZ, True)]
 
-        # self.data = []
+    import sympy
 
-        jointnum = 0
-        ets = DHFactor()
+    re_element = re.compile(r"([RT][xyz])\(([^)]+)\)")
 
-        for axis, eta in et_re.findall(s):
-            if eta[0] == "q":
-                eta = None
-                unit = None
-                j = jointnum
-                jointnum += 1
-            else:
-                # eta can be given as a variable or a number
-                try:
-                    # first attempt to create symbolic number
-                    eta = sympy.Number(eta)
-                except:
-                    # failing that, a symbolic variable
-                    eta = sympy.symbols(eta)
-                if axis[0] == "R":
-                    # convert to degrees, assumed unit in input string
-                    eta = eta * deg
-                j = None
+    def __init__(self, *args):
+        if len(args) == 1 and isinstance(args[0], str):
+            # Rx(...)
+            m = Element.re_element.match(args[0])
+            if m is None:
+                raise ValueError(f"bad string value: {el_value}")
+            el_type = m.group(1)
+            el_value = m.group(2)
+        elif len(args) == 2:
+            el_type = args[0]
+            el_value = args[1]
 
-            if axis == "Rx":
-                e = DHFactor.Rx(eta, j=j)
-            elif axis == "Ry":
-                e = DHFactor.Ry(eta, j=j)
-            elif axis == "Rz":
-                e = DHFactor.Rz(eta, j=j)
-            elif axis == "Tx":
-                e = DHFactor.tx(eta, j=j)
-            elif axis == "Ty":
-                e = DHFactor.ty(eta, j=j)
-            # elif axis == 'Tz':
-            else:
-                e = DHFactor.tz(eta, j=j)
+        if isinstance(el_type, str):
+            try:
+                self.type = Element.TYPE_NAMES_LC.index(el_type.lower())
+            except ValueError:
+                raise ValueError(f"Invalid transform type: {el_type}")
+        elif isinstance(el_type, int):
+            self.type = el_type
 
-            ets *= e
-
-        return cls(ets)
-
-    # ---------------------------------------------------------------------- #
-
-    def simplify(self, mdh=False):
-
-        self.merge()
-        self.swap(mdh)
-        self.merge()
-        self.float_right()
-        self.merge()
-        # self.substitute_to_z()
-        self.merge()
-        print("inital merge and swap\n  ", self)
-        print("main loop")
-        for i in range(10):
-            nchanges = 0
-
-            nchanges += self.merge()
-            nchanges += self.swap(mdh)
-            nchanges += self.merge()
-            print(ets)
-            nchanges += self.eliminate_y()
-            nchanges += self.merge()
-            print(ets)
-
-            if nchanges == 0:
-                # try this then
-                nchanges += self.substitute_to_z2()
-            if nchanges == 0:
-                break
-        else:
-            # too many iterations
-            print("too many iterations")
-
-    # ---------------------------------------------------------------------- #
-
-    def float_right(self):
-        """
-        Attempt to 'float' translational terms as far to the right as
-         * possible and across joint boundaries.
-        """
-
-        nchanges = 0
-
-        for i in range(len(self)):
-            this = self[i]
-            if this.isjoint or this.isrevolute:
-                continue
-
-            crossed = False
-            for j in range(i + 1, len(self)):
-                next = self[j]
-
-                if next.isprismatic:
-                    continue
-                if next.isrevolute and next.axis[1] == this.axis[1]:
-                    crossed = True
-                    continue
-                break
-
-            if crossed:
-                del self[i]
-                self.insert(j - 1, this)
-                nchanges += 1
-                print("floated")
-
-        return nchanges
-
-    # ---------------------------------------------------------------------- #
-    def swap(self, mdh=False):
-
-        #  we want to sort terms into the order:
-        # 	RZ
-        # 	TX
-        # 	TZ
-        # 	RX
-
-        def do_swap(this, next):
-            if mdh:
-                # modified DH
-                return (
-                    this.axis == "Rx"
-                    and next.axis == "tx"
-                    or this.axis == "Ry"
-                    and next.axis == "ty"
-                    or this.axis == "Rz"
-                    and next.axis == "tz"
-                    or this.axis == "tz"
-                    and next.axis == "tx"
-                )
-            else:
-                # standard DH
-
-                # push constant translations through rotational joints
-                # of the same type
-
-                if this.axis == "tz" and next.axis == "tx":
-                    return True
-
-                if next.isjoint and (
-                    this.axis == "tx"
-                    and next.axis == "Rx"
-                    or this.axis == "ty"
-                    and next.axis == "Ry"
-                    or this.axis == "tz"
-                    and next.axis == "Rz"
-                ):
-                    return True
-                elif not this.isjoint and (
-                    this.axis == "Rx"
-                    and next.axis == "tx"
-                    or this.axis == "Ry"
-                    and next.axis == "ty"
-                ):
-                    return True
-
-                if (
-                    not this.isjoint
-                    and not next.isjoint
-                    and this.axis == "tz"
-                    and next.axis == "Rz"
-                ):
-                    return True
-
-                #  move Ty terms to the right
-                if (
-                    this.axis == "ty"
-                    and next.axis == "tz"
-                    or this.axis == "ty"
-                    and next.axis == "tx"
-                ):
-                    return True
-
-            return False
-
-        total_changes = 0
-        while True:
-            nchanges = 0
-            for i in range(len(self) - 1):
-                this = self[i]
-                next = self[i + 1]
-
-                if do_swap(this, next):
-                    del self[i]
-                    self.insert(i + 1, this)
-                    nchanges += 1
-                    print(f"swapping {this} <--> {next}")
-            if nchanges == 0:
-                total_changes += nchanges
-                break
-
-        return total_changes
-
-    # ---------------------------------------------------------------------- #
-
-    def substitute_to_z(self):
-        # substitute all non Z joint transforms according to rules
-        nchanges = 0
-        out = DHFactor()
-
-        def subs_z(this):
-            if this.axis == "Rx":
-                return DHFactor.ry(pi2) * DHFactor.rz(this.eta) * DHFactor.ry(-pi2)
-            elif this.axis == "Ry":
-                return DHFactor.rx(-pi2) * DHFactor.rz(this.eta) * DHFactor.rx(pi2)
-            elif this.axis == "tx":
-                return DHFactor.ry(pi2) * DHFactor.tz(this.eta) * DHFactor.ry(-pi2)
-            elif this.axis == "ty":
-                return DHFactor.rx(-pi2) * DHFactor.tz(this.eta) * DHFactor.rx(pi2)
-
-        for e in self:
-            if not e.isjoint:
-                out *= e
-            else:
-                # do a substitution
-                new = DHFactor.subs_z(e)
-                if new is None:
-                    out *= e
-                    continue
-                out *= new
-                nchanges += 1
-                print(f"subs2z: {e} := {new}")
-
-        self.data = out.data
-        return nchanges
-
-    def substitute_to_z2(self):
-        # substitute all non Z joint transforms according to rules
-        nchanges = 0
-        out = DHFactor()
-        jointyet = False
-
-        def subs_z(prev, this):
-            if this.axis == "Ry":
-                return DHFactor.rz(pi2) * DHFactor.rx(this.eta) * DHFactor.rz(-pi2)
-            elif this.axis == "ty":
-                if prev.axis == "Rz":
-                    return DHFactor.rz(pi2) * DHFactor.ty(this.eta) * DHFactor.r(-pi2)
-                else:
-                    return DHFactor.rx(-pi2) * DHFactor.ty(this.eta) * DHFactor.rx(pi2)
-
-        for i in range(len(self)):
-            this = self[i]
-            if this.isjoint:
-                jointyet = True
-                continue
-
-            if i == 0 or not jointyet:
-                continue
-
-            prev = self[i - 1]
-
-            new = subs_z(prev, this)
-
-            if new is None:
-                out *= this
-                continue
-            out *= new
-            nchanges += 1
-            print(f"subs2z2: {this} := {new}")
-
-        self.data = out.data
-        return nchanges
-
-    # ---------------------------------------------------------------------- #
-
-    def merge(self):
-        def can_merge(prev, this):
-            return prev.axis == this.axis and not (prev.isjoint and this.isjoint)
-
-        out = DHFactor()
-        nchanges = 0
-        while len(self.data) > 0:
-            this = self.pop(0)
-
-            if len(self.data) > 0:
-                next = self[0]
-
-                if can_merge(this, next):
-                    new = DHFactor.add(this, next)
-                    out *= new
-                    self.pop(0)  # remove next from the queue
-                    print(f"Merging {this * next} to {new}")
-                else:
-                    out *= this
-            else:
-                out *= this
-
-        self.data = out.data
-        return nchanges
-        # remove zeros
+        self.val = sympy.sympify(el_value)
+        self._joint = False
+        self._check_q(self)
 
     @staticmethod
-    def add(this, that):
-        if this.isjoint and not that.isjoint:
-            out = DHFactor(this)
-            if out.eta is None:
-                out.eta = that.eta
-            else:
-                out.eta += that.eta
-        elif not this.isjoint and that.isjoint:
-            out = DHFactor(that)
-            if out.eta is None:
-                out.eta = this.eta
-            else:
-                out.eta += this.eta
-        elif not this.isjoint and not that.isjoint:
-            out = DHFactor(this)
-            if out.eta is None:
-                out.eta = that.eta
-            else:
-                out.eta += that.eta
+    def _check_q(el):
+        for var in el.val.free_symbols:
+            if str(var).startswith("q"):
+                el._joint = True
+
+    def __add__(self, other):
+        if self.type != other.type:
+            raise ValueError("can only add Elements of the same type")
+        new = copy.copy(self)
+        new.val += other.val
+        self._check_q(new)
+        return new
+
+    # def __init__(self, type_val, constant=0):
+    #     if not isinstance(type_val, int) or not (0 <= type_val < len(self.TYPE_NAMES)):
+    #         raise ValueError(f"Invalid transform type: {type_val}")
+    #     self.type = type_val
+    #     self.var = None  # e.g., 'q1'
+    #     # self.symconst = None  # e.g., 'L1'
+    #     if isinstance(constant, int):
+    #         self.constant = sympy.Integer(constant)
+    #     elif isinstance(constant, str):
+    #         self.constant = sympy.symbol(constant)
+    #     elif isinstance(constant, sympy.core.Expr):
+    #         self.constant = constant
+    #     else:
+    #         raise ValueError("constant must be int or str")
+
+    #     # DH specific parameters
+    #     self.theta = 0.0
+    #     self.alpha = 0.0
+    #     self.A = None
+    #     self.D = None
+    #     self.prismatic = 0
+    #     self.offset = 0.0
+
+    # # Element(curr, Element.TZ, prev.constant)
+
+    def clone(self, type_val, constant=0):
+        new_el = Element(type_val, constant)
+        new_el.val = self.val
+        # new_el.symconst = self.symconst
+        return new_el
+
+    def __repr__(self):
+        return f"{self.TYPE_NAMES[self.type]}({self.val})"
+        # s += str(self.val)
+        # # if self.symconst:
+        # #     s += f"{self.symconst}"
+
+        # return s + ")"
+
+    @classmethod
+    def from_string(cls, s):
+        """Parses a string like 'Rx(90)' or 'Tz(q1)'."""
+        match = re.match(r"([RT][xyz])\(([^)]+)\)", s, re.IGNORECASE)
+        if not match:
+            raise ValueError(f"Invalid transform format: {s}")
+
+        s_type = match.group(1).lower()
+        s_arg = match.group(2)
+
+        # Determine type index
+        try:
+            type_idx = [name.lower() for name in cls.TYPE_NAMES].index(s_type)
+        except ValueError:
+            raise ValueError(f"Bad transform name: {s_type}")
+
+        el = cls(type_idx)
+
+        if s_arg.startswith("q") or s_arg.startswith("-q"):
+            # we have a joint coordinate
+            el.var = s_arg
         else:
-            raise ValueError("both ET cannot be joint variables")
-        return out
+            try:
+                val = int(s_arg)
+                el.constant = sympy.Integer(val)
+            except ValueError:
+                # not an int
+                el.constant = sympy.symbols(s_arg)
 
-    # ---------------------------------------------------------------------- #
+        # # Handle sign
+        # negative = False
+        # if s_arg.startswith("-"):
+        #     negative = True
+        #     s_arg = s_arg[1:]
 
-    def eliminate_y(self):
+        # if s_arg.startswith("q"):
+        #     el.var = ("-" if negative else "") + s_arg
+        # elif s_arg.startswith("L"):
+        #     el.symconst = ("-" if negative else "") + s_arg
+        # else:
+        #     try:
+        #         el.constant = float(s_arg)
+        #         if negative:
+        #             el.constant = -el.constant
+        #     except ValueError:
+        #         raise ValueError(f"Bad argument in term: {s}")
+        return el
 
-        nchanges = 0
-        out = DHFactor()
-        jointyet = False
+    @property
+    def is_trans(self):
+        return self.type in (self.TX, self.TY, self.TZ)
 
-        def subs_y(prev, this):
-            if this.isjoint or prev.isjoint:
-                return None
+    @property
+    def is_rot(self):
+        return self.type in (self.RX, self.RY, self.RZ)
 
-            new = None
-            if prev.axis == "Rx" and this.axis == "ty":  # RX.TY -> TZ.RX
-                new = DHFactor.tx(prev.eta) * prev
-            elif prev.axis == "Rx" and this.axis == "tz":  # RX.TZ -> TY.RX
-                new = DHFactor.ty(-prev.eta) * prev
-            elif prev.axis == "Ry" and this.axis == "tz":  # RY.TX-> TZ.RY
-                new = DHFactor.tz(-prev.eta) * prev
-            elif prev.axis == "Ry" and this.axis == "tz":  # RY.TZ-> TX.RY
-                new = DHFactor.tx(prev.eta) * prev
+    @property
+    def is_joint(self):
+        return self._joint
 
-            elif prev.axis == "ty" and this.axis == "Rx":  # TY.RX -> RX.TZ
-                new = this * DHFactor.tz(-this.eta)
-            elif prev.axis == "tx" and this.axis == "Rz":  # TX.RZ -> RZ.TY
-                new = this * DHFactor.tz(this.eta)
-            elif prev.axis == "Ry" and this.axis == "Rx":  # RY(Q).RX -> RX.RZ(-Q)
-                new = this * DHFactor.Rz(-prev.eta)
-            elif prev.axis == "Rx" and this.axis == "Ry":  # RX.RY -> RZ.RX
-                new = DHFactor.Rz(this.eta) * prev
-            elif prev.axis == "Rz" and this.axis == "Rx":  # RZ.RX -> RX.RY
-                new = this * DHFactor.Ry(this.eta)
-            return new
+    @property
+    def axis(self):
+        if self.type in (self.TX, self.RX):
+            return 0
+        if self.type in (self.TY, self.RY):
+            return 1
+        if self.type in (self.TZ, self.RZ):
+            return 2
+        raise ValueError("Bad transform type for axis check")
 
-        for i in range(len(self)):
-            this = self[i]
-            jointyet = this.isjoint
-            if i == 0 or not jointyet:  # leave initial const xform
+    def negate(self):
+        self.constant = -self.constant
+        if self.symconst:
+            # Flip all signs in the symbolic constant string
+            s = self.symconst
+            if not s.startswith(("-", "+")):
+                s = "+" + s
+
+            new_s = ""
+            for char in s:
+                if char == "+":
+                    new_s += "-"
+                elif char == "-":
+                    new_s += "+"
+                else:
+                    new_s += char
+
+            if new_s.startswith("+"):
+                new_s = new_s[1:]
+            self.symconst = new_s
+
+    def sym_add(self, s1, s2):
+        if s1 is None and s2 is None:
+            return None
+        if s1 is not None and s2 is None:
+            return s1
+        if s1 is None and s2 is not None:
+            return s2
+        if s2.startswith("-"):
+            return f"{s1}{s2}"
+        return f"{s1}+{s2}"
+
+    def merge(self, other):
+        """Attempts to merge two adjacent transforms."""
+        if self.type != other.type or (self.is_joint and other.is_joint):
+            return None
+
+        return self + other
+        # new_el = Element(self.type)
+        # new_el.var = self.sym_add(self.var, other.var)
+        # new_el.constant = self.constant + other.constant
+
+        # if not new_el.is_joint and new_el.constant == 0:
+        #     return None  # Null transform
+        # return new_el
+
+    def arg_string(self):
+        # single ET
+        return str(self.val).replace(" ", "")
+        # if self.var is not None:
+        #     sum = sympy.symbols(self.var)
+        # else:
+        #     sum = sympy.Integer(0)
+        # if self.constant:
+        #     sum += self.constant
+        # if s and not self.symconst.startswith("-"):
+        #     s += "+"
+        # s += self.symconst
+        # if sum != 0:
+        #     s += str(sum).replace(" ", "")
+        #     f"+{self.constant:g}" if self.constant > 0 else f"{self.constant:g}"
+        # )
+        # return str(sum).replace(" ", "") if sum else "0"
+
+    def __str__(self):
+        return f"{self.TYPE_NAMES[self.type]}({self.arg_string()})"
+
+
+class DH(Element):
+    def __init__(self, modified=False):
+        # DH specific parameters
+        self.theta = 0.0
+        self.alpha = 0.0
+        self.A = None
+        self.D = None
+        self.prismatic = 0
+        self.offset = 0.0
+
+    def add_to_dh(self, e):
+        """Accumulates primitive transforms into a DH element."""
+
+        if e.type == self.RZ:
+            if e.is_joint:
+                self.prismatic = 0
+                self.val = e.val
+                self.offset = e.constant
+                self.theta = 0.0
+            else:
+                self.theta = e.constant
+        elif e.type == self.TX:
+            self.A = e.symconst
+        elif e.type == self.TZ:
+            if e.is_joint:
+                self.prismatic = 1
+                self.var = e.var
+                self.D = None
+            else:
+                self.D = e.constant
+        elif e.type == self.RX:
+            self.alpha = e.constant
+
+    def __str__(self):
+        # theta, d, a, alpha
+        parts = []
+        if self.prismatic == 0:
+            # revolute joint
+            s_theta = self.var if self.var else "0"
+            s_theta += str(self.offset)
+            # if self.offset > 0:
+            #     s_theta += str(self.offset)
+            # elif self.offset < 0:
+            #     s_theta += f"{self.offset:g}"
+            parts.append(s_theta)
+        else:
+            # prismatic joijnt
+            parts.append(f"{self.theta:g}")
+
+        parts.append(self.var if self.prismatic > 0 else (self.D if self.D else "0"))
+        parts.append(self.A if self.A else "0")
+        parts.append(f"{self.alpha:g}")
+        return ", ".join([str(part) for part in parts])
+
+
+class DHFactor(UserList):
+    def __init__(self, src_string=None):
+        if src_string:
+            self.parse_string(src_string)
+
+    def set(self, value):
+        self.data = value
+
+    def print(self, label):
+        print(f"{label+':':<6s} {self}")
+
+    def parse_string(self, buffer):
+        # Tokenize e.g. "Rz(q1)Tx(L1)"
+        tokens = re.findall(r"([RT][xyz]\([^)]+\))", buffer, re.IGNORECASE)
+        self.data = [Element(t) for t in tokens]
+
+        print(f"INIT: {buffer}")
+        self.simplify()
+        self.print("SIMPLIFIED")
+
+        self.factorize(Element.DH_STANDARD)
+        self.print("FACTORIZED")
+
+        if not self.is_valid():
+            print("DHFactor: error: Incomplete factorization, no DH equivalent found")
+
+    def is_valid(self):
+        iprev = -1
+        for i, e in enumerate(self):
+            if e.type == Element.DH_STANDARD:
+                if iprev >= 0 and (i - iprev) > 1:
+                    return False
+                iprev = i
+        return True
+
+    def simplify(self):
+        """Iterative simplification logic based on the Java program rules."""
+        self._merge_all()
+        self.print("MERGE")
+        self._swap_all(Element.DH_STANDARD)
+        self.print("SWAP")
+        self._merge_all()
+        self.print("MERGE")
+        self._float_right()
+        self.print("FLOAT")
+        self._merge_all()
+        self.print("MERGE")
+        self._substitute_to_z()
+        self.print("SUB_Z")
+        self._merge_all()
+        self.print("MERGE")
+        print("----------------------")
+
+        n_loops = 0
+        while n_loops < 10:
+            changes = 0
+            changes += self._merge_all()
+            self.print("MERGE")
+
+            changes += self._swap_all(Element.DH_STANDARD)
+            self.print("SWAP")
+
+            changes += self._merge_all()
+            self.print("MERGE")
+
+            changes += self._substitute_y()
+            self.print("SUB_Y")
+
+            changes += self._merge_all()
+            self.print("MERGE")
+
+            if changes == 0:
+                changes += self._substitute_to_z2()
+                self.print("SUBZ2")
+                changes += self._merge_all()
+                self.print("MERGE")
+
+            if changes == 0:
+                break
+            n_loops += 1
+
+    def factorize(self, dh_type):
+        """Greedily identifies sequences of transforms that match DH parameters."""
+        dh_order = (
+            Element.DH_STANDARD_ORDER
+            if dh_type == Element.DH_STANDARD
+            else Element.DH_MODIFIED_ORDER
+        )
+
+        i = 0
+        while i < len(self):
+            match_count = 0
+            joint_vars = 0
+
+            # Check for sequence matching DH terms
+            for f in range(4):
+                idx = i + f
+                if idx >= len(self):
+                    break
+
+                target_type, joint_allowed = dh_order[f]
+                el = self[idx]
+
+                if el.type == target_type and not (not joint_allowed and el.is_joint):
+                    match_count += 1
+                    if el.is_joint:
+                        joint_vars += 1
+                    if joint_vars > 1:
+                        break  # Max 1 joint per DH row
+                else:
+                    break
+
+            if match_count > 0 and joint_vars > 0:
+                # Merge into a DH element
+                dh_el = DH(modified=False)
+                for _ in range(match_count):
+                    dh_el.add_to_dh(self.pop(i))
+                self.insert(i, dh_el)
+                i += 1
+            else:
+                i += 1
+
+    # --- Internal Simplification Methods ---
+
+    def _merge_all(self):
+        changes = 0
+        i = 0
+        while i < len(self) - 1:
+            while True:
+                merged = self[i].merge(self[i + 1])
+                if merged is not None:
+                    if merged.val == 0:
+                        # Null transform, remove both
+                        self[i : i + 2] = []
+                    else:
+                        self[i : i + 2] = [merged]
+                    changes += 1
+                    if i >= len(self) - 1:
+                        break
+                else:
+                    break
+            i += 1
+        return changes
+
+    def _swap_all(self, dh_type):
+        total_changes = 0
+        while True:
+            changes = 0
+            for i in range(len(self) - 1):
+                if self._should_swap(self[i], self[i + 1], dh_type):
+                    self[i], self[i + 1] = (
+                        self[i + 1],
+                        self[i],
+                    )
+                    changes += 1
+            total_changes += changes
+            if changes == 0:
+                break
+        return total_changes
+
+    def _should_swap(self, e1, e2, dh_type):
+        if e1.is_joint and e2.is_joint:
+            return False
+        if dh_type == Element.DH_STANDARD:
+            # Java logic: push constant translations through joints, order RZ, TX, TZ, RX
+            if (
+                (e1.type == Element.TZ and e2.type == Element.TX)
+                or (e1.type == Element.TX and e2.type == Element.RX and e2.is_joint)
+                or (e1.type == Element.TY and e2.type == Element.RY and e2.is_joint)
+                or (e1.type == Element.TZ and e2.type == Element.RZ and e2.is_joint)
+                or (not e1.is_joint and e1.type == Element.RX and e2.type == Element.TX)
+                or (not e1.is_joint and e1.type == Element.RY and e2.type == Element.TY)
+                or (
+                    not e1.is_joint
+                    and not e2.is_joint
+                    and e1.type == Element.TZ
+                    and e2.type == Element.RZ
+                )
+                or (e1.type == Element.TY and e2.type in (Element.TZ, Element.TX))
+            ):
+                return True
+        return False
+
+    def _float_right(self):
+        changes = 0
+        i = 0
+        while i < len(self) - 1:
+            e = self[i]
+            if not e.is_joint and e.is_trans:
+                crossed = False
+                target_idx = i
+                for j in range(i + 1, len(self)):
+                    f = self[j]
+                    if f.is_trans:
+                        continue
+                    if f.is_rot and f.axis == e.axis:
+                        crossed = True
+                        target_idx = j
+                        continue
+                    break
+                if crossed:
+                    self.pop(i)
+                    self.insert(target_idx + 1, e)
+                    changes += 1
+                    # i -= 1  # change
+            i += 1
+        return changes
+
+    def _substitute_to_z(self):
+        changes = 0
+        i = 0
+        while i < len(self):
+            e = self[i]
+            if e.is_joint:
+                repl = None
+                if e.type == Element.RX:
+                    repl = [
+                        Element(Element.RY, 90),
+                        e.clone(Element.RZ),
+                        Element(Element.RY, -90),
+                    ]
+                elif e.type == Element.RY:
+                    repl = [
+                        Element(Element.RX, -90),
+                        e.clone(Element.RZ),
+                        Element(Element.RX, 90),
+                    ]
+                elif e.type == Element.TX:
+                    repl = [
+                        Element(Element.RY, 90),
+                        e.clone(Element.TZ),
+                        Element(Element.RY, -90),
+                    ]
+                elif e.type == Element.TY:
+                    repl = [
+                        Element(Element.RX, -90),
+                        e.clone(Element.TZ),
+                        Element(Element.RX, 90),
+                    ]
+
+                if repl:
+                    self.pop(i)
+                    for r in reversed(repl):
+                        self.insert(i, r)
+                    i += len(repl) - 1
+                    changes += 1
+            i += 1
+        return changes
+
+    def _substitute_y(self):
+        changes = 0
+        i = 1
+        while i < len(self):
+            prev, curr = self[i - 1], self[i]
+            if prev.is_joint or curr.is_joint:
+                i += 1
+                continue
+
+            repl = None
+            if prev.type == Element.RX and curr.type == Element.TY:
+                # RX.TY -> TZ.RX
+                repl = [
+                    curr.clone(Element.TZ, prev.val),
+                    prev.clone(prev.type),
+                ]
+            elif prev.type == Element.RX and curr.type == Element.TZ:
+                # RX.TZ -> TY.RX
+                repl = [
+                    curr.clone(Element.TY, -curr.val),
+                    prev.clone(prev.type),
+                ]
+            elif prev.type == Element.RY and curr.type == Element.TX:
+                # RY.TX -> TZ.RY
+                repl = [
+                    curr.clone(Element.TZ, -curr.val),
+                    prev.clone(prev.type),
+                ]
+            elif prev.type == Element.RY and curr.type == Element.TZ:
+                # RY.TZ -> TX.RY
+                repl = [
+                    curr.clone(Element.TX, curr.val),
+                    prev.clone(prev.type),
+                ]
+            elif prev.type == Element.TX and curr.type == Element.RZ:
+                # TX.RZ -> RY.TX
+                repl = [
+                    curr.clone(Element.TY, curr.val),
+                    prev.clone(prev.type),
+                ]
+            elif prev.type == Element.RY and curr.type == Element.RX:
+                # RY.RX -> RZ.RY
+                repl = [
+                    curr.clone(Element.RZ, -1),
+                    prev.clone(prev.type),
+                ]
+            elif prev.type == Element.RX and curr.type == Element.RY:
+                # RX.RY -> RZ.RX
+                repl = [
+                    curr.clone(Element.RZ),
+                    prev.clone(prev.type),
+                ]
+
+            if repl:
+                # self.pop(i)
+                # self.pop(i - 1)
+                # for r in reversed(repl):
+                #     self.insert(i - 1, r)
+                self[i - 1 : i + 1] = repl
+                changes += 1
+            else:
+                i += 1
+        return changes
+
+    def _substitute_to_z2(self):
+        changes = 0
+        joint_yet = False
+        i = 0
+        while i < len(self):
+            e = self[i]
+            if e.is_joint:
+                joint_yet = True
+            if not joint_yet or i == 0 or e.is_joint:
+                i += 1
                 continue
 
             prev = self[i - 1]
-
-            new = subs_y(prev, this)
-            if new is not None:
-                self[i - 1 : i + 1] = new
-                nchanges += 1
-                print(f"eliminate Y: {this} := {new}")
-
-        return nchanges
-
-    # ---------------------------------------------------------------------- #
-
-    def __str__(self, q=None):
-        """
-        Pretty prints the ETS
-
-        :param q: control how joint variables are displayed
-        :type q: str
-        :return: Pretty printed ETS
-        :rtype: str
-
-        ``q`` controls how the joint variables are displayed:
-
-        - None, format depends on number of joint variables
-            - one, display joint variable as q
-            - more, display joint variables as q0, q1, ...
-            - if a joint index was provided, use this value
-        - "", display all joint variables as empty parentheses ``()``
-        - "θ", display all joint variables as ``(θ)``
-        - format string with passed joint variables ``(j, j+1)``, so "θ{0}"
-          would display joint variables as θ0, θ1, ... while "θ{1}" would
-          display joint variables as θ1, θ2, ...  ``j`` is either the joint
-          index, if provided, otherwise a sequential value.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ETS
-            >>> e = ETS.rz() * ETS.tx(1) * ETS.rz()
-            >>> print(e[:2])
-            >>> print(e)
-            >>> print(e.__str__(""))
-            >>> print(e.__str__("θ{0}"))  # numbering from 0
-            >>> print(e.__str__("θ{1}"))  # numbering from 1
-            >>> # explicit joint indices
-            >>> e = ETS.rz(j=3) * ETS.tx(1) * ETS.rz(j=4)
-            >>> print(e)
-            >>> print(e.__str__("θ{0}"))
-
-        .. note:: Angular parameters are converted to degrees, except if they
-            are symbolic.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ETS
-            >>> from spatialmath.base import symbol
-            >>> theta, d = symbol('theta, d')
-            >>> e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * \
-            >>>     ETS.ry(0.2) * ETS.ty(d)
-            >>> str(e)
-
-        :SymPy: supported
-        """
-
-        # override this class from ETS
-        es = []
-        j = 0
-        c = 0
-
-        if q is None:
-            if len(self.joints()) > 1:
-                q = "q{0}"
-            else:
-                q = "q"
-
-        # For each ET in the object, display it, data comes from properties
-        # which come from the named tuple
-        for et in self:
-            s = f"{et.axis}("
-            if et.isjoint:
-                if q is not None:
-                    if et.jindex is None:
-                        _j = j
-                    else:
-                        _j = et.jindex
-                    qvar = q.format(
-                        _j, _j + 1
-                    )  # lgtm [py/str-format/surplus-argument]  # noqa
+            repl = None
+            if e.type == Element.RY:
+                repl = [
+                    Element(Element.RZ, 90),
+                    e.clone(Element.RX),
+                    Element(Element.RZ, -90),
+                ]
+            elif e.type == Element.TY:
+                if prev.type == Element.RZ:
+                    repl = [
+                        Element(Element.RZ, 90),
+                        e.clone(Element.TX),
+                        Element(Element.RZ, -90),
+                    ]
                 else:
-                    qvar = ""
-                if et.isflip:
-                    s += f"-{qvar}"
-                else:
-                    s += f"{qvar}"
-                j += 1
+                    repl = [
+                        Element(Element.RX, -90),
+                        e.clone(Element.TZ),
+                        Element(Element.RX, 90),
+                    ]
 
-            if et.eta is not None:
-                if et.isrevolute:
-                    if base.issymbol(et.eta):
-                        if s[-1] == "(":
-                            s += f"{et.eta}"
-                        else:
-                            # adding to a previous value
-                            if str(et.eta).startswith("-"):
-                                s += f"{et.eta}"
-                            else:
-                                s += f"+{et.eta}"
-                    else:
-                        s += f"{et.eta * 180 / np.pi:.4g}°"
+            if repl:
+                self.pop(i)
+                for r in reversed(repl):
+                    self.insert(i, r)
+                i += len(repl) - 1
+                changes += 1
+            i += 1
+        return changes
 
-                elif et.isprismatic:
-                    s += f"{et.eta}"
+    # --- Output Methods ---
 
-                elif et.isconstant:
-                    s += f"C{c}"
-                    c += 1
-            s += ")"
+    def _angle_str(self, a):
+        if a == 0:
+            return "0"
+        if a == 90:
+            return "pi/2"
+        if a == -90:
+            return "-pi/2"
+        if a == 180:
+            return "pi"
+        if a == -180:
+            return "-pi"
+        raise ValueError(f"Bad transform angle: {a}")
 
-            es.append(s)
+    def base(self):
+        for i, e in enumerate(self):
+            if e.type in (Element.DH_STANDARD, Element.DH_MODIFIED):
+                return self._el2matlab(0, i)
+        return "eye(4,4)"
 
-        return " * ".join(es)
+    def tool(self):
+        for i in range(len(self) - 1, -1, -1):
+            e = self[i]
+            if e.type in (Element.DH_STANDARD, Element.DH_MODIFIED):
+                return self._el2matlab(i + 1, len(self))
+        return "eye(4,4)"
+
+    def _el2matlab(self, start, end):
+        parts = []
+        for i in range(start, end):
+            e = self[i]
+            if e.type == Element.RX:
+                parts.append(f"trotx({self._angle_str(e.constant)})")
+            elif e.type == Element.RY:
+                parts.append(f"troty({self._angle_str(e.constant)})")
+            elif e.type == Element.RZ:
+                parts.append(f"trotz({self._angle_str(e.constant)})")
+            elif e.type == Element.TX:
+                parts.append(f"transl({e.symconst},0,0)")
+            elif e.type == Element.TY:
+                parts.append(f"transl(0,{e.symconst},0)")
+            elif e.type == Element.TZ:
+                parts.append(f"transl(0,0,{e.symconst})")
+        return "*".join(parts) if parts else "eye(4,4)"
+
+    def dh_matrix(self):
+        rows = []
+        for e in self:
+            if e.type == Element.DH_STANDARD:
+                theta = "0" if e.prismatic == 0 else self._angle_str(e.theta)
+                d = (
+                    e.D
+                    if (e.prismatic == 0 and e.D)
+                    else ("0" if e.prismatic == 0 else "0")
+                )
+                a = e.A if e.A else "0"
+                alpha = self._angle_str(e.alpha)
+                rows.append(f"{theta}, {d}, {a}, {alpha}, {e.prismatic}")
+        return "[" + "; ".join(rows) + "]"
+
+    def offsets(self):
+        offs = [
+            self._angle_str(e.offset) for e in self if e.type == Element.DH_STANDARD
+        ]
+        return "[" + " ".join(offs) + "]"
+
+    def command(self, name="robot"):
+        if self.is_valid():
+            return (
+                f"SerialLink({self.dh_matrix()}, 'name', '{name}', "
+                f"'base', {self.base()}, 'tool', {self.tool()}, "
+                f"'offset', {self.offsets()})"
+            )
+        return "error('incompletely factored transform string')"
+
+    def __str__(self):
+        return ".".join(str(e) for e in self)
+
+    def __repr__(self):
+        return __str__(self)
 
 
-if __name__ == "__main__":  # pragram: no cover
-    s = (
-        "Tz(L1) Rz(q1) Ry(q2) Ty(L2) Tz(L3) Ry(q3) Tx(L4) Ty(L5) Tz(L6) Rz(q4) Ry(q5)"
-        " Rz(q6)"
-    )
+def main():
+    # Handle command line input
+    input_str = ""
+    if len(sys.argv) > 1:
+        input_str = sys.argv[1]
+    else:
+        # Check if data is piped via stdin
+        if not sys.stdin.isatty():
+            input_str = sys.stdin.read().strip()
 
-    ets = DHFactor.parse(s)
-    print(ets)
-    # ets.substitute_to_z()
-    # print(ets)
-    # ets.merge()
-    # print(ets)
+    if not input_str:
+        print('Usage: python dhfactor.py "Rx(q1)Tx(L1)..."')
+        sys.exit(1)
 
-    ets.swap()
-    ets.simplify()
-    print(ets)
-    # ets.merge()
-    print(ets)
+    factor = DHFactor(input_str)
+    print("\nMatlab Command:")
+    print(factor.command("R"))
+
+
+if __name__ == "__main__":
+    main()
