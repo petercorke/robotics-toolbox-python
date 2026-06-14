@@ -17,8 +17,22 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  verify_version:
+    name: Verify tag matches package version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "Tag version : $TAG"
+          echo "Package version: $PKG"
+          [ "$TAG" = "$PKG" ] || { echo "ERROR: tag v$TAG does not match pyproject.toml version $PKG"; exit 1; }
+
   build_wheels:
     name: Build wheels on ${{ matrix.os }} (${{ matrix.arch }})
+    needs: verify_version
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -45,6 +59,7 @@ jobs:
 
   build_pyodide:
     name: Build Pyodide (wasm32) wheel
+    needs: verify_version
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -70,6 +85,7 @@ jobs:
 
   build_sdist:
     name: Build source distribution
+    needs: verify_version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
