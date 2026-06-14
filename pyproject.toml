@@ -13,10 +13,7 @@ authors = [
 
 dependencies = [
     "numpy",
-    # "spatialmath-python>=1.1.5",
-    "spatialmath-python @ git+https://github.com/petercorke/spatialmath-python.git@good",
-    # "spatialgeometry>=1.0.0",
-    "spatialgeometry @ git+https://github.com/petercorke/spatialgeometry.git@future",
+    "spatialmath-python>=1.1.16",
     "pgraph-python",
     "scipy",
     "matplotlib",
@@ -133,9 +130,10 @@ build-backend = "scikit_build_core.build"
 
 
 [tool.scikit-build]
-wheel.packages = ["src/roboticstoolbox"]
+wheel.packages = ["src/roboticstoolbox", "src/spatialgeometry"]
 sdist.include = [
     "src/roboticstoolbox",
+    "src/spatialgeometry",
     "tests",
     "CMakeLists.txt",
     "README.md",
@@ -161,10 +159,12 @@ build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
 skip = ["*musllinux*"]
 
 [tool.cibuildwheel.macos]
-archs = ["auto"]  # arm64 only from macos-latest; x86_64 EOL
+archs = ["auto"] # arm64 only from macos-latest; x86_64 EOL
 
 [tool.cibuildwheel.linux]
-archs = ["auto"]  # native arch only; arm64 uses ubuntu-24.04-arm runner (no QEMU)
+archs = [
+    "auto",
+] # native arch only; arm64 uses ubuntu-24.04-arm runner (no QEMU)
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
