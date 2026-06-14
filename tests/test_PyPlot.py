@@ -6,6 +6,7 @@
 # import numpy.testing as nt
 # import numpy as np
 import roboticstoolbox as rp
+import matplotlib.pyplot as plt
 
 # import spatialmath as sm
 import unittest
@@ -44,7 +45,30 @@ class TestPyPlot(unittest.TestCase):
         env.restart()
         env.remove(0)
 
+    def test_launch_with_external_3d_axes(self):
+        from roboticstoolbox.backends.PyPlot import PyPlot
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+
+        env = PyPlot()
+        env.launch(fig=fig, ax=ax)
+
+        self.assertIs(env.fig, fig)
+        self.assertIs(env.ax, ax)
+        env.close()
+
+    def test_launch_rejects_2d_axes(self):
+        from roboticstoolbox.backends.PyPlot import PyPlot
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        env = PyPlot()
+        with self.assertRaises(ValueError):
+            env.launch(fig=fig, ax=ax)
+        plt.close(fig)
+
 
 if __name__ == "__main__":
-
     unittest.main()

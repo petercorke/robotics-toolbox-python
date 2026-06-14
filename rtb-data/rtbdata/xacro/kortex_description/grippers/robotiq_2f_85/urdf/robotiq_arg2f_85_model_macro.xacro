@@ -168,7 +168,7 @@
     </joint>
   </xacro:macro>
 
-  <xacro:include filename="$(find kortex_description)/grippers/robotiq_2f_85/urdf/robotiq_arg2f.xacro" />
+  <xacro:include filename="./robotiq_arg2f.xacro" />
 
   <xacro:macro name="finger_joint" params="prefix">
     <joint name="${prefix}finger_joint" type="revolute">

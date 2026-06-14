@@ -32,7 +32,6 @@ def process_doc(app, what, name, obj, options, lines):
     python_re = r"( )*(>>>)"
 
     for i, line in enumerate(lines):
-
         if re.match(run_directive_re, line):
             # We have matched "   .. runblock:: pycon"
 

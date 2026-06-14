@@ -3,6 +3,8 @@
 .pyodide*/**
 *.doctree
 
+docs/source/IK/stubs/**/*.rst
+
 # Vim
 *.sw*
 

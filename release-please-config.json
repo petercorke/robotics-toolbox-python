@@ -1,0 +1,64 @@
+{
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+    "release-type": "python",
+    "packages": {
+        ".": {
+            "release-type": "python",
+            "package-name": "roboticstoolbox-python",
+            "version-file": "pyproject.toml",
+            "changelog-path": "CHANGELOG.md",
+            "include-component-in-tag": false
+        }
+    },
+    "pull-request-title-pattern": "chore: release ${version}",
+    "changelog-sections": [
+        {
+            "type": "feat",
+            "section": "Features"
+        },
+        {
+            "type": "fix",
+            "section": "Bug Fixes"
+        },
+        {
+            "type": "perf",
+            "section": "Performance Improvements"
+        },
+        {
+            "type": "deps",
+            "section": "Dependencies"
+        },
+        {
+            "type": "revert",
+            "section": "Reverts"
+        },
+        {
+            "type": "docs",
+            "section": "Documentation"
+        },
+        {
+            "type": "build",
+            "section": "Build System"
+        },
+        {
+            "type": "test",
+            "section": "Tests",
+            "hidden": true
+        },
+        {
+            "type": "refactor",
+            "section": "Code Refactoring",
+            "hidden": true
+        },
+        {
+            "type": "chore",
+            "section": "Miscellaneous",
+            "hidden": true
+        },
+        {
+            "type": "ci",
+            "section": "CI",
+            "hidden": true
+        }
+    ]
+}

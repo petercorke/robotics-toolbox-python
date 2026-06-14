@@ -11,6 +11,7 @@
 import os
 import sys
 import re
+from datetime import date
 
 # Defined relative to configuration directory which is where this file conf.py lives
 sys.path.append(os.path.abspath("exts"))
@@ -18,13 +19,15 @@ sys.path.append(os.path.abspath("exts"))
 # -------- Project information -------------------------------------------------------#
 
 project = "Robotics Toolbox for Python"
-copyright = "2023, Jesse Haviland and Peter Corke"
+copyright = f"{date.today().year}, Jesse Haviland and Peter Corke"
 author = "Jesse Haviland and Peter Corke"
 
-# Parse version number out of setup.py
-with open("../../setup.py", encoding="utf-8") as f:
-    setup_py = f.read()
-    m = re.search(r"version='([0-9\.]*)',", setup_py, re.MULTILINE)
+# Parse version number out of pyproject.toml
+_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+with open(os.path.join(_root, "pyproject.toml"), encoding="utf-8") as f:
+    pyproject_src = f.read()
+    m = re.search(r'^version\s*=\s*"([0-9.]*)"', pyproject_src, re.MULTILINE)
+    version = m.group(1) if m else "unknown"
 
 # -------- General configuration -----------------------------------------------------#
 
@@ -65,9 +68,7 @@ exclude_patterns = ["test_*"]
 autorun_languages = {}
 autorun_languages["pycon_output_encoding"] = "UTF-8"
 autorun_languages["pycon_input_encoding"] = "UTF-8"
-autorun_languages[
-    "pycon_runfirst"
-] = """
+autorun_languages["pycon_runfirst"] = """
 from spatialmath import SE3
 SE3._color = False
 import numpy as np
@@ -82,7 +83,6 @@ html_theme = "sphinx_rtd_theme"
 
 html_theme_options = {
     "logo_only": False,
-    "display_version": True,
     "prev_next_buttons_location": "None",
     "analytics_id": "G-11Q6WJM565",
     "style_external_links": False,
@@ -112,7 +112,6 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     "papersize": "a4paper",
     "fncychap": "\\usepackage{fncychap}",
-    "maketitle": "blah blah blah",
 }
 
 # Use RVC book notation for maths
@@ -158,10 +157,10 @@ mathjax3_config = {
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "numpy": ("http://docs.scipy.org/doc/numpy/", None),
-    "scipy": ("http://docs.scipy.org/doc/scipy/reference/", None),
-    "matplotlib": ("http://matplotlib.sourceforge.net/", None),
-    "spatialmath": ("https://petercorke.github.io/spatialmath-python/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "spatialmath": ("https://spatialmath-python.rai-inst.com/", None),
 }
 
 
@@ -176,11 +175,27 @@ napoleon_custom_sections = ["Synopsis"]
 # -------- Options AutoSummary -------------------------------------------------------#
 
 # autodoc_default_flags = ["members"]
-autosummary_generate = True
+
+# -------- rst_epilog: shared substitutions available in all RST/docstrings ------#
+
+rst_epilog = """
+.. role:: raw-html(raw)
+   :format: html
+.. |BlockOptions| replace:: :raw-html:`<a href="https://petercorke.github.io/bdsim/internals.html?highlight=block%20__init__#bdsim.Block.__init__">common Block options</a>`
+"""
+
+# -------- Suppress common noisy warnings ----------------------------------------#
+
+# Suppress "more than one target found" for short/common attribute names like
+# n, m, robot, symbolic that appear across many classes, and suppress duplicate
+# object description warnings for classes documented both inline and in stubs.
+suppress_warnings = [
+    "ref.python",  # ambiguous cross-references (multiple targets for 'n', 'm', etc.)
+    "duplicate",  # duplicate object descriptions (IKSolution, IKSolver defined twice)
+]
 
 # -------- Options favicon -------------------------------------------------------#
 
-html_static_path = ["_static"]
 # create favicons online using https://favicon.io/favicon-converter/
 favicons = [
     {
@@ -204,13 +219,13 @@ favicons = [
     {
         "rel": "android-chrome",
         "sizes": "192x192",
-        "static-file": "android-chrome-192x192.png ",
+        "static-file": "android-chrome-192x192.png",
         "type": "image/png",
     },
     {
         "rel": "android-chrome",
         "sizes": "512x512",
-        "static-file": "android-chrome-512x512.png ",
+        "static-file": "android-chrome-512x512.png",
         "type": "image/png",
     },
 ]

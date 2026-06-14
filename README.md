@@ -1,6 +1,6 @@
 # Robotics Toolbox for Python
 
-[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/py_collection.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/.github/svg/py_collection.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 [![Powered by Spatial Maths](https://raw.githubusercontent.com/petercorke/spatialmath-python/master/.github/svg/sm_powered.min.svg)](https://github.com/petercorke/spatialmath-python)
 [![QUT Centre for Robotics Open Source](https://github.com/qcr/qcr.github.io/raw/master/misc/badge.svg)](https://qcr.github.io)
 
@@ -8,15 +8,15 @@
 [![Anaconda version](https://anaconda.org/conda-forge/roboticstoolbox-python/badges/version.svg)](https://anaconda.org/conda-forge/roboticstoolbox-python)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 
-[![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/Test/badge.svg?branch=master)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3ATest)
-[![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
+[![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/CI/badge.svg?branch=main)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3ACI)
+[![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/main/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![PyPI - Downloads](https://img.shields.io/pypi/dw/roboticstoolbox-python)](https://pypistats.org/packages/roboticstoolbox-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <table style="border:0px">
 <tr style="border:0px">
 <td style="border:0px">
-<img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/RobToolBox_RoundLogoB.png" width="200"></td>
+<img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/docs/figs/RobToolBox_RoundLogoB.png" width="200"></td>
 <td style="border:0px">
 A Python implementation of the <a href="https://github.com/petercorke/robotics-toolbox-matlab">Robotics Toolbox for MATLAB<sup>&reg;</sup></a>
 <ul>
@@ -100,7 +100,11 @@ pip3 install roboticstoolbox-python
 
 Available options are:
 
-- `collision` install collision checking with [pybullet](https://pybullet.org)
+- `swift` install [Swift](https://github.com/jhavl/swift), a web-based visualizer
+- `qp` install quadratic-programming IK dependencies (`qpsolvers`, `quadprog`)
+- `bullet` install collision checking with [pybullet](https://pybullet.org)
+- `collision` alias of `bullet` (backward compatibility)
+- `all` install `swift`, `qp`, and `bullet`
 
 Put the options in a comma separated list like
 
@@ -108,8 +112,45 @@ Put the options in a comma separated list like
 pip3 install roboticstoolbox-python[optionlist]
 ```
 
-[Swift](https://github.com/jhavl/swift), a web-based visualizer, is
-installed as part of Robotics Toolbox.
+If you want the Swift visualizer, install the `swift` extra.
+
+Install matrix:
+
+- Core only
+
+```shell script
+pip3 install roboticstoolbox-python
+```
+
+- Swift visualizer only
+
+```shell script
+pip3 install roboticstoolbox-python[swift]
+```
+
+- QP solver dependencies only
+
+```shell script
+pip3 install roboticstoolbox-python[qp]
+```
+
+- Bullet collision dependencies only
+
+```shell script
+pip3 install roboticstoolbox-python[bullet]
+```
+
+- Everything (swift + qp + bullet)
+
+```shell script
+pip3 install roboticstoolbox-python[all]
+```
+
+- Multiple extras explicitly
+
+```shell script
+pip3 install roboticstoolbox-python[swift,qp,bullet]
+```
 
 ### From GitHub
 
@@ -119,6 +160,36 @@ To install the bleeding-edge version from GitHub
 git clone https://github.com/petercorke/robotics-toolbox-python.git
 cd robotics-toolbox-python
 pip3 install -e .
+```
+
+### Build a JupyterLite/Pyodide wasm wheel (cp313)
+
+This project includes a reproducible wasm wheel build target aligned to current
+JupyterLite runtimes based on Python 3.13.
+
+Build using cibuildwheel's Pyodide platform:
+
+```shell script
+make wheel-pyodide
+```
+
+Optionally pin the Pyodide runtime family to match your JupyterLite deployment:
+
+```shell script
+PYODIDE_VERSION=0.28.3 make wheel-pyodide
+```
+
+The target writes to `dist/` and runs `make wheel-pyodide-check`, which validates
+the wheel filename contains:
+
+- `cp313-cp313`
+- `wasm32`
+- `pyemscripten_<major>_<minor>` or `pyodide_<major>_<minor>`
+
+To inspect the produced artifact path:
+
+```shell script
+ls -1 dist/*wasm32*.whl
 ```
 
 <br>
@@ -272,49 +343,7 @@ while not arrived:
 
 ### Run some examples
 
-The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/master/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub. Additionally, have a look in the [`examples`](https://github.com/petercorke/robotics-toolbox-python/tree/master/roboticstoolbox/examples) folder for many ready to run examples.
-
-<br>
-
-<a id='5'></a>
-
-## Toolbox Research Applications
-
-The toolbox is incredibly useful for developing and prototyping algorithms for research, thanks to the exhaustive set of well documented and mature robotic functions exposed through clean and painless APIs. Additionally, the ease at which a user can visualize their algorithm supports a rapid prototyping paradigm.
-
-### Publication List
-
-J. Haviland, N. Sünderhauf and P. Corke, "**A Holistic Approach to Reactive Mobile Manipulation**," in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2022.3146554. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
-
-[[Arxiv Paper](https://arxiv.org/abs/2109.04749)] [[IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/9695298)] [[Project Website](https://jhavl.github.io/holistic/)] [[Video](https://youtu.be/-DXBQPeLIV4)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/roboticstoolbox/examples/holistic_mm_non_holonomic.py)]
-
-<p>
-  <a href="https://youtu.be/-DXBQPeLIV4">
-    <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/holistic_youtube.png" width="560">
-  </a>
-</p>
-
-J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators**," in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2021.3056060. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
-
-[[Arxiv Paper](https://arxiv.org/abs/2010.08686)] [[IEEE Xplore](https://ieeexplore.ieee.org/document/9343718)] [[Project Website](https://jhavl.github.io/neo/)] [[Video](https://youtu.be/jSLPJBr8QTY)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/roboticstoolbox/examples/neo.py)]
-
-<p>
-  <a href="https://youtu.be/jSLPJBr8QTY">
-    <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/neo_youtube.png" width="560">
-  </a>
-</p>
-
-**A Purely-Reactive Manipulability-Maximising Motion Controller**, J. Haviland and P. Corke. In the video, the robot is controlled using the Robotics toolbox for Python.
-
-[[Paper](https://arxiv.org/abs/2002.11901)] [[Project Website](https://jhavl.github.io/mmc/)] [[Video](https://youtu.be/Vu_rcPlaADI)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/roboticstoolbox/examples/mmc.py)]
-
-<p>
-  <a href="https://youtu.be/Vu_rcPlaADI">
-    <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/mmc_youtube.png" width="560">
-  </a>
-</p>
-
-<br>
+The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/main/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub. Additionally, have a look in the [`examples`](https://github.com/petercorke/robotics-toolbox-python/tree/main/roboticstoolbox/examples) folder for many ready to run examples.
 
 <br>
 
@@ -341,28 +370,30 @@ If the toolbox helped you in your research, please cite
 
 <a id='7'></a>
 
+
+
 ## Using the Toolbox in your Open Source Code?
 
 If you are using the Toolbox in your open source code, feel free to add our badge to your readme!
 
 For the powered by robotics toolbox badge
 
-[![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
 copy the following
 
 ```
-[![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 ```
 
 For the powered by python robotics badge
 
-[![Powered by Python Robotics](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by Python Robotics](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
 copy the following
 
 ```
-[![Powered by Python Robotics](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by Python Robotics](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 ```
 
 <br>
@@ -372,3 +403,65 @@ copy the following
 ## Common Issues and Solutions
 
 See the common issues with fixes [here](https://github.com/petercorke/robotics-toolbox-python/wiki/Common-Issues).
+
+### Using the Toolbox with Windows?
+
+Graphical visualisation via swift is currently not supported under Windows. However there is a hotfix, by changing in ```SwiftRoute.py```
+
+```self.path[9:]``` to  ```self.path[10:]```
+
+<br>
+
+<br>
+
+<a id='5'></a>
+
+## Toolbox Research Applications
+
+The toolbox is incredibly useful for developing and prototyping algorithms for research, thanks to the exhaustive set of well documented and mature robotic functions exposed through clean and painless APIs. Additionally, the ease at which a user can visualize their algorithm supports a rapid prototyping paradigm.
+
+### Publication List
+
+J. Haviland, N. Sünderhauf and P. Corke, "**A Holistic Approach to Reactive Mobile Manipulation**," in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2022.3146554. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
+
+[[Arxiv Paper](https://arxiv.org/abs/2109.04749)] [[IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/9695298)] [[Project Website](https://jhavl.github.io/holistic/)] [[Video](https://youtu.be/-DXBQPeLIV4)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/main/roboticstoolbox/examples/holistic_mm_non_holonomic.py)]
+
+<p>
+  <a href="https://youtu.be/-DXBQPeLIV4">
+    <img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/docs/figs/holistic_youtube.png" width="560">
+  </a>
+</p>
+
+J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators**," in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2021.3056060. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
+
+[[Arxiv Paper](https://arxiv.org/abs/2010.08686)] [[IEEE Xplore](https://ieeexplore.ieee.org/document/9343718)] [[Project Website](https://jhavl.github.io/neo/)] [[Video](https://youtu.be/jSLPJBr8QTY)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/main/roboticstoolbox/examples/neo.py)]
+
+<p>
+  <a href="https://youtu.be/jSLPJBr8QTY">
+    <img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/docs/figs/neo_youtube.png" width="560">
+  </a>
+</p>
+
+K. He, R. Newbury, T. Tran, J. Haviland, B. Burgess-Limerick, D. Kulić, P. Corke, A. Cosgun, "**Visibility Maximization Controller for Robotic Manipulation**", in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2022.3188430. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
+
+[[Arxiv Paper](https://arxiv.org/abs/2202.12557)] [[IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/9815144)] [[Project Website](https://rhys-newbury.github.io/projects/vmc/)] [[Video](https://youtu.be/vobLvg4E3kM)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/main/roboticstoolbox/examples/fetch_vision.py)]
+
+<p>
+  <a href="https://youtu.be/vobLvg4E3kM">
+    <img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/docs/figs/vmc_youtube.png" width="560">
+  </a>
+</p>
+
+**A Purely-Reactive Manipulability-Maximising Motion Controller**, J. Haviland and P. Corke. In the video, the robot is controlled using the Robotics toolbox for Python.
+
+[[Paper](https://arxiv.org/abs/2002.11901)] [[Project Website](https://jhavl.github.io/mmc/)] [[Video](https://youtu.be/Vu_rcPlaADI)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/main/roboticstoolbox/examples/mmc.py)]
+
+<p>
+  <a href="https://youtu.be/Vu_rcPlaADI">
+    <img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/docs/figs/mmc_youtube.png" width="560">
+  </a>
+</p>
+
+<br>
+
+<br>

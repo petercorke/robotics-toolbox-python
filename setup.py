@@ -9,7 +9,7 @@ extra_folders = [
 
 def package_files(directory):
     paths = []
-    for (pathhere, _, filenames) in os.walk(directory):
+    for pathhere, _, filenames in os.walk(directory):
         for filename in filenames:
             paths.append(os.path.join("..", pathhere, filename))
     return paths

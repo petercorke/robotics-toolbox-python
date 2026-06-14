@@ -5,7 +5,9 @@ import unittest
 try:
     from bdsim import BDSim
 except ModuleNotFoundError:
-    raise unittest.SkipTest("bdsim not found, skipping all tests in test_blocks.py") from None
+    raise unittest.SkipTest(
+        "bdsim not found, skipping all tests in test_blocks.py"
+    ) from None
 
 from spatialmath import SE3
 from spatialmath.base import tr2x
@@ -15,6 +17,7 @@ import numpy.testing as nt
 import roboticstoolbox as rtb
 from roboticstoolbox.blocks import *
 from roboticstoolbox.blocks.quad_model import quadrotor
+
 
 class State:
     T = 5
@@ -26,6 +29,7 @@ class State:
 
     def __init__(self):
         self.options = self.Opt()
+
 
 class RobotBlockTest(unittest.TestCase):
     def test_fkine(self):
@@ -279,7 +283,8 @@ class MobileBlockTest(unittest.TestCase):
 
         nt.assert_array_almost_equal(block.T_output(10, 0.3, x=x, t=0)[0], x)
         nt.assert_array_almost_equal(
-            block.T_deriv(10, 0.3, x=x), [10 * np.cos(x[2]), 10 * np.sin(x[2]), 10 / 3 * np.tan(0.3)]
+            block.T_deriv(10, 0.3, x=x),
+            [10 * np.cos(x[2]), 10 * np.sin(x[2]), 10 / 3 * np.tan(0.3)],
         )
 
     def test_unicycle(self):
@@ -328,7 +333,7 @@ class MultirotorBlockTest(unittest.TestCase):
         )[0]
         self.assertIsInstance(out, dict)
 
-        out = block.T_deriv(100*np.r_[1, 1, 1, 1], x=x)
+        out = block.T_deriv(100 * np.r_[1, 1, 1, 1], x=x)
         self.assertIsInstance(out, np.ndarray)
         self.assertEqual(out.shape, (12,))
 
@@ -413,5 +418,4 @@ class MultirotorBlockTest(unittest.TestCase):
 
 # ---------------------------------------------------------------------------------------#
 if __name__ == "__main__":
-
     unittest.main()

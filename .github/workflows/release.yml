@@ -1,0 +1,140 @@
+# Build wheels for all platforms and publish to PyPI.
+# Triggered on GitHub release creation or manually via workflow_dispatch.
+#
+# Uses OIDC trusted publishing — no stored PyPI token required.
+# macOS uses macos-14 (arm64); cibuildwheel cross-compiles x86_64 as well
+# (see [tool.cibuildwheel.macos] archs in pyproject.toml).
+# Check for latest cibuildwheel: https://github.com/pypa/cibuildwheel/releases
+
+name: Release
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  verify_version:
+    name: Verify tag matches package version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "Tag version : $TAG"
+          echo "Package version: $PKG"
+          [ "$TAG" = "$PKG" ] || { echo "ERROR: tag v$TAG does not match pyproject.toml version $PKG"; exit 1; }
+
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }} (${{ matrix.arch }})
+    needs: verify_version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+          - os: windows-latest
+            arch: x86_64
+          - os: macos-latest
+            arch: arm64
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.4.1
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_pyodide:
+    name: Build Pyodide (wasm32) wheel
+    needs: verify_version
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Diagnostics
+        run: |
+          python3 --version
+          pip3 --version
+          pip3 show cibuildwheel 2>/dev/null || echo "cibuildwheel not installed locally (normal)"
+          echo "PYODIDE_VERSION=${{ vars.PYODIDE_VERSION || '0.27.5' }}"
+
+      - name: Build Pyodide wheel
+        uses: pypa/cibuildwheel@v3.4.1
+        env:
+          CIBW_PLATFORM: pyodide
+
+      - uses: actions/upload-artifact@v7
+        if: success()
+        with:
+          name: wheels-pyodide
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    needs: verify_version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  smoke_test:
+    name: Smoke-test Linux wheel
+    needs: build_wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-ubuntu-latest-*
+          merge-multiple: true
+          path: wheelhouse
+
+      - name: Install wheel (pulls all deps from PyPI)
+        run: pip install --find-links wheelhouse roboticstoolbox-python
+
+      - name: Smoke test
+        run: python -c "import roboticstoolbox; print('OK', roboticstoolbox.__version__)"
+
+  upload_pypi:
+    needs: [build_wheels, build_pyodide, build_sdist, smoke_test]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # required for OIDC trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

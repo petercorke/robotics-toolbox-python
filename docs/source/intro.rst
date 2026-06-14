@@ -776,5 +776,5 @@ References
 .. [PyBullet] `PyBullet <https://pybullet.org/wordpress/>`_
 .. [SMTB-P] `Spatial Math Toolbox for Python <https://github.com/petercorke/spatialmath-python>`_
 .. [bdsim] `Block diagram simulator for Python <https://github.com/petercorke/bdsim>`_
-.. [neo] `NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulatorshttps://jhavl.github.io/neo>`_
+.. [neo] `NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators <https://jhavl.github.io/neo>`_
 .. [corke21a] P. Corke and J. Haviland, "Not your grandmother’s toolbox – the Robotics Toolbox reinvented for Python", Proc. ICRA 2021.

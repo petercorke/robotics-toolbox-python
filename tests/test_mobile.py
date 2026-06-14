@@ -16,8 +16,28 @@ from roboticstoolbox.mobile.landmarkmap import *
 from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.sensors import *
 from roboticstoolbox.mobile.Vehicle import *
+from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
 
 # from roboticstoolbox.mobile import Planner
+
+# ======================================================================== #
+
+
+class TestReedsSheppPlanner(unittest.TestCase):
+    def test_turn_around(self):
+        start = (0, 0, 0)
+        goal = (0, 0, pi)
+
+        reedsshepp = ReedsSheppPlanner(curvature=1.0, stepsize=0.1)
+        path, status = reedsshepp.query(start, goal)
+
+        # Turns: LRL and RLR are mirror-symmetric, equal-cost solutions.
+        self.assertIn(status[0], (["L", "R", "L"], ["R", "L", "R"]))
+        # Total length
+        nt.assert_almost_equal(status[1], pi)
+        # Segment lengths
+        nt.assert_array_almost_equal(status[2], [pi / 3, -pi / 3, pi / 3])
+
 
 # ======================================================================== #
 
@@ -248,7 +268,7 @@ class LandMarkTest(unittest.TestCase):
 class DriversTest(unittest.TestCase):
     def test_init(self):
 
-        rp = rtb.RandomPath(10)
+        rp = rtb.RandomPath(workspace=10)
 
         self.assertIsInstance(str(rp), str)
 
@@ -267,7 +287,6 @@ class DriversTest(unittest.TestCase):
 
 
 class TestBicycle(unittest.TestCase):
-
     # def test_deriv(self):
     #     xv = np.r_[1, 2, pi/4]
 
