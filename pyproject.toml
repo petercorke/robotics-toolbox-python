@@ -139,6 +139,9 @@ sdist.include = [
     "README.md",
     "LICENSE",
 ]
+sdist.exclude = [
+    "rtb-data/**",
+]
 
 
 [tool.ruff]
