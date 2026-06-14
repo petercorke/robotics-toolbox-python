@@ -149,7 +149,7 @@ jobs:
   upload_pyodide_asset:
     name: Attach Pyodide wheel to GitHub release
     needs: build_pyodide
-    if: needs.build_pyodide.result == 'success'
+    if: github.event_name == 'release' && needs.build_pyodide.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -162,4 +162,5 @@ jobs:
       - name: Upload Pyodide wheel as release asset
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: pyodide-dist/*.whl
