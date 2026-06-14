@@ -139,4 +139,27 @@ jobs:
           name: sdist
           path: dist
 
+      # Exclude Pyodide wheels — PyPI rejects the pyodide_* platform tag.
+      # They are uploaded as release assets in the next step instead.
+      - name: Remove Pyodide wheels from PyPI upload set
+        run: rm -f dist/*pyodide*.whl
+
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  upload_pyodide_asset:
+    name: Attach Pyodide wheel to GitHub release
+    needs: build_pyodide
+    if: needs.build_pyodide.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-pyodide
+          path: pyodide-dist
+
+      - name: Upload Pyodide wheel as release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: pyodide-dist/*.whl
