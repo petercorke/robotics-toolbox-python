@@ -5,18 +5,16 @@ TOML_IMPORT = import sys; tomllib = __import__('tomllib' if sys.version_info >= 
 BLACK=\033[0;30m
 
 help:
-	@echo "$(BLUE) make test           - run all unit tests"
-	@echo " make test-notebooks  - run notebook smoke tests (requires pytest-nbmake)"
-	@echo " make coverage        - run unit tests and coverage report"
-	@echo " make docs            - build Sphinx documentation"
-	@echo " make docupdate       - upload Sphinx documentation to GitHub pages"
-	@echo " make dist            - build native wheel + sdist"
-	@echo " make wheel-pyodide   - build wasm32/emscripten wheel for Pyodide/JupyterLite"
-	@echo " make wheel-pyodide-check - verify wasm wheel tags from filename"
-	@echo " make upload          - upload to PyPI"
-	@echo " make clean           - remove dist and docs build files"
-	@echo " make help            - this message$(BLACK)"
-
+	@echo "$(BLUE) make test                 - run all unit tests"
+	@echo " make test-notebooks       - run notebook smoke tests (requires pytest-nbmake)"
+	@echo " make coverage             - run unit tests and coverage report"
+	@echo " make docs                 - build Sphinx documentation"
+	@echo " make docupdate            - upload Sphinx documentation to GitHub pages"
+	@echo " make dist                 - build native wheel + sdist"
+	@echo " make wheel-pyodide        - build wasm32/emscripten wheel for Pyodide/JupyterLite"
+	@echo " make wheel-pyodide-check  - verify wasm wheel tags from filename"
+	@echo " make clean                - remove dist and docs build files"
+	@echo " make help                 - this message$(BLACK)"
 
 
 install-collision:
@@ -89,13 +87,6 @@ wheel-pyodide-check: .FORCE
 	fi; \
 	echo "Wheel tags look compatible with current cp313 runtime contract."
 
-upload: .FORCE
-	$(eval VERSION := $(shell python -c "$(TOML_IMPORT); print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])"))
-	@echo "Uploading version $(VERSION) to PyPI"
-	twine upload dist/*
-	git tag -a v$(VERSION) -m "Release v$(VERSION)"
-	git push origin v$(VERSION)
-	@echo "Tagged and pushed v$(VERSION)"
 
 clean: .FORCE
 	(cd docs; make clean)
