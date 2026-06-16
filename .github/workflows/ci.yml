@@ -104,7 +104,12 @@ jobs:
     needs: [test-core, test]
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
 
@@ -131,9 +136,12 @@ jobs:
           cd docs && make SPHINXOPTS="--keep-going" html
           touch build/html/.nojekyll
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        if: github.ref == 'refs/heads/main'
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/build/html
+          path: docs/build/html
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        if: github.ref == 'refs/heads/main'
+        uses: actions/deploy-pages@v4
