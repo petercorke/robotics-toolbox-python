@@ -8,8 +8,8 @@
 [![Anaconda version](https://anaconda.org/conda-forge/roboticstoolbox-python/badges/version.svg)](https://anaconda.org/conda-forge/roboticstoolbox-python)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 
-[![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/CI/badge.svg?branch=main)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3ACI)
-[![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/main/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
+[![Build Status](https://github.com/petercorke/robotics-toolbox-python/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/petercorke/robotics-toolbox-python/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/petercorke/robotics-toolbox-python/graph/badge.svg?token=0rqN39PDEO)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![PyPI - Downloads](https://img.shields.io/pypi/dw/roboticstoolbox-python)](https://pypistats.org/packages/roboticstoolbox-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -22,7 +22,7 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 <ul>
 <li><a href="https://github.com/petercorke/robotics-toolbox-python">GitHub repository </a></li>
 <li><a href="https://petercorke.github.io/robotics-toolbox-python">Documentation</a></li>
-<li><a href="#6">ICRA Paper</a></li>
+<li><a href="#toolbox-icra-paper-and-citation-info">ICRA Paper</a></li>
 <li><a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Wiki (examples and details)</a></li>
 </ul>
 </td>
@@ -33,25 +33,23 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 
 ## Contents
 
-- [Synopsis](#1)
-- [Getting going](#2)
-- [Tutorials](#3)
-- [Code Examples](#4)
-- [Toolbox Research Applications](#5)
-- [Toolbox ICRA Paper and Citation Info](#6)
-- [Using the Toolbox in your Open Source Code?](#7)
-- [Common Issues and Solutions](#8)
+- [Synopsis](#synopsis)
+- [Getting going](#getting-going)
+- [Tutorials](#tutorials)
+- [Code Examples](#code-examples)
+- [Toolbox Research Applications](#toolbox-research-applications)
+- [Toolbox ICRA Paper and Citation Info](#toolbox-icra-paper-and-citation-info)
+- [Using the Toolbox in your Open Source Code?](#using-the-toolbox-in-your-open-source-code)
+- [Common Issues and Solutions](#common-issues-and-solutions)
 
 <br>
-
-<a id='1'></a>
 
 ## Synopsis
 
 This toolbox brings robotics-specific functionality to Python, and leverages
 Python's advantages of portability, ubiquity and support, and the capability of
 the open-source ecosystem for linear algebra (numpy, scipy), graphics
-(matplotlib, three.js, WebGL), interactive development (jupyter, jupyterlab,
+(matplotlib, three.js, WebGL), interactive development (Jupyter, JupyterLab,
 mybinder.org), and documentation (sphinx).
 
 The Toolbox provides tools for representing the kinematics and dynamics of
@@ -84,18 +82,16 @@ provide support for data types such as SO(n) and SE(n) matrices, quaternions, tw
 
 <br>
 
-<a id='2'></a>
-
 ## Getting going
 
-You will need Python >= 3.6
+You will need Python >= 3.10
 
 ### Using pip
 
 Install a snapshot from PyPI
 
 ```shell script
-pip3 install roboticstoolbox-python
+pip install roboticstoolbox-python
 ```
 
 Available options are:
@@ -109,7 +105,7 @@ Available options are:
 Put the options in a comma separated list like
 
 ```shell script
-pip3 install roboticstoolbox-python[optionlist]
+pip install roboticstoolbox-python[optionlist]
 ```
 
 If you want the Swift visualizer, install the `swift` extra.
@@ -119,37 +115,37 @@ Install matrix:
 - Core only
 
 ```shell script
-pip3 install roboticstoolbox-python
+pip install roboticstoolbox-python
 ```
 
 - Swift visualizer only
 
 ```shell script
-pip3 install roboticstoolbox-python[swift]
+pip install roboticstoolbox-python[swift]
 ```
 
 - QP solver dependencies only
 
 ```shell script
-pip3 install roboticstoolbox-python[qp]
+pip install roboticstoolbox-python[qp]
 ```
 
 - Bullet collision dependencies only
 
 ```shell script
-pip3 install roboticstoolbox-python[bullet]
+pip install roboticstoolbox-python[bullet]
 ```
 
 - Everything (swift + qp + bullet)
 
 ```shell script
-pip3 install roboticstoolbox-python[all]
+pip install roboticstoolbox-python[all]
 ```
 
 - Multiple extras explicitly
 
 ```shell script
-pip3 install roboticstoolbox-python[swift,qp,bullet]
+pip install roboticstoolbox-python[swift,qp,bullet]
 ```
 
 ### From GitHub
@@ -159,42 +155,11 @@ To install the bleeding-edge version from GitHub
 ```shell script
 git clone https://github.com/petercorke/robotics-toolbox-python.git
 cd robotics-toolbox-python
-pip3 install -e .
+pip install -e .
 ```
 
-### Build a JupyterLite/Pyodide wasm wheel (cp313)
+To generate a Wasm wheel that will run in the browser see the [instructions here](#build-a-jupyterlitepyodide-wasm-wheel-cp313).
 
-This project includes a reproducible wasm wheel build target aligned to current
-JupyterLite runtimes based on Python 3.13.
-
-Build using cibuildwheel's Pyodide platform:
-
-```shell script
-make wheel-pyodide
-```
-
-Optionally pin the Pyodide runtime family to match your JupyterLite deployment:
-
-```shell script
-PYODIDE_VERSION=0.28.3 make wheel-pyodide
-```
-
-The target writes to `dist/` and runs `make wheel-pyodide-check`, which validates
-the wheel filename contains:
-
-- `cp313-cp313`
-- `wasm32`
-- `pyemscripten_<major>_<minor>` or `pyodide_<major>_<minor>`
-
-To inspect the produced artifact path:
-
-```shell script
-ls -1 dist/*wasm32*.whl
-```
-
-<br>
-
-<a id='3'></a>
 
 ## Tutorials
 
@@ -211,8 +176,6 @@ This tutorial comes with two articles to cover the theory and 12 Jupyter Noteboo
 </table>
 
 <br>
-
-<a id='4'></a>
 
 ## Code Examples
 
@@ -347,8 +310,6 @@ The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/mai
 
 <br>
 
-<a id='6'></a>
-
 ## Toolbox ICRA Paper and Citation Info
 
 Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/3ChcyNp).
@@ -367,10 +328,6 @@ If the toolbox helped you in your research, please cite
 ```
 
 <br>
-
-<a id='7'></a>
-
-
 
 ## Using the Toolbox in your Open Source Code?
 
@@ -398,8 +355,6 @@ copy the following
 
 <br>
 
-<a id='8'></a>
-
 ## Common Issues and Solutions
 
 See the common issues with fixes [here](https://github.com/petercorke/robotics-toolbox-python/wiki/Common-Issues).
@@ -413,8 +368,6 @@ Graphical visualisation via swift is currently not supported under Windows. Howe
 <br>
 
 <br>
-
-<a id='5'></a>
 
 ## Toolbox Research Applications
 
@@ -463,5 +416,35 @@ K. He, R. Newbury, T. Tran, J. Haviland, B. Burgess-Limerick, D. Kulić, P. Cork
 </p>
 
 <br>
+
+## Build a JupyterLite/Pyodide Wasm wheel (cp313)
+
+This project includes a reproducible wasm wheel build target aligned to current
+JupyterLite runtimes based on Python 3.13.
+
+Build using cibuildwheel's Pyodide platform:
+
+```shell script
+make wheel-pyodide
+```
+
+Optionally pin the Pyodide runtime family to match your JupyterLite deployment:
+
+```shell script
+PYODIDE_VERSION=0.28.3 make wheel-pyodide
+```
+
+The target writes to `dist/` and runs `make wheel-pyodide-check`, which validates
+the wheel filename contains:
+
+- `cp313-cp313`
+- `wasm32`
+- `pyemscripten_<major>_<minor>` or `pyodide_<major>_<minor>`
+
+To inspect the produced artifact path:
+
+```shell script
+ls -1 dist/*wasm32*.whl
+```
 
 <br>
