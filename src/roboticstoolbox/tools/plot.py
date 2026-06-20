@@ -12,6 +12,7 @@ def xplot(
     loc=None,
     grid=True,
     stack=False,
+    title=None,
     **kwargs,
 ):
     r"""
@@ -30,6 +31,8 @@ def xplot(
     :type block: bool
     :param labels: legend labels
     :type labels: list of str, or single string with space separated labels
+    :param title: plot title shown in title bar of the figure window
+    :type title: str
     :param kwargs: options passed to pyplot.plot
     :param loc: legend location as per pyplot.legend
     :type loc: str
@@ -103,6 +106,11 @@ def xplot(
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Joint coordinates (rad,m)")
         # ax.set_xlim(t[0], t[-1])  fails with RVC3 Sec 3.3.3
+
+        if title is not None:
+            manager = getattr(fig.canvas, "manager", None)
+            if manager is not None and hasattr(manager, "set_window_title"):
+                manager.set_window_title(title)
 
     plt.show(block=block)
 
