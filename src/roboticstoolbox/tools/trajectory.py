@@ -855,6 +855,7 @@ def mstraj(
     tacc,
     qdmax=None,
     tsegment=None,
+    segtime=None,
     q0=None,
     qd0=None,
     qdf=None,
@@ -897,7 +898,7 @@ def mstraj(
     - All joints arrive at each via point at the same time, ie. the motion is
       coordinated across axes
 
-    The time of the segments can be specified in two different ways:
+    The time of the segments can be specified in three different ways:
 
     #. In terms of segment time where ``tsegment`` is an array of segment times
        which is the number of via points minus one::
@@ -909,6 +910,9 @@ def mstraj(
        per axis::
 
             traj = mstraj(viapoints, dt, tacc, qdmax=SPEED)
+
+    #. computed by the function ``segtime`` from the distance between points
+       in the configuration space.
 
     The return value is a namedtuple (named ``mstraj``) with elements:
 
@@ -950,26 +954,21 @@ def mstraj(
     else:
         q0 = getvector(q0)
         if not viapoints.shape[1] == len(q0):
-            raise ValueError("WP and Q0 must have same number of columns")
+            raise ValueError("viapoints and q0 must have same number of columns")
 
     ns, nj = viapoints.shape
     Tacc = tacc
 
-    if qdmax is not None and tsegment is not None:
-        raise ValueError("cannot specify both qdmax and tsegment")
+    # sanity check the segment time options
 
-    if qdmax is None:
-        if tsegment is None:
-            raise ValueError("tsegment must be given if qdmax is not")
+    if sum(x is not None for x in (qdmax, tsegment, segtime)) != 1:
+        raise ValueError("exactly one of qdmax, tsegment, or segtime must be specified")
 
+    if tsegment is not None:
         if not len(tsegment) == ns:
-            raise ValueError("Length of TSEG does not match number of viapoints")
+            raise ValueError("Length of tsegment does not match number of viapoints")
 
-    if tsegment is None:
-        # This is unreachable, left just in case
-        if qdmax is None:  # pragma nocover
-            raise ValueError("qdmax must be given if tsegment is not")
-
+    elif qdmax is not None:
         if isinstance(qdmax, (int, float)):
             # if qdmax is a scalar assume all axes have the same speed
             qdmax = np.tile(qdmax, (nj,))
@@ -978,7 +977,7 @@ def mstraj(
 
             if not len(qdmax) == nj:
                 raise ValueError("Length of QDMAX does not match number of axes")
-
+            
     if isinstance(Tacc, (int, float)):
         Tacc = np.tile(Tacc, (ns,))
     else:
@@ -1058,19 +1057,23 @@ def mstraj(
 
             # find the total time and slowest axis
             tt = tb + tl
-            slowest = np.argmax(tt)
+            slowest = int(np.argmax(tt))
             tseg = tt[slowest]
-
-            # best if there is some linear motion component
-            if tseg <= 2 * tacc:
-                tseg = 2 * tacc
 
         elif tsegment is not None:
             # segment time specified, use that
             tseg = tsegment[seg]
-            slowest = math.nan
+            slowest = None
 
-        infolist.append(info(slowest, tseg, clock))
+        elif segtime is not None:
+            tseg = segtime(dq)
+            slowest = None
+
+        # best if there is some linear motion component
+        if tseg <= 2 * tacc:
+            tseg = 2 * tacc
+
+        infolist.append(info(slowest, float(tseg), clock))
 
         # log the planned arrival time
         arrive[seg] = clock + tseg
