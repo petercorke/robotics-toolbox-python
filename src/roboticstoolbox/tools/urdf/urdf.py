@@ -196,6 +196,9 @@ class Box(URDFType):
     def __init__(self, size):
         self.size = size
 
+    def __repr__(self):  # pragma nocover
+        return "Box(size={})".format(self.size)
+    
     @property
     def size(self):
         """(3,) float : The length, width, and height of the box in meters."""
@@ -225,6 +228,9 @@ class Cylinder(URDFType):
     def __init__(self, radius, length):
         self.radius = radius
         self.length = length
+
+    def __repr__(self):  # pragma nocover
+        return "Cylinder(radius={}, length={})".format(self.radius, self.length)
 
     @property
     def radius(self):
@@ -261,6 +267,9 @@ class Sphere(URDFType):
     def __init__(self, radius):
         self.radius = radius
 
+    def __repr__(self):  # pragma nocover
+        return "Sphere(radius={})".format(self.radius)
+
     @property
     def radius(self):
         """float : The radius of the sphere in meters."""
@@ -289,6 +298,9 @@ class Mesh(URDFType):
     def __init__(self, filename, scale=None):
         self.filename = filename
         self.scale = scale
+
+    def __repr__(self):  # pragma nocover
+        return "Mesh(filename={}, scale={})".format(self.filename, self.scale)
 
     @property
     def filename(self):
@@ -340,6 +352,10 @@ class Material(URDFType):
     texture : :class:`.Texture`, optional
         A texture for the material.
     """
+    def __repr__(self):  # pragma nocover
+        return "Material(name={}, color={}, texture={})".format(
+            self.name, self.color, self.texture
+        )
 
     _ATTRIBS = {"name": (str, True)}
     _ELEMENTS = {}
@@ -412,6 +428,11 @@ class Geometry(URDFType):
             self.mesh = mesh
             self.ob = gm.Mesh(mesh.filename, scale=mesh.scale)
 
+    def __repr__(self):  # pragma nocover
+        return "Geometry(box={}, cylinder={}, sphere={}, mesh={})".format(
+            self.box, self.cylinder, self.sphere, self.mesh
+        )
+    
     @property
     def box(self):
         """:class:`.Box` : Box geometry."""
@@ -487,7 +508,7 @@ class Collision(URDFType):
 
     _ATTRIBS = {"name": (str, False)}
     _ELEMENTS = {
-        "geometry": (Geometry, True, False),
+        "geometry": (Geometry, False, False),
     }
     _TAG = "collision"
 
@@ -497,6 +518,11 @@ class Collision(URDFType):
         self.origin = origin
         self.geometry.ob.T = origin
 
+    def __repr__(self):  # pragma nocover
+        return "Collision(name={}, origin={}, geometry={})".format(
+            self.name, self.origin, self.geometry
+        )
+    
     @property
     def geometry(self):
         """:class:`.Geometry` : The geometry of this element."""
@@ -552,7 +578,7 @@ class Visual(URDFType):
 
     _ATTRIBS = {"name": (str, False)}
     _ELEMENTS = {
-        "geometry": (Geometry, True, False),
+        "geometry": (Geometry, False, False),
         "material": (Material, False, False),
     }
     _TAG = "visual"
@@ -571,6 +597,12 @@ class Visual(URDFType):
         # Do set it if the color was defined in line by the URDF
         if material is not None and material.color is not None:
             self.geometry.ob.color = material.color
+
+
+    def __repr__(self):  # pragma nocover
+        return "Visual(name={}, origin={}, geometry={}, material={})".format(
+            self.name, self.origin, self.geometry, self.material
+        )
 
     @property
     def geometry(self):
@@ -630,6 +662,9 @@ class Inertial(URDFType):
         self._inertia = inertia
         self._origin = origin
 
+    def __repr__(self):  # pragma nocover
+        return "Inertial(mass={}, inertia={}, origin={})".format(self.mass, self.inertia, self.origin)
+    
     @property
     def mass(self):
         """float : The mass of the link in kilograms."""
@@ -699,6 +734,9 @@ class JointCalibration(URDFType):  # pragma nocover
         self.rising = rising
         self.falling = falling
 
+    def __repr__(self):  # pragma nocover
+        return "JointCalibration(rising={}, falling={})".format(self.rising, self.falling)
+
     @property
     def rising(self):
         """float : description."""
@@ -760,6 +798,9 @@ class JointDynamics(URDFType):
         self.damping = damping
         self.friction = friction
 
+    def __repr__(self):  # pragma nocover
+        return "JointDynamics(damping={}, friction={})".format(self.damping, self.friction)
+    
     @property
     def damping(self):  # pragma nocover
         """float : The damping value of the joint."""
@@ -811,6 +852,11 @@ class JointLimit(URDFType):
         self.velocity = velocity
         self.lower = lower
         self.upper = upper
+
+    def __repr__(self):  # pragma nocover
+        return "JointLimit(effort={}, velocity={}, lower={}, upper={})".format(
+            self.effort, self.velocity, self.lower, self.upper
+        )
 
     @property
     def effort(self):
@@ -879,6 +925,11 @@ class JointMimic(URDFType):  # pragma nocover
         self.joint = joint
         self.multiplier = multiplier
         self.offset = offset
+
+    def __repr__(self):  # pragma nocover
+        return "JointMimic(joint={}, multiplier={}, offset={})".format(
+            self.joint, self.multiplier, self.offset
+        )
 
     @property
     def joint(self):
@@ -949,6 +1000,11 @@ class SafetyController(URDFType):  # pragma nocover
         self.k_position = k_position
         self.soft_lower_limit = soft_lower_limit
         self.soft_upper_limit = soft_upper_limit
+
+    def __repr__(self):  # pragma nocover
+        return "SafetyController(k_velocity={}, k_position={}, soft_lower_limit={}, soft_upper_limit={})".format(
+            self.k_velocity, self.k_position, self.soft_lower_limit, self.soft_upper_limit
+        )
 
     @property
     def soft_lower_limit(self):
@@ -1027,6 +1083,12 @@ class Actuator(URDFType):
         self.mechanicalReduction = mechanicalReduction
         self.hardwareInterfaces = hardwareInterfaces
 
+
+    def __repr__(self):  # pragma nocover
+        return "Actuator(name={}, mechanicalReduction={}, hardwareInterfaces={})".format(
+            self.name, self.mechanicalReduction, self.hardwareInterfaces
+        )
+
     @property
     def name(self):  # pragma nocover
         """str : The name of this actuator."""
@@ -1095,6 +1157,11 @@ class TransmissionJoint(URDFType):
         self.name = name
         self.hardwareInterfaces = hardwareInterfaces
 
+    def __repr__(self):  # pragma nocover
+        return "TransmissionJoint(name={}, hardwareInterfaces={})".format(
+            self.name, self.hardwareInterfaces
+        )
+    
     @property
     def name(self):  # pragma nocover
         """str : The name of this transmission joint."""
@@ -1153,8 +1220,8 @@ class Transmission(URDFType):
         "name": (str, True),
     }
     _ELEMENTS = {
-        "joints": (TransmissionJoint, True, True),
-        "actuators": (Actuator, True, True),
+        "joints": (TransmissionJoint, False, True),
+        "actuators": (Actuator, False, True),
     }
     _TAG = "transmission"
 
@@ -1163,6 +1230,11 @@ class Transmission(URDFType):
         self.trans_type = trans_type
         self.joints = joints
         self.actuators = actuators
+
+    def __repr__(self):  # pragma nocover
+        return "Transmission(name={}, trans_type={}, joints={}, actuators={})".format(
+            self.name, self.trans_type, self.joints, self.actuators
+        )
 
     @property
     def name(self):
@@ -1309,6 +1381,11 @@ class Joint(URDFType):
         self.safety_controller = safety_controller
         self.calibration = calibration
         self.mimic = mimic
+
+    def __repr__(self):
+        return "Joint(name={}, joint_type={}, parent={}, child={})".format(
+            self.name, self.joint_type, self.parent, self.child
+        )
 
     @property
     def name(self):
@@ -1519,6 +1596,11 @@ class Link(URDFType):
         self.visuals = visuals
         self.collisions = collisions
 
+    def __repr__(self):  # pragma nocover
+        return "Link(name={}, inertial={}, visuals={}, collisions={})".format(
+            self.name, self.inertial, self.visuals, self.collisions
+        )
+    
     @property
     def name(self):
         """str : The name of this link."""
@@ -1762,7 +1844,10 @@ class URDF(URDFType):
             # joint limit
             try:
                 if childlink.isjoint:
-                    childlink.qlim = [joint.limit.lower, joint.limit.upper]
+                    if joint.limit.lower is not None and joint.limit.upper is not None:
+                        childlink.qlim = [joint.limit.lower, joint.limit.upper]
+                    childlink.qdlim = joint.limit.velocity
+                    childlink.tlim = joint.limit.effort
             except AttributeError:
                 # no joint limits provided
                 pass
