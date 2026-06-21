@@ -6,11 +6,12 @@ from roboticstoolbox.robot.Robot import Robot
 
 class LBR(Robot):
     """
-    Class that imports a LBR URDF model
+    Class that imports a Kuka LBR iiwa URDF model
 
-    ``LBR()`` is a class which imports a Franka-Emika LBR robot definition
-    from a URDF file.  The model describes its kinematic and graphical
-    characteristics.
+    ``LBR()`` is a class which imports a Kuka LBR iiwa 14 R820 robot definition
+    from a URDF file.  The robot has a payload of 14 kg, and a reach of 820 mm.
+    
+    The model describes its kinematic and graphical characteristics.
 
     .. runblock:: pycon
 
