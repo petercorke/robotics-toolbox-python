@@ -33,7 +33,7 @@ class Frankie(Robot):
     def __init__(self):
 
         links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "franka_description/robots/frankie_arm_hand.urdf.xacro"
+            "qut_frankie_description/robots/frankie_arm_hand.urdf.xacro"
         )
 
         super().__init__(

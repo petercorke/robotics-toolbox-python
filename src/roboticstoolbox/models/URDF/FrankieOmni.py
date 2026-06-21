@@ -36,11 +36,11 @@ class FrankieOmni(Robot):
     def __init__(self):
 
         links_base, _, urdf_string, urdf_filepath = self.URDF_read(
-            "ridgeback_description/urdf/ridgeback.urdf.xacro"
+            "clearpath_ridgeback_description/urdf/ridgeback.urdf.xacro"
         )
 
         links_panda, _, _, _ = self.URDF_read(
-            "franka_description/robots/panda_arm_hand.urdf.xacro"
+            "qut_frankie_description/robots/panda_arm_hand.urdf.xacro"
         )
 
         base_link = links_base[9]
