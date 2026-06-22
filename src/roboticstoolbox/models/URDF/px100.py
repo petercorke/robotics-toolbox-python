@@ -30,19 +30,12 @@ class px100(Robot):
     .. sectionauthor:: Peter Corke
     """
 
+    _urdf_path = "interbotix_descriptions/urdf/px100.urdf.xacro"
+    _manufacturer = "Interbotix"
+
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "interbotix_descriptions/urdf/px100.urdf.xacro"
-        )
-
-        super().__init__(
-            links,
-            name=name,
-            manufacturer="Interbotix",
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-        )
+        super().__init__()
 
         self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
         self.qz = np.zeros(7)

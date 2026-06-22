@@ -22,6 +22,7 @@ dependencies = [
     "progress",
     "typing_extensions",
     "colored>2.0.0",
+    "xacrodoc",
 ]
 
 license = { file = "LICENSE" }
@@ -139,9 +140,7 @@ sdist.include = [
     "README.md",
     "LICENSE",
 ]
-sdist.exclude = [
-    "rtb-data/**",
-]
+sdist.exclude = ["rtb-data/**"]
 
 
 [tool.ruff]

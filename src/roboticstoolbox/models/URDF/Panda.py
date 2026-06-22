@@ -30,20 +30,13 @@ class Panda(Robot):
     .. sectionauthor:: Peter Corke
     """
 
+    _urdf_path = "franka_description/robots/panda_arm_hand.urdf.xacro"
+    _manufacturer = "Franka Emika"
+    _gripper_link_index = 9
+
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "franka_description/robots/panda_arm_hand.urdf.xacro"
-        )
-
-        super().__init__(
-            links,
-            name=name,
-            manufacturer="Franka Emika",
-            gripper_links=links[9],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-        )
+        super().__init__()
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)
 

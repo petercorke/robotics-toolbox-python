@@ -24,7 +24,7 @@ from .utils import parse_origin, configure_origin
 _base_path = None
 
 
-class URDFType(object):
+class URDFType():
     """Abstract base class for all URDF types.
     This has useful class methods for automatic parsing/unparsing
     of XML trees.
@@ -1741,138 +1741,6 @@ class URDF(URDFType):
         ):  # pragma nocover  # noqa
             raise ValueError("Duplicate transmission names")
 
-        elinks = []
-        elinkdict = {}
-        # jointdict = {}
-
-        # build the list of links in URDF file order
-        for link in self._links:
-            elink = rtb.Link(
-                name=link.name,
-                m=link.inertial.mass,
-                r=link.inertial.origin[:3, 3]
-                if link.inertial.origin is not None
-                else None,
-                I=link.inertial.inertia,
-            )
-            elinks.append(elink)
-            elinkdict[link.name] = elink
-
-            # add the inertial parameters
-
-            # add the visuals to visual list
-            try:
-                elink.geometry = [v.geometry.ob for v in link.visuals]
-            except AttributeError:  # pragma nocover
-                pass
-
-            #  add collision objects to collision object list
-            try:
-                elink.collision = [col.geometry.ob for col in link.collisions]
-            except AttributeError:  # pragma nocover
-                pass
-
-        # connect the links using joint info
-        for joint in self._joints:
-            # get references to joint's parent and child
-            childlink = elinkdict[joint.child]
-            parentlink = elinkdict[joint.parent]
-
-            childlink._parent = parentlink  # connect child link to parent
-            childlink._joint_name = joint.name
-
-            # constant part of link transform
-            trans = SE3(joint.origin).t
-            rot = joint.rpy
-
-            # Check if axis of rotation/tanslation is not 1
-            if np.count_nonzero(joint.axis) < 2:
-                ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rot))
-            else:
-                # Normalise the joint axis to be along or about z axis
-                # Convert rest to static ETS
-                v = joint.axis
-                u, n = unitvec_norm(v)
-                R = angvec2r(n, u)
-
-                R_total = SE3.RPY(joint.rpy) * R
-                rpy = tr2rpy(R_total)
-
-                ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rpy))
-
-                joint.axis = [0, 0, 1]
-
-            # variable part of link transform
-            var = None
-            if joint.joint_type in ("revolute", "continuous"):  # pragma nocover # noqa
-                if joint.axis[0] == 1:
-                    var = rtb.ET.Rx()
-                elif joint.axis[0] == -1:
-                    var = rtb.ET.Rx(flip=True)
-                elif joint.axis[1] == 1:
-                    var = rtb.ET.Ry()
-                elif joint.axis[1] == -1:
-                    var = rtb.ET.Ry(flip=True)
-                elif joint.axis[2] == 1:
-                    var = rtb.ET.Rz()
-                elif joint.axis[2] == -1:
-                    var = rtb.ET.Rz(flip=True)
-            elif joint.joint_type == "prismatic":  # pragma nocover
-                if joint.axis[0] == 1:
-                    var = rtb.ET.tx()
-                elif joint.axis[0] == -1:
-                    var = rtb.ET.tx(flip=True)
-                elif joint.axis[1] == 1:
-                    var = rtb.ET.ty()
-                elif joint.axis[1] == -1:
-                    var = rtb.ET.ty(flip=True)
-                elif joint.axis[2] == 1:
-                    var = rtb.ET.tz()
-                elif joint.axis[2] == -1:
-                    var = rtb.ET.tz(flip=True)
-            elif joint.joint_type == "fixed":
-                var = None
-
-            if var is not None:
-                ets = ets * var
-
-            if isinstance(ets, rtb.ET):
-                ets = rtb.ETS(ets)
-
-            childlink.ets = ets
-
-            # joint limit
-            try:
-                if childlink.isjoint:
-                    if joint.limit.lower is not None and joint.limit.upper is not None:
-                        childlink.qlim = [joint.limit.lower, joint.limit.upper]
-                    childlink.qdlim = joint.limit.velocity
-                    childlink.tlim = joint.limit.effort
-            except AttributeError:
-                # no joint limits provided
-                pass
-
-            # joint friction
-            try:
-                if joint.dynamics.friction is not None:
-                    childlink.B = joint.dynamics.friction
-
-                # TODO Add damping
-                # joint.dynamics.damping
-            except AttributeError:
-                pass
-
-            # joint gear ratio
-            # TODO, not sure if t.joint.name is a thing
-            for t in self.transmissions:  # pragma nocover
-                if t.name == joint.name:
-                    childlink.G = t.actuators[0].mechanicalReduction
-
-            self.elinks = elinks
-
-            # TODO, why did you put the base_link on the end?
-            # easy to do it here
-
     @property
     def name(self):
         """str : The name of the URDF."""
@@ -2018,11 +1886,11 @@ class URDF(URDFType):
             _base_path = base_path
 
         if isinstance(str_obj, str):
-            if os.path.isfile(file_obj):
+            # if os.path.isfile(file_obj):
                 parser = ETT.XMLParser()
                 bytes_obj = BytesIO(bytes(str_obj, "utf-8"))
                 tree = ETT.parse(bytes_obj, parser=parser)
-                path, _ = os.path.split(file_obj)
+                # path, _ = os.path.split(file_obj)
 
         else:  # pragma nocover
             parser = ETT.XMLParser()
@@ -2030,10 +1898,11 @@ class URDF(URDFType):
             path, _ = os.path.split(file_obj.name)
 
         node = tree.getroot()
+        path = None
         return URDF._from_xml(node, path)
 
     def _validate_transmissions(self):
-        """Raise an exception of any transmissions are invalidly specified.
+        """Raise an exception if any transmissions are invalidly specified.
         Checks for the following:
         - Transmission joints have valid joint names.
         """

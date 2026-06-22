@@ -10,7 +10,7 @@ class LBR(Robot):
 
     ``LBR()`` is a class which imports a Kuka LBR iiwa 14 R820 robot definition
     from a URDF file.  The robot has a payload of 14 kg, and a reach of 820 mm.
-    
+
     The model describes its kinematic and graphical characteristics.
 
     .. runblock:: pycon
@@ -30,20 +30,12 @@ class LBR(Robot):
     .. sectionauthor:: Peter Corke
     """
 
+    _urdf_path = "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro"
+    _manufacturer = "Kuka"
+
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro"
-        )
-
-        super().__init__(
-            links,
-            name=name,
-            manufacturer="Kuka",
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-            # gripper_links=elinks[9]
-        )
+        super().__init__()
 
         # self.qdlim = np.array([
         #     2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])

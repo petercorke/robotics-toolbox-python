@@ -27,19 +27,12 @@ class UR10(Robot):
     .. sectionauthor:: Peter Corke
     """
 
+    _urdf_path = "ur_description/urdf/ur10_joint_limited_robot.urdf.xacro"
+    _manufacturer = "Universal Robotics"
+
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "ur_description/urdf/ur10_joint_limited_robot.urdf.xacro"
-        )
-
-        super().__init__(
-            links,
-            name=name.upper(),
-            manufacturer="Universal Robotics",
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-        )
+        super().__init__()
 
         self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
         self.qz = np.zeros(6)

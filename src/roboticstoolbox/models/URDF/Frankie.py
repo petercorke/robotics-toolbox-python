@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.robot.RobotURDF import URDFRobot
 from spatialmath import SE3
 
 
-class Frankie(Robot):
+class Frankie(URDFRobot):
     """
     Class that imports a Frankie URDF model
 
@@ -31,18 +31,10 @@ class Frankie(Robot):
     """
 
     def __init__(self):
-
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "qut_frankie_description/robots/frankie_arm_hand.urdf.xacro"
-        )
-
         super().__init__(
-            links,
-            name=name,
+            "qut_frankie_description/robots/frankie_arm_hand.urdf.xacro",
             manufacturer="Franka Emika",
-            gripper_links=links[12],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
+            gripper_link_index=12,
         )
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)

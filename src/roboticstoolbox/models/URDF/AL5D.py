@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.robot.RobotURDF import URDFRobot
 from math import pi
 
 
-class AL5D(Robot):
+class AL5D(URDFRobot):
     """
     Class that imports a AL5D URDF model
 
@@ -28,19 +28,10 @@ class AL5D(Robot):
     """
 
     def __init__(self):
-
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "al5d_description/urdf/al5d_robot.urdf"
-        )
-
         super().__init__(
-            links,
-            name=name,
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
+            "lynxmotion_al5d_description/urdf/al5d_robot.urdf",
+            manufacturer="Lynxmotion",
         )
-
-        self.manufacturer = "Lynxmotion"
 
         # zero angles, upper arm pointing up, lower arm straight ahead
         self.addconfiguration("qz", np.array([0, 0, 0, 0]))

@@ -28,22 +28,16 @@ class UR5(Robot):
     .. sectionauthor:: Peter Corke
     """
 
+    _urdf_path = "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro"
+    _manufacturer = "Universal Robotics"
+    _gripper_link_index = 7
+
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro"
-        )
+        super().__init__()
+
         # for link in links:
         #     print(link)
-
-        super().__init__(
-            links,
-            name=name.upper(),
-            manufacturer="Universal Robotics",
-            gripper_links=links[7],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-        )
 
         self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
         self.qz = np.zeros(6)

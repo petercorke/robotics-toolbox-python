@@ -15,6 +15,7 @@ from roboticstoolbox.robot.ELink import ELink, ELink2
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.ET import ET, ET2
+# from roboticstoolbox.robot.RobotURDF import URDFRobot, URDF_str, URDF_file
 
 from roboticstoolbox.robot.IK import IKSolution, IKSolver, IK_LM, IK_NR, IK_GN, IK_QP
 
@@ -51,4 +52,7 @@ __all__ = [
     "IK_NR",
     "IK_GN",
     "IK_QP",
+    # "URDFRobot",
+    # "URDF_str",
+    # "URDF_file"
 ]
