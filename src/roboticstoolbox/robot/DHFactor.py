@@ -18,7 +18,7 @@ class Element:
     TYPE_NAMES_LC = ["tx", "ty", "tz", "rx", "ry", "rz", "dh", "dhm"]
 
     # Order of elementary transforms for DH conventions: (Type, IsJointPossible)
-    DH_STANDARD_ORDER = [(RZ, True), (TZ, True), (TZ, False), (RX, False)]
+    DH_STANDARD_ORDER = [(RZ, True), (TZ, True), (TX, False), (RX, False)]
     DH_MODIFIED_ORDER = [(RX, False), (TX, False), (RZ, True), (TZ, True)]
 
     import sympy
@@ -160,7 +160,12 @@ class Element:
 
     @property
     def is_joint(self):
-        return self._joint
+        # return self._joint
+        for var in self.val.free_symbols:
+            if str(var).startswith("q"):
+                return True
+        else:
+            return False
 
     @property
     def axis(self):
@@ -245,60 +250,69 @@ class DH(Element):
         # DH specific parameters
         self.theta = 0.0
         self.alpha = 0.0
-        self.A = None
-        self.D = None
+        self.A = 0
+        self.D = 0
         self.prismatic = 0
         self.offset = 0.0
 
     def add_to_dh(self, e):
         """Accumulates primitive transforms into a DH element."""
+        # print(f"Adding {e} to DH element")
 
         if e.type == self.RZ:
             if e.is_joint:
+                # q, c = e.val.as_coeff_Add()
                 self.prismatic = 0
-                self.val = e.val
-                self.offset = e.constant
-                self.theta = 0.0
+                # self.val = e.val
+                # self.offset = c
+                self.theta = e.val
             else:
-                self.theta = e.constant
+                self.theta = e.val
         elif e.type == self.TX:
-            self.A = e.symconst
+            self.A = e.val
         elif e.type == self.TZ:
             if e.is_joint:
                 self.prismatic = 1
-                self.var = e.var
-                self.D = None
+                self.var = e.val
+                self.D = e.val
             else:
-                self.D = e.constant
+                self.D = e.val
         elif e.type == self.RX:
-            self.alpha = e.constant
+            self.alpha = e.val
 
     def __str__(self):
         # theta, d, a, alpha
         parts = []
-        if self.prismatic == 0:
-            # revolute joint
-            s_theta = self.var if self.var else "0"
-            s_theta += str(self.offset)
-            # if self.offset > 0:
-            #     s_theta += str(self.offset)
-            # elif self.offset < 0:
-            #     s_theta += f"{self.offset:g}"
-            parts.append(s_theta)
-        else:
-            # prismatic joijnt
-            parts.append(f"{self.theta:g}")
+        # if self.prismatic == 0:
+        #     # revolute joint
+        #     s_theta = self.val if self.val else "0"
+        #     # s_theta += str(self.offset)
+        #     # if self.offset > 0:
+        #     #     s_theta += str(self.offset)
+        #     # elif self.offset < 0:
+        #     #     s_theta += f"{self.offset:g}"
+        #     parts.append(f"{self.theta}")
+        # else:
+        #     # prismatic joijnt
+        #     parts.append(f"{self.theta:g}")
 
-        parts.append(self.var if self.prismatic > 0 else (self.D if self.D else "0"))
-        parts.append(self.A if self.A else "0")
-        parts.append(f"{self.alpha:g}")
-        return ", ".join([str(part) for part in parts])
+        parts.append(str(self.theta).replace(" ", ""))
+        parts.append(str(self.D).replace(" ", ""))
+        parts.append(str(self.A).replace(" ", ""))
+        parts.append(str(self.alpha).replace(" ", ""))
+        return "DH[" +  ", ".join([str(part) for part in parts]) + "]"
 
 
 class DHFactor(UserList):
     def __init__(self, src_string=None):
         if src_string:
             self.parse_string(src_string)
+
+        self.A = 0
+        self.D = 0
+        self.alpha = 0
+        self.theta = 0
+        self.prismatic = 0
 
     def set(self, value):
         self.data = value
@@ -311,7 +325,8 @@ class DHFactor(UserList):
         tokens = re.findall(r"([RT][xyz]\([^)]+\))", buffer, re.IGNORECASE)
         self.data = [Element(t) for t in tokens]
 
-        print(f"INIT: {buffer}")
+        # print(f"INIT: {buffer}")
+        self.print("INIT")
         self.simplify()
         self.print("SIMPLIFIED")
 
@@ -330,51 +345,71 @@ class DHFactor(UserList):
                 iprev = i
         return True
 
+    # def simplify(self):
+    #     """Iterative simplification logic based on the Java program rules."""
+    #     self._merge_all()
+    #     self.print("MERGE")
+    #     self._swap_all(Element.DH_STANDARD)
+    #     self.print("SWAP")
+    #     self._merge_all()
+    #     self.print("MERGE")
+    #     self._float_right()
+    #     self.print("FLOAT")
+    #     self._merge_all()
+    #     self.print("MERGE")
+    #     self._substitute_to_z()
+    #     self.print("SUB_Z")
+    #     self._merge_all()
+    #     self.print("MERGE")
+    #     print("----------------------")
+
+    #     n_loops = 0
+    #     while n_loops < 10:
+    #         changes = 0
+    #         changes += self._merge_all()
+    #         self.print("MERGE")
+
+    #         changes += self._swap_all(Element.DH_STANDARD)
+    #         self.print("SWAP")
+
+    #         changes += self._merge_all()
+    #         self.print("MERGE")
+
+    #         changes += self._substitute_y()
+    #         self.print("SUB_Y")
+
+    #         changes += self._merge_all()
+    #         self.print("MERGE")
+
+    #         if changes == 0:
+    #             changes += self._substitute_to_z2()
+    #             self.print("SUBZ2")
+    #             changes += self._merge_all()
+    #             self.print("MERGE")
+
+    #         if changes == 0:
+    #             break
+    #         n_loops += 1
+
     def simplify(self):
         """Iterative simplification logic based on the Java program rules."""
         self._merge_all()
         self.print("MERGE")
-        self._swap_all(Element.DH_STANDARD)
-        self.print("SWAP")
-        self._merge_all()
-        self.print("MERGE")
-        self._float_right()
-        self.print("FLOAT")
-        self._merge_all()
-        self.print("MERGE")
-        self._substitute_to_z()
-        self.print("SUB_Z")
-        self._merge_all()
-        self.print("MERGE")
-        print("----------------------")
+        
 
         n_loops = 0
         while n_loops < 10:
             changes = 0
+
+            changes += self._substitute_to_z2()
+            self.print("SUBZ2")
             changes += self._merge_all()
             self.print("MERGE")
-
-            changes += self._swap_all(Element.DH_STANDARD)
-            self.print("SWAP")
-
-            changes += self._merge_all()
-            self.print("MERGE")
-
-            changes += self._substitute_y()
-            self.print("SUB_Y")
-
-            changes += self._merge_all()
-            self.print("MERGE")
-
-            if changes == 0:
-                changes += self._substitute_to_z2()
-                self.print("SUBZ2")
-                changes += self._merge_all()
-                self.print("MERGE")
 
             if changes == 0:
                 break
             n_loops += 1
+
 
     def factorize(self, dh_type):
         """Greedily identifies sequences of transforms that match DH parameters."""
@@ -390,8 +425,8 @@ class DHFactor(UserList):
             joint_vars = 0
 
             # Check for sequence matching DH terms
+            idx = i
             for f in range(4):
-                idx = i + f
                 if idx >= len(self):
                     break
 
@@ -400,12 +435,13 @@ class DHFactor(UserList):
 
                 if el.type == target_type and not (not joint_allowed and el.is_joint):
                     match_count += 1
+                    idx += 1
                     if el.is_joint:
                         joint_vars += 1
                     if joint_vars > 1:
                         break  # Max 1 joint per DH row
                 else:
-                    break
+                    continue
 
             if match_count > 0 and joint_vars > 0:
                 # Merge into a DH element
@@ -461,7 +497,7 @@ class DHFactor(UserList):
         if dh_type == Element.DH_STANDARD:
             # Java logic: push constant translations through joints, order RZ, TX, TZ, RX
             if (
-                (e1.type == Element.TZ and e2.type == Element.TX)
+                (e1.type == Element.TX and e2.type == Element.TZ)
                 or (e1.type == Element.TX and e2.type == Element.RX and e2.is_joint)
                 or (e1.type == Element.TY and e2.type == Element.RY and e2.is_joint)
                 or (e1.type == Element.TZ and e2.type == Element.RZ and e2.is_joint)
@@ -581,7 +617,7 @@ class DHFactor(UserList):
             elif prev.type == Element.TX and curr.type == Element.RZ:
                 # TX.RZ -> RY.TX
                 repl = [
-                    curr.clone(Element.TY, curr.val),
+                    curr.clone(Element.RY, curr.val),
                     prev.clone(prev.type),
                 ]
             elif prev.type == Element.RY and curr.type == Element.RX:
@@ -748,10 +784,16 @@ def main():
         print('Usage: python dhfactor.py "Rx(q1)Tx(L1)..."')
         sys.exit(1)
 
-    factor = DHFactor(input_str)
-    print("\nMatlab Command:")
-    print(factor.command("R"))
+    # 
+    # print("\nMatlab Command:")
+    # print(factor.command("R"))
 
 
 if __name__ == "__main__":
-    main()
+    s = "Tz(L0)Rz(q1)Tx(L1)Rx(q2)Tz(-L2)Ry(180)"
+
+    s = "Tz(L1)Rz(q1)Ry(q2)Ty(L2)Tz(L3)Ry(q3)Tx(L6)Ty(L4)Tz(L5)Rz(q4)Ry(q5)Rz(q6)Tz(L7)"
+    # s = "Tz(L1)Rz(q1)Tx(d2)Rx(q2)Tz(q3)Rx(q4)Rz(q5)Rx(q6)Tz(L7)"
+
+    factor = DHFactor(s)
+    print(factor)
