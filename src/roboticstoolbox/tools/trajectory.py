@@ -847,7 +847,16 @@ def cmstraj():
 
 
 # -------------------------------------------------------------------------- #
-
+def _mrange(start, stop, step):
+    """
+    mrange(start, stop, step) behaves like MATLAB start:step:stop
+    and includes the final value unlike range() or np.arange()
+    """
+    # ret = []
+    istart = round(start / step)
+    istop = round(stop / step)
+    return np.arange(istart, istop + 1) * step
+    
 
 def mstraj(
     viapoints,
@@ -955,41 +964,49 @@ def mstraj(
         q0 = getvector(q0)
         if not viapoints.shape[1] == len(q0):
             raise ValueError("viapoints and q0 must have same number of columns")
+        
+    # q0 is initial state
+    # viapoints are the via points to be reached, one per row
 
-    ns, nj = viapoints.shape
+    # ns is number of segments, 
+    # nj is number of joints
+    nsegments, naxes = viapoints.shape
     Tacc = tacc
 
     # sanity check the segment time options
-
     if sum(x is not None for x in (qdmax, tsegment, segtime)) != 1:
         raise ValueError("exactly one of qdmax, tsegment, or segtime must be specified")
 
     if tsegment is not None:
-        if not len(tsegment) == ns:
+        if isinstance(tsegment, (float, int)):
+            # if tsegment is a scalar assume all segments have the same time
+            tsegment = np.tile(tsegment, (nsegments,))
+        if not callable(tsegment) and len(tsegment) != nsegments:
             raise ValueError("Length of tsegment does not match number of viapoints")
 
     elif qdmax is not None:
-        if isinstance(qdmax, (int, float)):
+        if isinstance(qdmax, (float, int)):
             # if qdmax is a scalar assume all axes have the same speed
-            qdmax = np.tile(qdmax, (nj,))
+            qdmax = np.tile(qdmax, (naxes,))
         else:
             qdmax = getvector(qdmax)
 
-            if not len(qdmax) == nj:
+            if not len(qdmax) == naxes:
                 raise ValueError("Length of QDMAX does not match number of axes")
-            
+    
+    # sanity check the acceleration time and initial conditions
     if isinstance(Tacc, (int, float)):
-        Tacc = np.tile(Tacc, (ns,))
+        Tacc = np.tile(Tacc, (nsegments,))
     else:
-        if not len(Tacc) == ns:
+        if not len(Tacc) == nsegments:
             raise ValueError("Tacc is wrong size")
     if qd0 is None:
-        qd0 = np.zeros((nj,))
+        qd0 = np.zeros((naxes,))
     else:
         if not len(qd0) == len(q0):
             raise ValueError("qd0 is wrong size")
     if qdf is None:
-        qdf = np.zeros((nj,))
+        qdf = np.zeros((naxes,))
     else:
         if not len(qdf) == len(q0):
             raise ValueError("qdf is wrong size")
@@ -999,34 +1016,28 @@ def mstraj(
     qd_prev = qd0
 
     clock = 0  # keep track of time
-    arrive = np.zeros((ns,))  # record planned time of arrival at via points
-    tg = np.zeros((0, nj))
+    arrive = np.zeros((nsegments,))  # record planned time of arrival at via points
+    tg = []
     infolist = []
-    info = namedtuple("mstraj_info", "slowest segtime clock")
+    info = namedtuple("mstraj_info", "slowest segtime clock q")
 
-    def mrange(start, stop, step):
-        """
-        mrange(start, stop, step) behaves like MATLAB start:step:stop
-        and includes the final value unlike range() or np.arange()
-        """
-        # ret = []
-        istart = round(start / step)
-        istop = round(stop / step)
-        return np.arange(istart, istop + 1) * step
+    for segnum in range(0, nsegments):
+        # Every segment in the path comprises a quintic blend followed by linear motion.
+        # The segments ends tacc/2 before the next via point.
 
-    for seg in range(0, ns):
-        q_next = viapoints[seg, :]  # current target
+        q_next = viapoints[segnum, :]  # current target
 
         if verbose:  # pragma nocover
-            print(f"------- segment {seg}: {q_prev} --> {q_next}")
+            print(f"------- segment {segnum}: {q_prev} --> {q_next}")
 
         # set the blend time, just half an interval for the first segment
-
-        tacc = Tacc[seg]
+        tacc = Tacc[segnum]
 
         tacc = math.ceil(tacc / dt) * dt
         tacc2 = math.ceil(tacc / 2 / dt) * dt
-        if seg == 0:
+
+        # the first blend is short one, tacc/2, the others are tacc
+        if segnum == 0:
             taccx = tacc2
         else:
             taccx = tacc
@@ -1035,99 +1046,103 @@ def mstraj(
         #    could better estimate distance travelled during the blend
 
         dq = q_next - q_prev  # total distance to move this segment
+        print(f"distance to move: {dq}")
 
-        # probably should iterate over the next section to get qb right...
-        # while 1
-        #   qd_next = (qnextnext - qnext)
-        #   tb = abs(qd_next - qd) ./ qddmax;
-        #   qb = f(tb, max acceleration)
-        #   dq = q_next - q_prev - qb
-        #   tl = abs(dq) ./ qdmax;
-
+        # determine the duration of this segment
         if qdmax is not None:
             # qdmax is specified, compute slowest axis
 
-            # qb = taccx * qdmax / 2       # distance moved during blend
-            tb = taccx
-
             # convert to time
             tl = abs(dq) / qdmax
-            # tl = abs(dq - qb) / qdmax
             tl = np.ceil(tl / dt) * dt
 
             # find the total time and slowest axis
-            tt = tb + tl
-            slowest = int(np.argmax(tt))
-            tseg = tt[slowest]
+            slowest_axis = int(np.argmax(tl))
+            t_seg = tl[slowest_axis]
 
         elif tsegment is not None:
             # segment time specified, use that
-            tseg = tsegment[seg]
-            slowest = None
+            if callable(tsegment):
+                t_seg = segtime(dq)
+            else:
+                t_seg = tsegment[segnum]
+            slowest_axis = None
 
-        elif segtime is not None:
-            tseg = segtime(dq)
-            slowest = None
+        infolist.append(info(slowest_axis, float(t_seg), clock, q_prev))
+
 
         # best if there is some linear motion component
-        if tseg <= 2 * tacc:
-            tseg = 2 * tacc
-
-        infolist.append(info(slowest, float(tseg), clock))
+        t_seg = max(t_seg, taccx + tacc2)
 
         # log the planned arrival time
-        arrive[seg] = clock + tseg
-        if seg > 0:
-            arrive[seg] += tacc2
+        arrive[segnum] = clock + t_seg
+        if segnum > 0:
+            arrive[segnum] += tacc2
 
         if verbose:  # pragma nocover
             print(
-                f"seg {seg}, distance {dq}, "
-                "slowest axis {slowest}, time required {tseg}"
+                f"seg {segnum}, distance {dq}, "
+                f"slowest axis {slowest_axis}, time required {t_seg}"
             )
 
-        # create the trajectories for this segment
+        # -- create the trajectories for this segment -- #
+
+        #   q: q0 -> q_next
+        #   t: 0  -> t_seg-tacc/2
 
         # linear velocity from qprev to qnext
-        qd = dq / tseg
+        qd = dq / t_seg
 
         # add the blend polynomial
+        #     q: q0 -> q_prev + taccx * qd
+        #     t: 0  -> taccx
         if taccx > 0:
-            qb = jtraj(
-                q0, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd
+            qblend = jtraj(
+                q_prev, q_prev + taccx * qd, _mrange(0, taccx, dt), qd0=qd_prev, qd1=qd
             ).s
-            if verbose:  # pragma nocover
-                print(qb)
-            tg = np.vstack([tg, qb[1:, :]])
+            # drop the first point of the blend except for the first segment, otherwise it will be a duplicate of the last point of the previous segment
+            if segnum == 0:
+                tg.append(qblend)
+            else:
+                tg.append(qblend[1:, :])
+            print(qblend)
+            clock += taccx
 
-        clock = clock + taccx  # update the clock
+        # add the linear part:
+        #     q: q_prev   -> q_next - qd*tacc/2
+        #     t: taccx+dt -> tseg-tacc/2
+        if taccx + dt < t_seg - tacc2:
+            t = np.array(_mrange(taccx + dt, t_seg - tacc2, dt), ndmin=2).T
+            s = t / t_seg
+            qlin = (1 - s) @ q_prev[np.newaxis, :] + s @ (q_next- dq*tacc2)[np.newaxis, :]  # linear steps
+            tg.append(qlin)
+            print(qlin)
+            q_prev = qlin[-1,:]  # next starting point is end of linear segment
+            clock += t_seg-tacc2 -taccx
 
-        # add the linear part, from tacc/2+dt to tseg-tacc/2
-        for t in mrange(tacc2 + dt, tseg - tacc2, dt):
-            s = t / tseg
-            q0 = (1 - s) * q_prev + s * q_next  # linear step
-            if verbose:  # pragma nocover
-                print(t, s, q0)
-            tg = np.vstack([tg, q0])
-            clock += dt
+        else:
+            q_prev = qblend[-1, :]  # next target starting point is end of blend
 
-        q_prev = q_next  # next target becomes previous target
         qd_prev = qd
 
-    # add the final blend
-    if tacc2 > 0:
-        qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).s
-        tg = np.vstack([tg, qb[1:, :]])
 
-    infolist.append(info(None, tseg, clock))
+
+    # add the final blend
+    if taccx > 0:
+        qblend = jtraj(q_prev, q_next, _mrange(0, taccx, dt), qd0=qd_prev, qd1=qdf).s
+        tg.append(qblend[1:, :])
+        print("-------- final blend")
+        print(qblend)
+
+        infolist.append(info(None, t_seg, clock, q_prev))
+
+    tg = np.vstack(tg)
 
     traj = Trajectory("mstraj", dt * np.arange(0, tg.shape[0]), tg)
     traj.arrive = arrive
     traj.info = infolist
     traj.via = viapoints
-
     return traj
-
 
 if __name__ == "__main__":
     # t = quintic(0, 1, 50)
@@ -1149,7 +1164,34 @@ if __name__ == "__main__":
     # traj = jtraj(puma.qz, puma.qr, 100)
     # traj.plot(block=True)
 
-    via = SO2(30, unit="deg") * np.array([[-1, 1, 1, -1, -1], [1, 1, -1, -1, 1]])
-    traj0 = mstraj(via.T, dt=0.2, tacc=0.5, qdmax=[2, 1])
-    xplot(traj0.q[:, 0], traj0.q[:, 1], color="red")
-    traj0.plot(block=True)
+    # dt = 0.05
+    # via = SO2(30, unit="deg") * np.array([[-1, 1, 1, -1, -1], [1, 1, -1, -1, 1]])
+    # traj0 = mstraj(via.T, dt=0.05, tacc=0.5, qdmax=[2, 1], verbose=True)
+    # xplot(traj0.q[:, 0], traj0.q[:, 1], color="red")
+    # traj0.plot()
+
+    dt = 0.02
+
+    # for inf in traj0.info:
+    #     print(f"slowest axis {inf.slowest}, segment time {inf.segtime}, clock {inf.clock}, q {inf.q}")  
+
+    def segment_time(pth):
+        for i, inf in enumerate(pth.info):
+            x = int(inf.clock/dt)
+            # x = inf.clock
+            plt.axvline(x)
+            for q in inf.q:
+                plt.plot(x, q, "o", markerfacecolor="none", markeredgecolor="black")
+            plt.text(x, 0.5, f"{i}→", color='black', transform=plt.gca().get_xaxis_transform(),
+                    ha='center', va='center', bbox=dict(facecolor='white', edgecolor='none', pad=2))
+    # segment_time(traj0)
+
+    via = np.c_[0,2,4,5,8,10]
+    traj0 = mstraj(via.T, dt=dt, tacc=1, qdmax=1, verbose=True)
+    samples = np.arange(0, len(traj0.t))
+    xplot(samples, traj0.q[:, 0], marker='o', linestyle='-')
+    segment_time(traj0)
+
+    qd = np.diff(traj0.q[:, 0]) / dt
+    xplot(samples[1:], qd, marker='o', linestyle='-', color='red')
+    plt.show(block=True)
