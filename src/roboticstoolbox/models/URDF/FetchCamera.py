@@ -17,7 +17,7 @@ class FetchCamera(URDFRobot):
     .. runblock:: pycon
 
         >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.URDF.Fetch()
+        >>> robot = rtb.models.URDF.FetchCamera()
         >>> print(robot)
 
     Defined joint configurations are:

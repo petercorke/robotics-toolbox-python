@@ -5,6 +5,23 @@ from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
 class PR2(URDFRobot):
+    """
+    Class that imports a PR2 URDF model
+
+    ``PR2()`` is a class which imports a Willow Garage PR2 robot definition
+    from a URDF file.  The model describes its kinematic and graphical
+    characteristics.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.URDF.PR2()
+        >>> print(robot)
+
+    .. codeauthor:: Jesse Haviland
+    .. sectionauthor:: Peter Corke
+    """
+
     def __init__(self):
 
         super().__init__("pr2", manufacturer="Willow Garage")

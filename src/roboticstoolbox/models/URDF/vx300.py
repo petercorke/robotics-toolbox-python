@@ -33,7 +33,7 @@ class vx300(URDFRobot):
     def __init__(self):
         super().__init__(
             "trossen_descriptions/urdf/vx300.urdf.xacro",
-            manufacturer="Trossen Robotics",
+            manufacturer="Interbotix",
         )
 
         self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4, 0])
