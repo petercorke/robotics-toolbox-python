@@ -19,13 +19,7 @@ help:
 
 
 install-collision:
-ifeq ($(shell uname -m),arm64)
-	CC=/usr/bin/clang CXX=/usr/bin/clang++ \
-	CFLAGS="-Wno-error -Wno-implicit-function-declaration" \
-	pip install pybullet
-else
-	pip install pybullet
-endif
+	pip install ".[collision]"
 
 test:
 	python -c "$(TOML_IMPORT); tomllib.load(open('pyproject.toml','rb')); print('pyproject.toml OK')"

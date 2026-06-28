@@ -14,7 +14,7 @@ import unittest
 import spatialmath as sm
 import spatialgeometry as gm
 from math import pi, sin, cos
-from tests import skip_no_pybullet
+from tests import skip_no_collision_checking
 
 try:
     from sympy import symbols
@@ -72,7 +72,7 @@ class TestERobot(unittest.TestCase):
         panda.grippers[0].links[0].collision.append(gm.Cuboid([1, 1, 1]))
         panda._fk_dict()
 
-    @skip_no_pybullet
+    @skip_no_collision_checking
     def test_dist(self):
         s0 = gm.Cuboid([1, 1, 1], pose=sm.SE3(0, 0, 0))
         s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
@@ -86,7 +86,7 @@ class TestERobot(unittest.TestCase):
         self.assertAlmostEqual(d1, 2.3621, places=4)  # type: ignore
         self.assertAlmostEqual(d2, None)  # type: ignore
 
-    @skip_no_pybullet
+    @skip_no_collision_checking
     def test_collided(self):
         s0 = gm.Cuboid([1, 1, 1], pose=sm.SE3(0, 0, 0))
         s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))

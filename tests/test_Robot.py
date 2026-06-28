@@ -9,7 +9,7 @@ import unittest
 import os
 import spatialgeometry as sg
 from spatialmath.base import tr2jac
-from tests import skip_no_pybullet
+from tests import skip_no_collision_checking
 
 # from spatialmath import SE3
 
@@ -829,7 +829,7 @@ class TestRobot(unittest.TestCase):
         with self.assertRaises(ValueError):
             r.jacobm(axes="abcdef")  # type: ignore
 
-    @skip_no_pybullet
+    @skip_no_collision_checking
     def test_collided2(self):
         p = rtb.models.Panda()
         s0 = sg.Cuboid([0.01, 0.01, 0.01], pose=p.fkine(p.q))

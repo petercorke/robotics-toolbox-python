@@ -7,9 +7,9 @@ def _available(*packages):
     return all(importlib.util.find_spec(p) is not None for p in packages)
 
 
-skip_no_pybullet = pytest.mark.skipif(
-    not _available("pybullet"),
-    reason="pybullet not installed (see 'collision' extra; Apple Silicon: make install-collision)",
+skip_no_collision_checking = pytest.mark.skipif(
+    not _available("coal", "trimesh"),
+    reason="coal not installed (pip install '.[collision]')",
 )
 
 skip_no_qp = pytest.mark.skipif(
