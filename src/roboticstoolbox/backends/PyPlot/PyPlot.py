@@ -79,6 +79,8 @@ class PyPlot(Connector):
 
     """
 
+    supports_ellipse: bool = True
+
     def __init__(self):
 
         super(PyPlot, self).__init__()

@@ -8,7 +8,14 @@ from swift.SwiftElement import (
     Button,
     Label,
 )
-from swift.Swift import Swift
+from swift.Swift import Swift as _SwiftBase
+
+
+class Swift(_SwiftBase):
+    """Swift backend with RTB capability flags."""
+
+    supports_teach: bool = False
+    supports_ellipse: bool = False
 
 
 __all__ = [

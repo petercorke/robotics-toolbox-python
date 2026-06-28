@@ -7,6 +7,12 @@ from abc import ABC, abstractmethod
 
 
 class Connector(ABC):
+    #: True if the backend supports the interactive teach pendant.
+    supports_teach: bool = True
+
+    #: True if the backend can render EllipsePlot objects.
+    supports_ellipse: bool = False
+
     def __init__(self):
         super().__init__()
 
