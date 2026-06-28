@@ -69,7 +69,7 @@ repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 [project.optional-dependencies]
 
-swift = ["swift-sim>=1.0.0", "websockets<11"]
+swift = ["swift-sim>=1.0.0", "websockets"]
 
 collision = ["coal", "trimesh"]
 
@@ -77,7 +77,7 @@ qp = ["qpsolvers", "quadprog"]
 
 all = [
     "swift-sim>=1.0.0",
-    "websockets<11",
+    "websockets",
     "qpsolvers",
     "quadprog",
     "coal",

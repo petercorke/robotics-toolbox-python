@@ -47,6 +47,8 @@ except ImportError:  # pragma nocover
 
 
 class PyPlot2(Connector):
+    supports_ellipse: bool = True
+
     def __init__(self):
 
         super(PyPlot2, self).__init__()
