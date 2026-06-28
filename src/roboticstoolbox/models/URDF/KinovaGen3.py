@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class KinovaGen3(Robot):
+class KinovaGen3(URDFRobot):
     """
     Class that imports a KinovaGen3 URDF model
 
@@ -30,18 +30,10 @@ class KinovaGen3(Robot):
     """
 
     def __init__(self):
-
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "kortex_description/robots/gen3.xacro"
-        )
-
         super().__init__(
-            links,
-            name=name,
+            "kortex_description/robots/gen3.xacro",
             manufacturer="Kinova",
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-            gripper_links=links[10],
+            gripper_link_index=10,
         )
 
         # self.qdlim = np.array([

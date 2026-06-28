@@ -1,36 +1,21 @@
 #!/usr/bin/env python
 
-from roboticstoolbox.robot.Robot import Robot
 import numpy as np
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class PR2(Robot):
+class PR2(URDFRobot):
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "pr2_description/robots/pr2.urdf.xacro", xacro_tld="pr2_description"
-        )
+        super().__init__("pr2", manufacturer="Willow Garage")
 
-        super().__init__(
-            links,
-            gripper_links=[links[53], links[73]],
-            name=name,
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-        )
-
-        self.grippers[0].tool = self.link_dict["r_gripper_tool_frame"].A()
-        self.grippers[1].tool = self.link_dict["l_gripper_tool_frame"].A()
-
-        self.manufacturer = "Willow Garage"
-
-        self.qr = np.zeros(31)
-        self.qz = np.zeros(31)
+        self.qr = np.zeros(self.n)
+        self.qz = np.zeros(self.n)
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
 
-        self.qdlim = 2.0 * np.ones(31)
+        self.qdlim = 2.0 * np.ones(self.n)
 
 
 if __name__ == "__main__":  # pragma nocover

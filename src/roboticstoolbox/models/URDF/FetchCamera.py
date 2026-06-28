@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 # from spatialmath import SE3
 
 
-class FetchCamera(Robot):
+class FetchCamera(URDFRobot):
     """
     Class that imports a FetchCamera URDF model
 
@@ -30,18 +30,10 @@ class FetchCamera(Robot):
     """
 
     def __init__(self):
-
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "fetch_description/robots/fetch_camera.urdf"
-        )
-
         super().__init__(
-            links,
-            name=name,
+            "fetch_description/robots/fetch_camera.urdf",
             manufacturer="Fetch",
-            gripper_links=links[6],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
+            gripper_link_index=6,
         )
 
         # self.grippers[0].tool = SE3(0, 0, 0.1034)

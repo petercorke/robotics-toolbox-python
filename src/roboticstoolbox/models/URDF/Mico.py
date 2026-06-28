@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class Mico(Robot):
+class Mico(URDFRobot):
     """
     Class that imports a Mico URDF model
 
@@ -30,30 +29,10 @@ class Mico(Robot):
 
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "kinova_description/urdf/j2n4s300_standalone.xacro"
-        )
-
-        gripper_base = links[6]
-
-        # Find the finger links
-        gripper_links = [link for link in links if link.parent == gripper_base]
-
-        # New intermediate link
-        gripper = Link(name="gripper", parent=gripper_base)
-        links.append(gripper)
-
-        # Set the finger link parent to be the new gripper base link
-        for g_link in gripper_links:
-            g_link._parent = gripper
-
         super().__init__(
-            links,
-            name=name,
+            "kinova_description/urdf/j2n4s300_standalone.xacro",
             manufacturer="Kinova",
-            gripper_links=[gripper],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
+            gripper_link_index=8,
         )
 
         self.qr = np.array([0, 45, 60, 0]) * np.pi / 180

@@ -135,6 +135,8 @@ class BaseLink(SceneNode, ABC):
         Tc: Union[ArrayLike, None] = None,
         G: Union[float, None] = None,
         qlim: Union[ArrayLike, None] = None,
+        qdlim: float | None = None,
+        tlim: float | None = None,
         geometry: List[Shape] = [],
         collision: List[Shape] = [],
         **kwargs,
@@ -217,9 +219,15 @@ class BaseLink(SceneNode, ABC):
 
         self.number = 0
 
-        # Set the qlim if provided
+        ## Set the limits if provided
+
+        # joint limits are attached to the variable part of the ETS
         if qlim is not None and self.v:
             self.v.qlim = qlim
+
+        # set qdlim and tlim on the link
+        self._qdlim = qdlim
+        self._tlim = tlim
 
     # -------------------------------------------------------------------------- #
 
@@ -422,6 +430,8 @@ class BaseLink(SceneNode, ABC):
         Tc = deepcopy(self.Tc)
         G = deepcopy(self.G)
         qlim = deepcopy(self.qlim)
+        qdlim = deepcopy(self.qdlim)
+        tlim = deepcopy(self.tlim)
         geometry = [deepcopy(shape) for shape in self._geometry]
         collision = [deepcopy(shape) for shape in self._collision]
 
@@ -439,6 +449,8 @@ class BaseLink(SceneNode, ABC):
             Tc=Tc,
             G=G,
             qlim=qlim,
+            qdlim=qdlim,
+            tlim=tlim,
             geometry=geometry,  # type: ignore
             collision=collision,  # type: ignore
         )
@@ -567,6 +579,66 @@ class BaseLink(SceneNode, ABC):
             self.ets.qlim = qlim_new
         else:
             raise ValueError("Can not set qlim on a static joint")
+
+    @property
+    def qdlim(self) -> Union[float, None]:
+        """
+        Get/set joint velocity limits
+
+        - ``link.qdlim`` is the joint velocity limits
+        - ``link.qdlim = ...`` checks and sets the joint velocity limits
+
+        Returns
+        -------
+        qdlim
+            joint velocity limits
+
+        Notes
+        -----
+        - The limits are not widely enforced within the toolbox.
+        - If no joint velocity limits are specified the value is ``None``
+
+        See Also
+        --------
+        :func:`~islimit`
+
+        """
+
+        return self._qdlim
+    
+    @qdlim.setter
+    def qdlim(self, qdlim_new: float):
+        self._qdlim = qdlim_new
+
+    @property
+    def tlim(self) -> Union[float, None]:
+        """
+        Get/set joint torque limits
+
+        - ``link.tlim`` is the joint torque/force limits
+        - ``link.tlim = ...`` checks and sets the joint torque limits
+
+        Returns
+        -------
+        tlim
+            joint torque limits
+
+        Notes
+        -----
+        - The limits are not widely enforced within the toolbox.
+        - If no joint torque limits are specified the value is ``None``
+
+        See Also
+        --------
+        :func:`~islimit`
+
+        """
+
+        return self._tlim   
+    
+    @tlim.setter
+    def tlim(self, tlim_new: float):
+        self._tlim = tlim_new
 
     @property
     def hasdynamics(self) -> bool:

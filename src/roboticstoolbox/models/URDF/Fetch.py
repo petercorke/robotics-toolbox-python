@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 # from spatialmath import SE3
 
 
-class Fetch(Robot):
+class Fetch(URDFRobot):
     """
     Class that imports a Fetch URDF model
 
@@ -30,18 +30,10 @@ class Fetch(Robot):
     """
 
     def __init__(self):
-
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "fetch_description/robots/fetch.urdf"
-        )
-
         super().__init__(
-            links,
-            name=name,
+            "fetch",
             manufacturer="Fetch",
-            gripper_links=links[11],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
+            gripper_link_index=11,
         )
 
         self.qdlim = np.array([4.0, 4.0, 0.1, 1.25, 1.45, 1.57, 1.52, 1.57, 2.26, 2.26])

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 from math import pi
 
 
-class UR5(Robot):
+class UR5(URDFRobot):
     """
     Class that imports a UR5 URDF model
 
@@ -30,20 +30,10 @@ class UR5(Robot):
 
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro"
-        )
+        super().__init__("ur5", manufacturer="Universal Robotics", gripper_link_index=7)
+
         # for link in links:
         #     print(link)
-
-        super().__init__(
-            links,
-            name=name.upper(),
-            manufacturer="Universal Robotics",
-            gripper_links=links[7],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-        )
 
         self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
         self.qz = np.zeros(6)

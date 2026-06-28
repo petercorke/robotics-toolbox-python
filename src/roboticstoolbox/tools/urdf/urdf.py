@@ -24,7 +24,7 @@ from .utils import parse_origin, configure_origin
 _base_path = None
 
 
-class URDFType(object):
+class URDFType():
     """Abstract base class for all URDF types.
     This has useful class methods for automatic parsing/unparsing
     of XML trees.
@@ -196,6 +196,9 @@ class Box(URDFType):
     def __init__(self, size):
         self.size = size
 
+    def __repr__(self):  # pragma nocover
+        return "Box(size={})".format(self.size)
+    
     @property
     def size(self):
         """(3,) float : The length, width, and height of the box in meters."""
@@ -225,6 +228,9 @@ class Cylinder(URDFType):
     def __init__(self, radius, length):
         self.radius = radius
         self.length = length
+
+    def __repr__(self):  # pragma nocover
+        return "Cylinder(radius={}, length={})".format(self.radius, self.length)
 
     @property
     def radius(self):
@@ -261,6 +267,9 @@ class Sphere(URDFType):
     def __init__(self, radius):
         self.radius = radius
 
+    def __repr__(self):  # pragma nocover
+        return "Sphere(radius={})".format(self.radius)
+
     @property
     def radius(self):
         """float : The radius of the sphere in meters."""
@@ -289,6 +298,9 @@ class Mesh(URDFType):
     def __init__(self, filename, scale=None):
         self.filename = filename
         self.scale = scale
+
+    def __repr__(self):  # pragma nocover
+        return "Mesh(filename={}, scale={})".format(self.filename, self.scale)
 
     @property
     def filename(self):
@@ -340,6 +352,10 @@ class Material(URDFType):
     texture : :class:`.Texture`, optional
         A texture for the material.
     """
+    def __repr__(self):  # pragma nocover
+        return "Material(name={}, color={}, texture={})".format(
+            self.name, self.color, self.texture
+        )
 
     _ATTRIBS = {"name": (str, True)}
     _ELEMENTS = {}
@@ -412,6 +428,11 @@ class Geometry(URDFType):
             self.mesh = mesh
             self.ob = gm.Mesh(mesh.filename, scale=mesh.scale)
 
+    def __repr__(self):  # pragma nocover
+        return "Geometry(box={}, cylinder={}, sphere={}, mesh={})".format(
+            self.box, self.cylinder, self.sphere, self.mesh
+        )
+    
     @property
     def box(self):
         """:class:`.Box` : Box geometry."""
@@ -487,7 +508,7 @@ class Collision(URDFType):
 
     _ATTRIBS = {"name": (str, False)}
     _ELEMENTS = {
-        "geometry": (Geometry, True, False),
+        "geometry": (Geometry, False, False),
     }
     _TAG = "collision"
 
@@ -497,6 +518,11 @@ class Collision(URDFType):
         self.origin = origin
         self.geometry.ob.T = origin
 
+    def __repr__(self):  # pragma nocover
+        return "Collision(name={}, origin={}, geometry={})".format(
+            self.name, self.origin, self.geometry
+        )
+    
     @property
     def geometry(self):
         """:class:`.Geometry` : The geometry of this element."""
@@ -552,7 +578,7 @@ class Visual(URDFType):
 
     _ATTRIBS = {"name": (str, False)}
     _ELEMENTS = {
-        "geometry": (Geometry, True, False),
+        "geometry": (Geometry, False, False),
         "material": (Material, False, False),
     }
     _TAG = "visual"
@@ -571,6 +597,12 @@ class Visual(URDFType):
         # Do set it if the color was defined in line by the URDF
         if material is not None and material.color is not None:
             self.geometry.ob.color = material.color
+
+
+    def __repr__(self):  # pragma nocover
+        return "Visual(name={}, origin={}, geometry={}, material={})".format(
+            self.name, self.origin, self.geometry, self.material
+        )
 
     @property
     def geometry(self):
@@ -630,6 +662,9 @@ class Inertial(URDFType):
         self._inertia = inertia
         self._origin = origin
 
+    def __repr__(self):  # pragma nocover
+        return "Inertial(mass={}, inertia={}, origin={})".format(self.mass, self.inertia, self.origin)
+    
     @property
     def mass(self):
         """float : The mass of the link in kilograms."""
@@ -699,6 +734,9 @@ class JointCalibration(URDFType):  # pragma nocover
         self.rising = rising
         self.falling = falling
 
+    def __repr__(self):  # pragma nocover
+        return "JointCalibration(rising={}, falling={})".format(self.rising, self.falling)
+
     @property
     def rising(self):
         """float : description."""
@@ -760,6 +798,9 @@ class JointDynamics(URDFType):
         self.damping = damping
         self.friction = friction
 
+    def __repr__(self):  # pragma nocover
+        return "JointDynamics(damping={}, friction={})".format(self.damping, self.friction)
+    
     @property
     def damping(self):  # pragma nocover
         """float : The damping value of the joint."""
@@ -811,6 +852,11 @@ class JointLimit(URDFType):
         self.velocity = velocity
         self.lower = lower
         self.upper = upper
+
+    def __repr__(self):  # pragma nocover
+        return "JointLimit(effort={}, velocity={}, lower={}, upper={})".format(
+            self.effort, self.velocity, self.lower, self.upper
+        )
 
     @property
     def effort(self):
@@ -879,6 +925,11 @@ class JointMimic(URDFType):  # pragma nocover
         self.joint = joint
         self.multiplier = multiplier
         self.offset = offset
+
+    def __repr__(self):  # pragma nocover
+        return "JointMimic(joint={}, multiplier={}, offset={})".format(
+            self.joint, self.multiplier, self.offset
+        )
 
     @property
     def joint(self):
@@ -949,6 +1000,11 @@ class SafetyController(URDFType):  # pragma nocover
         self.k_position = k_position
         self.soft_lower_limit = soft_lower_limit
         self.soft_upper_limit = soft_upper_limit
+
+    def __repr__(self):  # pragma nocover
+        return "SafetyController(k_velocity={}, k_position={}, soft_lower_limit={}, soft_upper_limit={})".format(
+            self.k_velocity, self.k_position, self.soft_lower_limit, self.soft_upper_limit
+        )
 
     @property
     def soft_lower_limit(self):
@@ -1027,6 +1083,12 @@ class Actuator(URDFType):
         self.mechanicalReduction = mechanicalReduction
         self.hardwareInterfaces = hardwareInterfaces
 
+
+    def __repr__(self):  # pragma nocover
+        return "Actuator(name={}, mechanicalReduction={}, hardwareInterfaces={})".format(
+            self.name, self.mechanicalReduction, self.hardwareInterfaces
+        )
+
     @property
     def name(self):  # pragma nocover
         """str : The name of this actuator."""
@@ -1095,6 +1157,11 @@ class TransmissionJoint(URDFType):
         self.name = name
         self.hardwareInterfaces = hardwareInterfaces
 
+    def __repr__(self):  # pragma nocover
+        return "TransmissionJoint(name={}, hardwareInterfaces={})".format(
+            self.name, self.hardwareInterfaces
+        )
+    
     @property
     def name(self):  # pragma nocover
         """str : The name of this transmission joint."""
@@ -1153,8 +1220,8 @@ class Transmission(URDFType):
         "name": (str, True),
     }
     _ELEMENTS = {
-        "joints": (TransmissionJoint, True, True),
-        "actuators": (Actuator, True, True),
+        "joints": (TransmissionJoint, False, True),
+        "actuators": (Actuator, False, True),
     }
     _TAG = "transmission"
 
@@ -1163,6 +1230,11 @@ class Transmission(URDFType):
         self.trans_type = trans_type
         self.joints = joints
         self.actuators = actuators
+
+    def __repr__(self):  # pragma nocover
+        return "Transmission(name={}, trans_type={}, joints={}, actuators={})".format(
+            self.name, self.trans_type, self.joints, self.actuators
+        )
 
     @property
     def name(self):
@@ -1309,6 +1381,11 @@ class Joint(URDFType):
         self.safety_controller = safety_controller
         self.calibration = calibration
         self.mimic = mimic
+
+    def __repr__(self):
+        return "Joint(name={}, joint_type={}, parent={}, child={})".format(
+            self.name, self.joint_type, self.parent, self.child
+        )
 
     @property
     def name(self):
@@ -1519,6 +1596,11 @@ class Link(URDFType):
         self.visuals = visuals
         self.collisions = collisions
 
+    def __repr__(self):  # pragma nocover
+        return "Link(name={}, inertial={}, visuals={}, collisions={})".format(
+            self.name, self.inertial, self.visuals, self.collisions
+        )
+    
     @property
     def name(self):
         """str : The name of this link."""
@@ -1658,135 +1740,6 @@ class URDF(URDFType):
             set([x.name for x in self._transmissions])
         ):  # pragma nocover  # noqa
             raise ValueError("Duplicate transmission names")
-
-        elinks = []
-        elinkdict = {}
-        # jointdict = {}
-
-        # build the list of links in URDF file order
-        for link in self._links:
-            elink = rtb.Link(
-                name=link.name,
-                m=link.inertial.mass,
-                r=link.inertial.origin[:3, 3]
-                if link.inertial.origin is not None
-                else None,
-                I=link.inertial.inertia,
-            )
-            elinks.append(elink)
-            elinkdict[link.name] = elink
-
-            # add the inertial parameters
-
-            # add the visuals to visual list
-            try:
-                elink.geometry = [v.geometry.ob for v in link.visuals]
-            except AttributeError:  # pragma nocover
-                pass
-
-            #  add collision objects to collision object list
-            try:
-                elink.collision = [col.geometry.ob for col in link.collisions]
-            except AttributeError:  # pragma nocover
-                pass
-
-        # connect the links using joint info
-        for joint in self._joints:
-            # get references to joint's parent and child
-            childlink = elinkdict[joint.child]
-            parentlink = elinkdict[joint.parent]
-
-            childlink._parent = parentlink  # connect child link to parent
-            childlink._joint_name = joint.name
-
-            # constant part of link transform
-            trans = SE3(joint.origin).t
-            rot = joint.rpy
-
-            # Check if axis of rotation/tanslation is not 1
-            if np.count_nonzero(joint.axis) < 2:
-                ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rot))
-            else:
-                # Normalise the joint axis to be along or about z axis
-                # Convert rest to static ETS
-                v = joint.axis
-                u, n = unitvec_norm(v)
-                R = angvec2r(n, u)
-
-                R_total = SE3.RPY(joint.rpy) * R
-                rpy = tr2rpy(R_total)
-
-                ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rpy))
-
-                joint.axis = [0, 0, 1]
-
-            # variable part of link transform
-            var = None
-            if joint.joint_type in ("revolute", "continuous"):  # pragma nocover # noqa
-                if joint.axis[0] == 1:
-                    var = rtb.ET.Rx()
-                elif joint.axis[0] == -1:
-                    var = rtb.ET.Rx(flip=True)
-                elif joint.axis[1] == 1:
-                    var = rtb.ET.Ry()
-                elif joint.axis[1] == -1:
-                    var = rtb.ET.Ry(flip=True)
-                elif joint.axis[2] == 1:
-                    var = rtb.ET.Rz()
-                elif joint.axis[2] == -1:
-                    var = rtb.ET.Rz(flip=True)
-            elif joint.joint_type == "prismatic":  # pragma nocover
-                if joint.axis[0] == 1:
-                    var = rtb.ET.tx()
-                elif joint.axis[0] == -1:
-                    var = rtb.ET.tx(flip=True)
-                elif joint.axis[1] == 1:
-                    var = rtb.ET.ty()
-                elif joint.axis[1] == -1:
-                    var = rtb.ET.ty(flip=True)
-                elif joint.axis[2] == 1:
-                    var = rtb.ET.tz()
-                elif joint.axis[2] == -1:
-                    var = rtb.ET.tz(flip=True)
-            elif joint.joint_type == "fixed":
-                var = None
-
-            if var is not None:
-                ets = ets * var
-
-            if isinstance(ets, rtb.ET):
-                ets = rtb.ETS(ets)
-
-            childlink.ets = ets
-
-            # joint limit
-            try:
-                if childlink.isjoint:
-                    childlink.qlim = [joint.limit.lower, joint.limit.upper]
-            except AttributeError:
-                # no joint limits provided
-                pass
-
-            # joint friction
-            try:
-                if joint.dynamics.friction is not None:
-                    childlink.B = joint.dynamics.friction
-
-                # TODO Add damping
-                # joint.dynamics.damping
-            except AttributeError:
-                pass
-
-            # joint gear ratio
-            # TODO, not sure if t.joint.name is a thing
-            for t in self.transmissions:  # pragma nocover
-                if t.name == joint.name:
-                    childlink.G = t.actuators[0].mechanicalReduction
-
-            self.elinks = elinks
-
-            # TODO, why did you put the base_link on the end?
-            # easy to do it here
 
     @property
     def name(self):
@@ -1933,11 +1886,11 @@ class URDF(URDFType):
             _base_path = base_path
 
         if isinstance(str_obj, str):
-            if os.path.isfile(file_obj):
+            # if os.path.isfile(file_obj):
                 parser = ETT.XMLParser()
                 bytes_obj = BytesIO(bytes(str_obj, "utf-8"))
                 tree = ETT.parse(bytes_obj, parser=parser)
-                path, _ = os.path.split(file_obj)
+                # path, _ = os.path.split(file_obj)
 
         else:  # pragma nocover
             parser = ETT.XMLParser()
@@ -1945,10 +1898,11 @@ class URDF(URDFType):
             path, _ = os.path.split(file_obj.name)
 
         node = tree.getroot()
+        path = None
         return URDF._from_xml(node, path)
 
     def _validate_transmissions(self):
-        """Raise an exception of any transmissions are invalidly specified.
+        """Raise an exception if any transmissions are invalidly specified.
         Checks for the following:
         - Transmission joints have valid joint names.
         """

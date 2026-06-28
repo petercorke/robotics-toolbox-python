@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class px100(Robot):
+class px100(URDFRobot):
     """
     Class that imports a PX100 URDF model
 
@@ -32,16 +32,8 @@ class px100(Robot):
 
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "interbotix_descriptions/urdf/px100.urdf.xacro"
-        )
-
         super().__init__(
-            links,
-            name=name,
-            manufacturer="Interbotix",
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
+            "trossen_descriptions/urdf/px100.urdf.xacro", manufacturer="Interbotix"
         )
 
         self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])

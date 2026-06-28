@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 from math import pi
 
 
-class Puma560(Robot):
+class Puma560(URDFRobot):
     """
     Class that imports a Puma 560 URDF model
 
@@ -39,18 +39,11 @@ class Puma560(Robot):
 
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "puma560_description/urdf/puma560_robot.urdf.xacro"
-        )
-
         super().__init__(
-            links,
-            name=name,
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
+            "unimation_puma560_description/urdf/puma560_robot.urdf.xacro",
+            manufacturer="Unimation",
         )
 
-        self.manufacturer = "Unimation"
         # self.ee_link = self.ets[9]
 
         # ready pose, arm up

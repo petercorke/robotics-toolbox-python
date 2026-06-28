@@ -16,20 +16,17 @@ from roboticstoolbox.robot.Robot import BaseRobot
 
 class TestBaseRobot(unittest.TestCase):
     def test_init(self):
+        from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 
-        links, name, urdf_string, urdf_filepath = rtb.Robot.URDF_read(
-            "franka_description/robots/panda_arm_hand.urdf.xacro"
-        )
+        links, name, urdf_filepath = URDF_read("panda")
 
         robot = rtb.Robot(
             links,
             name=name,
             manufacturer="Franka Emika",
             gripper_links=links[9],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
         )
-
+        robot._urdf_filepath = str(urdf_filepath) if urdf_filepath else ""
         robot.grippers[0].tool = SE3(0, 0, 0.1034)
 
     def test_init2(self):
@@ -366,7 +363,7 @@ class TestBaseRobot(unittest.TestCase):
 
     def test_nlinks(self):
         panda = rtb.models.Panda()
-        self.assertEqual(panda.nlinks, 12)
+        self.assertEqual(panda.nlinks, 13)
 
     def test_configs(self):
         panda = rtb.models.Panda()

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 from spatialmath import SE3
 
 
-class Panda(Robot):
+class Panda(URDFRobot):
     """
     Class that imports a Panda URDF model
 
@@ -32,18 +32,7 @@ class Panda(Robot):
 
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "franka_description/robots/panda_arm_hand.urdf.xacro"
-        )
-
-        super().__init__(
-            links,
-            name=name,
-            manufacturer="Franka Emika",
-            gripper_links=links[9],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-        )
+        super().__init__("panda", manufacturer="Franka Emika", gripper_link_index=9)
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)
 

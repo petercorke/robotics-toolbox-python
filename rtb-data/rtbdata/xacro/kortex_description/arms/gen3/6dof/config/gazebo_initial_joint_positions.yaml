@@ -1,6 +1,0 @@
-initial_joint_positions: "-J $(arg prefix)joint_1 1.57
-                          -J $(arg prefix)joint_2 -0.35
-                          -J $(arg prefix)joint_3 -2.00
-                          -J $(arg prefix)joint_4 0
-                          -J $(arg prefix)joint_5 -1.00
-                          -J $(arg prefix)joint_6 1.57 "

@@ -12,6 +12,7 @@ from warnings import warn
 from pathlib import PurePosixPath, Path
 from typing import (
     List,
+    TextIO,
     TypeVar,
     Union,
     Dict,
@@ -47,7 +48,6 @@ from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link, Link2
 from roboticstoolbox.robot.ETS import ETS, ETS2
-from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.tools.data import rtb_path_to_datafile
@@ -78,8 +78,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         symbolic: bool = False,
         configs: Union[Dict[str, NDArray], None] = None,
         check_jindex: bool = True,
-        urdf_string: Union[str, None] = None,
-        urdf_filepath: Union[Path, PurePosixPath, None] = None,
     ):
         # Process links
         if isinstance(arg, Robot):
@@ -111,7 +109,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             for i, gripper in enumerate(self.grippers):
                 gripper.tool = arg.grippers[i].tool.copy()
 
-            self._urdf_string = arg.urdf_string
             self._urdf_filepath = arg.urdf_filepath
         else:
             if isinstance(arg, ETS):
@@ -214,120 +211,145 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     # --------- URDF Methods ---------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    @staticmethod
-    def URDF_read(
-        file_path, tld=None, xacro_tld=None
-    ) -> Tuple[List[Link], str, str, Union[Path, PurePosixPath]]:
-        """
-        Read a URDF file as Links
+    # @staticmethod
+    # def URDF_read(
+    #     file_path, tld=None, xacro_tld=None
+    # ) -> Tuple[List[Link], str, str, Union[Path, PurePosixPath]]:
+    #     """
+    #     Read a URDF file as Links
 
-        File should be specified relative to ``RTBDATA/URDF/xacro``
+    #     File should be specified relative to ``RTBDATA/URDF/xacro``
 
-        Parameters
-        ----------
-        file_path
-            File path relative to the xacro folder
-        tld
-            A custom top-level directory which holds the xacro data,
-            defaults to None
-        xacro_tld
-            A custom top-level within the xacro data,
-            defaults to None
+    #     Parameters
+    #     ----------
+    #     file_path
+    #         File path relative to the xacro folder
+    #     tld
+    #         A custom top-level directory which holds the xacro data,
+    #         defaults to None
+    #     xacro_tld
+    #         A custom top-level within the xacro data,
+    #         defaults to None
 
-        Returns
-        -------
-        links
-            a list of links
-        name
-            the name of the robot
-        urdf
-            a string representing the URDF
-        file_path
-            a path to the original file
+    #     Returns
+    #     -------
+    #     links
+    #         a list of links
+    #     name
+    #         the name of the robot
+    #     urdf
+    #         a string representing the URDF
+    #     file_path
+    #         a path to the original file
 
-        Notes
-        -----
-        If ``tld`` is not supplied, filepath pointing to xacro data should
-        be directly under ``RTBDATA/URDF/xacro`` OR under ``./xacro`` relative
-        to the model file calling this method. If ``tld`` is supplied, then
-        ```file_path``` needs to be relative to ``tld``
+    #     Notes
+    #     -----
+    #     If ``tld`` is not supplied, filepath pointing to xacro data should
+    #     be directly under ``RTBDATA/URDF/xacro`` OR under ``./xacro`` relative
+    #     to the model file calling this method. If ``tld`` is supplied, then
+    #     ```file_path``` needs to be relative to ``tld``
 
-        """
+    #     """
 
-        # Get the path to the class that defines the robot
-        if tld is None:
-            base_path = rtb_path_to_datafile("xacro")
-        else:
-            base_path = PurePosixPath(tld)
+    #     # Get the path to the class that defines the robot
+    #     if tld is None:
+    #         base_path = rtb_path_to_datafile("xacro")
+    #     else:
+    #         base_path = PurePosixPath(tld)
 
-        # Add on relative path to get to the URDF or xacro file
-        # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
-        file_path = base_path / PurePosixPath(file_path)
-        _, ext = splitext(file_path)
+    #     # Add on relative path to get to the URDF or xacro file
+    #     # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
+    #     file_path = base_path / PurePosixPath(file_path)
+    #     _, ext = splitext(file_path)
 
-        if ext == ".xacro":
-            # it's a xacro file, preprocess it
-            if xacro_tld is not None:
-                xacro_tld = base_path / PurePosixPath(xacro_tld)
-            urdf_string = xacro.main(file_path, xacro_tld)
-            try:
-                urdf = URDF.loadstr(urdf_string, file_path, base_path)
-            except BaseException as e:  # pragma nocover
-                print("error parsing URDF file", file_path)
-                raise e
-        else:  # pragma nocover
-            urdf_string = open(file_path).read()
-            urdf = URDF.loadstr(urdf_string, file_path, base_path)
+    #     if ext == ".xacro":
+    #         # it's a xacro file, preprocess it
+    #         if xacro_tld is not None:
+    #             xacro_tld = base_path / PurePosixPath(xacro_tld)
+    #         urdf_string = xacro.main(file_path, xacro_tld)
+    #         try:
+    #             urdf = URDF.loadstr(urdf_string, file_path, base_path)
+    #         except BaseException as e:  # pragma nocover
+    #             print("error parsing URDF file", file_path)
+    #             raise e
+    #     else:  # pragma nocover
+    #         urdf_string = open(file_path).read()
+    #         urdf = URDF.loadstr(urdf_string, file_path, base_path)
 
-        if not isinstance(urdf_string, str):  # pragma nocover
-            raise ValueError("Parsing failed, did not get valid URDF string back")
+    #     if not isinstance(urdf_string, str):  # pragma nocover
+    #         raise ValueError("Parsing failed, did not get valid URDF string back")
 
-        return urdf.elinks, urdf.name, urdf_string, file_path
+    #     return urdf.elinks, urdf.name, urdf_string, file_path
+    
+    # def urdf_load(self, file: str|Path|TextIO, manufacturer: str|None = None, model: str|None = None):
+    #     from roboticstoolbox.tools.urdf import URDF
+    #     from xacrodoc import XacroDoc
+    #     from xacrodoc import packages
+
+    #     # Explicitly map package names to their paths (no ROS / package.xml needed)
+    #     import rtbdata
+    #     xacro_root = Path(rtbdata.__file__).parent / "xacro"
+    #     packages.update_package_cache({
+    #         d.name: str(d) for d in xacro_root.iterdir() if d.is_dir()
+    #     })
+
+
+    #     # Compile xacro → URDF string, resolve all mesh file path
+
+    #     if isinstance(file, (str, Path)):
+    #         doc = XacroDoc.from_file(xacro_root / file)
+    #     else:
+    #         doc = XacroDoc.from_string(file.read())
+
+    #     urdf_str = doc.to_urdf_string()
+
+    #     urdf = URDF.loadstr(urdf_str, None)
+
+    #     # links, name, urdf_string, urdf_filepath = self.URDF_read(
+    #     #     "trossen_descriptions/urdf/vx300.urdf.xacro"
+    #     # )
+
+    #     super().__init__(
+    #         urdf.elinks,
+    #         name=urdf.name,
+    #         manufacturer=manufacturer,
+    #         # urdf_string=urdf_string,
+    #         # urdf_filepath=urdf_filepath,
+    #     )
 
     @classmethod
-    def URDF(cls, file_path: str, gripper: Union[int, str, None] = None):
-        """
-        Construct a Robot object from URDF file
+    def URDF(cls, file, gripper=None, manufacturer=None):
+        """Deprecated. Use :class:`~roboticstoolbox.models.URDF.URDFRobot` as a
+        base class, or call ``URDF_read()`` from
+        ``roboticstoolbox.models.URDF.URDFRobot`` and construct ``Robot``
+        directly."""
+        import warnings
 
-        Parameters
-        ----------
-        file_path
-            the path to the URDF
-        gripper
-            index or name of the gripper link(s)
+        warnings.warn(
+            "Robot.URDF() is deprecated. "
+            "Subclass roboticstoolbox.models.URDF.URDFRobot, or call "
+            "URDF_read() from that module and construct Robot directly.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from roboticstoolbox.models.URDF.URDFRobot import URDF_file
 
-        Returns
-        -------
-        If ``gripper`` is specified, links from that link outward are removed
-        from the rigid-body tree and folded into a ``Gripper`` object.
-
-        """
-
-        links, name, urdf_string, urdf_filepath = Robot.URDF_read(file_path)
-
-        gripperLink: Union[Link, None] = None
-
-        if gripper is not None:
-            if isinstance(gripper, int):
-                gripperLink = links[gripper]
-            elif isinstance(gripper, str):
-                for link in links:
-                    if link.name == gripper:
-                        gripperLink = link
-                        break
-                else:  # pragma nocover
-                    raise ValueError(f"no link named {gripper}")
-            else:  # pragma nocover
-                raise TypeError("bad argument passed as gripper")
-
-        # links, name, urdf_string, urdf_filepath = Robot.URDF_read(file_path)
-
+        elinks, name, _ = URDF_file(file)
+        gripper_link = None
+        if isinstance(gripper, int):
+            gripper_link = elinks[gripper]
+        elif isinstance(gripper, str):
+            for link in elinks:
+                if link.name == gripper:
+                    gripper_link = link
+                    break
+            else:
+                raise ValueError(f"no link named '{gripper}'")
         return cls(
-            links,
+            elinks,
             name=name,
-            gripper_links=gripperLink,
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
+            manufacturer=manufacturer or "",
+            gripper_links=gripper_link,
         )
 
     #     # --------------------------------------------------------------------- #
@@ -1901,6 +1923,38 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             return Q[0]
         else:  # pragma nocover
             return Q
+
+
+# ============================================================================= #
+# ================= URDFRobot Class =========================================== #
+# ============================================================================= #
+
+
+# class URDFRobot(Robot):
+#     """A Robot subclass that initialises from a URDF or xacro file.
+
+#     Model classes should subclass this and call ``super().__init__()`` with
+#     the path and manufacturer::
+
+#         class vx300(URDFRobot):
+#             def __init__(self):
+#                 super().__init__(
+#                     "trossen_descriptions/urdf/vx300.urdf.xacro",
+#                     manufacturer="Trossen Robotics",
+#                 )
+#     """
+
+#     def __init__(
+#         self,
+#         urdf_path: "str | Path",
+#         manufacturer: str = "",
+#         gripper_link_index: "int | None" = None,
+#         **kwargs,
+#     ):
+#         elinks, name = self.URDF_file(urdf_path)
+#         if gripper_link_index is not None:
+#             kwargs["gripper_links"] = elinks[gripper_link_index]
+#         super().__init__(elinks, name=name, manufacturer=manufacturer, **kwargs)
 
 
 # ============================================================================= #

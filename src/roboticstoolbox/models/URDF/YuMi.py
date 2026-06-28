@@ -3,6 +3,7 @@
 from roboticstoolbox.robot.Link import Link
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 import spatialmath as sm
 
 
@@ -34,9 +35,7 @@ class YuMi(Robot):
 
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "yumi_description/urdf/yumi.urdf"
-        )
+        links, name, urdf_filepath = URDF_read("yumi")
 
         # We wish to add an intermediate link between gripper_r_base and
         # @gripper_r_finger_r/l
@@ -70,9 +69,8 @@ class YuMi(Robot):
             name=name,
             manufacturer="ABB",
             gripper_links=[r_gripper, l_gripper],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
         )
+        self._urdf_filepath = str(urdf_filepath) if urdf_filepath is not None else ""
 
         # Set the default tool transform for the end-effectors
         self.grippers[0].tool = sm.SE3.Tz(0.13)

@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class LBR(Robot):
+class LBR(URDFRobot):
     """
-    Class that imports a LBR URDF model
+    Class that imports a Kuka LBR iiwa URDF model
 
-    ``LBR()`` is a class which imports a Franka-Emika LBR robot definition
-    from a URDF file.  The model describes its kinematic and graphical
-    characteristics.
+    ``LBR()`` is a class which imports a Kuka LBR iiwa 14 R820 robot definition
+    from a URDF file.  The robot has a payload of 14 kg, and a reach of 820 mm.
+
+    The model describes its kinematic and graphical characteristics.
 
     .. runblock:: pycon
 
@@ -31,17 +32,9 @@ class LBR(Robot):
 
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro"
-        )
-
         super().__init__(
-            links,
-            name=name,
+            "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro",
             manufacturer="Kuka",
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
-            # gripper_links=elinks[9]
         )
 
         # self.qdlim = np.array([
