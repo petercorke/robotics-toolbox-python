@@ -6,7 +6,7 @@
 # import numpy as np
 # from spatialmath import SE3
 import roboticstoolbox as rp
-from roboticstoolbox.robot.Link import Link, _listen_dyn
+from roboticstoolbox.robot.Link import Link, _listen_dyn, _copy_shapes
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
 from spatialmath import SE3
@@ -399,8 +399,8 @@ class DHLink(Link):
             "Tc": deepcopy(self.Tc),
             "G": deepcopy(self.G),
             "qlim": deepcopy(self.qlim),
-            "geometry": [shape.copy() for shape in self._geometry],
-            "collision": [shape.copy() for shape in self._collision],
+            "geometry": _copy_shapes(self._geometry, self.name),
+            "collision": _copy_shapes(self._collision, self.name),
             "d": deepcopy(self.d),
             "alpha": deepcopy(self.alpha),
             "theta": deepcopy(self.theta),

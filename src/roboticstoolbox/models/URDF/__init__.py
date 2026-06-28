@@ -14,7 +14,7 @@ from roboticstoolbox.models.URDF.vx300s import vx300s
 from roboticstoolbox.models.URDF.wx200 import wx200
 from roboticstoolbox.models.URDF.wx250 import wx250
 from roboticstoolbox.models.URDF.wx250s import wx250s
-from roboticstoolbox.models.URDF.Mico import Mico
+from roboticstoolbox.models.URDF.Jaco import Jaco
 from roboticstoolbox.models.URDF.PR2 import PR2
 from roboticstoolbox.models.URDF.LBR import LBR
 from roboticstoolbox.models.URDF.KinovaGen3 import KinovaGen3
@@ -41,7 +41,7 @@ __all__ = [
     "wx200",
     "wx250",
     "wx250s",
-    "Mico",
+    "Jaco",
     "PR2",
     "LBR",
     "KinovaGen3",

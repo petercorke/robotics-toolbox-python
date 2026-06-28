@@ -32,7 +32,11 @@ class Panda(URDFRobot):
 
     def __init__(self):
 
-        super().__init__("panda", manufacturer="Franka Emika", gripper_link_index=9)
+        super().__init__(
+            "qut_frankie_description/robots/panda_arm_hand.urdf.xacro",
+            manufacturer="Franka Emika",
+            gripper_link_index=9,
+        )
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)
 

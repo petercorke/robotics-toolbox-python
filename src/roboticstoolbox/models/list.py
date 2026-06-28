@@ -73,8 +73,9 @@ def list(keywords=None, dof=None, type=None, border="thin"):
                     # we found a BaseRobot subclass, instantiate it
                     try:
                         robot = cls()
-                    except TypeError:
+                    except Exception:
                         print(f"failed to load {cls}")
+                        continue
                     try:
                         structure = robot.structure
                     except Exception:  # pragma nocover

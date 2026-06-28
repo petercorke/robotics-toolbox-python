@@ -8,7 +8,7 @@ import unittest
 import numpy.testing as nt
 
 
-@unittest.skip("BUG in .models()")
+#@unittest.skip("BUG in .models()")
 class TestModels(unittest.TestCase):
     def test_list(self):
         rp.models.list()
@@ -97,8 +97,8 @@ class TestModels(unittest.TestCase):
         r.qr
         r.qz
 
-    def test_Mico(self):
-        r = rp.models.Mico()
+    def test_Jaco(self):
+        r = rp.models.Jaco()
         r.qr
         r.qz
 

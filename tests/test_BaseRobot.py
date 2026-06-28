@@ -363,7 +363,7 @@ class TestBaseRobot(unittest.TestCase):
 
     def test_nlinks(self):
         panda = rtb.models.Panda()
-        self.assertEqual(panda.nlinks, 13)
+        self.assertEqual(panda.nlinks, 12)
 
     def test_configs(self):
         panda = rtb.models.Panda()

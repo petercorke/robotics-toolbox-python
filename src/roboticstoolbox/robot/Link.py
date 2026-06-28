@@ -23,6 +23,31 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 # ETType = TypeVar("ETType", bound=BaseET)
 
 
+def _copy_shapes(shapes, link_name):
+    """Copy a list of coal/geometry shape objects, warning and skipping any that
+    do not support deepcopy (coal CollisionObject instances cannot be pickled)."""
+    import warnings
+    from copy import deepcopy
+
+    result = []
+    warned = False
+    for shape in shapes:
+        try:
+            result.append(deepcopy(shape))
+        except RuntimeError:
+            if not warned:
+                warnings.warn(
+                    f"Collision/geometry shape on link '{link_name}' could not be "
+                    "copied (coal objects do not support deepcopy). "
+                    "Shapes will be absent from the copied link. "
+                    "Reload the robot from URDF if collision checking is needed.",
+                    UserWarning,
+                    stacklevel=5,
+                )
+                warned = True
+    return result
+
+
 def _listen_dyn(func):
     """
     @_listen_dyn
@@ -432,8 +457,8 @@ class BaseLink(SceneNode, ABC):
         qlim = deepcopy(self.qlim)
         qdlim = deepcopy(self.qdlim)
         tlim = deepcopy(self.tlim)
-        geometry = [deepcopy(shape) for shape in self._geometry]
-        collision = [deepcopy(shape) for shape in self._collision]
+        geometry = _copy_shapes(self._geometry, self.name)
+        collision = _copy_shapes(self._collision, self.name)
 
         cls = self.__class__
         result = cls(
