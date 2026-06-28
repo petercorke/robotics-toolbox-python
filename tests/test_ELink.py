@@ -11,7 +11,7 @@ import spatialgeometry as gm
 import unittest
 import spatialmath as sm
 from roboticstoolbox.robot.Link import BaseLink
-from tests.marks import skip_no_pybullet
+from tests import skip_no_pybullet
 
 
 class TestLink(unittest.TestCase):
@@ -236,8 +236,8 @@ qlim  =      -2.8 to      2.8""",  # noqa
         s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
         link = p.links[3]
-        c0 = link.collided(s0)
-        c1 = link.collided(s1)
+        c0 = link.iscollided(s0)
+        c1 = link.iscollided(s1)
 
         self.assertTrue(c0)
         self.assertFalse(c1)

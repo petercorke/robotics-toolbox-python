@@ -172,6 +172,9 @@ archs = ["AMD64"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+filterwarnings = [
+    "ignore:FigureCanvasAgg is non-interactive:UserWarning",
+]
 
 [tool.coverage.run]
 omit = ["src/roboticstoolbox/examples/*", "test_*.py"]

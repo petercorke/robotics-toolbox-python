@@ -1,3 +1,4 @@
+.PHONY: test test-notebooks coverage docs docupdate dist clean help
 .FORCE:
 
 BLUE=\033[0;34m

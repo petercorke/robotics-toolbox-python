@@ -863,7 +863,7 @@ class PlannerBase(ABC):
             vmax = max(v[np.isfinite(v)])
 
             # create a copy of greyscale color map
-            c_map = copy.copy(mpl.cm.get_cmap(cmap))
+            c_map = copy.copy(mpl.colormaps.get_cmap(cmap))
             # c_map.set_bad(color=(1,0,0,1))  # nan and inf are red
 
             # change all inf to large value, so they are not 'bad' ie. red

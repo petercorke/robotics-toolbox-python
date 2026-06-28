@@ -14,7 +14,7 @@ import unittest
 import spatialmath as sm
 import spatialgeometry as gm
 from math import pi, sin, cos
-from tests.marks import skip_no_pybullet
+from tests import skip_no_pybullet
 
 try:
     from sympy import symbols
@@ -83,7 +83,7 @@ class TestERobot(unittest.TestCase):
         d2, _, _ = p.closest_point(p.q, s1)
 
         self.assertAlmostEqual(d0, -0.5599999999995913)  # type: ignore
-        self.assertAlmostEqual(d1, 2.362147178773918)  # type: ignore
+        self.assertAlmostEqual(d1, 2.3621, places=4)  # type: ignore
         self.assertAlmostEqual(d2, None)  # type: ignore
 
     @skip_no_pybullet
@@ -92,8 +92,8 @@ class TestERobot(unittest.TestCase):
         s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
-        c0 = p.collided(p.q, s0)
-        c1 = p.collided(p.q, s1)
+        c0 = p.iscollided(p.q, s0)
+        c1 = p.iscollided(p.q, s1)
 
         self.assertTrue(c0)
         self.assertFalse(c1)

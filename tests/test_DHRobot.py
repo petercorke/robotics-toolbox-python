@@ -9,6 +9,7 @@ import roboticstoolbox as rp
 import spatialmath as sm
 import unittest
 import math
+import pytest
 
 
 class TestDHRobot(unittest.TestCase):
@@ -1540,7 +1541,8 @@ class TestDHRobot(unittest.TestCase):
         panda.ets()
 
     def test_SerialLink(self):
-        rp.SerialLink([rp.RevoluteDH()])
+        with pytest.warns(DeprecationWarning, match="SerialLink is deprecated"):
+            rp.SerialLink([rp.RevoluteDH()])
 
 
 if __name__ == "__main__":

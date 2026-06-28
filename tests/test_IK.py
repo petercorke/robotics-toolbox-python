@@ -10,7 +10,7 @@ import numpy.testing as nt
 
 # import sympy
 import pytest
-from tests.marks import skip_no_qp
+from tests import skip_no_qp
 
 test_tol = 1e-5
 
