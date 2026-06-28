@@ -70,16 +70,7 @@ repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 swift = ["swift-sim>=1.0.0", "websockets<11"]
 
-# pybullet has no arm64 wheel; on Apple Silicon install manually:
-#   CC=/usr/bin/clang CXX=/usr/bin/clang++ \
-#   CFLAGS="-Wno-error -Wno-implicit-function-declaration" \
-#   pip install pybullet
-bullet = ["pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'"]
-
-# Backward-compatible alias for previous extra name.
-collision = [
-    "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
-]
+collision = ["coal", "trimesh"]
 
 qp = ["qpsolvers", "quadprog"]
 
@@ -88,7 +79,8 @@ all = [
     "websockets<11",
     "qpsolvers",
     "quadprog",
-    "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
+    "coal",
+    "trimesh",
 ]
 
 dev = [
