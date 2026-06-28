@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 from math import pi
 
 
-class UR5(Robot):
+class UR5(URDFRobot):
     """
     Class that imports a UR5 URDF model
 
@@ -28,13 +28,9 @@ class UR5(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    _urdf_path = "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro"
-    _manufacturer = "Universal Robotics"
-    _gripper_link_index = 7
-
     def __init__(self):
 
-        super().__init__()
+        super().__init__("ur5", manufacturer="Universal Robotics", gripper_link_index=7)
 
         # for link in links:
         #     print(link)

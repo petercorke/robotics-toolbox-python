@@ -5,6 +5,7 @@ from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 from spatialmath import SE3
 
 
@@ -35,11 +36,11 @@ class FrankieOmni(Robot):
 
     def __init__(self):
 
-        links_base, _, urdf_string, urdf_filepath = self.URDF_read(
+        links_base, _, urdf_filepath = URDF_read(
             "clearpath_ridgeback_description/urdf/ridgeback.urdf.xacro"
         )
 
-        links_panda, _, _, _ = self.URDF_read(
+        links_panda, _, _ = URDF_read(
             "qut_frankie_description/robots/panda_arm_hand.urdf.xacro"
         )
 
@@ -55,9 +56,8 @@ class FrankieOmni(Robot):
             name="FrankieOmni",
             manufacturer="Custom",
             gripper_links=links_all[28],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
         )
+        self._urdf_filepath = str(urdf_filepath) if urdf_filepath is not None else ""
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)
 

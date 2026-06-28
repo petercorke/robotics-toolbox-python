@@ -48,7 +48,6 @@ from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link, Link2
 from roboticstoolbox.robot.ETS import ETS, ETS2
-from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.tools.data import rtb_path_to_datafile
@@ -79,8 +78,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         symbolic: bool = False,
         configs: Union[Dict[str, NDArray], None] = None,
         check_jindex: bool = True,
-        urdf_string: Union[str, None] = None,
-        urdf_filepath: Union[Path, PurePosixPath, None] = None,
     ):
         # Process links
         if isinstance(arg, Robot):
@@ -112,7 +109,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             for i, gripper in enumerate(self.grippers):
                 gripper.tool = arg.grippers[i].tool.copy()
 
-            self._urdf_string = arg.urdf_string
             self._urdf_filepath = arg.urdf_filepath
         else:
             if isinstance(arg, ETS):
@@ -321,52 +317,40 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #         # urdf_filepath=urdf_filepath,
     #     )
 
-    # @classmethod
-    # def URDF(cls, file_path: str, gripper: Union[int, str, None] = None, 
-    #          manufacturer: str|None = None, model: str|None = None) -> "Robot":
-    #     """
-    #     Construct a Robot object from URDF file
+    @classmethod
+    def URDF(cls, file, gripper=None, manufacturer=None):
+        """Deprecated. Use :class:`~roboticstoolbox.models.URDF.URDFRobot` as a
+        base class, or call ``URDF_read()`` from
+        ``roboticstoolbox.models.URDF.URDFRobot`` and construct ``Robot``
+        directly."""
+        import warnings
 
-    #     Parameters
-    #     ----------
-    #     file_path
-    #         the path to the URDF
-    #     gripper
-    #         index or name of the gripper link(s)
+        warnings.warn(
+            "Robot.URDF() is deprecated. "
+            "Subclass roboticstoolbox.models.URDF.URDFRobot, or call "
+            "URDF_read() from that module and construct Robot directly.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from roboticstoolbox.models.URDF.URDFRobot import URDF_file
 
-    #     Returns
-    #     -------
-    #     If ``gripper`` is specified, links from that link outward are removed
-    #     from the rigid-body tree and folded into a ``Gripper`` object.
-
-    #     """
-
-    #     links, name, urdf_string, urdf_filepath = Robot.URDF_read(file_path)
-
-    #     gripperLink: Union[Link, None] = None
-
-    #     if gripper is not None:
-    #         if isinstance(gripper, int):
-    #             gripperLink = links[gripper]
-    #         elif isinstance(gripper, str):
-    #             for link in links:
-    #                 if link.name == gripper:
-    #                     gripperLink = link
-    #                     break
-    #             else:  # pragma nocover
-    #                 raise ValueError(f"no link named {gripper}")
-    #         else:  # pragma nocover
-    #             raise TypeError("bad argument passed as gripper")
-
-    #     # links, name, urdf_string, urdf_filepath = Robot.URDF_read(file_path)
-
-    #     return cls(
-    #         links,
-    #         name=name,
-    #         gripper_links=gripperLink,
-    #         urdf_string=urdf_string,
-    #         urdf_filepath=urdf_filepath,
-    #     )
+        elinks, name, _ = URDF_file(file)
+        gripper_link = None
+        if isinstance(gripper, int):
+            gripper_link = elinks[gripper]
+        elif isinstance(gripper, str):
+            for link in elinks:
+                if link.name == gripper:
+                    gripper_link = link
+                    break
+            else:
+                raise ValueError(f"no link named '{gripper}'")
+        return cls(
+            elinks,
+            name=name,
+            manufacturer=manufacturer or "",
+            gripper_links=gripper_link,
+        )
 
     #     # --------------------------------------------------------------------- #
     #     # --------- Utility Methods ------------------------------------------- #

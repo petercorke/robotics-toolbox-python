@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.RobotURDF import URDFRobot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 from spatialmath import SE3
 
 
@@ -32,19 +32,19 @@ class Frankie(URDFRobot):
 
     def __init__(self):
         super().__init__(
-            "qut_frankie_description/robots/frankie_arm_hand.urdf.xacro",
+            "panda",
             manufacturer="Franka Emika",
-            gripper_link_index=12,
+            gripper_link_index=9,
         )
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)
 
         self.qdlim = np.array(
-            [4.0, 4.0, 2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0]
+            [2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0]
         )
 
-        self.qr = np.array([0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        self.qz = np.zeros(9)
+        self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        self.qz = np.zeros(7)
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)

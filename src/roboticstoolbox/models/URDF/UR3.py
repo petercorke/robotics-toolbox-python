@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class UR3(Robot):
+class UR3(URDFRobot):
     """
     Class that imports a UR3 URDF model
 
@@ -27,12 +27,9 @@ class UR3(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    _urdf_path = "ur_description/urdf/ur3_joint_limited_robot.urdf.xacro"
-    _manufacturer = "Universal Robotics"
-
     def __init__(self):
 
-        super().__init__()
+        super().__init__("ur3", manufacturer="Universal Robotics")
 
         self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
         self.qz = np.zeros(6)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.RobotURDF import URDFRobot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 from math import pi
 
 

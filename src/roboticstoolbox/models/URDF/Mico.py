@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class Mico(Robot):
+class Mico(URDFRobot):
     """
     Class that imports a Mico URDF model
 
@@ -27,13 +27,13 @@ class Mico(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    _urdf_path = "kinova_description/urdf/j2n4s300_standalone.xacro"
-    _manufacturer = "Kinova"
-    _gripper_link_index = 8
-
     def __init__(self):
 
-        super().__init__()
+        super().__init__(
+            "kinova_description/urdf/j2n4s300_standalone.xacro",
+            manufacturer="Kinova",
+            gripper_link_index=8,
+        )
 
         self.qr = np.array([0, 45, 60, 0]) * np.pi / 180
         self.qz = np.zeros(4)

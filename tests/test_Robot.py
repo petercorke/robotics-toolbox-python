@@ -616,16 +616,20 @@ class TestRobot(unittest.TestCase):
         self.assertTrue(len(rdict) > len(rdict2))
 
     def test_URDF(self):
-        r = rtb.Robot.URDF("fetch_description/robots/fetch.urdf", gripper=6)
-
+        with self.assertWarns(DeprecationWarning):
+            r = rtb.Robot.URDF(
+                "unimation_puma560_description/urdf/puma560_robot.urdf.xacro",
+                gripper=6,
+            )
         self.assertEqual(r.n, 5)
 
     def test_URDF2(self):
-        r = rtb.Robot.URDF(
-            "fetch_description/robots/fetch.urdf", gripper="forearm_roll_link"
-        )
-
-        self.assertEqual(r.n, 7)
+        with self.assertWarns(DeprecationWarning):
+            r = rtb.Robot.URDF(
+                "unimation_puma560_description/urdf/puma560_robot.urdf.xacro",
+                gripper="link6",
+            )
+        self.assertEqual(r.n, 4)
 
     def test_showgraph(self):
         r = rtb.models.Panda()
@@ -646,7 +650,16 @@ class TestRobot(unittest.TestCase):
             pass
 
     def test_dotfile2(self):
-        r = rtb.models.Frankie()
+        # branched robot built dynamically — two end-effectors sharing a common base
+        from roboticstoolbox.robot.Link import Link
+        from roboticstoolbox.robot.ET import ET
+        from roboticstoolbox.robot.ETS import ETS
+
+        L0 = Link(name="base")
+        L1 = Link(ETS(ET.Rz()), name="joint1", parent=L0)
+        L2 = Link(ETS(ET.Rz()), name="joint2", parent=L1)
+        L3 = Link(ETS(ET.Rz()), name="branch_a", parent=L1)
+        r = rtb.Robot([L0, L1, L2, L3], name="branched")
 
         r.dotfile("test.dot", jtype=True, etsbox=True)
         try:

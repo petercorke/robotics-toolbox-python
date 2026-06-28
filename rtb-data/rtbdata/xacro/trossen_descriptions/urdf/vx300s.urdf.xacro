@@ -15,7 +15,7 @@
   </xacro:if>
 
   <material name="interbotix_black">
-    <texture filename="package://interbotix_descriptions/meshes/interbotix_black.png"/>
+    <texture filename="package://trossen_descriptions/meshes/interbotix_black.png"/>
   </material>
 
   <xacro:if value="$(arg use_world_frame)">
@@ -30,14 +30,14 @@
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-1-Base.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-1-Base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-1-Base.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-1-Base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -69,14 +69,14 @@
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -108,14 +108,14 @@
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-3-UA.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-3-UA.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-3-UA.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-3-UA.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -147,14 +147,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-4-UF.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-4-UF.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-4-UF.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-4-UF.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -186,14 +186,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-5-LF.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-5-LF.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-5-LF.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-5-LF.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -225,14 +225,14 @@
     <visual>
       <origin rpy="0 ${pi} ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-6-Wrist.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-6-Wrist.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 ${pi} ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-6-Wrist.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-6-Wrist.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -264,14 +264,14 @@
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="-0.02 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-7-Gripper.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-7-Gripper.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 ${pi/2}" xyz="-0.02 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-7-Gripper.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-7-Gripper.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -317,14 +317,14 @@
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="-0.0685 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-8-Gripper-Prop.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-8-Gripper-Prop.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 ${pi/2}" xyz="-0.0685 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-8-Gripper-Prop.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-8-Gripper-Prop.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -349,14 +349,14 @@
       <visual>
         <origin rpy="0 0 ${pi/2}" xyz="-0.063 0 0"/>
         <geometry>
-          <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-9-Gripper-Bar.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-9-Gripper-Bar.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="interbotix_black"/>
       </visual>
       <collision>
         <origin rpy="0 0 ${pi/2}" xyz="-0.063 0 0"/>
         <geometry>
-          <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-9-Gripper-Bar.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-9-Gripper-Bar.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
       <inertial>
@@ -406,14 +406,14 @@
         <visual>
           <origin rpy="${pi/2} ${-pi} ${pi/2}" xyz="-0.0404 -0.0575 0"/>
           <geometry>
-            <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-10-Finger.stl" scale="0.001 0.001 0.001"/>
+            <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-10-Finger.stl" scale="0.001 0.001 0.001"/>
           </geometry>
           <material name="interbotix_black"/>
         </visual>
         <collision>
           <origin rpy="${pi/2} ${-pi} ${pi/2}" xyz="-0.0404 -0.0575 0"/>
           <geometry>
-            <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-10-Finger.stl" scale="0.001 0.001 0.001"/>
+            <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-10-Finger.stl" scale="0.001 0.001 0.001"/>
           </geometry>
         </collision>
         <inertial>
@@ -448,14 +448,14 @@
         <visual>
           <origin rpy="${-pi/2} ${pi} ${-pi/2}" xyz="-0.0404 0.0575 0 "/>
           <geometry>
-            <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-10-Finger.stl" scale="0.001 0.001 0.001"/>
+            <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-10-Finger.stl" scale="0.001 0.001 0.001"/>
           </geometry>
           <material name="interbotix_black"/>
         </visual>
         <collision>
           <origin rpy="${-pi/2} ${pi} ${-pi/2}" xyz="-0.0404 0.0575 0 "/>
           <geometry>
-            <mesh filename="package://interbotix_descriptions/meshes/meshes_vx300s/VXSA-300-M-10-Finger.stl" scale="0.001 0.001 0.001"/>
+            <mesh filename="package://trossen_descriptions/meshes/meshes_vx300s/VXSA-300-M-10-Finger.stl" scale="0.001 0.001 0.001"/>
           </geometry>
         </collision>
         <inertial>

@@ -17,7 +17,7 @@
   <link name="link1">
     <visual>
       <geometry>
-        <mesh filename="package://puma560_description/meshes/puma_link1.stl" scale="0.0254 0.0254 0.0254"/>
+        <mesh filename="package://unimation_puma560_description/meshes/puma_link1.stl" scale="0.0254 0.0254 0.0254"/>
       </geometry>
       <origin rpy="0 0 1.570796325"/>
       <material name="green"/>
@@ -26,7 +26,7 @@
   <link name="link2">
     <visual>
       <geometry>
-        <mesh filename="package://puma560_description/meshes/puma_link2.stl" scale="0.0254 0.0254 0.0254"/>
+        <mesh filename="package://unimation_puma560_description/meshes/puma_link2.stl" scale="0.0254 0.0254 0.0254"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 -0.1"/>
       <material name="red"/>
@@ -43,7 +43,7 @@
   <link name="link3">
     <visual>
       <geometry>
-        <mesh filename="package://puma560_description/meshes/puma_link3.stl" scale="0.0254 0.0254 0.0254"/>
+        <mesh filename="package://unimation_puma560_description/meshes/puma_link3.stl" scale="0.0254 0.0254 0.0254"/>
       </geometry>
       <origin xyz="0 0 0.1936"/>
       <material name="blue"/>
@@ -60,7 +60,7 @@
   <link name="link4">
     <visual>
       <geometry>
-        <mesh filename="package://puma560_description/meshes/puma_link4.stl" scale="0.0254 0.0254 0.0254"/>
+        <mesh filename="package://unimation_puma560_description/meshes/puma_link4.stl" scale="0.0254 0.0254 0.0254"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="green"/>
@@ -77,7 +77,7 @@
   <link name="link5">
     <visual>
       <geometry>
-        <mesh filename="package://puma560_description/meshes/puma_link5.stl" scale="0.0254 0.0254 0.0254"/>
+        <mesh filename="package://unimation_puma560_description/meshes/puma_link5.stl" scale="0.0254 0.0254 0.0254"/>
       </geometry>
       <origin rpy="0 0 1.570796325" xyz="0 0 0.3621"/>
       <material name="red"/>
@@ -93,7 +93,7 @@
   <link name="link6">
     <visual>
       <geometry>
-        <mesh filename="package://puma560_description/meshes/puma_link6.stl" scale="0.0254 0.0254 0.0254"/>
+        <mesh filename="package://unimation_puma560_description/meshes/puma_link6.stl" scale="0.0254 0.0254 0.0254"/>
       </geometry>
       <origin rpy="3.14159265 0 1.570796325" xyz="0 0 0"/>
       <material name="green"/>
@@ -109,7 +109,7 @@
   <link name="link7">
     <visual>
       <geometry>
-        <mesh filename="package://puma560_description/meshes/puma_link7.stl" scale="0.0254 0.0254 0.0254"/>
+        <mesh filename="package://unimation_puma560_description/meshes/puma_link7.stl" scale="0.0254 0.0254 0.0254"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 -0.010"/>
       <material name="blue"/>

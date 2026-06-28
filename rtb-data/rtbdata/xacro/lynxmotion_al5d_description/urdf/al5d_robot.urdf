@@ -10,7 +10,7 @@
   <link name="base">
     <visual>
       <geometry>
-        <mesh filename="package://al5d_description/meshes/base.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://lynxmotion_al5d_description/meshes/base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 0"/>
       <material name="black"/>
@@ -24,7 +24,7 @@
   <link name="link1">
     <visual>
       <geometry>
-        <mesh filename="package://al5d_description/meshes/link1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://lynxmotion_al5d_description/meshes/link1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="black"/>
@@ -38,7 +38,7 @@
   <link name="link2">
     <visual>
       <geometry>
-        <mesh filename="package://al5d_description/meshes/link2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://lynxmotion_al5d_description/meshes/link2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin xyz="0 0 0"/>
       <material name="gray"/>
@@ -52,7 +52,7 @@
   <link name="link3">
     <visual>
       <geometry>
-        <mesh filename="package://al5d_description/meshes/link3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://lynxmotion_al5d_description/meshes/link3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -0.0427" xyz="0 0 0"/>
       <material name="gray"/>
@@ -66,7 +66,7 @@
   <link name="link4">
     <visual>
       <geometry>
-        <mesh filename="package://al5d_description/meshes/link4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://lynxmotion_al5d_description/meshes/link4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 1.528096327" xyz="0 0 0"/>
       <material name="black"/>

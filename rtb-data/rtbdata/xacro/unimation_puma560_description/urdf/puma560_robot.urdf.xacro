@@ -2,10 +2,10 @@
 <robot name="Puma560" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="puma560_link_geometry" params="link_num">
-    <mesh filename="package://puma560_description/meshes/puma560_link${link_num}.dae" scale="1.0 1.0 1.0"/>
+    <mesh filename="package://unimation_puma560_description/meshes/puma560_link${link_num}.dae" scale="1.0 1.0 1.0"/>
   </xacro:macro>
   <xacro:macro name="puma560_link_collision" params="link_num">
-    <mesh filename="package://puma560_description/meshes/puma560_collision${link_num}.dae" scale="1.0 1.0 1.0"/>
+    <mesh filename="package://unimation_puma560_description/meshes/puma560_collision${link_num}.dae" scale="1.0 1.0 1.0"/>
   </xacro:macro>
 
   <xacro:property name="M_PI" value="3.14159265"/>

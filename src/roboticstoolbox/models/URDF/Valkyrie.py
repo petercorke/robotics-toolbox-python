@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot, Link
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 
 
 class Valkyrie(Robot):
@@ -34,9 +36,7 @@ class Valkyrie(Robot):
         if not variant in "ABCD":
             raise ValueError("variant must be in the range A-D")
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            f"val_description/model/robots/valkyrie_{variant}.urdf"
-        )
+        links, name, urdf_filepath = URDF_read("valkyrie")
 
         # We wish to add an intermediate link between gripper_r_base and
         # @gripper_r_finger_r/l
@@ -69,9 +69,8 @@ class Valkyrie(Robot):
             name=name,
             manufacturer="NASA",
             # gripper_links=[r_gripper, l_gripper],
-            urdf_string=urdf_string,
-            urdf_filepath=urdf_filepath,
         )
+        self._urdf_filepath = str(urdf_filepath) if urdf_filepath is not None else ""
 
         # self.addconfiguration_attr("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
         # self.addconfiguration_attr("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))

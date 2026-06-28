@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class LBR(Robot):
+class LBR(URDFRobot):
     """
     Class that imports a Kuka LBR iiwa URDF model
 
@@ -30,12 +30,12 @@ class LBR(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    _urdf_path = "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro"
-    _manufacturer = "Kuka"
-
     def __init__(self):
 
-        super().__init__()
+        super().__init__(
+            "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro",
+            manufacturer="Kuka",
+        )
 
         # self.qdlim = np.array([
         #     2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])

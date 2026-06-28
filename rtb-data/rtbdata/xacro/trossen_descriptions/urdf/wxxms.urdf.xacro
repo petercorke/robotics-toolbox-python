@@ -8,7 +8,7 @@
   <xacro:property name="urdf_loc" value="$(arg external_urdf_loc)"/>
 
   <material name="interbotix_black">
-    <texture filename="package://interbotix_descriptions/meshes/interbotix_black.png"/>
+    <texture filename="package://trossen_descriptions/meshes/interbotix_black.png"/>
   </material>
 
   <xacro:if value="$(arg use_world_frame)">
@@ -23,14 +23,14 @@
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_wxxms/WXT-XMS-M-1-Base.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_wxxms/WXT-XMS-M-1-Base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_wxxms/WXT-XMS-M-1-Base.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_wxxms/WXT-XMS-M-1-Base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -47,14 +47,14 @@
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_wxxms/WXT-XMS-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_wxxms/WXT-XMS-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_wxxms/WXT-XMS-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_wxxms/WXT-XMS-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -71,14 +71,14 @@
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.1181875"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_wxxms/WXT-XMS-M-3-Top.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_wxxms/WXT-XMS-M-3-Top.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="interbotix_black"/>
     </visual>
     <collision>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.1181875"/>
       <geometry>
-        <mesh filename="package://interbotix_descriptions/meshes/meshes_wxxms/WXT-XMS-M-3-Top.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://trossen_descriptions/meshes/meshes_wxxms/WXT-XMS-M-3-Top.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>

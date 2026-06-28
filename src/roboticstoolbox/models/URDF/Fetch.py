@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.RobotURDF import URDFRobot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 # from spatialmath import SE3
 
@@ -31,7 +31,7 @@ class Fetch(URDFRobot):
 
     def __init__(self):
         super().__init__(
-            "fetch_description/robots/fetch.urdf",
+            "fetch",
             manufacturer="Fetch",
             gripper_link_index=11,
         )

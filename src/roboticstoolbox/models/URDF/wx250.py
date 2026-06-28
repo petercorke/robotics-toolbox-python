@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
-class wx250(Robot):
+class wx250(URDFRobot):
     """
     Class that imports a WX250 URDF model
 
@@ -30,12 +30,11 @@ class wx250(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    _urdf_path = "interbotix_descriptions/urdf/wx250.urdf.xacro"
-    _manufacturer = "Interbotix"
-
     def __init__(self):
 
-        super().__init__()
+        super().__init__(
+            "trossen_descriptions/urdf/wx250.urdf.xacro", manufacturer="Interbotix"
+        )
 
         self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4, 0])
         self.qz = np.zeros(8)
