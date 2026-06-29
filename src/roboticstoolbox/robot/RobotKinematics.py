@@ -7,8 +7,7 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.Gripper import Gripper
 from spatialmath import SE3
-from typing import Union, Tuple, overload
-from typing_extensions import Literal as L
+from typing import Literal as L, overload
 
 
 class RobotKinematicsMixin:
@@ -28,13 +27,19 @@ class RobotKinematicsMixin:
     def fkine(
         self: KinematicsProtocol,
         q: ArrayLike,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        tool: NDArray | SE3 | None = None,
         include_base: bool = True,
     ) -> SE3:
         """
         Forward kinematics
+
+        :param q: Joint coordinates
+        :param end: end-effector or gripper to compute forward kinematics to
+        :param start: the link to compute forward kinematics from
+        :param tool: tool transform, optional
+        :returns: The transformation matrix representing the pose of the end-effector
 
         ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at
         joint configuration ``q``.
@@ -42,22 +47,6 @@ class RobotKinematicsMixin:
         **Trajectory operation**:
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
-
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        end
-            end-effector or gripper to compute forward kinematics to
-        start
-            the link to compute forward kinematics from
-        tool
-            tool transform, optional
-
-        Returns
-        -------
-            The transformation matrix representing the pose of the
-            end-effector
 
         Examples
         --------
@@ -69,8 +58,8 @@ class RobotKinematicsMixin:
         >>> panda = rtb.models.Panda()
         >>> panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - For a robot with a single end-effector there is no need to
             specify ``end``
         - For a robot with multiple end-effectors, the ``end`` must
@@ -80,8 +69,8 @@ class RobotKinematicsMixin:
         - A tool transform, if provided, is incorporated into the result.
         - Works from the end-effector link to the base
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -99,12 +88,20 @@ class RobotKinematicsMixin:
     def jacob0(
         self: KinematicsProtocol,
         q: ArrayLike,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
         Manipulator geometric Jacobian in the ``start`` frame
+
+        :param q: Joint coordinate vector
+        :param end: the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the end-effector if only one is present
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :returns: Manipulator Jacobian in the ``start`` frame
 
         ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
         joint  velocity to end-effector spatial velocity expressed in the
@@ -112,24 +109,6 @@ class RobotKinematicsMixin:
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-
-        Parameters
-        ----------
-        q
-            Joint coordinate vector
-        end
-            the particular link or gripper whose velocity the Jacobian
-            describes, defaults to the end-effector if only one is present
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        J0
-            Manipulator Jacobian in the ``start`` frame
 
         Examples
         --------
@@ -141,15 +120,15 @@ class RobotKinematicsMixin:
         >>> puma = rtb.models.Puma560()
         >>> puma.jacob0([0, 0, 0, 0, 0, 0])
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
@@ -160,12 +139,20 @@ class RobotKinematicsMixin:
     def jacobe(
         self: KinematicsProtocol,
         q: ArrayLike,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
         Manipulator geometric Jacobian in the end-effector frame
+
+        :param q: Joint coordinate vector
+        :param end: the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the end-effector if only one is present
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :returns: Manipulator Jacobian in the ``end`` frame
 
         ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
         joint  velocity to end-effector spatial velocity expressed in the
@@ -173,24 +160,6 @@ class RobotKinematicsMixin:
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-
-        Parameters
-        ----------
-        q
-            Joint coordinate vector
-        end
-            the particular link or gripper whose velocity the Jacobian
-            describes, defaults to the end-effector if only one is present
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        Je
-            Manipulator Jacobian in the ``end`` frame
 
         Examples
         --------
@@ -202,15 +171,15 @@ class RobotKinematicsMixin:
         >>> puma = rtb.models.Puma560()
         >>> puma.jacobe([0, 0, 0, 0, 0, 0])
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
@@ -222,10 +191,10 @@ class RobotKinematicsMixin:
     def hessian0(
         self: KinematicsProtocol,
         q: ArrayLike = ...,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         J0: None = None,
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:  # pragma nocover
         ...
 
@@ -233,51 +202,38 @@ class RobotKinematicsMixin:
     def hessian0(
         self: KinematicsProtocol,
         q: None = None,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         J0: NDArray = ...,
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:  # pragma nocover
         ...
 
     def hessian0(
         self: KinematicsProtocol,
         q=None,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         J0=None,
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
         Manipulator Hessian
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :param end: the final link/Gripper which the Hessian represents
+        :param start: the first link which the Hessian represents
+        :param J0: The manipulator Jacobian in the ``start`` frame
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :returns: The manipulator Hessian in the ``start`` frame
 
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the ``start`` frame. This
         function calulcates this based on the ETS of the robot. One of J0 or q
         is required. Supply J0 if already calculated to save computation time
 
-        Parameters
-        ----------
-        q
-            The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        end
-            the final link/Gripper which the Hessian represents
-        start
-            the first link which the Hessian represents
-        J0
-            The manipulator Jacobian in the ``start`` frame
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        h0
-            The manipulator Hessian in the ``start`` frame
-
-        Synopsis
-        --------
         This method computes the manipulator Hessian in the ``start`` frame.  If
         we take the time derivative of the differential kinematic relationship
 
@@ -320,8 +276,8 @@ class RobotKinematicsMixin:
         >>> panda = rtb.models.Panda()
         >>> panda.hessian0([0, -0.3, 0, -2.2, 0, 2, 0.7854])
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -335,10 +291,10 @@ class RobotKinematicsMixin:
     def hessiane(
         self: KinematicsProtocol,
         q: ArrayLike = ...,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         Je: None = None,
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:  # pragma nocover
         ...
 
@@ -346,51 +302,38 @@ class RobotKinematicsMixin:
     def hessiane(
         self: KinematicsProtocol,
         q: None = None,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         Je: NDArray = ...,
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:  # pragma nocover
         ...
 
     def hessiane(
         self: KinematicsProtocol,
         q=None,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         Je=None,
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
         Manipulator Hessian
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :param end: the final link/Gripper which the Hessian represents
+        :param start: the first link which the Hessian represents
+        :param Je: The manipulator Jacobian in the ``end`` frame
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :returns: The manipulator Hessian in ``end`` frame
 
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the ``end`` coordinate frame. This
         function calulcates this based on the ETS of the robot. One of J0 or q
         is required. Supply J0 if already calculated to save computation time
 
-        Parameters
-        ----------
-        q
-            The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        end
-            the final link/Gripper which the Hessian represents
-        start
-            the first link which the Hessian represents
-        J0
-            The manipulator Jacobian in the ``end`` frame
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        he
-            The manipulator Hessian in ``end`` frame
-
-        Synopsis
-        --------
         This method computes the manipulator Hessian in the ``end`` frame.  If
         we take the time derivative of the differential kinematic relationship
 
@@ -433,8 +376,8 @@ class RobotKinematicsMixin:
         >>> panda = rtb.models.Panda()
         >>> panda.hessiane([0, -0.3, 0, -2.2, 0, 2, 0.7854])
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -448,34 +391,23 @@ class RobotKinematicsMixin:
         self: KinematicsProtocol,
         q: ArrayLike,
         n: int = 3,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
     ):
         r"""
         Manipulator Forward Kinematics nth Partial Derivative
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :param n: The derivative order, must be >= 3
+        :param end: the final link/Gripper which the Hessian represents
+        :param start: the first link which the Hessian represents
+        :returns: The nth Partial Derivative of the forward kinematics
 
         This method computes the nth derivative of the forward kinematics where ``n`` is
         greater than or equal to 3. This is an extension of the differential kinematics
         where the Jacobian is the first partial derivative and the Hessian is the
         second.
-
-        Parameters
-        ----------
-        q
-            The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        end
-            the final link/Gripper which the Hessian represents
-        start
-            the first link which the Hessian represents
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        A
-            The nth Partial Derivative of the forward kinematics
 
         Examples
         --------
@@ -488,8 +420,8 @@ class RobotKinematicsMixin:
         >>> panda = rtb.models.Panda()
         >>> panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -503,39 +435,26 @@ class RobotKinematicsMixin:
         self: KinematicsProtocol,
         q: ArrayLike,
         representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",  # noqa
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        tool: NDArray | SE3 | None = None,
     ):
         r"""
         Manipulator analytical Jacobian in the ``start`` frame
+
+        :param q: Joint coordinate vector
+        :param representation: angular representation
+        :param end: the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the base link
+        :param start: the link considered as the end-effector, defaults to the robots's end-effector
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :returns: Manipulator Jacobian in the ``start`` frame
 
         ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
         joint  velocity to end-effector spatial velocity expressed in the
         ``start`` frame.
 
-        Parameters
-        ----------
-        q
-            Joint coordinate vector
-        representation
-            angular representation
-        end
-            the particular link or gripper whose velocity the Jacobian
-            describes, defaults to the base link
-        start
-            the link considered as the end-effector, defaults to the robots's end-effector
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        jacob0
-            Manipulator Jacobian in the ``start`` frame
-
-        Synopsis
-        --------
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
@@ -575,20 +494,36 @@ class RobotKinematicsMixin:
 
     def ik_LM(
         self: KinematicsProtocol,
-        Tep: Union[NDArray, SE3],
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        q0: Union[NDArray, None] = None,
+        Tep: NDArray | SE3,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        q0: NDArray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[NDArray, None] = None,
+        mask: NDArray | None = None,
         joint_limits: bool = True,
         k: float = 1.0,
         method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
-    ) -> Tuple[NDArray, int, int, int, float]:
+    ) -> tuple[NDArray, int, int, int, float]:
         r"""
         Fast levenberg-Marquadt Numerical Inverse Kinematics Solver
+
+        :param Tep: The desired end-effector pose
+        :param end: the link considered as the end-effector
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: The initial joint coordinate vector
+        :param ilimit: How many iterations are allowed within a search before a new search
+            is started
+        :param slimit: How many searches are allowed before being deemed unsuccessful
+        :param tol: Maximum allowed residual error E
+        :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        :param joint_limits: Reject solutions with joint limit violations
+        :param k: Sets the gain value for the damping matrix Wn in the next iteration
+        :param method: One of "chan", "sugihara" or "wampler". Defines which method is used
+            to calculate the damping matrix Wn in the ``step`` method
+        :returns: tuple (q, success, iterations, searches, residual)
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levemberg-Marquadt method. This
@@ -597,40 +532,6 @@ class RobotKinematicsMixin:
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        end
-            the link considered as the end-effector
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        k
-            Sets the gain value for the damping matrix Wn in the next iteration. See
-            synopsis
-        method
-            One of "chan", "sugihara" or "wampler". Defines which method is used
-            to calculate the damping matrix Wn in the ``step`` method
-
-        Synopsis
-        --------
         The operation is defined by the choice of the ``method`` kwarg.
 
         The step is deined as
@@ -701,8 +602,8 @@ class RobotKinematicsMixin:
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_LM(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are
         using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,
         ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``
@@ -713,8 +614,8 @@ class RobotKinematicsMixin:
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -747,20 +648,38 @@ class RobotKinematicsMixin:
 
     def ik_NR(
         self: KinematicsProtocol,
-        Tep: Union[NDArray, SE3],
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        q0: Union[NDArray, None] = None,
+        Tep: NDArray | SE3,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        q0: NDArray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[NDArray, None] = None,
+        mask: NDArray | None = None,
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> Tuple[NDArray, int, int, int, float]:
+    ) -> tuple[NDArray, int, int, int, float]:
         r"""
         Fast numerical inverse kinematics using Newton-Raphson optimization
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param end: the link considered as the end-effector
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param mask: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param joint_limits: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param pinv: Use the psuedo-inverse instad of the normal matrix inverse
+        :param pinv_damping: Damping factor for the psuedo-inverse
+        :returns: tuple (q, success, iterations, searches, residual)
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -770,44 +689,9 @@ class RobotKinematicsMixin:
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Note
-        ----
-        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
+        .. note::
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose or pose trajectory
-        end
-            the link considered as the end-effector
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        q0
-            initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
-        ilimit
-            maximum number of iterations per search
-        slimit
-            maximum number of search attempts
-        tol
-            final error tolerance
-        mask
-            a mask vector which weights the end-effector error priority.
-            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
-            respectively
-        joint_limits
-            constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
-            another search up to the slimit)
-        pinv
-            Use the psuedo-inverse instad of the normal matrix inverse
-        pinv_damping
-            Damping factor for the psuedo-inverse
-
-        Returns
-        -------
-        sol
-            tuple (q, success, iterations, searches, residual)
+            When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
 
         The return value ``sol`` is a tuple with elements:
 
@@ -825,8 +709,6 @@ class RobotKinematicsMixin:
         solution will be in error.  The amount of error is indicated by
         the ``residual``.
 
-        Synopsis
-        --------
         Each iteration uses the Newton-Raphson optimisation method
 
         .. math::
@@ -845,13 +727,13 @@ class RobotKinematicsMixin:
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ik_NR(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         When using the this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -880,20 +762,38 @@ class RobotKinematicsMixin:
 
     def ik_GN(
         self: KinematicsProtocol,
-        Tep: Union[NDArray, SE3],
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        q0: Union[NDArray, None] = None,
+        Tep: NDArray | SE3,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        q0: NDArray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[NDArray, None] = None,
+        mask: NDArray | None = None,
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> Tuple[NDArray, int, int, int, float]:
+    ) -> tuple[NDArray, int, int, int, float]:
         r"""
         Fast numerical inverse kinematics by Gauss-Newton optimization
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param end: the link considered as the end-effector
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param mask: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param joint_limits: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param pinv: Use the psuedo-inverse instad of the normal matrix inverse
+        :param pinv_damping: Damping factor for the psuedo-inverse
+        :returns: tuple (q, success, iterations, searches, residual)
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -903,44 +803,9 @@ class RobotKinematicsMixin:
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Note
-        ----
-        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
+        .. note::
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose or pose trajectory
-        end
-            the link considered as the end-effector
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        q0
-            initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
-        ilimit
-            maximum number of iterations per search
-        slimit
-            maximum number of search attempts
-        tol
-            final error tolerance
-        mask
-            a mask vector which weights the end-effector error priority.
-            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
-            respectively
-        joint_limits
-            constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
-            another search up to the slimit)
-        pinv
-            Use the psuedo-inverse instad of the normal matrix inverse
-        pinv_damping
-            Damping factor for the psuedo-inverse
-
-        Returns
-        -------
-        sol
-            tuple (q, success, iterations, searches, residual)
+            When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
 
         The return value ``sol`` is a tuple with elements:
 
@@ -958,8 +823,6 @@ class RobotKinematicsMixin:
         solution will be in error.  The amount of error is indicated by
         the ``residual``.
 
-        Synopsis
-        --------
         Each iteration uses the Gauss-Newton optimisation method
 
         .. math::
@@ -993,13 +856,13 @@ class RobotKinematicsMixin:
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ik_GN(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         When using the this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -1028,26 +891,51 @@ class RobotKinematicsMixin:
 
     def ikine_LM(
         self: KinematicsProtocol,
-        Tep: Union[NDArray, SE3],
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        q0: Union[ArrayLike, None] = None,
+        Tep: NDArray | SE3,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
+        mask: ArrayLike | None = None,
         joint_limits: bool = True,
-        seed: Union[int, None] = None,
+        seed: int | None = None,
         k: float = 1.0,
         method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
+        pi: NDArray | float = 0.3,
         **kwargs,
     ):
         r"""
         Levenberg-Marquadt Numerical Inverse Kinematics Solver
+
+        :param Tep: The desired end-effector pose
+        :param end: the link considered as the end-effector
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: The initial joint coordinate vector
+        :param ilimit: How many iterations are allowed within a search before a new search
+            is started
+        :param slimit: How many searches are allowed before being deemed unsuccessful
+        :param tol: Maximum allowed residual error E
+        :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        :param joint_limits: Reject solutions with joint limit violations
+        :param seed: A seed for the private RNG used to generate random joint coordinate
+            vectors
+        :param k: Sets the gain value for the damping matrix Wn in the next iteration
+        :param method: One of "chan", "sugihara" or "wampler". Defines which method is used
+            to calculate the damping matrix Wn in the ``step`` method
+        :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        :param km: The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        :param ps: The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        :param pi: The influence angle/distance (in radians or metres) in null space motion
+            becomes active
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levemberg-Marquadt method.
@@ -1055,52 +943,6 @@ class RobotKinematicsMixin:
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        end
-            the link considered as the end-effector
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        k
-            Sets the gain value for the damping matrix Wn in the next iteration. See
-            synopsis
-        method
-            One of "chan", "sugihara" or "wampler". Defines which method is used
-            to calculate the damping matrix Wn in the ``step`` method
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
-
-        Synopsis
-        --------
         The operation is defined by the choice of the ``method`` kwarg.
 
         The step is deined as
@@ -1171,8 +1013,8 @@ class RobotKinematicsMixin:
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_LM(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are
         using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,
         ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``
@@ -1183,8 +1025,8 @@ class RobotKinematicsMixin:
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -1227,25 +1069,49 @@ class RobotKinematicsMixin:
 
     def ikine_NR(
         self: KinematicsProtocol,
-        Tep: Union[NDArray, SE3],
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        q0: Union[ArrayLike, None] = None,
+        Tep: NDArray | SE3,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
+        mask: ArrayLike | None = None,
         joint_limits: bool = True,
-        seed: Union[int, None] = None,
+        seed: int | None = None,
         pinv: bool = False,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
+        pi: NDArray | float = 0.3,
         **kwargs,
     ):
         r"""
         Newton-Raphson Numerical Inverse Kinematics Solver
+
+        :param Tep: The desired end-effector pose
+        :param end: the link considered as the end-effector
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: The initial joint coordinate vector
+        :param ilimit: How many iterations are allowed within a search before a new search
+            is started
+        :param slimit: How many searches are allowed before being deemed unsuccessful
+        :param tol: Maximum allowed residual error E
+        :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        :param joint_limits: Reject solutions with joint limit violations
+        :param seed: A seed for the private RNG used to generate random joint coordinate
+            vectors
+        :param pinv: If True, will use the psuedoinverse in the `step` method instead of
+            the normal inverse
+        :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        :param km: The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        :param ps: The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        :param pi: The influence angle/distance (in radians or metres) in null space motion
+            becomes active
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Newton-Raphson method.
@@ -1253,53 +1119,10 @@ class RobotKinematicsMixin:
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Note
-        ----
-        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
+        .. note::
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        end
-            the link considered as the end-effector
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        pinv
-            If True, will use the psuedoinverse in the `step` method instead of
-            the normal inverse
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
+            When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
 
-        Synopsis
-        --------
         Each iteration uses the Newton-Raphson optimisation method
 
         .. math::
@@ -1318,16 +1141,16 @@ class RobotKinematicsMixin:
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_NR(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         When using the this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -1369,25 +1192,49 @@ class RobotKinematicsMixin:
 
     def ikine_GN(
         self: KinematicsProtocol,
-        Tep: Union[NDArray, SE3],
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        q0: Union[ArrayLike, None] = None,
+        Tep: NDArray | SE3,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
+        mask: ArrayLike | None = None,
         joint_limits: bool = True,
-        seed: Union[int, None] = None,
+        seed: int | None = None,
         pinv: bool = False,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
+        pi: NDArray | float = 0.3,
         **kwargs,
     ):
         r"""
         Gauss-Newton Numerical Inverse Kinematics Solver
+
+        :param Tep: The desired end-effector pose
+        :param end: the link considered as the end-effector
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: The initial joint coordinate vector
+        :param ilimit: How many iterations are allowed within a search before a new search
+            is started
+        :param slimit: How many searches are allowed before being deemed unsuccessful
+        :param tol: Maximum allowed residual error E
+        :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        :param joint_limits: Reject solutions with joint limit violations
+        :param seed: A seed for the private RNG used to generate random joint coordinate
+            vectors
+        :param pinv: If True, will use the psuedoinverse in the `step` method instead of
+            the normal inverse
+        :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        :param km: The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        :param ps: The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        :param pi: The influence angle/distance (in radians or metres) in null space motion
+            becomes active
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Gauss-Newton method.
@@ -1395,53 +1242,10 @@ class RobotKinematicsMixin:
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Note
-        ----
-        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
+        .. note::
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        end
-            the link considered as the end-effector
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        pinv
-            If True, will use the psuedoinverse in the `step` method instead of
-            the normal inverse
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
+            When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
 
-        Synopsis
-        --------
         Each iteration uses the Gauss-Newton optimisation method
 
         .. math::
@@ -1475,16 +1279,16 @@ class RobotKinematicsMixin:
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_GN(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         When using the this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -1526,26 +1330,51 @@ class RobotKinematicsMixin:
 
     def ikine_QP(
         self: KinematicsProtocol,
-        Tep: Union[NDArray, SE3],
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        q0: Union[ArrayLike, None] = None,
+        Tep: NDArray | SE3,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
+        mask: ArrayLike | None = None,
         joint_limits: bool = True,
-        seed: Union[int, None] = None,
+        seed: int | None = None,
         kj=1.0,
         ks=1.0,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
+        pi: NDArray | float = 0.3,
         **kwargs,
     ):
         r"""
         Quadratic Programming Numerical Inverse Kinematics Solver
+
+        :param Tep: The desired end-effector pose
+        :param end: the link considered as the end-effector
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: The initial joint coordinate vector
+        :param ilimit: How many iterations are allowed within a search before a new search
+            is started
+        :param slimit: How many searches are allowed before being deemed unsuccessful
+        :param tol: Maximum allowed residual error E
+        :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        :param joint_limits: Reject solutions with joint limit violations
+        :param seed: A seed for the private RNG used to generate random joint coordinate
+            vectors
+        :param kj: A gain for joint velocity norm minimisation
+        :param ks: A gain which adjusts the cost of slack (intentional error)
+        :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        :param km: The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        :param ps: The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        :param pi: The influence angle/distance (in radians or metres) in null space motion
+            becomes active
+        :raises ImportError: If the package ``qpsolvers`` is not installed
 
         A method that provides functionality to perform numerical inverse kinematics
         (IK) using a quadratic progamming approach.
@@ -1553,55 +1382,6 @@ class RobotKinematicsMixin:
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        end
-            the link considered as the end-effector
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        kj
-            A gain for joint velocity norm minimisation
-        ks
-            A gain which adjusts the cost of slack (intentional error)
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
-
-        Raises
-        ------
-        ImportError
-            If the package ``qpsolvers`` is not installed
-
-        Synopsis
-        --------
         Each iteration uses the following approach
 
         .. math::
@@ -1674,16 +1454,16 @@ class RobotKinematicsMixin:
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_QP(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         When using the this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:

@@ -5,6 +5,7 @@
 @author: Peter Corke
 """
 
+from __future__ import annotations
 # import sys
 from abc import ABC
 from copy import deepcopy
@@ -15,12 +16,7 @@ from typing import (
     Any,
     Callable,
     Generic,
-    List,
     TypeVar,
-    Union,
-    Dict,
-    Tuple,
-    Set,
 )
 
 from typing_extensions import Literal as L
@@ -63,24 +59,24 @@ LinkType = TypeVar("LinkType", bound=BaseLink)
 class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[LinkType]):
     def __init__(
         self,
-        links: List[LinkType],
-        gripper_links: Union[LinkType, List[LinkType], None] = None,
+        links: list[LinkType],
+        gripper_links: LinkType | list[LinkType] | None = None,
         name: str = "",
         manufacturer: str = "",
         comment: str = "",
-        base: Union[NDArray, SE3, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        base: NDArray | SE3 | None = None,
+        tool: NDArray | SE3 | None = None,
         gravity: ArrayLike = [0, 0, -9.81],
-        keywords: Union[List[str], Tuple[str]] = [],
+        keywords: list[str] | tuple[str] = [],
         symbolic: bool = False,
-        configs: Union[Dict[str, NDArray], None] = None,
+        configs: dict[str, NDArray] | None = None,
         check_jindex: bool = True,
     ):
         # Initialise the scene node
         SceneNode.__init__(self)
 
         # Lets sort out links now
-        self._linkdict: Dict[str, LinkType] = {}
+        self._linkdict: dict[str, LinkType] = {}
 
         # Sort links and set self.link, self.n, self.base_link,
         # self.ee_links
@@ -187,8 +183,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def _sort_links(
         self,
-        links: List[LinkType],
-        gripper_links: Union[LinkType, List[LinkType], None],
+        links: list[LinkType],
+        gripper_links: LinkType | list[LinkType] | None,
         check_jindex: bool,
     ):
         """
@@ -205,10 +201,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
 
         # The ordered links
-        orlinks: List[LinkType] = []
+        orlinks: list[LinkType] = []
 
         # The end-effector links
-        self._ee_links: List[LinkType] = []
+        self._ee_links: list[LinkType] = []
 
         # Check all the incoming Link objects
         n: int = 0
@@ -305,7 +301,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         # Set the ee links
         # ----------------
-        ee_links: List[LinkType] = []
+        ee_links: list[LinkType] = []
 
         if len(gripper_links) == 0:
             for link in links:
@@ -370,7 +366,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # ---------
         self._links = orlinks
 
-    def dynchanged(self, what: Union[str, None] = None):
+    def dynchanged(self, what: str | None = None):
         """
         Dynamic parameters have changed
 
@@ -403,23 +399,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             raise StopIteration
 
-    def __getitem__(self, i: Union[int, str]) -> LinkType:
+    def __getitem__(self, i: int | str) -> LinkType:
         """
         Get link
 
         This also supports iterating over each link in the robot object,
         from the base to the tool.
 
-        Parameters
-        ----------
-        i
-            link number or name
-
-        Returns
-        -------
-        link
-            i'th link or named link
-
+        :param i: link number or name
+        :returns: i'th link or named link
         Examples
         --------
         .. runblock:: pycon
@@ -428,8 +416,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         >>> print(robot[1]) # print the 2nd link
         >>> print([link.a for link in robot])  # print all the a_j values
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         ``Robot`` supports link lookup by name,
             eg. ``robot['link1']``
 
@@ -444,13 +432,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Pretty prints the ETS Model of the robot.
 
-        Returns
-        -------
-        str
-            Pretty print of the robot model
+        :returns: Pretty print of the robot model
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Constant links are shown in blue.
         - End-effector links are prefixed with an @
         - Angles in degrees
@@ -530,17 +515,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     # --------------------------------------------------------------------- #
 
     @property
-    def links(self) -> List[LinkType]:
+    def links(self) -> list[LinkType]:
         """
         Robot links
 
-        Returns
-        -------
-        links
-            A list of link objects
+        :returns: A list of link objects
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         It is probably more concise to index the robot object rather
         than the list of links, ie. the following are equivalent:
         - ``robot.links[i]``
@@ -551,19 +533,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._links
 
     @property
-    def link_dict(self) -> Dict[str, LinkType]:
+    def link_dict(self) -> dict[str, LinkType]:
         return self._linkdict
 
     @property
-    def grippers(self) -> List[Gripper]:
+    def grippers(self) -> list[Gripper]:
         """
         Grippers attached to the robot
 
-        Returns
-        -------
-        grippers
-            A list of grippers
-
+        :returns: A list of grippers
         """
 
         return self._grippers
@@ -575,17 +553,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         - ``robot.base_link`` is the robot base link
 
-        Returns
-        -------
-        base_link
-            the first link in the robot tree
-
+        :returns: the first link in the robot tree
         """
 
         return self._base_link
 
     @property
-    def ee_links(self) -> List[LinkType]:
+    def ee_links(self) -> list[LinkType]:
         return self._ee_links
 
     @property
@@ -593,11 +567,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Number of joints
 
-        Returns
-        -------
-        n
-            Number of joints
-
+        :returns: Number of joints
         Examples
         --------
         .. runblock:: pycon
@@ -622,11 +592,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         The returned number is the total of both variable joints and
         static links
 
-        Returns
-        -------
-        nlinks
-            Number of links
-
+        :returns: Number of links
         Examples
         --------
 
@@ -652,11 +618,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Number of branches in this robot.  Computed as the number of links with
         zero children
 
-        Returns
-        -------
-        nbranches
-            number of branches in the robot's kinematic tree
-
+        :returns: number of branches in the robot's kinematic tree
         Examples
         --------
 
@@ -683,16 +645,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.name`` is the robot name
         - ``robot.name = ...`` checks and sets the robot name
 
-        Parameters
-        ----------
-        name
-            the new robot name
-
-        Returns
-        -------
-        name
-            the current robot name
-
+        :param name: the new robot name
+        :returns: the current robot name
         """
         return self._name
 
@@ -708,16 +662,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.comment`` is the robot comment
         - ``robot.comment = ...`` checks and sets the robot comment
 
-        Parameters
-        ----------
-        name
-            the new robot comment
-
-        Returns
-        -------
-        comment
-            robot comment
-
+        :param name: the new robot comment
+        :returns: robot comment
         """
         return self._comment
 
@@ -733,11 +679,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.manufacturer`` is the robot manufacturer's name
         - ``robot.manufacturer = ...`` checks and sets the manufacturer's name
 
-        Returns
-        -------
-        manufacturer
-            robot manufacturer's name
-
+        :returns: robot manufacturer's name
         """
         return self._manufacturer
 
@@ -746,11 +688,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self._manufacturer = manufacturer_new
 
     @property
-    def configs(self) -> Dict[str, NDArray]:
+    def configs(self) -> dict[str, NDArray]:
         return self._configs
 
     @property
-    def keywords(self) -> List[str]:
+    def keywords(self) -> list[str]:
         return self._keywords
 
     @property
@@ -762,13 +704,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Robot has dynamic parameters
 
-        Returns
-        -------
-        hasdynamics
-            Robot has dynamic parameters
-
-        At least one link has associated dynamic parameters.
-
+        :returns: Robot has dynamic parameters
+        :returns: At least one link has associated dynamic parameters.
         Examples
         --------
 
@@ -788,11 +725,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         At least one link has associated mesh to describe its shape.
 
-        Returns
-        -------
-        hasgeometry
-            Robot has geometry model
-
+        :returns: Robot has geometry model
         Examples
         --------
 
@@ -814,13 +747,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Robot has collision model
 
-        Returns
-        -------
-        hascollision
-            Robot has collision model
-
-        At least one link has associated collision model.
-
+        :returns: Robot has collision model
+        :returns: At least one link has associated collision model.
         Examples
         --------
 
@@ -848,12 +776,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             no explicit backend is passed to ``Robot.plot``.  The default set here will
             be overridden if the particular ``Robot`` subclass cannot support it.
 
-        Returns
-        -------
-        default_backend
-            backend name
-
-
+        :returns: backend name
         """
         return self._default_backend
 
@@ -871,18 +794,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             acceleration
 
 
-        Parameters
-        ----------
-        gravity
-            the new gravitational acceleration for this robot
+        :param gravity: the new gravitational acceleration for this robot
+        :returns: gravitational acceleration
 
-        Returns
-        -------
-        gravity
-            gravitational acceleration
+        .. rubric:: Notes
 
-        Notes
-        -----
         If the z-axis is upward, out of the Earth, this should be
         a positive number.
 
@@ -905,16 +821,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.q`` is the robot joint configuration
         - ``robot.q = ...`` checks and sets the joint configuration
 
-        Parameters
-        ----------
-        q
-            the new robot joint configuration
-
-        Returns
-        -------
-        q
-            robot joint configuration
-
+        :param q: the new robot joint configuration
+        :returns: robot joint configuration
         """
 
         return self._q
@@ -931,11 +839,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.qd`` is the robot joint velocity
         - ``robot.qd = ...`` checks and sets the joint velocity
 
-        Returns
-        -------
-        qd
-            robot joint velocity
-
+        :returns: robot joint velocity
         """
 
         return self._qd
@@ -952,12 +856,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.qdd`` is the robot joint acceleration
         - ``robot.qdd = ...`` checks and sets the robot joint acceleration
 
-        Returns
-        -------
-        qdd
-            robot joint acceleration
-
-
+        :returns: robot joint acceleration
         """
         return self._qdd
 
@@ -976,21 +875,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - a revolute joint [-𝜋. 𝜋] is returned
         - a prismatic joint an exception is raised
 
-        Attributes
-        ----------
-        qlim
-            An array of joints limits (2, n)
-
-        Raises
-        ------
-        ValueError
-            unset limits for a prismatic joint
-
-        Returns
-        -------
-        qlim
-            Array of joint limit values
-
+        :param qlim: An array of joints limits (2, n)
+        :raises ValueError: unset limits for a prismatic joint
+        :returns: Array of joint limit values
         Examples
         --------
         .. runblock:: pycon
@@ -1048,11 +935,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         A string with one letter per joint: ``R`` for a revolute
         joint, and ``P`` for a prismatic joint.
 
-        Returns
-        -------
-        structure
-            joint configuration string
-
+        :returns: joint configuration string
         Examples
         --------
         .. runblock:: pycon
@@ -1062,8 +945,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         >>> stanford = rtb.models.DH.Stanford()
         >>> stanford.structure
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         Fixed joints, that maintain a constant link relative pose,
         are not included.
         ``len(self.structure) == self.n``.
@@ -1081,15 +964,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return "".join(structure)
 
     @property
-    def prismaticjoints(self) -> List[bool]:
+    def prismaticjoints(self) -> list[bool]:
         """
         Revolute joints as bool array
 
-        Returns
-        -------
-        prismaticjoints
-            array of joint type, True if prismatic
-
+        :returns: array of joint type, True if prismatic
         Examples
         --------
         .. runblock:: pycon
@@ -1099,8 +978,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         >>> stanford = rtb.models.DH.Stanford()
         >>> stanford.prismaticjoints
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         Fixed joints, that maintain a constant link relative pose,
         are not included.
 
@@ -1114,15 +993,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return [link.isprismatic for link in self.links if link.isjoint]
 
     @property
-    def revolutejoints(self) -> List[bool]:
+    def revolutejoints(self) -> list[bool]:
         """
         Revolute joints as bool array
 
-        Returns
-        -------
-        revolutejoints
-            array of joint type, True if revolute
-
+        :returns: array of joint type, True if revolute
         Examples
         --------
         .. runblock:: pycon
@@ -1132,8 +1007,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         >>> stanford = rtb.models.DH.Stanford()
         >>> stanford.revolutejoints
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         Fixed joints, that maintain a constant link relative pose,
         are not included.
 
@@ -1154,16 +1029,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.control_type`` is the robot control mode
         - ``robot.control_type = ...`` checks and sets the robot control mode
 
-        Parameters
-        ----------
-        control_mode
-            the new robot control mode
-
-        Returns
-        -------
-        control_mode
-            the current robot control mode
-
+        :param control_mode: the new robot control mode
+        :returns: the current robot control mode
         """
 
         return self._control_mode
@@ -1196,23 +1063,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot._tool`` is the robot tool transform as a numpy array
         - ``robot.tool = ...`` checks and sets the robot tool transform
 
-        Parameters
-        ----------
-        tool
-            the new robot tool transform (as an SE(3))
-
-        Returns
-        -------
-        tool
-            robot tool transform
-
-
-
+        :param tool: the new robot tool transform (as an SE(3))
+        :returns: robot tool transform
         """
         return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T: Union[SE3, NDArray]):
+    def tool(self, T: SE3 | NDArray):
         if isinstance(T, SE3):
             self._tool = T.A
         else:
@@ -1226,16 +1083,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.base`` is the robot base transform
         - ``robot.base = ...`` checks and sets the robot base transform
 
-        Parameters
-        ----------
-        base
-            the new robot base transform
-
-        Returns
-        -------
-        base
-            the current robot base transform
-
+        :param base: the new robot base transform
+        :returns: the current robot base transform
         """
 
         # return a copy, otherwise somebody with
@@ -1246,7 +1095,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return SE3(self._T, check=False)
 
     @base.setter
-    def base(self, T: Union[NDArray, SE3]):
+    def base(self, T: NDArray | SE3):
         if isinstance(self, rtb.Robot):
             # All 3D robots
             # Set the SceneNode T
@@ -1260,41 +1109,26 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     @lru_cache(maxsize=32)
     def get_path(
         self,
-        end: Union[Gripper, LinkType, str, None] = None,
-        start: Union[Gripper, LinkType, str, None] = None,
-    ) -> Tuple[List[LinkType], int, SE3]:
+        end: Gripper | LinkType | str | None = None,
+        start: Gripper | LinkType | str | None = None,
+    ) -> tuple[list[LinkType], int, SE3]:
         """
         Find a path from start to end
 
-        Parameters
-        ----------
-        end
-            end-effector or gripper to compute forward kinematics to
-        start
-            name or reference to a base link, defaults to None
-
-        Raises
-        ------
-        ValueError
-            link not known or ambiguous
-
-        Returns
-        -------
-        path
-            the path from start to end
-        n
-            the number of joints in the path
-        T
-            the tool transform present after end
-
+        :param end: end-effector or gripper to compute forward kinematics to
+        :param start: name or reference to a base link, defaults to None
+        :raises ValueError: link not known or ambiguous
+        :returns: the path from start to end
+        :returns: the number of joints in the path
+        :returns: the tool transform present after end
         """
 
         def search(
             start,
             end,
-            explored: Set[Union[LinkType, Link]],
-            path: List[Union[LinkType, Link]],
-        ) -> Union[List[Union[LinkType, Link]], None]:
+            explored: set[LinkType | Link],
+            path: list[LinkType | Link],
+        ) -> list[LinkType | Link] | None:
             link = self._getlink(start, self.base_link)
             end = self._getlink(end, self.ee_links[0])
 
@@ -1353,9 +1187,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     @lru_cache(maxsize=32)
     def _getlink(
         self,
-        link: Union[LinkType, Gripper, str, None],
-        default: Union[LinkType, Gripper, str, None] = None,
-    ) -> Union[LinkType, Link]:
+        link: LinkType | Gripper | str | None,
+        default: LinkType | Gripper | str | None = None,
+    ) -> LinkType | Link:
         """
         Validate reference to Link
 
@@ -1367,23 +1201,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - a string, then it looked up in the robot's link name dictionary, and
           a Link reference returned.
 
-        Parameters
-        ----------
-        link
-            link
-
-        Raises
-        ------
-        ValueError
-            link does not belong to this ERobot
-        TypeError
-            bad argument
-
-        Returns
-        -------
-        link
-            link reference
-
+        :param link: link
+        :raises ValueError: link does not belong to this ERobot
+        :raises TypeError: bad argument
+        :returns: link reference
         """
 
         if link is None:
@@ -1413,7 +1234,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             raise TypeError("unknown argument")
 
-    def _find_ets(self, start, end, explored, path) -> Union[ETS, None]:
+    def _find_ets(self, start, end, explored, path) -> ETS | None:
         """
         Privade method which will recursively find the ETS of a path
         see ets()
@@ -1467,9 +1288,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     @lru_cache(maxsize=32)
     def _get_limit_links(
         self,
-        end: Union[Gripper, LinkType, str, None] = None,
-        start: Union[Gripper, LinkType, str, None] = None,
-    ) -> Tuple[LinkType, LinkType, Union[None, SE3]]:
+        end: Gripper | LinkType | str | None = None,
+        start: Gripper | LinkType | str | None = None,
+    ) -> tuple[LinkType, LinkType, SE3 | None]:
         """
         Get and validate an end-effector, and a base link
 
@@ -1487,15 +1308,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         TypeError
             unknown type provided
 
-        Returns
-        -------
-        end
-            end-effector link
-        start
-            base link
-        tool
-            tool transform of gripper if applicable
-
+        :returns: end-effector link
+        :returns: base link
+        :returns: tool transform of gripper if applicable
         """
 
         tool = None
@@ -1544,8 +1359,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     @lru_cache(maxsize=32)
     def ets(
         self,
-        start: Union[LinkType, Gripper, str, None] = None,
-        end: Union[LinkType, Gripper, str, None] = None,
+        start: LinkType | Gripper | str | None = None,
+        end: LinkType | Gripper | str | None = None,
     ) -> ETS:
         """
         Robot to ETS
@@ -1559,23 +1374,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
         from link ``l1`` to link ``l2``.
 
-        Parameters
-        ----------
-        :param start: start of path, defaults to ``base_link``
-        :param end: end of path, defaults to end-effector
-
-        Raises
-        ------
-        ValueError
-            a link does not belong to this ERobot
-        TypeError
-            a bad link argument
-
-        Returns
-        -------
-        ets
-            elementary transform sequence
-
+        :param :param start: start of path, defaults to ``base_link``: 
+        :param :param end: end of path, defaults to end-effector: 
+        :raises ValueError: a link does not belong to this ERobot
+        :raises TypeError: a bad link argument
+        :returns: elementary transform sequence
         Examples
         --------
         .. runblock:: pycon
@@ -1695,23 +1498,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Convert joint angles to degrees
 
-        Parameters
-        ----------
-        q
-            The joint configuration of the robot
-
-        Returns
-        -------
-        q
-            a vector of joint coordinates in degrees and metres
-
-        ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
-        taking into account whether elements of ``q`` correspond to revolute
-        or prismatic joints, ie. prismatic joint values are not converted.
-
-        If ``q`` is a matrix, with one column per joint, the conversion is
-        performed columnwise.
-
+        :param q: The joint configuration of the robot
+        :returns: a vector of joint coordinates in degrees and metres
+        :returns: ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
+        :returns: taking into account whether elements of ``q`` correspond to revolute
+        :returns: or prismatic joints, ie. prismatic joint values are not converted.
+        :returns: If ``q`` is a matrix, with one column per joint, the conversion is
+        :returns: performed columnwise.
         Examples
         --------
         .. runblock:: pycon
@@ -1744,16 +1537,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         If ``q`` is a matrix, with one column per joint, the conversion is
         performed columnwise.
 
-        Parameters
-        ----------
-        q
-            The joint configuration of the robot
-
-        Returns
-        -------
-        q
-            a vector of joint coordinates in radians and metres
-
+        :param q: The joint configuration of the robot
+        :returns: a vector of joint coordinates in radians and metres
         Examples
         --------
         .. runblock:: pycon
@@ -1778,11 +1563,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Check if joint is revolute
 
-        Returns
-        -------
-        j
-            True if revolute
-
+        :returns: True if revolute
         Examples
         --------
         .. runblock:: pycon
@@ -1804,11 +1585,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Check if joint is prismatic
 
-        Returns
-        -------
-        j
-            True if prismatic
-
+        :returns: True if prismatic
         Examples
         --------
         .. runblock:: pycon
@@ -1832,26 +1609,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     def dfs_links(
         self,
         start: LinkType,
-        func: Union[None, Callable[[LinkType], Any]] = None,
-    ) -> List[LinkType]:
+        func: Callable[[LinkType | None, Any]] = None,
+    ) -> list[LinkType]:
         """
         A link search method
 
         Visit all links from start in depth-first order and will apply
         func to each visited link
 
-        Parameters
-        ----------
-        start
-            The link to start at
-        func
-            An optional function to apply to each link as it is found
-
-        Returns
-        -------
-        links
-            A list of links
-
+        :param start: The link to start at
+        :param func: An optional function to apply to each link as it is found
+        :returns: A list of links
         """
 
         visited = []
@@ -1873,13 +1641,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Add a named joint configuration as an attribute
 
-        Parameters
-        ----------
-        name
-            Name of the joint configuration
-        q
-            Joint configuration
-
+        :param name: Name of the joint configuration
+        :param q: Joint configuration
         Examples
         --------
         .. runblock:: pycon
@@ -1889,8 +1652,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         >>> robot.mypos
         >>> robot.configs["mypos"]
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Used in robot model init method to store the ``qr`` configuration
         - Dynamically adding attributes to objects can cause issues with
             Python type checking.
@@ -1914,15 +1677,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Add a named configuration to the robot instance's dictionary of named
         configurations.
 
-        Parameters
-        ----------
-        name
-            Name of the joint configuration
-        q
-            Joint configuration
-
-
-
+        :param name: Name of the joint configuration
+        :param q: Joint configuration
         Examples
         --------
         .. runblock:: pycon
@@ -1987,11 +1743,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         ----
         The joint limit for all joints must be set.
 
-        Returns
-        -------
-        q
-            Random joint configuration :rtype: ndarray(n)
-
+        :returns: Random joint configuration :rtype: ndarray(n)
         See Also
         --------
         :func:`Robot.qlim`
@@ -2008,10 +1760,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Pretty print the robot link hierachy
 
-        Returns
-        -------
-        Pretty print of the robot model
-
+        :returns: Pretty print of the robot model
         Examples
         --------
         Makes a robot and prints the heirachy
@@ -2031,7 +1780,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         recurse(self.base_link)
 
-    def segments(self) -> List[List[Union[LinkType, None]]]:
+    def segments(self) -> list[list[LinkType | None]]:
         """
         Segments of branched robot
 
@@ -2048,13 +1797,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         the return is ``[[None, L1, L2], [L2, L3, L4], [L2, L5, L6]]``
 
-        Returns
-        -------
-        segments
-            Segment list
+        :returns: Segment list
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - the length of the list is the number of segments in the robot
         - the first segment always starts with ``None`` which represents
             the base transform (since there is no base link)
@@ -2085,7 +1831,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     # Scene Graph section
     # --------------------------------------------------------------------- #
 
-    def _update_link_tf(self, q: Union[ArrayLike, None] = None):
+    def _update_link_tf(self, q: ArrayLike | None = None):
         """
         This private method updates the local transform of each link within
         this robot according to q (or self.q if q is none)
@@ -2109,7 +1855,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def _get_graphical_backend(
         self,
-        backend: Union[L["swift", "pyplot", "pyplot2"], None] = None,  # noqa
+        backend: L["swift", "pyplot", "pyplot2"] | None = None,  # noqa
     ) -> Connector:
         import sys
         from roboticstoolbox.backends import load_backend
@@ -2159,14 +1905,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     def plot(
         self,
         q: ArrayLike,
-        backend: Union[L["swift", "pyplot", "pyplot2"], None] = None,  # noqa
+        backend: L["swift", "pyplot", "pyplot2"] | None = None,  # noqa
         block: bool = False,
         dt: float = 0.050,
-        limits: Union[ArrayLike, None] = None,
+        limits: ArrayLike | None = None,
         vellipse: bool = False,
         fellipse: bool = False,
-        fig: Union[str, None] = None,
-        movie: Union[str, None] = None,
+        fig: str | None = None,
+        movie: str | None = None,
         loop: bool = False,
         **kwargs,
     ) -> Connector:
@@ -2182,75 +1928,28 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         If ``q`` (m,n) representing a joint-space trajectory it will create an
         animation with a pause of ``dt`` seconds between each frame.
 
-        Parameters
-        ----------
-        q
-            The joint configuration of the robot.
-        backend
-            The graphical backend to use, currently 'swift'
-            and 'pyplot' are implemented. Defaults to 'swift' of a ``Robot``
-            and 'pyplot` for a ``DHRobot``
-        block
-            Block operation of the code and keep the figure open
-        dt
-            if q is a trajectory, this describes the delay in
-            seconds between frames
-        limits
-            Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-            (this option is for 'pyplot' only)
-        vellipse
-            (Plot Option) Plot the velocity ellipse at the
-            end-effector (this option is for 'pyplot' only)
-        fellipse
-            (Plot Option) Plot the force ellipse at the
-            end-effector (this option is for 'pyplot' only)
-        fig
-            (Plot Option) The figure label to plot in (this option is for
-            'pyplot' only)
-        movie
-            (Plot Option) The filename to save the movie to (this option is for
-            'pyplot' only)
-        loop
-            (Plot Option) Loop the movie (this option is for
-            'pyplot' only)
-        jointaxes
-            (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint) (this option is for 'pyplot' only)
-        eeframe
-            (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-            (this option is for 'pyplot' only)
-        shadow
-            (Plot Option) Plot a shadow of the robot in the x-y
-            plane. (this option is for 'pyplot' only)
-        name
-            (Plot Option) Plot the name of the robot near its base
-            (this option is for 'pyplot' only)
-        render_mode
-            (Plot Option) Rendering mode for matplotlib backends:
-            ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``.
-            If omitted, an environment-appropriate mode is selected.
-        inline_every_n
-            (Plot Option) In notebook-inline mode, push one rendered frame
-            every N simulation steps. Larger N reduces output load.
-        inline_format
-            (Plot Option) In notebook-inline mode, frame format:
-            ``'svg'`` (default) or ``'png'``.
-        inline_dpi
-            (Plot Option) DPI for PNG inline frames only; ignored when
-            ``inline_format='svg'``.
+        :param q: The joint configuration of the robot.
+        :param backend: The graphical backend to use, currently 'swift' and 'pyplot' are implemented. Defaults to 'swift' of a ``Robot`` and 'pyplot` for a ``DHRobot``
+        :param block: Block operation of the code and keep the figure open
+        :param dt: if q is a trajectory, this describes the delay in seconds between frames
+        :param limits: Custom view limits for the plot. If not supplied will autoscale, [x1, x2, y1, y2, z1, z2] (this option is for 'pyplot' only)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the end-effector (this option is for 'pyplot' only)
+        :param fellipse: (Plot Option) Plot the force ellipse at the end-effector (this option is for 'pyplot' only)
+        :param fig: (Plot Option) The figure label to plot in (this option is for 'pyplot' only)
+        :param movie: (Plot Option) The filename to save the movie to (this option is for 'pyplot' only)
+        :param loop: (Plot Option) Loop the movie (this option is for 'pyplot' only)
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in which the joint revolves around(revolute joint) or translates along (prosmatic joint) (this option is for 'pyplot' only)
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame at the location of the end-effector. Uses three arrows, red, green and blue to indicate the x, y, and z-axes. (this option is for 'pyplot' only)
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y plane. (this option is for 'pyplot' only)
+        :param name: (Plot Option) Plot the name of the robot near its base (this option is for 'pyplot' only)
+        :param render_mode: (Plot Option) Rendering mode for matplotlib backends: ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``. If omitted, an environment-appropriate mode is selected.
+        :param inline_every_n: (Plot Option) In notebook-inline mode, push one rendered frame every N simulation steps. Larger N reduces output load.
+        :param inline_format: (Plot Option) In notebook-inline mode, frame format: ``'svg'`` (default) or ``'png'``.
+        :param inline_dpi: (Plot Option) DPI for PNG inline frames only; ignored when ``inline_format='svg'``.
+        :returns: A reference to the environment object which controls the figure
 
-        Returns
-        -------
-        env
-            A reference to the environment object which controls the
-            figure
+        .. rubric:: Notes
 
-        Notes
-        -----
         - By default this method will block until the figure is dismissed.
             To avoid this set ``block=False``.
         - For PyPlot, the polyline joins the origins of the link frames,
@@ -2343,12 +2042,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def teach(
         self,
-        q: Union[ArrayLike, None],
+        q: ArrayLike | None,
         block: bool = True,
-        limits: Union[ArrayLike, None] = None,
+        limits: ArrayLike | None = None,
         vellipse: bool = False,
         fellipse: bool = False,
-        backend: Union[L["pyplot", "pyplot2"], None] = None,  # noqa
+        backend: L["pyplot", "pyplot2"] | None = None,  # noqa
     ) -> Connector:
         """
         Graphical teach pendant
@@ -2376,14 +2075,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             (Plot Option) Plot the force ellipse at the
             end-effector (this option is for 'pyplot' only)
 
-        Returns
-        -------
-        env
-            A reference to the PyPlot object which controls the
-            matplotlib figure
+        :returns: A reference to the PyPlot object which controls the matplotlib figure
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Program execution is blocked until the teach window is
             dismissed.  If ``block=False`` the method is non-blocking but
             you need to poll the window manager to ensure that the window
@@ -2444,7 +2139,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     # --------- Utility Methods ------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    def showgraph(self, display_graph: bool = True, **kwargs) -> Union[None, str]:
+    def showgraph(self, display_graph: bool = True, **kwargs) -> str | None:
         """
         Display a link transform graph in browser
 
@@ -2467,18 +2162,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Edge labels or nodes in blue have a fixed transformation to the
         preceding link.
 
-        Parameters
-        ----------
-        display_graph
-            Open the graph in a browser if True. Otherwise will return the
-            file path
-        etsbox
-            Put the link ETS in a box, otherwise an edge label
-        jtype
-            Arrowhead to node indicates revolute or prismatic type
-        static
-            Show static joints in blue and bold
-
+        :param display_graph: Open the graph in a browser if True. Otherwise will return the file path
+        :param etsbox: Put the link ETS in a box, otherwise an edge label
+        :param jtype: Arrowhead to node indicates revolute or prismatic type
+        :param static: Show static joints in blue and bold
         Examples
         --------
         >>> import roboticstoolbox as rtb
@@ -2516,7 +2203,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def dotfile(
         self,
-        filename: Union[str, IO[str]],
+        filename: str | IO[str],
         etsbox: bool = False,
         ets: L["full", "brief"] = "full",  # noqa
         jtype: bool = False,
@@ -2549,19 +2236,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         If ``filename`` is a file object then the file will *not*
             be closed after the GraphViz model is written.
 
-        Parameters
-        ----------
-        file
-            Name of file to write to
-        etsbox
-            Put the link ETS in a box, otherwise an edge label
-        ets
-            Display the full ets with "full" or a brief version with "brief"
-        jtype
-            Arrowhead to node indicates revolute or prismatic type
-        static
-            Show static joints in blue and bold
-
+        :param file: Name of file to write to
+        :param etsbox: Put the link ETS in a box, otherwise an edge label
+        :param ets: Display the full ets with "full" or a brief version with "brief"
+        :param jtype: Arrowhead to node indicates revolute or prismatic type
+        :param static: Show static joints in blue and bold
         See Also
         --------
         :func:`showgraph`

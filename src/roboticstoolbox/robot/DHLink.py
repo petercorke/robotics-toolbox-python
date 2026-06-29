@@ -10,15 +10,10 @@ from roboticstoolbox.robot.Link import Link, _listen_dyn, _copy_shapes
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
 from spatialmath import SE3
-from typing import List, Union
 from functools import wraps
 from numpy import ndarray, cos, sin, array
 from copy import deepcopy
-
-# _eps = np.finfo(np.float64).eps
-
-
-ArrayLike = Union[list, ndarray, tuple, set]
+from roboticstoolbox.tools.types import ArrayLike
 
 
 def _check_rne(func):
@@ -91,29 +86,20 @@ class DHLink(Link):
     transmission parameters.
 
     :param theta: kinematic: joint angle
-    :type theta: float
     :param d: kinematic - link offset
-    :type d: float
     :param alpha: kinematic - link twist
-    :type alpha: float
     :param a: kinematic - link length
-    :type a: float
     :param sigma: kinematic - 0 if revolute, 1 if prismatic
-    :type sigma: int
-    :param mdh: kinematic - 0 if standard D&H, else 1
-    :type mdh: int
+    :param mdh: kinematic - False if standard D&H, True for modified D&H
     :param offset: kinematic - joint variable offset
-    :type offset: float
-
     :param qlim: joint variable limits [min, max]
     :type qlim: ndarray(2,)
     :param flip: joint moves in opposite direction
-    :type flip: bool
 
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
-    :type r:  ndarray(3,)
+    :type r: ndarray(3,)
     :param I: dynamic - inertia of link with respect to COM
     :type I: ndarray
     :param Jm: dynamic - motor inertia
@@ -132,15 +118,15 @@ class DHLink(Link):
 
     def __init__(
         self,
-        d=0.0,
-        alpha=0.0,
-        theta=0.0,
-        a=0.0,
-        sigma=0,
-        mdh=False,
-        offset=0,
-        flip=False,
-        qlim: Union[ArrayLike, None] = None,
+        d: float = 0.0,
+        alpha: float = 0.0,
+        theta: float = 0.0,
+        a: float = 0.0,
+        sigma: int = 0,
+        mdh: bool = False,
+        offset: float = 0,
+        flip: bool = False,
+        qlim: ArrayLike | None = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -170,7 +156,7 @@ class DHLink(Link):
         self.mesh = None
         self.number = None
 
-    def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool, mdh):
+    def _to_ets(self, sigma: int, theta: float, d: float, alpha: float, a: float, offset: float, flip: bool, mdh: bool) -> ETS:
         ets = ETS()
 
         isrevolute = False if sigma else True
@@ -435,13 +421,13 @@ class DHLink(Link):
     @property
     def theta(self):
         """
-        Get/set joint angle
+        Get/set joint angle.
+
+        :returns: joint angle
+        :rtype: float
 
         - ``link.theta`` is the joint angle
-            :return: joint angle
-            :rtype: float
         - ``link.theta = ...`` checks and sets the joint angle
-
         """
         return self._theta
 
@@ -458,13 +444,13 @@ class DHLink(Link):
     @property
     def d(self):
         """
-        Get/set link offset
+        Get/set link offset.
+
+        :returns: link offset
+        :rtype: float
 
         - ``link.d`` is the link offset
-            :return: link offset
-            :rtype: float
         - ``link.d = ...`` checks and sets the link offset
-
         """
         return self._d
 
@@ -481,13 +467,13 @@ class DHLink(Link):
     @property
     def a(self):
         """
-        Get/set link length
+        Get/set link length.
+
+        :returns: link length
+        :rtype: float
 
         - ``link.a`` is the link length
-            :return: link length
-            :rtype: float
         - ``link.a = ...`` checks and sets the link length
-
         """
         return self._a
 
@@ -501,13 +487,13 @@ class DHLink(Link):
     @property
     def alpha(self):
         """
-        Get/set link twist
+        Get/set link twist.
 
-        - ``link.d`` is the link twist
-            :return: link twist
-            :rtype: float
-        - ``link.d = ...`` checks and sets the link twist
+        :returns: link twist
+        :rtype: float
 
+        - ``link.alpha`` is the link twist
+        - ``link.alpha = ...`` checks and sets the link twist
         """
         return self._alpha
 
@@ -521,16 +507,16 @@ class DHLink(Link):
     @property
     def sigma(self):
         """
-        Get/set joint type
+        Get/set joint type.
+
+        :returns: joint type
+        :rtype: int
+        :seealso: :func:`isrevolute`, :func:`isprismatic`
 
         - ``link.sigma`` is the joint type
-            :return: joint type
-            :rtype: int
         - ``link.sigma = ...`` checks and sets the joint type
 
         The joint type is 0 for a revolute joint, and 1 for a prismatic joint.
-
-        :seealso: :func:`isrevolute`, :func:`isprismatic`
         """
         return self._sigma
 
@@ -544,16 +530,16 @@ class DHLink(Link):
     @property
     def mdh(self):
         """
-        Get/set kinematic convention
+        Get/set kinematic convention.
+
+        :returns: kinematic convention
+        :rtype: bool
 
         - ``link.mdh`` is the kinematic convention
-            :return: kinematic convention
-            :rtype: bool
         - ``link.mdh = ...`` checks and sets the kinematic convention
 
-        The kinematic convention is True for modified Denavit-Hartenberg
-        notation (eg. Craig's textbook) and False for Denavit-Hartenberg
-        notation (eg. Siciliano, Spong, Paul textbooks).
+        True for modified Denavit-Hartenberg notation (eg. Craig's textbook),
+        False for standard Denavit-Hartenberg notation (eg. Siciliano, Spong, Paul).
         """
         return self._mdh
 
@@ -593,10 +579,9 @@ class DHLink(Link):
         r"""
         Link transform matrix
 
-        :param q: Joint coordinate
-        :type q: float
-        :return T: SE(3) link homogeneous transformation
-        :rtype T: SE3 instance
+        :param q: joint coordinate
+        :returns: SE(3) link homogeneous transformation
+        :rtype: SE3
 
         ``A(q)`` is an ``SE3`` instance representing the SE(3) homogeneous
         transformation matrix corresponding to the link's joint variable ``q``
@@ -677,7 +662,7 @@ class DHLink(Link):
         """
         Checks if the joint is of revolute type
 
-        :return: Ture if is revolute
+        :return: True if revolute
         :rtype: bool
 
         :seealso: :func:`sigma`
@@ -693,7 +678,7 @@ class DHLink(Link):
         """
         Checks if the joint is of prismatic type
 
-        :return: Ture if is prismatic
+        :return: True if prismatic
         :rtype: bool
 
         :seealso: :func:`sigma`
@@ -710,23 +695,20 @@ class DHLink(Link):
 
 class RevoluteDH(DHLink):
     r"""
-    Class for revolute links using standard DH convention
+    Class for revolute links using standard DH convention.
+
     :param d: kinematic - link offset
-    :type d: float
     :param alpha: kinematic - link twist
-    :type alpha: float
     :param a: kinematic - link length
-    :type a: float
     :param offset: kinematic - joint variable offset
-    :type offset: float
     :param qlim: joint variable limits [min, max]
-    :type qlim: float ndarray(1,2)
+    :type qlim: ndarray(2,)
     :param flip: joint moves in opposite direction
-    :type flip: bool
+
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
-    :type r:  float ndarray(3)
+    :type r: ndarray(3,)
     :param I: dynamic - inertia of link with respect to COM
     :type I: ndarray
     :param Jm: dynamic - motor inertia
@@ -751,7 +733,8 @@ class RevoluteDH(DHLink):
     """  # noqa
 
     def __init__(
-        self, d=0.0, a=0.0, alpha=0.0, offset=0.0, qlim=None, flip=False, **kwargs
+        self, d: float = 0.0, a: float = 0.0, alpha: float = 0.0, offset: float = 0.0,
+        qlim: ArrayLike | None = None, flip: bool = False, **kwargs
     ):
 
         theta = 0.0
@@ -774,25 +757,20 @@ class RevoluteDH(DHLink):
 
 class PrismaticDH(DHLink):
     r"""
-    Class for prismatic link using standard DH convention
+    Class for prismatic link using standard DH convention.
+
     :param theta: kinematic: joint angle
-    :type theta: float
-    :param d: kinematic - link offset
-    :type d: float
     :param alpha: kinematic - link twist
-    :type alpha: float
     :param a: kinematic - link length
-    :type a: float
     :param offset: kinematic - joint variable offset
-    :type offset: float
     :param qlim: joint variable limits [min, max]
-    :type qlim: float ndarray(1,2)
+    :type qlim: ndarray(2,)
     :param flip: joint moves in opposite direction
-    :type flip: bool
+
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
-    :type r:  float ndarray(3)
+    :type r: ndarray(3,)
     :param I: dynamic - inertia of link with respect to COM
     :type I: ndarray
     :param Jm: dynamic - motor inertia
@@ -816,7 +794,8 @@ class PrismaticDH(DHLink):
     """  # noqa
 
     def __init__(
-        self, theta=0.0, a=0.0, alpha=0.0, offset=0.0, qlim=None, flip=False, **kwargs
+        self, theta: float = 0.0, a: float = 0.0, alpha: float = 0.0,
+        offset: float = 0.0, qlim: ArrayLike | None = None, flip: bool = False, **kwargs
     ):
 
         d = 0.0
@@ -839,26 +818,20 @@ class PrismaticDH(DHLink):
 
 class RevoluteMDH(DHLink):
     r"""
-    Class for revolute links using modified DH convention
+    Class for revolute links using modified DH convention.
 
     :param d: kinematic - link offset
-    :type d: float
     :param alpha: kinematic - link twist
-    :type alpha: float
     :param a: kinematic - link length
-    :type a: float
     :param offset: kinematic - joint variable offset
-    :type offset: float
-
     :param qlim: joint variable limits [min, max]
-    :type qlim: float ndarray(1,2)
+    :type qlim: ndarray(2,)
     :param flip: joint moves in opposite direction
-    :type flip: bool
 
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
-    :type r:  float ndarray(3)
+    :type r: ndarray(3,)
     :param I: dynamic - inertia of link with respect to COM
     :type I: ndarray
     :param Jm: dynamic - motor inertia
@@ -887,7 +860,8 @@ class RevoluteMDH(DHLink):
     """  # noqa
 
     def __init__(
-        self, d=0.0, a=0.0, alpha=0.0, offset=0.0, qlim=None, flip=False, **kwargs
+        self, d: float = 0.0, a: float = 0.0, alpha: float = 0.0, offset: float = 0.0,
+        qlim: ArrayLike | None = None, flip: bool = False, **kwargs
     ):
 
         theta = 0.0
@@ -910,28 +884,20 @@ class RevoluteMDH(DHLink):
 
 class PrismaticMDH(DHLink):
     r"""
-    Class for prismatic link using modified DH convention
+    Class for prismatic link using modified DH convention.
 
     :param theta: kinematic: joint angle
-    :type theta: float
-    :param d: kinematic - link offset
-    :type d: float
     :param alpha: kinematic - link twist
-    :type alpha: float
     :param a: kinematic - link length
-    :type a: float
     :param offset: kinematic - joint variable offset
-    :type offset: float
-
     :param qlim: joint variable limits [min, max]
-    :type qlim: float ndarray(1,2)
+    :type qlim: ndarray(2,)
     :param flip: joint moves in opposite direction
-    :type flip: bool
 
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
-    :type r:  float ndarray(3)
+    :type r: ndarray(3,)
     :param I: dynamic - inertia of link with respect to COM
     :type I: ndarray
     :param Jm: dynamic - motor inertia
@@ -960,7 +926,8 @@ class PrismaticMDH(DHLink):
     """  # noqa
 
     def __init__(
-        self, theta=0.0, a=0.0, alpha=0.0, offset=0.0, qlim=None, flip=False, **kwargs
+        self, theta: float = 0.0, a: float = 0.0, alpha: float = 0.0,
+        offset: float = 0.0, qlim: ArrayLike | None = None, flip: bool = False, **kwargs
     ):
 
         d = 0.0

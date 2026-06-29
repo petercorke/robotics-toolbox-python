@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from copy import deepcopy
 from abc import ABC
 from typing_extensions import Self
@@ -9,7 +11,7 @@ from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from spatialmath import SE3, SE2
 from ansitable import ANSITable, Column
 from spatialgeometry import Shape, SceneNode, SceneGroup
-from typing import List, Union, Tuple, overload
+from typing import overload
 
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
@@ -88,48 +90,22 @@ class BaseLink(SceneNode, ABC):
     """
     An abstract link superclass for all link types.
 
-    Parameters
-    ----------
-    ets
-        kinematic - The elementary transforms which make up the link
-    name
-        name of the link
-    parent
-        a reference to the parent link in the kinematic chain
-    joint_name
-        the name of the joint variable
-    m
-        dynamic - link mass
-    r
-        dynamic - position of COM with respect to link frame
-    I
-        dynamic - inertia of link with respect to COM
-    Jm
-        dynamic - motor inertia
-    B
-        dynamic - motor viscous friction
-    Tc
-        dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
-    G
-        dynamic - gear ratio
-    qlim
-        joint variable limits [min, max]
-    geometry
-        the visual geometry which represents the link. This is used
+    :param ets: kinematic - The elementary transforms which make up the link
+    :param name: name of the link
+    :param parent: a reference to the parent link in the kinematic chain
+    :param joint_name: the name of the joint variable
+    :param m: dynamic - link mass
+    :param r: dynamic - position of COM with respect to link frame
+    :param I: dynamic - inertia of link with respect to COM
+    :param Jm: dynamic - motor inertia
+    :param B: dynamic - motor viscous friction
+    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
+    :param G: dynamic - gear ratio
+    :param qlim: joint variable limits [min, max]
+    :param geometry: the visual geometry which represents the link. This is used
         to display the link in Swift
-    collision
-        the collision geometry which represents the link in collision
+    :param collision: the collision geometry which represents the link in collision
         checkers
-
-
-    .. inheritance-diagram:: roboticstoolbox.RevoluteDH
-        roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH
-        roboticstoolbox.PrismaticMDH roboticstoolbox.Link
-        :top-classes: roboticstoolbox.robot.Link
-        :parts: 2
-
-    Synopsis
-    --------
 
     It holds metadata related to:
 
@@ -138,8 +114,14 @@ class BaseLink(SceneNode, ABC):
     - a robot joint, that connects this link to its parent, such as joint
       limits, direction of motion, motor and transmission parameters.
 
-    Notes
-    -----
+    .. inheritance-diagram:: roboticstoolbox.RevoluteDH
+        roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH
+        roboticstoolbox.PrismaticMDH roboticstoolbox.Link
+        :top-classes: roboticstoolbox.robot.Link
+        :parts: 2
+
+    .. rubric:: Notes
+
     - For a more sophisticated actuator model use the ``actuator``
         attribute which is not initialized or used by this Toolbox.
     - There is no ability to name a joint as supported by URDF
@@ -148,22 +130,22 @@ class BaseLink(SceneNode, ABC):
 
     def __init__(
         self,
-        ets: Union[ETS, ETS2, ET, ET2] = ETS(),
+        ets: ETS | ETS2 | ET | ET2 = ETS(),
         name=None,
-        parent: Union[Self, str, None] = None,
-        joint_name: Union[str, None] = None,
-        m: Union[float, None] = None,
-        r: Union[ArrayLike, None] = None,
-        I: Union[ArrayLike, None] = None,  # noqa
-        Jm: Union[float, None] = None,
-        B: Union[float, None] = None,
-        Tc: Union[ArrayLike, None] = None,
-        G: Union[float, None] = None,
-        qlim: Union[ArrayLike, None] = None,
+        parent: Self | str | None = None,
+        joint_name: str | None = None,
+        m: float | None = None,
+        r: ArrayLike | None = None,
+        I: ArrayLike | None = None,  # noqa
+        Jm: float | None = None,
+        B: float | None = None,
+        Tc: ArrayLike | None = None,
+        G: float | None = None,
+        qlim: ArrayLike | None = None,
         qdlim: float | None = None,
         tlim: float | None = None,
-        geometry: List[Shape] = [],
-        collision: List[Shape] = [],
+        geometry: list[Shape] = [],
+        collision: list[Shape] = [],
         **kwargs,
     ):
         # Initialise the scene node
@@ -277,19 +259,17 @@ class BaseLink(SceneNode, ABC):
         self._Ts = T
 
     @property
-    def Ts(self) -> Union[NDArray, None]:
+    def Ts(self) -> NDArray | None:
         """
         Constant part of link ETS
+
+        :returns: constant part of link transform
+        :rtype: ndarray(4,4) or None
 
         The ETS for each Link comprises a constant part (possible the
         identity) followed by an optional joint variable transform.
         This property returns the constant part.  If no constant part
         is given, this returns an identity matrix.
-
-        Returns
-        -------
-        Ts
-            constant part of link transform
 
         Examples
         --------
@@ -317,15 +297,8 @@ class BaseLink(SceneNode, ABC):
         - ``link.ets`` is the link ets
         - ``link.ets = ...`` checks and sets the link ets
 
-        Parameters
-        ----------
-        ets
-            the new link ets
-
-        Returns
-        -------
-        ets
-            the current link ets
+        :param ets: the new link ets
+        :returns: the current link ets
 
         """
 
@@ -369,13 +342,9 @@ class BaseLink(SceneNode, ABC):
         """
         Pretty prints the ETS Model of the link
 
+        :returns: pretty print of the robot link
+
         Will output angles in degrees
-
-        Returns
-        -------
-        str
-            pretty print of the robot link
-
         """
 
         s = self.__class__.__name__ + "("
@@ -405,16 +374,11 @@ class BaseLink(SceneNode, ABC):
         """
         Pretty string for IPython
 
+        :param p: pretty printer handle (ignored)
+        :param cycle: pretty printer flag (ignored)
+
         Print colorized output when variable is displayed in IPython, ie. on a line by
         itself.
-
-        Parameters
-        ----------
-        p
-            pretty printer handle (ignored)
-        cycle
-            pretty printer flag (ignored)
-
         """
         # see
         # https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
@@ -427,14 +391,10 @@ class BaseLink(SceneNode, ABC):
         """
         Copy of link object
 
+        :returns: copy of link object
+
         ``link.copy()`` is a new Link subclass instance with a copy of all
         the parameters.
-
-        Returns
-        -------
-        link
-            copy of link object
-
         """
 
         return deepcopy(self)
@@ -491,24 +451,21 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @overload
-    def v(self: "Link") -> Union["ET", None]: ...  # pragma: nocover
+    def v(self: "Link") -> ET | None: ...  # pragma: nocover
 
     @overload
-    def v(self: "Link2") -> Union["ET2", None]: ...  # pragma: nocover
+    def v(self: "Link2") -> ET2 | None: ...  # pragma: nocover
 
     @property
     def v(self):
         """
         Variable part of link ETS
 
+        :returns: joint variable transform
+
         The ETS for each Link comprises a constant part (possible the
         identity) followed by an optional joint variable transform.
         This property returns the latter.
-
-        Returns
-        -------
-        v
-            joint variable transform
 
         Examples
         --------
@@ -530,10 +487,7 @@ class BaseLink(SceneNode, ABC):
         - ``link.name`` is the link name
         - ``link.name = ...`` checks and sets the link name
 
-        Returns
-        -------
-        name
-            link name
+        :returns: link name
 
         """
         return self._name
@@ -545,17 +499,14 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def robot(self) -> Union["rtb.BaseRobot", None]:
+    def robot(self) -> rtb.BaseRobot | None:
         """
         Get forward reference to the robot which owns this link
 
         - ``link.robot`` is the robot reference
         - ``link.robot = ...`` checks and sets the robot reference
 
-        Returns
-        -------
-        robot
-            The robot object
+        :returns: The robot object
 
         """
         return self._robot
@@ -570,27 +521,22 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def qlim(self) -> Union[NDArray, None]:
+    def qlim(self) -> NDArray | None:
         """
         Get/set joint limits
 
         - ``link.qlim`` is the joint limits
         - ``link.qlim = ...`` checks and sets the joint limits
 
-        Returns
-        -------
-        qlim
-            joint limits
+        :returns: joint limits
+        :rtype: ndarray(2,) or None
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - The limits are not widely enforced within the toolbox.
         - If no joint limits are specified the value is ``None``
 
-        See Also
-        --------
-        :func:`~islimit`
-
+        :seealso: :func:`~islimit`
         """
 
         if self.v:
@@ -606,27 +552,21 @@ class BaseLink(SceneNode, ABC):
             raise ValueError("Can not set qlim on a static joint")
 
     @property
-    def qdlim(self) -> Union[float, None]:
+    def qdlim(self) -> float | None:
         """
         Get/set joint velocity limits
 
         - ``link.qdlim`` is the joint velocity limits
         - ``link.qdlim = ...`` checks and sets the joint velocity limits
 
-        Returns
-        -------
-        qdlim
-            joint velocity limits
+        :returns: joint velocity limits
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - The limits are not widely enforced within the toolbox.
         - If no joint velocity limits are specified the value is ``None``
 
-        See Also
-        --------
-        :func:`~islimit`
-
+        :seealso: :func:`~islimit`
         """
 
         return self._qdlim
@@ -636,27 +576,21 @@ class BaseLink(SceneNode, ABC):
         self._qdlim = qdlim_new
 
     @property
-    def tlim(self) -> Union[float, None]:
+    def tlim(self) -> float | None:
         """
         Get/set joint torque limits
 
         - ``link.tlim`` is the joint torque/force limits
         - ``link.tlim = ...`` checks and sets the joint torque limits
 
-        Returns
-        -------
-        tlim
-            joint torque limits
+        :returns: joint torque limits
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - The limits are not widely enforced within the toolbox.
         - If no joint torque limits are specified the value is ``None``
 
-        See Also
-        --------
-        :func:`~islimit`
-
+        :seealso: :func:`~islimit`
         """
 
         return self._tlim   
@@ -670,16 +604,13 @@ class BaseLink(SceneNode, ABC):
         """
         Link has dynamic parameters (Link superclass)
 
+        :returns: Link has dynamic parameters
+
         Link has some assigned (non-default) dynamic parameters.  These could
         have been assigned:
 
         - at constructor time, eg. ``m=1.2``
         - by invoking a setter method, eg. ``link.m = 1.2``
-
-        Returns
-        -------
-        hasdynamics
-            Link has dynamic parameters
 
         Examples
         --------
@@ -698,6 +629,8 @@ class BaseLink(SceneNode, ABC):
         """
         Get/set joint flip
 
+        :returns: joint flip
+
         - ``link.flip`` is the joint flip status
         - ``link.flip = ...`` checks and sets the joint flip status
 
@@ -712,12 +645,6 @@ class BaseLink(SceneNode, ABC):
 
             - revolute motion is a negative rotation about the z-axis
             - prismatic motion is a negative translation along the z-axis
-
-        Returns
-        -------
-        isflip
-            joint flip
-
         """
 
         return self.v.isflip if self.v else False
@@ -732,10 +659,7 @@ class BaseLink(SceneNode, ABC):
         - ``link.m`` is the link mass
         - ``link.m = ...`` checks and sets the link mass
 
-        Returns
-        -------
-        m
-            link mass
+        :returns: link mass
 
         """
 
@@ -753,17 +677,14 @@ class BaseLink(SceneNode, ABC):
         """
         Get/set link centre of mass
 
+        :returns: link centre of mass
+        :rtype: ndarray(3,)
+
         The link centre of mass is a 3-vector defined with respect to the link
         frame.
 
         - ``link.r`` is the link centre of mass
         - ``link.r = ...`` checks and sets the link centre of mass
-
-        Returns
-        -------
-        r
-            link centre of mass
-
         """
 
         return self._r  # type: ignore
@@ -780,20 +701,15 @@ class BaseLink(SceneNode, ABC):
         r"""
         Get/set link inertia
 
+        :returns: link inertia
+        :rtype: ndarray(3,3)
+
         Link inertia is a symmetric 3x3 matrix describing the inertia with
         respect to a frame with its origin at the centre of mass, and with
         axes parallel to those of the link frame.
 
         - ``link.I`` is the link inertia
         - ``link.I = ...`` checks and sets the link inertia
-
-        Returns
-        -------
-        I
-            link inertia
-
-        Synopsis
-        --------
 
         The inertia matrix is
 
@@ -805,8 +721,8 @@ class BaseLink(SceneNode, ABC):
         - a 3-vector :math:`(I_{xx}, I_{yy}, I_{zz})`
         - a 6-vector :math:`(I_{xx}, I_{yy}, I_{zz}, I_{xy}, I_{yz}, I_{xz})`
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Referred to the link side of the gearbox.
 
         """  # noqa
@@ -857,13 +773,10 @@ class BaseLink(SceneNode, ABC):
         - ``link.Jm`` is the motor inertia
         - ``link.Jm = ...`` checks and sets the motor inertia
 
-        Returns
-        -------
-        Jm
-            motor inertia
+        :returns: motor inertia
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Referred to the motor side of the gearbox.
 
         """
@@ -885,13 +798,10 @@ class BaseLink(SceneNode, ABC):
         - ``link.B`` is the motor viscous friction
         - ``link.B = ...`` checks and sets the motor viscous friction
 
-        Returns
-        -------
-        B
-            motor viscous friction
+        :returns: motor viscous friction
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Referred to the motor side of the gearbox.
         - Viscous friction is the same for positive and negative motion.
 
@@ -913,6 +823,9 @@ class BaseLink(SceneNode, ABC):
         r"""
         Get/set motor Coulomb friction
 
+        :returns: motor Coulomb friction
+        :rtype: ndarray(2,)
+
         - ``link.Tc`` is the motor Coulomb friction
         - ``link.Tc = ...`` checks and sets the motor Coulomb friction. If a
           scalar is given the value is set to [T, -T], if a 2-vector it is
@@ -927,13 +840,8 @@ class BaseLink(SceneNode, ABC):
                 \tau_C^+ & \mbox{if $\dot{q} > 0$} \\
                 \tau_C^- & \mbox{if $\dot{q} < 0$} \end{array} \right.
 
-        Returns
-        -------
-        Tc
-            motor Coulomb friction
+        .. rubric:: Notes
 
-        Notes
-        -----
         -  Referred to the motor side of the gearbox.
         - :math:`\tau_C^+` must be :math:`> 0`, and :math:`\tau_C^-` must
             be :math:`< 0`.
@@ -969,20 +877,14 @@ class BaseLink(SceneNode, ABC):
         - ``link.G`` is the transmission gear ratio
         - ``link.G = ...`` checks and sets the gear ratio
 
-        Returns
-        -------
-        G
-            gear ratio
+        :returns: gear ratio
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - The ratio of motor motion : link motion
         - The gear ratio can be negative, see also the ``flip`` attribute.
 
-        See Also
-        --------
-        :func:`flip`
-
+        :seealso: :func:`flip`
         """
 
         return self._G
@@ -1028,7 +930,7 @@ class BaseLink(SceneNode, ABC):
         return self._collision
 
     @collision.setter
-    def collision(self, coll: Union[SceneGroup, List[Shape], Shape]):
+    def collision(self, coll: SceneGroup | list[Shape] | Shape):
         if isinstance(coll, list):
             self.collision.scene_children = coll  # type: ignore
         elif isinstance(coll, Shape):
@@ -1037,7 +939,7 @@ class BaseLink(SceneNode, ABC):
             self._collision = coll
 
     @geometry.setter
-    def geometry(self, geom: Union[SceneGroup, List[Shape], Shape]):
+    def geometry(self, geom: SceneGroup | list[Shape] | Shape):
         if isinstance(geom, list):
             self.geometry.scene_children = geom  # type: ignore
         elif isinstance(geom, Shape):
@@ -1052,15 +954,12 @@ class BaseLink(SceneNode, ABC):
         """
         Test if link has joint
 
+        :returns: test if link has a joint
+
         The ETS for each Link comprises a constant part (possible the
         identity) followed by an optional joint variable transform.
         This property returns the whether the Link contains the
         variable transform.
-
-        Returns
-        -------
-        isjoint
-            test if link has a joint
 
         Examples
         --------
@@ -1076,12 +975,14 @@ class BaseLink(SceneNode, ABC):
         return self._isjoint
 
     @property
-    def jindex(self) -> Union[None, int]:
+    def jindex(self) -> int | None:
         """
         Get/set joint index
 
         - ``link.jindex`` is the joint index
         - ``link.jindex = ...`` checks and sets the joint index
+
+        :returns: joint index
 
         For a serial-link manipulator the joints are numbered starting at zero
         and increasing sequentially toward the end-effector.  For branched
@@ -1089,13 +990,8 @@ class BaseLink(SceneNode, ABC):
         The link's ``jindex`` property specifies the index of its joint
         variable within a vector of joint coordinates.
 
-        Returns
-        -------
-        jindex
-            joint index
+        .. rubric:: Notes
 
-        Notes
-        -----
         - ``jindex`` values must be a sequence of integers starting
             at zero.
 
@@ -1113,10 +1009,7 @@ class BaseLink(SceneNode, ABC):
         """
         Checks if the joint is of prismatic type
 
-        Returns
-        -------
-        :return: True if is prismatic
-        :rtype: bool
+        :returns: True if is prismatic
         """
         return self.v.istranslation if self.v else False
 
@@ -1125,27 +1018,20 @@ class BaseLink(SceneNode, ABC):
         """
         Checks if the joint is of revolute type
 
-        Returns
-        -------
-        isrevolute
-            True if is revolute
-
+        :returns: True if is revolute
         """
 
         return self.v.isrotation if self.v else False
 
     @property
-    def parent(self) -> Union[Self, None]:
+    def parent(self) -> Self | None:
         """
         Parent link
 
+        :returns: Link's parent
+
         This is a reference to the links parent in the kinematic
         chain
-
-        Returns
-        -------
-        parent
-            Link's parent
 
         Examples
         --------
@@ -1160,18 +1046,15 @@ class BaseLink(SceneNode, ABC):
         return self._parent
 
     @parent.setter
-    def parent(self, parent: Union[Self, None]):
+    def parent(self, parent: Self | None):
         self._parent = parent
 
     @property
-    def parent_name(self) -> Union[str, None]:
+    def parent_name(self) -> str | None:
         """
         Parent link name
 
-        Returns
-        -------
-        parent_name
-            Link's parent name
+        :returns: Link's parent name
 
         """
 
@@ -1181,17 +1064,13 @@ class BaseLink(SceneNode, ABC):
             return self._parent_name
 
     @property
-    def children(self) -> Union[List["Link"], None]:
+    def children(self) -> list[Link] | None:
         """
         List of child links
 
+        :returns: child links
+
         The list will be empty for a end-effector link
-
-        Returns
-        -------
-        children
-            child links
-
         """
 
         return self._children
@@ -1201,50 +1080,30 @@ class BaseLink(SceneNode, ABC):
         """
         Number of child links
 
+        :returns: number of child links
+
         Will be zero for an end-effector link
-
-        Returns
-        -------
-        nchildren
-            number of child links
-
         """
         return len(self._children)
 
     def closest_point(
         self, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    ) -> Tuple[
-        Union[int, None],
-        Union[NDArray, None],
-        Union[NDArray, None],
-    ]:
+    ) -> tuple[int | None, NDArray | None, NDArray | None]:
         """
         Finds the closest point to a shape
+
+        :param shape: The shape to compare distance to
+        :param inf_dist: The minimum distance within which to consider the shape
+        :param skip: Skip setting all shape transforms
+        :returns: (d, p1, p2) where d is the distance between the shapes,
+            p1 is the point in the world frame on the link [x, y, z], and
+            p2 is the point in the world frame on the shape [x, y, z].
 
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this link and shape, provided it is less than
         inf_dist. It will also return the points on self and shape in the
         world frame which connect the line of length distance between the
         shapes. If the distance is negative then the shapes are collided.
-
-        Parameters
-        ----------
-        :param shape: The shape to compare distance to
-        :param inf_dist: The minimum distance within which to consider
-            the shape
-        :param skip: Skip setting all shape transforms
-
-        Returns
-        -------
-        d
-            d is the distance between the shapes
-        p1
-            the points in the world frame on the link
-            shape. The points returned are [x, y, z].
-        p2
-            the points in the world frame the
-            shape. The points returned are [x, y, z].
-
         """
 
         if not skip:
@@ -1273,20 +1132,11 @@ class BaseLink(SceneNode, ABC):
         """
         Checks for collision with a shape
 
+        :param shape: The shape to compare distance to
+        :param skip: Skip setting all shape transforms
+        :returns: True if shapes have collided
+
         ``iscollided(shape)`` checks if this link and shape have collided
-
-        Parameters
-        ----------
-        shape
-            The shape to compare distance to
-        skip
-            Skip setting all shape transforms
-
-        Returns
-        -------
-        iscollided
-            True if shapes have collided
-
         """
 
         if not skip:
@@ -1304,20 +1154,11 @@ class BaseLink(SceneNode, ABC):
         """
         Checks for collision with a shape
 
+        :param shape: The shape to compare distance to
+        :param skip: Skip setting all shape transforms
+        :returns: True if shapes have collided
+
         ``iscollided(shape)`` checks if this link and shape have collided
-
-        Parameters
-        ----------
-        shape
-            The shape to compare distance to
-        skip
-            Skip setting all shape transforms
-
-        Returns
-        -------
-        iscollided
-            True if shapes have collided
-
         """
 
         warn("base kwarg is deprecated, use pose instead", FutureWarning)
@@ -1327,14 +1168,11 @@ class BaseLink(SceneNode, ABC):
         """
         Inertial properties of link as a string
 
+        :param indent: indent each line by this many spaces
+
         ``link.dyn()`` is a string representation the inertial properties of
         the link object in a multi-line format. The properties shown are mass,
         centre of mass, inertia, friction, gear ratio and motor properties.
-
-        Parameters
-        ----------
-        indent
-            indent each line by this many spaces
 
         Examples
         --------
@@ -1344,10 +1182,7 @@ class BaseLink(SceneNode, ABC):
         >>> print(robot.links[2])        # kinematic parameters
         >>> print(robot.links[2].dyn())  # dynamic parameters
 
-        See Also
-        --------
-        :func:`~dyntable`
-
+        :seealso: :func:`~dyntable`
         """
 
         qlim = [0, 0] if self.qlim is None else self.qlim
@@ -1399,23 +1234,14 @@ class BaseLink(SceneNode, ABC):
         """
         Inertial properties of link as a string
 
+        :param fmt: conversion format for each number
+        :returns: The string representation of the link dynamics
+
         ``link._dyn2list()`` returns a list of pretty-printed inertial
         properties of the link The properties included are mass, centre of
         mass, inertia, friction, gear ratio and motor properties.
 
-        Parameters
-        ----------
-        :param fmt: conversion format for each number
-
-        Returns
-        -------
-        dyn2list
-            The string representation of the link dynamics
-
-        See Also
-        --------
-        :func:`~dyn`
-
+        :seealso: :func:`~dyn`
         """
 
         ANSITable(
@@ -1519,27 +1345,17 @@ class BaseLink(SceneNode, ABC):
         """
         Checks if joint exceeds limit
 
+        :param q: joint coordinate
+        :returns: True if joint is exceeded
+
         ``link.islimit(q)`` is True if ``q`` exceeds the joint limits defined
         by ``link``.
 
-        Parameters
-        ----------
-        q
-            joint coordinate
+        .. rubric:: Notes
 
-        Returns
-        -------
-        islimit
-            True if joint is exceeded
-
-        Notes
-        -----
         - If no limits are set always return False.
 
-        See Also
-        --------
-        :func:`qlim`
-
+        :seealso: :func:`qlim`
         """
 
         if self.qlim is None:
@@ -1551,19 +1367,15 @@ class BaseLink(SceneNode, ABC):
         """
         Clone link without friction
 
+        :param coulomb: if True, will set the Coulomb friction to 0
+        :param viscous: if True, will set the viscous friction to 0
+
         ``link.nofriction()`` is a copy of the link instance with the same
         parameters except, the Coulomb and/or viscous friction parameters are
         set to zero.
 
-        Parameters
-        ----------
-        coulomb
-            if True, will set the Coulomb friction to 0
-        viscous
-            if True, will set the viscous friction to 0
+        .. rubric:: Notes
 
-        Notes
-        -----
         - For simulation it can be useful to remove Couloumb friction
             which can cause problems for numerical integration.
 
@@ -1584,6 +1396,10 @@ class BaseLink(SceneNode, ABC):
         r"""
         Compute joint friction
 
+        :param qd: The joint velocity
+        :param coulomb: include Coulomb friction
+        :returns: the friction force/torque
+
         ``friction(qd)`` is the joint friction force/torque
         for joint velocity ``qd``. The friction model includes:
 
@@ -1596,20 +1412,8 @@ class BaseLink(SceneNode, ABC):
                 \tau_C^+ & \mbox{if $\dot{q} > 0$} \\
                 \tau_C^- & \mbox{if $\dot{q} < 0$} \end{array} \right.
 
-        Parameters
-        ----------
-        qd
-            The joint velocity
-        coulomb
-            include Coulomb friction
+        .. rubric:: Notes
 
-        Returns
-        -------
-        tau
-            the friction force/torque
-
-        Notes
-        -----
         - The friction value should be added to the motor output torque to
             determine the nett torque. It has a negative value when qd > 0.
         - The returned friction value is referred to the output of the
@@ -1647,6 +1451,24 @@ class Link(BaseLink):
     """
     ETS link class
 
+    :param ets: kinematic - The elementary transforms which make up the link
+    :param jindex: the joint variable index
+    :param name: name of the link
+    :param parent: a reference to the parent link in the kinematic chain
+    :param joint_name: the name of the joint variable
+    :param m: dynamic - link mass
+    :param r: dynamic - position of COM with respect to link frame
+    :param I: dynamic - inertia of link with respect to COM
+    :param Jm: dynamic - motor inertia
+    :param B: dynamic - motor viscous friction
+    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
+    :param G: dynamic - gear ratio
+    :param qlim: joint variable limits [min, max]
+    :param geometry: the visual geometry which represents the link. This is used
+        to display the link in Swift
+    :param collision: the collision geometry which represents the link in collision
+        checkers
+
     The Link object holds all information related to a robot link and can form
     a serial-connected chain or a rigid-body tree.
     It inherits from the Link class which provides common functionality such
@@ -1654,54 +1476,15 @@ class Link(BaseLink):
     The transform to the next link is given as an ETS with the joint
     variable, if present, as the last term.  This is preprocessed and
     the object stores:
+
     - ``Ts`` the constant part as a NumPy array, or None
-    - ``v`` a pointer to an ETS object representing the joint variable.
-        or None
+    - ``v`` a pointer to an ETS object representing the joint variable, or None
 
-    Parameters
-    ----------
-    ets
-        kinematic - The elementary transforms which make up the link
-    jindex
-        the joint variable index
-    name
-        name of the link
-    parent
-        a reference to the parent link in the kinematic chain
-    joint_name
-        the name of the joint variable
-    m
-        dynamic - link mass
-    r
-        dynamic - position of COM with respect to link frame
-    I
-        dynamic - inertia of link with respect to COM
-    Jm
-        dynamic - motor inertia
-    B
-        dynamic - motor viscous friction
-    Tc
-        dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
-    G
-        dynamic - gear ratio
-    qlim
-        joint variable limits [min, max]
-    geometry
-        the visual geometry which represents the link. This is used
-        to display the link in Swift
-    collision
-        the collision geometry which represents the link in collision
-        checkers
-
-    See Also
-    --------
-    :class:`Link2`
-    :class:`DHLink`
-
+    :seealso: :class:`Link2`, :class:`DHLink`
     """
 
     def __init__(
-        self, ets: Union[ETS, ET] = ETS(), jindex: Union[None, int] = None, **kwargs
+        self, ets: ETS | ET = ETS(), jindex: int | None = None, **kwargs
     ):
         # process common options
         super().__init__(ets=ets, **kwargs)
@@ -1720,21 +1503,13 @@ class Link(BaseLink):
         """
         Link transform matrix
 
+        :param q: Joint coordinate (radians or metres). Not required for links
+            with no variable
+        :returns: link frame transformation matrix
+
         ``link.A(q)`` is an SE(3) matrix that describes the rigid-body
         transformation from the previous to the current link frame to
         the next, which depends on the joint coordinate ``q``.
-
-        Parameters
-        ----------
-        q
-            Joint coordinate (radians or metres). Not required for links
-            with no variable
-
-        Returns
-        -------
-        T
-            link frame transformation matrix
-
         """
         if self.isjoint:
             if self._Ts is not None:
@@ -1749,7 +1524,7 @@ class Link(BaseLink):
 
 
 class Link2(BaseLink):
-    def __init__(self, ets: ETS2 = ETS2(), jindex: Union[int, None] = None, **kwargs):
+    def __init__(self, ets: ETS2 = ETS2(), jindex: int | None = None, **kwargs):
         # process common options
         super().__init__(ets=ets, **kwargs)
 
@@ -1766,21 +1541,13 @@ class Link2(BaseLink):
         """
         Link transform matrix
 
+        :param q: Joint coordinate (radians or metres). Not required for links
+            with no variable
+        :returns: link frame transformation matrix
+
         ``link.A(q)`` is an SE(2) matrix that describes the rigid-body
         transformation from the previous to the current link frame to
         the next, which depends on the joint coordinate ``q``.
-
-        Parameters
-        ----------
-        q
-            Joint coordinate (radians or metres). Not required for links
-            with no variable
-
-        Returns
-        -------
-        T
-            link frame transformation matrix
-
         """
 
         if self.isjoint:

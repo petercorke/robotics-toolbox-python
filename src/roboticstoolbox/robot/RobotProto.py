@@ -1,5 +1,5 @@
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-from typing import Any, Callable, List, Literal, Optional, Union, Dict
+from typing import Any, Callable, Literal
 from typing_extensions import Protocol, Self
 
 from roboticstoolbox.robot.Link import Link, BaseLink
@@ -20,8 +20,8 @@ class KinematicsProtocol(Protocol):
 
     def ets(
         self,
-        start: Union[Link, Gripper, str, None] = None,
-        end: Union[Link, Gripper, str, None] = None,
+        start: Link | Gripper | str | None = None,
+        end: Link | Gripper | str | None = None,
     ) -> ETS: ...
 
 
@@ -38,7 +38,7 @@ class RobotProto(Protocol):
     # ------------------------------------------------------------------
 
     @property
-    def links(self) -> List[BaseLink]: ...
+    def links(self) -> list[BaseLink]: ...
 
     @property
     def n(self) -> int: ...
@@ -62,34 +62,34 @@ class RobotProto(Protocol):
     def jacobe(
         self,
         q: ArrayLike,
-        end: Union[str, BaseLink, Gripper, None] = None,
-        start: Union[str, BaseLink, Gripper, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        end: str | BaseLink | Gripper | None = None,
+        start: str | BaseLink | Gripper | None = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray: ...
 
     def jacob0(
         self,
         q: ArrayLike,
-        end: Union[str, BaseLink, Gripper, None] = None,
-        start: Union[str, BaseLink, Gripper, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        end: str | BaseLink | Gripper | None = None,
+        start: str | BaseLink | Gripper | None = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray: ...
 
     def jacob0_analytical(
         self,
         q: ArrayLike,
         representation: Literal["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
-        end: Union[str, BaseLink, Gripper, None] = None,
-        start: Union[str, BaseLink, Gripper, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        end: str | BaseLink | Gripper | None = None,
+        start: str | BaseLink | Gripper | None = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray: ...
 
     def jacob0_dot(
         self,
         q: ArrayLike,
         qd: ArrayLike,
-        J0: Optional[NDArray] = None,
-        representation: Optional[Literal["rpy/xyz", "rpy/zyx", "eul", "exp"]] = None,
+        J0: NDArray | None = None,
+        representation: Literal["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
     ) -> NDArray: ...
 
     # ------------------------------------------------------------------
@@ -104,25 +104,25 @@ class RobotProto(Protocol):
         qd: NDArray,
         qdd: NDArray,
         symbolic: bool = False,
-        gravity: Union[None, ArrayLike] = None,
+        gravity: ArrayLike | None = None,
     ) -> NDArray: ...
 
     def inertia(self, q: NDArray) -> NDArray: ...
 
     def inertia_x(
         self,
-        q: Optional[ArrayLike] = None,
+        q: ArrayLike | None = None,
         pinv: bool = False,
         representation: Literal["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
-        Ji: Optional[NDArray] = None,
+        Ji: NDArray | None = None,
     ) -> NDArray: ...
 
     def coriolis(self, q: ArrayLike, qd: ArrayLike) -> NDArray: ...
 
     def gravload(
         self,
-        q: Union[None, ArrayLike] = None,
-        gravity: Union[None, ArrayLike] = None,
+        q: ArrayLike | None = None,
+        gravity: ArrayLike | None = None,
     ) -> NDArray: ...
 
     def accel(
@@ -130,14 +130,14 @@ class RobotProto(Protocol):
         q: ArrayLike,
         qd: ArrayLike,
         torque: ArrayLike,
-        gravity: Optional[ArrayLike] = None,
+        gravity: ArrayLike | None = None,
     ) -> NDArray: ...
 
     def pay(
         self,
         W: ArrayLike,
-        q: Union[NDArray, None] = None,
-        J: Union[NDArray, None] = None,
+        q: NDArray | None = None,
+        J: NDArray | None = None,
         frame: int = 1,
     ) -> NDArray: ...
 
@@ -150,7 +150,7 @@ class RobotProto(Protocol):
         t: float,
         x: NDArray,
         torqfun: Callable[[Any], NDArray],
-        targs: Dict,
+        targs: dict,
     ) -> NDArray: ...
 
     def delete_rne(self) -> None: ...

@@ -5,21 +5,14 @@
 @author: Peter Corke
 """
 
+from __future__ import annotations
+
 # import sys
 from os.path import splitext
 from copy import deepcopy
 from warnings import warn
 from pathlib import PurePosixPath, Path
-from typing import (
-    List,
-    TextIO,
-    TypeVar,
-    Union,
-    Dict,
-    Tuple,
-    overload,
-)
-from typing_extensions import Literal as L
+from typing import TextIO, TypeVar, Literal as L, overload
 
 
 import numpy as np
@@ -66,17 +59,17 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def __init__(
         self,
-        arg: Union[List[Link], ETS, "Robot"],
-        gripper_links: Union[Link, List[Link], None] = None,
+        arg: list[Link] | ETS | Robot,
+        gripper_links: Link | list[Link] | None = None,
         name: str = "",
         manufacturer: str = "",
         comment: str = "",
-        base: Union[NDArray, SE3, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        base: NDArray | SE3 | None = None,
+        tool: NDArray | SE3 | None = None,
         gravity: ArrayLike = [0, 0, -9.81],
-        keywords: Union[List[str], Tuple[str]] = [],
+        keywords: list[str] | tuple[str, ...] = [],
         symbolic: bool = False,
-        configs: Union[Dict[str, NDArray], None] = None,
+        configs: dict[str, NDArray] | None = None,
         check_jindex: bool = True,
     ):
         # Process links
@@ -605,21 +598,17 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         r"""
         Reach of the robot
 
+        :returns: Maximum reach of the robot
+        :rtype: float
+
         A conservative estimate of the reach of the robot. It is computed as
         the sum of the translational ETs that define the link transform.
 
-        Note
-        ----
         Computed on the first access. If kinematic parameters
         subsequently change this will not be reflected.
 
-        Returns
-        -------
-        reach
-            Maximum reach of the robot
+        .. rubric:: Notes
 
-        Notes
-        -----
         - Probably an overestimate of reach
         - Used by numerical inverse kinematics to scale translational
           error.
@@ -661,24 +650,17 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         """
         Compute the pose of every link frame
 
+        :param q: The joint configuration
+        :returns: Pose of all links
+
         ``T = robot.fkine_all(q)`` is  an SE3 instance with ``robot.nlinks +
         1`` values:
 
         - ``T[0]`` is the base transform
         - ``T[i]`` is the pose of link whose ``number`` is ``i``
 
-        Parameters
-        ----------
-        q
-            The joint configuration
+        .. rubric:: References
 
-        Returns
-        -------
-        fkine_all
-            Pose of all links
-
-        References
-        ----------
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
@@ -724,14 +706,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         self,
         q: ArrayLike = ...,
         J: None = None,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         method: L[
             "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
         ] = "yoshikawa",
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
         **kwargs,
-    ) -> Union[float, NDArray]:  # pragma nocover
+    ) -> float | NDArray:  # pragma nocover
         ...
 
     @overload
@@ -739,57 +721,43 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         self,
         q: None = None,
         J: NDArray = ...,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         method: L[
             "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
         ] = "yoshikawa",
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
         **kwargs,
-    ) -> Union[float, NDArray]:  # pragma nocover
+    ) -> float | NDArray:  # pragma nocover
         ...
 
     def manipulability(
         self,
         q=None,
         J=None,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
         method: L[
             "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
         ] = "yoshikawa",
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
         **kwargs,
     ):
         """
         Manipulability measure
+
+        :param q: Joint coordinates, one of J or q required
+        :param J: Jacobian in base frame if already computed, one of J or q required
+        :param method: method to use, "yoshikawa" (default), "invcondition",
+            "minsingular"  or "asada"
+        :param axes: Task space axes to consider: "all" [default], "trans", or "rot"
+        :returns: manipulability index
 
         ``manipulability(q)`` is the scalar manipulability index
         for the robot at the joint configuration ``q``.  It indicates
         dexterity, that is, how well conditioned the robot is for motion
         with respect to the 6 degrees of Cartesian motion.  The values is
         zero if the robot is at a singularity.
-
-        Parameters
-        ----------
-        q
-            Joint coordinates, one of J or q required
-        J
-            Jacobian in base frame if already computed, one of J or
-            q required
-        method
-            method to use, "yoshikawa" (default), "invcondition",
-            "minsingular"  or "asada"
-        axes
-            Task space axes to consider: "all" [default],
-            "trans", or "rot"
-
-        Returns
-        -------
-        manipulability
-
-        Synopsis
-        --------
 
         Various measures are supported:
 
@@ -811,8 +779,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         manipulability indices for each joint configuration specified by a row
         of ``q``.
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
         - The "all" option includes rotational and translational
             dexterity, but this involves adding different units. It can be
@@ -823,8 +791,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         - Asada's measure requires inertial a robot model with inertial
             parameters.
 
-        References
-        ----------
+        .. rubric:: References
+
         .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
                 The International Journal of Robotics Research.
                 1985;4(2):3-9. doi:10.1177/027836498500400201
@@ -846,7 +814,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         ets = self.ets(end, start)
 
-        axes_list: List[bool] = []
+        axes_list: list[bool] = []
 
         if isinstance(axes, list):
             axes_list = axes
@@ -938,13 +906,19 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def jtraj(
         self,
-        T1: Union[NDArray, SE3],
-        T2: Union[NDArray, SE3],
-        t: Union[NDArray, int],
+        T1: NDArray | SE3,
+        T2: NDArray | SE3,
+        t: NDArray | int,
         **kwargs,
     ):
         """
         Joint-space trajectory between SE(3) poses
+
+        :param T1: initial end-effector pose
+        :param T2: final end-effector pose
+        :param t: time vector or number of steps
+        :param kwargs: arguments passed to the IK solver
+        :returns: trajectory
 
         The initial and final poses are mapped to joint space using inverse
         kinematics:
@@ -954,21 +928,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
         attribute ``traj.q`` is a row-wise joint-space trajectory.
-
-        Parameters
-        ----------
-        T1
-            initial end-effector pose
-        T2
-            final end-effector pose
-        t
-            time vector or number of steps
-        kwargs
-            arguments passed to the IK solver
-
-        Returns
-        -------
-        trajectory
 
         """  # noqa
 
@@ -988,9 +947,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: ArrayLike,
         qd: ArrayLike,
         J0: None = None,
-        representation: Union[
-            L["rpy/xyz", "rpy/zyx", "eul", "exp"], None  # noqa
-        ] = None,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,  # noqa
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1000,9 +957,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: None,
         qd: ArrayLike,
         J0: NDArray = ...,
-        representation: Union[
-            L["rpy/xyz", "rpy/zyx", "eul", "exp"], None  # noqa
-        ] = None,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,  # noqa
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1011,12 +966,16 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q,
         qd: ArrayLike,
         J0=None,
-        representation: Union[
-            L["rpy/xyz", "rpy/zyx", "eul", "exp"], None  # noqa
-        ] = None,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,  # noqa
     ):
         r"""
         Derivative of Jacobian
+
+        :param q: The joint configuration of the robot
+        :param qd: The joint velocity of the robot
+        :param J0: Jacobian in {0} frame
+        :param representation: angular representation
+        :returns: The derivative of the manipulator Jacobian
 
         ``robot.jacob_dot(q, qd)`` computes the rate of change of the
         Jacobian elements
@@ -1026,25 +985,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             \dmat{J} = \frac{d \mat{J}}{d \vec{q}} \frac{d \vec{q}}{dt}
 
         where the first term is the rank-3 Hessian.
-
-        Parameters
-        ----------
-        q
-        The joint configuration of the robot
-        qd
-            The joint velocity of the robot
-        J0
-            Jacobian in {0} frame
-        representation
-            angular representation
-
-        Returns
-        -------
-        jdot
-            The derivative of the manipulator Jacobian
-
-        Synopsis
-        --------
 
         If ``J0`` is already calculated for the joint
         coordinates ``q`` it can be passed in to to save computation time.
@@ -1069,9 +1009,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
            * - ``'exp'``
              - exponential coordinate rates
 
+        .. rubric:: References
 
-        References
-        ----------
         - Kinematic Derivatives using the Elementary Transform
             Sequence, J. Haviland and P. Corke
 
@@ -1125,9 +1064,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: ArrayLike = ...,
         J: None = None,
         H: None = None,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1137,9 +1076,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: None = None,
         J: NDArray = ...,
         H: NDArray = ...,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1148,38 +1087,25 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q=None,
         J=None,
         H=None,
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
     ) -> NDArray:
         r"""
         The manipulability Jacobian
 
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :param J: The manipulator Jacobian in any frame
+        :param H: The manipulator Hessian in any frame
+        :param end: the final link or Gripper which the Hessian represents
+        :param start: the first link which the Hessian represents
+        :returns: The manipulability Jacobian
+
         This measure relates the rate of change of the manipulability to the
         joint velocities of the robot. One of J or q is required. Supply J
-        and H if already calculated to save computation time
+        and H if already calculated to save computation time.
 
-        Parameters
-        ----------
-        q
-            The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        J
-            The manipulator Jacobian in any frame
-        H
-            The manipulator Hessian in any frame
-        end
-            the final link or Gripper which the Hessian represents
-        start
-            the first link which the Hessian represents
-
-        Returns
-        -------
-        jacobm
-            The manipulability Jacobian
-
-        Synopsis
-        --------
         Yoshikawa's manipulability measure
 
         .. math::
@@ -1192,8 +1118,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
             \frac{\partial m(\vec{q})}{\partial \vec{q}}
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -1261,39 +1187,21 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def closest_point(
         self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    ) -> Tuple[
-        Union[int, None],
-        Union[NDArray, None],
-        Union[NDArray, None],
-    ]:
+    ) -> tuple[int | None, NDArray | None, NDArray | None]:
         """
         Find the closest point between robot and shape
+
+        :param shape: The shape to compare distance to
+        :param inf_dist: The minimum distance within which to consider the shape
+        :param skip: Skip setting all shape transforms based on q, use this
+            option if using this method in conjuction with Swift to save time
+        :returns: tuple of (distance, point on robot, point on shape)
 
         ``closest_point(shape, inf_dist)`` returns the minimum euclidean
         distance between this robot and shape, provided it is less than
         inf_dist. It will also return the points on self and shape in the
         world frame which connect the line of length distance between the
         shapes. If the distance is negative then the shapes are collided.
-
-        Parameters
-        ----------
-        shape
-            The shape to compare distance to
-        inf_dist
-            The minimum distance within which to consider
-            the shape
-        skip
-            Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
-
-        Returns
-        -------
-        d
-            distance between the robot and shape
-        p1
-            [x, y, z] point on the robot (in the world frame)
-        p2
-            [x, y, z] point on the shape (in the world frame)
 
         """
 
@@ -1323,20 +1231,12 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         """
         Check if the robot is in collision with a shape
 
-        ``iscollided(shape)`` checks if this robot and shape have collided
-
-        Parameters
-        ----------
-        shape
-            The shape to compare distance to
-        skip
-            Skip setting all shape transforms based on q, use this
+        :param shape: The shape to compare distance to
+        :param skip: Skip setting all shape transforms based on q, use this
             option if using this method in conjuction with Swift to save time
+        :returns: True if shapes have collided
 
-        Returns
-        -------
-        iscollided
-            True if shapes have collided
+        ``iscollided(shape)`` checks if this robot and shape have collided
 
         """
 
@@ -1361,20 +1261,12 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         """
         Check if the robot is in collision with a shape
 
-        ``collided(shape)`` checks if this robot and shape have collided
-
-        Parameters
-        ----------
-        shape
-            The shape to compare distance to
-        skip
-            Skip setting all shape transforms based on q, use this
+        :param shape: The shape to compare distance to
+        :param skip: Skip setting all shape transforms based on q, use this
             option if using this method in conjuction with Swift to save time
+        :returns: True if shapes have collided
 
-        Returns
-        -------
-        collided
-            True if shapes have collided
+        ``collided(shape)`` checks if this robot and shape have collided
 
         """
 
@@ -1390,36 +1282,24 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q=None,
         ps: float = 0.05,
         pi: float = 0.1,
-        n: Union[int, None] = None,
+        n: int | None = None,
         gain: float = 1.0,
-    ) -> Tuple[NDArray, NDArray]:
+    ) -> tuple[NDArray, NDArray]:
         """
         Compute the joint velocity damper for QP motion control
+
+        :param ps: The minimum angle (in radians) in which the joint is
+            allowed to approach to its limit
+        :param pi: The influence angle (in radians) in which the velocity
+            damper becomes active
+        :param n: The number of joints to consider. Defaults to all joints
+        :param gain: The gain for the velocity damper
+        :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
         Formulates an inequality contraint which, when optimised for will
         make it impossible for the robot to run into joint limits. Requires
         the joint limits of the robot to be specified. See examples/mmc.py
-        for use case
-
-        Parameters
-        ----------
-        ps
-            The minimum angle (in radians) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle (in radians) in which the velocity
-            damper becomes active
-        n
-            The number of joints to consider. Defaults to all joints
-        gain
-            The gain for the velocity damper
-
-        Returns
-        -------
-        Ain
-            A (6,) vector inequality contraint for an optisator
-        Bin
-            b (6,) vector inequality contraint for an optisator
+        for use case.
 
         """
 
@@ -1449,40 +1329,26 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         di: float = 0.3,
         ds: float = 0.05,
         xi: float = 1.0,
-        end: Union[Link, None] = None,
-        start: Union[Link, None] = None,
-        collision_list: Union[List[Shape], None] = None,
+        end: Link | None = None,
+        start: Link | None = None,
+        collision_list: list[Shape] | None = None,
     ):
         """
         Compute a collision constrain for QP motion control
 
+        :param ds: The minimum distance in which a joint is allowed to
+            approach the collision object shape
+        :param di: The influence distance in which the velocity
+            damper becomes active
+        :param xi: The gain for the velocity damper
+        :param end: The end link of the robot to consider
+        :param start: The start link of the robot to consider
+        :param collision_list: A list of shapes to consider for collision
+        :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
+
         Formulates an inequality contraint which, when optimised for will
         make it impossible for the robot to run into a collision. Requires
-        See examples/neo.py for use case
-
-        Parameters
-        ----------
-        ds
-            The minimum distance in which a joint is allowed to
-            approach the collision object shape
-        di
-            The influence distance in which the velocity
-            damper becomes active
-        xi
-            The gain for the velocity damper
-        end
-            The end link of the robot to consider
-        start
-            The start link of the robot to consider
-        collision_list
-            A list of shapes to consider for collision
-
-        Returns
-        -------
-        Ain
-            A (6,) vector inequality contraint for an optisator
-        Bin
-            b (6,) vector inequality contraint for an optisator
+        See examples/neo.py for use case.
 
         """
 
@@ -1560,7 +1426,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     def vision_collision_damper(
         self,
         shape: CollisionShape,
-        camera: Union["Robot", SE3, None] = None,
+        camera: Robot | SE3 | None = None,
         camera_n: int = 0,
         q=None,
         di=0.3,
@@ -1573,38 +1439,22 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         """
         Compute a vision collision constrain for QP motion control
 
+        :param camera: The camera link, either as a robotic link or SE3 pose
+        :param camera_n: Degrees of freedom of the camera link
+        :param ds: The minimum distance in which a joint is allowed to
+            approach the collision object shape
+        :param di: The influence distance in which the velocity
+            damper becomes active
+        :param xi: The gain for the velocity damper
+        :param end: The end link of the robot to consider
+        :param start: The start link of the robot to consider
+        :param collision_list: A list of shapes to consider for collision
+        :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
+
         Formulates an inequality contraint which, when optimised for will
         make it impossible for the robot to run into a line of sight.
-        See examples/fetch_vision.py for use case
+        See examples/fetch_vision.py for use case.
 
-        Parameters
-        ----------
-        camera
-            The camera link, either as a robotic link or SE3
-            pose
-        camera_n
-            Degrees of freedom of the camera link
-        ds
-            The minimum distance in which a joint is allowed to
-            approach the collision object shape
-        di
-            The influence distance in which the velocity
-            damper becomes active
-        xi
-            The gain for the velocity damper
-        end
-            The end link of the robot to consider
-        start
-            The start link of the robot to consider
-        collision_list
-            A list of shapes to consider for collision
-
-        Returns
-        -------
-        Ain
-            A (6,) vector inequality contraint for an optisator
-        Bin
-            b (6,) vector inequality contraint for an optisator
         """
 
         end, start, _ = self._get_limit_links(start=start, end=end)
@@ -1729,10 +1579,17 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         qd: NDArray,
         qdd: NDArray,
         symbolic: bool = False,
-        gravity: Union[ArrayLike, None] = None,
+        gravity: ArrayLike | None = None,
     ):
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
+
+        :param q: Joint coordinates
+        :param qd: Joint velocity
+        :param qdd: Joint acceleration
+        :param symbolic: If True, supports symbolic expressions
+        :param gravity: Gravitational acceleration, defaults to attribute of self
+        :returns: Joint force/torques
 
         ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n is
         the number of robot joints.  The result has shape (n,).
@@ -1747,27 +1604,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         ``rne_dh(p)`` where the input is a 2D array ``p`` = [q, qd, qdd] with
         shape (m,3n) and the result has shape (m,n).
 
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        qd
-            Joint velocity
-        qdd
-            Joint acceleration
-        symbolic
-            If True, supports symbolic expressions
-        gravity
-            Gravitational acceleration, defaults to attribute
-            of self
+        .. rubric:: Notes
 
-        Returns
-        -------
-        tau
-            Joint force/torques
-
-        Notes
-        -----
         - This version supports symbolic model parameters
         - Verified against MATLAB code
 
@@ -1796,7 +1634,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         else:
             Q = np.empty((l, n))  # joint torque/force
 
-        link_groups: List[List[int]] = []
+        link_groups: list[list[int]] = []
 
         # Group links together based on whether they are joints or not
         # Static links are grouped with the first joint encountered
@@ -1996,17 +1834,14 @@ class Robot2(BaseRobot[Link2]):
         """
         Get/set robot base transform (Robot superclass)
 
-        ``robot.base`` is the robot base transform
+        :returns: robot tool transform
 
-        Returns
-        -------
-        base
-            robot tool transform
+        ``robot.base`` is the robot base transform
 
         - ``robot.base = ...`` checks and sets the robot base transform
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - The private attribute ``_base`` will be None in the case of
             no base transform, but this property will return ``SE3()`` which
             is an identity matrix.
@@ -2039,21 +1874,17 @@ class Robot2(BaseRobot[Link2]):
         r"""
         Reach of the robot
 
+        :returns: Maximum reach of the robot
+        :rtype: float
+
         A conservative estimate of the reach of the robot. It is computed as
         the sum of the translational ETs that define the link transform.
 
-        Note
-        ----
         Computed on the first access. If kinematic parameters
         subsequently change this will not be reflected.
 
-        Returns
-        -------
-        reach
-            Maximum reach of the robot
+        .. rubric:: Notes
 
-        Notes
-        -----
         - Probably an overestimate of reach
         - Used by numerical inverse kinematics to scale translational
           error.
@@ -2095,24 +1926,17 @@ class Robot2(BaseRobot[Link2]):
         """
         Compute the pose of every link frame
 
+        :param q: The joint configuration
+        :returns: Pose of all links
+
         ``T = robot.fkine_all(q)`` is  an SE3 instance with ``robot.nlinks +
         1`` values:
 
         - ``T[0]`` is the base transform
         - ``T[i]`` is the pose of link whose ``number`` is ``i``
 
-        Parameters
-        ----------
-        q
-            The joint configuration
+        .. rubric:: References
 
-        Returns
-        -------
-        fkine_all
-            Pose of all links
-
-        References
-        ----------
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 

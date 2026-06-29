@@ -9,7 +9,7 @@ import spatialmath as sm
 from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
 from functools import lru_cache
-from typing import Union, TypeVar, Generic, List, Callable
+from typing import TypeVar, Generic, Callable
 from roboticstoolbox.fknm import Robot_link_T
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.robot.Link import BaseLink
@@ -21,9 +21,9 @@ LinkType = TypeVar("LinkType", bound=BaseLink)
 class Gripper(Generic[LinkType]):
     def __init__(
         self,
-        links: List[LinkType],
+        links: list[LinkType],
         name: str = "",
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ):
 
         self._n = 0
@@ -100,26 +100,18 @@ class Gripper(Generic[LinkType]):
         return s
 
     def dfs_links(
-        self, start: LinkType, func: Union[Callable[[Link], None], None] = None
+        self, start: LinkType, func: Callable[[Link], None] | None = None
     ):
         """
-        Search links using depth first search
+        Search links using depth first search.
 
-        Visit all links from start in depth-first order and will apply
-        func to each visited link
+        Visit all links from ``start`` in depth-first order and optionally
+        apply ``func`` to each visited link.
 
-        Parameters
-        ----------
-        start
-            the link to start at
-        func
-            An optional function to apply to each link as it is found
-
-        Returns
-        -------
-        links
-            A list of links
-
+        :param start: the link to start at
+        :param func: an optional function to apply to each link as it is found
+        :returns: a list of links in visitation order
+        :rtype: list[LinkType]
         """
         visited = []
 
@@ -139,29 +131,21 @@ class Gripper(Generic[LinkType]):
     @property
     def tool(self) -> SE3:
         """
-        Get/set gripper tool transform
+        Get/set gripper tool transform.
+
+        :param tool: the new gripper tool transform, as an SE(3)
+        :type tool: SE3 or ndarray
+        :returns: gripper tool transform
+        :rtype: SE3
 
         - ``gripper.tool`` is the gripper tool transform as an SE3 object
         - ``gripper._tool`` is the gripper tool transform as a numpy array
         - ``gripper.tool = ...`` checks and sets the gripper tool transform
-
-        Parameters
-        ----------
-        tool
-            the new gripper tool transform (as an SE(3))
-
-        Returns
-        -------
-        tool
-            gripper tool transform
-
-
-
         """
         return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T: Union[SE3, NDArray]):
+    def tool(self, T: SE3 | NDArray):
         if isinstance(T, SE3):
             self._tool = T.A
         else:
@@ -170,25 +154,18 @@ class Gripper(Generic[LinkType]):
     @property
     def n(self) -> int:
         """
-        Number of joints
+        Number of joints.
 
-        Returns
-        -------
-        n
-            Number of joints
+        :returns: number of joints
+        :rtype: int
 
-        Examples
-        --------
         .. runblock:: pycon
+
         >>> import roboticstoolbox as rtb
         >>> robot = rtb.models.DH.Puma560()
         >>> robot.n
 
-        See Also
-        --------
-        :func:`nlinks`
-        :func:`nbranches`
-
+        .. seealso:: :func:`nlinks`, :func:`nbranches`
         """
 
         return self._n
@@ -196,21 +173,14 @@ class Gripper(Generic[LinkType]):
     @property
     def q(self) -> NDArray:
         """
-        Get/set gripper joint configuration
+        Get/set gripper joint configuration.
+
+        :param q: the new gripper joint configuration
+        :returns: gripper joint configuration
+        :rtype: NDArray
 
         - ``gripper.q`` is the gripper joint configuration
         - ``gripper.q = ...`` checks and sets the joint configuration
-
-        Parameters
-        ----------
-        q
-            the new gripper joint configuration
-
-        Returns
-        -------
-        q
-            gripper joint configuration
-
         """
 
         return self._q
@@ -222,15 +192,12 @@ class Gripper(Generic[LinkType]):
     # --------------------------------------------------------------------- #
 
     @property
-    def links(self) -> List[LinkType]:
+    def links(self) -> list[LinkType]:
         """
-        Gripper links
+        Gripper links.
 
-        Returns
-        -------
-        links
-            A list of link objects
-
+        :returns: a list of link objects
+        :rtype: list[LinkType]
         """
         return self._links
 
@@ -239,21 +206,14 @@ class Gripper(Generic[LinkType]):
     @property
     def name(self) -> str:
         """
-        Get/set gripper name
+        Get/set gripper name.
+
+        :param name: the new gripper name
+        :returns: the current gripper name
+        :rtype: str
 
         - ``gripper.name`` is the gripper name
         - ``gripper.name = ...`` checks and sets the gripper name
-
-        Parameters
-        ----------
-        name
-            the new gripper name
-
-        Returns
-        -------
-        name
-            the current gripper name
-
         """
         return self._name
 
@@ -265,7 +225,7 @@ class Gripper(Generic[LinkType]):
     # Scene Graph section
     # --------------------------------------------------------------------- #
 
-    def _update_link_tf(self, q: Union[ArrayLike, None] = None):
+    def _update_link_tf(self, q: ArrayLike | None = None):
         """
         This private method updates the local transform of each link within
         this robot according to q (or self.q if q is none)

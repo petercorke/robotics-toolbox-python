@@ -12,7 +12,7 @@ so must be subclassed by ``DHRobot`` class.
 """
 
 from collections import namedtuple
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable
 import numpy as np
 from spatialmath.base import getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
 from scipy import integrate, interpolate
@@ -80,6 +80,11 @@ class DynamicsMixin:
         r"""
         Manipulator joint friction (Robot superclass)
 
+        :param qd: The joint velocities of the robot
+        :type qd: ndarray(n,)
+        :returns: The joint friction forces/torques for the robot
+        :rtype: ndarray(n,)
+
         ``robot.friction(qd)`` is a vector of joint friction
         forces/torques for the robot moving with joint velocities ``qd``.
 
@@ -94,18 +99,8 @@ class DynamicsMixin:
                 \tau_{C,j}^+ & \mbox{if $\dot{q}_j > 0$} \\
                 \tau_{C,j}^- & \mbox{if $\dot{q}_j < 0$} \end{array} \right.
 
-        Parameters
-        ----------
-        qd
-            The joint velocities of the robot
+        .. rubric:: Notes
 
-        Returns
-        -------
-        friction
-            The joint friction forces/torques for the robot
-
-        Notes
-        -----
         - The friction value should be added to the motor output torque to
             determine the nett torque. It has a negative value when qd > 0.
         - The returned friction value is referred to the output of the
@@ -113,7 +108,7 @@ class DynamicsMixin:
         - The friction parameters in the Link object are referred to the
             motor.
         - Motor viscous friction is scaled up by :math:`G^2`.
-        - Motor Coulomb friction is scaled up by math:`G`.
+        - Motor Coulomb friction is scaled up by :math:`G`.
         - The appropriate Coulomb friction value to use in the
             non-symmetric case depends on the sign of the joint velocity,
             not the motor velocity.
@@ -121,9 +116,6 @@ class DynamicsMixin:
             not modeled.
         - The absolute value of the gear ratio is used.  Negative gear
             ratios are tricky: the Puma560 robot has negative gear ratio for
-            joints 1 and 3.
-        - The absolute value of the gear ratio is used. Negative gear
-            ratios are tricky: the Puma560 has negative gear ratio for
             joints 1 and 3.
 
         See Also
@@ -147,21 +139,13 @@ class DynamicsMixin:
         """
         Remove manipulator joint friction
 
+        :param coulomb: set the Coulomb friction to 0
+        :param viscous: set the viscous friction to 0
+        :returns: A copy of the robot with dynamic parameters perturbed
+
         ``nofriction()`` copies the robot and returns
         a robot with the same link parameters except the Coulomb and/or viscous
         friction parameter are set to zero.
-
-        Parameters
-        ----------
-        coulomb
-            set the Coulomb friction to 0
-        viscous
-            set the viscous friction to 0
-
-        Returns
-        -------
-        robot
-            A copy of the robot with dynamic parameters perturbed
 
         See Also
         --------
@@ -186,17 +170,31 @@ class DynamicsMixin:
         self: RobotProto,
         T: float,
         q0: ArrayLike,
-        Q: Union[Callable[[Any, float, NDArray, NDArray], NDArray], None] = None,
-        Q_args: Dict = {},
-        qd0: Union[ArrayLike, None] = None,
+        Q: Callable[[Any, float, NDArray, NDArray], NDArray] | None = None,
+        Q_args: dict = {},
+        qd0: ArrayLike | None = None,
         solver: str = "RK45",
-        solver_args: Dict = {},
-        dt: Union[float, None] = None,
+        solver_args: dict = {},
+        dt: float | None = None,
         progress: bool = False,
     ):
         """
         Integrate forward dynamics
 
+        :param T: integration time
+        :param q0: initial joint coordinates
+        :type q0: ndarray(n,)
+        :param Q: a function that computes generalized joint force as a function of
+            time and/or state
+        :param Q_args: positional arguments passed to ``torque``
+        :param qd0: initial joint velocities, assumed zero if not given
+        :type qd0: ndarray(n,)
+        :param solver: name of SciPy integrator to use, default ``'RK45'``
+        :param solver_args: optional arguments passed to the SciPy integrator
+        :param dt: if given, interpolate the results to this timestep
+        :param progress: show progress bar, default False
+        :returns: robot trajectory
+        :rtype: namedtuple with fields ``t``, ``q``, ``qd``
 
         ``tg = R.fdyn(T, q)`` integrates the dynamics of the robot with zero
         input torques over the time  interval 0 to ``T`` and returns the
@@ -221,33 +219,6 @@ class DynamicsMixin:
               passed in from the ``targs`` keyword argument.
 
         The function must return a Numpy array (n,) of joint forces/torques.
-
-        Parameters
-        ----------
-        T
-            integration time
-        q0
-            initial joint coordinates
-        qd0
-            initial joint velocities, assumed zero if not given
-        Q
-            a function that computes generalized joint force as a function of
-            time and/or state
-        Q_args
-            positional arguments passed to ``torque``
-        solver
-            str
-        solver_args
-            dict
-        dt
-            float
-        progress
-            show progress bar, default False
-
-        Returns
-        -------
-        trajectory
-            robot trajectory
 
         Examples
         --------
@@ -282,8 +253,8 @@ class DynamicsMixin:
         want to animate the result.  If ``dt`` is specified then the solver
         results are interpolated in time steps of ``dt``.
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - This function performs poorly with non-linear joint friction,
             such as Coulomb friction.  The R.nofriction() method can be used
             to set this friction to zero.
@@ -376,7 +347,7 @@ class DynamicsMixin:
         t: float,
         x: NDArray,
         Qfunc: Callable[[Any, float, NDArray, NDArray], NDArray],
-        Qargs: Dict,
+        Qargs: dict,
     ):
         """
         Private function called by fdyn
@@ -384,22 +355,15 @@ class DynamicsMixin:
         Called by ``fdyn`` to evaluate the robot velocity and acceleration for
         forward dynamics.
 
-        Parameters
-        ----------
-        t
-            current time
-        x
-            current state [q, qd]
-        Qfunc
-            a function that computes torque as a function of time
+        :param t: current time
+        :param x: current state [q, qd]
+        :type x: ndarray(2n,)
+        :param Qfunc: a function that computes torque as a function of time
             and/or state
-        Qargs : dict
-            argumments passed to ``Qfunc``
-
-        Returns
-        -------
-        fdyn
-            derivative of current state [qd, qdd]
+        :param Qargs: arguments passed to ``Qfunc``
+        :type Qargs: dict
+        :returns: derivative of current state [qd, qdd]
+        :rtype: ndarray(2n,)
 
         """
         n = self.n
@@ -425,6 +389,17 @@ class DynamicsMixin:
         r"""
         Compute acceleration due to applied torque
 
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :param qd: Joint velocity
+        :type qd: ndarray(n,) or ndarray(m,n)
+        :param torque: Joint torques of the robot
+        :type torque: ndarray(n,) or ndarray(m,n)
+        :param gravity: Gravitational acceleration (Optional, if not supplied will
+            use the ``gravity`` attribute of self).
+        :returns: Joint accelerations
+        :rtype: ndarray(n,)
+
         ``qdd = accel(q, qd, torque)`` calculates a vector (n) of joint
         accelerations that result from applying the actuator force/torque (n)
         to the manipulator in state `q` (n) and `qd` (n), and ``n`` is
@@ -440,22 +415,6 @@ class DynamicsMixin:
         where each row is the acceleration corresponding to the equivalent rows
         of q, qd, torque.
 
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        qd
-            Joint velocity
-        torque
-            Joint torques of the robot
-        gravity
-            Gravitational acceleration (Optional, if not supplied will
-            use the ``gravity`` attribute of self).
-
-        Returns
-        -------
-        ndarray(n)
-
         Examples
         --------
         .. runblock:: pycon
@@ -463,8 +422,8 @@ class DynamicsMixin:
         >>> puma = rtb.models.DH.Puma560()
         >>> puma.accel(puma.qz, 0.5 * np.ones(6), np.zeros(6))
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Useful for simulation of manipulator dynamics, in
             conjunction with a numerical integration function.
         - Uses the method 1 of Walker and Orin to compute the forward
@@ -473,11 +432,11 @@ class DynamicsMixin:
             numbers of joints.
         - Joint friction is considered.
 
-        References
-        ----------
+        .. rubric:: References
+
         - Efficient dynamic computer simulation of robotic mechanisms,
             M. W. Walker and D. E. Orin,
-            ASME Journa of Dynamic Systems, Measurement and Control, vol.
+            ASME Journal of Dynamic Systems, Measurement and Control, vol.
             104, no. 3, pp. 205-211, 1982.
 
         """  # noqa
@@ -512,12 +471,26 @@ class DynamicsMixin:
     def pay(
         self: RobotProto,
         W: ArrayLike,
-        q: Union[NDArray, None] = None,
-        J: Union[NDArray, None] = None,
+        q: NDArray | None = None,
+        J: NDArray | None = None,
         frame: int = 1,
     ):
         """
         Generalised joint force/torque due to a payload wrench
+
+        :param W: A wrench vector applied at the end effector,
+            W = [Fx Fy Fz Mx My Mz]
+        :type W: ndarray(6,)
+        :param q: Joint coordinates
+        :type q: ndarray(n,)
+        :param J: The manipulator Jacobian (Optional, if not supplied will
+            use the q value).
+        :type J: ndarray(6,n)
+        :param frame: The frame in which to torques are expressed in when J
+            is not supplied. 0 means base frame of the robot, 1 means end-
+            effector frame
+        :returns: Joint forces/torques due to W
+        :rtype: ndarray(n,)
 
         tau = pay(W, J) Returns the generalised joint force/torques due to a
         payload wrench W applied to the end-effector. Where the manipulator
@@ -535,28 +508,8 @@ class DynamicsMixin:
           is the generalised force/torque at the pose given by corresponding
           row of q.
 
-        Parameters
-        ----------
-        W
-            A wrench vector applied at the end effector,
-            W = [Fx Fy Fz Mx My Mz]
-        q
-            Joint coordinates
-        J
-            The manipulator Jacobian (Optional, if not supplied will
-            use the q value).
-        frame
-            The frame in which to torques are expressed in when J
-            is not supplied. 0 means base frame of the robot, 1 means end-
-            effector frame
+        .. rubric:: Notes
 
-        Returns
-        -------
-        t
-            Joint forces/torques due to w
-
-        Notes
-        -----
         - Wrench vector and Jacobian must be from the same reference
             frame.
         - Tool transforms are taken into consideration when frame=1.
@@ -622,6 +575,10 @@ class DynamicsMixin:
         """
         Add a payload to the end-effector
 
+        :param m: mass (kg)
+        :param p: position in end-effector frame
+        :type p: ndarray(3,)
+
         payload(m, p) adds payload mass adds a payload with point mass m at
         position p in the end-effector coordinate frame.
 
@@ -629,13 +586,6 @@ class DynamicsMixin:
         in the end-effector coordinate frame.
 
         payload(0) removes added payload.
-
-        Parameters
-        ----------
-        m
-            mass (kg)
-        p
-            position in end-effector frame
 
         """
 
@@ -649,6 +599,13 @@ class DynamicsMixin:
         """
         Transfer function of joint actuator
 
+        :param q: Joint coordinates
+        :type q: ndarray(n,)
+        :param qd: Joint velocity
+        :type qd: ndarray(n,)
+        :returns: transfer function denominators
+        :rtype: list of 2-tuples
+
         ``tf = jointdynamics(qd, q)`` calculates a vector of n
         continuous-time transfer functions that represent the transfer
         function 1/(Js+B) for each joint based on the dynamic parameters
@@ -658,18 +615,6 @@ class DynamicsMixin:
         ``tf = jointdynamics(q, qd)`` as above but include the linearized
         effects of Coulomb friction when operating at joint velocity QD
         (1xN).
-
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        qd
-            Joint velocity
-
-        Returns
-        -------
-        list of 2-tuples
-            transfer function denominators
 
         """
 
@@ -702,7 +647,14 @@ class DynamicsMixin:
         warnings.warn("cinertia is deprecated, use inertia_x", DeprecationWarning)
 
     def inertia(self: RobotProto, q: NDArray) -> NDArray:
-        """Manipulator inertia matrix
+        """
+        Manipulator inertia matrix
+
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :returns: The inertia matrix
+        :rtype: ndarray(n,n)
+
         ``inertia(q)`` is the symmetric joint inertia matrix (n,n) which
         relates joint torque to joint acceleration for the robot at joint
         configuration q.
@@ -713,16 +665,6 @@ class DynamicsMixin:
         vector, and the result is a 3d-matrix (nxnxk) where each plane
         corresponds to the inertia for the corresponding row of q.
 
-        Parameters
-        ----------
-        q
-            Joint coordinates
-
-        Returns
-        -------
-        inertia
-            The inertia matrix
-
         Examples
         --------
         .. runblock:: pycon
@@ -730,8 +672,8 @@ class DynamicsMixin:
         >>> puma = rtb.models.DH.Puma560()
         >>> puma.inertia(puma.qz)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - The diagonal elements ``M[j,j]`` are the inertia seen by joint
             actuator ``j``.
         - The off-diagonal elements ``M[j,k]`` are coupling inertias that
@@ -766,6 +708,13 @@ class DynamicsMixin:
         r"""
         Coriolis and centripetal term
 
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :param qd: Joint velocity
+        :type qd: ndarray(n,) or ndarray(m,n)
+        :returns: Coriolis/centripetal velocity matrix
+        :rtype: ndarray(n,n)
+
         ``coriolis(q, qd)`` calculates the Coriolis/centripetal matrix (n,n)
         for the robot in configuration ``q`` and velocity ``qd``, where ``n``
         is the number of joints.
@@ -783,18 +732,6 @@ class DynamicsMixin:
         joint configuration, and the result (n,n,m) is a 3d-matrix where
         each plane corresponds to a row of ``q`` and ``qd``.
 
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        qd
-            Joint velocity
-
-        Returns
-        -------
-        coriolis
-            Velocity matrix
-
         Examples
         --------
         .. runblock:: pycon
@@ -802,8 +739,8 @@ class DynamicsMixin:
         >>> puma = rtb.models.DH.Puma560()
         >>> puma.coriolis(puma.qz, 0.5 * np.ones((6,)))
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Joint viscous friction is also a joint force proportional to
             velocity but it is eliminated in the computation of this value.
         - Computationally slow, involves :math:`n^2/2` invocations of RNE.
@@ -862,11 +799,19 @@ class DynamicsMixin:
 
     def gravload(
         self: RobotProto,
-        q: Union[ArrayLike, None] = None,
-        gravity: Union[ArrayLike, None] = None,
+        q: ArrayLike | None = None,
+        gravity: ArrayLike | None = None,
     ):
         """
         Compute gravity load
+
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :param gravity: Gravitational acceleration (Optional, if not supplied will
+            use the stored gravity values).
+        :type gravity: ndarray(3,)
+        :returns: The generalised joint force/torques due to gravity
+        :rtype: ndarray(n,)
 
         ``robot.gravload(q)`` calculates the joint gravity loading (n) for
         the robot in the joint configuration ``q`` and using the default
@@ -880,19 +825,6 @@ class DynamicsMixin:
         If q is a matrix (nxm) each column is interpreted as a joint
         configuration vector, and the result is a matrix (nxm) each column
         being the corresponding joint torques.
-
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        gravity : ndarray(3)
-            Gravitational acceleration (Optional, if not supplied will
-            use the stored gravity values).
-
-        Returns
-        -------
-        gravload
-            The generalised joint force/torques due to gravity
 
         Examples
         --------
@@ -927,6 +859,16 @@ class DynamicsMixin:
         r"""
         Operational space inertia matrix
 
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :param pinv: use pseudo inverse rather than inverse (Default value = False)
+        :param representation: the type of analytical Jacobian to use, default is
+            ``'rpy/xyz'``
+        :param Ji: The inverse analytical Jacobian (base-frame)
+        :type Ji: ndarray(6,n)
+        :returns: The operational space inertia matrix
+        :rtype: ndarray(6,6)
+
         ``robot.inertia_x(q)`` is the operational space (Cartesian) inertia
         matrix which relates Cartesian force/torque to Cartesian
         acceleration at the joint configuration q.
@@ -954,25 +896,6 @@ class DynamicsMixin:
         corresponds to the Cartesian inertia for the corresponding
         row of ``q``.
 
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        pinv
-            use pseudo inverse rather than inverse (Default value = False)
-        analytical
-            the type of analytical Jacobian to use, default is
-            'rpy/xyz'
-        representation
-            (Default value = "rpy/xyz")
-        Ji
-            The inverse analytical Jacobian (base-frame)
-
-        Returns
-        -------
-        inertia_x
-            The operational space inertia matrix
-
         Examples
         --------
         .. runblock:: pycon
@@ -980,8 +903,8 @@ class DynamicsMixin:
         >>> puma = rtb.models.DH.Puma560()
         >>> puma.inertia_x(puma.qn)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - If the robot is not 6 DOF the ``pinv`` option is set True.
         - ``pinv()`` is around 5x slower than ``inv()``
 
@@ -1038,6 +961,26 @@ class DynamicsMixin:
         r"""
         Operational space Coriolis and centripetal term
 
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :param qd: Joint velocity
+        :type qd: ndarray(n,) or ndarray(m,n)
+        :param pinv: use pseudo inverse rather than inverse (Default value = False)
+        :param representation: the type of analytical Jacobian to use, default is
+            ``'rpy/xyz'``
+        :param J: pre-computed analytical Jacobian (optional)
+        :type J: ndarray(6,n)
+        :param Ji: pre-computed inverse analytical Jacobian (optional)
+        :type Ji: ndarray(n,6)
+        :param Jd: pre-computed time-derivative of analytical Jacobian (optional)
+        :type Jd: ndarray(6,n)
+        :param C: pre-computed joint-space Coriolis matrix (optional)
+        :type C: ndarray(n,n)
+        :param Mx: pre-computed operational-space inertia matrix (optional)
+        :type Mx: ndarray(6,6)
+        :returns: Operational space velocity matrix
+        :rtype: ndarray(6,6)
+
         ``coriolis_x(q, qd)`` is the Coriolis/centripetal matrix (m,m)
         in operational space for the robot in configuration ``q`` and velocity
         ``qd``, where ``n`` is the number of joints.
@@ -1071,35 +1014,6 @@ class DynamicsMixin:
         joint configuration, and the result (n,n,m) is a 3d-matrix where
         each plane corresponds to a row of ``q`` and ``qd``.
 
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        qd
-            Joint velocity
-        pinv
-            use pseudo inverse rather than inverse (Default value = False)
-        analytical
-            the type of analytical Jacobian to use, default is
-            'rpy/xyz'
-        representation
-             (Default value = "rpy/xyz")
-        J
-
-        Ji
-
-        Jd
-
-        C
-
-        Mx
-
-
-        Returns
-        -------
-        ndarray(6,6) or ndarray(m,6,6)
-            Operational space velocity matrix
-
         Examples
         --------
         .. runblock:: pycon
@@ -1107,8 +1021,8 @@ class DynamicsMixin:
         >>> puma = rtb.models.DH.Puma560()
         >>> puma.coriolis_x(puma.qn, 0.5 * np.ones((6,)))
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Joint viscous friction is also a joint force proportional to
             velocity but it is eliminated in the computation of this value.
         - Computationally slow, involves :math:`n^2/2` invocations of RNE.
@@ -1177,6 +1091,19 @@ class DynamicsMixin:
         r"""
         Operational space gravity load
 
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :param gravity: Gravitational acceleration (Optional, if not supplied will
+            use the ``gravity`` attribute of self).
+        :type gravity: ndarray(3,)
+        :param pinv: use pseudo inverse rather than inverse (Default value = False)
+        :param representation: the type of analytical Jacobian to use, default is
+            ``'rpy/xyz'``
+        :param Ji: pre-computed inverse analytical Jacobian (optional)
+        :type Ji: ndarray(n,6)
+        :returns: The operational space gravity wrench
+        :rtype: ndarray(6,)
+
         ``robot.gravload_x(q)`` calculates the gravity wrench for
         the robot in the joint configuration ``q`` and using the default
         gravitational acceleration specified in the robot object.
@@ -1206,28 +1133,6 @@ class DynamicsMixin:
         configuration vector, and the result is a matrix (nxm) each column
         being the corresponding joint torques.
 
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        gravity
-            Gravitational acceleration (Optional, if not supplied will
-            use the ``gravity`` attribute of self).
-        pinv
-            use pseudo inverse rather than inverse (Default value = False)
-        analytical
-            the type of analytical Jacobian to use, default is
-            'rpy/xyz'
-        representation :
-             (Default value = "rpy/xyz")
-        Ji :
-
-
-        Returns
-        -------
-        gravload
-            The operational space gravity wrench
-
         Examples
         --------
         .. runblock:: pycon
@@ -1235,8 +1140,8 @@ class DynamicsMixin:
         >>> puma = rtb.models.DH.Puma560()
         >>> puma.gravload_x(puma.qn)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - If the robot is not 6 DOF the ``pinv`` option is set True.
         - ``pinv()`` is around 5x slower than ``inv()``
 
@@ -1297,6 +1202,20 @@ class DynamicsMixin:
         r"""
         Operational space acceleration due to applied wrench
 
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :param xd: Operational space velocity of the end-effector
+        :type xd: ndarray(6,)
+        :param wrench: Wrench applied to the end-effector
+        :type wrench: ndarray(6,)
+        :param gravity: Gravitational acceleration (Optional, if not supplied will
+            use the ``gravity`` attribute of self).
+        :param pinv: use pseudo inverse rather than inverse
+        :param representation: the type of analytical Jacobian to use, default is
+            ``'rpy/xyz'``
+        :returns: Operational space accelerations of the end-effector
+        :rtype: ndarray(6,)
+
         ``xdd = accel_x(q, qd, wrench)`` is the operational space acceleration
         due to ``wrench`` applied to the end-effector of a robot in joint
         configuration ``q`` and joint velocity ``qd``.
@@ -1313,33 +1232,8 @@ class DynamicsMixin:
         where each row is the acceleration corresponding to the equivalent rows
         of q, qd, wrench.
 
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        qd
-            Joint velocity
-        wrench
-            Wrench applied to the end-effector
-        gravity
-            Gravitational acceleration (Optional, if not supplied will
-            use the ``gravity`` attribute of self).
-        pinv
-            use pseudo inverse rather than inverse
-        analytical
-            the type of analytical Jacobian to use, default is
-            'rpy/xyz'
-        xd :
-        representation :
-            (Default value = "rpy/xyz")
+        .. rubric:: Notes
 
-        Returns
-        -------
-        accel
-            Operational space accelerations of the end-effector
-
-        Notes
-        -----
         - Useful for simulation of manipulator dynamics, in
             conjunction with a numerical integration function.
         - Uses the method 1 of Walker and Orin to compute the forward
@@ -1408,28 +1302,22 @@ class DynamicsMixin:
         r"""
         Inertia torque
 
+        :param q: Joint coordinates
+        :type q: ndarray(n,) or ndarray(m,n)
+        :param qdd: Joint acceleration
+        :type qdd: ndarray(n,) or ndarray(m,n)
+        :returns: The inertia torque vector
+        :rtype: ndarray(n,)
+
         ``itorque(q, qdd)`` is the inertia force/torque vector (n) at
         the specified joint configuration q (n) and acceleration qdd (n), and
-        ``n`` is the number of robot joints.
-        It is :math:`\mathbf{I}(q) \ddot{q}`.
+        ``n`` is the number of robot joints. It is :math:`\mathbf{I}(q) \ddot{q}`.
 
         **Trajectory operation**
 
         If ``q`` and ``qdd`` are matrices (m,n), each row is interpretted as a
         joint configuration, and the result is a matrix (m,n) where each row is
         the corresponding joint torques.
-
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        qdd
-            Joint acceleration
-
-        Returns
-        -------
-        itorque
-            The inertia torque vector
 
         Examples
         --------
@@ -1438,8 +1326,8 @@ class DynamicsMixin:
         >>> puma = rtb.models.DH.Puma560()
         >>> puma.itorque(puma.qz, 0.5 * np.ones((6,)))
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - If the robot model contains non-zero motor inertia then this
             will be included in the result.
 
@@ -1469,10 +1357,22 @@ class DynamicsMixin:
         w: NDArray,
         tauR: NDArray,
         frame: int = 1,
-        q: Union[ArrayLike, None] = None,
+        q: ArrayLike | None = None,
     ):
         """
         Static payload capacity of a robot
+
+        :param w: The payload wrench
+        :type w: ndarray(6,)
+        :param tauR: Joint torque matrix minimum and maximums
+        :type tauR: ndarray(n,2)
+        :param frame: The frame in which to torques are expressed in when J
+            is not supplied. 'base' means base frame of the robot, 'ee' means
+            end-effector frame
+        :param q: Joint coordinates
+        :type q: ndarray(n,)
+        :returns: The maximum permissible payload wrench
+        :rtype: ndarray(6,)
 
         ``wmax, joint = paycap(q, w, f, tauR)`` returns the maximum permissible
         payload wrench ``wmax`` (6) applied at the end-effector, and the index
@@ -1486,26 +1386,8 @@ class DynamicsMixin:
         In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
         the results at the pose given by corresponding row of q.
 
-        Parameters
-        ----------
-        w
-            The payload wrench
-        tauR
-            Joint torque matrix minimum and maximums
-        frame
-            The frame in which to torques are expressed in when J
-            is not supplied. 'base' means base frame of the robot, 'ee' means
-            end-effector frame
-        q
-            Joint coordinates
+        .. rubric:: Notes
 
-        Returns
-        -------
-        ndarray(6)
-            The maximum permissible payload wrench
-
-        Notes
-        -----
         - Wrench vector and Jacobian must be from the same reference frame
         - Tool transforms are taken into consideration for frame=1.
 
@@ -1569,6 +1451,9 @@ class DynamicsMixin:
         """
         Perturb robot parameters
 
+        :param p: The percent (+/-) to be perturbed. Default 10%
+        :returns: A copy of the robot with dynamic parameters perturbed
+
         rp = perturb(p) is a new robot object in which the dynamic parameters
         (link mass and inertia) have been perturbed. The perturbation is
         multiplicative so that values are multiplied by random numbers in the
@@ -1578,16 +1463,6 @@ class DynamicsMixin:
         Useful for investigating the robustness of various model-based control
         schemes. For example to vary parameters in the range +/- 10 percent
         is: r2 = puma.perturb(0.1)
-
-        Parameters
-        ----------
-        p
-            The percent (+/-) to be perturbed. Default 10%
-
-        Returns
-        -------
-        DHRobot
-            A copy of the robot with dynamic parameters perturbed
 
         """
 

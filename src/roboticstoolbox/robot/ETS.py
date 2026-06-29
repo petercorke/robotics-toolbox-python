@@ -38,8 +38,8 @@ from roboticstoolbox.fknm import (
 )
 from copy import deepcopy
 from roboticstoolbox.robot.ET import ET, ET2, BaseET
-from typing import Union, overload, List, Set, Tuple, TypeVar
-from typing_extensions import Literal as L
+from typing import overload, TypeVar
+from typing import Literal as L
 from sys import version_info
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
@@ -69,7 +69,7 @@ class BaseETS(UserList):
         )
         # self._fknm = [et.fknm for et in self.data]
 
-    def __str__(self, q: Union[str, None] = None):
+    def __str__(self, q: str | None = None):
         """
         Pretty prints the ETS
 
@@ -86,15 +86,9 @@ class BaseETS(UserList):
           display joint variables as θ1, θ2, ...  ``j`` is either the joint
           index, if provided, otherwise a sequential value.
 
-        Parameters
-        ----------
-        q
-            control how joint variables are displayed
-
-        Returns
-        -------
-        str
-            Pretty printed ETS
+        :param q: control how joint variables are displayed
+        :returns: Pretty printed ETS
+        :rtype: str
 
         Examples
         --------
@@ -190,12 +184,8 @@ class BaseETS(UserList):
         Print stringified version when variable is displayed in IPython, ie. on
         a line by itself.
 
-        Parameters
-        ----------
-        p
-            pretty printer handle (ignored)
-        cycle
-            pretty printer flag (ignored)
+        :param p: pretty printer handle (ignored)
+        :param cycle: pretty printer flag (ignored)
 
         Examples
         --------
@@ -206,14 +196,12 @@ class BaseETS(UserList):
 
         print(self.__str__())  # pragma: nocover
 
-    def joint_idx(self) -> List[int]:
+    def joint_idx(self) -> list[int]:
         """
         Get index of joint transforms
 
-        Returns
-        -------
-        joint_idx
-            indices of transforms that are joints
+        :returns: indices of transforms that are joints
+        :rtype: ndarray
 
         Examples
         --------
@@ -226,14 +214,12 @@ class BaseETS(UserList):
 
         return np.where([e.isjoint for e in self])[0]  # type: ignore
 
-    def joints(self) -> List[ET]:
+    def joints(self) -> list[ET]:
         """
         Get a list of the variable ETs with this ETS
 
-        Returns
-        -------
-        joints
-            list of ETs that are joints
+        :returns: list of ETs that are joints
+        :rtype: list[ET]
 
         Examples
         --------
@@ -246,14 +232,12 @@ class BaseETS(UserList):
 
         return [e for e in self if e.isjoint]
 
-    def jindex_set(self) -> Set[int]:  #
+    def jindex_set(self) -> set[int]:  #
         """
         Get set of joint indices
 
-        Returns
-        -------
-        jindex_set
-            set of unique joint indices
+        :returns: set of unique joint indices
+        :rtype: set[int]
 
         Examples
         --------
@@ -271,10 +255,8 @@ class BaseETS(UserList):
         """
         Get an array of joint indices
 
-        Returns
-        -------
-        jindices
-            array of unique joint indices
+        :returns: array of unique joint indices
+        :rtype: ndarray
 
         Examples
         --------
@@ -298,20 +280,11 @@ class BaseETS(UserList):
         - a revolute joint [-𝜋. 𝜋] is returned
         - a prismatic joint an exception is raised
 
-        Parameters
-        ----------
-        new_qlim
-            An ndarray(2, n) of the new joint limits to set
-
-        Returns
-        -------
-        :return: Array of joint limit values
+        :param new_qlim: new joint limits to set
+        :type new_qlim: ndarray(2,n)
+        :returns: array of joint limit values
         :rtype: ndarray(2,n)
-
-        Raises
-        ------
-        ValueError
-            unset limits for a prismatic joint
+        :raises ValueError: unset limits for a prismatic joint
 
         Examples
         --------
@@ -367,12 +340,8 @@ class BaseETS(UserList):
         A string comprising the characters 'R' or 'P' which indicate the types
         of joints in order from left to right.
 
-        Returns
-        -------
-        structure
-            A string indicating the joint types
-
-
+        :returns: a string indicating the joint types
+        :rtype: str
 
         Examples
         --------
@@ -392,12 +361,10 @@ class BaseETS(UserList):
         """
         Number of joints
 
-        Counts the number of joints in the ETS.
+        :returns: the number of joints in the ETS
+        :rtype: int
 
-        Returns
-        -------
-        n
-            the number of joints in the ETS
+        Counts the number of joints in the ETS.
 
         Examples
         --------
@@ -419,12 +386,10 @@ class BaseETS(UserList):
         """
         Number of transforms
 
-        Counts the number of transforms in the ETS.
+        :returns: the number of transforms in the ETS
+        :rtype: int
 
-        Returns
-        -------
-        m
-            the number of transforms in the ETS
+        Counts the number of transforms in the ETS.
 
         Examples
         --------
@@ -438,10 +403,10 @@ class BaseETS(UserList):
         return self._m
 
     @overload
-    def data(self: "ETS") -> List[ET]: ...  # pragma: nocover
+    def data(self: "ETS") -> list[ET]: ...  # pragma: nocover
 
     @overload
-    def data(self: "ETS2") -> List[ET2]: ...  # pragma: nocover
+    def data(self: "ETS2") -> list[ET2]: ...  # pragma: nocover
 
     @property
     def data(self):
@@ -449,11 +414,11 @@ class BaseETS(UserList):
 
     @data.setter
     @overload
-    def data(self: "ETS", new_data: List[ET]): ...  # pragma: nocover
+    def data(self: "ETS", new_data: list[ET]): ...  # pragma: nocover
 
     @data.setter
     @overload
-    def data(self: "ETS", new_data: List[ET2]): ...  # pragma: nocover
+    def data(self: "ETS", new_data: list[ET2]): ...  # pragma: nocover
 
     @data.setter
     def data(self, new_data):
@@ -469,23 +434,12 @@ class BaseETS(UserList):
         """
         Pop value
 
+        :param i: item in the list to pop, default is last
+        :returns: the popped value
+        :raises IndexError: if there are no values to pop
+
         Removes a value from the value list and returns it.  The original
         instance is modified.
-
-        Parameters
-        ----------
-        i
-            item in the list to pop, default is last
-
-        Returns
-        -------
-        pop
-            the popped value
-
-        Raises
-        ------
-        IndexError
-            if there are no values to pop
 
         Examples
         --------
@@ -503,20 +457,16 @@ class BaseETS(UserList):
         return item
 
     @overload
-    def split(self: "ETS") -> List["ETS"]: ...  # pragma: nocover
+    def split(self: "ETS") -> list["ETS"]: ...  # pragma: nocover
 
     @overload
-    def split(self: "ETS2") -> List["ETS2"]: ...  # pragma: nocover
+    def split(self: "ETS2") -> list["ETS2"]: ...  # pragma: nocover
 
     def split(self):
         """
         Split ETS into link segments
 
-        Returns
-        -------
-        split
-            a list of ETS, each one, apart from the last,
-            ends with a variable ET.
+        :returns: a list of ETS, each one, apart from the last, ends with a variable ET.
 
         """
 
@@ -553,10 +503,7 @@ class BaseETS(UserList):
 
             (\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )
 
-        Returns
-        -------
-        inv
-            Inverse of the ETS
+        :returns: Inverse of the ETS
 
         Examples
         --------
@@ -566,8 +513,8 @@ class BaseETS(UserList):
         >>> print(e)
         >>> print(e.inv())
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - It is essential to use explicit joint indices to account for
             the reversed order of the transforms.
 
@@ -582,27 +529,20 @@ class BaseETS(UserList):
     def __getitem__(self: "ETS", i: int) -> ET: ...
 
     @overload
-    def __getitem__(self: "ETS", i: slice) -> List[ET]: ...
+    def __getitem__(self: "ETS", i: slice) -> list[ET]: ...
 
     @overload
     def __getitem__(self: "ETS2", i: int) -> ET2: ...
 
     @overload
-    def __getitem__(self: "ETS2", i: slice) -> List[ET2]: ...
+    def __getitem__(self: "ETS2", i: slice) -> list[ET2]: ...
 
     def __getitem__(self, i):
         """
         Index or slice an ETS
 
-        Parameters
-        ----------
-        i
-            the index or slince
-
-        Returns
-        -------
-        et
-            Elementary transform
+        :param i: the index or slice
+        :returns: elementary transform
 
         Examples
         --------
@@ -623,24 +563,20 @@ class BaseETS(UserList):
     def __setitem__(self: "ETS", i: int, value: ET): ...
 
     @overload
-    def __setitem__(self: "ETS", i: slice, value: List[ET]): ...
+    def __setitem__(self: "ETS", i: slice, value: list[ET]): ...
 
     @overload
     def __setitem__(self: "ETS2", i: int, value: ET2): ...
 
     @overload
-    def __setitem__(self: "ETS2", i: slice, value: List[ET2]): ...
+    def __setitem__(self: "ETS2", i: slice, value: list[ET2]): ...
 
     def __setitem__(self, i, value):
         """
         Set an item in the ETS
 
-        Parameters
-        ----------
-        i
-            the index
-        value
-            the value to set
+        :param i: the index
+        :param value: the value to set
 
         Examples
         --------
@@ -689,13 +625,12 @@ class BaseETS(UserList):
         """
         Generate a random valid joint configuration
 
-        Generates a random q vector within the joint limits defined by
-        `self.qlim`.
+        :param i: number of configurations to generate
+        :returns: random joint configuration
+        :rtype: ndarray(n,) or ndarray(i,n)
 
-        Parameters
-        ----------
-        i
-            number of configurations to generate
+        Generates a random q vector within the joint limits defined by
+        ``self.qlim``.
 
         Examples
         --------
@@ -737,10 +672,7 @@ class ETS(BaseETS):
     - ``ETS(et)`` an ETS containing a single ET
     - ``ETS([et0, et1, et2])`` an ETS consisting of three ET's
 
-    Parameters
-    ----------
-    arg
-        Function to compute ET value
+    :param arg: list of ETs or a single ET to initialise the ETS
 
     Examples
     --------
@@ -753,8 +685,8 @@ class ETS(BaseETS):
     >>> len(ets2)                    # of length 2
     >>> ets2[1]                      # an ET sliced from the ETS
 
-    References
-    ----------
+    .. rubric:: References
+
     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
         Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -774,9 +706,7 @@ class ETS(BaseETS):
 
     def __init__(
         self,
-        arg: Union[
-            List[Union["ETS", ET]], List[ET], List["ETS"], ET, "ETS", None
-        ] = None,
+        arg: list[ETS | ET] | list[ET] | list[ETS] | ET | ETS | None = None,
     ):
         super().__init__()
         if isinstance(arg, list):
@@ -839,13 +769,13 @@ class ETS(BaseETS):
 
             self._auto_jindex = True
 
-    def __mul__(self, other: Union["ET", "ETS"]) -> "ETS":
+    def __mul__(self, other: ET | ETS) -> "ETS":
         if isinstance(other, ET):
             return ETS([*self.data, other])
         else:
             return ETS([*self.data, *other.data])  # pragma: nocover
 
-    def __rmul__(self, other: Union["ET", "ETS"]) -> "ETS":
+    def __rmul__(self, other: ET | ETS) -> "ETS":
         return ETS([other, *self.data])  # pragma: nocover
 
     def __imul__(self, rest: "ETS"):
@@ -858,14 +788,12 @@ class ETS(BaseETS):
         """
         Compile an ETS
 
+        :returns: optimised ETS
+        :rtype: ETS
+
         Perform constant folding for faster evaluation.  Consecutive constant
         ETs are compounded, leading to a constant ET which is denoted by
         ``SE3`` when displayed.
-
-        Returns
-        -------
-        compile
-            optimised ETS
 
         Examples
         --------
@@ -907,21 +835,17 @@ class ETS(BaseETS):
 
     def insert(
         self,
-        arg: Union[ET, "ETS"],
+        arg: ET | ETS,
         i: int = -1,
     ) -> None:
         """
         Insert value
 
+        :param arg: the elementary transform or sequence to insert
+        :param i: position to insert at, default is at the end
+
         Inserts an ET or ETS into the ET sequence.  The inserted value is at position
         ``i``.
-
-        Parameters
-        ----------
-        i
-            insert an ET or ETS into the ETS, default is at the end
-        arg
-            the elementary transform or sequence to insert
 
         Examples
         --------
@@ -951,12 +875,19 @@ class ETS(BaseETS):
     def fkine(
         self,
         q: ArrayLike,
-        base: Union[NDArray, SE3, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        base: NDArray | SE3 | None = None,
+        tool: NDArray | SE3 | None = None,
         include_base: bool = True,
     ) -> SE3:
         """
         Forward kinematics
+
+        :param q: Joint coordinates
+        :param base: a base transform applied before the ETS
+        :param tool: tool transform, optional
+        :param include_base: set to True if the base transform should be considered
+        :returns: the transformation matrix representing the pose of the end-effector
+        :rtype: SE3
 
         ``T = ets.fkine(q)`` evaluates forward kinematics for the ets at
         joint configuration ``q``.
@@ -964,22 +895,6 @@ class ETS(BaseETS):
         **Trajectory operation**:
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
-
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        base
-            A base transform applied before the ETS
-        tool
-            tool transform, optional
-        include_base
-            set to True if the base transform should be considered
-
-        Returns
-        -------
-            The transformation matrix representing the pose of the
-            end-effector
 
         Examples
         --------
@@ -991,13 +906,13 @@ class ETS(BaseETS):
         >>> panda = rtb.models.Panda().ets()
         >>> panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - A tool transform, if provided, is incorporated into the result.
         - Works from the end-effector link to the base
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
@@ -1021,52 +936,41 @@ class ETS(BaseETS):
     def eval(
         self,
         q: ArrayLike,
-        base: Union[NDArray, SE3, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        base: NDArray | SE3 | None = None,
+        tool: NDArray | SE3 | None = None,
         include_base: bool = True,
     ) -> NDArray:
         """
-        Forward kinematics
+        Forward kinematics (returns raw ndarray)
 
-        ``T = ets.fkine(q)`` evaluates forward kinematics for the ets at
+        :param q: Joint coordinates
+        :param base: a base transform applied before the ETS
+        :param tool: tool transform, optional
+        :param include_base: set to True if the base transform should be considered
+        :returns: the transformation matrix representing the pose of the end-effector
+        :rtype: ndarray(4,4) or ndarray(m,4,4)
+
+        ``T = ets.eval(q)`` evaluates forward kinematics for the ets at
         joint configuration ``q``.
 
         **Trajectory operation**:
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
-        result is an ``SE3`` instance with ``m`` values.
-
-        Parameters
-        ----------
-        q
-            Joint coordinates
-        base
-            A base transform applied before the ETS
-        tool
-            tool transform, optional
-        include_base
-            set to True if the base transform should be considered
-        Returns
-        -------
-            The transformation matrix representing the pose of the
-            end-effector
+        result is a 3d array with ``m`` planes.
 
         Examples
         --------
-        The following example makes a ``panda`` robot object, gets the ets, and
-        solves for the forward kinematics at the listed configuration.
-
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> panda = rtb.models.Panda().ets()
-        >>> panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> panda.eval([0, -0.3, 0, -2.2, 0, 2, 0.7854])
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - A tool transform, if provided, is incorporated into the result.
         - Works from the end-effector link to the base
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
@@ -1143,30 +1047,22 @@ class ETS(BaseETS):
     def jacob0(
         self,
         q: ArrayLike,
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
         Manipulator geometric Jacobian in the base frame
 
-        ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
-        joint  velocity to end-effector spatial velocity expressed in the
+        :param q: Joint coordinate vector
+        :param tool: a static tool transformation matrix to apply to the end of ETS
+        :returns: Manipulator Jacobian in the base frame
+        :rtype: ndarray(6,n)
+
+        ``robot.jacob0(q)`` is the manipulator Jacobian matrix which maps
+        joint velocity to end-effector spatial velocity expressed in the
         base frame.
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-
-        Parameters
-        ----------
-        q
-            Joint coordinate vector
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        J0
-            Manipulator Jacobian in the base frame
 
         Examples
         --------
@@ -1178,15 +1074,15 @@ class ETS(BaseETS):
         >>> puma = rtb.models.Puma560().ets()
         >>> puma.jacob0([0, 0, 0, 0, 0, 0])
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
@@ -1268,35 +1164,22 @@ class ETS(BaseETS):
     def jacobe(
         self,
         q: ArrayLike,
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
         Manipulator geometric Jacobian in the end-effector frame
 
+        :param q: Joint coordinate vector
+        :param tool: a static tool transformation matrix to apply to the end of ETS
+        :returns: Manipulator Jacobian in the end-effector frame
+        :rtype: ndarray(6,n)
+
         ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
-        joint  velocity to end-effector spatial velocity expressed in the
-        ``end`` frame.
+        joint velocity to end-effector spatial velocity expressed in the
+        end-effector frame.
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-
-        Parameters
-        ----------
-        q
-            Joint coordinate vector
-        end
-            the particular link or gripper whose velocity the Jacobian
-            describes, defaults to the end-effector if only one is present
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        Je
-            Manipulator Jacobian in the ``end`` frame
 
         Examples
         --------
@@ -1308,15 +1191,15 @@ class ETS(BaseETS):
         >>> puma = rtb.models.Puma560().ets()
         >>> puma.jacobe([0, 0, 0, 0, 0, 0])
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
@@ -1333,36 +1216,19 @@ class ETS(BaseETS):
 
     def hessian0(
         self,
-        q: Union[ArrayLike, None] = None,
-        J0: Union[NDArray, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        q: ArrayLike | None = None,
+        J0: NDArray | None = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
-        Manipulator Hessian
+        Manipulator Hessian in the base frame
 
-        The manipulator Hessian tensor maps joint acceleration to end-effector
-        spatial acceleration, expressed in the base frame. This
-        function calulcates this based on the ETS of the robot. One of J0 or q
-        is required. Supply J0 if already calculated to save computation time
+        :param q: joint angles (optional if J0 supplied)
+        :param J0: the manipulator Jacobian in the base frame (optional if q supplied)
+        :param tool: a static tool transformation matrix to apply to the end of ETS
+        :returns: The manipulator Hessian in the base frame
+        :rtype: ndarray(n,6,n)
 
-        Parameters
-        ----------
-        q
-            The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        J0
-            The manipulator Jacobian in the base frame
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        h0
-            The manipulator Hessian in the base frame
-
-        Synopsis
-        --------
         This method computes the manipulator Hessian in the base frame.  If
         we take the time derivative of the differential kinematic relationship
 
@@ -1405,8 +1271,8 @@ class ETS(BaseETS):
         >>> panda = rtb.models.Panda().ets()
         >>> panda.hessian0([0, -0.3, 0, -2.2, 0, 2, 0.7854])
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -1451,36 +1317,19 @@ class ETS(BaseETS):
 
     def hessiane(
         self,
-        q: Union[ArrayLike, None] = None,
-        Je: Union[NDArray, None] = None,
-        tool: Union[NDArray, SE3, None] = None,
+        q: ArrayLike | None = None,
+        Je: NDArray | None = None,
+        tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
-        Manipulator Hessian
+        Manipulator Hessian in the end-effector frame
 
-        The manipulator Hessian tensor maps joint acceleration to end-effector
-        spatial acceleration, expressed in the end-effector coordinate frame. This
-        function calulcates this based on the ETS of the robot. One of J0 or q
-        is required. Supply J0 if already calculated to save computation time
+        :param q: joint angles (optional if Je supplied)
+        :param Je: the manipulator Jacobian in the end-effector frame (optional if q supplied)
+        :param tool: a static tool transformation matrix to apply to the end of ETS
+        :returns: The manipulator Hessian in the end-effector frame
+        :rtype: ndarray(n,6,n)
 
-        Parameters
-        ----------
-        q
-            The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        J0
-            The manipulator Jacobian in the end-effector frame
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        he
-            The manipulator Hessian in end-effector frame
-
-        Synopsis
-        --------
         This method computes the manipulator Hessian in the end-effector frame.  If
         we take the time derivative of the differential kinematic relationship
 
@@ -1523,8 +1372,8 @@ class ETS(BaseETS):
         >>> panda = rtb.models.Panda().ets()
         >>> panda.hessiane([0, -0.3, 0, -2.2, 0, 2, 0.7854])
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -1571,32 +1420,19 @@ class ETS(BaseETS):
         self,
         q: ArrayLike,
         representation: str = "rpy/xyz",
-        tool: Union[NDArray, SE3, None] = None,
+        tool: NDArray | SE3 | None = None,
     ):
         r"""
         Manipulator analytical Jacobian in the base frame
 
+        :param q: joint coordinate vector
+        :param representation: angular representation
+        :param tool: a static tool transformation matrix to apply to the end of ETS
+        :returns: Manipulator Jacobian in the base frame
+        :rtype: ndarray(6,n)
+
         ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
-        joint  velocity to end-effector spatial velocity expressed in the
-        base frame.
-
-        Parameters
-        ----------
-        q
-            Joint coordinate vector
-        representation
-            angular representation
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        jacob0
-            Manipulator Jacobian in the base frame
-
-        Synopsis
-        --------
+        joint velocity to end-effector spatial velocity expressed in the base frame.
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
@@ -1629,23 +1465,12 @@ class ETS(BaseETS):
         r"""
         The manipulability Jacobian
 
+        :param q: joint angles/configuration of the robot
+        :returns: The manipulability Jacobian
+        :rtype: ndarray(n,1)
+
         This measure relates the rate of change of the manipulability to the
-        joint velocities of the robot. One of J or q is required. Supply J
-        and H if already calculated to save computation time
-
-        Parameters
-        ----------
-        q
-            The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-
-        Returns
-        -------
-        jacobm
-            The manipulability Jacobian
-
-        Synopsis
-        --------
+        joint velocities of the robot.
         Yoshikawa's manipulability measure
 
         .. math::
@@ -1658,8 +1483,8 @@ class ETS(BaseETS):
 
             \frac{\partial m(\vec{q})}{\partial \vec{q}}
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -1688,35 +1513,22 @@ class ETS(BaseETS):
         self,
         q,
         method: L["yoshikawa", "minsingular", "invcondition"] = "yoshikawa",  # noqa
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
     ):
         """
         Manipulability measure
 
+        :param q: joint coordinates (trajectory as matrix(m,n))
+        :param method: method to use, ``"yoshikawa"`` (default), ``"invcondition"``, or ``"minsingular"``
+        :param axes: task space axes to consider: ``"all"`` [default], ``"trans"``, or ``"rot"``
+        :returns: the manipulability metric
+        :rtype: float | ndarray(m)
+
         ``manipulability(q)`` is the scalar manipulability index
         for the ets at the joint configuration ``q``.  It indicates
         dexterity, that is, how well conditioned the ets is for motion
-        with respect to the 6 degrees of Cartesian motion.  The values is
+        with respect to the 6 degrees of Cartesian motion.  The value is
         zero if the ets is at a singularity.
-
-        Parameters
-        ----------
-        q
-            Joint coordinates, one of J or q required
-        method
-            method to use, "yoshikawa" (default), "invcondition",
-            "minsingular"
-        axes
-            Task space axes to consider: "all" [default],
-            "trans", or "rot"
-
-        Returns
-        -------
-        manipulability
-            the manipulability metric
-
-        Synopsis
-        --------
 
         Various measures are supported:
 
@@ -1735,20 +1547,20 @@ class ETS(BaseETS):
         manipulability indices for each joint configuration specified by a row
         of ``q``.
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
         - The "all" option includes rotational and translational
-            dexterity, but this involves adding different units. It can be
-            more useful to look at the translational and rotational
-            manipulability separately.
+          dexterity, but this involves adding different units. It can be
+          more useful to look at the translational and rotational
+          manipulability separately.
         - Examples in the RVC book (1st edition) can be replicated by
-            using the "all" option
+          using the "all" option
         - Asada's measure requires inertial a robot model with inertial
-            parameters.
+          parameters.
 
-        References
-        ----------
+        .. rubric:: References
+
         .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
                 The International Journal of Robotics Research.
                 1985;4(2):3-9. doi:10.1177/027836498500400201
@@ -1764,7 +1576,7 @@ class ETS(BaseETS):
 
         """
 
-        axes_list: List[bool] = []
+        axes_list: list[bool] = []
 
         if isinstance(axes, list):
             axes_list = axes
@@ -1822,33 +1634,19 @@ class ETS(BaseETS):
         r"""
         Manipulator Forward Kinematics nth Partial Derivative
 
+        :param q: joint angles/configuration of the robot
+        :param n: the order of derivative (must be >= 3)
+        :returns: The nth partial derivative of the forward kinematics
+
         This method computes the nth derivative of the forward kinematics where ``n`` is
         greater than or equal to 3. This is an extension of the differential kinematics
         where the Jacobian is the first partial derivative and the Hessian is the
         second.
 
-        Parameters
-        ----------
-        q
-            The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        end
-            the final link/Gripper which the Hessian represents
-        start
-            the first link which the Hessian represents
-        tool
-            a static tool transformation matrix to apply to the
-            end of end, defaults to None
-
-        Returns
-        -------
-        A
-            The nth Partial Derivative of the forward kinematics
-
         Examples
         --------
         The following example makes a ``Panda`` robot object, and solves for the
-        base-effector frame 4th defivative of the forward kinematics at the given
+        base-effector frame 4th derivative of the forward kinematics at the given
         joint angle configuration
 
         .. runblock:: pycon
@@ -1856,8 +1654,8 @@ class ETS(BaseETS):
         >>> panda = rtb.models.Panda().ets()
         >>> panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
@@ -2013,56 +1811,37 @@ class ETS(BaseETS):
 
     def ik_LM(
         self,
-        Tep: Union[NDArray, SE3],
-        q0: Union[NDArray, None] = None,
+        Tep: NDArray | SE3,
+        q0: NDArray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[NDArray, None] = None,
+        mask: NDArray | None = None,
         joint_limits: bool = True,
         k: float = 1.0,
         method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
-    ) -> Tuple[NDArray, int, int, int, float]:
+    ) -> tuple[NDArray, int, int, int, float]:
         r"""
-        Fast levenberg-Marquadt Numerical Inverse Kinematics Solver
+        Fast Levenberg-Marquardt numerical inverse kinematics solver
+
+        :param Tep: the desired end-effector pose
+        :param q0: the initial joint coordinate vector
+        :param ilimit: maximum iterations allowed per search
+        :param slimit: maximum search attempts before failure
+        :param tol: maximum allowed residual error E
+        :param mask: a 6-vector weighting Cartesian DoF error priority
+        :param joint_limits: reject solutions with joint limit violations
+        :param k: gain value for the damping matrix Wn
+        :param method: one of ``"chan"`` (default), ``"sugihara"`` or ``"wampler"``
+        :returns: tuple (q, success, iterations, searches, residual)
+        :rtype: tuple
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
-        using the Levemberg-Marquadt method. This
-        is a fast solver implemented in C++.
+        using the Levenberg-Marquardt method. This is a fast solver implemented in C++.
 
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        k
-            Sets the gain value for the damping matrix Wn in the next iteration. See
-            synopsis
-        method
-            One of "chan", "sugihara" or "wampler". Defines which method is used
-            to calculate the damping matrix Wn in the ``step`` method
-
-        Synopsis
-        --------
         The operation is defined by the choice of the ``method`` kwarg.
 
         The step is deined as
@@ -2133,35 +1912,29 @@ class ETS(BaseETS):
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_LM(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are
         using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,
         ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``
 
-        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        When using this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        ik_NR
-            A fast numerical inverse kinematics solver using Newton-Raphson optimisation
-        ik_GN
-            A fast numerical inverse kinematics solver using Gauss-Newton optimisation
-
+        .. seealso:: :meth:`ik_NR` :meth:`ik_GN`
 
         .. versionchanged:: 1.0.4
-            Merged the Levemberg-Marquadt IK solvers into the ik_LM method
+            Merged the Levenberg-Marquardt IK solvers into the ik_LM method
 
         """  # noqa
 
@@ -2171,18 +1944,30 @@ class ETS(BaseETS):
 
     def ik_NR(
         self,
-        Tep: Union[NDArray, SE3],
-        q0: Union[NDArray, None] = None,
+        Tep: NDArray | SE3,
+        q0: NDArray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[NDArray, None] = None,
+        mask: NDArray | None = None,
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> Tuple[NDArray, int, int, int, float]:
+    ) -> tuple[NDArray, int, int, int, float]:
         r"""
-        Fast numerical inverse kinematics using Newton-Raphson optimization
+        Fast numerical inverse kinematics using Newton-Raphson optimisation
+
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: initial joint configuration (random valid configuration if not supplied)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param mask: a 6-vector weighting end-effector error priority (XYZ translation, XYZ rotation)
+        :param joint_limits: reject solutions with invalid joint configurations
+        :param pinv: use the pseudo-inverse instead of the normal matrix inverse
+        :param pinv_damping: damping factor for the pseudo-inverse
+        :returns: tuple (q, success, iterations, searches, residual)
+        :rtype: tuple
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -2192,59 +1977,12 @@ class ETS(BaseETS):
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Note
-        ----
-        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
-
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose or pose trajectory
-        q0
-            initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
-        ilimit
-            maximum number of iterations per search
-        slimit
-            maximum number of search attempts
-        tol
-            final error tolerance
-        mask
-            a mask vector which weights the end-effector error priority.
-            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
-            respectively
-        joint_limits
-            constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
-            another search up to the slimit)
-        pinv
-            Use the psuedo-inverse instad of the normal matrix inverse
-        pinv_damping
-            Damping factor for the psuedo-inverse
-
-        Returns
-        -------
-        sol
-            tuple (q, success, iterations, searches, residual)
-
-        The return value ``sol`` is a tuple with elements:
-
-        ============    ==========  ===============================================
-        Element         Type        Description
-        ============    ==========  ===============================================
-        ``q``           ndarray(n)  joint coordinates in units of radians or metres
-        ``success``     int         whether a solution was found
-        ``iterations``  int         total number of iterations
-        ``searches``    int         total number of searches
-        ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``.
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by
         the ``residual``.
 
-        Synopsis
-        --------
         Each iteration uses the Newton-Raphson optimisation method
 
         .. math::
@@ -2255,7 +1993,7 @@ class ETS(BaseETS):
         --------
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
-        ``Tep`` using the `ikine_GN` method.
+        ``Tep`` using the `ik_NR` method.
 
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
@@ -2263,24 +2001,19 @@ class ETS(BaseETS):
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ik_NR(Tep)
 
-        Notes
-        -----
-        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        .. rubric:: Notes
+
+        When using this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        ik_LM
-            A fast numerical inverse kinematics solver using Levenberg-Marquadt optimisation
-        ik_GN
-            A fast numerical inverse kinematics solver using Gauss-Newton optimisation
+        .. seealso:: :meth:`ik_LM` :meth:`ik_GN`
 
         """  # noqa
 
@@ -2299,18 +2032,30 @@ class ETS(BaseETS):
 
     def ik_GN(
         self,
-        Tep: Union[NDArray, SE3],
-        q0: Union[NDArray, None] = None,
+        Tep: NDArray | SE3,
+        q0: NDArray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[NDArray, None] = None,
+        mask: NDArray | None = None,
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> Tuple[NDArray, int, int, int, float]:
+    ) -> tuple[NDArray, int, int, int, float]:
         r"""
-        Fast numerical inverse kinematics by Gauss-Newton optimization
+        Fast numerical inverse kinematics by Gauss-Newton optimisation
+
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: initial joint configuration (random valid configuration if not supplied)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param mask: a 6-vector weighting end-effector error priority (XYZ translation, XYZ rotation)
+        :param joint_limits: reject solutions with invalid joint configurations
+        :param pinv: use the pseudo-inverse instead of the normal matrix inverse
+        :param pinv_damping: damping factor for the pseudo-inverse
+        :returns: tuple (q, success, iterations, searches, residual)
+        :rtype: tuple
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -2320,59 +2065,12 @@ class ETS(BaseETS):
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Note
-        ----
-        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
-
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose or pose trajectory
-        q0
-            initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
-        ilimit
-            maximum number of iterations per search
-        slimit
-            maximum number of search attempts
-        tol
-            final error tolerance
-        mask
-            a mask vector which weights the end-effector error priority.
-            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
-            respectively
-        joint_limits
-            constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
-            another search up to the slimit)
-        pinv
-            Use the psuedo-inverse instad of the normal matrix inverse
-        pinv_damping
-            Damping factor for the psuedo-inverse
-
-        Returns
-        -------
-        sol
-            tuple (q, success, iterations, searches, residual)
-
-        The return value ``sol`` is a tuple with elements:
-
-        ============    ==========  ===============================================
-        Element         Type        Description
-        ============    ==========  ===============================================
-        ``q``           ndarray(n)  joint coordinates in units of radians or metres
-        ``success``     int         whether a solution was found
-        ``iterations``  int         total number of iterations
-        ``searches``    int         total number of searches
-        ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``.
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by
         the ``residual``.
 
-        Synopsis
-        --------
         Each iteration uses the Gauss-Newton optimisation method
 
         .. math::
@@ -2406,24 +2104,19 @@ class ETS(BaseETS):
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ik_GN(Tep)
 
-        Notes
-        -----
-        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        .. rubric:: Notes
+
+        When using this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        ik_NR
-            A fast numerical inverse kinematics solver using Newton-Raphson optimisation
-        ik_GN
-            A fast numerical inverse kinematics solver using Gauss-Newton optimisation
+        .. seealso:: :meth:`ik_LM` :meth:`ik_NR`
 
         """  # noqa
 
@@ -2442,76 +2135,50 @@ class ETS(BaseETS):
 
     def ikine_LM(
         self,
-        Tep: Union[NDArray, SE3],
-        q0: Union[ArrayLike, None] = None,
+        Tep: NDArray | SE3,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
+        mask: ArrayLike | None = None,
         joint_limits: bool = True,
-        seed: Union[int, None] = None,
+        seed: int | None = None,
         k: float = 1.0,
         method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
+        pi: NDArray | float = 0.3,
         **kwargs,
     ):
         r"""
-        Levemberg-Marquadt Numerical Inverse Kinematics Solver
+        Levenberg-Marquardt numerical inverse kinematics solver
+
+        :param Tep: the desired end-effector pose
+        :param q0: the initial joint coordinate vector
+        :param ilimit: maximum iterations allowed per search
+        :param slimit: maximum search attempts before failure
+        :param tol: maximum allowed residual error E
+        :param mask: a 6-vector weighting Cartesian DoF error priority
+        :param joint_limits: reject solutions with joint limit violations
+        :param seed: seed for the RNG used to generate random joint configurations
+        :param k: gain value for the damping matrix Wn
+        :param method: one of ``"chan"`` (default), ``"sugihara"`` or ``"wampler"``
+        :param kq: gain for joint limit avoidance (0.0 disables)
+        :param km: gain for manipulability maximisation (0.0 disables)
+        :param ps: minimum joint approach distance to limit (radians or metres)
+        :param pi: null-space influence distance (radians or metres)
+        :returns: IK solution
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
-        using the Levemberg-Marquadt method.
+        using the Levenberg-Marquardt method.
 
-        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a 
+        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        k
-            Sets the gain value for the damping matrix Wn in the next iteration. See
-            synopsis
-        method
-            One of "chan", "sugihara" or "wampler". Defines which method is used
-            to calculate the damping matrix Wn in the ``step`` method
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
+        The operation is defined by the choice of the ``method`` kwarg.
 
-        Synopsis
-        --------
-        The operation is defined by the choice of the ``method`` kwarg. 
-
-        The step is deined as
+        The step is defined as
 
         .. math::
 
@@ -2579,39 +2246,29 @@ class ETS(BaseETS):
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_LM(Tep)
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are
         using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,
         ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``
-        
-        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+
+        When using this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_LM`
-            An IK Solver class which implements the Levemberg Marquadt optimisation technique
-        ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
-        ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
-        ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
-
+        .. seealso:: :meth:`ikine_NR` :meth:`ikine_GN` :meth:`ikine_QP`
 
         .. versionchanged:: 1.0.4
-            Added the Levemberg-Marquadt IK solver method on the `ETS` class
+            Added the Levenberg-Marquardt IK solver method on the `ETS` class
 
         """  # noqa
 
@@ -2638,23 +2295,38 @@ class ETS(BaseETS):
 
     def ikine_NR(
         self,
-        Tep: Union[NDArray, SE3],
-        q0: Union[ArrayLike, None] = None,
+        Tep: NDArray | SE3,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
+        mask: ArrayLike | None = None,
         joint_limits: bool = True,
-        seed: Union[int, None] = None,
+        seed: int | None = None,
         pinv: bool = False,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
+        pi: NDArray | float = 0.3,
         **kwargs,
     ):
         r"""
-        Newton-Raphson Numerical Inverse Kinematics Solver
+        Newton-Raphson numerical inverse kinematics solver
+
+        :param Tep: the desired end-effector pose
+        :param q0: the initial joint coordinate vector
+        :param ilimit: maximum iterations allowed per search
+        :param slimit: maximum search attempts before failure
+        :param tol: maximum allowed residual error E
+        :param mask: a 6-vector weighting Cartesian DoF error priority
+        :param joint_limits: reject solutions with joint limit violations
+        :param seed: seed for the RNG used to generate random joint configurations
+        :param pinv: use the pseudo-inverse in the step method instead of the normal inverse
+        :param kq: gain for joint limit avoidance (0.0 disables)
+        :param km: gain for manipulability maximisation (0.0 disables)
+        :param ps: minimum joint approach distance to limit (radians or metres)
+        :param pi: null-space influence distance (radians or metres)
+        :returns: IK solution
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Newton-Raphson method.
@@ -2662,49 +2334,8 @@ class ETS(BaseETS):
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Note
-        ----
-        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
+        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``.
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        pinv
-            If True, will use the psuedoinverse in the `step` method instead of
-            the normal inverse
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
-
-        Synopsis
-        --------
         Each iteration uses the Newton-Raphson optimisation method
 
         .. math::
@@ -2723,32 +2354,22 @@ class ETS(BaseETS):
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_NR(Tep)
 
-        Notes
-        -----
-        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        .. rubric:: Notes
+
+        When using this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_NR`
-            An IK Solver class which implements the Newton-Raphson optimisation technique
-        ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
-        ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
-        ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
-
+        .. seealso:: :meth:`ikine_LM` :meth:`ikine_GN` :meth:`ikine_QP`
 
         .. versionchanged:: 1.0.4
             Added the Newton-Raphson IK solver method on the `ETS` class
@@ -2777,23 +2398,38 @@ class ETS(BaseETS):
 
     def ikine_GN(
         self,
-        Tep: Union[NDArray, SE3],
-        q0: Union[ArrayLike, None] = None,
+        Tep: NDArray | SE3,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
+        mask: ArrayLike | None = None,
         joint_limits: bool = True,
-        seed: Union[int, None] = None,
+        seed: int | None = None,
         pinv: bool = False,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
+        pi: NDArray | float = 0.3,
         **kwargs,
     ):
         r"""
-        Gauss-Newton Numerical Inverse Kinematics Solver
+        Gauss-Newton numerical inverse kinematics solver
+
+        :param Tep: the desired end-effector pose
+        :param q0: the initial joint coordinate vector
+        :param ilimit: maximum iterations allowed per search
+        :param slimit: maximum search attempts before failure
+        :param tol: maximum allowed residual error E
+        :param mask: a 6-vector weighting Cartesian DoF error priority
+        :param joint_limits: reject solutions with joint limit violations
+        :param seed: seed for the RNG used to generate random joint configurations
+        :param pinv: use the pseudo-inverse in the step method instead of the normal inverse
+        :param kq: gain for joint limit avoidance (0.0 disables)
+        :param km: gain for manipulability maximisation (0.0 disables)
+        :param ps: minimum joint approach distance to limit (radians or metres)
+        :param pi: null-space influence distance (radians or metres)
+        :returns: IK solution
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Gauss-Newton method.
@@ -2801,49 +2437,8 @@ class ETS(BaseETS):
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Note
-        ----
-        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
+        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``.
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        pinv
-            If True, will use the psuedoinverse in the `step` method instead of
-            the normal inverse
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
-
-        Synopsis
-        --------
         Each iteration uses the Gauss-Newton optimisation method
 
         .. math::
@@ -2877,32 +2472,22 @@ class ETS(BaseETS):
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_GN(Tep)
 
-        Notes
-        -----
-        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        .. rubric:: Notes
+
+        When using this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_NR`
-            An IK Solver class which implements the Newton-Raphson optimisation technique
-        ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
-        ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
-        ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
-
+        .. seealso:: :meth:`ikine_LM` :meth:`ikine_NR` :meth:`ikine_QP`
 
         .. versionchanged:: 1.0.4
             Added the Gauss-Newton IK solver method on the `ETS` class
@@ -2931,76 +2516,48 @@ class ETS(BaseETS):
 
     def ikine_QP(
         self,
-        Tep: Union[NDArray, SE3],
-        q0: Union[ArrayLike, None] = None,
+        Tep: NDArray | SE3,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
+        mask: ArrayLike | None = None,
         joint_limits: bool = True,
-        seed: Union[int, None] = None,
+        seed: int | None = None,
         kj=1.0,
         ks=1.0,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
+        pi: NDArray | float = 0.3,
         **kwargs,
     ):
         r"""
-        Quadratic Programming Numerical Inverse Kinematics Solver
+        Quadratic programming numerical inverse kinematics solver
+
+        :param Tep: the desired end-effector pose
+        :param q0: the initial joint coordinate vector
+        :param ilimit: maximum iterations allowed per search
+        :param slimit: maximum search attempts before failure
+        :param tol: maximum allowed residual error E
+        :param mask: a 6-vector weighting Cartesian DoF error priority
+        :param joint_limits: reject solutions with joint limit violations
+        :param seed: seed for the RNG used to generate random joint configurations
+        :param kj: gain for joint velocity norm minimisation
+        :param ks: gain adjusting the cost of slack (intentional error)
+        :param kq: gain for joint limit avoidance (0.0 disables)
+        :param km: gain for manipulability maximisation (0.0 disables)
+        :param ps: minimum joint approach distance to limit (radians or metres)
+        :param pi: null-space influence distance (radians or metres)
+        :returns: IK solution
+        :raises ImportError: if the package ``qpsolvers`` is not installed
 
         A method that provides functionality to perform numerical inverse kinematics
-        (IK) using a quadratic progamming approach.
+        (IK) using a quadratic programming approach.
 
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        kj
-            A gain for joint velocity norm minimisation
-        ks
-            A gain which adjusts the cost of slack (intentional error)
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
-
-        Raises
-        ------
-        ImportError
-            If the package ``qpsolvers`` is not installed
-
-        Synopsis
-        --------
         Each iteration uses the following approach
 
         .. math::
@@ -3073,32 +2630,22 @@ class ETS(BaseETS):
         >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         >>> panda.ikine_QP(Tep)
 
-        Notes
-        -----
-        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        .. rubric:: Notes
+
+        When using this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
         This class supports null-space motion to assist with maximising manipulability and
         avoiding joint limits. These are enabled by setting kq and km to non-zero values.
 
-        References
-        ----------
+        .. rubric:: References
+
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_NR`
-            An IK Solver class which implements the Newton-Raphson optimisation technique
-        ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
-        ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
-        ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
-
+        .. seealso:: :meth:`ikine_LM` :meth:`ikine_NR` :meth:`ikine_GN`
 
         .. versionchanged:: 1.0.4
             Added the Quadratic Programming IK solver method on the `ETS` class
@@ -3169,9 +2716,7 @@ class ETS2(BaseETS):
 
     def __init__(
         self,
-        arg: Union[
-            List[Union["ETS2", ET2]], List[ET2], List["ETS2"], ET2, "ETS2", None
-        ] = None,
+        arg: list[ETS2 | ET2] | list[ET2] | list[ETS2] | ET2 | ETS2 | None = None,
     ):
         super().__init__()
         if isinstance(arg, list):
@@ -3232,13 +2777,13 @@ class ETS2(BaseETS):
                 joint.jindex = j
             self._auto_jindex = True
 
-    def __mul__(self, other: Union[ET2, "ETS2"]) -> "ETS2":
+    def __mul__(self, other: ET2 | ETS2) -> "ETS2":
         if isinstance(other, ET2):
             return ETS2([*self.data, other])
         else:
             return ETS2([*self.data, *other.data])  # pragma: nocover
 
-    def __rmul__(self, other: Union[ET2, "ETS2"]) -> "ETS2":
+    def __rmul__(self, other: ET2 | ETS2) -> "ETS2":
         return ETS2([other, self.data])  # pragma: nocover
 
     def __imul__(self, rest: "ETS2"):
@@ -3286,7 +2831,7 @@ class ETS2(BaseETS):
 
     def insert(
         self,
-        arg: Union[ET2, "ETS2"],
+        arg: ET2 | ETS2,
         i: int = -1,
     ) -> None:
         """
@@ -3326,33 +2871,34 @@ class ETS2(BaseETS):
     def fkine(
         self,
         q: ArrayLike,
-        base: Union[NDArray, SE2, None] = None,
-        tool: Union[NDArray, SE2, None] = None,
+        base: NDArray | SE2 | None = None,
+        tool: NDArray | SE2 | None = None,
         include_base: bool = True,
     ) -> SE2:
         """
         Forward kinematics
-        :param q: Joint coordinates
-        :type q: ArrayLike
+
+        :param q: joint coordinates
         :param base: base transform, optional
         :param tool: tool transform, optional
+        :returns: transformation matrix representing the end-effector pose
+        :rtype: SE2
 
-        :return: The transformation matrix representing the pose of the
-            end-effector
+        ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
+        joint configuration ``q``.
 
-        - ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
-          joint configuration ``q``.
-        **Trajectory operation**:
-        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
-        result is an ``SE2`` instance with ``m`` values.
+        **Trajectory operation**: If ``q`` has multiple rows (mxn), it is considered a
+        trajectory and the result is an ``SE2`` instance with ``m`` values.
+
         .. note::
-            - The robot's base tool transform, if set, is incorporated
-              into the result.
+
+            - The robot's base tool transform, if set, is incorporated into the result.
             - A tool transform, if provided, is incorporated into the result.
             - Works from the end-effector link to the base
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
+
+        .. rubric:: References
+
+        - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
         """
 
         ret = SE2.Empty()
@@ -3373,33 +2919,34 @@ class ETS2(BaseETS):
     def eval(
         self,
         q: ArrayLike,
-        base: Union[NDArray, SE2, None] = None,
-        tool: Union[NDArray, SE2, None] = None,
+        base: NDArray | SE2 | None = None,
+        tool: NDArray | SE2 | None = None,
         include_base: bool = True,
     ) -> NDArray:
         """
-        Forward kinematics
-        :param q: Joint coordinates
-        :type q: ArrayLike
+        Forward kinematics (returns raw ndarray)
+
+        :param q: joint coordinates
         :param base: base transform, optional
         :param tool: tool transform, optional
+        :returns: transformation matrix representing the end-effector pose
+        :rtype: ndarray(3,3) or ndarray(m,3,3)
 
-        :return: The transformation matrix representing the pose of the
-            end-effector
+        ``T = ets.eval(q)`` evaluates forward kinematics for the robot at
+        joint configuration ``q``, returning the raw ndarray.
 
-        - ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
-          joint configuration ``q``.
-        **Trajectory operation**:
-        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
-        result is an ``SE2`` instance with ``m`` values.
+        **Trajectory operation**: If ``q`` has multiple rows (mxn), it is considered a
+        trajectory and the result is an ndarray of shape (m,3,3).
+
         .. note::
-            - The robot's base tool transform, if set, is incorporated
-              into the result.
+
+            - The robot's base tool transform, if set, is incorporated into the result.
             - A tool transform, if provided, is incorporated into the result.
             - Works from the end-effector link to the base
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
+
+        .. rubric:: References
+
+        - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
         """
 
         q = getmatrix(q, (None, None))
@@ -3523,19 +3070,19 @@ class ETS2(BaseETS):
         q: ArrayLike,
     ):
         r"""
-        Jacobian in base frame
+        Jacobian in end-effector frame
 
         :param q: joint coordinates
-        :type q: ArrayLike
-        :return: Jacobian matrix
+        :returns: Jacobian matrix
+        :rtype: ndarray(3,n)
 
         ``jacobe(q)`` is the manipulator Jacobian matrix which maps joint
         velocity to end-effector spatial velocity.
 
-        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, \omega)^T`
         is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
 
-        :seealso: :func:`jacob`, :func:`hessian0`
+        :seealso: :func:`jacob0`, :func:`hessian0`
         """  # noqa
 
         T = self.fkine(q, include_base=False).A

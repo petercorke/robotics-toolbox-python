@@ -3,6 +3,7 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
 from collections import namedtuple
 from email import message
 from roboticstoolbox.tools.data import rtb_path_to_datafile
@@ -34,10 +35,8 @@ from roboticstoolbox.robot.DHLink import _check_rne, DHLink
 from roboticstoolbox import rtb_get_param
 from roboticstoolbox.frne import init, frne, delete
 from numpy import any
-from typing import Union, Tuple
+from numpy.typing import ArrayLike
 from roboticstoolbox.robot.IK import IKSolution
-
-ArrayLike = Union[list, np.ndarray, tuple, set]
 
 # iksol = namedtuple("IKsolution", "q, success, reason")
 
@@ -1922,15 +1921,15 @@ class DHRobot(Robot):
 
     def ik_lm_chan(
         self,
-        Tep: Union[np.ndarray, SE3],
-        q0: Union[np.ndarray, None] = None,
+        Tep: np.ndarray | SE3,
+        q0: np.ndarray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
         reject_jl: bool = True,
-        we: Union[np.ndarray, None] = None,
+        we: np.ndarray | None = None,
         λ: float = 1.0,
-    ) -> Tuple[np.ndarray, int, int, int, float]:
+    ) -> tuple[np.ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
 
@@ -2027,15 +2026,15 @@ class DHRobot(Robot):
 
     def ik_lm_wampler(
         self,
-        Tep: Union[np.ndarray, SE3],
-        q0: Union[np.ndarray, None] = None,
+        Tep: np.ndarray | SE3,
+        q0: np.ndarray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
         reject_jl: bool = True,
-        we: Union[np.ndarray, None] = None,
+        we: np.ndarray | None = None,
         λ: float = 1.0,
-    ) -> Tuple[np.ndarray, int, int, int, float]:
+    ) -> tuple[np.ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Wamplers's Method)
 
@@ -2132,15 +2131,15 @@ class DHRobot(Robot):
 
     def ik_lm_sugihara(
         self,
-        Tep: Union[np.ndarray, SE3],
-        q0: Union[np.ndarray, None] = None,
+        Tep: np.ndarray | SE3,
+        q0: np.ndarray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
         reject_jl: bool = True,
-        we: Union[np.ndarray, None] = None,
+        we: np.ndarray | None = None,
         λ: float = 1.0,
-    ) -> Tuple[np.ndarray, int, int, int, float]:
+    ) -> tuple[np.ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Sugihara's Method)
 
@@ -2237,16 +2236,16 @@ class DHRobot(Robot):
 
     def ik_nr(
         self,
-        Tep: Union[np.ndarray, SE3],
-        q0: Union[np.ndarray, None] = None,
+        Tep: np.ndarray | SE3,
+        q0: np.ndarray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
         reject_jl: bool = True,
-        we: Union[np.ndarray, None] = None,
+        we: np.ndarray | None = None,
         use_pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> Tuple[np.ndarray, int, int, int, float]:
+    ) -> tuple[np.ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Newton-Raphson Method)
 
@@ -2345,16 +2344,16 @@ class DHRobot(Robot):
 
     def ik_gn(
         self,
-        Tep: Union[np.ndarray, SE3],
-        q0: Union[np.ndarray, None] = None,
+        Tep: np.ndarray | SE3,
+        q0: np.ndarray | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
         reject_jl: bool = True,
-        we: Union[np.ndarray, None] = None,
+        we: np.ndarray | None = None,
         use_pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> Tuple[np.ndarray, int, int, int, float]:
+    ) -> tuple[np.ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Gauss-Newton Method)
 
@@ -2453,14 +2452,14 @@ class DHRobot(Robot):
 
     def ikine_LM(
         self,
-        Tep: Union[np.ndarray, SE3],
-        q0: Union[ArrayLike, None] = None,
+        Tep: np.ndarray | SE3,
+        q0: ArrayLike | None = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
         joint_limits: bool = False,
-        mask: Union[ArrayLike, None] = None,
-        seed: Union[int, None] = None,
+        mask: ArrayLike | None = None,
+        seed: int | None = None,
     ):
         return self.ets().ikine_LM(
             Tep=Tep,

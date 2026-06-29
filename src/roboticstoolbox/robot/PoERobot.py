@@ -48,8 +48,8 @@ class PoELink(Link):
 
         :param twist: given twist as Twist3 object
 
-        References
-        ----------
+        .. rubric:: References
+
         - D. Huczala, T. Kot, J. Mlotek, J. Suder and M. Pfurner, *An Automated
           Conversion Between Selected Robot Kinematic Representations*, ICCMA 2022,
           Luxembourg, doi: 10.1109/ICCMA56665.2022.10011595

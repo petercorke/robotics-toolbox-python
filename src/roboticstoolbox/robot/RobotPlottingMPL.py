@@ -9,9 +9,7 @@ matplotlib.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Union
-
-from typing_extensions import Literal as L
+from typing import TYPE_CHECKING, Any, Literal as L
 
 if TYPE_CHECKING:  # pragma: nocover
     from roboticstoolbox.backends.PyPlot import PyPlot
@@ -26,9 +24,12 @@ class RobotPlottingMPLMixin:
     # Colour helpers
     # ------------------------------------------------------------------
 
-    def linkcolormap(self, linkcolors: Union[List[Any], str] = "viridis"):
+    def linkcolormap(self, linkcolors: list[Any] | str = "viridis"):
         """
-        Create a colormap for robot joints
+        Create a colormap for robot joints.
+
+        :param linkcolors: list of colors or colormap name, defaults to ``"viridis"``
+        :returns: the color map
 
         - ``cm = robot.linkcolormap()`` is an n-element colormap that gives a
           unique color for every link.  The RGBA colors for link ``j`` are
@@ -40,19 +41,8 @@ class RobotPlottingMPLMixin:
           colormap is created from a list of n color names given as strings,
           tuples or hexstrings.
 
-        Parameters
-        ----------
-        linkcolors
-            list of colors or colormap, defaults to "viridis"
-
-        Returns
-        -------
-        color map
-            the color map
-
-        Examples
-        --------
         .. runblock:: pycon
+
         >>> import roboticstoolbox as rtb
         >>> robot = rtb.models.DH.Puma560()
         >>> cm = robot.linkcolormap("inferno")
@@ -61,8 +51,8 @@ class RobotPlottingMPLMixin:
         ...     ['red', 'g', (0,0.5,0), '#0f8040', 'yellow', 'cyan'])
         >>> print(cm(range(6)))
 
-        Notes
-        -----
+        .. rubric:: Notes
+
         - Colormaps have 4-elements: red, green, blue, alpha (RGBA)
         - Names of supported colors and colormaps are defined in the
           matplotlib documentation.
@@ -85,47 +75,35 @@ class RobotPlottingMPLMixin:
 
     def fellipse(
         self,
-        q: "ArrayLike",
+        q: ArrayLike,
         opt: L["trans", "rot"] = "trans",  # noqa
         unit: L["rad", "deg"] = "rad",  # noqa
-        centre: Union[L["ee"], "ArrayLike"] = "ee",  # noqa
+        centre: L["ee"] | ArrayLike = "ee",  # noqa
         add: bool = True,
-    ) -> "EllipsePlot":
+    ) -> EllipsePlot:
         """
-        Create a force ellipsoid object for plotting with PyPlot
+        Create a force ellipsoid object for plotting with PyPlot.
+
+        :param q: the joint configuration of the robot
+        :param opt: ``'trans'`` or ``'rot'`` — plot the translational or
+            rotational force ellipsoid
+        :param unit: ``'rad'`` or ``'deg'``
+        :param centre: centre of the ellipsoid — ``'ee'`` for the
+            end-effector or a 3-vector ``[x, y, z]`` in the world frame
+        :param add: if ``True``, add the ellipsoid to the active plot environment
+        :returns: an EllipsePlot object
+        :rtype: EllipsePlot
 
         ``robot.fellipse(q)`` creates a force ellipsoid for the robot at
         pose ``q``. By default the ellipsoid is centered at the end-effector.
 
-        Parameters
-        ----------
-        q
-            The joint configuration of the robot.
-        opt
-            'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        unit
-            'rad' or 'deg' will plot the ellipsoid in radians or
-            degrees
-        centre
-            The centre of the ellipsoid, either 'ee' for the end-effector
-            or a 3-vector [x, y, z] in the world frame
+        .. rubric:: Notes
 
-        Returns
-        -------
-        env
-            An EllipsePlot object
-
-        Notes
-        -----
         - By default the ellipsoid related to translational motion is
-            drawn.  Use ``opt='rot'`` to draw the rotational velocity
-            ellipsoid.
+          drawn.  Use ``opt='rot'`` to draw the rotational velocity ellipsoid.
         - By default the ellipsoid is drawn at the end-effector.  The option
-            ``centre`` allows its origin to set to set to the specified
-            3-vector, or the string "ee" ensures it is drawn at the
-            end-effector position.
-
+          ``centre`` allows its origin to be set to the specified 3-vector,
+          or the string ``"ee"`` ensures it is drawn at the end-effector position.
         """
         import roboticstoolbox as rtb
         from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
@@ -144,50 +122,37 @@ class RobotPlottingMPLMixin:
 
     def vellipse(
         self,
-        q: "ArrayLike",
+        q: ArrayLike,
         opt: L["trans", "rot"] = "trans",  # noqa
         unit: L["rad", "deg"] = "rad",  # noqa
-        centre: Union[L["ee"], "ArrayLike"] = "ee",  # noqa
+        centre: L["ee"] | ArrayLike = "ee",  # noqa
         scale: float = 0.1,
         add: bool = True,
-    ) -> "EllipsePlot":
+    ) -> EllipsePlot:
         """
-        Create a velocity ellipsoid object for plotting with PyPlot
+        Create a velocity ellipsoid object for plotting with PyPlot.
 
-        ``robot.vellipse(q)`` creates a force ellipsoid for the robot at
+        :param q: the joint configuration of the robot
+        :param opt: ``'trans'`` or ``'rot'`` — plot the translational or
+            rotational velocity ellipsoid
+        :param unit: ``'rad'`` or ``'deg'``
+        :param centre: centre of the ellipsoid — ``'ee'`` for the
+            end-effector or a 3-vector ``[x, y, z]`` in the world frame
+        :param scale: scale factor for the ellipsoid
+        :param add: if ``True``, add the ellipsoid to the active plot environment
+        :returns: an EllipsePlot object
+        :rtype: EllipsePlot
+
+        ``robot.vellipse(q)`` creates a velocity ellipsoid for the robot at
         pose ``q``. By default the ellipsoid is centered at the end-effector.
 
-        Parameters
-        ----------
-        q
-            The joint configuration of the robot.
-        opt
-            'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        unit
-            'rad' or 'deg' will plot the ellipsoid in radians or
-            degrees
-        centre
-            The centre of the ellipsoid, either 'ee' for the end-effector
-            or a 3-vector [x, y, z] in the world frame
-        scale
-            The scale factor for the ellipsoid
+        .. rubric:: Notes
 
-        Returns
-        -------
-        env
-            An EllipsePlot object
-
-        Notes
-        -----
         - By default the ellipsoid related to translational motion is
-            drawn.  Use ``opt='rot'`` to draw the rotational velocity
-            ellipsoid.
+          drawn.  Use ``opt='rot'`` to draw the rotational velocity ellipsoid.
         - By default the ellipsoid is drawn at the end-effector.  The option
-            ``centre`` allows its origin to set to set to the specified
-            3-vector, or the string "ee" ensures it is drawn at the
-            end-effector position.
-
+          ``centre`` allows its origin to be set to the specified 3-vector,
+          or the string ``"ee"`` ensures it is drawn at the end-effector position.
         """
         import roboticstoolbox as rtb
         from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
@@ -204,7 +169,7 @@ class RobotPlottingMPLMixin:
 
         return ell
 
-    def _maybe_add_ellipse_to_active_env(self, ellipse: "EllipsePlot") -> None:
+    def _maybe_add_ellipse_to_active_env(self, ellipse: EllipsePlot) -> None:
         """Add ellipse to the most recently active PyPlot environment, if available."""
         env = self._active_plot_env
         if env is None:
@@ -224,48 +189,28 @@ class RobotPlottingMPLMixin:
 
     def plot_ellipse(
         self,
-        ellipse: "EllipsePlot",
+        ellipse: EllipsePlot,
         block: bool = True,
-        limits: Union["ArrayLike", None] = None,
+        limits: ArrayLike | None = None,
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,
         name: bool = True,
-    ) -> "PyPlot":
+    ) -> PyPlot:
         """
-        Plot the an ellipsoid
+        Plot an ellipsoid.
+
+        :param ellipse: the ellipsoid to plot
+        :param block: block operation of the code and keep the figure open
+        :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
+        :param jointaxes: plot an arrow indicating the joint axis
+        :param eeframe: plot the end-effector coordinate frame
+        :param shadow: plot a shadow of the robot in the x-y plane
+        :param name: plot the name of the robot near its base
+        :returns: a reference to the PyPlot object controlling the matplotlib figure
+        :rtype: PyPlot
 
         ``robot.plot_ellipse(ellipsoid)`` displays the ellipsoid.
-
-        Parameters
-        ----------
-        ellipse
-            the ellipsoid to plot
-        block
-            Block operation of the code and keep the figure open
-        limits
-            Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        jointaxes
-            (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        eeframe
-            (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        shadow
-            (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        name
-            (Plot Option) Plot the name of the robot near its base
-
-        Returns
-        -------
-        env
-            A reference to the PyPlot object which controls the
-            matplotlib figure
-
         """
         from roboticstoolbox.backends.PyPlot import PyPlot
         from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
@@ -287,78 +232,45 @@ class RobotPlottingMPLMixin:
 
     def plot_fellipse(
         self,
-        q: Union["ArrayLike", None],
+        q: ArrayLike | None,
         block: bool = True,
-        fellipse: Union["EllipsePlot", None] = None,
-        limits: Union["ArrayLike", None] = None,
+        fellipse: EllipsePlot | None = None,
+        limits: ArrayLike | None = None,
         opt: L["trans", "rot"] = "trans",  # noqa
-        centre: Union[L["ee"], "ArrayLike"] = "ee",  # noqa
+        centre: L["ee"] | ArrayLike = "ee",  # noqa
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,
         name: bool = True,
-    ) -> "PyPlot":
+    ) -> PyPlot:
         """
-        Plot the force ellipsoid for manipulator
+        Plot the force ellipsoid for a manipulator.
 
-        ``robot.plot_fellipse(q)`` displays the velocity ellipsoid for the
-        robot at pose ``q``. The plot will autoscale with an aspect ratio
-        of 1.
+        :param q: the joint configuration of the robot
+        :param block: block operation of the code and keep the figure open
+        :param fellipse: a pre-built force ellipsoid to plot
+        :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
+        :param opt: ``'trans'`` or ``'rot'`` — plot the translational or rotational force ellipsoid
+        :param centre: coordinates to plot the ellipse — ``[x, y, z]`` or ``"ee"``
+        :param jointaxes: plot an arrow indicating the joint axis
+        :param eeframe: plot the end-effector coordinate frame
+        :param shadow: plot a shadow of the robot in the x-y plane
+        :param name: plot the name of the robot near its base
+        :raises ValueError: if neither ``q`` nor ``fellipse`` is supplied
+        :returns: a reference to the PyPlot object controlling the matplotlib figure
+        :rtype: PyPlot
 
-        ``robot.plot_fellipse(vellipse)`` specifies a custon ellipse to plot.
+        ``robot.plot_fellipse(q)`` displays the force ellipsoid for the robot
+        at pose ``q``. The plot will autoscale with an aspect ratio of 1.
 
-        Parameters
-        ----------
-        q
-            The joint configuration of the robot
-        block
-            Block operation of the code and keep the figure open
-        fellipse
-            the vellocity ellipsoid to plot
-        limits
-            Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        opt
-            'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        centre
-            The coordinates to plot the fellipse [x, y, z] or "ee"
-            to plot at the end-effector location
-        jointaxes
-            (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        eeframe
-            (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        shadow
-            (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        name
-            (Plot Option) Plot the name of the robot near its base
+        ``robot.plot_fellipse(vellipse=ell)`` uses a pre-built ellipse object.
 
-        Raises
-        ------
-        ValueError
-            q or fellipse must be supplied
+        .. rubric:: Notes
 
-        Returns
-        -------
-        env
-            A reference to the PyPlot object which controls the
-            matplotlib figure
-
-        Notes
-        -----
-        - By default the ellipsoid related to translational motion is
-            drawn.  Use ``opt='rot'`` to draw the rotational velocity
-            ellipsoid.
-        - By default the ellipsoid is drawn at the origin.  The option
-            ``centre`` allows its origin to set to set to the specified
-            3-vector, or the string "ee" ensures it is drawn at the
-            end-effector position.
-
+        - By default the ellipsoid related to translational motion is drawn.
+          Use ``opt='rot'`` to draw the rotational velocity ellipsoid.
+        - By default the ellipsoid is drawn at the origin.  Use ``centre``
+          to specify a 3-vector, or ``"ee"`` to draw at the end-effector.
         """
         import roboticstoolbox as rtb
 
@@ -382,76 +294,45 @@ class RobotPlottingMPLMixin:
 
     def plot_vellipse(
         self,
-        q: Union["ArrayLike", None],
+        q: ArrayLike | None,
         block: bool = True,
-        vellipse: Union["EllipsePlot", None] = None,
-        limits: Union["ArrayLike", None] = None,
+        vellipse: EllipsePlot | None = None,
+        limits: ArrayLike | None = None,
         opt: L["trans", "rot"] = "trans",  # noqa
-        centre: Union[L["ee"], "ArrayLike"] = "ee",  # noqa
+        centre: L["ee"] | ArrayLike = "ee",  # noqa
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,
         name: bool = True,
-    ) -> "PyPlot":
+    ) -> PyPlot:
         """
-        Plot the velocity ellipsoid for manipulator
+        Plot the velocity ellipsoid for a manipulator.
 
-        ``robot.plot_vellipse(q)`` displays the velocity ellipsoid for the
-        robot at pose ``q``. The plot will autoscale with an aspect ratio
-        of 1.
+        :param q: the joint configuration of the robot
+        :param block: block operation of the code and keep the figure open
+        :param vellipse: a pre-built velocity ellipsoid to plot
+        :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
+        :param opt: ``'trans'`` or ``'rot'`` — plot the translational or rotational velocity ellipsoid
+        :param centre: coordinates to plot the ellipse — ``[x, y, z]`` or ``"ee"``
+        :param jointaxes: plot an arrow indicating the joint axis
+        :param eeframe: plot the end-effector coordinate frame
+        :param shadow: plot a shadow of the robot in the x-y plane
+        :param name: plot the name of the robot near its base
+        :raises ValueError: if neither ``q`` nor ``vellipse`` is supplied
+        :returns: a reference to the PyPlot object controlling the matplotlib figure
+        :rtype: PyPlot
 
-        ``robot.plot_vellipse(vellipse)`` specifies a custon ellipse to plot.
+        ``robot.plot_vellipse(q)`` displays the velocity ellipsoid for the robot
+        at pose ``q``. The plot will autoscale with an aspect ratio of 1.
 
-        block
-            Block operation of the code and keep the figure open
-        q
-            The joint configuration of the robot
-        vellipse
-            the vellocity ellipsoid to plot
-        limits
-            Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        opt
-            'trans' or 'rot' will plot either the translational or
-            rotational velocity ellipsoid
-        centre
-            The coordinates to plot the vellipse [x, y, z] or "ee"
-            to plot at the end-effector location
-        jointaxes
-            (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        eeframe
-            (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        shadow
-            (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        name
-            (Plot Option) Plot the name of the robot near its base
+        ``robot.plot_vellipse(vellipse=ell)`` uses a pre-built ellipse object.
 
-        Raises
-        ------
-        ValueError
-            q or fellipse must be supplied
+        .. rubric:: Notes
 
-        Returns
-        -------
-        env
-            A reference to the PyPlot object which controls the
-            matplotlib figure
-
-        Notes
-        -----
-        - By default the ellipsoid related to translational motion is
-            drawn.  Use ``opt='rot'`` to draw the rotational velocity
-            ellipsoid.
-        - By default the ellipsoid is drawn at the origin.  The option
-            ``centre`` allows its origin to set to set to the specified
-            3-vector, or the string "ee" ensures it is drawn at the
-            end-effector position.
-
+        - By default the ellipsoid related to translational motion is drawn.
+          Use ``opt='rot'`` to draw the rotational velocity ellipsoid.
+        - By default the ellipsoid is drawn at the origin.  Use ``centre``
+          to specify a 3-vector, or ``"ee"`` to draw at the end-effector.
         """
         import roboticstoolbox as rtb
 
