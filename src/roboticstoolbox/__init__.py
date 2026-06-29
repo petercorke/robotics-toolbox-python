@@ -5,7 +5,7 @@ from roboticstoolbox.robot import *
 from roboticstoolbox.mobile import *
 from roboticstoolbox import models
 from roboticstoolbox import backends
-# from roboticstoolbox.robot.RobotURDF import URDFRobot, URDF_str, URDF_file
+
 
 __all__ = [
     # Aliased
