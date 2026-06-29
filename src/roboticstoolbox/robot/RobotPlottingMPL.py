@@ -60,7 +60,7 @@ class RobotPlottingMPLMixin:
           - `Specifying colors <https://matplotlib.org/3.1.0/tutorials/colors/colors.html>`_
           - `Colormaps <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html>`_
 
-        """  # noqa
+        """
 
         from matplotlib import cm, colors
 
@@ -76,9 +76,9 @@ class RobotPlottingMPLMixin:
     def fellipse(
         self,
         q: ArrayLike,
-        opt: L["trans", "rot"] = "trans",  # noqa
-        unit: L["rad", "deg"] = "rad",  # noqa
-        centre: L["ee"] | ArrayLike = "ee",  # noqa
+        opt: L["trans", "rot"] = "trans",
+        unit: L["rad", "deg"] = "rad",
+        centre: L["ee"] | ArrayLike = "ee",
         add: bool = True,
     ) -> EllipsePlot:
         """
@@ -123,9 +123,9 @@ class RobotPlottingMPLMixin:
     def vellipse(
         self,
         q: ArrayLike,
-        opt: L["trans", "rot"] = "trans",  # noqa
-        unit: L["rad", "deg"] = "rad",  # noqa
-        centre: L["ee"] | ArrayLike = "ee",  # noqa
+        opt: L["trans", "rot"] = "trans",
+        unit: L["rad", "deg"] = "rad",
+        centre: L["ee"] | ArrayLike = "ee",
         scale: float = 0.1,
         add: bool = True,
     ) -> EllipsePlot:
@@ -236,8 +236,8 @@ class RobotPlottingMPLMixin:
         block: bool = True,
         fellipse: EllipsePlot | None = None,
         limits: ArrayLike | None = None,
-        opt: L["trans", "rot"] = "trans",  # noqa
-        centre: L["ee"] | ArrayLike = "ee",  # noqa
+        opt: L["trans", "rot"] = "trans",
+        centre: L["ee"] | ArrayLike = "ee",
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,
@@ -298,8 +298,8 @@ class RobotPlottingMPLMixin:
         block: bool = True,
         vellipse: EllipsePlot | None = None,
         limits: ArrayLike | None = None,
-        opt: L["trans", "rot"] = "trans",  # noqa
-        centre: L["ee"] | ArrayLike = "ee",  # noqa
+        opt: L["trans", "rot"] = "trans",
+        centre: L["ee"] | ArrayLike = "ee",
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,

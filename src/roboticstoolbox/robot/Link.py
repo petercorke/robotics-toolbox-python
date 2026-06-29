@@ -136,7 +136,7 @@ class BaseLink(SceneNode, ABC):
         joint_name: str | None = None,
         m: float | None = None,
         r: ArrayLike | None = None,
-        I: ArrayLike | None = None,  # noqa
+        I: ArrayLike | None = None,
         Jm: float | None = None,
         B: float | None = None,
         Tc: ArrayLike | None = None,
@@ -409,7 +409,7 @@ class BaseLink(SceneNode, ABC):
         joint_name = deepcopy(self._joint_name)
         m = deepcopy(self.m)
         r = deepcopy(self.r)
-        I = deepcopy(self.I)  # noqa
+        I = deepcopy(self.I)
         Jm = deepcopy(self.Jm)
         B = deepcopy(self.B)
         Tc = deepcopy(self.Tc)
@@ -697,7 +697,7 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def I(self) -> NDArray:  # noqa
+    def I(self) -> NDArray:
         r"""
         Get/set link inertia
 
@@ -725,13 +725,13 @@ class BaseLink(SceneNode, ABC):
 
         - Referred to the link side of the gearbox.
 
-        """  # noqa
+        """
 
         return self._I  # type: ignore
 
     @I.setter
     @_listen_dyn
-    def I(self, I_new: ArrayLike):  # noqa
+    def I(self, I_new: ArrayLike):
         if ismatrix(I_new, (3, 3)):
             # 3x3 matrix passed
             if np.any(np.abs(I_new - I_new.T) > 1e-8):  # type: ignore
@@ -1250,7 +1250,7 @@ class BaseLink(SceneNode, ABC):
             border="thin",
         )
 
-        def format(l, fmt, val):  # noqa
+        def format(l, fmt, val):
             if isinstance(val, np.ndarray):
                 try:
                     s = ", ".join([fmt.format(v) for v in val])
@@ -1268,7 +1268,7 @@ class BaseLink(SceneNode, ABC):
         dyn = []
         format(dyn, fmt, self.m)
         format(dyn, fmt, self.r)
-        I = self.I.flatten()  # noqa
+        I = self.I.flatten()
         format(dyn, fmt, np.r_[[I[k] for k in [0, 4, 8, 1, 5, 2]]])
         format(dyn, fmt, self.Jm)
         format(dyn, fmt, self.B)
@@ -1283,7 +1283,7 @@ class BaseLink(SceneNode, ABC):
         name,
         symbol=None,
         ignorevalue=None,
-        indices=None,  # noqa
+        indices=None,
     ):  # noqa  # pragma nocover
         # if value == ignorevalue then don't display it
 
@@ -1320,7 +1320,7 @@ class BaseLink(SceneNode, ABC):
 
     def _params(self, name: bool = True):  # pragma nocover
 
-        l = []  # noqa
+        l = []
         if name:
             self._format_param(l, "name")
         if self.parent_name is not None:

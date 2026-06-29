@@ -583,7 +583,7 @@ class IK_NR(IKSolver):
     .. versionchanged:: 1.0.3
         Added the Newton-Raphson IK solver class
 
-    """  # noqa
+    """
 
     def __init__(
         self,
@@ -740,7 +740,7 @@ class IK_LM(IKSolver):
     .. versionchanged:: 1.0.3
         Added the Levemberg-Marquadt IK solver class
 
-    """  # noqa
+    """
 
     def __init__(
         self,
@@ -860,7 +860,7 @@ class IK_LM(IKSolver):
         **Wampler's Method**
 
         Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
-        """  # noqa
+        """
 
         Te = ets.eval(q)
         e, E = self.error(Te, Tep)
@@ -963,7 +963,7 @@ class IK_GN(IKSolver):
     .. versionchanged:: 1.0.3
         Added the Gauss-Newton IK solver class
 
-    """  # noqa
+    """
 
     def __init__(
         self,
@@ -1040,7 +1040,7 @@ class IK_GN(IKSolver):
         :math:`\mat{J}(\vec{q}_k)` is non-singular, and :math:`\mat{W}_e = \mat{1}_n`, then
         the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
         is singular, the above can not be computed and the GN solution is infeasible.
-        """  # noqa
+        """
 
         Te = ets.eval(q)
         e, E = self.error(Te, Tep)
@@ -1128,7 +1128,7 @@ class IK_QP(IKSolver):
     .. versionchanged:: 1.0.3
         Added the Quadratic Programming IK solver class
 
-    """  # noqa
+    """
 
     def __init__(
         self,
@@ -1253,7 +1253,7 @@ class IK_QP(IKSolver):
         :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and
         :math:`\dvec{\delta}^{-,+}` are the minimum and maximum slack velocities.
 
-        """  # noqa
+        """
 
         Te = ets.eval(q)
         e, E = self.error(Te, Tep)

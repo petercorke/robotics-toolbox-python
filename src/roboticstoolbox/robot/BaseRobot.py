@@ -1855,7 +1855,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def _get_graphical_backend(
         self,
-        backend: L["swift", "pyplot", "pyplot2"] | None = None,  # noqa
+        backend: L["swift", "pyplot", "pyplot2"] | None = None,
     ) -> Connector:
         import sys
         from roboticstoolbox.backends import load_backend
@@ -1905,7 +1905,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     def plot(
         self,
         q: ArrayLike,
-        backend: L["swift", "pyplot", "pyplot2"] | None = None,  # noqa
+        backend: L["swift", "pyplot", "pyplot2"] | None = None,
         block: bool = False,
         dt: float = 0.050,
         limits: ArrayLike | None = None,
@@ -1961,7 +1961,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         --------
         :func:`teach`
 
-        """  # noqa
+        """
 
         env = None
 
@@ -2047,7 +2047,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         limits: ArrayLike | None = None,
         vellipse: bool = False,
         fellipse: bool = False,
-        backend: L["pyplot", "pyplot2"] | None = None,  # noqa
+        backend: L["pyplot", "pyplot2"] | None = None,
     ) -> Connector:
         """
         Graphical teach pendant
@@ -2205,7 +2205,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self,
         filename: str | IO[str],
         etsbox: bool = False,
-        ets: L["full", "brief"] = "full",  # noqa
+        ets: L["full", "brief"] = "full",
         jtype: bool = False,
         static: bool = True,
     ):
@@ -2361,4 +2361,4 @@ graph [rankdir=LR];
         file.write("}\n")
 
         if isinstance(filename, str):
-            file.close()  # noqa
+            file.close()

@@ -587,7 +587,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #         file.write("}\n")
 
     #         if isinstance(filename, str):
-    #             file.close()  # noqa
+    #             file.close()
 
     # --------------------------------------------------------------------- #
     # --------- Kinematic Methods ----------------------------------------- #
@@ -664,7 +664,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """  # noqa
+        """
 
         q = getvector(q)
 
@@ -709,9 +709,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
         method: L[
-            "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
+            "yoshikawa", "asada", "minsingular", "invcondition"
         ] = "yoshikawa",
-        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
         **kwargs,
     ) -> float | NDArray:  # pragma nocover
         ...
@@ -724,9 +724,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
         method: L[
-            "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
+            "yoshikawa", "asada", "minsingular", "invcondition"
         ] = "yoshikawa",
-        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
         **kwargs,
     ) -> float | NDArray:  # pragma nocover
         ...
@@ -738,9 +738,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
         method: L[
-            "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
+            "yoshikawa", "asada", "minsingular", "invcondition"
         ] = "yoshikawa",
-        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
         **kwargs,
     ):
         """
@@ -929,7 +929,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
         attribute ``traj.q`` is a row-wise joint-space trajectory.
 
-        """  # noqa
+        """
 
         if hasattr(self, "ikine_a"):
             ik = self.ikine_a  # type: ignore
@@ -947,7 +947,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: ArrayLike,
         qd: ArrayLike,
         J0: None = None,
-        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,  # noqa
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -957,7 +957,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: None,
         qd: ArrayLike,
         J0: NDArray = ...,
-        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,  # noqa
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -966,7 +966,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q,
         qd: ArrayLike,
         J0=None,
-        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,  # noqa
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
     ):
         r"""
         Derivative of Jacobian
@@ -1066,7 +1066,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         H: None = None,
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
-        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1078,7 +1078,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         H: NDArray = ...,
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
-        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1089,7 +1089,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         H=None,
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
-        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
     ) -> NDArray:
         r"""
         The manipulability Jacobian
@@ -1125,7 +1125,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         end, start, _ = self._get_limit_links(end, start)
 
@@ -1620,7 +1620,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         v = SpatialVelocity.Alloc(n)
         a = SpatialAcceleration.Alloc(n)
         f = SpatialForce.Alloc(n)
-        I = SpatialInertia.Alloc(n)  # noqa
+        I = SpatialInertia.Alloc(n)
         s = []  # joint motion subspace
 
         # Handle trajectory case
@@ -1940,7 +1940,7 @@ class Robot2(BaseRobot[Link2]):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """  # noqa
+        """
 
         q = getvector(q)
 

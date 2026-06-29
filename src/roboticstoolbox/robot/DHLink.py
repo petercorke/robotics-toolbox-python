@@ -730,7 +730,7 @@ class RevoluteDH(DHLink):
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
-    """  # noqa
+    """
 
     def __init__(
         self, d: float = 0.0, a: float = 0.0, alpha: float = 0.0, offset: float = 0.0,
@@ -791,7 +791,7 @@ class PrismaticDH(DHLink):
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
-    """  # noqa
+    """
 
     def __init__(
         self, theta: float = 0.0, a: float = 0.0, alpha: float = 0.0,
@@ -857,7 +857,7 @@ class RevoluteMDH(DHLink):
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     :seealso: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`
-    """  # noqa
+    """
 
     def __init__(
         self, d: float = 0.0, a: float = 0.0, alpha: float = 0.0, offset: float = 0.0,
@@ -923,7 +923,7 @@ class PrismaticMDH(DHLink):
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     :seealso: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`
-    """  # noqa
+    """
 
     def __init__(
         self, theta: float = 0.0, a: float = 0.0, alpha: float = 0.0,

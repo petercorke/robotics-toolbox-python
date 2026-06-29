@@ -439,7 +439,7 @@ class DynamicsMixin:
             ASME Journal of Dynamic Systems, Measurement and Control, vol.
             104, no. 3, pp. 205-211, 1982.
 
-        """  # noqa
+        """
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -1246,7 +1246,7 @@ class DynamicsMixin:
         --------
         :func:`accel`
 
-        """  # noqa
+        """
 
         q = getmatrix(q, (None, self.n))
         xd = getmatrix(xd, (None, 6))
@@ -1474,7 +1474,7 @@ class DynamicsMixin:
             r2.links[i].m = r2.links[i].m * s
 
             s = (2 * np.random.random() - 1) * p + 1
-            r2.links[i].I = r2.links[i].I * s  # noqa
+            r2.links[i].I = r2.links[i].I * s
 
         return r2
 

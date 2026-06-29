@@ -1091,7 +1091,7 @@ class DHRobot(Robot):
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
-        """  # noqa
+        """
 
         q = getvector(q, self.n)
 
@@ -1174,7 +1174,7 @@ class DHRobot(Robot):
             kinematics which is needed to transform velocity from end-effector
             frame to world frame.
 
-        """  # noqa
+        """
         q = getvector(q, self.n)
 
         if T is None:
@@ -1243,7 +1243,7 @@ class DHRobot(Robot):
             kinematics which is needed to transform velocity from end-effector
             frame to world frame.
 
-        """  # noqa
+        """
         q = getvector(q, self.n)
 
         # compute forward kinematics if not provided
@@ -1758,7 +1758,7 @@ class DHRobot(Robot):
                     print(
                         f"j={j:}, G={link.G:}, Jm={link.Jm:},"
                         f" friction={link.friction(qd_k[j], coulomb=False):}"
-                    )  # noqa
+                    )
                     print()
 
             # compute the base wrench and save it
@@ -1776,7 +1776,7 @@ class DHRobot(Robot):
 
         #     # tau = trigsimp(tau)
         #     # consider using multiprocessing to spread over cores
-        #     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy  # noqa
+        #     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy
         #     print('done')
         #     if tau.shape[0] == 1:
         #         return tau.reshape(self.n)

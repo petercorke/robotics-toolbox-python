@@ -142,7 +142,7 @@ class BaseETS(UserList):
                         _j = j
                     else:
                         _j = et.jindex
-                    qvar = q.format(  # lgtm [py/str-format/surplus-argument]  # noqa
+                    qvar = q.format(
                         _j, _j + 1
                     )
                 # else:
@@ -518,7 +518,7 @@ class BaseETS(UserList):
         - It is essential to use explicit joint indices to account for
             the reversed order of the transforms.
 
-        """  # noqa
+        """
 
         return self.__class__([et.inv() for et in reversed(self.data)])
 
@@ -916,7 +916,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """  # noqa
+        """
 
         ret = SE3.Empty()
         fk = self.eval(q, base, tool, include_base)
@@ -974,7 +974,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """  # noqa
+        """
 
         try:
             return ETS_fkine(self._fknm, q, base, tool, include_base)
@@ -1086,7 +1086,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """  # noqa
+        """
 
         # Use c extension
         try:
@@ -1203,7 +1203,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """  # noqa
+        """
 
         # Use c extension
         try:
@@ -1278,7 +1278,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         # Use c extension
         try:
@@ -1379,7 +1379,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         # Use c extension
         try:
@@ -1453,7 +1453,7 @@ class ETS(BaseETS):
         >>> puma = rtb.models.ETS.Puma560().ets()
         >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
 
-        """  # noqa
+        """
 
         T = self.eval(q, tool=tool)
         J = self.jacob0(q, tool=tool)
@@ -1490,7 +1490,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         J = self.jacob0(q)
         H = self.hessian0(q)
@@ -1512,8 +1512,8 @@ class ETS(BaseETS):
     def manipulability(
         self,
         q,
-        method: L["yoshikawa", "minsingular", "invcondition"] = "yoshikawa",  # noqa
-        axes: L["all", "trans", "rot"] | list[bool] = "all",  # noqa
+        method: L["yoshikawa", "minsingular", "invcondition"] = "yoshikawa",
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
     ):
         """
         Manipulability measure
@@ -1661,7 +1661,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         # Calculate the Jacobian and Hessian
         J = self.jacob0(q)
@@ -1819,7 +1819,7 @@ class ETS(BaseETS):
         mask: NDArray | None = None,
         joint_limits: bool = True,
         k: float = 1.0,
-        method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
+        method: L["chan", "wampler", "sugihara"] = "chan",
     ) -> tuple[NDArray, int, int, int, float]:
         r"""
         Fast Levenberg-Marquardt numerical inverse kinematics solver
@@ -1936,7 +1936,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.4
             Merged the Levenberg-Marquardt IK solvers into the ik_LM method
 
-        """  # noqa
+        """
 
         return IK_LM_c(
             self._fknm, Tep, q0, ilimit, slimit, tol, joint_limits, mask, k, method
@@ -2015,7 +2015,7 @@ class ETS(BaseETS):
 
         .. seealso:: :meth:`ik_LM` :meth:`ik_GN`
 
-        """  # noqa
+        """
 
         return IK_NR_c(
             self._fknm,
@@ -2118,7 +2118,7 @@ class ETS(BaseETS):
 
         .. seealso:: :meth:`ik_LM` :meth:`ik_NR`
 
-        """  # noqa
+        """
 
         return IK_GN_c(
             self._fknm,
@@ -2144,7 +2144,7 @@ class ETS(BaseETS):
         joint_limits: bool = True,
         seed: int | None = None,
         k: float = 1.0,
-        method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
+        method: L["chan", "wampler", "sugihara"] = "chan",
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
@@ -2270,7 +2270,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.4
             Added the Levenberg-Marquardt IK solver method on the `ETS` class
 
-        """  # noqa
+        """
 
         solver = IK_LM(
             ilimit=ilimit,
@@ -2374,7 +2374,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.4
             Added the Newton-Raphson IK solver method on the `ETS` class
 
-        """  # noqa
+        """
 
         solver = IK_NR(
             ilimit=ilimit,
@@ -2492,7 +2492,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.4
             Added the Gauss-Newton IK solver method on the `ETS` class
 
-        """  # noqa
+        """
 
         solver = IK_GN(
             ilimit=ilimit,
@@ -2650,7 +2650,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.4
             Added the Quadratic Programming IK solver method on the `ETS` class
 
-        """  # noqa: E501
+        """
 
         solver = IK_QP(
             ilimit=ilimit,
@@ -3083,7 +3083,7 @@ class ETS2(BaseETS):
         is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
 
         :seealso: :func:`jacob0`, :func:`hessian0`
-        """  # noqa
+        """
 
         T = self.fkine(q, include_base=False).A
         return tr2jac2(T.T) @ self.jacob0(q)

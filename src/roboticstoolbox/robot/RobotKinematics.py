@@ -76,7 +76,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         return SE3(
             self.ets(start, end).fkine(
@@ -132,7 +132,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """  # noqa
+        """
 
         return self.ets(start, end).jacob0(q, tool=tool)
 
@@ -183,7 +183,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """  # noqa
+        """
 
         return self.ets(start, end).jacobe(q, tool=tool)
 
@@ -283,7 +283,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         return self.ets(start, end).hessian0(q, J0=J0, tool=tool)
 
@@ -383,7 +383,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         return self.ets(start, end).hessiane(q, Je=Je, tool=tool)
 
@@ -427,14 +427,14 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """  # noqa
+        """
 
         return self.ets(start, end).partial_fkine0(q, n=n)
 
     def jacob0_analytical(
         self: KinematicsProtocol,
         q: ArrayLike,
-        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",  # noqa
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
         tool: NDArray | SE3 | None = None,
@@ -482,7 +482,7 @@ class RobotKinematicsMixin:
         >>> puma = rtb.models.ETS.Puma560()
         >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
 
-        """  # noqa
+        """
 
         return self.ets(start, end).jacob0_analytical(
             q, tool=tool, representation=representation
@@ -504,7 +504,7 @@ class RobotKinematicsMixin:
         mask: NDArray | None = None,
         joint_limits: bool = True,
         k: float = 1.0,
-        method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
+        method: L["chan", "wampler", "sugihara"] = "chan",
     ) -> tuple[NDArray, int, int, int, float]:
         r"""
         Fast levenberg-Marquadt Numerical Inverse Kinematics Solver
@@ -632,7 +632,7 @@ class RobotKinematicsMixin:
         .. versionchanged:: 1.0.4
             Merged the Levemberg-Marquadt IK solvers into the ik_LM method
 
-        """  # noqa
+        """
 
         return self.ets(start, end).ik_LM(
             Tep=Tep,
@@ -746,7 +746,7 @@ class RobotKinematicsMixin:
         ik_GN
             A fast numerical inverse kinematics solver using Gauss-Newton optimisation
 
-        """  # noqa
+        """
 
         return self.ets(start, end).ik_NR(
             Tep=Tep,
@@ -875,7 +875,7 @@ class RobotKinematicsMixin:
         ik_GN
             A fast numerical inverse kinematics solver using Gauss-Newton optimisation
 
-        """  # noqa
+        """
 
         return self.ets(start, end).ik_GN(
             Tep=Tep,
@@ -902,7 +902,7 @@ class RobotKinematicsMixin:
         joint_limits: bool = True,
         seed: int | None = None,
         k: float = 1.0,
-        method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
+        method: L["chan", "wampler", "sugihara"] = "chan",
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
@@ -1047,7 +1047,7 @@ class RobotKinematicsMixin:
         .. versionchanged:: 1.0.4
             Added the Levemberg-Marquadt IK solver method on the `Robot` class
 
-        """  # noqa
+        """
 
         return self.ets(start, end).ikine_LM(
             Tep=Tep,
@@ -1171,7 +1171,7 @@ class RobotKinematicsMixin:
         .. versionchanged:: 1.0.4
             Added the Newton-Raphson IK solver method on the `Robot` class
 
-        """  # noqa
+        """
 
         return self.ets(start, end).ikine_NR(
             Tep=Tep,
@@ -1309,7 +1309,7 @@ class RobotKinematicsMixin:
         .. versionchanged:: 1.0.4
             Added the Gauss-Newton IK solver method on the `Robot` class
 
-        """  # noqa
+        """
 
         return self.ets(start, end).ikine_GN(
             Tep=Tep,
@@ -1484,7 +1484,7 @@ class RobotKinematicsMixin:
         .. versionchanged:: 1.0.4
             Added the Quadratic Programming IK solver method on the `Robot` class
 
-        """  # noqa: E501
+        """
 
         return self.ets(start, end).ikine_QP(
             Tep=Tep,
