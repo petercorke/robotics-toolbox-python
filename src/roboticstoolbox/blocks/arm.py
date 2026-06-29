@@ -662,9 +662,9 @@ class CTraj(SourceBlock):
 
     def output(self, t, inports, x):
         if self.trapezoidal:
-            s = self.trapezoidalfunc(t)
+            s = self.trapezoidalfunc(t)[0]  # get the position from the trapezoidal function
         else:
-            s = np.min(t / self.T, 1.0)
+            s = min(t / self.T, 1.0)
 
         return [self.T1.interp(self.T2, s)]
 
@@ -887,15 +887,15 @@ class Traj(FunctionBlock):
 
     The distance along the trajectory is either:
 
-    - a linear function from 0 to ``T`` or maximum simulation time
-    - the value [0, 1] given on inport port.
+    - a linear function from 0 to ``T`` or maximum simulation time if `time` is True, or
+    - the value [0, 1] given on inport port if `time` is False
 
     :seealso: :func:`spatialmath.base.mtraj`
     """
 
     nin = -1
     nout = 3
-    outlabels = ("q",)
+    outlabels = ("q", "qd", "qdd")
 
     # TODO: this needs work, need better description of what this does for
     # time-based case
@@ -908,7 +908,7 @@ class Traj(FunctionBlock):
         :type yf: array_like(m), optional
         :param T: maximum time, defaults to None
         :type T: float, optional
-        :param time: x is simulation time, defaults to False
+        :param time: if `True` trajectory is based on simulation time, else based on input 0. Defaults to False
         :type time: bool, optional
         :param traj: trajectory type, one of: 'trapezoidal' [default], 'quintic'
         :type traj: str, optional
