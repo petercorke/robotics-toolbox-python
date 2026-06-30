@@ -50,9 +50,9 @@ def _copy_shapes(shapes, link_name):
     return result
 
 
-def _listen_dyn(func):
+def _dirties_frne(func):
     """
-    @_listen_dyn
+    @_dirties_frne
 
     Decorator for property setters
 
@@ -69,7 +69,7 @@ def _listen_dyn(func):
     Example::
 
         @m.setter
-        @_listen_dyn
+        @_dirties_frne
         def m(self, m_new):
             self._m = m_new
 
@@ -77,13 +77,13 @@ def _listen_dyn(func):
     """
 
     @wraps(func)
-    def wrapper_listen_dyn(*args):
+    def wrapper_dirties_frne(*args):
         if args[0]._robot is not None:
             args[0]._robot.dynchanged()
         args[0]._hasdynamics = True
         return func(*args)
 
-    return wrapper_listen_dyn
+    return wrapper_dirties_frne
 
 
 class BaseLink(SceneNode, ABC):
@@ -646,7 +646,7 @@ class BaseLink(SceneNode, ABC):
         return self._m
 
     @m.setter
-    @_listen_dyn
+    @_dirties_frne
     def m(self, m_new: float):
         self._m = m_new
 
@@ -670,7 +670,7 @@ class BaseLink(SceneNode, ABC):
         return self._r  # type: ignore
 
     @r.setter
-    @_listen_dyn
+    @_dirties_frne
     def r(self, r_new: ArrayLike):
         self._r = getvector(r_new, 3)
 
@@ -710,7 +710,7 @@ class BaseLink(SceneNode, ABC):
         return self._I  # type: ignore
 
     @I.setter
-    @_listen_dyn
+    @_dirties_frne
     def I(self, I_new: ArrayLike):
         if ismatrix(I_new, (3, 3)):
             # 3x3 matrix passed
@@ -764,7 +764,7 @@ class BaseLink(SceneNode, ABC):
         return self._Jm
 
     @Jm.setter
-    @_listen_dyn
+    @_dirties_frne
     def Jm(self, Jm_new: float):
         self._Jm = Jm_new
 
@@ -789,7 +789,7 @@ class BaseLink(SceneNode, ABC):
         return self._B
 
     @B.setter
-    @_listen_dyn
+    @_dirties_frne
     def B(self, B_new: float):
         if isscalar(B_new):
             self._B = B_new
@@ -831,7 +831,7 @@ class BaseLink(SceneNode, ABC):
         return self._Tc
 
     @Tc.setter
-    @_listen_dyn
+    @_dirties_frne
     def Tc(self, Tc_new: ArrayLike):
         try:
             # sets Coulomb friction parameters to [F -F], for a symmetric
@@ -870,7 +870,7 @@ class BaseLink(SceneNode, ABC):
         return self._G
 
     @G.setter
-    @_listen_dyn
+    @_dirties_frne
     def G(self, G_new: float):
         self._G = G_new
 

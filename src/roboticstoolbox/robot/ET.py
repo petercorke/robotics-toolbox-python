@@ -250,7 +250,7 @@ class BaseET:
         """
         if isinstance(self, ET2):
             return 0
-        return _AXIS_TO_INT[axis]
+        return _AXIS_TO_INT.get(axis, 0)
 
     @property
     def fknm(self):

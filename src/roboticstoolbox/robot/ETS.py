@@ -6,7 +6,8 @@
 """
 
 from __future__ import annotations
-from collections import UserList
+from collections.abc import MutableSequence
+from functools import wraps, cached_property
 import numpy as np
 from numpy.random import uniform
 from numpy.linalg import inv, det, cond, svd
@@ -40,34 +41,75 @@ from copy import deepcopy
 from roboticstoolbox.robot.ET import ET, ET2, BaseET
 from typing import overload, TypeVar
 from typing import Literal as L
-from sys import version_info
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-
-py_ver = version_info
-
-if version_info >= (3, 9):
-    from functools import cached_property
-
-    c_property = cached_property
-else:  # pragma: nocover
-    c_property = property
 
 T = TypeVar("T", bound="BaseETS")
 
 
-class BaseETS(UserList):
-    def __init__(self, *args):
-        super().__init__(*args)
+def _dirties_fknm(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        result = func(self, *args, **kwargs)
+        self._fknm_stale = True
+        return result
+    return wrapper
 
-    def _update_internals(self):
-        self._m = len(self.data)
-        self._n = len([True for et in self.data if et.isjoint])
-        self._fknm = ETS_init(
-            [et.fknm for et in self.data],
-            self._n,
-            self._m,
+
+class BaseETS(MutableSequence):
+    def __init__(self):
+        self._data: list = []
+        self._fknm_stale = True
+        self._BaseETS__fknm = None
+
+    # ------------------------------------------------------------------
+    # MutableSequence abstract methods
+    # ------------------------------------------------------------------
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __getitem__(self, i):
+        return self._data[i]
+
+    @_dirties_fknm
+    def __setitem__(self, i, value):
+        self._data[i] = value
+
+    @_dirties_fknm
+    def __delitem__(self, i):
+        del self._data[i]
+
+    @_dirties_fknm
+    def insert(self, index: int, value) -> None:
+        self._data.insert(index, value)
+
+    def __repr__(self) -> str:
+        return repr(self._data)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, BaseETS):
+            return self._data == other._data
+        return NotImplemented
+
+    __hash__ = None  # type: ignore[assignment]
+
+    # ------------------------------------------------------------------
+    # C handle: lazy build on first use after any mutation
+    # ------------------------------------------------------------------
+
+    @property
+    def _fknm(self):
+        if self._fknm_stale:
+            self._copy_to_cpp()
+        return self._BaseETS__fknm
+
+    def _copy_to_cpp(self):
+        self._BaseETS__fknm = ETS_init(
+            [et.fknm for et in self._data],
+            self.n,
+            self.m,
         )
-        # self._fknm = [et.fknm for et in self.data]
+        self._fknm_stale = False
 
     def __str__(self, q: str | None = None):
         """
@@ -124,7 +166,7 @@ class BaseETS(UserList):
         unicode = rtb_get_param("unicode")
 
         # An empty SE3
-        if len(self.data) == 0:
+        if len(self._data) == 0:
             return "SE3()"
 
         if q is None:
@@ -135,7 +177,7 @@ class BaseETS(UserList):
 
         # For et in the object, display it, data comes from properties
         # which come from the named tuple
-        for et in self.data:
+        for et in self._data:
             if et.isjoint:
                 if q is not None:
                     if et.jindex is None:  # pragma: nocover  this is no longer possible
@@ -250,7 +292,7 @@ class BaseETS(UserList):
 
         return set([self[j].jindex for j in self.joint_idx()])  # type: ignore
 
-    @c_property
+    @cached_property
     def jindices(self) -> NDArray:
         """
         Get an array of joint indices
@@ -327,10 +369,7 @@ class BaseETS(UserList):
         for j, i in enumerate(self.joint_idx()):
             et = self[i]
             et.qlim = new_qlim[:, j]
-
             self[i] = et
-
-        self._update_internals()
 
     @property
     def structure(self) -> str:
@@ -353,7 +392,7 @@ class BaseETS(UserList):
         """
 
         return "".join(
-            ["R" if self.data[i].isrotation else "P" for i in self.joint_idx()]
+            ["R" if self._data[i].isrotation else "P" for i in self.joint_idx()]
         )
 
     @property
@@ -379,7 +418,7 @@ class BaseETS(UserList):
 
         """
 
-        return self._n
+        return sum(1 for et in self._data if et.isjoint)
 
     @property
     def m(self) -> int:
@@ -400,7 +439,7 @@ class BaseETS(UserList):
 
         """
 
-        return self._m
+        return len(self._data)
 
     @overload
     def data(self: "ETS") -> list[ET]: ...  # pragma: nocover
@@ -423,38 +462,7 @@ class BaseETS(UserList):
     @data.setter
     def data(self, new_data):
         self._data = new_data
-
-    @overload
-    def pop(self: "ETS", i: int = -1) -> ET: ...  # pragma: nocover
-
-    @overload
-    def pop(self: "ETS2", i: int = -1) -> ET2: ...  # pragma: nocover
-
-    def pop(self, i=-1):
-        """
-        Pop value
-
-        :param i: item in the list to pop, default is last
-        :returns: the popped value
-        :raises IndexError: if there are no values to pop
-
-        Removes a value from the value list and returns it.  The original
-        instance is modified.
-
-        Examples
-        --------
-        .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-        >>> tail = e.pop()
-        >>> tail
-        >>> e
-
-        """
-
-        item = super().pop(i)
-        self._update_internals()
-        return item
+        self._fknm_stale = True
 
     @overload
     def split(self: "ETS") -> list["ETS"]: ...  # pragma: nocover
@@ -474,21 +482,14 @@ class BaseETS(UserList):
         start = 0
 
         for j, k in enumerate(self.joint_idx()):
-            ets_j = self.data[start : k + 1]
+            ets_j = self._data[start : k + 1]
             start = k + 1
-            segments.append(ets_j)
+            segments.append(self.__class__(ets_j))
 
-        tail = self.data[start:]
+        tail = self._data[start:]
 
-        if isinstance(tail, list):
-            tail_len = len(tail)
-        elif tail is not None:  # pragma: nocover
-            tail_len = 1
-        else:  # pragma: nocover
-            tail_len = 0
-
-        if tail_len > 0:
-            segments.append(tail)
+        if len(tail) > 0:
+            segments.append(self.__class__(tail))
 
         return segments
 
@@ -520,7 +521,7 @@ class BaseETS(UserList):
 
         """
 
-        return self.__class__([et.inv() for et in reversed(self.data)])
+        return self.__class__([et.inv() for et in reversed(self._data)])  # type: ignore[call-arg]
 
     @overload
     def __getitem__(self: "BaseETS", i: int) -> BaseET: ...
@@ -554,41 +555,7 @@ class BaseETS(UserList):
         >>> e[1:3]
 
         """
-        return self.data[i]  # can be [2] or slice, eg. [3:5]
-
-    @overload
-    def __setitem__(self: "BaseETS", i: int, value: BaseET): ...
-
-    @overload
-    def __setitem__(self: "ETS", i: int, value: ET): ...
-
-    @overload
-    def __setitem__(self: "ETS", i: slice, value: list[ET]): ...
-
-    @overload
-    def __setitem__(self: "ETS2", i: int, value: ET2): ...
-
-    @overload
-    def __setitem__(self: "ETS2", i: slice, value: list[ET2]): ...
-
-    def __setitem__(self, i, value):
-        """
-        Set an item in the ETS
-
-        :param i: the index
-        :param value: the value to set
-
-        Examples
-        --------
-        .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-        >>> e[1] = ET.tx(2)
-        >>> e
-
-        """
-        self.data[i] = value
-        self._update_internals()
+        return self._data[i]  # can be [2] or slice, eg. [3:5]
 
     def __deepcopy__(self, memo):
         new_data = []
@@ -712,23 +679,19 @@ class ETS(BaseETS):
         if isinstance(arg, list):
             for item in arg:
                 if isinstance(item, ET):
-                    self.data.append(deepcopy(item))
+                    self._data.append(deepcopy(item))
                 elif isinstance(item, ETS):
                     for ets_item in item:
-                        self.data.append(deepcopy(ets_item))
+                        self._data.append(deepcopy(ets_item))
                 else:
                     raise TypeError("Invalid arg")
         elif isinstance(arg, ET):
-            self.data.append(deepcopy(arg))
+            self._data.append(deepcopy(arg))
         elif isinstance(arg, ETS):
             for ets_item in arg:
-                self.data.append(deepcopy(ets_item))
-        elif arg is None:
-            self.data = []
-        else:
+                self._data.append(deepcopy(ets_item))
+        elif arg is not None:
             raise TypeError("Invalid arg")
-
-        super()._update_internals()
 
         self._auto_jindex = False
 
@@ -771,12 +734,12 @@ class ETS(BaseETS):
 
     def __mul__(self, other: ET | ETS) -> "ETS":
         if isinstance(other, ET):
-            return ETS([*self.data, other])
+            return ETS([*self._data, other])
         else:
-            return ETS([*self.data, *other.data])  # pragma: nocover
+            return ETS([*self._data, *other._data])  # pragma: nocover
 
     def __rmul__(self, other: ET | ETS) -> "ETS":
-        return ETS([other, *self.data])  # pragma: nocover
+        return ETS([other, *self._data])  # pragma: nocover
 
     def __imul__(self, rest: "ETS"):
         return self + rest  # pragma: nocover
@@ -833,19 +796,19 @@ class ETS(BaseETS):
                 ets *= ET.SE3(const)
         return ets
 
-    def insert(
+    def insert(  # type: ignore[override]
         self,
-        arg: ET | ETS,
-        i: int = -1,
+        index: int,
+        value: ET | ETS,
     ) -> None:
         """
         Insert value
 
-        :param arg: the elementary transform or sequence to insert
-        :param i: position to insert at, default is at the end
+        :param index: position to insert at
+        :param value: the elementary transform or sequence to insert
 
-        Inserts an ET or ETS into the ET sequence.  The inserted value is at position
-        ``i``.
+        Inserts an ET or ETS into the ET sequence.  The inserted ET is at position
+        ``index``; an ETS is expanded and inserted element by element.
 
         Examples
         --------
@@ -853,24 +816,17 @@ class ETS(BaseETS):
         >>> from roboticstoolbox import ET
         >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
         >>> f = ET.Ry()
-        >>> e.insert(f, 2)
+        >>> e.insert(2, f)
         >>> e
 
         """
 
-        if isinstance(arg, ET):
-            if i == -1:
-                self.data.append(arg)
-            else:
-                self.data.insert(i, arg)
-        elif isinstance(arg, ETS):
-            if i == -1:
-                for et in arg:
-                    self.data.append(et)
-            else:
-                for j, et in enumerate(arg):
-                    self.data.insert(i + j, et)
-        self._update_internals()
+        if isinstance(value, ET):
+            self._data.insert(index, value)
+        elif isinstance(value, ETS):
+            for j, et in enumerate(value):
+                self._data.insert(index + j, et)
+        self._fknm_stale = True
 
     def fkine(
         self,
@@ -2512,23 +2468,19 @@ class ETS2(BaseETS):
         if isinstance(arg, list):
             for item in arg:
                 if isinstance(item, ET2):
-                    self.data.append(deepcopy(item))
+                    self._data.append(deepcopy(item))
                 elif isinstance(item, ETS2):
                     for ets_item in item:
-                        self.data.append(deepcopy(ets_item))
+                        self._data.append(deepcopy(ets_item))
                 else:
                     raise TypeError("bad arg")
         elif isinstance(arg, ET2):
-            self.data.append(deepcopy(arg))
+            self._data.append(deepcopy(arg))
         elif isinstance(arg, ETS2):
             for ets_item in arg:
-                self.data.append(deepcopy(ets_item))
-        elif arg is None:
-            self.data = []
-        else:
-            raise TypeError("Invalid arg")
-
-        self._update_internals()
+                self._data.append(deepcopy(ets_item))
+        elif arg is not None:
+            raise TypeError("bad arg")
         self._ndims = 2
         self._auto_jindex = False
 
@@ -2569,12 +2521,12 @@ class ETS2(BaseETS):
 
     def __mul__(self, other: ET2 | ETS2) -> "ETS2":
         if isinstance(other, ET2):
-            return ETS2([*self.data, other])
+            return ETS2([*self._data, other])
         else:
-            return ETS2([*self.data, *other.data])  # pragma: nocover
+            return ETS2([*self._data, *other._data])  # pragma: nocover
 
     def __rmul__(self, other: ET2 | ETS2) -> "ETS2":
-        return ETS2([other, self.data])  # pragma: nocover
+        return ETS2([other, *self._data])  # pragma: nocover
 
     def __imul__(self, rest: "ETS2"):
         return self + rest  # pragma: nocover
@@ -2619,15 +2571,15 @@ class ETS2(BaseETS):
                 ets *= ET2.SE2(const)
         return ets
 
-    def insert(
+    def insert(  # type: ignore[override]
         self,
+        i: int,
         arg: ET2 | ETS2,
-        i: int = -1,
     ) -> None:
         """
         Insert value
 
-        :param i: insert an ET or ETS into the ETS, default is at the end
+        :param i: position to insert at
         :param arg: the elementary transform or sequence to insert
 
         Inserts an ET or ETS into the ET sequence.  The inserted value is at position
@@ -2640,23 +2592,16 @@ class ETS2(BaseETS):
             >>> from roboticstoolbox import ET2
             >>> e = ET2.R() * ET2.tx(1) * ET2.R() * ET2.tx(1)
             >>> f = ET2.R()
-            >>> e.insert(f, 2)
+            >>> e.insert(2, f)
             >>> e
         """
 
         if isinstance(arg, ET2):
-            if i == -1:
-                self.data.append(arg)
-            else:
-                self.data.insert(i, arg)
+            self._data.insert(i, arg)
         elif isinstance(arg, ETS2):
-            if i == -1:
-                for et in arg:
-                    self.data.append(et)
-            else:
-                for j, et in enumerate(arg):
-                    self.data.insert(i + j, et)
-        self._update_internals()
+            for j, et in enumerate(arg):
+                self._data.insert(i + j, et)
+        self._fknm_stale = True
 
     def fkine(
         self,
@@ -2777,7 +2722,7 @@ class ETS2(BaseETS):
 
             # add remaining links, back toward the base
             for i in range(self.m - 2, -1, -1):
-                link = self.data[i]
+                link = self._data[i]
 
                 jindex = 0 if link.jindex is None and link.isjoint else link.jindex
                 A = link.A(qk[jindex])

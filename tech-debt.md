@@ -303,6 +303,30 @@ bypasses all hooks.
 - `data` property (if needed externally) becomes simple read-only `return self._data`
 - No `_building` context manager needed — lazy rebuild handles bulk construction
 
+### Phase 3.5 — per-ET result buffer and sparse op functions (post-nanobind)
+
+**Problem:** `rx`, `ry`, `rz`, `tx`, `ty`, `tz` each write all 16 elements of
+the output matrix on every call, even though only 4 (rotation) or 1 (translation)
+elements actually change between evaluations at different joint angles. This is
+efficient for the current shared scratch buffer (`ret` in the FK loop), but
+leaves performance on the table for the common IK/Jacobian pattern where the
+same joint ET is evaluated repeatedly with different `q` values.
+
+**Fix (depends on Phase 2 per-ET buffer):**
+
+Once each joint ET owns its own `double[16]` result buffer (analogous to how
+static ETs already own `et->T`):
+
+- Initialise the buffer to identity once at `ET_init` time
+- Each op function only overwrites the elements that depend on eta:
+  - `rx`/`ry`/`rz`: 4 elements (the 2×2 rotation sub-block)
+  - `tx`/`ty`/`tz`: 1 element (the relevant translation component)
+- The matrix multiply `ret * U` in `_ET_T` uses the per-ET buffer directly
+  instead of copying into a shared scratch
+
+This eliminates ~12 zero-stores per rotation ET and ~15 stores per translation
+ET in every FK/Jacobian/Hessian call.
+
 ### Phase 3 — nanobind port
 
 **Problem:** `fknm.cpp` and `frne.c` use the raw CPython C API (`PyArg_ParseTuple`,

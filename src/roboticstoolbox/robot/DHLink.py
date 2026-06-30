@@ -6,7 +6,7 @@
 # import numpy as np
 # from spatialmath import SE3
 import roboticstoolbox as rp
-from roboticstoolbox.robot.Link import Link, _listen_dyn, _copy_shapes
+from roboticstoolbox.robot.Link import Link, _dirties_frne, _copy_shapes
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
 from spatialmath import SE3
@@ -23,7 +23,7 @@ def _check_rne(func):
     Decorator applied to any method to calls to C RNE code.  Works in
     conjunction with::
 
-        @_listen_dyn
+        @_dirties_frne
         def dyn_param_setter(self, value):
 
     which marks the dynamic parameters as having changed using the robot's
@@ -37,10 +37,8 @@ def _check_rne(func):
 
     @wraps(func)
     def wrapper_check_rne(*args, **kwargs):
-        if args[0]._rne_ob is None or args[0]._dynchanged:
-            args[0].delete_rne()
-            args[0]._init_rne()
-        args[0]._rne_changed = False
+        if args[0]._frne is None or args[0]._frne_stale:
+            args[0]._copy_to_cpp()
         return func(*args, **kwargs)
 
     return wrapper_check_rne
@@ -432,7 +430,7 @@ class DHLink(Link):
         return self._theta
 
     @theta.setter
-    @_listen_dyn
+    @_dirties_frne
     def theta(self, theta_new):
         if not self.sigma and theta_new != 0.0:
             raise ValueError("theta is not valid for revolute joints")
@@ -455,7 +453,7 @@ class DHLink(Link):
         return self._d
 
     @d.setter
-    @_listen_dyn
+    @_dirties_frne
     def d(self, d_new):
         if self.sigma and d_new != 0.0:
             raise ValueError("f is not valid for prismatic joints")
@@ -478,7 +476,7 @@ class DHLink(Link):
         return self._a
 
     @a.setter
-    @_listen_dyn
+    @_dirties_frne
     def a(self, a_new):
         self._a = a_new
 
@@ -498,7 +496,7 @@ class DHLink(Link):
         return self._alpha
 
     @alpha.setter
-    @_listen_dyn
+    @_dirties_frne
     def alpha(self, alpha_new):
         self._alpha = alpha_new
 
@@ -521,7 +519,7 @@ class DHLink(Link):
         return self._sigma
 
     @sigma.setter
-    @_listen_dyn
+    @_dirties_frne
     def sigma(self, sigma_new):
         self._sigma = sigma_new
 
@@ -544,7 +542,7 @@ class DHLink(Link):
         return self._mdh
 
     @mdh.setter
-    @_listen_dyn
+    @_dirties_frne
     def mdh(self, mdh_new):
         self._mdh = int(mdh_new)
 
