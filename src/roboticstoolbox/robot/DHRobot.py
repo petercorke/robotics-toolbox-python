@@ -35,7 +35,7 @@ from roboticstoolbox.robot.DHLink import _check_rne, DHLink
 from roboticstoolbox import rtb_get_param
 from roboticstoolbox.frne import init, frne, delete
 from numpy import any
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 from roboticstoolbox.robot.IK import IKSolution
 
 # iksol = namedtuple("IKsolution", "q, success, reason")
@@ -139,6 +139,10 @@ class DHRobot(Robot):
 
         # rne parameters
         self._rne_ob = None
+
+    @property
+    def links(self) -> list[DHLink]:  # type: ignore[override]
+        return self._links  # type: ignore[return-value]
 
     def __str__(self):
         """
@@ -852,9 +856,9 @@ class DHRobot(Robot):
             # MDH case
             for j, link in enumerate(self):
                 if link.sigma == 0:
-                    tw[j] = Twist3.UnitRevolute(T[j].a, T[j].t)
+                    tw[j] = Twist3.UnitRevolute(T[j].a, T[j].t)  # type: ignore[union-attr]
                 else:
-                    tw[j] = Twist3.UnitPrismatic(T[j].a)
+                    tw[j] = Twist3.UnitPrismatic(T[j].a)  # type: ignore[union-attr]
         else:
             # DH case
             for j, link in enumerate(self):
@@ -868,7 +872,7 @@ class DHRobot(Robot):
                 else:
                     # subsequent links
                     if link.sigma == 0:
-                        tw[j] = Twist3.UnitRevolute(T[j - 1].a, T[j - 1].t)  # revolute
+                        tw[j] = Twist3.UnitRevolute(T[j - 1].a, T[j - 1].t)  # type: ignore[union-attr]  # revolute
                     else:
                         tw[j] = Twist3.UnitPrismatic(T[j - 1].a)  # prismatic
 
@@ -1099,7 +1103,7 @@ class DHRobot(Robot):
         L = self.links
         J = np.zeros((6, self.n), dtype=q.dtype)  # type: ignore
 
-        U = self.tool.A
+        U: NDArray = np.asarray(self.tool.A)
 
         for j in range(n - 1, -1, -1):
             if self.mdh == 0:
@@ -1838,7 +1842,7 @@ class DHRobot(Robot):
                     self.links[5].alpha
                 )
 
-                R = Td4.inv() * T13.inv() * Tk * Tt.inv()
+                R = Td4.inv() * T13.inv() * Tk * Tt.inv()  # type: ignore[union-attr]
 
                 # The spherical wrist implements Euler angles
                 if "f" in config:
@@ -2022,7 +2026,7 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_lm_chan(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets().ik_lm_chan(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)  # type: ignore[attr-defined]
 
     def ik_lm_wampler(
         self,
@@ -2127,7 +2131,7 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_lm_wampler(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets().ik_lm_wampler(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)  # type: ignore[attr-defined]
 
     def ik_lm_sugihara(
         self,
@@ -2232,7 +2236,7 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_lm_sugihara(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets().ik_lm_sugihara(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)  # type: ignore[attr-defined]
 
     def ik_nr(
         self,
@@ -2338,7 +2342,7 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_nr(
+        return self.ets().ik_nr(  # type: ignore[attr-defined]
             Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
         )
 
@@ -2446,7 +2450,7 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_gn(
+        return self.ets().ik_gn(  # type: ignore[attr-defined]
             Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
         )
 

@@ -1412,7 +1412,7 @@ class DynamicsMixin:
         verifymatrix(tauR, (self.n, 2))
 
         wmax = np.zeros((trajn, 6))
-        joint = np.zeros(trajn, dtype=np.int)
+        joint = np.zeros(trajn, dtype=int)
 
         for i in range(trajn):
             tauB = self.gravload(q[i, :])
@@ -1437,7 +1437,7 @@ class DynamicsMixin:
             WM[M] = (TAUM[M] - tauB[M]) / tauP[M]
             WM[m] = (TAUm[m] - tauB[m]) / tauP[m]
 
-            WM[WM == np.NINF] = np.Inf
+            WM[WM == -np.inf] = np.inf
 
             wmax[i, :] = WM
             joint[i] = np.argmin(WM)

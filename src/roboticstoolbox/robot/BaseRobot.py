@@ -17,6 +17,7 @@ from typing import (
     Callable,
     Generic,
     TypeVar,
+    cast,
 )
 
 from typing_extensions import Literal as L
@@ -67,7 +68,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         base: NDArray | SE3 | None = None,
         tool: NDArray | SE3 | None = None,
         gravity: ArrayLike = [0, 0, -9.81],
-        keywords: list[str] | tuple[str] = [],
+        keywords: list[str] | tuple[str, ...] = [],
         symbolic: bool = False,
         configs: dict[str, NDArray] | None = None,
         check_jindex: bool = True,
@@ -91,13 +92,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # Set the pose of the robot in the world frame
         # in the scenenode object to a numpy array
         if isinstance(base, SE3):
-            self._T = base.A
+            if len(base) != 1:
+                raise ValueError("base must be a single SE3, not a batch")
+            self._T = cast(NDArray, base.A)  # SE3.A typed list|ndarray; single pose always ndarray
         elif isinstance(base, np.ndarray):
             self._T = base
 
         # Set the robot tool transform
         if isinstance(tool, SE3):
-            self._tool = tool.A
+            if len(tool) != 1:
+                raise ValueError("tool must be a single SE3, not a batch")
+            self._tool = cast(NDArray, tool.A)  # SE3.A typed list|ndarray; single pose always ndarray
         elif isinstance(tool, np.ndarray):
             self._tool = tool
         else:
@@ -1071,7 +1076,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     @tool.setter
     def tool(self, T: SE3 | NDArray):
         if isinstance(T, SE3):
-            self._tool = T.A
+            if len(T) != 1:
+                raise ValueError("tool must be a single SE3, not a batch")
+            self._tool = cast(NDArray, T.A)  # SE3.A typed list|ndarray; single pose always ndarray
         else:
             self._tool = T
 
@@ -1100,7 +1107,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             # All 3D robots
             # Set the SceneNode T
             if isinstance(T, SE3):
-                self._T = T.A
+                if len(T) != 1:
+                    raise ValueError("base must be a single SE3, not a batch")
+                self._T = cast(NDArray, T.A)  # SE3.A typed list|ndarray; single pose always ndarray
             else:
                 self._T = T
 

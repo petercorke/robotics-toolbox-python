@@ -12,7 +12,7 @@ from os.path import splitext
 from copy import deepcopy
 from warnings import warn
 from pathlib import PurePosixPath, Path
-from typing import TextIO, TypeVar, Literal as L, overload
+from typing import TextIO, TypeVar, Literal as L, overload, cast
 
 
 import numpy as np
@@ -114,9 +114,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     if (
                         elink.qlim is None
                         and elink.v is not None
-                        and elink.v.qlim is not None
+                        and elink.v.qlim is not None  # type: ignore[union-attr]
                     ):
-                        elink.qlim = elink.v.qlim  # pragma nocover
+                        elink.qlim = elink.v.qlim  # type: ignore[union-attr]  # pragma nocover
                     parent = elink
                     links.append(elink)
 
@@ -1162,7 +1162,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             raise ValueError("Hessian must be numpy array of shape 6xnxn")
 
         manipulability = self.manipulability(
-            q,
+            q,  # type: ignore[arg-type]
             J=J,
             start=start,
             end=end,
@@ -1476,7 +1476,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             return SE3.AngleAxis(angle, axis)
 
         if isinstance(camera, rtb.BaseRobot):
-            wTcp = camera.fkine(camera.q).A[:3, 3]
+            wTcp = cast(NDArray, camera.fkine(camera.q).A)[:3, 3]
         elif isinstance(camera, SE3):
             wTcp = camera.t
         else:
@@ -1510,7 +1510,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     (np.linalg.inv(self.fkine(q, end=link).A) @ SE3(wTlp).A)[:3, 3]
                 )
 
-                Je = self.jacob0(q, end=link, tool=tool.A)
+                Je = self.jacob0(q, end=link, tool=cast(NDArray, tool.A))
                 Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
                 n_dim = Je.shape[1]
 
@@ -1657,7 +1657,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 I_int = I_int + SpatialInertia(m=link.m, r=link.r)
 
                 if link.v is not None:
-                    s.append(link.v.s)
+                    s.append(link.v.s)  # type: ignore[union-attr]
 
             I[i] = I_int
 
@@ -1705,7 +1705,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                         else:
                             Xup_int = Xup_int * SE3(link.A())
 
-                Xup[j] = Xup_int.inv()
+                Xup[j] = Xup_int.inv()  # type: ignore[union-attr]
 
                 # The first link in the group
                 first_link = self.links[group[0]]

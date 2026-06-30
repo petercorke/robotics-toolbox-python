@@ -64,10 +64,10 @@ class RobotPlottingMPLMixin:
 
         from matplotlib import cm, colors
 
-        if isinstance(linkcolors, list) and len(linkcolors) == self.n:  # pragma: nocover
+        if isinstance(linkcolors, list) and len(linkcolors) == self.n:  # type: ignore[attr-defined]  # pragma: nocover
             return colors.ListedColormap(linkcolors)
         else:  # pragma: nocover
-            return cm.get_cmap(linkcolors, 6)
+            return cm.get_cmap(linkcolors, 6)  # type: ignore[arg-type]
 
     # ------------------------------------------------------------------
     # Ellipse creation
@@ -112,7 +112,7 @@ class RobotPlottingMPLMixin:
         if isinstance(self, rtb.ERobot):  # pragma: nocover
             raise NotImplementedError("ERobot fellipse not implemented yet")
 
-        q = getunit(q, unit)
+        q = getunit(q, unit)  # type: ignore[assignment]
         ell = EllipsePlot(self, q, "f", opt, centre=centre)
 
         if add:
@@ -161,7 +161,7 @@ class RobotPlottingMPLMixin:
         if isinstance(self, rtb.ERobot):  # pragma: nocover
             raise NotImplementedError("ERobot vellipse not implemented yet")
 
-        q = getunit(q, unit)
+        q = getunit(q, unit)  # type: ignore[assignment]
         ell = EllipsePlot(self, q, "v", opt, centre=centre, scale=scale)
 
         if add:
@@ -171,7 +171,7 @@ class RobotPlottingMPLMixin:
 
     def _maybe_add_ellipse_to_active_env(self, ellipse: EllipsePlot) -> None:
         """Add ellipse to the most recently active PyPlot environment, if available."""
-        env = self._active_plot_env
+        env = self._active_plot_env  # type: ignore[attr-defined]
         if env is None:
             return
 

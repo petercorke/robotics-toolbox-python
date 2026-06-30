@@ -68,16 +68,16 @@ newton_euler (
 	double	*fext,		/*!< external force on manipulator tip */
 	int	stride		/*!< indexing stride for qd, qdd */
 ) {
-	Vect		t1, t2, t3, t4;
-	Vect		qdv, qddv;
-	Vect		F, N;
-	Vect		z0 = {0.0, 0.0, 1.0};
-	Vect		zero = {0.0, 0.0, 0.0};
-	Vect		f_tip = {0.0, 0.0, 0.0};
-	Vect		n_tip = {0.0, 0.0, 0.0};
-	register int		j;
-	double			t;
-	Link			*links = robot->links;
+	Vect	t1, t2, t3, t4;
+	Vect	qdv, qddv;
+	Vect	F, N;
+	Vect	z0 = {0.0, 0.0, 1.0};
+	Vect	zero = {0.0, 0.0, 0.0};
+	Vect	f_tip = {0.0, 0.0, 0.0};
+	Vect	n_tip = {0.0, 0.0, 0.0};
+	int 	j;
+	double	t;
+	Link	*links = robot->links;
 
 	/*
 	 * angular rate and acceleration vectors only have finite

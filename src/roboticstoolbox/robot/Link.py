@@ -15,7 +15,7 @@ from typing import overload
 
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
-from roboticstoolbox.robot.ET import ET, ET2
+from roboticstoolbox.robot.ET import ET, ET2, BaseET
 from warnings import warn
 
 from roboticstoolbox.tools.types import ArrayLike, NDArray
@@ -283,12 +283,6 @@ class BaseLink(SceneNode, ABC):
         """
         return self._Ts
 
-    @overload
-    def ets(self: "Link") -> ETS: ...  # pragma: nocover
-
-    @overload
-    def ets(self: "Link2") -> ETS2: ...  # pragma: nocover
-
     @property
     def ets(self) -> ETS:
         """
@@ -302,18 +296,10 @@ class BaseLink(SceneNode, ABC):
 
         """
 
-        return self._ets
+        return self._ets  # type: ignore[return-value]  # _ets is ETS|ETS2; ETS for Link subclasses
 
     @ets.setter
-    @overload
-    def ets(self: "Link", new_ets: ETS): ...  # pragma: nocover
-
-    @ets.setter
-    @overload
-    def ets(self: "Link2", new_ets: ETS2): ...  # pragma: nocover
-
-    @ets.setter
-    def ets(self, new_ets):
+    def ets(self, new_ets: ETS | ETS2):
         if new_ets.n > 1:
             raise ValueError("An elementary link can only have one joint variable")
 
@@ -450,14 +436,8 @@ class BaseLink(SceneNode, ABC):
 
     # -------------------------------------------------------------------------- #
 
-    @overload
-    def v(self: "Link") -> ET | None: ...  # pragma: nocover
-
-    @overload
-    def v(self: "Link2") -> ET2 | None: ...  # pragma: nocover
-
     @property
-    def v(self):
+    def v(self) -> BaseET | None:
         """
         Variable part of link ETS
 

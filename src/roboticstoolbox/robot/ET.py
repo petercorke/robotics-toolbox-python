@@ -954,7 +954,7 @@ class ET2(BaseET):
 
         if self.isjoint:
             if self.isflip:
-                q = -1.0 * q
+                q = -1.0 * q  # type: ignore[assignment]  # Sym*float yields Expr, not Sym
 
             if self.axis_func is not None:
                 return self.axis_func(q)

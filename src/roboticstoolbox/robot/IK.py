@@ -6,7 +6,7 @@
 
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Tuple, cast
 import roboticstoolbox as rtb
 from dataclasses import dataclass
 from spatialmath import SE3
@@ -220,7 +220,7 @@ class IKSolver(ABC):
                 for i, T in enumerate(Tep):
                     methTep[i] = T.A
             else:
-                methTep = Tep.A
+                methTep = cast(NDArray, Tep.A)
         elif Tep.ndim == 3:
             traj = True
             methTep = Tep

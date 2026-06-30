@@ -318,7 +318,7 @@ class DHLink(Link):
             return rp.DHRobot([self, L])
 
         elif isinstance(L, rp.DHRobot):
-            nlinks = [self]
+            nlinks: list[DHLink] = [self]
 
             # TODO - Should I do a deep copy here a physically copy the Links
             # and not just the references?

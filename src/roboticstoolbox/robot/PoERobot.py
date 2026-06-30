@@ -16,18 +16,18 @@ class PoELink(Link):
     :seealso: :class:`Link`
     """
 
-    def __init__(self, twist, name=None):
+    def __init__(self, twist, name: str | None = None):
         # get ETS of the link in the world frame, given by its twist
         ets = self._ets_world(twist)
 
         # initialize the link with its world frame ETS
         super().__init__(ets)
         self.S = Twist3(twist)
-        self.name = name
+        self.name = name if name is not None else ""
 
     def __repr__(self):
-        s = f"PoELink({np.array2string(self.S.S, separator=',')}"
-        if self.name is not None:
+        s = f"PoELink({np.array2string(self.S.S, separator=',')}"  # type: ignore[arg-type]
+        if self.name:
             s += f', name="{self.name}"'
         s += ")"
         return s
@@ -108,8 +108,8 @@ class PoELink(Link):
             ET.Ry(rpy[1]),
             ET.Rx(rpy[0]),
         ]
-        # remove ETs with empty transform
-        et_list = [et for et in et_list if not np.isclose(et.eta, 0.0)]
+        # remove ETs with empty transform (eta=None means joint variable, skip)
+        et_list = [et for et in et_list if et.eta is None or not np.isclose(et.eta, 0.0)]  # type: ignore[arg-type]
 
         # assign joint variable at the end of list (if the frame is not base or tool
         # frame)
@@ -181,6 +181,10 @@ class PoERobot(Robot):
         # given WITH relation to base frame, NOT to previous joint's ETS)
         self._update_ets()
 
+    @property
+    def links(self) -> list[PoELink]:  # type: ignore[override]
+        return self._links  # type: ignore[return-value]
+
     def __str__(self):
         """
         Pretty prints the PoE Model of the robot.
@@ -188,7 +192,7 @@ class PoERobot(Robot):
         :rtype: str
         """
         s = "PoERobot:\n"
-        for j, link in enumerate(self):
+        for j, link in enumerate(self.links):
             s += f"  {j}: {link.S}\n"
 
         s += f"  T0: {self.T0.strline()}"
@@ -239,14 +243,14 @@ class PoERobot(Robot):
         columns = []
         T = SE3()
         for i in range(self.n):
-            columns.append(T.Ad() @ self.links[i + 1].S.S)
+            columns.append(T.Ad() @ self.links[i + 1].S.S)  # type: ignore[union-attr]
             T *= self.links[i + 1].S.exp(q[i])
         T *= self.T0
         J = np.column_stack(columns)
 
         # convert Jacobian from velocity twist to spatial velocity
         Jsv = np.eye(6)
-        Jsv[:3, 3:] = -skew(T.t)
+        Jsv[:3, 3:] = -skew(T.t)  # type: ignore[union-attr]
         return Jsv @ J
 
     def jacobe(self, q):
@@ -261,13 +265,13 @@ class PoERobot(Robot):
         columns = []
         T = SE3()
         for i in range(self.n):
-            columns.append(T.Ad() @ self.links[i + 1].S.S)
+            columns.append(T.Ad() @ self.links[i + 1].S.S)  # type: ignore[union-attr]
             T *= self.links[i + 1].S.exp(q[i])
         T *= self.T0
         J = np.column_stack(columns)
 
         # convert velocity twist from world frame to EE frame
-        return T.inv().Ad() @ J
+        return T.inv().Ad() @ J  # type: ignore[union-attr]
 
     def _update_ets(self):
         """
@@ -282,7 +286,7 @@ class PoERobot(Robot):
 
         # initialize transformations between joints from joint 1 to ee, related to
         # the world (base) frame
-        twist_as_SE3_world = [SE3(link.Ts) for link in self.links]
+        twist_as_SE3_world = [SE3(link.Ts if link.Ts is not None else np.eye(4)) for link in self.links]
 
         # update the ee since its twist can provide transform with different x-, y-axes
         twist_as_SE3_world[-1] = self.T0
@@ -311,7 +315,7 @@ class PoERobot(Robot):
                 ET.Rx(rpy[0]),
             ]
             # remove ETs with empty transform
-            et_list = [et for et in et_list if not np.isclose(et.eta, 0.0)]
+            et_list = [et for et in et_list if et.eta is None or not np.isclose(et.eta, 0.0)]  # type: ignore[arg-type]
 
             # assign joint variable with corresponding index
             if self.links[i].isrevolute:
@@ -324,14 +328,14 @@ class PoERobot(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-    T0 = SE3.Trans(2, 0, 0)
+    T0 = SE3.Trans(2, 0, 0)  # type: ignore[call-overload]
 
     # rotate about z-axis, through (0,0,0)
     link1 = PoERevolute([0, 0, 1], [0, 0, 0], name="foo")
     # rotate about z-axis, through (1,0,0)
     link2 = PoERevolute([0, 0, 1], [1, 0, 0])
     # end-effector pose when q=[0,0]
-    TE0 = SE3.Trans(2, 0, 0)
+    TE0 = SE3.Trans(2, 0, 0)  # type: ignore[call-overload]
 
     print(repr(link1))
     print(link1)
