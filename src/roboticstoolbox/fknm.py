@@ -201,33 +201,53 @@ def _python_hessian(J):
 
 
 def ETS_init(fknm_data, n, m):
-    """Create the C++ ETS handle; returns None when C extension is absent."""
-    if _C_AVAILABLE:
+    """Create the C++ ETS handle; returns None when C is absent or any ET is symbolic."""
+    if _C_AVAILABLE and all(h is not None for h in fknm_data):
         return _c_ETS_init(fknm_data, n, m)
     return None
 
 
+def _to_q_array(q) -> np.ndarray:
+    """Convert q to C-contiguous float64 ndarray; raises TypeError for non-numeric."""
+    try:
+        return np.ascontiguousarray(q, dtype=float)
+    except (ValueError, TypeError):
+        raise TypeError(f"q must be numeric, not {type(q).__name__}")
+
+
+def _to_f_array(x):
+    """Convert SE3 or ndarray to float64 ndarray; pass through None."""
+    if x is None:
+        return None
+    if isinstance(x, SE3):
+        return np.asarray(x.A, dtype=float)
+    return np.asarray(x, dtype=float)
+
+
 def ETS_fkine(fknm, q, base, tool, include_base, _data=None):
     if fknm is not None and not _is_symbolic(q):
-        return _c_ETS_fkine(fknm, q, base, tool, include_base)
+        return _c_ETS_fkine(
+            fknm, _to_q_array(q),
+            _to_f_array(base), _to_f_array(tool), include_base,
+        )
     return _python_fkine(_data, q, base, tool, include_base)
 
 
 def ETS_jacob0(fknm, q, tool, _data=None, _n=None):
     if fknm is not None and not _is_symbolic(q):
-        return _c_ETS_jacob0(fknm, q, tool)
+        return _c_ETS_jacob0(fknm, _to_q_array(q), _to_f_array(tool))
     return _python_jacob0(_data, _n, q, tool)
 
 
 def ETS_jacobe(fknm, q, tool, _data=None, _n=None):
     if fknm is not None and not _is_symbolic(q):
-        return _c_ETS_jacobe(fknm, q, tool)
+        return _c_ETS_jacobe(fknm, _to_q_array(q), _to_f_array(tool))
     return _python_jacobe(_data, _n, q, tool)
 
 
 def ETS_hessian0(fknm, q, J0, tool, _data=None, _n=None):
     if fknm is not None and not _is_symbolic(q) and not _is_symbolic(J0):
-        return _c_ETS_hessian0(fknm, q, J0, tool)
+        return _c_ETS_hessian0(fknm, _to_q_array(q), J0, _to_f_array(tool))
     if J0 is None:
         if q is None:
             raise ValueError("Either J0 or q must be provided")
@@ -240,7 +260,7 @@ def ETS_hessian0(fknm, q, J0, tool, _data=None, _n=None):
 
 def ETS_hessiane(fknm, q, Je, tool, _data=None, _n=None):
     if fknm is not None and not _is_symbolic(q) and not _is_symbolic(Je):
-        return _c_ETS_hessiane(fknm, q, Je, tool)
+        return _c_ETS_hessiane(fknm, _to_q_array(q), Je, _to_f_array(tool))
     if Je is None:
         if q is None:
             raise ValueError("Either Je or q must be provided")
@@ -256,12 +276,22 @@ def ETS_hessiane(fknm, q, Je, tool, _data=None, _n=None):
 # ---------------------------------------------------------------------------
 
 
+def _ik_args_se3(args):
+    """Convert Tep (first positional arg) from SE3 to ndarray if needed."""
+    if not args:
+        return args
+    tep = args[0]
+    if isinstance(tep, SE3):
+        tep = np.asarray(tep.A, dtype=float)
+    return (tep,) + args[1:]
+
+
 def IK_NR_c(fknm, *args, **kwargs):
     if fknm is None:
         raise RuntimeError(
             "ik_NR requires the _fknm_c C extension; use ikine_NR for the Python solver"
         )
-    return _c_IK_NR_c(fknm, *args, **kwargs)
+    return _c_IK_NR_c(fknm, *_ik_args_se3(args), **kwargs)
 
 
 def IK_GN_c(fknm, *args, **kwargs):
@@ -269,7 +299,7 @@ def IK_GN_c(fknm, *args, **kwargs):
         raise RuntimeError(
             "ik_GN requires the _fknm_c C extension; use ikine_GN for the Python solver"
         )
-    return _c_IK_GN_c(fknm, *args, **kwargs)
+    return _c_IK_GN_c(fknm, *_ik_args_se3(args), **kwargs)
 
 
 def IK_LM_c(fknm, *args, **kwargs):
@@ -277,7 +307,7 @@ def IK_LM_c(fknm, *args, **kwargs):
         raise RuntimeError(
             "ik_LM requires the _fknm_c C extension; use ikine_LM for the Python solver"
         )
-    return _c_IK_LM_c(fknm, *args, **kwargs)
+    return _c_IK_LM_c(fknm, *_ik_args_se3(args), **kwargs)
 
 
 # ---------------------------------------------------------------------------
@@ -286,9 +316,12 @@ def IK_LM_c(fknm, *args, **kwargs):
 
 
 def ET_init(*args):
-    """Create a C ET handle; returns None when C extension is absent."""
+    """Create a C ET handle; returns None when C extension is absent or inputs are symbolic."""
     if _C_AVAILABLE:
-        return _c_ET_init(*args)
+        try:
+            return _c_ET_init(*args)
+        except TypeError:
+            return None  # symbolic T matrix (object dtype) — use Python path
     return None
 
 
@@ -300,9 +333,12 @@ def ET_T(et_handle, q):
 
 
 def ET_update(et_handle, *args):
-    """Update a C ET handle in-place; no-op when handle is None (C absent)."""
+    """Update a C ET handle in-place; no-op when handle is None or inputs are symbolic."""
     if et_handle is not None:
-        _c_ET_update(et_handle, *args)
+        try:
+            _c_ET_update(et_handle, *args)
+        except TypeError:
+            pass  # symbolic qlim or T matrix — C handle left unchanged
 
 
 # ---------------------------------------------------------------------------

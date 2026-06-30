@@ -1432,6 +1432,11 @@ class DHRobot(Robot):
             verifymatrix(qd, (trajn, self.n))
             verifymatrix(qdd, (trajn, self.n))
 
+        # Ensure row slices are C-contiguous (frne C code assumes stride-1 arrays)
+        q = np.ascontiguousarray(q, dtype=float)
+        qd = np.ascontiguousarray(qd, dtype=float)
+        qdd = np.ascontiguousarray(qdd, dtype=float)
+
         if gravity is None:
             gravity = self.gravity
         else:

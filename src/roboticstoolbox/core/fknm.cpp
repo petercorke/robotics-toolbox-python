@@ -960,7 +960,7 @@ extern "C"
 
         // std::cout << "q: " << q[0] << ", " << q[1] << ", " << q[2] << ", " << q[3] << ", " << q[4] << ", " << q[5] << std::endl;
 
-        // Check the dimesnions of q
+        // Check the dimensions of q
         q_nd = PyArray_NDIM((PyArrayObject *)py_np_q);
         q_shape = PyArray_SHAPE((PyArrayObject *)py_np_q);
 

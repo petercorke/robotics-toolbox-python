@@ -1,8 +1,10 @@
-/**
- * \file ne.c
- * \author Peter Corke
- * \author Jesse Haviland
- * \brief Compute the recursive Newton-Euler formulation
+/*
+ * Compute the recursive Newton-Euler formulation
+ *
+ * Copyright (C) 1999-2008, by Peter I. Corke
+ * This file is part of The Robotics Toolbox for MATLAB (RTB).
+ *
+ * Modifications to work with RTB-Python by Jesse Haviland, 2020
  */
 
 /*
