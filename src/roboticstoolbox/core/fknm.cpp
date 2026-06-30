@@ -95,12 +95,12 @@ static PyMethodDef fknmMethods[] = {
 static struct PyModuleDef fknmmodule =
     {
         PyModuleDef_HEAD_INIT,
-        "fknm",
+        "_fknm_c",
         "Fast Kinematics",
         -1,
         fknmMethods};
 
-PyMODINIT_FUNC PyInit_fknm(void)
+PyMODINIT_FUNC PyInit__fknm_c(void)
 {
     import_array();
     return PyModule_Create(&fknmmodule);

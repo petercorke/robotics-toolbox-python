@@ -976,73 +976,7 @@ class ETS(BaseETS):
 
         """
 
-        try:
-            return ETS_fkine(self._fknm, q, base, tool, include_base)
-        except BaseException:
-            pass
-
-        q = getmatrix(q, (None, None))
-        l, _ = q.shape  # type: ignore
-        end = self.data[-1]
-
-        if isinstance(tool, SE3):
-            tool = np.array(tool.A)
-
-        if isinstance(base, SE3):
-            base = np.array(base.A)
-
-        if base is None:
-            bases = None
-        elif np.array_equal(base, np.eye(3)):  # pragma: nocover
-            bases = None
-        else:  # pragma: nocover
-            bases = base
-
-        if tool is None:
-            tools = None
-        elif np.array_equal(tool, np.eye(3)):  # pragma: nocover
-            tools = None
-        else:  # pragma: nocover
-            tools = tool
-
-        if l > 1:
-            T = np.zeros((l, 4, 4), dtype=object)
-        else:
-            T = np.zeros((4, 4), dtype=object)
-
-        # Tk = None
-
-        for k, qk in enumerate(q):  # type: ignore
-            link = end  # start with last link
-
-            jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-
-            Tk = link.A(qk[jindex])
-
-            if tools is not None:
-                Tk = Tk @ tools
-
-            # add remaining links, back toward the base
-            for i in range(self.m - 2, -1, -1):
-                link = self.data[i]
-
-                jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-                A = link.A(qk[jindex])
-
-                if A is not None:
-                    Tk = A @ Tk
-
-            # add base transform if it is set
-            if include_base is True and bases is not None:
-                Tk = bases @ Tk
-
-            # append
-            if l > 1:
-                T[k, :, :] = Tk
-            else:
-                T = Tk
-
-        return T
+        return ETS_fkine(self._fknm, q, base, tool, include_base, _data=self.data)
 
     def jacob0(
         self,
@@ -1088,78 +1022,7 @@ class ETS(BaseETS):
 
         """
 
-        # Use c extension
-        try:
-            return ETS_jacob0(self._fknm, q, tool)
-        except TypeError:
-            pass
-
-        # Otherwise use Python
-        if tool is None:
-            tools = np.eye(4)
-        elif isinstance(tool, SE3):
-            tools = np.array(tool.A)
-        else:  # pragma: nocover
-            tools = np.eye(4)
-
-        q = getvector(q, None)
-
-        T = self.eval(q, include_base=False) @ tools
-
-        U = np.eye(4)
-        j = 0
-        J = np.zeros((6, self.n), dtype="object")
-        zero = np.array([0, 0, 0])
-        end = self.data[-1]
-
-        for link in self.data:
-            jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-
-            if link.isjoint:
-                U = U @ link.A(q[jindex])  # type: ignore
-
-                if link == end:
-                    U = U @ tools
-
-                Tu = SE3(U, check=False).inv().A @ T
-                n = U[:3, 0]
-                o = U[:3, 1]
-                a = U[:3, 2]
-                x = Tu[0, 3]
-                y = Tu[1, 3]
-                z = Tu[2, 3]
-
-                if link.axis == "Rz":
-                    J[:3, j] = (o * x) - (n * y)
-                    J[3:, j] = a
-
-                elif link.axis == "Ry":
-                    J[:3, j] = (n * z) - (a * x)
-                    J[3:, j] = o
-
-                elif link.axis == "Rx":
-                    J[:3, j] = (a * y) - (o * z)
-                    J[3:, j] = n
-
-                elif link.axis == "tx":
-                    J[:3, j] = n
-                    J[3:, j] = zero
-
-                elif link.axis == "ty":
-                    J[:3, j] = o
-                    J[3:, j] = zero
-
-                elif link.axis == "tz":
-                    J[:3, j] = a
-                    J[3:, j] = zero
-
-                j += 1
-            else:
-                A = link.A()
-                if A is not None:
-                    U = U @ A
-
-        return J
+        return ETS_jacob0(self._fknm, q, tool, _data=self.data, _n=self.n)
 
     def jacobe(
         self,
@@ -1205,14 +1068,7 @@ class ETS(BaseETS):
 
         """
 
-        # Use c extension
-        try:
-            return ETS_jacobe(self._fknm, q, tool)
-        except TypeError:
-            pass
-
-        T = self.eval(q, tool=tool, include_base=False)
-        return tr2jac(T.T) @ self.jacob0(q, tool=tool)
+        return ETS_jacobe(self._fknm, q, tool, _data=self.data, _n=self.n)
 
     def hessian0(
         self,
@@ -1280,40 +1136,7 @@ class ETS(BaseETS):
 
         """
 
-        # Use c extension
-        try:
-            return ETS_hessian0(self._fknm, q, J0, tool)
-        except TypeError:
-            pass
-
-        def cross(a, b):
-            x = a[1] * b[2] - a[2] * b[1]
-            y = a[2] * b[0] - a[0] * b[2]
-            z = a[0] * b[1] - a[1] * b[0]
-            return np.array([x, y, z])
-
-        n = self.n
-
-        if J0 is None:
-            if q is None:
-                raise ValueError("Either J0 or q must be provided")
-
-            q = getvector(q, None)
-            J0 = self.jacob0(q, tool=tool)
-        else:
-            verifymatrix(J0, (6, self.n))
-
-        H = np.zeros((n, 6, n))
-
-        for j in range(n):
-            for i in range(j, n):
-                H[j, :3, i] = cross(J0[3:, j], J0[:3, i])
-                H[j, 3:, i] = cross(J0[3:, j], J0[3:, i])
-
-                if i != j:
-                    H[i, :3, j] = H[j, :3, i]
-
-        return H
+        return ETS_hessian0(self._fknm, q, J0, tool, _data=self.data, _n=self.n)
 
     def hessiane(
         self,
@@ -1381,40 +1204,7 @@ class ETS(BaseETS):
 
         """
 
-        # Use c extension
-        try:
-            return ETS_hessiane(self._fknm, q, Je, tool)
-        except TypeError:
-            pass
-
-        def cross(a, b):
-            x = a[1] * b[2] - a[2] * b[1]
-            y = a[2] * b[0] - a[0] * b[2]
-            z = a[0] * b[1] - a[1] * b[0]
-            return np.array([x, y, z])
-
-        n = self.n
-
-        if Je is None:
-            if q is None:
-                raise ValueError("Either Je or q must be provided")
-
-            q = getvector(q, None)
-            Je = self.jacobe(q, tool=tool)
-        else:
-            verifymatrix(Je, (6, self.n))
-
-        H = np.zeros((n, 6, n))
-
-        for j in range(n):
-            for i in range(j, n):
-                H[j, :3, i] = cross(Je[3:, j], Je[:3, i])
-                H[j, 3:, i] = cross(Je[3:, j], Je[3:, i])
-
-                if i != j:
-                    H[i, :3, j] = H[j, :3, i]
-
-        return H
+        return ETS_hessiane(self._fknm, q, Je, tool, _data=self.data, _n=self.n)
 
     def jacob0_analytical(
         self,

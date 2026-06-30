@@ -65,13 +65,13 @@ static PyMethodDef frneMethods[] = {
 static struct PyModuleDef frnemodule =
 {
     PyModuleDef_HEAD_INIT,
-    "frne", 
+    "_frne_c",
     "Fast RNE",
     -1,
     frneMethods
 };
 
-PyMODINIT_FUNC PyInit_frne(void)
+PyMODINIT_FUNC PyInit__frne_c(void)
 {
     return PyModule_Create(&frnemodule);
 }

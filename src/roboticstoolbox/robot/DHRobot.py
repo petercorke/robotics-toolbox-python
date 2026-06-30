@@ -1409,7 +1409,7 @@ class DHRobot(Robot):
         :seealso: :func:`rne_python`
         """
 
-        if base_wrench:
+        if self._rne_ob is None or base_wrench:
             return self.rne_python(
                 q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
             )
