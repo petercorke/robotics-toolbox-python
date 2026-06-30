@@ -26,6 +26,8 @@ from typing import Callable, TYPE_CHECKING
 # from spatialmath.base.types import ArrayLike
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
+_AXIS_TO_INT: dict[str, int] = {"Rx": 0, "Ry": 1, "Rz": 2, "tx": 3, "ty": 4, "tz": 5}
+
 if TYPE_CHECKING:  # pragma: nocover
     import sympy
 
@@ -248,22 +250,7 @@ class BaseET:
         """
         if isinstance(self, ET2):
             return 0
-
-        if axis[0] == "R":
-            if axis[1] == "x":
-                return 0
-            elif axis[1] == "y":
-                return 1
-            elif axis[1] == "z":
-                return 2
-        elif axis[0] == "t":
-            if axis[1] == "x":
-                return 3
-            elif axis[1] == "y":
-                return 4
-            elif axis[1] == "z":
-                return 5
-        return 0
+        return _AXIS_TO_INT[axis]
 
     @property
     def fknm(self):

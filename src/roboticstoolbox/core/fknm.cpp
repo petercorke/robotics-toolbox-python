@@ -1116,7 +1116,7 @@ extern "C"
     static PyObject *ET_update(PyObject *self, PyObject *args)
     {
         ET *et;
-        int jointtype;
+        int axis_type;
         PyObject *ret, *py_et;
         PyArrayObject *py_T, *py_qlim;
         npy_float64 *np_qlim;
@@ -1130,7 +1130,7 @@ extern "C"
                               &isjoint,
                               &isflip,
                               &jindex,
-                              &jointtype,
+                              &axis_type,
                               &PyArray_Type, &py_T,
                               &PyArray_Type, &py_qlim))
             return NULL;
@@ -1144,33 +1144,33 @@ extern "C"
 
         et->T = (npy_float64 *)PyArray_DATA(py_T);
         new (&et->Tm) MapMatrix4dc(et->T);
-        et->axis = jointtype;
+        et->axis = axis_type;
 
         et->isjoint = isjoint;
         et->isflip = isflip;
         et->jindex = jindex;
 
-        if (jointtype == 0)
+        if (axis_type == 0)
         {
             et->op = rx;
         }
-        else if (jointtype == 1)
+        else if (axis_type == 1)
         {
             et->op = ry;
         }
-        else if (jointtype == 2)
+        else if (axis_type == 2)
         {
             et->op = rz;
         }
-        else if (jointtype == 3)
+        else if (axis_type == 3)
         {
             et->op = tx;
         }
-        else if (jointtype == 4)
+        else if (axis_type == 4)
         {
             et->op = ty;
         }
-        else if (jointtype == 5)
+        else if (axis_type == 5)
         {
             et->op = tz;
         }
@@ -1182,7 +1182,7 @@ extern "C"
     static PyObject *ET_init(PyObject *self, PyObject *args)
     {
         ET *et;
-        int jointtype;
+        int axis_type;
         PyObject *ret;
         PyArrayObject *py_T, *py_qlim;
         npy_float64 *np_qlim;
@@ -1194,7 +1194,7 @@ extern "C"
                               &et->isjoint,
                               &et->isflip,
                               &et->jindex,
-                              &jointtype,
+                              &axis_type,
                               &PyArray_Type, &py_T,
                               &PyArray_Type, &py_qlim))
             return NULL;
@@ -1207,29 +1207,29 @@ extern "C"
         et->T = (npy_float64 *)PyArray_DATA(py_T);
         new (&et->Tm) MapMatrix4dc(et->T);
 
-        et->axis = jointtype;
+        et->axis = axis_type;
 
-        if (jointtype == 0)
+        if (axis_type == 0)
         {
             et->op = rx;
         }
-        else if (jointtype == 1)
+        else if (axis_type == 1)
         {
             et->op = ry;
         }
-        else if (jointtype == 2)
+        else if (axis_type == 2)
         {
             et->op = rz;
         }
-        else if (jointtype == 3)
+        else if (axis_type == 3)
         {
             et->op = tx;
         }
-        else if (jointtype == 4)
+        else if (axis_type == 4)
         {
             et->op = ty;
         }
-        else if (jointtype == 5)
+        else if (axis_type == 5)
         {
             et->op = tz;
         }
@@ -1340,23 +1340,6 @@ extern "C"
         data[7] = 0;
         data[11] = 0;
         data[15] = 1;
-
-        // data[0] = 1;
-        // data[1] = 0;
-        // data[2] = 0;
-        // data[3] = 0;
-        // data[4] = 0;
-        // data[5] = ct;
-        // data[6] = -st;
-        // data[7] = 0;
-        // data[8] = 0;
-        // data[9] = st;
-        // data[10] = ct;
-        // data[11] = 0;
-        // data[12] = 0;
-        // data[13] = 0;
-        // data[14] = 0;
-        // data[15] = 1;
     }
 
     void ry(npy_float64 *data, double eta)
@@ -1382,23 +1365,6 @@ extern "C"
         data[7] = 0;
         data[11] = 0;
         data[15] = 1;
-
-        // data[0] = ct;
-        // data[1] = 0;
-        // data[2] = st;
-        // data[3] = 0;
-        // data[4] = 0;
-        // data[5] = 1;
-        // data[6] = 0;
-        // data[7] = 0;
-        // data[8] = -st;
-        // data[9] = 0;
-        // data[10] = ct;
-        // data[11] = 0;
-        // data[12] = 0;
-        // data[13] = 0;
-        // data[14] = 0;
-        // data[15] = 1;
     }
 
     void rz(npy_float64 *data, double eta)
@@ -1424,23 +1390,6 @@ extern "C"
         data[7] = 0;
         data[11] = 0;
         data[15] = 1;
-
-        // data[0] = ct;
-        // data[1] = -st;
-        // data[2] = 0;
-        // data[3] = 0;
-        // data[4] = st;
-        // data[5] = ct;
-        // data[6] = 0;
-        // data[7] = 0;
-        // data[8] = 0;
-        // data[9] = 0;
-        // data[10] = 1;
-        // data[11] = 0;
-        // data[12] = 0;
-        // data[13] = 0;
-        // data[14] = 0;
-        // data[15] = 1;
     }
 
     void tx(npy_float64 *data, double eta)
@@ -1461,23 +1410,6 @@ extern "C"
         data[13] = 0;
         data[14] = 0;
         data[15] = 1;
-
-        // data[0] = 1;
-        // data[1] = 0;
-        // data[2] = 0;
-        // data[3] = eta;
-        // data[4] = 0;
-        // data[5] = 1;
-        // data[6] = 0;
-        // data[7] = 0;
-        // data[8] = 0;
-        // data[9] = 0;
-        // data[10] = 1;
-        // data[11] = 0;
-        // data[12] = 0;
-        // data[13] = 0;
-        // data[14] = 0;
-        // data[15] = 1;
     }
 
     void ty(npy_float64 *data, double eta)
@@ -1498,23 +1430,6 @@ extern "C"
         data[7] = 0;
         data[14] = 0;
         data[15] = 1;
-
-        // data[0] = 1;
-        // data[1] = 0;
-        // data[2] = 0;
-        // data[3] = 0;
-        // data[4] = 0;
-        // data[5] = 1;
-        // data[6] = 0;
-        // data[7] = eta;
-        // data[8] = 0;
-        // data[9] = 0;
-        // data[10] = 1;
-        // data[11] = 0;
-        // data[12] = 0;
-        // data[13] = 0;
-        // data[14] = 0;
-        // data[15] = 1;
     }
 
     void tz(npy_float64 *data, double eta)
@@ -1535,23 +1450,6 @@ extern "C"
         data[13] = 0;
         data[11] = 0;
         data[15] = 1;
-
-        // data[0] = 1;
-        // data[1] = 0;
-        // data[2] = 0;
-        // data[3] = 0;
-        // data[4] = 0;
-        // data[5] = 1;
-        // data[6] = 0;
-        // data[7] = 0;
-        // data[8] = 0;
-        // data[9] = 0;
-        // data[10] = 1;
-        // data[11] = eta;
-        // data[12] = 0;
-        // data[13] = 0;
-        // data[14] = 0;
-        // data[15] = 1;
     }
 
 } /* extern "C" */
