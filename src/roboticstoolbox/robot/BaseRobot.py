@@ -35,7 +35,7 @@ from ansitable import ANSITable, Column
 from spatialgeometry import SceneNode
 from roboticstoolbox.backends.Connector import Connector
 
-from roboticstoolbox.fknm import Robot_link_T
+from roboticstoolbox.robot.fknm import Robot_link_T
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link

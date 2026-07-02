@@ -4,13 +4,15 @@ import numpy as np
 from spatialmath import SE3, base
 import math
 from typing import Union
-from roboticstoolbox.fknm import Angle_Axis
 from roboticstoolbox.tools.types import NDArray, ArrayLike
 
 # ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
 def angle_axis(T, Td) -> NDArray:
+    # deferred: roboticstoolbox.robot.fknm imports the robot package, which
+    # depends on roboticstoolbox.tools being fully initialised first
+    from roboticstoolbox.robot.fknm import Angle_Axis
 
     try:
         e: NDArray = Angle_Axis(T, Td)

@@ -17,7 +17,7 @@ import numpy as np
 from spatialmath.base import getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
-from roboticstoolbox import rtb_get_param
+from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.robot.RobotProto import RobotProto
 
 from roboticstoolbox.tools.types import ArrayLike, NDArray

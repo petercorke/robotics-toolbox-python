@@ -13,7 +13,7 @@ import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS, ET
 from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox import rtb_set_param
+from roboticstoolbox.tools.params import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
 # from spatialmath import base
@@ -32,8 +32,8 @@ import spatialmath.base.symbolic as sym
 from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
 from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox import rtb_get_param
-from roboticstoolbox.frne import init, frne, delete
+from roboticstoolbox.tools.params import rtb_get_param
+from roboticstoolbox.robot.frne import init, frne, delete
 from numpy import any
 from numpy.typing import ArrayLike, NDArray
 from roboticstoolbox.robot.IK import IKSolution

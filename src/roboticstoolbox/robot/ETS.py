@@ -23,10 +23,10 @@ from spatialmath.base import (
     simplify,
     getmatrix,
 )
-from roboticstoolbox import rtb_get_param
+from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP
 
-from roboticstoolbox.fknm import (
+from roboticstoolbox.robot.fknm import (
     ETS_init,
     ETS_fkine,
     ETS_jacob0,

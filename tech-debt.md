@@ -346,3 +346,38 @@ support.
 - Verify `build_pyodide` CI job (`CIBW_PLATFORM: pyodide`) still passes;
   keep `continue-on-error: true` during transition
 - The facade from Phase 1 means `ETS.py` is untouched by this phase
+
+---
+
+## `tools/p_servo.py` — cross-package import papered over with a lazy import
+
+### Background
+
+`roboticstoolbox/__init__.py` loads `roboticstoolbox.tools` before
+`roboticstoolbox.robot`, because `robot/*.py` modules need things from `tools`
+(`rtb_get_param`, `ArrayLike`, …) at their own module scope. `tools/p_servo.py`
+sits in `tools/` but needs `Angle_Axis` from the `fknm` facade, which lives in
+`robot/` (`robot/fknm.py`) since it's a robot-kinematics concept. Any
+module-level `from roboticstoolbox.robot.fknm import Angle_Axis` in
+`p_servo.py` forces Python to run `robot/__init__.py` *before* `tools/__init__.py`
+has finished — which breaks, because `robot/*.py` in turn expects `tools` to
+already be fully initialised. True circular dependency between the two
+packages, not a matter of which subfolder `fknm.py` lives in.
+
+**Current fix (workaround, not a real solution):** the import was moved inside
+the `angle_axis()` function body so it's deferred until first call, well after
+package init completes. This works but means `p_servo.py`'s dependency on
+`robot` is now invisible at a glance — a future edit that hoists it back to
+module scope re-breaks the import chain with no obvious cause (this exact bug
+recurred once already, see the `robot/cpp-extensions` move in this session).
+
+### Proper fix
+
+`p_servo`/`angle_axis` doesn't conceptually belong in `tools/` — it's a
+robot pose-error/servoing function, not a generic tool, and its only
+non-trivial dependency (`Angle_Axis`) is a robot-kinematics primitive. Move
+`p_servo.py` into `robot/` (or a `robot/control.py`-style module) so the
+dependency direction is `robot → robot`, not `tools → robot`, eliminating the
+need for the lazy-import workaround entirely. Requires updating the handful of
+call sites and the `roboticstoolbox/tools/__init__.py` / top-level `__init__.py`
+re-exports that expose `p_servo`/`angle_axis` at package scope.
