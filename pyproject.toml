@@ -18,7 +18,7 @@ dependencies = [
     "scipy",
     "matplotlib",
     "ansitable",
-    "rtb-data",
+    "rtb-data @ git+https://github.com/petercorke/robotics-toolbox-python.git@main#subdirectory=rtb-data",
     "progress",
     "typing_extensions",
     "colored>2.0.0",
