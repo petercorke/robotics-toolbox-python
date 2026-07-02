@@ -100,16 +100,9 @@ jobs:
         with:
           files: ./coverage.xml
 
-  docs:
+  docs-build:
     needs: [test-core, test]
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
 
@@ -141,7 +134,22 @@ jobs:
         with:
           path: docs/build/html
 
+  # Separate job so the github-pages environment (and its deployment
+  # protection rules restricting it to main) is only ever touched on main —
+  # a job-level `environment:` triggers a deployment attempt as soon as the
+  # job starts, regardless of any step-level `if:`, so PR/dependabot runs
+  # would otherwise show a false "failed to deploy to github-pages".
+  docs-deploy:
+    needs: docs-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deploy
-        if: github.ref == 'refs/heads/main'
         uses: actions/deploy-pages@v4
