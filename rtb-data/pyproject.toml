@@ -1,0 +1,36 @@
+[project]
+name = "rtb-data"
+version = "1.1.0"
+description = "Data files for the Robotics Toolbox for Python."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Peter Corke", email = "rvc@petercorke.com" }]
+keywords = ["python", "robotics"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.urls]
+Source = "https://github.com/petercorke/roboticstoolbox-python"
+Homepage = "https://github.com/petercorke/roboticstoolbox-python"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["rtbdata"]
+
+[tool.hatch.build]
+include = [
+    "rtbdata/**",
+    "README.md",
+]
+exclude = [
+    "rtbdata/**/__pycache__/**",
+    "rtbdata/**/*.pyc",
+]
