@@ -1,0 +1,14 @@
+# xarm:
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 100
+  
+joint_group_velocity_controller:
+  type: velocity_controllers/JointGroupVelocityController
+  joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6

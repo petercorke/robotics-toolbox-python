@@ -94,6 +94,8 @@ dev = [
     "quadprog",
     "bdsim",
     "ruff",
+    "coal",
+    "trimesh",
 ]
 
 # Backward-compatible alias; notebook tooling is included in "dev".

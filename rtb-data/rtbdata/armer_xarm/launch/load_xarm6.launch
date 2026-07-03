@@ -1,0 +1,5 @@
+<launch>
+    <arg name="xarm_dof" default="6" doc="The robot model based on degrees of freedom (dof) - default is 6 from [5, 6, 7]" />
+
+    <param name="robot_description" command="$(find xacro)/xacro $(find armer_xarm)/data/xacro/robots/xarm$(arg xarm_dof)/xarm$(arg xarm_dof).xacro"/>
+</launch>
