@@ -381,3 +381,37 @@ dependency direction is `robot → robot`, not `tools → robot`, eliminating th
 need for the lazy-import workaround entirely. Requires updating the handful of
 call sites and the `roboticstoolbox/tools/__init__.py` / top-level `__init__.py`
 re-exports that expose `p_servo`/`angle_axis` at package scope.
+
+---
+
+## `rtb-data` publishing is manual and has drifted from `main`
+
+### Background
+
+`rtb-data` is a separate PyPI package (data files: meshes, xacro/URDF sources,
+etc.) built from the `rtb-data/` subdirectory of this repo, but published
+independently — `roboticstoolbox-python`'s own release process
+(`release-please` + `release.yml`) knows nothing about it. As of 2026-07-03,
+`rtb-data/` on `main` had drifted well ahead of what's on PyPI (missing
+`rtb-data/pyproject.toml` entirely at one point — see the "add missing
+rtb-data package config and data files" fix), and several `test_models.py`
+cases fail on CI as a direct result (xacro files the installed PyPI package
+doesn't have yet).
+
+### Proposed fix
+
+Automatically publish a new `rtb-data` release alongside `roboticstoolbox-python`'s
+own release, **but only if `rtb-data/` actually changed** since the last
+`rtb-data` publish. The whole point of `rtb-data` being a separate package is
+that it's large (meshes, STL/OBJ files) and should get pushed infrequently —
+don't turn this into "publish rtb-data on every roboticstoolbox-python
+release" regardless of whether anything in it moved. A GH Actions step
+(likely in `release.yml` or a new workflow, triggered the same way) that:
+
+1. Diffs `rtb-data/` against the tree at the last `rtb-data` publish (tag or
+   recorded commit SHA)
+2. If unchanged, no-op
+3. If changed, bump `rtb-data/pyproject.toml`'s version and publish to PyPI
+
+would keep the two packages in sync without manual "did I remember to publish
+rtb-data" steps, while preserving the "infrequent, only-when-needed" intent.
