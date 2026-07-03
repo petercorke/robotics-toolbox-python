@@ -120,7 +120,7 @@ rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 [build-system]
 
-requires = ["scikit-build-core>=0.9", "numpy"]
+requires = ["scikit-build-core>=0.9", "numpy", "nanobind>=2"]
 build-backend = "scikit_build_core.build"
 
 

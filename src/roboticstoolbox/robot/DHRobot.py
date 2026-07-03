@@ -13,7 +13,7 @@ import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS, ET
 from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox import rtb_set_param
+from roboticstoolbox.tools.params import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
 # from spatialmath import base
@@ -31,9 +31,9 @@ import spatialmath.base.symbolic as sym
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
-from roboticstoolbox.robot.DHLink import _check_rne, DHLink
-from roboticstoolbox import rtb_get_param
-from roboticstoolbox.frne import init, frne, delete
+from roboticstoolbox.robot.DHLink import DHLink
+from roboticstoolbox.tools.params import rtb_get_param
+from roboticstoolbox.robot.frne import init, frne, delete
 from numpy import any
 from numpy.typing import ArrayLike, NDArray
 from roboticstoolbox.robot.IK import IKSolution
@@ -137,8 +137,8 @@ class DHRobot(Robot):
         else:
             self.basemesh = None
 
-        # rne parameters
-        self._rne_ob = None
+        # frne parameters
+        self._frne = None
 
     @property
     def links(self) -> list[DHLink]:  # type: ignore[override]
@@ -1340,7 +1340,7 @@ class DHRobot(Robot):
 
     # -------------------------------------------------------------------------- #
 
-    def _init_rne(self):
+    def _copy_to_cpp(self):
         # Compress link data into a 1D array
         L = np.zeros(24 * self.n)
 
@@ -1360,20 +1360,23 @@ class DHRobot(Robot):
             L[j + 21] = self.links[i].B
             L[j + 22 : j + 24] = self.links[i].Tc.flatten()
 
+        if self._frne is not None:
+            delete(self._frne)
         # we negate gravity here, since the C code has the sign wrong
-        self._rne_ob = init(self.n, self.mdh, L, -self.gravity)
+        self._frne = init(self.n, self.mdh, L, -self.gravity)
+        self._frne_stale = False
 
     def delete_rne(self):
         """
-        Frees the memory holding the robot object in c if the robot object
-        has been initialised in c.
+        Frees the memory holding the robot object in C if it has been
+        initialised.  Not normally needed — the destructor handles this
+        automatically.  Use as an explicit early-free escape hatch.
         """
-        if self._rne_ob is not None:
-            delete(self._rne_ob)
-            self._dynchanged = False
-            self._rne_ob = None
+        if self._frne is not None:
+            delete(self._frne)
+            self._frne = None
+            self._frne_stale = True
 
-    @_check_rne
     def rne(self, q, qd=None, qdd=None, gravity=None, fext=None, base_wrench=False):
         r"""
         Inverse dynamics
@@ -1409,7 +1412,10 @@ class DHRobot(Robot):
         :seealso: :func:`rne_python`
         """
 
-        if base_wrench:
+        if self._frne is None or self._frne_stale:
+            self._copy_to_cpp()
+
+        if self._frne is None or base_wrench:
             return self.rne_python(
                 q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
             )
@@ -1425,6 +1431,11 @@ class DHRobot(Robot):
             verifymatrix(q, (trajn, self.n))
             verifymatrix(qd, (trajn, self.n))
             verifymatrix(qdd, (trajn, self.n))
+
+        # Ensure row slices are C-contiguous (frne C code assumes stride-1 arrays)
+        q = np.ascontiguousarray(q, dtype=float)
+        qd = np.ascontiguousarray(qd, dtype=float)
+        qdd = np.ascontiguousarray(qdd, dtype=float)
 
         if gravity is None:
             gravity = self.gravity
@@ -1445,7 +1456,7 @@ class DHRobot(Robot):
         for i in range(trajn):
             tau[i, :] = frne(
                 # we negate gravity here, since the C code has the sign wrong
-                self._rne_ob,
+                self._frne,
                 q[i, :],
                 qd[i, :],
                 qdd[i, :],

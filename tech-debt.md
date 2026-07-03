@@ -186,3 +186,198 @@ unrelated URDF robot through shared class-level state in `Link` or `Robot`
 `--tb=long` when running `test_ERobot.py` followed by
 `test_Link.py::TestDHLink::test_copy`, trace which attribute chain connects the
 fresh `DHLink` to a coal object, and remove or weak-ref that shared state.
+
+---
+
+## ETS / fknm / frne refactor
+
+### Context
+
+`fknm.cpp` is a C++ extension (raw CPython API + Eigen) that accelerates FK,
+Jacobian, Hessian, and IK. `frne.c` is CPython glue around `ne.c` (pure C
+Newton-Euler maths) used by Dynamics. Both are built via scikit-build-core /
+CMakeLists.txt and the Pyodide WASM wheel is already built in CI
+(`CIBW_PLATFORM: pyodide`, uploaded as a GitHub release asset).
+
+### Phase 0 — Tests first (prerequisite for all phases)
+
+Write test coverage before touching any C code:
+
+- `eval()` / `fkine()` with and without fknm — mock the C import to force the
+  Python fallback path
+- Symbolic (SymPy) inputs through `fkine()`, `jacob0()`, `jacobe()`
+- `jacob0`, `jacobe`, `hessian0`, `hessiane` numerical results against a
+  reference robot (Puma560 — DH params and reference values are well-known)
+- Dynamics: `rne()` via frne/ne against known torque values
+- Pyodide simulation: fknm import mocked as `ImportError`, all paths correct
+
+### Phase 1 — Facade module
+
+**Problem:** `from roboticstoolbox.fknm import ETS_fkine, ...` is a hard import
+of the `.so`. If unavailable the module fails to load. The fallback is a
+`try/except BaseException: pass` in `eval()` that swallows real bugs. The
+symbolic path is detected after the fact via `dtype == 'O'`.
+
+**Fix:**
+
+- Rename the C extension to `_fknm_c` so that `roboticstoolbox/fknm.py` can be
+  a pure Python module
+- `fknm.py` tries `from roboticstoolbox._fknm_c import ...`; on `ImportError`
+  provides pure Python implementations of `ETS_init`, `ETS_fkine`, `ETS_jacob0`,
+  `ETS_jacobe`, `ETS_hessian0`, `ETS_hessiane`, and the IK wrappers
+- Pure Python implementations are the existing fallback code consolidated from
+  `eval()`, `jacob0()` etc. in ETS.py — they already exist, just scattered
+- Symbolic detection (`_is_symbolic(q)`) lives inside each facade function;
+  callers never check
+- `eval()` and friends in ETS.py become a single unconditional call — no
+  `try/except`, no `dtype == 'O'` guard
+
+### Phase 2 — BaseETS redesign and unified C++ state management
+
+#### Unified design: parallel structure across fknm and frne
+
+Both C extensions share the same lifecycle pattern:
+
+| Concept | ETS / fknm | DHRobot / frne |
+|---|---|---|
+| C++ handle | `self._fknm` | `self._frne` (was `_rne_ob`) |
+| Dirty flag | `self._fknm_stale` | `self._frne_stale` (was `_dynchanged`) |
+| Build/update C++ object | `_copy_to_cpp()` (was `_update_internals`) | `_copy_to_cpp()` (was `_init_rne`) |
+| Dirty on mutation | `@_dirties_fknm` decorator | `@_dirties_frne` decorator (was `@_listen_dyn`) |
+| Guard before C call | `if self._fknm_stale: self._copy_to_cpp()` | `if self._frne_stale: self._copy_to_cpp()` |
+| Free C++ object | implicit (GC) | `delete_rne()` — kept as explicit early free |
+
+Both use **lazy rebuild**: the dirty flag is set on mutation; `_copy_to_cpp()` is
+called only when a C function is about to be invoked. This eliminates the need for
+the `_building` context manager (multiple mutations during construction just set the
+flag once; `_copy_to_cpp()` runs on the first C call).
+
+**`@_dirties_fknm`** (on `BaseETS` mutation methods):
+```python
+def _dirties_fknm(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        result = func(self, *args, **kwargs)
+        self._fknm_stale = True
+        return result
+    return wrapper
+```
+Applied to `__setitem__`, `__delitem__`, `insert` — `MutableSequence` derives
+`append`, `extend`, `pop`, `remove` from these three, so all mutations propagate.
+
+**`@_dirties_frne`** (on `DHLink` property setters — rename of `@_listen_dyn`):
+Same signal path as before (`robot.dynchanged()` → `robot._frne_stale = True`),
+plus `link._hasdynamics = True`. The second effect is intentional and stays: setting
+a dynamic parameter IS the act of declaring the link has dynamics — the decorator is
+the single chokepoint where both effects belong. Name change only.
+
+**`_copy_to_cpp()` on DHRobot** frees existing C allocation before reallocating:
+```python
+def _copy_to_cpp(self):
+    if self._frne is not None:
+        delete(self._frne)      # free old PyMem_RawMalloc'd Robot struct
+    self._frne = init(self.n, self.mdh, L, -self.gravity)
+    self._frne_stale = False
+```
+This makes `delete_rne()` redundant for the update-before-compute case.
+`delete_rne()` is kept as a public "free memory now" escape hatch, but is no longer
+required for correctness. With nanobind (Phase 3), it becomes fully redundant
+because nanobind binds the Robot struct with a proper C++ destructor — `_frne`
+going out of scope triggers the free automatically.
+
+#### BaseETS structural fix
+
+**Problem:** `BaseETS(UserList)` stores its list in `UserList.self.data` (plain
+attribute) but shadows it with a `@property` redirecting to `self._data`. The
+`data` setter does not call `_copy_to_cpp()`. Mutation via `self.data.append(x)`
+bypasses all hooks.
+
+**Fix:**
+
+- Drop `UserList`; inherit from `collections.abc.MutableSequence` instead
+- Backing store: `self._data: list[ET]` — no property hack needed
+- Implement the five required abstract methods (`__getitem__`, `__len__`,
+  `__setitem__`, `__delitem__`, `insert`) decorated with `@_dirties_fknm`
+- `MutableSequence` provides `append`, `extend`, `pop`, `remove`, `__contains__`
+  etc. for free, all routing through the decorated methods
+- `data` property (if needed externally) becomes simple read-only `return self._data`
+- No `_building` context manager needed — lazy rebuild handles bulk construction
+
+### Phase 3.5 — per-ET result buffer and sparse op functions (post-nanobind)
+
+**Problem:** `rx`, `ry`, `rz`, `tx`, `ty`, `tz` each write all 16 elements of
+the output matrix on every call, even though only 4 (rotation) or 1 (translation)
+elements actually change between evaluations at different joint angles. This is
+efficient for the current shared scratch buffer (`ret` in the FK loop), but
+leaves performance on the table for the common IK/Jacobian pattern where the
+same joint ET is evaluated repeatedly with different `q` values.
+
+**Fix (depends on Phase 2 per-ET buffer):**
+
+Once each joint ET owns its own `double[16]` result buffer (analogous to how
+static ETs already own `et->T`):
+
+- Initialise the buffer to identity once at `ET_init` time
+- Each op function only overwrites the elements that depend on eta:
+  - `rx`/`ry`/`rz`: 4 elements (the 2×2 rotation sub-block)
+  - `tx`/`ty`/`tz`: 1 element (the relevant translation component)
+- The matrix multiply `ret * U` in `_ET_T` uses the per-ET buffer directly
+  instead of copying into a shared scratch
+
+This eliminates ~12 zero-stores per rotation ET and ~15 stores per translation
+ET in every FK/Jacobian/Hessian call.
+
+### Phase 3 — nanobind port
+
+**Problem:** `fknm.cpp` and `frne.c` use the raw CPython C API (`PyArg_ParseTuple`,
+`PyObject*`, `PyMethodDef` boilerplate). nanobind gives the same performance with
+far less boilerplate, safer reference counting, and better Emscripten/Pyodide
+support.
+
+**Fix:**
+
+- Port `fknm.cpp` to nanobind; Eigen (already present) stays unchanged —
+  nanobind and Eigen are natural companions
+- Port `frne.c` (CPython glue only) to a nanobind `.cpp` binding file; `ne.c`
+  maths is pure C with no Python API and stays as-is (rename to `ne.cpp` only
+  if C++ features are needed, otherwise leave it)
+- Both build via the existing CMakeLists.txt / scikit-build-core pipeline —
+  scikit-build-core is already in pyproject.toml
+- Verify `build_pyodide` CI job (`CIBW_PLATFORM: pyodide`) still passes;
+  keep `continue-on-error: true` during transition
+- The facade from Phase 1 means `ETS.py` is untouched by this phase
+
+---
+
+## `tools/p_servo.py` — cross-package import papered over with a lazy import
+
+### Background
+
+`roboticstoolbox/__init__.py` loads `roboticstoolbox.tools` before
+`roboticstoolbox.robot`, because `robot/*.py` modules need things from `tools`
+(`rtb_get_param`, `ArrayLike`, …) at their own module scope. `tools/p_servo.py`
+sits in `tools/` but needs `Angle_Axis` from the `fknm` facade, which lives in
+`robot/` (`robot/fknm.py`) since it's a robot-kinematics concept. Any
+module-level `from roboticstoolbox.robot.fknm import Angle_Axis` in
+`p_servo.py` forces Python to run `robot/__init__.py` *before* `tools/__init__.py`
+has finished — which breaks, because `robot/*.py` in turn expects `tools` to
+already be fully initialised. True circular dependency between the two
+packages, not a matter of which subfolder `fknm.py` lives in.
+
+**Current fix (workaround, not a real solution):** the import was moved inside
+the `angle_axis()` function body so it's deferred until first call, well after
+package init completes. This works but means `p_servo.py`'s dependency on
+`robot` is now invisible at a glance — a future edit that hoists it back to
+module scope re-breaks the import chain with no obvious cause (this exact bug
+recurred once already, see the `robot/cpp-extensions` move in this session).
+
+### Proper fix
+
+`p_servo`/`angle_axis` doesn't conceptually belong in `tools/` — it's a
+robot pose-error/servoing function, not a generic tool, and its only
+non-trivial dependency (`Angle_Axis`) is a robot-kinematics primitive. Move
+`p_servo.py` into `robot/` (or a `robot/control.py`-style module) so the
+dependency direction is `robot → robot`, not `tools → robot`, eliminating the
+need for the lazy-import workaround entirely. Requires updating the handful of
+call sites and the `roboticstoolbox/tools/__init__.py` / top-level `__init__.py`
+re-exports that expose `p_servo`/`angle_axis` at package scope.

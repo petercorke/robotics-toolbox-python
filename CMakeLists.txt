@@ -1,36 +1,46 @@
 cmake_minimum_required(VERSION 3.15)
 project(${SKBUILD_PROJECT_NAME} LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Python COMPONENTS Interpreter Development.Module NumPy REQUIRED)
+# Locate Python (interpreter needed to find nanobind cmake dir)
+find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+
+# Locate nanobind via the installed Python package
+execute_process(
+    COMMAND "${Python_EXECUTABLE}" -c "import nanobind; print(nanobind.cmake_dir())"
+    OUTPUT_VARIABLE NB_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+find_package(nanobind CONFIG REQUIRED HINTS "${NB_DIR}")
 
 # ---------------------------------------------------------------------------
-# frne — Newton-Euler inverse dynamics (pure C)
+# _frne_c — Newton-Euler inverse dynamics
+# ne.c / vmath.c are pure C maths; frne_nb.cpp is the nanobind glue.
 # ---------------------------------------------------------------------------
-python_add_library(frne MODULE WITH_SOABI
-    src/roboticstoolbox/core/vmath.c
-    src/roboticstoolbox/core/ne.c
-    src/roboticstoolbox/core/frne.c
+nanobind_add_module(_frne_c
+    src/roboticstoolbox/robot/cpp-extensions/vmath.c
+    src/roboticstoolbox/robot/cpp-extensions/ne.c
+    src/roboticstoolbox/robot/cpp-extensions/frne_nb.cpp
 )
-target_include_directories(frne PRIVATE
-    src/roboticstoolbox/core
+target_include_directories(_frne_c PRIVATE
+    src/roboticstoolbox/robot/cpp-extensions
 )
 
 # ---------------------------------------------------------------------------
-# fknm — forward kinematics, Jacobian, IK (C++ with Eigen + NumPy C API)
-# Eigen is vendored as header-only in src/roboticstoolbox/core/Eigen/
+# _fknm_c — forward kinematics, Jacobian, Hessian, IK
+# Eigen is vendored as header-only in src/roboticstoolbox/robot/cpp-extensions/Eigen/
+# fknm_nb.cpp is the nanobind glue; maths lives in methods/ik/linalg.
 # ---------------------------------------------------------------------------
-python_add_library(fknm MODULE WITH_SOABI
-    src/roboticstoolbox/core/methods.cpp
-    src/roboticstoolbox/core/ik.cpp
-    src/roboticstoolbox/core/linalg.cpp
-    src/roboticstoolbox/core/fknm.cpp
+nanobind_add_module(_fknm_c
+    src/roboticstoolbox/robot/cpp-extensions/methods.cpp
+    src/roboticstoolbox/robot/cpp-extensions/ik.cpp
+    src/roboticstoolbox/robot/cpp-extensions/linalg.cpp
+    src/roboticstoolbox/robot/cpp-extensions/fknm_nb.cpp
 )
-target_include_directories(fknm PRIVATE
-    src/roboticstoolbox/core
-    ${Python_NumPy_INCLUDE_DIRS}
+target_include_directories(_fknm_c PRIVATE
+    src/roboticstoolbox/robot/cpp-extensions
 )
 
-install(TARGETS frne fknm DESTINATION roboticstoolbox)
+install(TARGETS _frne_c _fknm_c DESTINATION roboticstoolbox)

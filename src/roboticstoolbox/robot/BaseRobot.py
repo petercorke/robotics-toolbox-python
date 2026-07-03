@@ -35,7 +35,7 @@ from ansitable import ANSITable, Column
 from spatialgeometry import SceneNode
 from roboticstoolbox.backends.Connector import Connector
 
-from roboticstoolbox.fknm import Robot_link_T
+from roboticstoolbox.robot.fknm import Robot_link_T
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link
@@ -159,7 +159,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self._configs = configs
 
         # A flag for watching dynamics properties
-        self._dynchanged = False
+        self._frne_stale = False
 
         # Set up qlim
         qlim = np.zeros((2, self.n))
@@ -380,11 +380,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`roboticstoolbox.Link._listen_dyn`
+        :func:`roboticstoolbox.Link._dirties_frne`
 
         """
 
-        self._dynchanged = True
+        self._frne_stale = True
         if what != "gravity":
             self._hasdynamics = True
 

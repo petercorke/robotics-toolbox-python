@@ -569,18 +569,18 @@ class TestETS(unittest.TestCase):
         r = l0 * l1 * l2 * l3 * l4 * l5 * l6 * ee
 
         r2 = l0 * l1 * l2 * l3 * l4 * l6 * ee
-        r2.insert(l5, 14)
+        r2.insert(14, l5)
 
         r3 = l0 * l1 * l2 * l3 * l4 * l5 * l6
-        r3.insert(ee)
+        r3.append(ee)
 
         r4 = l0 * l1 * l2 * l3 * l4 * l5 * l6
-        r4.insert(rtb.ET.tz(tool_offset))
-        r4.insert(rtb.ET.Rz(-np.pi / 4))
+        r4.append(rtb.ET.tz(tool_offset))
+        r4.append(rtb.ET.Rz(-np.pi / 4))
 
         r5 = l0 * l1 * l2 * l3 * l4 * l6 * ee
-        r5.insert(rtb.ET.Rx(90 * deg), 14)
-        r5.insert(rtb.ET.Rz(jindex=5), 15)
+        r5.insert(14, rtb.ET.Rx(90 * deg))
+        r5.insert(15, rtb.ET.Rz(jindex=5))
 
         nt.assert_almost_equal(r.eval(q), r2.eval(q))
         nt.assert_almost_equal(r.eval(q), r3.eval(q))
