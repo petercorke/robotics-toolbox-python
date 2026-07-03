@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Armer driver required arguments for sim and model -->
+  <arg name="xarm_dof" default="6" doc="The robot model based on degrees of freedom (dof) - default is 6 from [5, 6, 7]" />
+  <arg name="sim" default="false" />
+  <arg name="description_via_launch" default="true" doc="Method of description setup - default is true for launch, false for xacro path" />
+  <arg name="robot_description_launch" default="$(find xarm_description)/launch/xarm$(arg xarm_dof)_upload.launch" doc="Robot Description Launch File" />
+  <arg name="robot_description_path" default="$(find armer_xarm)/data/xacro/robots/xarm$(arg xarm_dof)/xarm$(arg xarm_dof).xacro" />
+
+  <!-- XArm ROS drivers required -->
+  <arg name="robot_ip" default="192.168.1.212" />
+  <arg name="report_type" default="normal" />	
+  <arg name="no_gui_plan" default="false" />
+  <arg name="xarm_hw_ns" default="xarm" />
+  <arg name="ext_ns" default="" />
+  <arg name="use_gripper_action" default="true" />
+  <arg name="velocity_control" default="true"/>
+  <arg name="enforce_limits" default="true" />
+  <arg name="baud_checkset" default="true" />
+	<arg name="default_gripper_baud" default="2000000" />
+
+  <!-- load robot model into parameter server (used by Armer) -->
+  <group if="$(arg description_via_launch)">
+    <include file="$(arg robot_description_launch)" />
+  </group>
+  <group unless="$(arg description_via_launch)">
+    <param name="robot_description" command="$(find xacro)/xacro $(arg robot_description_path)"/>
+  </group>
+
+  <!-- Physical Robot -->
+  <group unless="$(arg sim)">
+    <arg name="config" default="$(find armer_xarm)/cfg/xarm_$(arg xarm_dof)_real.yaml" />
+
+    <!-- common: bring up node to enable real xArm control -->
+    <include file="$(find xarm_bringup)/launch/xarm6_server.launch">
+      <arg name="robot_ip" value="$(arg robot_ip)" />
+      <arg name="report_type" value="$(arg report_type)" />
+      <arg name="use_moveit" value="false" />
+      <arg name="use_gripper_action" value="$(arg use_gripper_action)" />
+      <arg name="ns" value="$(arg xarm_hw_ns)" />
+      <arg name="velocity_control" value="$(arg velocity_control)" />
+      <arg name="enforce_limits" value="$(arg enforce_limits)" />
+      <arg name="baud_checkset" value="$(arg baud_checkset)" />
+      <arg name="default_gripper_baud" value="$(arg default_gripper_baud)" />
+    </include>
+
+    <group ns="xarm">
+      <!-- Launch the hardware interface node to communicate to the robot -->
+      <node pkg="xarm_controller" type="uf_ros_controller" name="xarm_controller_hw" output="screen">
+      </node>
+
+      <rosparam file="$(find armer_xarm)/cfg/xarm_$(arg xarm_dof)_hw_controllers.yaml" command="load"/>
+
+      <node pkg="controller_manager" type="spawner" name="started" ns="/xarm" args="joint_state_controller joint_group_velocity_controller"/>
+    </group>
+
+    <!-- Launch Armer Driver -->
+    <include file="$(find armer)/launch/armer.launch">
+        <arg name="config" value="$(arg config)" />
+    </include>
+    
+  </group>
+
+  <!-- Simulated Robot (Swift) for Use with RBT -->
+  <group if="$(arg sim)">
+    <arg name="config" default="$(find armer_xarm)/cfg/xarm_$(arg xarm_dof)_sim.yaml" />
+
+    <include file="$(find armer)/launch/armer.launch">
+        <arg name="config" value="$(arg config)" />
+    </include>
+  </group>
+
+</launch>

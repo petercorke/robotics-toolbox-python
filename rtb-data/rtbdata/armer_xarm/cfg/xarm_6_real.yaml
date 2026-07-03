@@ -1,0 +1,17 @@
+robots:
+  - name: arm
+    type: armer_xarm.robots.xArmROSRobot
+    model:
+      gripper: ee_control_link
+      qr: [-1.570796012878418, -0.663224995136261, -0.9075713157653809, 0.0, 1.570796012878418, -4.71238899230957]
+    joint_state_topic: /xarm/joint_states # default
+    joint_velocity_topic: /xarm/joint_group_velocity_controller/command # default
+    singularity_thresh: 0.01
+    frequency: 100
+backend: 
+  type: armer.backends.ROS.ROS
+publish_transforms: true
+#readonly_backends:
+# - type: roboticstoolbox.backends.swift.Swift
+logging: 
+  frequency: false

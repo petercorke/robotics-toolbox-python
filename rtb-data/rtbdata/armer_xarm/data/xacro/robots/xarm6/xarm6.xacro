@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<robot name="xarm6_urdf" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="xarm6_macro.xacro"/>
+  <xacro:xarm6_urdf prefix=""/>
+</robot>
