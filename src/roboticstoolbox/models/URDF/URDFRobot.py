@@ -11,7 +11,8 @@ Provides:
 
 from pathlib import Path
 import importlib
-from typing import TextIO, Union
+import warnings
+from typing import TextIO
 
 import numpy as np
 from spatialmath import SE3
@@ -45,6 +46,33 @@ def _register_rd_packages(urdf_path: Path) -> None:
             break
 
 
+def _load_rd_module(robot_name: str):
+    """Import the robot_descriptions submodule for ``robot_name``, trying the
+    current name first and falling back to older/newer naming schemes.
+
+    robot_descriptions has renamed some entries over time (e.g. ``ur5_description``
+    -> ``ur5_official_description``); trying alternates here means callers and
+    model classes don't need to track that migration themselves.
+    """
+    candidates = [f"{robot_name}_description", f"{robot_name}_official_description"]
+    last_error: ImportError | None = None
+    for candidate in candidates:
+        try:
+            with warnings.catch_warnings():
+                # Deprecation notices name "robot_descriptions" directly, which
+                # is an implementation detail users of roboticstoolbox never
+                # opted into seeing.
+                warnings.simplefilter("ignore", FutureWarning)
+                return importlib.import_module(f"robot_descriptions.{candidate}")
+        except ImportError as e:
+            last_error = e
+            continue
+    raise ValueError(
+        f"Robot model '{robot_name}' is not available. Check the spelling, or "
+        "that any optional dependency required for this model is installed."
+    ) from last_error
+
+
 def _load_urdf_from_RD(robot_name: str) -> Path:
     """Fetch the URDF/xacro path from robot_descriptions and register its packages.
 
@@ -55,10 +83,7 @@ def _load_urdf_from_RD(robot_name: str) -> Path:
                      (e.g. j2n6s200, ur5, kinova family)
     Both are passed to XacroDoc.from_file(), which handles either format.
     """
-    try:
-        module = importlib.import_module(f"robot_descriptions.{robot_name}_description")
-    except ImportError:
-        raise ValueError(f"Robot model '{robot_name}' not found in robot_descriptions.")
+    module = _load_rd_module(robot_name)
 
     if hasattr(module, "URDF_PATH"):
         urdf_path = Path(module.URDF_PATH)
