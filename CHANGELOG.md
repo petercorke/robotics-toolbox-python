@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.1](https://github.com/petercorke/robotics-toolbox-python/compare/v1.3.0...v1.3.1) (2026-07-03)
+
+Manual out-of-band release from the `v1.3.0` tag (not via release-please —
+`main` has since diverged with in-progress, breaking work). See
+`tech-debt.md` ("Release process: single-branch release-please + stacked
+PRs on a red `main`") for why.
+
+### Bug Fixes
+
+* **deps:** pin `rtb-data<2` to protect this release line from an upcoming
+  breaking `rtb-data` reorganisation (renamed/deleted model folders) that
+  will ship as `rtb-data` 2.0 alongside the next `roboticstoolbox-python`
+  major/minor release. Without this pin, any fresh `pip install
+  roboticstoolbox-python` would silently pick up the incompatible new
+  `rtb-data` and fail to load bundled robot models.
+
 ## [1.3.0](https://github.com/petercorke/robotics-toolbox-python/compare/v1.2.0...v1.3.0) (2026-06-14)
 
 
