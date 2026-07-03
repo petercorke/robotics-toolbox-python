@@ -1,0 +1,92 @@
+# Build and publish the rtb-data package (robot model/mesh data files).
+# Separate from release.yml (roboticstoolbox-python) since rtb-data is an
+# independently-versioned PyPI project, published infrequently — only when
+# rtb-data/ actually changes.
+#
+# Triggered by pushing a tag matching rtb-data-v* (e.g. rtb-data-v2.0.0), or
+# manually via workflow_dispatch. Uses OIDC trusted publishing — no stored
+# PyPI token required (trusted publisher must be registered on PyPI for the
+# rtb-data project: workflow release-rtb-data.yml, environment pypi).
+
+name: Release rtb-data
+
+on:
+  push:
+    tags:
+      - "rtb-data-v*"
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  verify_version:
+    name: Verify tag matches rtb-data package version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check version
+        # Skip check on manual workflow_dispatch runs (no tag exists)
+        if: github.event_name == 'push'
+        run: |
+          TAG="${GITHUB_REF_NAME#rtb-data-v}"
+          PKG=$(python3 -c "import tomllib; print(tomllib.load(open('rtb-data/pyproject.toml','rb'))['project']['version'])")
+          echo "Tag version : $TAG"
+          echo "Package version: $PKG"
+          [ "$TAG" = "$PKG" ] || { echo "ERROR: tag rtb-data-v$TAG does not match rtb-data/pyproject.toml version $PKG"; exit 1; }
+
+  build:
+    name: Build rtb-data sdist and wheel
+    needs: verify_version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Build
+        run: |
+          pip install build
+          python -m build --outdir dist rtb-data
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rtb-data-dist
+          path: dist/*
+
+  smoke_test:
+    name: Smoke-test wheel install
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: rtb-data-dist
+          path: dist
+
+      - name: Install and check
+        run: |
+          pip install dist/*.whl
+          python -c "import rtbdata, os; d = os.path.dirname(rtbdata.__file__); print('OK', d); assert os.path.isdir(os.path.join(d, 'xacro', 'qut_frankie_description')); assert os.path.isdir(os.path.join(d, 'xacro', 'unimation_puma560_description'))"
+
+  upload_pypi:
+    needs: smoke_test
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write # required for OIDC trusted publishing
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: rtb-data-dist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip_existing: true
