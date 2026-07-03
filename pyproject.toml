@@ -71,7 +71,7 @@ repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 swift = ["swift-sim>=1.0.0", "websockets"]
 
-collision = ["coal", "trimesh"]
+collision = ["coal; sys_platform != 'win32'", "trimesh"]
 
 qp = ["qpsolvers", "quadprog"]
 
@@ -80,7 +80,7 @@ all = [
     "websockets",
     "qpsolvers",
     "quadprog",
-    "coal",
+    "coal; sys_platform != 'win32'",
     "trimesh",
 ]
 
@@ -94,7 +94,7 @@ dev = [
     "quadprog",
     "bdsim",
     "ruff",
-    "coal",
+    "coal; sys_platform != 'win32'",
     "trimesh",
 ]
 

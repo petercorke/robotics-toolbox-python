@@ -415,3 +415,67 @@ release" regardless of whether anything in it moved. A GH Actions step
 
 would keep the two packages in sync without manual "did I remember to publish
 rtb-data" steps, while preserving the "infrequent, only-when-needed" intent.
+
+---
+
+## `intro.rst` still describes PyBullet as the collision backend
+
+### Background
+
+The Toolbox switched its collision backend from PyBullet to `coal`
+(pyproject.toml's `collision` extra is `["coal; sys_platform != 'win32'",
+"trimesh"]`), and README.md/docs/source/install.rst have been updated to
+match (2026-07-03). `docs/source/intro.rst`'s "Collision checking" section
+(around line 650) was missed — it still says checking is "dramatically
+improved... using [PyBullet]_" and carries a `[PyBullet]_` citation in the
+references list. This is prose adapted from the ICRA2021 paper, not a plain
+install matrix, so it wasn't rewritten opportunistically; it needs a
+deliberate pass to reword the narrative and swap/remove the citation.
+
+### Proposed fix
+
+Rewrite the "Collision checking" section to describe `coal` (GJK/EPA,
+`CollisionObject`/`BVHModelOBBRSS`, primitive shapes) instead of PyBullet,
+update or drop the `[PyBullet]_` reference, and add a one-line note that
+collision checking is unavailable on Windows via pip (see the `coal` Windows
+wheel gap noted below).
+
+---
+
+## `coal` has no Windows wheels on PyPI — collision checking is Linux/macOS-only via pip
+
+### Background
+
+`coal` (the actively-maintained FCL/hpp-fcl successor, used by Pinocchio)
+publishes wheels for Linux (manylinux) and macOS (incl. arm64) but not
+Windows, and its sdist can't build there either (needs `cmeel-assimp>=6.0.5`,
+unavailable for Windows on PyPI). This broke `pip install .[dev]` on Windows
+CI outright (coal was an unconditional `dev`/`all`/`collision` dependency).
+Fixed 2026-07-03 by marking `coal` `sys_platform != 'win32'` in
+pyproject.toml — Windows installs now succeed but simply don't get collision
+checking; `tests/__init__.py`'s `skip_no_collision_checking` marker and
+`CollisionShape.py`'s lazy `_require_coal()` already handle the missing-coal
+case gracefully at runtime.
+
+`coal` does have real Windows builds — just via conda-forge (confirmed:
+~56 win-64 builds of `coal-python`), not PyPI. So this isn't "coal doesn't
+work on Windows," it's "coal isn't pip-installable on Windows."
+
+### Options considered
+
+1. **(current)** No collision checking on Windows via pip; document
+   `conda install -c conda-forge coal-python` as a manual escape hatch.
+2. Add `python-fcl` (BerkeleyAutomation fork) as a Windows-specific backend —
+   it does publish win_amd64/macos-arm64/manylinux-aarch64 wheels on PyPI.
+   Not a drop-in: `CollisionShape.py` calls coal's API directly and
+   non-trivially (`BVHModelOBBRSS`, `CollisionObject`,
+   `DistanceRequest`/`DistanceResult`, `Cylinder`/`Sphere`/`Box`), so this
+   means writing and maintaining a second backend with a different API
+   shape and (likely) weaker performance — coal superseded python-fcl's
+   underlying library for a reason. Worth doing only if Windows collision
+   support becomes an actual blocker for someone, not preemptively.
+
+### Proposed fix
+
+None needed unless Windows collision-checking demand shows up — option 1 is
+the deliberate resting state, not a stopgap.
