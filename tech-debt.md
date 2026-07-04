@@ -191,6 +191,20 @@ fresh `DHLink` to a coal object, and remove or weak-ref that shared state.
 
 ## ETS / fknm / frne refactor
 
+### CI evidence this is currently broken (2026-07-04)
+
+Once the `rtb-data`/`coal`/`robot_descriptions` dependency issues were fixed
+(see elsewhere in this file), `main`'s CI surfaced a **Python-3.10-only**
+failure, reproducing on both Windows and macOS: `AttributeError: <class
+'roboticstoolbox.robot.ETS.ETS'> does not have the attribute 'ETS_jacob0'`
+(also `'ETS_jacobe'`, `'ETS_hessian0'`, `'ETS_hessiane'`) — 22-74 test
+failures per job depending on platform. Being Python-version-specific
+rather than OS-specific points at exactly the facade/fallback gap Phase 1
+below describes: the C extension likely isn't loading on 3.10 (build or
+ABI mismatch) and the pure-Python fallback attributes it's supposed to
+provide don't exist yet because Phase 1 hasn't been done. Not investigated
+further — needs a dedicated debugging pass, not a quick fix.
+
 ### Context
 
 `fknm.cpp` is a C++ extension (raw CPython API + Eigen) that accelerates FK,
@@ -554,3 +568,44 @@ avoid adding another moving part to an already-unstable `main`.
 
 `git mv rtb-data packages/rtb-data`, update `sdist.exclude`, land as its own
 small PR to `main`, independent of any release-process work in flight.
+
+---
+
+## `test_collision.py` doesn't consistently use `skip_no_collision_checking`
+
+### Background
+
+`tests/__init__.py` provides a `skip_no_collision_checking` marker
+specifically so collision tests degrade gracefully when `coal` isn't
+installed (e.g. Windows, per the `coal` Windows-wheel gap noted above).
+`test_ELink.py`, `test_ERobot.py`, and `test_Robot.py` use it correctly.
+`test_collision.py` itself does not (or not consistently) — on Windows CI
+(2026-07-04, once the `coal` install fix let Windows jobs reach the Test
+step at all) it produced 52 hard failures, all `ImportError: The 'coal'
+package is required for collision functionality`, instead of skips.
+
+### Proposed fix
+
+Audit `test_collision.py`'s test classes and apply `@skip_no_collision_checking`
+(or an equivalent module-level `pytestmark`) wherever a test exercises real
+collision geometry rather than the `collision=False` guard paths.
+
+---
+
+## Flaky numerical IK test: `test_IK_GN3`
+
+### Background
+
+Seen failing on `macos-latest, Python 3.12` CI (2026-07-04) only:
+`AssertionError: 1e-05 not greater than 0.05291452734038758` — a
+Gauss-Newton IK convergence tolerance check. Didn't reproduce on the same
+run's other platform/version combinations, so likely a genuine numerical
+flake (seed-dependent convergence, or platform BLAS/LAPACK differences)
+rather than a real regression. Not investigated further.
+
+### Proposed fix
+
+Watch for recurrence; if it keeps showing up, look at whether `test_IK_GN3`
+seeds its initial joint configuration deterministically and whether the
+tolerance is unreasonably tight for Gauss-Newton specifically (GN is known
+to converge less reliably than LM from some seeds).
