@@ -29,6 +29,8 @@ _mod = sys.modules["spatialgeometry.geom.CollisionShape"]
 
 from spatialgeometry.geom.CollisionShape import Sphere, Cuboid, Cylinder, Box
 
+from tests import skip_no_collision_checking
+
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -67,12 +69,14 @@ class TestEnvironmentGuards:
             with pytest.raises(ImportError, match="coal"):
                 _mod._require_coal()
 
+    @skip_no_collision_checking
     def test_coal_loads_on_demand(self):
         _reset_coal()
         assert _mod._coal is None
         _mod._require_coal()
         assert _mod._coal is not None
 
+    @skip_no_collision_checking
     def test_second_call_is_noop(self):
         """_require_coal() must not re-import on subsequent calls."""
         _mod._require_coal()
@@ -83,6 +87,7 @@ class TestEnvironmentGuards:
 
 # ── Sphere – Sphere ───────────────────────────────────────────────────────────
 
+@skip_no_collision_checking
 class TestSphereSphere:
     """Analytical ground truth: d = |c1 − c2| − r1 − r2."""
 
@@ -135,6 +140,7 @@ class TestSphereSphere:
 
 # ── Cuboid – Cuboid ───────────────────────────────────────────────────────────
 
+@skip_no_collision_checking
 class TestCuboidCuboid:
     """Unit cubes (1×1×1) extend ±0.5 along each axis from their centre."""
 
@@ -164,6 +170,7 @@ class TestCuboidCuboid:
 
 # ── Cylinder ──────────────────────────────────────────────────────────────────
 
+@skip_no_collision_checking
 class TestCylinder:
     def test_separated_radially(self):
         # two Z-axis cylinders, centres 3 apart along X, radius 0.5 each → gap 2.0
@@ -184,6 +191,7 @@ class TestCylinder:
 
 # ── Mixed shape pairs ─────────────────────────────────────────────────────────
 
+@skip_no_collision_checking
 class TestMixedPairs:
     def test_sphere_cuboid_separated(self):
         # sphere r=1 at origin; cuboid 1×1×1 at (3,0,0)
@@ -211,6 +219,7 @@ class TestMixedPairs:
 
 # ── iscollided ────────────────────────────────────────────────────────────────
 
+@skip_no_collision_checking
 class TestIsCollided:
     def test_separated_not_collided(self):
         assert not sphere_at(1.0).iscollided(sphere_at(1.0, x=5.0))
@@ -237,11 +246,13 @@ class TestIsCollided:
 # ── deprecation warnings ──────────────────────────────────────────────────────
 
 class TestDeprecation:
+    @skip_no_collision_checking
     def test_collided_warns(self):
         with pytest.warns(FutureWarning, match="iscollided"):
             result = sphere_at(1.0).collided(sphere_at(1.0, x=5.0))
         assert result is False
 
+    @skip_no_collision_checking
     def test_collided_result_matches_iscollided(self):
         s1, s2 = sphere_at(2.0), sphere_at(2.0, x=1.0)
         with pytest.warns(FutureWarning):
@@ -256,6 +267,7 @@ class TestDeprecation:
 
 # ── pose / world-frame transforms ─────────────────────────────────────────────
 
+@skip_no_collision_checking
 class TestPoseTransforms:
     def test_sphere_pose_at_construction(self):
         s1 = Sphere(1.0, pose=SE3(0, 0, 0))
@@ -284,6 +296,7 @@ class TestPoseTransforms:
 
 # ── collision=False guard ─────────────────────────────────────────────────────
 
+@skip_no_collision_checking
 class TestCollisionFalseGuard:
     def test_sphere_collision_false_raises(self):
         with pytest.raises(ValueError, match="collision=False"):
@@ -300,6 +313,7 @@ class TestCollisionFalseGuard:
 
 # ── return type / structure ───────────────────────────────────────────────────
 
+@skip_no_collision_checking
 class TestResultStructure:
     def test_returns_three_tuple(self):
         result = sphere_at(1.0).closest_point(sphere_at(1.0, x=5.0), inf_dist=BIG)
@@ -321,6 +335,7 @@ class TestResultStructure:
 
 # ── original test_closest chain (ported from spatialgeometry test suite) ──────
 
+@skip_no_collision_checking
 class TestClosestChain:
     """
     Mixed-type chain matching the analytical scenario from the original
@@ -402,6 +417,7 @@ class TestToDict:
 
 # ── _init_coal collision=False direct call ────────────────────────────────────
 
+@skip_no_collision_checking
 class TestInitCoalDirect:
     """Call _init_coal() directly, matching the pattern in the original suite."""
 
