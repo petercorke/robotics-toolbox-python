@@ -18,7 +18,7 @@ dependencies = [
     "scipy",
     "matplotlib",
     "ansitable",
-    "rtb-data",
+    "rtb-data>=2.0",
     "progress",
     "typing_extensions",
     "colored>2.0.0",
