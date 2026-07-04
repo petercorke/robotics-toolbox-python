@@ -98,9 +98,14 @@ Available options are:
 
 - `swift` install [Swift](https://github.com/jhavl/swift), a web-based visualizer
 - `qp` install quadratic-programming IK dependencies (`qpsolvers`, `quadprog`)
-- `bullet` install collision checking with [pybullet](https://pybullet.org)
-- `collision` alias of `bullet` (backward compatibility)
-- `all` install `swift`, `qp`, and `bullet`
+- `collision` install collision checking with [coal](https://github.com/coal-library/coal) and `trimesh`
+- `all` install `swift`, `qp`, and `collision`
+
+> **Windows note:** `coal` does not publish Windows wheels on PyPI, so the
+> `collision`/`all` extras skip it there and collision checking is
+> unavailable via `pip` on Windows. It's available via
+> `conda install -c conda-forge coal-python` if needed. Everything else in
+> the Toolbox works normally.
 
 Put the options in a comma separated list like
 
@@ -130,13 +135,13 @@ pip install roboticstoolbox-python[swift]
 pip install roboticstoolbox-python[qp]
 ```
 
-- Bullet collision dependencies only
+- Collision checking dependencies only
 
 ```shell script
-pip install roboticstoolbox-python[bullet]
+pip install roboticstoolbox-python[collision]
 ```
 
-- Everything (swift + qp + bullet)
+- Everything (swift + qp + collision)
 
 ```shell script
 pip install roboticstoolbox-python[all]
@@ -145,7 +150,7 @@ pip install roboticstoolbox-python[all]
 - Multiple extras explicitly
 
 ```shell script
-pip install roboticstoolbox-python[swift,qp,bullet]
+pip install roboticstoolbox-python[swift,qp,collision]
 ```
 
 ### From GitHub

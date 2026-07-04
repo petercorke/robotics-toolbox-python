@@ -415,3 +415,142 @@ release" regardless of whether anything in it moved. A GH Actions step
 
 would keep the two packages in sync without manual "did I remember to publish
 rtb-data" steps, while preserving the "infrequent, only-when-needed" intent.
+
+---
+
+## `intro.rst` still describes PyBullet as the collision backend
+
+### Background
+
+The Toolbox switched its collision backend from PyBullet to `coal`
+(pyproject.toml's `collision` extra is `["coal; sys_platform != 'win32'",
+"trimesh"]`), and README.md/docs/source/install.rst have been updated to
+match (2026-07-03). `docs/source/intro.rst`'s "Collision checking" section
+(around line 650) was missed — it still says checking is "dramatically
+improved... using [PyBullet]_" and carries a `[PyBullet]_` citation in the
+references list. This is prose adapted from the ICRA2021 paper, not a plain
+install matrix, so it wasn't rewritten opportunistically; it needs a
+deliberate pass to reword the narrative and swap/remove the citation.
+
+### Proposed fix
+
+Rewrite the "Collision checking" section to describe `coal` (GJK/EPA,
+`CollisionObject`/`BVHModelOBBRSS`, primitive shapes) instead of PyBullet,
+update or drop the `[PyBullet]_` reference, and add a one-line note that
+collision checking is unavailable on Windows via pip (see the `coal` Windows
+wheel gap noted below).
+
+---
+
+## `coal` has no Windows wheels on PyPI — collision checking is Linux/macOS-only via pip
+
+### Background
+
+`coal` (the actively-maintained FCL/hpp-fcl successor, used by Pinocchio)
+publishes wheels for Linux (manylinux) and macOS (incl. arm64) but not
+Windows, and its sdist can't build there either (needs `cmeel-assimp>=6.0.5`,
+unavailable for Windows on PyPI). This broke `pip install .[dev]` on Windows
+CI outright (coal was an unconditional `dev`/`all`/`collision` dependency).
+Fixed 2026-07-03 by marking `coal` `sys_platform != 'win32'` in
+pyproject.toml — Windows installs now succeed but simply don't get collision
+checking; `tests/__init__.py`'s `skip_no_collision_checking` marker and
+`CollisionShape.py`'s lazy `_require_coal()` already handle the missing-coal
+case gracefully at runtime.
+
+`coal` does have real Windows builds — just via conda-forge (confirmed:
+~56 win-64 builds of `coal-python`), not PyPI. So this isn't "coal doesn't
+work on Windows," it's "coal isn't pip-installable on Windows."
+
+### Options considered
+
+1. **(current)** No collision checking on Windows via pip; document
+   `conda install -c conda-forge coal-python` as a manual escape hatch.
+2. Add `python-fcl` (BerkeleyAutomation fork) as a Windows-specific backend —
+   it does publish win_amd64/macos-arm64/manylinux-aarch64 wheels on PyPI.
+   Not a drop-in: `CollisionShape.py` calls coal's API directly and
+   non-trivially (`BVHModelOBBRSS`, `CollisionObject`,
+   `DistanceRequest`/`DistanceResult`, `Cylinder`/`Sphere`/`Box`), so this
+   means writing and maintaining a second backend with a different API
+   shape and (likely) weaker performance — coal superseded python-fcl's
+   underlying library for a reason. Worth doing only if Windows collision
+   support becomes an actual blocker for someone, not preemptively.
+
+### Proposed fix
+
+None needed unless Windows collision-checking demand shows up — option 1 is
+the deliberate resting state, not a stopgap.
+
+---
+
+## Release process: single-branch release-please + stacked PRs on a red `main`
+
+### Background
+
+Two compounding problems made 2026-07 CI work much harder than it should
+have been:
+
+1. **release-please here only understands one linear history.** Its config
+   (`.github/release-please-config.json`) tracks a single package (`.` =
+   roboticstoolbox-python) off `main`'s tip — it has no concept of releasing
+   from an older point in history, and no concept of `rtb-data/` as a second
+   component (see the `rtb-data` publishing note above). The standing
+   `chore: release X.Y.Z` PR it maintains (#520 as of this writing) just
+   accumulates every conventional-commit merged to `main`, including
+   in-progress/breaking work — it's inert until merged, so leaving it alone
+   is always safe, but it also means release-please can't be the vehicle for
+   a small out-of-band fix once `main` has diverged from what's actually
+   releasable.
+2. **Multiple PRs were stacked on top of a `main` with red CI**, each trying
+   to fix a different symptom (Windows `coal` install failure, stale
+   `rtb-data` causing test failures, etc.) without `main` itself ever going
+   green first. Every PR branched from a broken base inherits that breakage,
+   so fixing the root cause in one PR doesn't unblock siblings that branched
+   before the fix landed — CI never went green across any of them, even
+   though each individual fix was correct in isolation.
+
+### Proposed fix / operating pattern
+
+- Land CI-health fixes directly against `main` as small, independent PRs —
+  don't stack feature/fix work on top of other unmerged fix PRs. Get `main`
+  green first, then resume feature branches from a clean base.
+- When a fix needs to ship for the *currently released* version but `main`
+  has moved on to in-progress/breaking work (see the rtb-data version-pin
+  case, 2026-07-03), release from the last good tag on a dedicated
+  maintenance branch (e.g. `maintenance/1.3.x` off `v1.3.0`), out-of-band
+  from release-please. This only works cleanly because the release pipeline
+  triggers off `release: created` (any tag), not off `main` — see
+  `.github/workflows/release.yml`.
+- Note there is **no approval gate** on the `pypi` deployment environment
+  (`protection_rules: []` — confirmed via the GitHub API 2026-07-03): once a
+  GitHub Release is created (or `release.yml` is run via
+  `workflow_dispatch`), a successful build publishes to PyPI immediately.
+  There is no dry-run; rehearse locally (`python -m build`, install into a
+  throwaway venv) before creating the real tag.
+- Longer term, fixing the rtb-data multi-package gap (see above) so
+  release-please manages both packages would remove the main reason for
+  doing out-of-band releases at all.
+
+---
+
+## Move `rtb-data/` into a `packages/` folder
+
+### Background
+
+`rtb-data/` currently sits at repo root alongside the main `roboticstoolbox`
+source tree, even though it's an independently-versioned, independently
+-published PyPI package. Only two files reference the path today
+(`pyproject.toml`'s `sdist.exclude`, and `rtb-data/pyproject.toml` itself),
+so the move is cheap. Worth doing since `GRAPHICS-BACKEND.md` and
+`SWIFT-MPL-SPLIT.md` both describe splitting graphics backends into further
+sub-packages — better to establish the `packages/` convention while there's
+one occupant than to reshuffle after two or three exist. Also sequences
+well with the rtb-data multi-package release-please config above: build
+that config against the new path from the start rather than writing it
+against `rtb-data/` and moving it later. Queued behind the 1.3.1
+maintenance release (2026-07-03) — deliberately not bundled with it, to
+avoid adding another moving part to an already-unstable `main`.
+
+### Proposed fix
+
+`git mv rtb-data packages/rtb-data`, update `sdist.exclude`, land as its own
+small PR to `main`, independent of any release-process work in flight.

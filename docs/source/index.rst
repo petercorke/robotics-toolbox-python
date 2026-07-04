@@ -11,6 +11,7 @@ Robotics Toolbox for Python
    :maxdepth: 2
 
    intro
+   install
    arm
    mobile
    blocks
