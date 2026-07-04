@@ -33,22 +33,6 @@ jobs:
       - name: Install package (core, no swift)
         run: pip install .[dev]
 
-      # Model tests (Panda, PR2, UR3/5/10, Jaco, ...) load URDFs via the
-      # robot_descriptions package, which does NOT bundle the actual asset
-      # data — on first use of a given model it lazily `git clone`s a large
-      # upstream asset repo (hundreds of files) straight into this cache dir.
-      # On a fresh runner that clone happens mid-test, competing with our
-      # own --timeout=50 per test, so it's slow and occasionally flaky.
-      # Caching the directory between runs means only the very first run
-      # after this step lands pays that cost; every run after restores
-      # instantly. Bump the "v1" suffix below to force a clean re-fetch if
-      # the cache ever ends up corrupted or stale.
-      - name: Cache robot_descriptions assets
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/robot_descriptions
-          key: robot-descriptions-v1-${{ runner.os }}
-
       - name: Test (core)
         run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
 
@@ -86,14 +70,6 @@ jobs:
       - name: Install package
         run: pip install .[dev]
 
-      # See the "Cache robot_descriptions assets" step in test-core above —
-      # same reasoning, this job hits the same lazily-cloned model data.
-      - name: Cache robot_descriptions assets
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/robot_descriptions
-          key: robot-descriptions-v1-${{ runner.os }}
-
       - name: Test
         run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
 
@@ -116,14 +92,6 @@ jobs:
 
       - name: Install package
         run: pip install .[dev]
-
-      # See the "Cache robot_descriptions assets" step in test-core above —
-      # same reasoning, this job hits the same lazily-cloned model data.
-      - name: Cache robot_descriptions assets
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/robot_descriptions
-          key: robot-descriptions-v1-${{ runner.os }}
 
       - name: Run coverage
         run: pytest tests/ --ignore=tests/test_blocks.py --cov=src/roboticstoolbox --cov-report=xml:coverage.xml -q

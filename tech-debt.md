@@ -609,3 +609,41 @@ Watch for recurrence; if it keeps showing up, look at whether `test_IK_GN3`
 seeds its initial joint configuration deterministically and whether the
 tolerance is unreasonably tight for Gauss-Newton specifically (GN is known
 to converge less reliably than LM from some seeds).
+
+---
+
+## Removed: `robot_descriptions` CI caching (was solving the wrong problem)
+
+### Background
+
+PR #530 (2026-07-03) added `actions/cache` steps for `~/.cache/robot_descriptions`
+to `ci.yml`'s `test-core`, `test`, and `coverage` jobs, reasoning that the
+package's lazy `git clone` of upstream asset repos was "slow and
+occasionally flaky" against the per-test `--timeout=50`. That diagnosis was
+wrong: `robot_descriptions` had never been added to `pyproject.toml` at all
+(see the "missing robot_descriptions dependency" fix, 2026-07-04) — every
+run hit `ModuleNotFoundError` immediately, before any clone was ever
+attempted. The caching apparatus was solving a plausible-sounding symptom
+of a problem that didn't exist yet. Removed 2026-07-04 rather than left in
+place now that the real fix has landed.
+
+Two independent reasons this wasn't worth keeping even setting the wrong
+-diagnosis issue aside: the cache key (`robot-descriptions-v1-${{
+runner.os }}`) is keyed only by OS, not Python version, while the `test`
+job's matrix is `os × python-version` — same-OS jobs run in parallel and
+all start cold, so within a single CI run it provided no benefit across
+the 4 Python versions per OS anyway; and the naming-fallback logic in
+`_load_rd_module` (`URDFRobot.py`) that keeps `robot_descriptions`'
+implementation-detail name out of user-facing errors is legitimate,
+separate, correct UX and was *not* removed — only the CI caching steps
+were part of the wrong-theory rabbit hole.
+
+### If CI timing/flakiness resurfaces
+
+Now that `robot_descriptions` is genuinely installed and genuinely
+git-clones on first use of models like YuMi/PR2/UR3/5/10/Jaco, real
+network-fetch time is incurred every run. If that turns out to matter in
+practice, re-add caching with a corrected key that includes
+`matrix.python-version` (or better, restructure so only one job per OS
+does the network fetch and others restore from it) — don't just restore
+this exact removed code.
