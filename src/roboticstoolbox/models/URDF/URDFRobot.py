@@ -46,6 +46,34 @@ def _register_rd_packages(urdf_path: Path) -> None:
             break
 
 
+_RD_URL = "https://github.com/robot-descriptions/robot_descriptions.py"
+
+
+def _rd_link() -> str:
+    """Render "robot_descriptions" as a clickable terminal hyperlink (OSC 8).
+
+    Terminals that don't understand OSC 8 just display the plain text, so
+    this degrades safely everywhere.
+    """
+    return f"\033]8;;{_RD_URL}\033\\robot_descriptions\033]8;;\033\\"
+
+
+def _find_rd_rename(robot_name: str, tried: list[str]) -> str | None:
+    """Look for another robot_descriptions entry for the same robot under a
+    name we didn't try, e.g. an alternate/newer naming convention.
+
+    Returns the matching name, or None if robot_descriptions has nothing
+    registered for ``robot_name`` at all.
+    """
+    import robot_descriptions
+
+    prefix = f"{robot_name}_"
+    for key in robot_descriptions.DESCRIPTIONS:
+        if key not in tried and key.startswith(prefix):
+            return key
+    return None
+
+
 def _load_rd_module(robot_name: str):
     """Import the robot_descriptions submodule for ``robot_name``, trying the
     current name first and falling back to older/newer naming schemes.
@@ -54,6 +82,13 @@ def _load_rd_module(robot_name: str):
     -> ``ur5_official_description``); trying alternates here means callers and
     model classes don't need to track that migration themselves.
     """
+    if "_mj_" in robot_name:
+        raise ValueError(
+            f"Toolbox uses {_rd_link()} to provide URDF robot models. The "
+            f'requested model named "{robot_name}" is a MuJoCo model not a '
+            "URDF model."
+        )
+
     candidates = [f"{robot_name}_description", f"{robot_name}_official_description"]
     last_error: ImportError | None = None
     for candidate in candidates:
@@ -67,9 +102,17 @@ def _load_rd_module(robot_name: str):
         except ImportError as e:
             last_error = e
             continue
+
+    renamed_to = _find_rd_rename(robot_name, candidates)
+    if renamed_to is not None:
+        raise ValueError(
+            f"Toolbox uses {_rd_link()} to provide URDF robot models. The "
+            f'requested model named "{robot_name}" is now named "{renamed_to}".'
+        ) from last_error
+
     raise ValueError(
-        f"Robot model '{robot_name}' is not available. Check the spelling, or "
-        "that any optional dependency required for this model is installed."
+        f"Toolbox uses {_rd_link()} to provide URDF robot models. The "
+        f'requested model named "{robot_name}" can not be found.'
     ) from last_error
 
 
