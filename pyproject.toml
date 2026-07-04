@@ -23,6 +23,7 @@ dependencies = [
     "typing_extensions",
     "colored>2.0.0",
     "xacrodoc",
+    "robot_descriptions",
 ]
 
 license = { file = "LICENSE" }
