@@ -82,6 +82,13 @@ def _load_rd_module(robot_name: str):
     -> ``ur5_official_description``); trying alternates here means callers and
     model classes don't need to track that migration themselves.
     """
+    if "_mj_" in robot_name:
+        raise ValueError(
+            f"Toolbox uses {_rd_link()} to provide URDF robot models. The "
+            f'requested model named "{robot_name}" is a MuJoCo model not a '
+            "URDF model."
+        )
+
     candidates = [f"{robot_name}_description", f"{robot_name}_official_description"]
     last_error: ImportError | None = None
     for candidate in candidates:
