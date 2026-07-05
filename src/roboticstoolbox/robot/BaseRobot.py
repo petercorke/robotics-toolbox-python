@@ -413,13 +413,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param i: link number or name
         :returns: i'th link or named link
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> print(robot[1]) # print the 2nd link
-        >>> print([link.a for link in robot])  # print all the a_j values
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> print(robot[1]) # print the 2nd link
+            >>> print([link.a for link in robot])  # print all the a_j values
 
         .. rubric:: Notes
 
@@ -573,12 +576,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Number of joints
 
         :returns: Number of joints
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.n
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.n
 
         See Also
         --------
@@ -598,13 +604,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         static links
 
         :returns: Number of links
+
         Examples
         --------
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.nlinks
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.nlinks
 
         See Also
         --------
@@ -624,13 +632,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         zero children
 
         :returns: number of branches in the robot's kinematic tree
+
         Examples
         --------
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.ETS.Panda()
-        >>> robot.nbranches
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.ETS.Panda()
+            >>> robot.nbranches
 
         See Also
         --------
@@ -711,13 +721,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Robot has dynamic parameters
         :returns: At least one link has associated dynamic parameters.
+
         Examples
         --------
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.hasdynamics:
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hasdynamics
 
         """
 
@@ -731,13 +743,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         At least one link has associated mesh to describe its shape.
 
         :returns: Robot has geometry model
+
         Examples
         --------
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.hasgeometry
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hasgeometry
 
         See Also
         --------
@@ -754,13 +768,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Robot has collision model
         :returns: At least one link has associated collision model.
+
         Examples
         --------
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.hascollision
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hascollision
 
         See Also
         --------
@@ -883,12 +899,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param qlim: An array of joints limits (2, n)
         :raises ValueError: unset limits for a prismatic joint
         :returns: Array of joint limit values
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.qlim
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.qlim
 
         """
 
@@ -941,14 +960,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         joint, and ``P`` for a prismatic joint.
 
         :returns: joint configuration string
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.structure
-        >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.structure
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.structure
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.structure
 
         .. rubric:: Notes
 
@@ -974,14 +996,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Revolute joints as bool array
 
         :returns: array of joint type, True if prismatic
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.prismaticjoints
-        >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.prismaticjoints
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.prismaticjoints
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.prismaticjoints
 
         .. rubric:: Notes
 
@@ -1003,14 +1028,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Revolute joints as bool array
 
         :returns: array of joint type, True if revolute
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.revolutejoints
-        >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.revolutejoints
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.revolutejoints
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.revolutejoints
 
         .. rubric:: Notes
 
@@ -1388,9 +1416,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :raises ValueError: a link does not belong to this ERobot
         :raises TypeError: a bad link argument
         :returns: elementary transform sequence
+
         Examples
         --------
+
         .. runblock:: pycon
+
             >>> import roboticstoolbox as rtb
             >>> panda = rtb.models.ETS.Panda()
             >>> panda.ets()
@@ -1514,13 +1545,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :returns: or prismatic joints, ie. prismatic joint values are not converted.
         :returns: If ``q`` is a matrix, with one column per joint, the conversion is
         :returns: performed columnwise.
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> from math import pi
-        >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])
+
+            >>> import roboticstoolbox as rtb
+            >>> from math import pi
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])
 
         """
 
@@ -1548,12 +1582,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param q: The joint configuration of the robot
         :returns: a vector of joint coordinates in radians and metres
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.toradians([10, 20, 2, 30, 40, 50])
+
+            >>> import roboticstoolbox as rtb
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.toradians([10, 20, 2, 30, 40, 50])
 
         """
 
@@ -1573,14 +1610,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Check if joint is revolute
 
         :returns: True if revolute
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.revolutejoints
-        >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.isrevolute(1)
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.revolutejoints
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.isrevolute(1)
 
         See Also
         --------
@@ -1595,14 +1635,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Check if joint is prismatic
 
         :returns: True if prismatic
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.prismaticjoints
-        >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.isprismatic(1)
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.prismaticjoints
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.isprismatic(1)
 
         See Also
         --------
@@ -1652,14 +1695,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param name: Name of the joint configuration
         :param q: Joint configuration
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
-        >>> robot.mypos
-        >>> robot.configs["mypos"]
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+            >>> robot.mypos
+            >>> robot.configs["mypos"]
 
         .. rubric:: Notes
 
@@ -1688,13 +1734,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param name: Name of the joint configuration
         :param q: Joint configuration
+
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
-        >>> robot.configs["mypos"]
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+            >>> robot.configs["mypos"]
 
         See Also
         --------
@@ -1748,11 +1797,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         The value for each joint is uniform randomly distributed  between the
         limits set for the robot.
 
-        Note
-        ----
+        .. rubric:: Notes
+
         The joint limit for all joints must be set.
 
         :returns: Random joint configuration :rtype: ndarray(n)
+
         See Also
         --------
         :func:`Robot.qlim`
@@ -1770,8 +1820,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Pretty print the robot link hierachy
 
         :returns: Pretty print of the robot model
+
         Examples
         --------
+
         Makes a robot and prints the heirachy
 
         .. runblock:: pycon
@@ -2069,19 +2121,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         ``robot.teach()`` as above except the robot's stored value of ``q``
         is used.
 
-        q
-            The joint configuration of the robot (Optional,
+        :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        block
-            Block operation of the code and keep the figure open
-        limits
-            Custom view limits for the plot. If not supplied will
+        :param block: Block operation of the code and keep the figure open
+        :param limits: Custom view limits for the plot. If not supplied will
             autoscale, [x1, x2, y1, y2, z1, z2]
-        vellipse
-            (Plot Option) Plot the velocity ellipse at the
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
             end-effector (this option is for 'pyplot' only)
-        fellipse
-            (Plot Option) Plot the force ellipse at the
+        :param fellipse: (Plot Option) Plot the force ellipse at the
             end-effector (this option is for 'pyplot' only)
 
         :returns: A reference to the PyPlot object which controls the matplotlib figure
@@ -2089,14 +2136,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         .. rubric:: Notes
 
         - Program execution is blocked until the teach window is
-            dismissed.  If ``block=False`` the method is non-blocking but
-            you need to poll the window manager to ensure that the window
-            remains responsive.
+          dismissed.  If ``block=False`` the method is non-blocking but
+          you need to poll the window manager to ensure that the window
+          remains responsive.
         - The slider limits are derived from the joint limit properties.
-            If not set then:
-            - For revolute joints they are assumed to be [-pi, +pi]
-            - For prismatic joint they are assumed unknown and an error
-              occurs.
+          If not set then:
+
+          - For revolute joints they are assumed to be [-pi, +pi]
+          - For prismatic joint they are assumed unknown and an error
+            occurs.
 
         """
 
@@ -2175,8 +2223,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param etsbox: Put the link ETS in a box, otherwise an edge label
         :param jtype: Arrowhead to node indicates revolute or prismatic type
         :param static: Show static joints in blue and bold
+
         Examples
         --------
+
         >>> import roboticstoolbox as rtb
         >>> panda = rtb.models.URDF.Panda()
         >>> panda.showgraph()
@@ -2221,35 +2271,39 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Write a link transform graph as a GraphViz dot file
 
-        The file can be processed using dot:
+        The file can be processed using dot::
+
             % dot -Tpng -o out.png dotfile.dot
 
         The nodes are:
-            - Base is shown as a grey square.  This is the world frame origin,
-              but can be changed using the ``base`` attribute of the robot.
-            - Link frames are indicated by circles
-            - ETS transforms are indicated by rounded boxes
+
+        - Base is shown as a grey square.  This is the world frame origin,
+          but can be changed using the ``base`` attribute of the robot.
+        - Link frames are indicated by circles
+        - ETS transforms are indicated by rounded boxes
 
         The edges are:
-            - an arrow if `jtype` is False or the joint is fixed
-            - an arrow with a round head if `jtype` is True and the joint is
-              revolute
-            - an arrow with a box head if `jtype` is True and the joint is
-              prismatic
+
+        - an arrow if `jtype` is False or the joint is fixed
+        - an arrow with a round head if `jtype` is True and the joint is
+          revolute
+        - an arrow with a box head if `jtype` is True and the joint is
+          prismatic
 
         Edge labels or nodes in blue have a fixed transformation to the
         preceding link.
 
-        Note
-        ----
+        .. rubric:: Notes
+
         If ``filename`` is a file object then the file will *not*
-            be closed after the GraphViz model is written.
+        be closed after the GraphViz model is written.
 
         :param file: Name of file to write to
         :param etsbox: Put the link ETS in a box, otherwise an edge label
         :param ets: Display the full ets with "full" or a brief version with "brief"
         :param jtype: Arrowhead to node indicates revolute or prismatic type
         :param static: Show static joints in blue and bold
+
         See Also
         --------
         :func:`showgraph`

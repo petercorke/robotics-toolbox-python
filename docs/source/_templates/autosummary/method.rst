@@ -1,7 +1,8 @@
 :orphan:
 
-{{ class + '.' + name | escape | underline}}
+{{ (class + '.' + name) | escape | underline}}
 
 .. currentmodule:: {{ module }}
 
 .. auto{{ objtype }}:: {{ fullname }}
+   :no-index:

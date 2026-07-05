@@ -683,3 +683,115 @@ handles the shadowing correctly on its own. Also worth a quick sweep for
 any other `sys.version_info`/Python-3.10-specific conditionals elsewhere in
 the codebase at that point, so 3.10 cleanup happens in one pass rather than
 piecemeal.
+
+---
+
+## Repeated `:returns:`/`:param:` field markers in `robot/*.py` docstrings
+
+### Background
+
+While fixing the "Field list ends without a blank line" Sphinx build warnings
+(2026-07-05 — a broken `Examples`/`.. runblock::` template pattern across
+`BaseRobot.py`, `ETS.py`, `Link.py`, `ET.py`, `Dynamics.py`, likely from the
+same refactor work already covered by the "ETS / fknm / frne refactor" entry
+above), several docstrings turned up with **repeated field markers** that
+don't actually trigger a Sphinx/docutils warning (repeated field names are
+silently accepted, not flagged) but are still wrong:
+
+- `BaseRobot.hasdynamics`/`hascollision`: two consecutive `:returns:` lines
+  (only one is really shown depending on renderer; the two sentences should
+  be merged into one field).
+- `BaseRobot.ets`: `:param :param start: ...` / `:param :param end: ...` —
+  a duplicated `:param` marker, plus a stray trailing colon after the
+  description.
+- `BaseRobot.todegrees`: **six** consecutive `:returns:` lines that are
+  clearly meant to be one multi-line description.
+- A `path`-returning method and a gripper/end-effector method with three
+  consecutive `:returns:` lines each.
+- `BaseRobot` (one of the `q`-random methods, ~line 1804):
+  `:returns: Random joint configuration :rtype: ndarray(n)` — `:rtype:`
+  crammed onto the same line as `:returns:` instead of being its own field.
+
+Left alone deliberately (2026-07-05) since fixing the actual build warnings
+was the scoped task — this is docstring *content* quality, not a build
+break, and merging multi-sentence explanations correctly needs a human
+read of intent rather than a mechanical script.
+
+### Proposed fix
+
+Sweep `robot/*.py` for `^\s*:returns:.*\n\s*:returns:` (and `:param:`)
+regex hits and manually merge each into a single well-formed field.
+
+---
+
+## `napoleon` + `sphinx_autodoc_typehints`: bare NumPy-style section headers conflict
+
+### Background
+
+While fixing Sphinx build warnings (2026-07-05), `BaseRobot.dotfile`'s
+docstring kept reporting "Explicit markup ends without a blank line" at a
+line that had nothing wrong with it by inspection. Root-caused via an
+isolated minimal Sphinx build (bisecting the extension list): the
+combination of `sphinx.ext.napoleon` + `sphinx_autodoc_typehints` conflicts
+when a docstring mixes bare NumPy-style section headers (`Note` underlined
+with `----`, recognized and reformatted by Napoleon's heuristics) with
+explicit reST fields (`:param:`, `:returns:`) and typehint injection from
+`sphinx_autodoc_typehints`. Neither extension alone reproduces it.
+
+Confirmed napoleon is still genuinely needed, not just historical baggage:
+`tools/urdf/utils.py` and `tools/urdf/urdf.py` have real NumPy-style
+`Parameters`/`Returns` docstrings (looks vendored/adapted from an external
+URDF library) that Napoleon actually converts. Everywhere else in the
+codebase (confirmed via grep) writes explicit reST fields directly and
+doesn't need Napoleon's conversion — but two `robot/BaseRobot.py` docstrings
+had a stray bare `Note` header mixed into otherwise-reST content, which is
+what triggered the conflict. Also found `napoleon_custom_sections =
+["Synopsis"]` in `conf.py` was dead config — nothing in the codebase uses a
+"Synopsis" section — removed.
+
+### Proposed fix
+
+Fixed the two known `Note` occurrences (now `.. rubric:: Notes`, matching
+the pattern already used elsewhere in the same file). If this warning
+resurfaces elsewhere, the fix is the same: replace the bare NumPy-style
+header with the equivalent explicit directive (`.. rubric:: Notes`,
+`.. warning::`, etc.) rather than relying on Napoleon to recognize it —
+don't touch `tools/urdf/*.py`, which needs Napoleon's real NumPy-style
+parsing left alone.
+
+---
+
+## Codebase is mid-migration from NumPy-style to reST-style docstrings
+
+### Background
+
+The `Note` header bug above is one instance of a broader pattern: this
+codebase has clearly moved from NumPy-style docstrings (bare underlined
+section headers — `Parameters`/`Returns`/`Notes`/`See Also`, each followed
+by a `----` underline) to explicit reST fields (`:param:`, `:returns:`,
+`:seealso:`), but the migration is incomplete. Checked 2026-07-05: the
+`:seealso:` field is used **202** times across the codebase — clearly the
+intended, current convention — but the vestigial bare `See Also`
+NumPy-style heading still appears **48** times across 6 files. Each one is
+a latent instance of the same Napoleon-heuristic-recognition risk that hit
+`BaseRobot.dotfile`/`random_q` (see above) — most haven't triggered a
+visible warning yet only because they haven't hit the right combination of
+circumstances, not because they're actually safe.
+
+The same is likely true for other NumPy-style section names (`Notes`,
+`Warning`, `Raises`, `Attributes`, `Examples`) wherever they appear as a
+bare underlined heading instead of the reST equivalent — this file only
+audited `Note`/`See Also` specifically because those are what broke the
+build this session. `tools/urdf/utils.py` and `tools/urdf/urdf.py` are the
+one confirmed exception: genuine vendored/adapted NumPy-style docstrings
+that Napoleon is correctly converting — don't touch those.
+
+### Proposed fix
+
+A future pass should grep for each NumPy-recognized bare section header
+(`^\s*(Notes?|Warnings?|Parameters|Returns|Raises|Yields|Attributes|Methods|References|See Also|Examples)\s*$`
+followed by a matching-length `-+` underline) outside `tools/urdf/`, and
+convert each to its reST equivalent (`:seealso:`, `.. rubric:: Notes`,
+`.. warning::`, etc.) — same treatment as this session's `Note` fixes,
+just systematically rather than one-off as each breaks the build.
+parsing left alone.

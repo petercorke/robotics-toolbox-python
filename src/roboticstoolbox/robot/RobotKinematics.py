@@ -695,15 +695,15 @@ class RobotKinematicsMixin:
 
         The return value ``sol`` is a tuple with elements:
 
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     int         whether a solution was found
         ``iterations``  int         total number of iterations
         ``searches``    int         total number of searches
         ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by
@@ -809,15 +809,15 @@ class RobotKinematicsMixin:
 
         The return value ``sol`` is a tuple with elements:
 
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     int         whether a solution was found
         ``iterations``  int         total number of iterations
         ``searches``    int         total number of searches
         ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by

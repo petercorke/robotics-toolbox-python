@@ -39,10 +39,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.dynamics()
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.dynamics()
 
         """
         unicode = rtb_get_param("unicode")
@@ -417,10 +419,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.accel(puma.qz, 0.5 * np.ones(6), np.zeros(6))
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.accel(puma.qz, 0.5 * np.ones(6), np.zeros(6))
 
         .. rubric:: Notes
 
@@ -667,10 +671,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.inertia(puma.qz)
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.inertia(puma.qz)
 
         .. rubric:: Notes
 
@@ -734,10 +740,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.coriolis(puma.qz, 0.5 * np.ones((6,)))
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.coriolis(puma.qz, 0.5 * np.ones((6,)))
 
         .. rubric:: Notes
 
@@ -828,10 +836,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.gravload(puma.qz)
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.gravload(puma.qz)
 
         """
 
@@ -898,10 +908,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.inertia_x(puma.qn)
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.inertia_x(puma.qn)
 
         .. rubric:: Notes
 
@@ -1016,10 +1028,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.coriolis_x(puma.qn, 0.5 * np.ones((6,)))
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.coriolis_x(puma.qn, 0.5 * np.ones((6,)))
 
         .. rubric:: Notes
 
@@ -1135,10 +1149,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.gravload_x(puma.qn)
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.gravload_x(puma.qn)
 
         .. rubric:: Notes
 
@@ -1321,10 +1337,12 @@ class DynamicsMixin:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.itorque(puma.qz, 0.5 * np.ones((6,)))
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.itorque(puma.qz, 0.5 * np.ones((6,)))
 
         .. rubric:: Notes
 

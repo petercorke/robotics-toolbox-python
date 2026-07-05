@@ -761,17 +761,15 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         Various measures are supported:
 
-        | Measure           |       Description                               |
-        | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
-        |                   | from singularity [Yoshikawa85]_                 |
-        | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
-        |                   | of the velocity ellipsoid [Klein87]_            |
-        | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
-        |                   | *distance*  from singularity [Klein87]_         |
-        | ``"asada"``       | Isotropy of the task-space acceleration         |
-        |                   | ellipsoid which is a function of the Cartesian  |
-        |                   | inertia matrix which depends on the inertial    |
-        |                   | parameters [Asada83]_                           |
+        - ``"yoshikawa"`` -- volume of the velocity ellipsoid, *distance*
+          from singularity [Yoshikawa85]_
+        - ``"invcondition"`` -- inverse condition number of Jacobian,
+          isotropy of the velocity ellipsoid [Klein87]_
+        - ``"minsingular"`` -- minimum singular value of the Jacobian,
+          *distance* from singularity [Klein87]_
+        - ``"asada"`` -- isotropy of the task-space acceleration ellipsoid
+          which is a function of the Cartesian inertia matrix which depends
+          on the inertial parameters [Asada83]_
 
         **Trajectory operation**:
 
@@ -804,8 +802,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
                 The International Journal of Robotics Research.
                 1987;6(2):72-83. doi:10.1177/027836498700600206
-        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
 
+        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
 
         .. versionchanged:: 1.0.3
             Removed 'both' option for axes, added a custom list option.

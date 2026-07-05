@@ -170,7 +170,14 @@ intersphinx_mapping = {
 # the documentation
 napoleon_include_special_with_doc = True
 
-napoleon_custom_sections = ["Synopsis"]
+# Napoleon is still needed: tools/urdf/utils.py and urdf.py have genuine
+# NumPy-style docstrings (vendored/adapted from an external URDF library)
+# that depend on it. Everywhere else uses explicit reST fields directly.
+# Bare NumPy-style section headers (Note, Examples, See Also, ...) mixed
+# into otherwise-reST docstrings should use explicit directives
+# (.. rubric:: Notes, etc.) instead — Napoleon's heuristic recognition of
+# those bare headers can conflict with sphinx_autodoc_typehints (see
+# tech-debt.md, 2026-07-05).
 
 # -------- Options AutoSummary -------------------------------------------------------#
 
@@ -187,11 +194,18 @@ rst_epilog = """
 # -------- Suppress common noisy warnings ----------------------------------------#
 
 # Suppress "more than one target found" for short/common attribute names like
-# n, m, robot, symbolic that appear across many classes, and suppress duplicate
-# object description warnings for classes documented both inline and in stubs.
+# n, m, robot, symbolic that appear across many classes, and duplicate-citation
+# warnings for references (e.g. Yoshikawa85) defined in both a narrative page
+# and a docstring pulled in from two classes.
+#
+# Note: "duplicate object description" (autodoc members documented both
+# inline and via a separate IK/stubs/ page) is a different warning class
+# with no type/subtype tag at all, so it can't be suppressed here — it's
+# fixed at the source instead, via :no-index: in
+# _templates/autosummary/method.rst.
 suppress_warnings = [
     "ref.python",  # ambiguous cross-references (multiple targets for 'n', 'm', etc.)
-    "duplicate",  # duplicate object descriptions (IKSolution, IKSolver defined twice)
+    "ref.citation",  # duplicate citations (Yoshikawa85 etc in both arm_*.rst and docstrings)
 ]
 
 # -------- Options favicon -------------------------------------------------------#
