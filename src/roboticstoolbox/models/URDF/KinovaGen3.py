@@ -31,7 +31,7 @@ class KinovaGen3(URDFRobot):
 
     def __init__(self):
         super().__init__(
-            "kortex_description/robots/gen3.xacro",
+            "gen3",
             manufacturer="Kinova",
             gripper_link_index=10,
         )

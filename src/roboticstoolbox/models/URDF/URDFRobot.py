@@ -116,7 +116,7 @@ def _load_rd_module(robot_name: str):
     ) from last_error
 
 
-def _load_urdf_from_RD(robot_name: str) -> Path:
+def _load_urdf_from_RD(robot_name: str) -> "tuple[Path, dict | None]":
     """Fetch the URDF/xacro path from robot_descriptions and register its packages.
 
     robot_descriptions models expose different path attributes depending on their
@@ -125,6 +125,13 @@ def _load_urdf_from_RD(robot_name: str) -> Path:
       - XACRO_PATH — a xacro source that must be processed by xacrodoc
                      (e.g. j2n6s200, ur5, kinova family)
     Both are passed to XacroDoc.from_file(), which handles either format.
+
+    Some xacro-based models also expose ``XACRO_ARGS`` — substitution
+    values required to compile the file at all (e.g. Kinova Gen3's
+    ``{"dof": "7"}``, which selects the 6dof/7dof arm variant; several UR
+    and xArm variants have the same pattern). Returned alongside the path
+    so the caller can forward them to xacrodoc as ``subargs`` — without
+    them, xacro fails on an unresolved ``$(arg ...)``/property reference.
     """
     module = _load_rd_module(robot_name)
 
@@ -138,7 +145,7 @@ def _load_urdf_from_RD(robot_name: str) -> Path:
             "URDF_PATH nor XACRO_PATH."
         )
     _register_rd_packages(urdf_path)
-    return urdf_path
+    return urdf_path, getattr(module, "XACRO_ARGS", None)
 
 
 def _parse_urdf(urdf_str: str):
@@ -272,17 +279,18 @@ def URDF_file(file: "str | Path | TextIO", model: "str | None" = None) -> tuple:
     pkg_map = {d.name: str(d) for d in xacro_root.iterdir() if d.is_dir()}
     packages.update_package_cache(pkg_map)
 
+    xacro_args = None
     if isinstance(file, str):
         file = Path(file)
         if file.suffix not in (".urdf", ".xacro"):
-            file = Path(_load_urdf_from_RD(str(file)))
+            file, xacro_args = _load_urdf_from_RD(str(file))
 
     resolved_path = None
     if isinstance(file, Path):
         if not file.is_absolute():
             file = xacro_root / file
         resolved_path = file
-        doc = XacroDoc.from_file(file)
+        doc = XacroDoc.from_file(file, subargs=xacro_args)
     else:
         doc = XacroDoc.from_string(file.read())
 
