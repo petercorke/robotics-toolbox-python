@@ -34,8 +34,8 @@ class Orion5(DHRobot):
       - Robot has only 4 DoF.
 
     :references:
-        - https://rawrobotics.com.au/orion5
-        - https://drive.google.com/file/d/0B6_9_-ZgiRdTNkVqMEkxN2RSc2c/view
+        - ``https://rawrobotics.com.au/orion5``
+        - ``https://drive.google.com/file/d/0B6_9_-ZgiRdTNkVqMEkxN2RSc2c/view``
 
     .. codeauthor:: Aditya Dua
     .. codeauthor:: Peter Corke

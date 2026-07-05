@@ -366,7 +366,6 @@ class ArmPlot(GraphicsBlock):
             - 0
             - ndarray(N)
             - :math:`\mathit{q}`, joint configuration
-        *   - Output
 
     Create a robot animation using the robot's ``plot`` method.
 

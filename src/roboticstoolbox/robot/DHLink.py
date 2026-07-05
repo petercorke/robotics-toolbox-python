@@ -724,6 +724,7 @@ class RevoluteDH(DHLink):
     The link transform is
     :math:`\underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
     where :math:`q_i` is the joint variable.
+
     :references:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
@@ -779,12 +780,14 @@ class PrismaticDH(DHLink):
     :type Tc: ndarray(2,)
     :param G: dynamic - gear ratio
     :type G: float
+
     A subclass of the DHLink class for a prismatic joint that holds all
     information related to a robot link such as kinematics parameters,
     rigid-body inertial parameters, motor and transmission parameters.
     The link transform is
     :math:`\mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
     where :math:`q_i` is the joint variable.
+
     :references:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 

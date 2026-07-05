@@ -15,10 +15,11 @@ class Puma560(Robot):
 
         - The model has different joint offset conventions compared to
           ``DH.Puma560()``. For this robot:
-            - Zero joint angles ``qz`` is the vertical configuration,
-              corresponding to ``qr`` with ``DH.Puma560()``
-            - ``qbent`` is the bent configuration, corresponding to
-              ``qz`` with ``DH.Puma560()``
+
+          - Zero joint angles ``qz`` is the vertical configuration,
+            corresponding to ``qr`` with ``DH.Puma560()``
+          - ``qbent`` is the bent configuration, corresponding to
+            ``qz`` with ``DH.Puma560()``
 
     :references:
         - "A Simple and Systematic Approach to Assigning Denavit–Hartenberg

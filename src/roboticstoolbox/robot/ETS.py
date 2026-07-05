@@ -134,18 +134,20 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz() * ET.tx(1) * ET.Rz()
-        >>> print(e[:2])
-        >>> print(e)
-        >>> print(e.__str__(""))
-        >>> print(e.__str__("θ{0}"))  # numbering from 0
-        >>> print(e.__str__("θ{1}"))  # numbering from 1
-        >>> # explicit joint indices
-        >>> e = ET.Rz(jindex=3) * ET.tx(1) * ET.Rz(jindex=4)
-        >>> print(e)
-        >>> print(e.__str__("θ{0}"))
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz()
+            >>> print(e[:2])
+            >>> print(e)
+            >>> print(e.__str__(""))
+            >>> print(e.__str__("θ{0}"))  # numbering from 0
+            >>> print(e.__str__("θ{1}"))  # numbering from 1
+            >>> # explicit joint indices
+            >>> e = ET.Rz(jindex=3) * ET.tx(1) * ET.Rz(jindex=4)
+            >>> print(e)
+            >>> print(e.__str__("θ{0}"))
 
         Angular parameters are converted to degrees, except if they
         are symbolic.
@@ -231,6 +233,7 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         In [1]: e
         Out [1]: R(q0) ⊕ tx(1) ⊕ R(q1) ⊕ tx(1)
 
@@ -247,10 +250,12 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-        >>> e.joint_idx()
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e.joint_idx()
 
         """
 
@@ -265,10 +270,12 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-        >>> e.joints()
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e.joints()
 
         """
 
@@ -283,10 +290,12 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
-        >>> e.jointset()
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
+            >>> e.jointset()
 
         """
 
@@ -302,10 +311,12 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
-        >>> e.jointset()
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
+            >>> e.jointset()
 
         """
 
@@ -330,10 +341,12 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot.qlim
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.qlim
 
         """
 
@@ -384,10 +397,12 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-        >>> e.structure
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e.structure
 
         """
 
@@ -407,10 +422,12 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rx() * ET.tx(1) * ET.tz()
-        >>> e.n
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rx() * ET.tx(1) * ET.tz()
+            >>> e.n
 
         See Also
         --------
@@ -432,10 +449,12 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rx() * ET.tx(1) * ET.tz()
-        >>> e.m
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rx() * ET.tx(1) * ET.tz()
+            >>> e.m
 
         """
 
@@ -508,11 +527,13 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz(jindex=2) * ET.tx(1) * ET.Rx(jindex=3,flip=True) * ET.tx(1)
-        >>> print(e)
-        >>> print(e.inv())
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz(jindex=2) * ET.tx(1) * ET.Rx(jindex=3,flip=True) * ET.tx(1)
+            >>> print(e)
+            >>> print(e.inv())
 
         .. rubric:: Notes
 
@@ -547,12 +568,14 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-        >>> e[0]
-        >>> e[1]
-        >>> e[1:3]
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e[0]
+            >>> e[1]
+            >>> e[1:3]
 
         """
         return self._data[i]  # can be [2] or slice, eg. [3:5]
@@ -601,12 +624,14 @@ class BaseETS(MutableSequence):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.Panda()
-        >>> ets = robot.ets()
-        >>> q = ets.random_q()
-        >>> q
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.Panda()
+            >>> ets = robot.ets()
+            >>> q = ets.random_q()
+            >>> q
 
         """
 
@@ -643,21 +668,23 @@ class ETS(BaseETS):
 
     Examples
     --------
+
     .. runblock:: pycon
-    >>> from roboticstoolbox import ETS, ET
-    >>> e = ET.Rz(0.3) # a single ET, rotation about z
-    >>> ets1 = ETS(e)
-    >>> len(ets1)
-    >>> ets2 = ET.Rz(0.3) * ET.tx(2) # an ETS
-    >>> len(ets2)                    # of length 2
-    >>> ets2[1]                      # an ET sliced from the ETS
+
+        >>> from roboticstoolbox import ETS, ET
+        >>> e = ET.Rz(0.3) # a single ET, rotation about z
+        >>> ets1 = ETS(e)
+        >>> len(ets1)
+        >>> ets2 = ET.Rz(0.3) * ET.tx(2) # an ETS
+        >>> len(ets2)                    # of length 2
+        >>> ets2[1]                      # an ET sliced from the ETS
 
     .. rubric:: References
 
     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
-        Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+      Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
-        Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+      Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
 
     See Also
@@ -760,12 +787,14 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.ETS.Panda()
-        >>> ets = robot.ets()
-        >>> ets
-        >>> ets.compile()
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.ETS.Panda()
+            >>> ets = robot.ets()
+            >>> ets
+            >>> ets.compile()
 
         See Also
         --------
@@ -812,12 +841,14 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-        >>> f = ET.Ry()
-        >>> e.insert(2, f)
-        >>> e
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> f = ET.Ry()
+            >>> e.insert(2, f)
+            >>> e
 
         """
 
@@ -854,6 +885,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example makes a ``panda`` robot object, gets the ets, and
         solves for the forward kinematics at the listed configuration.
 
@@ -915,10 +947,12 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda().ets()
-        >>> panda.eval([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.Panda().ets()
+            >>> panda.eval([0, -0.3, 0, -2.2, 0, 2, 0.7854])
 
         .. rubric:: Notes
 
@@ -956,6 +990,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example makes a ``Puma560`` robot object, and solves for the
         base-frame Jacobian at the zero joint angle configuration
 
@@ -1002,6 +1037,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example makes a ``Puma560`` robot object, and solves for the
         end-effector frame Jacobian at the zero joint angle configuration
 
@@ -1075,6 +1111,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example makes a ``Panda`` robot object, and solves for the
         base frame Hessian at the given joint angle configuration
 
@@ -1143,6 +1180,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example makes a ``Panda`` robot object, and solves for the
         end-effector frame Hessian at the given joint angle configuration
 
@@ -1191,6 +1229,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         Makes a robot object and computes the analytic Jacobian for the given
         joint configuration
 
@@ -1391,6 +1430,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example makes a ``Panda`` robot object, and solves for the
         base-effector frame 4th derivative of the forward kinematics at the given
         joint angle configuration
@@ -1648,6 +1688,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_LM` method.
@@ -1737,6 +1778,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ik_NR` method.
@@ -1840,6 +1882,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_GN` method.
@@ -1982,6 +2025,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_LM` method.
@@ -2090,6 +2134,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_NR` method.
@@ -2208,6 +2253,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_GN` method.
@@ -2366,6 +2412,7 @@ class ETS(BaseETS):
 
         Examples
         --------
+
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_QP` method.

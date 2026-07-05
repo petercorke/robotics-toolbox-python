@@ -273,12 +273,14 @@ class BaseLink(SceneNode, ABC):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import Link, ET
-        >>> link = Link( ET.tz(0.333) * ET.Rx(90, 'deg') * ET.Rz() )
-        >>> link.Ts
-        >>> link = Link( ET.Rz() )
-        >>> link.Ts
+
+            >>> from roboticstoolbox import Link, ET
+            >>> link = Link( ET.tz(0.333) * ET.Rx(90, 'deg') * ET.Rz() )
+            >>> link.Ts
+            >>> link = Link( ET.Rz() )
+            >>> link.Ts
 
         """
         return self._Ts
@@ -449,10 +451,12 @@ class BaseLink(SceneNode, ABC):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import Link, ET, ETS
-        >>> link = Link( ET.tz(0.333) * ET.Rx(90, 'deg') * ET.Rz() )
-        >>> print(link.v)
+
+            >>> from roboticstoolbox import Link, ET, ETS
+            >>> link = Link( ET.tz(0.333) * ET.Rx(90, 'deg') * ET.Rz() )
+            >>> print(link.v)
 
         """
         return self._v
@@ -594,10 +598,12 @@ class BaseLink(SceneNode, ABC):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> robot[1].hasdynamics
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot[1].hasdynamics
 
         """
         return self._hasdynamics
@@ -943,11 +949,13 @@ class BaseLink(SceneNode, ABC):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import models
-        >>> robot = models.URDF.Panda()
-        >>> robot[1].isjoint  # link with joint
-        >>> robot[8].isjoint  # static link
+
+            >>> from roboticstoolbox import models
+            >>> robot = models.URDF.Panda()
+            >>> robot[1].isjoint  # link with joint
+            >>> robot[8].isjoint  # static link
 
         """
 
@@ -1015,11 +1023,13 @@ class BaseLink(SceneNode, ABC):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import models
-        >>> robot = models.URDF.Panda()
-        >>> robot[0].parent  # base link has no parent
-        >>> robot[1].parent  # second link's parent
+
+            >>> from roboticstoolbox import models
+            >>> robot = models.URDF.Panda()
+            >>> robot[0].parent  # base link has no parent
+            >>> robot[1].parent  # second link's parent
 
         """
 
@@ -1156,11 +1166,13 @@ class BaseLink(SceneNode, ABC):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.Puma560()
-        >>> print(robot.links[2])        # kinematic parameters
-        >>> print(robot.links[2].dyn())  # dynamic parameters
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> print(robot.links[2])        # kinematic parameters
+            >>> print(robot.links[2].dyn())  # dynamic parameters
 
         :seealso: :func:`~dyntable`
         """

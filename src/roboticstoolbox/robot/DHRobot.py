@@ -1047,7 +1047,7 @@ class DHRobot(Robot):
 
         .. note::
             - Old behaviour is to return a list of ``n`` frames {1} to {n}, but
-              if ``old=False`` it returns ``n``+1 frames {0} to {n}, ie. it
+              if ``old=False`` it returns ``n`` + 1 frames {0} to {n}, ie. it
               includes the base frame.
             - The robot's base or tool transform, if present, are incorporated
               into the result.
@@ -1512,7 +1512,7 @@ class DHRobot(Robot):
 
         .. note::
             - This is a pure Python implementation and slower than the .rne()
-            which is written in C.
+              which is written in C.
             - This version supports symbolic model parameters
             - Verified against MATLAB code
 
@@ -1970,15 +1970,15 @@ class DHRobot(Robot):
         This method can be used for robots with any number of degrees of freedom.
         The return value ``sol`` is a tuple with elements:
 
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     int         whether a solution was found
         ``iterations``  int         total number of iterations
         ``searches``    int         total number of searches
         ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by
@@ -2021,8 +2021,7 @@ class DHRobot(Robot):
 
         .. note::
 
-            - See `Toolbox kinematics wiki page
-                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a Levenberg-Marquadt variable-damping solver.
             - The tolerance is computed on the norm of the error between
                 current and desired tool pose.  This norm is computed from
@@ -2075,15 +2074,15 @@ class DHRobot(Robot):
         This method can be used for robots with any number of degrees of freedom.
         The return value ``sol`` is a tuple with elements:
 
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     int         whether a solution was found
         ``iterations``  int         total number of iterations
         ``searches``    int         total number of searches
         ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by
@@ -2126,8 +2125,7 @@ class DHRobot(Robot):
 
         .. note::
 
-            - See `Toolbox kinematics wiki page
-                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a Levenberg-Marquadt variable-damping solver.
             - The tolerance is computed on the norm of the error between
                 current and desired tool pose.  This norm is computed from
@@ -2180,15 +2178,15 @@ class DHRobot(Robot):
         This method can be used for robots with any number of degrees of freedom.
         The return value ``sol`` is a tuple with elements:
 
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     int         whether a solution was found
         ``iterations``  int         total number of iterations
         ``searches``    int         total number of searches
         ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by
@@ -2231,8 +2229,7 @@ class DHRobot(Robot):
 
         .. note::
 
-            - See `Toolbox kinematics wiki page
-                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a Levenberg-Marquadt variable-damping solver.
             - The tolerance is computed on the norm of the error between
                 current and desired tool pose.  This norm is computed from
@@ -2286,15 +2283,15 @@ class DHRobot(Robot):
         This method can be used for robots with any number of degrees of freedom.
         The return value ``sol`` is a tuple with elements:
 
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     int         whether a solution was found
         ``iterations``  int         total number of iterations
         ``searches``    int         total number of searches
         ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by
@@ -2337,8 +2334,7 @@ class DHRobot(Robot):
 
         .. note::
 
-            - See `Toolbox kinematics wiki page
-                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a Levenberg-Marquadt variable-damping solver.
             - The tolerance is computed on the norm of the error between
                 current and desired tool pose.  This norm is computed from
@@ -2394,15 +2390,15 @@ class DHRobot(Robot):
         This method can be used for robots with any number of degrees of freedom.
         The return value ``sol`` is a tuple with elements:
 
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
         ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     int         whether a solution was found
         ``iterations``  int         total number of iterations
         ``searches``    int         total number of searches
         ``residual``    float       final value of cost function
-        ============    ==========  ===============================================
+        ==============  ==========  ===============================================
 
         If ``success == 0`` the ``q`` values will be valid numbers, but the
         solution will be in error.  The amount of error is indicated by
@@ -2445,8 +2441,7 @@ class DHRobot(Robot):
 
         .. note::
 
-            - See `Toolbox kinematics wiki page
-                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a Levenberg-Marquadt variable-damping solver.
             - The tolerance is computed on the norm of the error between
                 current and desired tool pose.  This norm is computed from

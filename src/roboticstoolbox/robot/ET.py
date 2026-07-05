@@ -266,14 +266,16 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tx(1)
-        >>> e.eta
-        >>> e = ET.Rx(90, 'deg')
-        >>> e.eta
-        >>> e = ET.ty()
-        >>> e.eta
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1)
+            >>> e.eta
+            >>> e = ET.Rx(90, 'deg')
+            >>> e.eta
+            >>> e = ET.ty()
+            >>> e.eta
 
         .. rubric:: Notes
 
@@ -312,12 +314,14 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tx(1)
-        >>> e.axis
-        >>> e = ET.Rx(90, 'deg')
-        >>> e.axis
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1)
+            >>> e.axis
+            >>> e = ET.Rx(90, 'deg')
+            >>> e.axis
 
         """
         return self._axis
@@ -332,12 +336,14 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tx(1)
-        >>> e.isjoint
-        >>> e = ET.tx()
-        >>> e.isjoint
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1)
+            >>> e.isjoint
+            >>> e = ET.tx()
+            >>> e.isjoint
 
         """
         return self._joint
@@ -355,12 +361,14 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tx()
-        >>> e.T(1)
-        >>> eflip = ET.tx(flip=True)
-        >>> eflip.T(1)
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx()
+            >>> e.T(1)
+            >>> eflip = ET.tx(flip=True)
+            >>> eflip.T(1)
 
         """
 
@@ -376,12 +384,14 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tx(1)
-        >>> e.isrotation
-        >>> e = ET.rx()
-        >>> e.isrotation
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1)
+            >>> e.isrotation
+            >>> e = ET.rx()
+            >>> e.isrotation
 
         """
 
@@ -397,12 +407,14 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tx(1)
-        >>> e.istranslation
-        >>> e = ET.rx()
-        >>> e.istranslation
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1)
+            >>> e.istranslation
+            >>> e = ET.rx()
+            >>> e.istranslation
 
         """
 
@@ -431,13 +443,15 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tx()
-        >>> print(e)
-        >>> e = ET.tx(j=3)
-        >>> print(e)
-        >>> print(e.jindex)
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx()
+            >>> print(e)
+            >>> e = ET.tx(j=3)
+            >>> print(e)
+            >>> print(e.jindex)
 
         """
 
@@ -482,11 +496,13 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.Rz(2.5)
-        >>> print(e)
-        >>> print(e.inv())
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz(2.5)
+            >>> print(e)
+            >>> print(e.inv())
 
         """  # noqa
 
@@ -514,12 +530,14 @@ class BaseET:
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> e = ET.tx(1)
-        >>> e.A()
-        >>> e = ET.tx()
-        >>> e.A(0.7)
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1)
+            >>> e.A()
+            >>> e = ET.tx()
+            >>> e.A(0.7)
 
         """
         try:
@@ -930,12 +948,14 @@ class ET2(BaseET):
 
         Examples
         --------
+
         .. runblock:: pycon
-        >>> from roboticstoolbox import ET2
-        >>> e = ET2.tx(1)
-        >>> e.A()
-        >>> e = ET2.tx()
-        >>> e.A(0.7)
+
+            >>> from roboticstoolbox import ET2
+            >>> e = ET2.tx(1)
+            >>> e.A()
+            >>> e = ET2.tx()
+            >>> e.A(0.7)
 
         """
 
