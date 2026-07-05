@@ -51,7 +51,7 @@ The design goals of this version can be summarised as new functionality:
 
 and improved software engineering:
 
-* Use Python 3 (3.6 and greater)
+* Use Python 3 (3.10 and greater)
 * Utilize WebGL and Javascript graphics technologies
 * Documentation in ReStructured Text using Sphinx and delivered via GitHub pages.
 * Hosted on GitHub with continuous integration using GitHub actions
@@ -241,7 +241,7 @@ Robotics Toolbox
 Robot models
 ^^^^^^^^^^^^
 
-The Toolbox ships with over 30 robot models, most of which are purely kinematic
+The Toolbox ships with over 50 robot models, most of which are purely kinematic
 but some have inertial and frictional parameters. Kinematic models can be
 specified in a variety of ways:  standard or modified Denavit-Hartenberg (DH,
 MDH) notation, as an ETS string [Corke07]_, as a rigid-body tree, or from a URDF
@@ -259,7 +259,7 @@ a list of link objects.  For example, a Puma560 is simply::
             RevoluteDH(alpha=pi/2),
             RevoluteDH(a=0.4318),
             RevoluteDH(d=0.15005, a=0.0203, alpha=-pi/2),
-            RevoluteDH(d=0.4318, alpha=pi/2)
+            RevoluteDH(d=0.4318, alpha=pi/2),
             RevoluteDH(alpha=-pi/2),
             RevoluteDH()
         ], name="Puma560")
@@ -282,7 +282,7 @@ The toolbox provides such definitions wrapped as class definitions, for example:
                         RevoluteDH(alpha=pi/2),
                         RevoluteDH(a=0.4318),
                         RevoluteDH(d=0.15005, a=0.0203, alpha=-pi/2),
-                        RevoluteDH(d=0.4318, alpha=pi/2)
+                        RevoluteDH(d=0.4318, alpha=pi/2),
                         RevoluteDH(alpha=-pi/2),
                         RevoluteDH()
                     ], name="Puma560"
@@ -458,32 +458,30 @@ function::
 Straight line (Cartesian) paths can be generated in a similar way between
 two points specified by a pair of poses in :math:`\SE{3}`
 
-.. .. runblock:: pycon
-..     :linenos:
+.. runblock:: pycon
+    :linenos:
 
-..     >>> import numpy as np
-..     >>> from spatialmath import SE3
-..     >>> import roboticstoolbox as rtb
-..     >>> puma = rtb.models.DH.Puma560()
-..     >>> t = np.arange(0, 2, 0.010)
-..     >>> T0 = SE3(0.6, -0.5, 0.0)
-..     >>> T1 = SE3(0.4, 0.5, 0.2)
-..     >>> Ts = rtb.tools.trajectory.ctraj(T0, T1, len(t))
-..     >>> len(Ts)
-..     >>> sol = puma.ikine_LM(Ts)       # named tuple of arrays
-..     >>> sol.q.shape
+    >>> import numpy as np
+    >>> from spatialmath import SE3
+    >>> import roboticstoolbox as rtb
+    >>> puma = rtb.models.DH.Puma560()
+    >>> t = np.arange(0, 2, 0.010)
+    >>> T0 = SE3(0.6, -0.5, 0.3)
+    >>> T1 = SE3(0.4, 0.5, 0.2)
+    >>> Ts = rtb.tools.trajectory.ctraj(T0, T1, len(t))
+    >>> len(Ts)
+    >>> sol = puma.ikine_LM(Ts, q0=puma.qn)
+    >>> sol.success
+    >>> sol.q.shape
 
-At line 9 we see that the resulting trajectory, ``Ts``, is an ``SE3`` instance with 200 values.
+At line 9 we see that the resulting trajectory, ``Ts``, is an ``SE3`` instance
+with 200 values.
 
-At line 11 we compute the inverse kinematics of each pose in the trajectory
-using a single call to the ``ikine_LM`` method.
-The result is a list of named tuples, which gives the IK success status for
-each time step.
-At line 12 we convert this into an array, with one row per time step, and each
-row is a joint coordinate.
-The starting 
-joint coordinates for each inverse kinematic solution
-is taken as the result of the solution at the previous time step.
+At line 10 we compute the inverse kinematics of the whole trajectory in a
+single call to ``ikine_LM``, seeded with the joint coordinates ``puma.qn``.
+Line 11 confirms the solve converged for every pose in the sequence, and at
+line 12 the per-step joint coordinates are returned as a single array, with
+one row per time step.
 
 
 Symbolic manipulation
@@ -651,10 +649,17 @@ Collision checking
 ^^^^^^^^^^^^^^^^^^
 
 RTB-M had a simple, contributed but unsupported, collision checking capability.
-This is dramatically improved in the Python version using [PyBullet]_
-which supports primitive shapes such as Cylinders, Spheres and Boxes as well as
-mesh objects. Every robot link can have a collision shape in addition to the shape
-used for rendering.  
+This is dramatically improved in the Python version using [coal]_, the actively
+maintained successor to FCL/hpp-fcl, which performs GJK/EPA-based distance and
+collision queries against primitive shapes such as Cylinders, Spheres and Boxes
+as well as mesh objects. Every robot link can have a collision shape in addition
+to the shape used for rendering.
+
+.. note:: ``coal`` publishes wheels for Linux and macOS; on Windows it is
+    installable via conda-forge (``conda install -c conda-forge coal-python``)
+    but not via pip, so collision checking is unavailable on a plain
+    ``pip install`` on Windows.
+
 We can conveniently perform collision checks between links as well as between
 whole robots, discrete links, and objects in the world. For example a :math:`1
 \times 1 \times 1` box centered at :math:`(1,0,0)` can be tested against all, or
@@ -668,11 +673,10 @@ just one link, of the robot by::
 
 Additionally, we can compute the minimum Euclidean distance between whole
 robots, discrete links, or objects.  Each distance is the length of a line
-segment defined by two points in the world frame
+segment defined by two points in the world frame::
 
-
->>> d, p1, p2 = panda.closest_point(obstacle)
->>> d, p1, p2 = panda.links[0].closest_point(obstacle)
+    >>> d, p1, p2 = panda.closest_point(obstacle)
+    >>> d, p1, p2 = panda.links[0].closest_point(obstacle)
 
 
 Interfaces
@@ -689,7 +693,7 @@ other robotics packages.
 
 By default the Toolbox behaves like the MATLAB version with a plot method::
 
->>> puma.plot(q)
+    >>> puma.plot(q)
 
 which will plot the robot at the specified joint configurmation, or animate it if ``q`` is an :math:`m \times 6` matrix, using
 the default ``PyPlot`` backend which draws a "noodle robot" using the PyPlot backend.
@@ -718,10 +722,9 @@ devices. Still frames and animations can be recorded.
 Code engineering
 ^^^^^^^^^^^^^^^^
 
-The code is implemented in Python :math:`\ge 3.6` and all code is hosted on GitHub and
+The code is implemented in Python :math:`\ge 3.10` and all code is hosted on GitHub and
 unit-testing is performed using GitHub-actions. Test coverage is uploaded to
-``codecov.io`` for visualization and trending, and we use ``lgtm.com`` to perform
-automated code review. The code is documented with ReStructured Text format
+``codecov.io`` for visualization and trending. The code is documented with ReStructured Text format
 docstrings which provides powerful markup including cross-referencing,
 equations, class inheritance diagrams and figures -- all of which is converted
 to HTML documentation whenever a change is pushed, and this is accessible via
@@ -752,17 +755,18 @@ Conclusion
 
 This article has introduced and demonstrated in tutorial form the principle
 features of the Robotics Toolbox for Python which runs on Mac, Windows and Linux
-using Python 3.6 or better. The code is free and open, and released under the
+using Python 3.10 or better. The code is free and open, and released under the
 MIT licence. It provides many of the essential tools necessary for robotic
 manipulator modelling, simulation and  control which is essential for robotics
 education  and research. It is familiar yet new, and we hope it will serve the
 community well for the next 25 years.
 
 A high-performance reactive motion controller, NEO, is based on this toolbox
-[neo]_. Currently under development are backend interfaces for CoppeliaSim,
-Dynamixel servo chains, and ROS; symbolic dynamics, simplification and code
-generation; mobile robotics motion models, planners, EKF localization, map
-making and SLAM; and a minimalist block-diagram simulation tool [bdsim]_.
+[neo]_. The Toolbox has since grown to include mobile robotics motion models,
+planners, EKF localization, map making and SLAM. Currently under development
+are backend interfaces for CoppeliaSim, Dynamixel servo chains, and ROS, and
+symbolic dynamics simplification/code generation; see also [bdsim]_, a
+complementary minimalist block-diagram simulation tool.
 
 References
 ==========
@@ -773,7 +777,7 @@ References
 .. [Featherstone87] R. Featherstone, Robot Dynamics Algorithms. Kluwer Academic, 1987.
 .. [Corke07] P. Corke, `“A simple and systematic approach to assigning Denavit- Hartenberg parameters,” IEEE transactions on robotics, vol. 23, no. 3, pp. 590–594, 2007, DOI 10.1109/TRO.2007.896765. <https://ieeexplore.ieee.org/document/4252158>`_.
 .. [Haviland20] `J. Haviland and P. Corke, “A systematic approach to computing the manipulator Jacobian and Hessian using the elementary transform sequence,” arXiv preprint, 2020. <https://arxiv.org/abs/2010.08696>`_
-.. [PyBullet] `PyBullet <https://pybullet.org/wordpress/>`_
+.. [coal] `coal: Collision detection And Lightweight <https://github.com/coal-library/coal>`_
 .. [SMTB-P] `Spatial Math Toolbox for Python <https://github.com/petercorke/spatialmath-python>`_
 .. [bdsim] `Block diagram simulator for Python <https://github.com/petercorke/bdsim>`_
 .. [neo] `NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators <https://jhavl.github.io/neo>`_
