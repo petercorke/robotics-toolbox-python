@@ -1725,7 +1725,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self._configs[name] = v
         setattr(self, name, v)
 
-    def addconfiguration(self, name: str, q: NDArray):
+    def addconfiguration(self, name: str, q: ArrayLike):
         """
         Add a named joint configuration
 
@@ -1751,7 +1751,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
-        self._configs[name] = q
+        self._configs[name] = np.array(getvector(q, self.n))
 
     def configurations_str(self, border="thin"):
         deg = 180 / np.pi
