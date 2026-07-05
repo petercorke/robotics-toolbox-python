@@ -58,7 +58,13 @@ class VehicleDriverBase(ABC):
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
         """
-        if hasattr(workspace, "workspace"):
+        if workspace is None:
+            # spatialmath.base.expand_dims(None) raises TypeError despite
+            # None being its own advertised default (see tech-debt.md in
+            # the spatialmath-python repo) — treat "no workspace" as None
+            # rather than relying on that default.
+            self._workspace = None
+        elif hasattr(workspace, "workspace"):
             # workspace can be defined by an object with a workspace attribute
             self._workspace = base.expand_dims(workspace.workspace)
         else:
