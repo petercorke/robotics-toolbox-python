@@ -647,3 +647,39 @@ practice, re-add caching with a corrected key that includes
 `matrix.python-version` (or better, restructure so only one job per OS
 does the network fetch and others restore from it) — don't just restore
 this exact removed code.
+
+---
+
+## Python-3.10-specific workaround: `sys.modules` lookup in `test_fknm_fallback.py`
+
+### Background
+
+`tests/test_fknm_fallback.py` (2026-07-05) has a `_ETS_module =
+sys.modules["roboticstoolbox.robot.ETS"]` workaround, with a long comment
+explaining why: `roboticstoolbox/robot/ETS.py` defines a class also called
+`ETS`, `robot/__init__.py`'s `from ...ETS import ETS` shadows the
+submodule of the same name on the `roboticstoolbox.robot` package, and
+Python 3.10's `unittest.mock` resolves dotted-string `patch()` targets via
+plain `getattr` (falling back to import only on `AttributeError`) — so it
+gets fooled by the shadowing and raises `AttributeError`. Python 3.11+
+rewrote this resolution to use `pkgutil.resolve_name`, which isn't fooled.
+Not a real code bug (the actual fknm/facade fallback machinery was always
+fine) — purely a Python-3.10 `unittest.mock` limitation the test had to
+work around.
+
+Python 3.10 reaches end-of-life in **October 2026** (per the official
+CPython release schedule). `pyproject.toml`'s `requires-python = ">=3.10"`
+and the module/class name collision in `ETS.py` aren't going anywhere on
+their own, but this specific workaround exists *only* because of 3.10's
+mock behavior.
+
+### Proposed fix
+
+When `requires-python` drops support for 3.10 (naturally, around/after its
+EOL), search for this specific workaround and simplify
+`test_fknm_fallback.py` back to plain `patch("roboticstoolbox.robot.ETS.ETS_fkine", ...)`
+-style dotted strings, since 3.11+'s `pkgutil.resolve_name`-based resolution
+handles the shadowing correctly on its own. Also worth a quick sweep for
+any other `sys.version_info`/Python-3.10-specific conditionals elsewhere in
+the codebase at that point, so 3.10 cleanup happens in one pass rather than
+piecemeal.
