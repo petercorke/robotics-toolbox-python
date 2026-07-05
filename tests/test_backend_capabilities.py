@@ -178,7 +178,7 @@ class TestBaseRobotNoModuleLevelMPLImport(unittest.TestCase):
             "robot",
             "BaseRobot.py",
         )
-        with open(os.path.normpath(base_robot_path)) as f:
+        with open(os.path.normpath(base_robot_path), encoding="utf-8") as f:
             source = f.read()
 
         tree = ast.parse(source)
@@ -231,7 +231,7 @@ class TestBaseRobotNoModuleLevelMPLImport(unittest.TestCase):
                 "BaseRobot.py",
             )
         )
-        with open(base_robot_path) as f:
+        with open(base_robot_path, encoding="utf-8") as f:
             source = f.read()
 
         tree = ast.parse(source)
@@ -257,7 +257,7 @@ class TestWebsocketsPin(unittest.TestCase):
         toml_path = os.path.normpath(
             os.path.join(os.path.dirname(__file__), "..", "pyproject.toml")
         )
-        with open(toml_path) as f:
+        with open(toml_path, encoding="utf-8") as f:
             content = f.read()
         self.assertNotIn(
             "websockets<11",
