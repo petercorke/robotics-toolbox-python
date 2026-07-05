@@ -683,3 +683,36 @@ handles the shadowing correctly on its own. Also worth a quick sweep for
 any other `sys.version_info`/Python-3.10-specific conditionals elsewhere in
 the codebase at that point, so 3.10 cleanup happens in one pass rather than
 piecemeal.
+
+## `roboticstoolbox.models.list()` shadows the builtin `list`
+
+### Background
+
+Found 2026-07-05 while fixing a stale `mtype=` kwarg in the docs
+(`arm_dh.rst`/`arm_erobot.rst` runblock examples called
+`rtb.models.list(mtype="DH")`, but the function's parameter had been
+renamed to `type` at some point without updating the docs).
+
+Two things stood out while looking at `src/roboticstoolbox/models/list.py`:
+
+1. The function itself is named `list`, shadowing the builtin `list`
+   within any scope that does `from roboticstoolbox.models.list import
+   list` or `import roboticstoolbox.models as models; models.list(...)`.
+   It's always called qualified (`rtb.models.list(...)`) in practice, so
+   this hasn't bitten anyone yet, but it's a landmine for future edits to
+   that file — reaching for `list(...)` to build an actual list inside the
+   function body would silently recurse/shadow instead of erroring.
+2. (Already fixed, see commit around 2026-07-05) one of its parameters was
+   named `type`, shadowing the builtin `type`. This has been renamed to
+   `mtype` — matching what the docs already (mistakenly, but presciently)
+   assumed the parameter was called — and all call sites (docs, tests)
+   updated to match.
+
+### Proposed fix
+
+Renaming the function itself (e.g. to `list_models`) would fix the
+remaining shadowing, but `list` is public API (`rtb.models.list`) and a
+rename is a breaking change for any external callers — deferred rather
+than done opportunistically. If/when a broader API-breaking pass happens
+on this module (or at the next major version bump), rename `list` to
+something that doesn't shadow a builtin.
