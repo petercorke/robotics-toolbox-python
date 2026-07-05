@@ -163,19 +163,6 @@ class TestModelSmoke(unittest.TestCase):
         # the "_support" suffix -- needs an rtb-data rename + republish.
         # See tech-debt.md, "rtb-data" section.
         ("URDF", "LBR"),
-        # The next four are already fixed on unmerged branches as of this
-        # writing (2026-07-05) -- remove once merged to main:
-        #   Valkyrie, Fetch: patched broken upstream robot_descriptions
-        #     files, PR #543.
-        #   KinovaGen3: migrated to robot_descriptions + XACRO_ARGS
-        #     support, PR #546.
-        #   FetchCamera: removed outright (unshippable, unused in RVC3),
-        #     PR #545 -- once merged it disappears from __all__ entirely
-        #     and this entry becomes a harmless no-op; delete it then.
-        ("URDF", "Valkyrie"),
-        ("URDF", "Fetch"),
-        ("URDF", "KinovaGen3"),
-        ("URDF", "FetchCamera"),
     }
 
     def test_all_models_construct(self):
