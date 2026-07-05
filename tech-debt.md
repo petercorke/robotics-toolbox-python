@@ -479,43 +479,56 @@ content.
 No xacro content needs editing. Requires an `rtb-data` release (can't be
 fixed from `roboticstoolbox-python` alone).
 
-### `Valkyrie` and `Fetch` already load via `robot_descriptions`, but the RD-supplied files are broken upstream
+### `Valkyrie` and `Fetch` load via `robot_descriptions`, whose supplied files are broken upstream — patched on the way in
 
-Found 2026-07-05 investigating the same sweep. Unlike LBR, `Valkyrie.py`
+Found 2026-07-05, fixed the same day. Unlike LBR, `Valkyrie.py`
 (`URDF_read("valkyrie")`) and `Fetch.py`
 (`super().__init__("fetch", ...)`) both pass a bare name with no
 `.urdf`/`.xacro` suffix, which `URDFRobot.py`'s `URDF_file()` already routes
 through `_load_urdf_from_RD()` — i.e. these do **not** use the bundled
-`rtb-data` tree at all, they're already on `robot_descriptions`. Both fail,
-but the root cause is upstream data, not the loading path:
+`rtb-data` tree at all, they're already on `robot_descriptions`. Both failed,
+but the root cause was upstream data, not the loading path:
 
-- **Valkyrie**: RD's `valkyrie_description` resolves to
-  `nasa-urdf-robots/val_description/model/robots/valkyrie_sim.urdf` (repo
-  `gkjohnson/nasa-urdf-robots`, commit `54cdeb1d`, 2020-11-14). Despite the
-  `.urdf` extension and RD listing it as `formats={URDF}`, the file still
-  declares `xmlns:xacro` and contains a live, unexpanded
+- **Valkyrie**: RD's `valkyrie_description` (robot_descriptions v2.0.0)
+  resolves to `nasa-urdf-robots/val_description/model/robots/valkyrie_sim.urdf`
+  (repo `gkjohnson/nasa-urdf-robots`, commit `54cdeb1d`, 2020-11-14). Despite
+  the `.urdf` extension and RD listing it as `formats={URDF}`, the file still
+  declared `xmlns:xacro` and contained a live, unexpanded
   `<xacro:v1_pelvis_sensors_usb .../>` macro call (line 2432) — it was never
   actually compiled. There are **zero `.xacro` files anywhere in the whole
-  cloned repo**, so the macro definition simply isn't present upstream —
-  this is an incompleteness in `gkjohnson/nasa-urdf-robots` itself.
-- **Fetch**: RD's `fetch_description` resolves to
-  `roboschool/roboschool/models_robot/fetch_description/robots/fetch.urdf`.
-  Line 655 has `<sensor:camera name="rgb">`, an XML element using the
-  `sensor:` namespace prefix, but the root `<robot name="fetch">` element
-  never declares `xmlns:sensor="..."` anywhere in the document — old
-  pre-SDF Gazebo camera-sensor syntax (ROS Fuerte/Groovy era, ~2012) that was
-  never well-formed XML. `xml.parsers.expat` correctly rejects it
+  cloned repo**, so the macro definition simply isn't present upstream — an
+  incompleteness in `gkjohnson/nasa-urdf-robots` itself.
+- **Fetch**: RD's `fetch_description` (robot_descriptions v2.0.0) resolves to
+  `roboschool/roboschool/models_robot/fetch_description/robots/fetch.urdf`
+  (repo `openai/roboschool`, commit `c8ee2812`). Line 655 had
+  `<sensor:camera name="rgb">`, an XML element using the `sensor:` namespace
+  prefix, but the root `<robot name="fetch">` element never declared
+  `xmlns:sensor="..."` anywhere in the document — old pre-SDF Gazebo
+  camera-sensor syntax (ROS Fuerte/Groovy era, ~2012) that was never
+  well-formed XML. `xml.parsers.expat` correctly rejected it
   (`unbound prefix`).
 
-Neither is fixable from this repo or from `rtb-data` — both are bugs/gaps in
-third-party source repos that `robot_descriptions` fetches verbatim.
+Neither was fixable upstream: `openai/roboschool` is **archived**
+(confirmed via GitHub API, `archived: true`, deprecated ~2023-04) so it
+can't take PRs at all; `gkjohnson/nasa-urdf-robots` isn't archived but
+"fixing" it would mean *inventing* a macro definition from scratch (no
+source of truth exists for what `v1_pelvis_sensors_usb` should actually
+contain), which isn't a responsible thing to submit upstream.
 
-**Proposed fix:** none available upstream-side. Options: (a) leave both
-models as known-broken (current state — document and move on), or (b) patch
-the fetched file post-load in `roboticstoolbox` (fragile: would need
-re-patching whenever RD's cache is cleared/re-fetched, and embeds
-upstream-repo-specific knowledge into our loading code). (a) is likely the
-right call unless someone actually needs these two models to work.
+**Fix applied:** Valkyrie is referenced in the RVC3 textbook, so a working
+model is required — not just optional cleanup. `Fetch` was equally easy to
+fix, so both were patched rather than one being deleted. Added an optional
+`patch: Callable[[str], str]` hook to `URDF_file`/`URDF_read`/
+`URDFRobot.__init__` (`URDFRobot.py`) that runs on the raw file text before
+xacro/XML processing. Each model defines a small local patch function
+(`_patch_valkyrie_urdf` in `Valkyrie.py`, `_patch_fetch_urdf` in `Fetch.py`)
+that surgically regex-strips the one broken element — both are
+Gazebo-simulation-only blocks (a sensor plugin macro call, a camera plugin
+config block respectively) with zero bearing on kinematics, dynamics, or
+geometry, so dropping them is safe. Each patch function's docstring records
+the exact robot_descriptions version and upstream commit it targets, so if
+either upstream repo is ever fixed, the regex simply stops matching (a
+no-op) and the patch can be confirmed-safe-to-delete.
 
 ### Docstrings for RD-loaded models don't credit/link `robot_descriptions`
 
