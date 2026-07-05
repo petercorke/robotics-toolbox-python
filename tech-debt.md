@@ -398,29 +398,31 @@ re-exports that expose `p_servo`/`angle_axis` at package scope.
 
 ---
 
-## `rtb-data` publishing is manual and has drifted from `main`
-
-### Background
+## `rtb-data`
 
 `rtb-data` is a separate PyPI package (data files: meshes, xacro/URDF sources,
-etc.) built from the `rtb-data/` subdirectory of this repo, but published
-independently — `roboticstoolbox-python`'s own release process
-(`release-please` + `release.yml`) knows nothing about it. As of 2026-07-03,
-`rtb-data/` on `main` had drifted well ahead of what's on PyPI (missing
+etc.) built from the `rtb-data/` subdirectory of this repo, published
+independently of `roboticstoolbox-python` itself. This section groups
+everything currently known to be wrong or incomplete about it.
+
+### Publishing is manual and has drifted from `main`
+
+`roboticstoolbox-python`'s own release process (`release-please` +
+`release.yml`) knows nothing about `rtb-data`. As of 2026-07-03, `rtb-data/`
+on `main` had drifted well ahead of what's on PyPI (missing
 `rtb-data/pyproject.toml` entirely at one point — see the "add missing
 rtb-data package config and data files" fix), and several `test_models.py`
-cases fail on CI as a direct result (xacro files the installed PyPI package
-doesn't have yet).
+cases failed on CI as a direct result (xacro files the installed PyPI package
+didn't have yet).
 
-### Proposed fix
-
-Automatically publish a new `rtb-data` release alongside `roboticstoolbox-python`'s
-own release, **but only if `rtb-data/` actually changed** since the last
-`rtb-data` publish. The whole point of `rtb-data` being a separate package is
-that it's large (meshes, STL/OBJ files) and should get pushed infrequently —
-don't turn this into "publish rtb-data on every roboticstoolbox-python
-release" regardless of whether anything in it moved. A GH Actions step
-(likely in `release.yml` or a new workflow, triggered the same way) that:
+**Proposed fix:** automatically publish a new `rtb-data` release alongside
+`roboticstoolbox-python`'s own release, **but only if `rtb-data/` actually
+changed** since the last `rtb-data` publish. The whole point of `rtb-data`
+being a separate package is that it's large (meshes, STL/OBJ files) and
+should get pushed infrequently — don't turn this into "publish rtb-data on
+every roboticstoolbox-python release" regardless of whether anything in it
+moved. A GH Actions step (likely in `release.yml` or a new workflow,
+triggered the same way) that:
 
 1. Diffs `rtb-data/` against the tree at the last `rtb-data` publish (tag or
    recorded commit SHA)
@@ -429,6 +431,129 @@ release" regardless of whether anything in it moved. A GH Actions step
 
 would keep the two packages in sync without manual "did I remember to publish
 rtb-data" steps, while preserving the "infrequent, only-when-needed" intent.
+
+### Move `rtb-data/` into a `packages/` folder
+
+`rtb-data/` currently sits at repo root alongside the main `roboticstoolbox`
+source tree, even though it's an independently-versioned, independently
+-published PyPI package. Only two files reference the path today
+(`pyproject.toml`'s `sdist.exclude`, and `rtb-data/pyproject.toml` itself),
+so the move is cheap. Worth doing since `GRAPHICS-BACKEND.md` and
+`SWIFT-MPL-SPLIT.md` both describe splitting graphics backends into further
+sub-packages — better to establish the `packages/` convention while there's
+one occupant than to reshuffle after two or three exist. Also sequences well
+with the publishing-automation fix above: build that config against the new
+path from the start rather than writing it against `rtb-data/` and moving it
+later. Queued behind the 1.3.1 maintenance release (2026-07-03) —
+deliberately not bundled with it, to avoid adding another moving part to an
+already-unstable `main`.
+
+**Proposed fix:** `git mv rtb-data packages/rtb-data`, update `sdist.exclude`,
+land as its own small PR to `main`, independent of any release-process work
+in flight.
+
+### Bundled xacro tree has a naming mismatch: `LBR` (Kuka)
+
+Found 2026-07-05 while investigating a runblock `unbound prefix`/`unknown
+macro`/`PackageNotFoundError` sweep. `LBR.py` loads
+`"kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro"` from the
+bundled `rtb-data` xacro tree (an explicit `.xacro` suffix path, so this
+doesn't go through `robot_descriptions` at all — see below). The xacro file
+itself does:
+
+```xml
+<xacro:include filename="$(find kuka_lbr_iiwa_support)/urdf/lbr_iiwa_14_r820_macro.xacro"/>
+```
+
+but the bundled directory is named `kuka_lbr_iiwa` (no `_support` suffix), so
+`$(find kuka_lbr_iiwa_support)` fails to resolve —
+`xacrodoc.packages.PackageNotFoundError: Package not found:
+kuka_lbr_iiwa_support`. `kuka_lbr_iiwa_support` is the real upstream ROS
+package name (confirmed against the actual macro file's own `$(find ...)`
+reference), so the bundled folder's name is simply wrong, not the xacro
+content.
+
+**Proposed fix:** rename the bundled directory
+`rtb-data/xacro/kuka_description/kuka_lbr_iiwa/` →
+`.../kuka_lbr_iiwa_support/` to match what the xacro file already expects.
+No xacro content needs editing. Requires an `rtb-data` release (can't be
+fixed from `roboticstoolbox-python` alone).
+
+### `Valkyrie` and `Fetch` load via `robot_descriptions`, whose supplied files are broken upstream — patched on the way in
+
+Found 2026-07-05, fixed the same day. Unlike LBR, `Valkyrie.py`
+(`URDF_read("valkyrie")`) and `Fetch.py`
+(`super().__init__("fetch", ...)`) both pass a bare name with no
+`.urdf`/`.xacro` suffix, which `URDFRobot.py`'s `URDF_file()` already routes
+through `_load_urdf_from_RD()` — i.e. these do **not** use the bundled
+`rtb-data` tree at all, they're already on `robot_descriptions`. Both failed,
+but the root cause was upstream data, not the loading path:
+
+- **Valkyrie**: RD's `valkyrie_description` (robot_descriptions v2.0.0)
+  resolves to `nasa-urdf-robots/val_description/model/robots/valkyrie_sim.urdf`
+  (repo `gkjohnson/nasa-urdf-robots`, commit `54cdeb1d`, 2020-11-14). Despite
+  the `.urdf` extension and RD listing it as `formats={URDF}`, the file still
+  declared `xmlns:xacro` and contained a live, unexpanded
+  `<xacro:v1_pelvis_sensors_usb .../>` macro call (line 2432) — it was never
+  actually compiled. There are **zero `.xacro` files anywhere in the whole
+  cloned repo**, so the macro definition simply isn't present upstream — an
+  incompleteness in `gkjohnson/nasa-urdf-robots` itself.
+- **Fetch**: RD's `fetch_description` (robot_descriptions v2.0.0) resolves to
+  `roboschool/roboschool/models_robot/fetch_description/robots/fetch.urdf`
+  (repo `openai/roboschool`, commit `c8ee2812`). Line 655 had
+  `<sensor:camera name="rgb">`, an XML element using the `sensor:` namespace
+  prefix, but the root `<robot name="fetch">` element never declared
+  `xmlns:sensor="..."` anywhere in the document — old pre-SDF Gazebo
+  camera-sensor syntax (ROS Fuerte/Groovy era, ~2012) that was never
+  well-formed XML. `xml.parsers.expat` correctly rejected it
+  (`unbound prefix`).
+
+Neither was fixable upstream: `openai/roboschool` is **archived**
+(confirmed via GitHub API, `archived: true`, deprecated ~2023-04) so it
+can't take PRs at all; `gkjohnson/nasa-urdf-robots` isn't archived but
+"fixing" it would mean *inventing* a macro definition from scratch (no
+source of truth exists for what `v1_pelvis_sensors_usb` should actually
+contain), which isn't a responsible thing to submit upstream.
+
+**Fix applied:** Valkyrie is referenced in the RVC3 textbook, so a working
+model is required — not just optional cleanup. `Fetch` was equally easy to
+fix, so both were patched rather than one being deleted. Added an optional
+`patch: Callable[[str], str]` hook to `URDF_file`/`URDF_read`/
+`URDFRobot.__init__` (`URDFRobot.py`) that runs on the raw file text before
+xacro/XML processing. Each model defines a small local patch function
+(`_patch_valkyrie_urdf` in `Valkyrie.py`, `_patch_fetch_urdf` in `Fetch.py`)
+that surgically regex-strips the one broken element — both are
+Gazebo-simulation-only blocks (a sensor plugin macro call, a camera plugin
+config block respectively) with zero bearing on kinematics, dynamics, or
+geometry, so dropping them is safe. Each patch function's docstring records
+the exact robot_descriptions version and upstream commit it targets, so if
+either upstream repo is ever fixed, the regex simply stops matching (a
+no-op) and the patch can be confirmed-safe-to-delete.
+
+### Docstrings for RD-loaded models don't credit/link `robot_descriptions`
+
+At least 8 model classes load via `robot_descriptions` under the hood
+(`Fetch`, `Frankie` (as `panda`), `Jaco`, `PR2`, `UR10`, `UR3`, `UR5`,
+`Valkyrie`, `YuMi` — found by scanning for bare-name, no-suffix arguments to
+`URDF_read`/`URDFRobot.__init__`), but none of their docstrings mention that
+the underlying model comes from `robot_descriptions` at all — a user reading
+e.g. `UR5`'s docstring has no way to know it's fetched from a third-party
+package (or to go find that package's own model listing/license/source
+repo).
+
+**Proposed fix:** add a line to each affected class docstring naming
+robot_descriptions as the source, with an anchor link to its GitHub repo,
+e.g.:
+
+```rst
+This model is provided by `robot_descriptions
+<https://github.com/robot-descriptions/robot_descriptions.py>`_.
+```
+
+Same URL already used for the clickable terminal hyperlink in
+`URDFRobot.py`'s error messages (`_RD_URL`) — worth a shared constant/snippet
+so the two don't drift. Mechanical, low-risk change across ~8 files; good
+candidate for a single small PR once the runblock-cleanup pass is done.
 
 ---
 
@@ -543,31 +668,6 @@ have been:
 - Longer term, fixing the rtb-data multi-package gap (see above) so
   release-please manages both packages would remove the main reason for
   doing out-of-band releases at all.
-
----
-
-## Move `rtb-data/` into a `packages/` folder
-
-### Background
-
-`rtb-data/` currently sits at repo root alongside the main `roboticstoolbox`
-source tree, even though it's an independently-versioned, independently
--published PyPI package. Only two files reference the path today
-(`pyproject.toml`'s `sdist.exclude`, and `rtb-data/pyproject.toml` itself),
-so the move is cheap. Worth doing since `GRAPHICS-BACKEND.md` and
-`SWIFT-MPL-SPLIT.md` both describe splitting graphics backends into further
-sub-packages — better to establish the `packages/` convention while there's
-one occupant than to reshuffle after two or three exist. Also sequences
-well with the rtb-data multi-package release-please config above: build
-that config against the new path from the start rather than writing it
-against `rtb-data/` and moving it later. Queued behind the 1.3.1
-maintenance release (2026-07-03) — deliberately not bundled with it, to
-avoid adding another moving part to an already-unstable `main`.
-
-### Proposed fix
-
-`git mv rtb-data packages/rtb-data`, update `sdist.exclude`, land as its own
-small PR to `main`, independent of any release-process work in flight.
 
 ---
 
@@ -794,4 +894,38 @@ followed by a matching-length `-+` underline) outside `tools/urdf/`, and
 convert each to its reST equivalent (`:seealso:`, `.. rubric:: Notes`,
 `.. warning::`, etc.) — same treatment as this session's `Note` fixes,
 just systematically rather than one-off as each breaks the build.
-parsing left alone.
+
+---
+
+## `roboticstoolbox.models.list()` shadows the builtin `list`
+
+### Background
+
+Found 2026-07-05 while fixing a stale `mtype=` kwarg in the docs
+(`arm_dh.rst`/`arm_erobot.rst` runblock examples called
+`rtb.models.list(mtype="DH")`, but the function's parameter had been
+renamed to `type` at some point without updating the docs).
+
+Two things stood out while looking at `src/roboticstoolbox/models/list.py`:
+
+1. The function itself is named `list`, shadowing the builtin `list`
+   within any scope that does `from roboticstoolbox.models.list import
+   list` or `import roboticstoolbox.models as models; models.list(...)`.
+   It's always called qualified (`rtb.models.list(...)`) in practice, so
+   this hasn't bitten anyone yet, but it's a landmine for future edits to
+   that file — reaching for `list(...)` to build an actual list inside the
+   function body would silently recurse/shadow instead of erroring.
+2. (Already fixed, see commit around 2026-07-05) one of its parameters was
+   named `type`, shadowing the builtin `type`. This has been renamed to
+   `mtype` — matching what the docs already (mistakenly, but presciently)
+   assumed the parameter was called — and all call sites (docs, tests)
+   updated to match.
+
+### Proposed fix
+
+Renaming the function itself (e.g. to `list_models`) would fix the
+remaining shadowing, but `list` is public API (`rtb.models.list`) and a
+rename is a breaking change for any external callers — deferred rather
+than done opportunistically. If/when a broader API-breaking pass happens
+on this module (or at the next major version bump), rename `list` to
+something that doesn't shadow a builtin.

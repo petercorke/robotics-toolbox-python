@@ -12,7 +12,7 @@ Provides:
 from pathlib import Path
 import importlib
 import warnings
-from typing import TextIO
+from typing import Callable, TextIO
 
 import numpy as np
 from spatialmath import SE3
@@ -116,7 +116,7 @@ def _load_rd_module(robot_name: str):
     ) from last_error
 
 
-def _load_urdf_from_RD(robot_name: str) -> Path:
+def _load_urdf_from_RD(robot_name: str) -> "tuple[Path, dict | None]":
     """Fetch the URDF/xacro path from robot_descriptions and register its packages.
 
     robot_descriptions models expose different path attributes depending on their
@@ -125,6 +125,13 @@ def _load_urdf_from_RD(robot_name: str) -> Path:
       - XACRO_PATH — a xacro source that must be processed by xacrodoc
                      (e.g. j2n6s200, ur5, kinova family)
     Both are passed to XacroDoc.from_file(), which handles either format.
+
+    Some xacro-based models also expose ``XACRO_ARGS`` — substitution
+    values required to compile the file at all (e.g. Kinova Gen3's
+    ``{"dof": "7"}``, which selects the 6dof/7dof arm variant; several UR
+    and xArm variants have the same pattern). Returned alongside the path
+    so the caller can forward them to xacrodoc as ``subargs`` — without
+    them, xacro fails on an unresolved ``$(arg ...)``/property reference.
     """
     module = _load_rd_module(robot_name)
 
@@ -138,7 +145,7 @@ def _load_urdf_from_RD(robot_name: str) -> Path:
             "URDF_PATH nor XACRO_PATH."
         )
     _register_rd_packages(urdf_path)
-    return urdf_path
+    return urdf_path, getattr(module, "XACRO_ARGS", None)
 
 
 def _parse_urdf(urdf_str: str):
@@ -258,13 +265,26 @@ def _parse_urdf(urdf_str: str):
     return elinks, urdf.name
 
 
-def URDF_file(file: "str | Path | TextIO", model: "str | None" = None) -> tuple:
+def URDF_file(
+    file: "str | Path | TextIO",
+    model: "str | None" = None,
+    patch: "Callable[[str], str] | None" = None,
+) -> tuple:
     """Parse a URDF or xacro file, return (elinks, name).
 
     ``file`` may be:
     - an absolute or relative path (str or Path) to a .urdf or .xacro file
     - a bare name with no suffix, looked up via robot_descriptions
     - a file-like object whose .read() gives the URDF XML
+
+    ``patch``, if given, is called with the raw file text and must return
+    the text to actually process. It runs *before* xacro processing/XML
+    parsing, so it can surgically correct known-broken third-party source
+    files (e.g. an upstream file with an unexpanded xacro macro that has no
+    definition anywhere in its own repo, or malformed XML) without touching
+    the upstream repo or the bundled `rtb-data` copy. See ``Valkyrie.py``
+    and ``Fetch.py`` for real examples — each documents exactly which
+    upstream bug its patch works around.
     """
     import rtbdata
 
@@ -272,31 +292,45 @@ def URDF_file(file: "str | Path | TextIO", model: "str | None" = None) -> tuple:
     pkg_map = {d.name: str(d) for d in xacro_root.iterdir() if d.is_dir()}
     packages.update_package_cache(pkg_map)
 
+    xacro_args = None
     if isinstance(file, str):
         file = Path(file)
         if file.suffix not in (".urdf", ".xacro"):
-            file = Path(_load_urdf_from_RD(str(file)))
+            file, xacro_args = _load_urdf_from_RD(str(file))
 
     resolved_path = None
     if isinstance(file, Path):
         if not file.is_absolute():
             file = xacro_root / file
         resolved_path = file
-        doc = XacroDoc.from_file(file)
+        if patch is not None:
+            # mirrors XacroDoc.from_file()'s own package-discovery step,
+            # since we bypass from_file() here to patch the text first
+            packages.walk_up_from(file)
+            doc = XacroDoc.from_string(
+                patch(file.read_text()), rootdir=file.parent, subargs=xacro_args
+            )
+        else:
+            doc = XacroDoc.from_file(file, subargs=xacro_args)
     else:
-        doc = XacroDoc.from_string(file.read())
+        text = file.read()
+        if patch is not None:
+            text = patch(text)
+        doc = XacroDoc.from_string(text)
 
     elinks, name = _parse_urdf(doc.to_urdf_string())
     return elinks, name, resolved_path
 
 
-def URDF_read(urdf_path: "str | Path") -> tuple:
+def URDF_read(
+    urdf_path: "str | Path", patch: "Callable[[str], str] | None" = None
+) -> tuple:
     """Load a URDF/xacro file, return (elinks, name, filepath).
 
     ``filepath`` is the resolved filesystem path that was loaded, or None if
-    the source was a file-like object.
+    the source was a file-like object. See ``URDF_file`` for ``patch``.
     """
-    return URDF_file(urdf_path)
+    return URDF_file(urdf_path, patch=patch)
 
 
 class URDFRobot(Robot):
@@ -320,9 +354,10 @@ class URDFRobot(Robot):
         urdf_path: "str | Path",
         manufacturer: str = "",
         gripper_link_index: "int | None" = None,
+        patch: "Callable[[str], str] | None" = None,
         **kwargs,
     ):
-        elinks, name, filepath = URDF_file(urdf_path)
+        elinks, name, filepath = URDF_file(urdf_path, patch=patch)
         if gripper_link_index is not None:
             kwargs["gripper_links"] = elinks[gripper_link_index]
         super().__init__(elinks, name=name, manufacturer=manufacturer, **kwargs)

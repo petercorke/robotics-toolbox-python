@@ -371,7 +371,7 @@ class VehicleBase(ABC):
 
             >>> from roboticstoolbox import Bicycle, RandomPath
             >>> bike = Bicycle()
-            >>> bike.control = RandomPath(10)
+            >>> bike.control = RandomPath(workspace=10)
             >>> print(bike)
 
         :seealso: :meth:`run` :meth:`eval_control` :obj:`scipy.interpolate.interp1d` :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
