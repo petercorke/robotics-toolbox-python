@@ -8,7 +8,7 @@ import inspect
 # import importlib
 
 
-def list(keywords=None, dof=None, type=None, border="thin"):
+def list(keywords=None, dof=None, mtype=None, border="thin"):
     """
     Display all robot models in summary form
 
@@ -16,13 +16,13 @@ def list(keywords=None, dof=None, type=None, border="thin"):
     :type keywords: tuple of str, optional
     :param dof: number of DoF to filter on, defaults to None
     :type dof: int, optional
-    :param type: model type "DH", "ETS", "URDF", defaults to all types
-    :type type: str, optional
+    :param mtype: model type "DH", "ETS", "URDF", defaults to all types
+    :type mtype: str, optional
 
     - ``list()`` displays a list of all models provided by the Toolbox.  It
       lists the name, manufacturer, model type, number of DoF, and keywords.
 
-    - ``list(type=MT)`` as above, but only displays models of type ``MT``
+    - ``list(mtype=MT)`` as above, but only displays models of type ``MT``
       where ``MT`` is one of "DH", "ETS" or "URDF".
 
     - ``list(keywords=KW)`` as above, but only displays models that have a
@@ -61,8 +61,8 @@ def list(keywords=None, dof=None, type=None, border="thin"):
             border=border,
         )
 
-        if type is not None:
-            categories = [type]
+        if mtype is not None:
+            categories = [mtype]
         else:
             categories = ["DH", "URDF", "ETS"]
         for category in categories:
