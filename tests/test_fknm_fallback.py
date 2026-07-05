@@ -13,6 +13,7 @@ Robot used: Franka Panda (7-DOF) for ETS functions; Puma560 (6-DOF DH) for rne.
 """
 
 import os
+import sys
 import timeit
 import unittest
 from contextlib import contextmanager
@@ -23,6 +24,24 @@ import numpy.testing as nt
 import sympy
 
 import roboticstoolbox as rtb
+# roboticstoolbox/robot/ETS.py defines a class also called ETS, and
+# roboticstoolbox/robot/__init__.py does `from ...ETS import ETS`, which
+# rebinds the "ETS" attribute on the roboticstoolbox.robot package to the
+# class, shadowing the submodule of the same name. `import a.b.c as x` is
+# defined as `import a.b.c; x = a.b.c` — that second step is still
+# attribute access, so it hits the same shadowing and also gives the
+# class, not the module. sys.modules[...] is a plain dict keyed by the
+# literal dotted string, with no getattr involved, so it's the only
+# reliably-correct way to get the real module object here.
+#
+# This only matters for patch() at all because Python 3.10's
+# unittest.mock resolves dotted string patch targets via plain getattr
+# (falling back to import only on AttributeError), so
+# patch("...ETS.ETS_fkine", ...) resolves "ETS" to the shadowing class
+# and fails with AttributeError; 3.11+ uses pkgutil.resolve_name and
+# isn't fooled. patch.object() against the real module (via sys.modules)
+# works on every version.
+_ETS_module = sys.modules["roboticstoolbox.robot.ETS"]
 from spatialmath import SE3
 
 
@@ -57,7 +76,7 @@ def _no_c_fkine():
     def _py(fknm, q, base, tool, include_base, _data=None):
         return _python_fkine(_data, q, base, tool, include_base)
 
-    with patch("roboticstoolbox.robot.ETS.ETS_fkine", new=_py):
+    with patch.object(_ETS_module, "ETS_fkine", new=_py):
         yield
 
 
@@ -69,7 +88,7 @@ def _no_c_jacob0():
     def _py(fknm, q, tool, _data=None, _n=None):
         return _python_jacob0(_data, _n, q, tool)
 
-    with patch("roboticstoolbox.robot.ETS.ETS_jacob0", new=_py):
+    with patch.object(_ETS_module, "ETS_jacob0", new=_py):
         yield
 
 
@@ -81,7 +100,7 @@ def _no_c_jacobe():
     def _py(fknm, q, tool, _data=None, _n=None):
         return _python_jacobe(_data, _n, q, tool)
 
-    with patch("roboticstoolbox.robot.ETS.ETS_jacobe", new=_py):
+    with patch.object(_ETS_module, "ETS_jacobe", new=_py):
         yield
 
 
@@ -101,7 +120,7 @@ def _no_c_hessian0():
             verifymatrix(J0, (6, _n))
         return _python_hessian(J0)
 
-    with patch("roboticstoolbox.robot.ETS.ETS_hessian0", new=_py):
+    with patch.object(_ETS_module, "ETS_hessian0", new=_py):
         yield
 
 
@@ -121,7 +140,7 @@ def _no_c_hessiane():
             verifymatrix(Je, (6, _n))
         return _python_hessian(Je)
 
-    with patch("roboticstoolbox.robot.ETS.ETS_hessiane", new=_py):
+    with patch.object(_ETS_module, "ETS_hessiane", new=_py):
         yield
 
 
