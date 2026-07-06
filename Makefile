@@ -47,7 +47,7 @@ dist: .FORCE
 	$(MAKE) test
 	python -m build
 
-PYODIDE_BUILD ?= cp313-*
+PYODIDE_BUILD ?= cp312-*
 
 wheel-pyodide: .FORCE
 	@echo "Building Pyodide wheel with selector $(PYODIDE_BUILD)"
@@ -61,7 +61,7 @@ wheel-pyodide: .FORCE
 	@$(MAKE) wheel-pyodide-check
 
 wheel-pyodide-check: .FORCE
-	@wheel=$$(ls -1 dist/*cp313-cp313*wasm32*.whl 2>/dev/null | head -n 1); \
+	@wheel=$$(ls -1 dist/*cp312-cp312*wasm32*.whl 2>/dev/null | head -n 1); \
 	if [ -z "$$wheel" ]; then \
 		wheel=$$(ls -1 dist/*wasm32*.whl 2>/dev/null | head -n 1); \
 	fi; \
@@ -72,15 +72,15 @@ wheel-pyodide-check: .FORCE
 	name=$$(basename "$$wheel"); \
 	echo "Built wheel: $$name"; \
 	echo "Path: $$wheel"; \
-	if ! echo "$$name" | grep -Eq "cp313-cp313-.*wasm32[.]whl$$"; then \
-		echo "Wheel tag check failed: expected cp313-cp313 and wasm32 in filename."; \
+	if ! echo "$$name" | grep -Eq "cp312-cp312-.*wasm32[.]whl$$"; then \
+		echo "Wheel tag check failed: expected cp312-cp312 and wasm32 in filename."; \
 		exit 1; \
 	fi; \
 	if ! echo "$$name" | grep -Eq "pyemscripten_[0-9]+_[0-9]+" && ! echo "$$name" | grep -Eq "pyodide_[0-9]+_[0-9]+"; then \
 		echo "Wheel tag check failed: expected pyemscripten_<major>_<minor> or pyodide_<major>_<minor> tag in filename."; \
 		exit 1; \
 	fi; \
-	echo "Wheel tags look compatible with current cp313 runtime contract."
+	echo "Wheel tags look compatible with current cp312 runtime contract."
 
 
 clean: .FORCE

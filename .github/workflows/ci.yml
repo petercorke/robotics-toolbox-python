@@ -129,6 +129,73 @@ jobs:
           cd docs && make SPHINXOPTS="--keep-going" html
           touch build/html/.nojekyll
 
+      - name: Fetch pyodide wheel for JupyterLite
+        # A plain `pip wheel`/`build` here would produce a native
+        # macOS/Linux wheel with the compiled _fknm_c/_frne_c extensions --
+        # useless in Pyodide (WASM). release.yml already cross-compiles a
+        # genuine wasm32 wheel via cibuildwheel (CIBW_PLATFORM=pyodide) and
+        # attaches it to each GitHub Release (PyPI rejects the pyodide_*
+        # platform tag), so reuse that rather than rebuilding here. This
+        # means the "Try it Now" experience tracks the latest release, not
+        # bleeding-edge main -- deliberate, since a full Pyodide/Emscripten
+        # rebuild on every docs push would be slow.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p docs/lite/pypi
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern '*pyodide*' --dir docs/lite/pypi --clobber
+
+      - name: Sync notebooks into JupyterLite content
+        # Copies *.ipynb plus any local asset directories (e.g.
+        # docs/notebooks/figs/, referenced by relative path from markdown
+        # cells) -- but not the Makefile-generated *.py script conversions
+        # or other loose files. ik_benchmark.ipynb is excluded deliberately:
+        # it benchmarks numeric IK solver performance and uses the
+        # websocket-based Swift visualizer, neither of which is meaningful
+        # or functional inside the Pyodide sandbox -- it stays Colab-only.
+        run: |
+          mkdir -p docs/lite/files
+          rsync -a --exclude '.ipynb_checkpoints' --exclude '__pycache__' \
+            --exclude 'Untitled*.ipynb' --exclude '*.py' --exclude 'Makefile' \
+            --exclude 'ik_benchmark.ipynb' \
+            docs/notebooks/ docs/lite/files/
+
+      - name: Adapt staged notebooks for JupyterLite
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("docs/lite/files")
+          for nb_path in root.rglob("*.ipynb"):
+              with nb_path.open("r", encoding="utf-8") as f:
+                  nb = json.load(f)
+
+              meta = nb.setdefault("metadata", {})
+              meta["kernelspec"] = {
+                  "name": "python",
+                  "display_name": "Python (Pyodide)",
+                  "language": "python",
+              }
+              meta.setdefault("language_info", {})
+              meta["language_info"]["name"] = "python"
+
+              with nb_path.open("w", encoding="utf-8") as f:
+                  json.dump(nb, f, indent=1)
+                  f.write("\n")
+          PY
+
+      - name: Build JupyterLite site
+        # jupyterlite-pyodide-kernel is pinned deliberately: newer versions
+        # bundle a newer Pyodide runtime than the cp312 wasm wheel attached
+        # to releases targets, which manifests as a silent hang in the
+        # browser (no error, just a kernel that never responds) rather than
+        # a build-time failure. See toolbox-infrastructure.md for the full
+        # version-skew story before bumping this.
+        run: |
+          pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server
+          cd docs/lite && jupyter lite build --output-dir ../build/html/lite
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
