@@ -929,3 +929,74 @@ rename is a breaking change for any external callers — deferred rather
 than done opportunistically. If/when a broader API-breaking pass happens
 on this module (or at the next major version bump), rename `list` to
 something that doesn't shadow a builtin.
+
+---
+
+## `_fknm_c` (nanobind) leaks `_ETObj`/`_ETSObj` when created from a background thread
+
+### Background
+
+Found 2026-07-06 while investigating a `KeyboardInterrupt` traceback from
+`examples/plot_swift.py` (unrelated Swift fix), which ended in:
+
+```
+nanobind: leaked 32 instances!
+ - leaked instance 0x... of type "roboticstoolbox._fknm_c._ETObj"
+ - leaked instance 0x... of type "roboticstoolbox._fknm_c._ETSObj"
+nanobind: leaked 2 types!
+nanobind: leaked 17 functions!
+nanobind: this is likely caused by a reference counting issue in the binding code.
+See https://nanobind.readthedocs.io/en/latest/refleaks.html
+```
+
+This is nanobind's built-in reference-leak detector, printed at
+interpreter shutdown when C++-bound objects from `_fknm_c` (`_ETObj`,
+`_ETSObj` — the compiled ETS/element representations behind `fkine`,
+`jacob0`, etc.) are still alive. Confirmed via direct testing:
+
+- **Not new, and not specific to Ctrl+C or Swift.** The identical message
+  appears on a completely normal, successful `docs && make html` build
+  (Sphinx's autodoc/runblock machinery constructs many robot models while
+  importing modules) — nothing to do with signal handling.
+- **Not simply "many calls."** 2000 `fkine()`/`jacob0()` calls in a loop
+  on the main thread: clean, no leak. The same calls in a loop on a
+  background `threading.Thread` for as little as 0.5s: leaks every time.
+
+Repro:
+
+```python
+import threading, time
+import roboticstoolbox as rtb
+
+p = rtb.models.Panda()
+stop = False
+
+def loop():
+    while not stop:
+        p.fkine(p.qr)
+        p.jacob0(p.qr)
+
+t = threading.Thread(target=loop, daemon=True)
+t.start()
+time.sleep(0.5)
+stop = True
+```
+
+So the trigger is specifically **fknm object creation from a non-main
+thread**, not call volume. This is directly relevant to `swift-sim`,
+whose rendering/stepping machinery runs on background threads — any
+script using the Swift backend is a candidate to hit this, independent
+of whether it's interrupted.
+
+### Proposed fix
+
+Not root-caused yet — needs the actual `_fknm_c` nanobind binding code
+(wherever `_ETObj`/`_ETSObj` are defined and bound) checked against
+nanobind's refleak guide above. Leading hypothesis: a reference cycle
+between the Python-side ETS wrapper and the C++ object that only cyclic
+GC can break, where a non-main-thread-created object's cycle isn't
+collected before process/thread teardown the way a main-thread one is.
+Worth first confirming whether this is purely cosmetic (a shutdown-time
+diagnostic with no real-world consequence for a long-running process) or
+an actual growing-memory leak in a long-lived Swift session — the repro
+above only demonstrates the message, not measured memory growth.
