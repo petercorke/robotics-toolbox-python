@@ -667,7 +667,7 @@ class RobotKinematicsMixin:
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
         :param q0: initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
+            configuration constrained by the joint limits of the robot)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
         :param tol: final error tolerance
@@ -675,10 +675,10 @@ class RobotKinematicsMixin:
             Corresponds to translation in X, Y and Z and rotation about X, Y and Z
             respectively
         :param joint_limits: constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
+            the robot (reject solution with invalid joint configurations and perform
             another search up to the slimit)
-        :param pinv: Use the psuedo-inverse instad of the normal matrix inverse
-        :param pinv_damping: Damping factor for the psuedo-inverse
+        :param pinv: Use the pseudo-inverse instead of the normal matrix inverse
+        :param pinv_damping: Damping factor for the pseudo-inverse
         :returns: tuple (q, success, iterations, searches, residual)
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
@@ -781,7 +781,7 @@ class RobotKinematicsMixin:
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
         :param q0: initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
+            configuration constrained by the joint limits of the robot)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
         :param tol: final error tolerance
@@ -789,10 +789,10 @@ class RobotKinematicsMixin:
             Corresponds to translation in X, Y and Z and rotation about X, Y and Z
             respectively
         :param joint_limits: constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
+            the robot (reject solution with invalid joint configurations and perform
             another search up to the slimit)
-        :param pinv: Use the psuedo-inverse instad of the normal matrix inverse
-        :param pinv_damping: Damping factor for the psuedo-inverse
+        :param pinv: Use the pseudo-inverse instead of the normal matrix inverse
+        :param pinv_damping: Damping factor for the pseudo-inverse
         :returns: tuple (q, success, iterations, searches, residual)
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
@@ -1102,7 +1102,7 @@ class RobotKinematicsMixin:
         :param joint_limits: Reject solutions with joint limit violations
         :param seed: A seed for the private RNG used to generate random joint coordinate
             vectors
-        :param pinv: If True, will use the psuedoinverse in the `step` method instead of
+        :param pinv: If True, will use the pseudoinverse in the `step` method instead of
             the normal inverse
         :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
             completely from the solution
@@ -1225,7 +1225,7 @@ class RobotKinematicsMixin:
         :param joint_limits: Reject solutions with joint limit violations
         :param seed: A seed for the private RNG used to generate random joint coordinate
             vectors
-        :param pinv: If True, will use the psuedoinverse in the `step` method instead of
+        :param pinv: If True, will use the pseudoinverse in the `step` method instead of
             the normal inverse
         :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
             completely from the solution
