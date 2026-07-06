@@ -1157,3 +1157,71 @@ general fix — this UR5 case is likely not unique.
 **Deferred**: not fixed now, since the pin already resolves the immediate
 CI break and this needs its own design pass rather than a rushed fix
 bundled into a dependency-pin PR.
+
+---
+
+## `spatialgeometry` is vendored (pure-Python) inside RTB, but CI also installs the real external package from git
+
+### Background
+
+`src/spatialgeometry/` is a full copy of the `spatialgeometry` package
+living inside this repo, bundled into RTB's own wheel
+(`pyproject.toml`'s `[tool.scikit-build] wheel.packages` and
+`sdist.include` both list `src/spatialgeometry` alongside
+`src/roboticstoolbox`). Per git history this was deliberate:
+
+- `1b522e65` — "bundle spatialgeometry as pure-Python (removes external
+  dep)"
+- `f99c154f` — "change collision backend from PyBullet to Coal"
+
+i.e. the external `spatialgeometry` PyPI package was compiled (native
+extensions) and became a NumPy-1-vs-2 compatibility hazard, so RTB
+vendored its own pure-Python copy to stop depending on it directly.
+
+However, `.github/workflows/ci.yml` still separately does, in every job
+that needs `swift` (`test`, `coverage`, `docs-build`):
+
+```
+pip install git+https://github.com/petercorke/spatialgeometry.git@future
+pip install git+https://github.com/petercorke/swift.git@future
+```
+
+This installs the *external* `spatialgeometry` under the same top-level
+import name (`spatialgeometry`) that RTB's own wheel provides. Since
+`pip install .[dev]` runs afterwards and rebuilds/installs RTB's own
+wheel (which includes its bundled `src/spatialgeometry`), the files from
+the external git install are almost certainly clobbered by RTB's vendored
+copy — meaning the `@future`-branch install is likely a no-op in
+practice, or at best relies on file-level overlap being total. This
+hasn't been directly diagnosed/proven this session, just flagged as
+suspicious: two packages exporting the same import name, installed in
+sequence, is fragile regardless of which one currently "wins".
+
+### Proposed fix
+
+Decide on one ownership model and stop straddling both:
+
+- **Option A**: keep vendoring `spatialgeometry` inside RTB (current
+  state) and drop the redundant `pip install
+  git+.../spatialgeometry.git@future` step from `ci.yml` — only
+  `swift.git@future` is actually needed (assuming `swift` itself doesn't
+  require anything from the external `spatialgeometry` that the vendored
+  copy lacks; needs verifying).
+  `swift.git@future`'s own dependency on `spatialgeometry` also needs
+  checking — if `swift` unconditionally pulls in the real
+  `spatialgeometry` from PyPI, that's the actual source of the NumPy-2
+  crash for `spatialgeometry` again, RTB's vendoring or not.
+- **Option B** (what the user favours): un-vendor `src/spatialgeometry`
+  from RTB entirely, get `spatialgeometry` a proper NumPy-2-compatible
+  PyPI release (companion to whatever eventually resolves the
+  `swift`/`spatialgeometry` `@future`-branch hotfix noted elsewhere in
+  this file under CI), and go back to a normal external dependency in
+  `pyproject.toml`. Cleaner long-term (one source of truth for
+  `spatialgeometry`, matches how `spatialmath-python` is already handled
+  as a normal external dependency), but is real work: whoever maintains
+  `petercorke/spatialgeometry` needs to actually cut and publish a
+  release from its `future` branch first, or RTB is back to the same
+  NumPy-1 compiled-wheel crash it vendored its way out of.
+
+Either way, the current arrangement (vendored copy + redundant external
+git install in CI) should not persist indefinitely without a decision.
