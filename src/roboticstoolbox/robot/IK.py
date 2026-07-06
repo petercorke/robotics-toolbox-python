@@ -283,6 +283,13 @@ class IKSolver(ABC):
             while i < self.ilimit:
                 i += 1
 
+                # step() reports E for q as it was *before* this iteration's
+                # update. An undamped update (GN/NR) can overshoot, so if E is
+                # already below tol we must return this pre-step q, not the
+                # mutated one step() hands back - otherwise we can report
+                # success with a q whose actual residual is far above tol.
+                q_prev = q.copy()
+
                 # Attempt a step
                 try:
                     E, q[ets.jindices] = self.step(ets, Tep, q)
@@ -294,6 +301,8 @@ class IKSolver(ABC):
 
                 # Check if we have arrived
                 if E < self.tol:
+                    q = q_prev
+
                     # Wrap q to be within +- 180 deg
                     # If your robot has larger than 180 deg range on a joint
                     # this line should be modified in incorporate the extra range

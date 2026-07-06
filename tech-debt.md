@@ -692,23 +692,37 @@ collision geometry rather than the `collision=False` guard paths.
 
 ---
 
-## Flaky numerical IK test: `test_IK_GN3`
+## Fixed: stale pre-step residual accepted as solution in `IKSolver._solve` (was `test_IK_GN3` flake)
 
 ### Background
 
-Seen failing on `macos-latest, Python 3.12` CI (2026-07-04) only:
+Seen failing on `macos-latest, Python 3.12` CI (2026-07-04):
 `AssertionError: 1e-05 not greater than 0.05291452734038758` — a
-Gauss-Newton IK convergence tolerance check. Didn't reproduce on the same
-run's other platform/version combinations, so likely a genuine numerical
-flake (seed-dependent convergence, or platform BLAS/LAPACK differences)
-rather than a real regression. Not investigated further.
+Gauss-Newton IK convergence tolerance check, originally logged here as an
+unreproducible numerical flake. Root-caused 2026-07-06: `IKSolver._solve`
+(`src/roboticstoolbox/robot/IK.py`) calls `step()`, which computes `E` for
+`q` *before* applying that iteration's update, then mutates `q` in place and
+hands the mutated array back. `_solve` then checks `E < self.tol` and, if
+true, returns the **post-step** `q` — a point whose actual residual was
+never checked. For undamped solvers (`IK_GN`, `IK_NR`) this update can
+overshoot arbitrarily, so a q with real error >0.05 (or worse — measured up
+to ~1.5 in a 500-seed sweep) was routinely reported as a converged, tol-1e-6
+success. This affected `IK_NR`, `IK_GN`, and `IK_LM` (all share `_solve`);
+roughly half of "successful" `IK_GN` solves on the UR5 test case were
+actually invalid.
 
-### Proposed fix
+The compiled solver path (`_IK_loop` in
+`src/roboticstoolbox/robot/cpp-extensions/ik.cpp`) does not have this bug —
+it evaluates error *before* deciding whether to step, and only steps when
+not yet converged, so it never returns an unverified post-step point. That
+Python/C++ behavioral divergence is what led to re-investigating this.
 
-Watch for recurrence; if it keeps showing up, look at whether `test_IK_GN3`
-seeds its initial joint configuration deterministically and whether the
-tolerance is unreasonably tight for Gauss-Newton specifically (GN is known
-to converge less reliably than LM from some seeds).
+### Fix
+
+`_solve` now snapshots `q` before calling `step()` and, on convergence,
+returns that pre-step snapshot rather than the mutated array `step()`
+handed back — matching the C++ semantics. See the fix on
+`bug/ik-gn-stale-residual`.
 
 ---
 
