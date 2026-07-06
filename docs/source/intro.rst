@@ -661,14 +661,15 @@ to the shape used for rendering.
     ``pip install`` on Windows.
 
 We can conveniently perform collision checks between links as well as between
-whole robots, discrete links, and objects in the world. For example a :math:`1
-\times 1 \times 1` box centered at :math:`(1,0,0)` can be tested against all, or
+whole robots, discrete links, and objects in the world. For example a :math:`0.3
+\times 0.3 \times 0.3` box centered at :math:`(0,0,0.6)` -- which intersects the
+robot's forearm in its zero-angle configuration -- can be tested against all, or
 just one link, of the robot by::
 
     >>> panda = rtb.models.Panda()
-    >>> obstacle = Cuboid([1, 1, 1], pose = SE3(1, 0, 0)) 
-    >>> iscollision = panda.iscollided(panda.q, obstacle) # boolean
-    >>> iscollision = panda.links[0].iscollided(obstacle)
+    >>> obstacle = Cuboid([0.3, 0.3, 0.3], pose = SE3(0, 0, 0.6))
+    >>> iscollision = panda.iscollided(panda.q, obstacle) # True, some link hits the box
+    >>> iscollision = panda.links[0].iscollided(obstacle) # False, the base link is clear
 
 
 Additionally, we can compute the minimum Euclidean distance between whole
