@@ -43,7 +43,10 @@ class RobotBlockTest(unittest.TestCase):
         T = robot.fkine(q)
         sol = robot.ikine_LM(T)
 
-        block = IKine(robot, seed=0)
+        # `tol` bounds the quadratic angle-axis residual E, not the linear
+        # pose error directly - the default tol=1e-6 only guarantees pose
+        # error on the order of 1e-3, not tight enough for the check below.
+        block = IKine(robot, seed=0, args={"tol": 1e-10})
 
         q_ik = block.test_output(T)[0]  # get IK from block
         pass

@@ -102,7 +102,7 @@ class IKSolution:
 
 
 class IKSolver(ABC):
-    """
+    r"""
     An abstract super class for numerical inverse kinematics (IK)
 
     This class provides basic functionality to perform numerical IK. Superclasses
@@ -113,7 +113,15 @@ class IKSolver(ABC):
     :param ilimit: How many iterations are allowed within a search before a new search
         is started
     :param slimit: How many searches are allowed before being deemed unsuccessful
-    :param tol: Maximum allowed residual error E
+    :param tol: Maximum allowed residual error E, where
+        :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
+        in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
+        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        orientation error directly — with the default unit weighting, components of
+        :math:`\vec{e}` are only guaranteed to be within roughly
+        :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
+        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
@@ -517,7 +525,7 @@ def _calc_qnull(
 
 
 class IK_NR(IKSolver):
-    """
+    r"""
     Newton-Raphson Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
@@ -531,7 +539,15 @@ class IK_NR(IKSolver):
     :param ilimit: How many iterations are allowed within a search before a new search
         is started
     :param slimit: How many searches are allowed before being deemed unsuccessful
-    :param tol: Maximum allowed residual error E
+    :param tol: Maximum allowed residual error E, where
+        :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
+        in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
+        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        orientation error directly — with the default unit weighting, components of
+        :math:`\vec{e}` are only guaranteed to be within roughly
+        :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
+        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
@@ -674,7 +690,7 @@ class IK_NR(IKSolver):
 
 
 class IK_LM(IKSolver):
-    """
+    r"""
     Levemberg-Marquadt Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
@@ -684,7 +700,15 @@ class IK_LM(IKSolver):
     :param ilimit: How many iterations are allowed within a search before a new search
         is started
     :param slimit: How many searches are allowed before being deemed unsuccessful
-    :param tol: Maximum allowed residual error E
+    :param tol: Maximum allowed residual error E, where
+        :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
+        in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
+        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        orientation error directly — with the default unit weighting, components of
+        :math:`\vec{e}` are only guaranteed to be within roughly
+        :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
+        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
@@ -898,7 +922,7 @@ class IK_LM(IKSolver):
 
 
 class IK_GN(IKSolver):
-    """
+    r"""
     Gauss-Newton Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
@@ -912,7 +936,15 @@ class IK_GN(IKSolver):
     :param ilimit: How many iterations are allowed within a search before a new search
         is started
     :param slimit: How many searches are allowed before being deemed unsuccessful
-    :param tol: Maximum allowed residual error E
+    :param tol: Maximum allowed residual error E, where
+        :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
+        in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
+        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        orientation error directly — with the default unit weighting, components of
+        :math:`\vec{e}` are only guaranteed to be within roughly
+        :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
+        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
@@ -1070,7 +1102,7 @@ class IK_GN(IKSolver):
 
 
 class IK_QP(IKSolver):
-    """
+    r"""
     Quadratic Progamming Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
@@ -1081,7 +1113,15 @@ class IK_QP(IKSolver):
     :param ilimit: How many iterations are allowed within a search before a new search
         is started
     :param slimit: How many searches are allowed before being deemed unsuccessful
-    :param tol: Maximum allowed residual error E
+    :param tol: Maximum allowed residual error E, where
+        :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
+        in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
+        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        orientation error directly — with the default unit weighting, components of
+        :math:`\vec{e}` are only guaranteed to be within roughly
+        :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
+        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations

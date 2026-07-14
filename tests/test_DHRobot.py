@@ -968,7 +968,12 @@ class TestDHRobot(unittest.TestCase):
 
         T = puma.fkine(puma.qn)
 
-        sol = puma.ikine_LM(T)
+        # `tol` bounds the quadratic angle-axis residual E, not the linear
+        # pose error directly (see IKSolver's `tol` docs) - the default
+        # tol=1e-6 only guarantees pose error on the order of 1e-3, not the
+        # 1e-4-ish precision `places=4` below checks for. Tighten tol
+        # accordingly and pin a seed so the search is reproducible.
+        sol = puma.ikine_LM(T, tol=1e-10, seed=0)
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=4)
 

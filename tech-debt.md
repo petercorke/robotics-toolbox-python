@@ -726,6 +726,39 @@ handed back — matching the C++ semantics. See the fix on
 
 ---
 
+## Fixed: `tol` is a quadratic residual, so default IK tests under-guaranteed pose accuracy
+
+### Background
+
+`test_DHRobot.py::test_ikine_LM` and `test_blocks.py::RobotBlockTest::test_ikine`
+intermittently (the former) or deterministically at `seed=0` (the latter)
+failed a `places=4` (~5e-5) check on `np.linalg.norm(T - fkine(sol.q))`, even
+though `sol.success` was `True`. Root cause: `IKSolver`'s `tol` bounds the
+*quadratic* weighted angle-axis error
+:math:`E = \tfrac{1}{2}\vec{e}^\top\mat{W}_e\vec{e}`, not the linear-scale
+pose error. With the default `tol=1e-6`, the actual pose error is only
+guaranteed to be on the order of :math:`\sqrt{2\cdot\text{tol}} \approx 1.4
+\times 10^{-3}` — looser than the `places=4` checks assumed. Confirmed
+concretely on the Panda `test_ikine` case: `sol.residual = 2.87e-8` (well
+under `tol=1e-6`) still coincided with a raw pose difference of `3.27e-4`,
+consistent with the quadratic/linear relationship, not a solver defect.
+
+`test_DHRobot.py::test_ikine_LM` additionally had no pinned `seed`, so it
+was genuinely non-deterministic between runs (unlike `test_blocks.py`'s
+`seed=0`, which just deterministically landed on the same marginal
+solution every time — a reproducible near-miss, not a random flake).
+
+### Fix
+
+- Documented the quadratic-vs-linear relationship directly on `tol`'s
+  docstring (`IKSolver` and all four solver subclasses in
+  `src/roboticstoolbox/robot/IK.py`).
+- Both tests now pass `tol=1e-10` explicitly (comfortably bounding pose
+  error under `places=4`'s ~5e-5 threshold), and `test_ikine_LM` now pins
+  `seed=0` for reproducibility.
+
+---
+
 ## Removed: `robot_descriptions` CI caching (was solving the wrong problem)
 
 ### Background
