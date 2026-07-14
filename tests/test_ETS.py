@@ -587,6 +587,80 @@ class TestETS(unittest.TestCase):
         nt.assert_almost_equal(r.eval(q), r4.eval(q))
         nt.assert_almost_equal(r.fkine(q).A, r5.fkine(q).A)
 
+    def test_swap(self):
+        q = [1.0]
+        e = rtb.ET.Rz(jindex=0) * rtb.ET.Rz(1) * rtb.ET.tx(2)
+
+        ans = SE3.Rz(q[0]) * SE3.Rz(1) * SE3.Tx(2)
+
+        self.assertTrue(e[0].isjoint)
+        self.assertFalse(e[1].isjoint)
+        nt.assert_almost_equal(e.fkine(q).A, ans.A)
+
+        # swap two adjacent transforms that share the same axis - the
+        # kinematics must be unaffected since same-axis rotations commute
+        e.swap(0)
+        self.assertFalse(e[0].isjoint)
+        self.assertTrue(e[1].isjoint)
+        self.assertAlmostEqual(e[0].eta, 1.0)  # type: ignore
+        nt.assert_almost_equal(e.fkine(q).A, ans.A)
+
+        # swap back and check we're symmetric
+        e.swap(0)
+        self.assertTrue(e[0].isjoint)
+        self.assertFalse(e[1].isjoint)
+        nt.assert_almost_equal(e.fkine(q).A, ans.A)
+
+    def test_swap_not_commutative(self):
+        e = rtb.ET.tx(1) * rtb.ET.Rz(jindex=0) * rtb.ET.Rz(1)
+
+        with self.assertRaises(ValueError):
+            e.swap(0)
+
+    def test_swap_bad_index(self):
+        e = rtb.ET.tx(1) * rtb.ET.tx(2)
+
+        with self.assertRaises(IndexError):
+            e.swap(-1)
+
+        with self.assertRaises(IndexError):
+            e.swap(1)
+
+    def test_merge(self):
+        q = [1.0]
+        e = rtb.ET.Rz(jindex=0) * rtb.ET.tx(1) * rtb.ET.tx(2) * rtb.ET.Rz(1)
+
+        ans = SE3.Rz(q[0]) * SE3.Tx(3) * SE3.Rz(1)
+
+        n = len(e)
+        e.merge(1)
+
+        self.assertEqual(len(e), n - 1)
+        self.assertEqual(e[1].axis, "tx")
+        self.assertAlmostEqual(e[1].eta, 3.0)  # type: ignore
+        nt.assert_almost_equal(e.fkine(q).A, ans.A)
+
+    def test_merge_not_same_type(self):
+        e = rtb.ET.tx(1) * rtb.ET.Rz(1)
+
+        with self.assertRaises(ValueError):
+            e.merge(0)
+
+    def test_merge_both_joints(self):
+        e = rtb.ET.Rz(jindex=0) * rtb.ET.Rz(jindex=1)
+
+        with self.assertRaises(ValueError):
+            e.merge(0)
+
+    def test_merge_bad_index(self):
+        e = rtb.ET.tx(1) * rtb.ET.tx(2)
+
+        with self.assertRaises(IndexError):
+            e.merge(-1)
+
+        with self.assertRaises(IndexError):
+            e.merge(1)
+
     def test_jacob0(self):
         q = [0.0]
         rx = rtb.ETS(rtb.ET.Rx())

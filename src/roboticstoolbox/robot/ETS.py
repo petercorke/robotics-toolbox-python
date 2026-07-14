@@ -483,35 +483,6 @@ class BaseETS(MutableSequence):
         self._data = new_data
         self._fknm_stale = True
 
-    @overload
-    def split(self: "ETS") -> list["ETS"]: ...  # pragma: nocover
-
-    @overload
-    def split(self: "ETS2") -> list["ETS2"]: ...  # pragma: nocover
-
-    def split(self):
-        """
-        Split ETS into link segments
-
-        :returns: a list of ETS, each one, apart from the last, ends with a variable ET.
-
-        """
-
-        segments = []
-        start = 0
-
-        for j, k in enumerate(self.joint_idx()):
-            ets_j = self._data[start : k + 1]
-            start = k + 1
-            segments.append(self.__class__(ets_j))
-
-        tail = self._data[start:]
-
-        if len(tail) > 0:
-            segments.append(self.__class__(tail))
-
-        return segments
-
     def inv(self: T) -> T:
         r"""
         Inverse of ETS
@@ -650,6 +621,78 @@ class BaseETS(MutableSequence):
 
         return q
 
+    def swap(self, i: int) -> None:
+        """
+        Swap two transforms in the ETS
+
+        :param i: index of first transform
+
+        Swaps the two transforms at indices ``i`` and ``i+1``.  This is useful for
+        changing the order of commutative transforms in an ETS.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rx() * ET.Rz(1)
+            >>> print(e)
+            >>> e.swap(1)
+            >>> print(e)
+
+        """
+        if i < 0 or i >= len(self._data) - 1:
+            raise IndexError("Index out of range")  # pragma: nocover
+        
+        e1 = self._data[i]
+        e2 = self._data[i + 1]
+        if e1.axis == e2.axis:
+            self._data[i], self._data[i + 1] = self._data[i + 1], self._data[i]
+            self._fknm_stale = True
+        else:
+            raise ValueError("Transforms are not commutative")  # pragma: nocover
+        
+    def merge(self, i: int) -> None:
+        """
+        Merge two transforms in the ETS
+
+        :param i: index of first transform
+
+        Merges the two transforms at indices ``i`` and ``i+1``.  This is useful for
+        reducing the number of transforms in an ETS.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> from math import pi
+            >>> e = ET.Rz() * ET.tx(1) * ET.tx(2) * ET.Rz(1)
+            >>> print(e)
+            >>> e.merge(1)
+            >>> print(e)
+            >>> e = ET.tx(1) * ET.Rx() * ET.Rx(pi/2) * ET.tx(2)
+            >>> print(e)
+            >>> e.merge(1)
+            >>> print(e)
+
+        """
+        if i < 0 or i >= len(self._data) - 1:
+            raise IndexError("Index out of range")  # pragma: nocover
+        e1 = self._data[i]
+        e2 = self._data[i + 1]
+        if e1.axis != e2.axis:
+            raise ValueError("Transforms are not the same type")  # pragma: nocover
+
+        elif  (e1.isjoint + e2.isjoint) == 2:
+            raise ValueError("Transforms are both joints")  # pragma: nocover
+
+        else:
+            self._data[i].eta = e1.eta + e2.eta
+            del self._data[i + 1]
+            self._fknm_stale = True
 
 class ETS(BaseETS):
     """
@@ -2466,6 +2509,29 @@ class ETS(BaseETS):
 
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
+    def split(self) -> list["ETS"]:
+        """
+        Split ETS into link segments
+
+        :returns: a list of ETS, each one, apart from the last, ends with a variable ET.
+
+        """
+
+        segments = []
+        start = 0
+
+        for j, k in enumerate(self.joint_idx()):
+            ets_j = self._data[start : k + 1]
+            start = k + 1
+            segments.append(self.__class__(ets_j))
+
+        tail = self._data[start:]
+
+        if len(tail) > 0:
+            segments.append(self.__class__(tail))
+
+        return segments
+
 
 class ETS2(BaseETS):
     """
@@ -2649,6 +2715,29 @@ class ETS2(BaseETS):
             for j, et in enumerate(arg):
                 self._data.insert(i + j, et)
         self._fknm_stale = True
+
+    def split(self) -> list["ETS2"]:
+        """
+        Split ETS2 into link segments
+
+        :returns: a list of ETS2, each one, apart from the last, ends with a variable ET.
+
+        """
+
+        segments = []
+        start = 0
+
+        for j, k in enumerate(self.joint_idx()):
+            ets_j = self._data[start : k + 1]
+            start = k + 1
+            segments.append(self.__class__(ets_j))
+
+        tail = self._data[start:]
+
+        if len(tail) > 0:
+            segments.append(self.__class__(tail))
+
+        return segments
 
     def fkine(
         self,

@@ -339,6 +339,49 @@ class TestET(unittest.TestCase):
         with self.assertRaises(ValueError):
             r1.jindex = -2
 
+    def test_eta_setter_updates_transform(self):
+        # ETS.merge() reassigns `.eta` on an already-constructed ET (to
+        # combine two adjacent static transforms). The compiled fast path
+        # (`.A()` -> ET_T) and the qlim/jindex the C struct also carries
+        # must reflect the new value, not the value at construction time.
+        r1 = rtb.ET.tx(1.0)
+        nt.assert_almost_equal(r1.A(), sm.transl(1.0, 0, 0))
+
+        r1.eta = 3.0
+        self.assertEqual(r1.eta, 3.0)
+        nt.assert_almost_equal(r1.A(), sm.transl(3.0, 0, 0))
+
+        # deepcopy must rebuild its own compiled struct from the updated
+        # state, not the stale one from construction
+        r2 = deepcopy(r1)
+        nt.assert_almost_equal(r2.A(), sm.transl(3.0, 0, 0))
+
+    def test_et2_no_compiled_accel(self):
+        # ET2 is pure Python and must never build/hold a compiled
+        # acceleration handle: calling the C fast path (ET_T) directly on
+        # an ET2's data is undefined behaviour (it assumes a 4x4 SE(3)
+        # buffer, but ET2 stores 3x3 SE(2) matrices). Asserting `.fknm`
+        # doesn't exist keeps this structurally impossible rather than
+        # relying on nothing ever calling the fast path by accident.
+        e = rtb.ET2.tx(1.0)
+
+        self.assertFalse(hasattr(e, "fknm"))
+        self.assertFalse(hasattr(e, "_ET__fknm"))
+
+        # eta/qlim/jindex updates on ET2 must not attempt to touch a
+        # compiled struct that doesn't exist
+        e.eta = 2.0
+        nt.assert_almost_equal(e.A(), sm.transl2(2.0, 0))
+        e.qlim = (-1, 1)
+        e.jindex = 0
+
+    def test_et_has_compiled_accel(self):
+        # Counterpart to test_et2_no_compiled_accel: ET (3D) does build a
+        # compiled struct, and it survives deepcopy as a distinct object
+        # (see also test_copy).
+        r1 = rtb.ET.Rx(1.0)
+        self.assertIsNotNone(r1.fknm)
+
     def test_et2_T(self):
         fl = 1.543
         rx = rtb.ET2.R()

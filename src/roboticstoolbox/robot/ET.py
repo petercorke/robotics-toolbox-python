@@ -54,15 +54,11 @@ class BaseET:
         # Defaults to False as is set to True if eta is a symbol below
         self._isstaticsym = False
 
-        if eta is None:
-            self._eta = None
-        else:
-            if axis[0] == "R" and unit.lower().startswith("deg"):
-                if not issymbol(eta):
-                    self.eta = deg2rad(float(eta))
-            else:
-                self.eta = eta
-
+        # axis_func/flip/jindex/qlim must all be set before `eta` below:
+        # the `eta` setter (for the static, eta-is-not-None case) reads
+        # `self.axis_func` to (re)compute `self._T`, and subclasses that add
+        # compiled acceleration (see ET._accel_update) need jindex/qlim/flip
+        # already in place too.
         self._axis_func = axis_func
         self._flip = flip
         self._jindex = jindex
@@ -72,7 +68,8 @@ class BaseET:
         else:
             self._qlim: NDArray | None = None
 
-        if self.eta is None:
+        if eta is None:
+            self._eta = None
             if T is None:
                 self._joint = True
                 self._T = eye(4).copy(order="F")
@@ -82,77 +79,13 @@ class BaseET:
                 self._joint = False
                 self._T = T.copy(order="F")
         else:
-            # This is a static joint
-            if issymbol(eta):
-                self._isstaticsym = True
-
-            self._joint = False
-            if axis_func is not None:
-                self._T = axis_func(self.eta).copy(order="F")
-            else:
-                raise TypeError(
-                    "For a static joint either both `eta` and `axis_func` "
-                    "must be specified otherwise `T` must be supplied"
-                )
-
-        # Initialise the C object which holds ET data
-        # This returns a reference to said C data
-        self.__fknm = self.__init_c()
-
-    def __init_c(self):
-        """
-        Super Private method which initialises a C object to hold ET Data
-        """
-        if self.jindex is None:
-            jindex = 0
-        else:
-            jindex = self.jindex
-
-        if self.qlim is None:
-            if self.axis[0] == "R":
-                qlim = array([-pi, pi])
-            else:
-                qlim = array([0, 1])
-        else:
-            qlim = self.qlim
-
-        return ET_init(
-            self._isstaticsym,
-            self.isjoint,
-            self.isflip,
-            jindex,
-            self.__axis_to_number(self.axis),
-            self._T,
-            qlim,
-        )
-
-    def __update_c(self):
-        """
-        Super Private method which updates the C object which holds ET Data
-        """
-        if self.jindex is None:
-            jindex = 0
-        else:
-            jindex = self.jindex
-
-        if self.qlim is None:
-            if self.axis[0] == "R":
-                qlim = array([-pi, pi])
-            else:
-                qlim = array([0, 1])
-        else:
-            qlim = self.qlim
-
-        ET_update(
-            self.fknm,
-            self._isstaticsym,
-            self.isjoint,
-            self.isflip,
-            jindex,
-            self.__axis_to_number(self.axis),
-            self._T,
-            qlim,
-        )
+            if axis[0] == "R" and unit.lower().startswith("deg"):
+                if not issymbol(eta):
+                    eta = deg2rad(float(eta))
+            # This is a static joint. The `eta` setter validates axis_func,
+            # computes `_T`, sets `_isstaticsym`/`_joint`, and (for ET)
+            # syncs the compiled acceleration struct.
+            self.eta = eta
 
     def __str__(self):
         eta_str = ""
@@ -228,33 +161,39 @@ class BaseET:
         """
         p.text(str(self))  # pragma: nocover
 
+    # Attribute names to exclude from the generic __dict__ copy below, e.g.
+    # an opaque compiled-acceleration handle that can't be deep-copied and
+    # must instead be rebuilt fresh by _accel_init(). Empty for the plain
+    # Python ET2; overridden by ET.
+    _deepcopy_skip: tuple[str, ...] = ()
+
     def __deepcopy__(self, memo):
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
 
         for k, v in self.__dict__.items():
-            if k != "_BaseET__fknm":
+            if k not in self._deepcopy_skip:
                 setattr(result, k, deepcopy(v, memo))
 
-        result.__fknm = result.__init_c()
+        result._accel_init()
         return result
 
     def __eq__(self, other):
         return repr(self) == repr(other)
 
-    def __axis_to_number(self, axis: str) -> int:
-        """
-        Private convenience function which converts the axis string to an
-        integer for faster processing in the C extensions
-        """
-        if isinstance(self, ET2):
-            return 0
-        return _AXIS_TO_INT.get(axis, 0)
+    # ------------------------------------------------------------------
+    # Compiled-acceleration hooks. BaseET (and so ET2) is pure Python; ET
+    # overrides both to build/refresh the compiled C++ struct. Keeping
+    # these as no-op hooks here means the eta/qlim/jindex setters and
+    # inv()/__deepcopy__ below don't need to know or care whether the
+    # concrete class has acceleration at all.
+    # ------------------------------------------------------------------
+    def _accel_init(self) -> None:
+        pass
 
-    @property
-    def fknm(self):
-        return self.__fknm
+    def _accel_update(self) -> None:
+        pass
 
     @property
     def eta(self) -> float | Sym | None:
@@ -295,8 +234,23 @@ class BaseET:
 
         - No unit conversions are applied, it is assumed to be in
             radians.
+        - Setting `eta` always makes the ET a static (non-joint) transform:
+            `_T` is recomputed from `axis_func`, and (for ET) the compiled
+            acceleration struct is refreshed. This is also what ETS.merge()
+            relies on when it combines two adjacent static ETs.
         """
+        if self.axis_func is None:
+            raise TypeError(
+                "For a static joint either both `eta` and `axis_func` "
+                "must be specified otherwise `T` must be supplied"
+            )
+
         self._eta = value if issymbol(value) else float(value)
+        self._isstaticsym = issymbol(value)
+        self._joint = False
+        self._T = self.axis_func(self._eta).copy(order="F")
+
+        self._accel_update()
 
     @property
     def axis_func(
@@ -429,7 +383,7 @@ class BaseET:
         if qlim_new is not None:
             qlim_new = getvector(qlim_new, 2, out="array")
         self._qlim = qlim_new
-        self.__update_c()
+        self._accel_update()
 
     @property
     def jindex(self) -> int | None:
@@ -462,7 +416,7 @@ class BaseET:
         if not isinstance(j, int) or j < 0:
             raise ValueError(f"jindex is {j}, must be an int >= 0")
         self._jindex = j
-        self.__update_c()
+        self._accel_update()
 
     @property
     def iselementary(self) -> bool:
@@ -516,7 +470,7 @@ class BaseET:
             inv._T = npinv(inv._T).copy(order="F")
             inv._eta = -inv._eta
 
-        inv.__update_c()
+        inv._accel_update()
 
         return inv
 
@@ -539,33 +493,148 @@ class BaseET:
             >>> e = ET.tx()
             >>> e.A(0.7)
 
+        Pure-Python evaluation, shared by ET2 and used by ET as the
+        fallback when the compiled acceleration struct can't be used.
         """
-        try:
-            # Try and use the C implementation, flip is handled in C
-            return ET_T(self.__fknm, q)
-        except TypeError:
-            # We can't use the fast version, lets use Python instead
-            if self.isjoint:
-                if self.isflip:
-                    q = -q  # type: ignore
+        if self.isjoint:
+            if self.isflip:
+                q = -q  # type: ignore
 
-                if self.axis_func is not None:
-                    return self.axis_func(q)
-                else:  # pragma: no cover
-                    raise TypeError("axis_func not defined")
+            if self.axis_func is not None:
+                return self.axis_func(q)
             else:  # pragma: no cover
-                return self._T
+                raise TypeError("axis_func not defined")
+        else:  # pragma: no cover
+            return self._T
 
 
 class ET(BaseET):
+    # See BaseET._deepcopy_skip: the compiled acceleration handle is
+    # rebuilt by _accel_init() rather than deep-copied.
+    _deepcopy_skip = ("_ET__fknm",)
+
     def __init__(self, **kwargs):
+        # Set before super().__init__() runs: BaseET.__init__ may invoke
+        # the `eta` setter (for a static ET), which calls _accel_update()
+        # below. `None` here tells _accel_update() the compiled struct
+        # doesn't exist yet, so it skips the sync instead of touching an
+        # attribute that isn't there yet.
+        self.__fknm = None
         super().__init__(**kwargs)
+        # Now that BaseET.__init__ has finished (axis/eta/T/joint/etc. are
+        # all final), do the one real build of the compiled struct.
+        self._accel_init()
 
     def __mul__(self, other: "ET") -> "rtb.ETS":
         return rtb.ETS([self, other])
 
     def __add__(self, other: "ET") -> "rtb.ETS":
         return self.__mul__(other)
+
+    # ------------------------------------------------------------------
+    # Compiled C++ acceleration. ET2 has none of this - see BaseET's
+    # no-op _accel_init/_accel_update and pure-Python A().
+    # ------------------------------------------------------------------
+    def __axis_to_number(self, axis: str) -> int:
+        """
+        Private convenience function which converts the axis string to an
+        integer for faster processing in the C extensions
+        """
+        return _AXIS_TO_INT.get(axis, 0)
+
+    def _accel_init(self) -> None:
+        """
+        Build the compiled struct that holds this ET's data, from the
+        current (final) Python-side state.
+        """
+        if self.jindex is None:
+            jindex = 0
+        else:
+            jindex = self.jindex
+
+        if self.qlim is None:
+            if self.axis[0] == "R":
+                qlim = array([-pi, pi])
+            else:
+                qlim = array([0, 1])
+        else:
+            qlim = self.qlim
+
+        self.__fknm = ET_init(
+            self._isstaticsym,
+            self.isjoint,
+            self.isflip,
+            jindex,
+            self.__axis_to_number(self.axis),
+            self._T,
+            qlim,
+        )
+
+    def _accel_update(self) -> None:
+        """
+        Push current Python-side state to the compiled struct. Called
+        whenever eta/qlim/jindex change after construction. A no-op while
+        the struct doesn't exist yet (i.e. mid-__init__, before
+        _accel_init() has run for the first time).
+        """
+        if self.__fknm is None:
+            return
+
+        if self.jindex is None:
+            jindex = 0
+        else:
+            jindex = self.jindex
+
+        if self.qlim is None:
+            if self.axis[0] == "R":
+                qlim = array([-pi, pi])
+            else:
+                qlim = array([0, 1])
+        else:
+            qlim = self.qlim
+
+        ET_update(
+            self.__fknm,
+            self._isstaticsym,
+            self.isjoint,
+            self.isflip,
+            jindex,
+            self.__axis_to_number(self.axis),
+            self._T,
+            qlim,
+        )
+
+    @property
+    def fknm(self):
+        return self.__fknm
+
+    def A(self, q: float | Sym = 0.0) -> ndarray:
+        """
+        Evaluate an elementary transformation
+
+        :param q: Is used if this ET is variable (a joint)
+        :returns: The SE(3) matrix value of the ET
+        :rtype: ndarray
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1)
+            >>> e.A()
+            >>> e = ET.tx()
+            >>> e.A(0.7)
+
+        """
+        try:
+            # Try and use the C implementation, flip is handled in C
+            return ET_T(self.__fknm, q)
+        except TypeError:
+            # We can't use the fast version (e.g. symbolic q), fall back
+            # to the pure-Python evaluation shared with ET2
+            return super().A(q)
 
     @property
     def s(self) -> ndarray:  # pragma: nocover
@@ -938,34 +1007,5 @@ class ET2(BaseET):
 
         return cls(axis="SE2", T=trans, **kwargs)
 
-    def A(self, q: float | Sym = 0.0) -> ndarray:
-        """
-        Evaluate an elementary transformation
-
-        :param q: Is used if this ET2 is variable (a joint)
-        :returns: The SE(2) matrix value of the ET2
-        :rtype: ndarray
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET2
-            >>> e = ET2.tx(1)
-            >>> e.A()
-            >>> e = ET2.tx()
-            >>> e.A(0.7)
-
-        """
-
-        if self.isjoint:
-            if self.isflip:
-                q = -1.0 * q  # type: ignore[assignment]  # Sym*float yields Expr, not Sym
-
-            if self.axis_func is not None:
-                return self.axis_func(q)
-            else:  # pragma: no cover
-                raise TypeError("axis_func not defined")
-        else:  # pragma: no cover
-            return self._T
+    # A() is inherited from BaseET: ET2 has no compiled acceleration, so
+    # the shared pure-Python evaluation is all it ever needed.
