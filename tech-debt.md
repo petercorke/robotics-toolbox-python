@@ -1047,3 +1047,52 @@ Worth first confirming whether this is purely cosmetic (a shutdown-time
 diagnostic with no real-world consequence for a long-running process) or
 an actual growing-memory leak in a long-lived Swift session — the repro
 above only demonstrates the message, not measured memory growth.
+
+---
+
+## `IK.py`'s solvers are typed against `ETS` but only need a small FK/Jacobian surface
+
+### Background
+
+`IKSolver._solve`/`step`/`_random_q`/`_check_jl`/`_null_Σ` (`src/roboticstoolbox/robot/IK.py`)
+all take an `ets: "rtb.ETS"` parameter, but only ever call a small, fixed
+set of things on it:
+
+- `n` (int) — joint count
+- `qlim` (2×n array) — joint limits
+- `jindices` — joint index array
+- `joints()` — iterate joint ETs (used once, to find max jindex)
+- `eval(q)` — forward kinematics, raw matrix
+- `jacob0(q)` — base-frame Jacobian
+- `jacobm(q)` — manipulability Jacobian (only for the null-space `kq`/`km` terms)
+
+Typing this as literally `ETS` overstates the coupling: nothing in `IK.py`
+needs the rest of `ETS`'s surface (`merge`/`swap`/`split`/etc.), and the
+solvers would work unchanged against anything else exposing this same
+shape. (Note: this isn't a circular-import problem today — `IK.py`
+already does `import roboticstoolbox as rtb` and only references
+`rtb.ETS` inside string-quoted type hints, deferred and never evaluated
+at runtime. This is about honestly documenting the dependency, not
+working around an import cycle.)
+
+`RobotProto.py` already establishes exactly this pattern for two other
+mixins: `KinematicsProtocol` (needs just `_T` + `.ets()`, used by
+`RobotKinematicsMixin`) and the larger `RobotProto` (used by the
+`Dynamics` mixin). Both are `typing.Protocol` classes specifically so
+mixins can be type-checked against a structural contract without
+importing the concrete class.
+
+### Proposed fix
+
+Add a third protocol alongside those two — proposed name `IKProtocol`
+(matches the existing `KinematicsProtocol`/`RobotProto` naming, and says
+what it's for without the discarded, less-precise "IK-capable" framing)
+— declaring exactly the seven-item surface above. Change every
+`ets: "rtb.ETS"` in `IK.py` to `ets: "IKProtocol"`. `ETS` already
+structurally satisfies it, so no change needed there; the payoff is that
+the real dependency becomes explicit rather than implicit.
+
+**Deferred** while the `/ets` package split (moving `ET`/`ETS` out of
+`/robot`, see the ETS/fknm refactor entry above) is underway — worth
+revisiting together since the import surface `IK.py` needs from the new
+package location is the same shape this protocol would formalize.
