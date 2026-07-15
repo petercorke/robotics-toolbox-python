@@ -2,7 +2,7 @@
 
 import numpy as np
 from roboticstoolbox.ets.ET2 import ET2
-from roboticstoolbox.ets.ETS import ETS2
+from roboticstoolbox.ets.ETS2 import ETS2
 from roboticstoolbox.robot.Robot import Robot2
 from roboticstoolbox.robot.Link import Link2
 
