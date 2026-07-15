@@ -35,12 +35,12 @@ from ansitable import ANSITable, Column
 from spatialgeometry import SceneNode
 from roboticstoolbox.backends.Connector import Connector
 
-from roboticstoolbox.robot.fknm import Robot_link_T
+from roboticstoolbox.ets.fknm import Robot_link_T
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link
-from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.tools.params import rtb_get_param

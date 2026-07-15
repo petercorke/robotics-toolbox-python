@@ -26,7 +26,7 @@ from spatialmath.base import (
 from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP
 
-from roboticstoolbox.robot.fknm import (
+from roboticstoolbox.ets.fknm import (
     ETS_init,
     ETS_fkine,
     ETS_jacob0,
@@ -38,7 +38,7 @@ from roboticstoolbox.robot.fknm import (
     IK_LM_c,
 )
 from copy import deepcopy
-from roboticstoolbox.robot.ET import ET, ET2, BaseET
+from roboticstoolbox.ets.ET import ET, ET2, BaseET
 from typing import overload, TypeVar
 from typing import Literal as L
 from roboticstoolbox.tools.types import ArrayLike, NDArray

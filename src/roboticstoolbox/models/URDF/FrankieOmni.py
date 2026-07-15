@@ -3,8 +3,8 @@
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 from spatialmath import SE3
 

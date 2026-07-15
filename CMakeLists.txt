@@ -30,17 +30,17 @@ target_include_directories(_frne_c PRIVATE
 
 # ---------------------------------------------------------------------------
 # _fknm_c — forward kinematics, Jacobian, Hessian, IK
-# Eigen is vendored as header-only in src/roboticstoolbox/robot/cpp-extensions/Eigen/
+# Eigen is vendored as header-only in src/roboticstoolbox/ets/cpp-extensions/Eigen/
 # fknm_nb.cpp is the nanobind glue; maths lives in methods/ik/linalg.
 # ---------------------------------------------------------------------------
 nanobind_add_module(_fknm_c
-    src/roboticstoolbox/robot/cpp-extensions/methods.cpp
-    src/roboticstoolbox/robot/cpp-extensions/ik.cpp
-    src/roboticstoolbox/robot/cpp-extensions/linalg.cpp
-    src/roboticstoolbox/robot/cpp-extensions/fknm_nb.cpp
+    src/roboticstoolbox/ets/cpp-extensions/methods.cpp
+    src/roboticstoolbox/ets/cpp-extensions/ik.cpp
+    src/roboticstoolbox/ets/cpp-extensions/linalg.cpp
+    src/roboticstoolbox/ets/cpp-extensions/fknm_nb.cpp
 )
 target_include_directories(_fknm_c PRIVATE
-    src/roboticstoolbox/robot/cpp-extensions
+    src/roboticstoolbox/ets/cpp-extensions
 )
 
 install(TARGETS _frne_c _fknm_c DESTINATION roboticstoolbox)

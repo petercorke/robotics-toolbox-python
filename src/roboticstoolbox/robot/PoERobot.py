@@ -3,8 +3,8 @@ import numpy as np
 from spatialmath import Twist3, SE3
 from spatialmath.base import skew
 from roboticstoolbox.robot import Link, Robot
-from roboticstoolbox.robot.ET import ET
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
 
 
 class PoELink(Link):

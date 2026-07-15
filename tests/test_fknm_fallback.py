@@ -24,9 +24,9 @@ import numpy.testing as nt
 import sympy
 
 import roboticstoolbox as rtb
-# roboticstoolbox/robot/ETS.py defines a class also called ETS, and
-# roboticstoolbox/robot/__init__.py does `from ...ETS import ETS`, which
-# rebinds the "ETS" attribute on the roboticstoolbox.robot package to the
+# roboticstoolbox/ets/ETS.py defines a class also called ETS, and
+# roboticstoolbox/ets/__init__.py does `from ...ETS import ETS`, which
+# rebinds the "ETS" attribute on the roboticstoolbox.ets package to the
 # class, shadowing the submodule of the same name. `import a.b.c as x` is
 # defined as `import a.b.c; x = a.b.c` — that second step is still
 # attribute access, so it hits the same shadowing and also gives the
@@ -41,7 +41,7 @@ import roboticstoolbox as rtb
 # and fails with AttributeError; 3.11+ uses pkgutil.resolve_name and
 # isn't fooled. patch.object() against the real module (via sys.modules)
 # works on every version.
-_ETS_module = sys.modules["roboticstoolbox.robot.ETS"]
+_ETS_module = sys.modules["roboticstoolbox.ets.ETS"]
 from spatialmath import SE3
 
 
@@ -71,7 +71,7 @@ def _puma():
 @contextmanager
 def _no_c_fkine():
     """Force ETS.eval() onto the Python path via the facade's Python implementation."""
-    from roboticstoolbox.robot.fknm import _python_fkine
+    from roboticstoolbox.ets.fknm import _python_fkine
 
     def _py(fknm, q, base, tool, include_base, _data=None):
         return _python_fkine(_data, q, base, tool, include_base)
@@ -83,7 +83,7 @@ def _no_c_fkine():
 @contextmanager
 def _no_c_jacob0():
     """Force ETS.jacob0() onto the Python path via the facade's Python implementation."""
-    from roboticstoolbox.robot.fknm import _python_jacob0
+    from roboticstoolbox.ets.fknm import _python_jacob0
 
     def _py(fknm, q, tool, _data=None, _n=None):
         return _python_jacob0(_data, _n, q, tool)
@@ -95,7 +95,7 @@ def _no_c_jacob0():
 @contextmanager
 def _no_c_jacobe():
     """Force ETS.jacobe() onto the Python path via the facade's Python implementation."""
-    from roboticstoolbox.robot.fknm import _python_jacobe
+    from roboticstoolbox.ets.fknm import _python_jacobe
 
     def _py(fknm, q, tool, _data=None, _n=None):
         return _python_jacobe(_data, _n, q, tool)
@@ -107,7 +107,7 @@ def _no_c_jacobe():
 @contextmanager
 def _no_c_hessian0():
     """Force ETS.hessian0() onto the Python path via the facade's Python implementation."""
-    from roboticstoolbox.robot.fknm import _python_jacob0, _python_hessian
+    from roboticstoolbox.ets.fknm import _python_jacob0, _python_hessian
     from spatialmath.base import getvector, verifymatrix
 
     def _py(fknm, q, J0, tool, _data=None, _n=None):
@@ -127,7 +127,7 @@ def _no_c_hessian0():
 @contextmanager
 def _no_c_hessiane():
     """Force ETS.hessiane() onto the Python path via the facade's Python implementation."""
-    from roboticstoolbox.robot.fknm import _python_jacobe, _python_hessian
+    from roboticstoolbox.ets.fknm import _python_jacobe, _python_hessian
     from spatialmath.base import getvector, verifymatrix
 
     def _py(fknm, q, Je, tool, _data=None, _n=None):
@@ -549,21 +549,21 @@ class TestPathTiming(unittest.TestCase):
             f"  Python path: {t_py * 1000 / self.N:.3f} ms/call",
         )
 
-    @unittest.skipIf(not __import__("roboticstoolbox.robot.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
+    @unittest.skipIf(not __import__("roboticstoolbox.ets.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
                      "C extension not built")
     def test_eval_c_faster_than_python(self):
         t_c = self._time_c("eval", self.q)
         t_py = self._time_python(_no_c_fkine, "eval", self.q)
         self._assert_c_faster(t_c, t_py)
 
-    @unittest.skipIf(not __import__("roboticstoolbox.robot.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
+    @unittest.skipIf(not __import__("roboticstoolbox.ets.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
                      "C extension not built")
     def test_jacob0_c_faster_than_python(self):
         t_c = self._time_c("jacob0", self.q)
         t_py = self._time_python(_no_c_jacob0, "jacob0", self.q)
         self._assert_c_faster(t_c, t_py)
 
-    @unittest.skipIf(not __import__("roboticstoolbox.robot.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
+    @unittest.skipIf(not __import__("roboticstoolbox.ets.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
                      "C extension not built")
     def test_jacobe_c_faster_than_python(self):
         t_c = self._time_c("jacobe", self.q)

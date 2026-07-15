@@ -20,7 +20,7 @@ from spatialmath.base import (
 import re
 import warnings
 from copy import deepcopy
-from roboticstoolbox.robot.fknm import ET_T, ET_init, ET_update
+from roboticstoolbox.ets.fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
 from spatialmath import SE3, SE2
 from typing import Callable, TYPE_CHECKING

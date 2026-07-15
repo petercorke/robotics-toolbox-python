@@ -7,8 +7,8 @@
 # from spatialmath import SE3
 import roboticstoolbox as rp
 from roboticstoolbox.robot.Link import Link, _dirties_frne, _copy_shapes
-from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.ets.ET import ET
 from spatialmath import SE3
 from functools import wraps
 from numpy import ndarray, cos, sin, array

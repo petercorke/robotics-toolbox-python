@@ -11,7 +11,7 @@ import warnings
 import copy
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
-from roboticstoolbox.robot.ETS import ETS, ET
+from roboticstoolbox.ets.ETS import ETS, ET
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.tools.params import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix

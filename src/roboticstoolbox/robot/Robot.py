@@ -40,7 +40,7 @@ from roboticstoolbox.robot.BaseRobot import BaseRobot
 from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link, Link2
-from roboticstoolbox.robot.ETS import ETS, ETS2
+from roboticstoolbox.ets.ETS import ETS, ETS2
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.tools.data import rtb_path_to_datafile

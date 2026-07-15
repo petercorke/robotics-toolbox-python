@@ -11,7 +11,7 @@ import roboticstoolbox as rtb
 import spatialmath.base as sm
 from spatialmath import SE3
 import unittest
-from roboticstoolbox.robot.ET import BaseET
+from roboticstoolbox.ets.ET import BaseET
 import sympy
 from copy import copy, deepcopy
 

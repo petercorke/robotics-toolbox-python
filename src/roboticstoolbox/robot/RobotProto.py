@@ -4,7 +4,7 @@ from typing_extensions import Protocol, Self
 
 from roboticstoolbox.robot.Link import Link, BaseLink
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.ets.ETS import ETS
 from spatialmath import SE3
 
 

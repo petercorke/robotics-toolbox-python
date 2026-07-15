@@ -14,8 +14,8 @@ from spatialgeometry import Shape, SceneNode, SceneGroup
 from typing import overload
 
 import roboticstoolbox as rtb
-from roboticstoolbox.robot.ETS import ETS, ETS2
-from roboticstoolbox.robot.ET import ET, ET2, BaseET
+from roboticstoolbox.ets.ETS import ETS, ETS2
+from roboticstoolbox.ets.ET import ET, ET2, BaseET
 from warnings import warn
 
 from roboticstoolbox.tools.types import ArrayLike, NDArray
