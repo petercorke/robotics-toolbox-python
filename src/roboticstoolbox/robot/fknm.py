@@ -139,22 +139,22 @@ def _python_jacob0(data, n, q, tool):
             y = Tu[1, 3]
             z = Tu[2, 3]
 
-            if link.axis == "Rz":
+            if link.kind == "Rz":
                 J[:3, j] = (o * x) - (n_vec * y)
                 J[3:, j] = a
-            elif link.axis == "Ry":
+            elif link.kind == "Ry":
                 J[:3, j] = (n_vec * z) - (a * x)
                 J[3:, j] = o
-            elif link.axis == "Rx":
+            elif link.kind == "Rx":
                 J[:3, j] = (a * y) - (o * z)
                 J[3:, j] = n_vec
-            elif link.axis == "tx":
+            elif link.kind == "tx":
                 J[:3, j] = n_vec
                 J[3:, j] = zero
-            elif link.axis == "ty":
+            elif link.kind == "ty":
                 J[:3, j] = o
                 J[3:, j] = zero
-            elif link.axis == "tz":
+            elif link.kind == "tz":
                 J[:3, j] = a
                 J[3:, j] = zero
 

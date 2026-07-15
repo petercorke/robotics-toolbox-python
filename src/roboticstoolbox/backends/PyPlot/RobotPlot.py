@@ -169,11 +169,11 @@ class RobotPlot:
                 elif link.isjoint:
                     Tj = T[link.number]
                     R = Tj.R
-                    if link.v.axis[1] == "z":
+                    if link.v.ax == "z":
                         direction = R[:, 2]  # z direction
-                    elif link.v.axis[1] == "y":
+                    elif link.v.ax == "y":
                         direction = R[:, 1]  # y direction
-                    elif link.v.axis[1] == "x":
+                    elif link.v.ax == "x":
                         direction = R[:, 0]  #  direction
 
                 if direction is not None:

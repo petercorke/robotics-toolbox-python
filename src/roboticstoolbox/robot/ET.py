@@ -17,6 +17,7 @@ from spatialmath.base import (
     transl2,
     tr2xyt,
 )
+import warnings
 from copy import deepcopy
 from roboticstoolbox.robot.fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
@@ -48,7 +49,7 @@ class BaseET:
         flip: bool = False,
         qlim: ArrayLike | None = None,
     ):
-        self._axis = axis
+        self._kind = axis
 
         # A flag to check if the ET is a static joint with a symbolic value
         # Defaults to False as is set to True if eta is a symbol below
@@ -124,7 +125,7 @@ class BaseET:
         else:
             eta_str = f"{self.eta:.4g}"
 
-        return f"{self.axis}({eta_str})"
+        return f"{self.kind}({eta_str})"
 
     def __repr__(self):
         s_eta = "" if self.eta is None else f"eta={self.eta}"
@@ -142,7 +143,7 @@ class BaseET:
 
         start = "ET" if isinstance(self, ET) else "ET2"
 
-        return f"{start}.{self.axis}({s_kwargs})"
+        return f"{start}.{self.kind}({s_kwargs})"
 
     def _repr_pretty_(self, p, cycle):
         """
@@ -259,11 +260,11 @@ class BaseET:
         return self._axis_func
 
     @property
-    def axis(self) -> str:
+    def kind(self) -> str:
         """
         The transform type and axis
 
-        :returns: The transform type and axis
+        :returns: The transform type and axis, e.g. ``"Rx"``, ``"tx"``, ``"SE3"``
         :rtype: str
 
         Examples
@@ -273,12 +274,56 @@ class BaseET:
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
-            >>> e.axis
+            >>> e.kind
             >>> e = ET.Rx(90, 'deg')
-            >>> e.axis
+            >>> e.kind
 
         """
-        return self._axis
+        return self._kind
+
+    @property
+    def axis(self) -> str:
+        """
+        The transform type and axis
+
+        .. deprecated:: 1.4.0
+            Use :attr:`kind` instead. ``axis`` is kept as an alias and will
+            not be repurposed to mean something else in a future release.
+
+        :returns: The transform type and axis
+        :rtype: str
+        """
+        warnings.warn(
+            "ET.axis is deprecated since 1.4.0, use .kind instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self._kind
+
+    @property
+    def ax(self) -> str | None:
+        """
+        The Cartesian axis this transform acts along/about
+
+        :returns: ``"x"``, ``"y"``, or ``"z"`` for an elementary transform,
+            otherwise ``None`` (e.g. ``ET2``'s rotation, which has no axis
+            letter, or a compound/arbitrary ``SE3``/``SE2`` transform)
+        :rtype: str or None
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1)
+            >>> e.ax
+            >>> e = ET.Rx(90, 'deg')
+            >>> e.ax
+
+        """
+        letter = self._kind[-1]
+        return letter if letter in "xyz" else None
 
     @property
     def isjoint(self) -> bool:
@@ -349,7 +394,7 @@ class BaseET:
 
         """
 
-        return self.axis[0] == "R"
+        return self.kind[0] == "R"
 
     @property
     def istranslation(self) -> bool:
@@ -372,7 +417,7 @@ class BaseET:
 
         """
 
-        return self.axis[0] == "t"
+        return self.kind[0] == "t"
 
     @property
     def qlim(self) -> ndarray | None:
@@ -437,7 +482,7 @@ class BaseET:
 
         """
 
-        return self.axis[0] != "S"
+        return self.kind[0] != "S"
 
     def inv(self):
         r"""
@@ -553,7 +598,7 @@ class ET(BaseET):
             jindex = self.jindex
 
         if self.qlim is None:
-            if self.axis[0] == "R":
+            if self.kind[0] == "R":
                 qlim = array([-pi, pi])
             else:
                 qlim = array([0, 1])
@@ -565,7 +610,7 @@ class ET(BaseET):
             self.isjoint,
             self.isflip,
             jindex,
-            self.__axis_to_number(self.axis),
+            self.__axis_to_number(self.kind),
             self._T,
             qlim,
         )
@@ -586,7 +631,7 @@ class ET(BaseET):
             jindex = self.jindex
 
         if self.qlim is None:
-            if self.axis[0] == "R":
+            if self.kind[0] == "R":
                 qlim = array([-pi, pi])
             else:
                 qlim = array([0, 1])
@@ -599,7 +644,7 @@ class ET(BaseET):
             self.isjoint,
             self.isflip,
             jindex,
-            self.__axis_to_number(self.axis),
+            self.__axis_to_number(self.kind),
             self._T,
             qlim,
         )
@@ -638,18 +683,18 @@ class ET(BaseET):
 
     @property
     def s(self) -> ndarray:  # pragma: nocover
-        if self.axis[1] == "x":
-            if self.axis[0] == "R":
+        if self.kind[1] == "x":
+            if self.kind[0] == "R":
                 return array([0, 0, 0, 1, 0, 0])
             else:
                 return array([1, 0, 0, 0, 0, 0])
-        elif self.axis[1] == "y":
-            if self.axis[0] == "R":
+        elif self.kind[1] == "y":
+            if self.kind[0] == "R":
                 return array([0, 0, 0, 0, 1, 0])
             else:
                 return array([0, 1, 0, 0, 0, 0])
         else:
-            if self.axis[0] == "R":
+            if self.kind[0] == "R":
                 return array([0, 0, 0, 0, 0, 1])
             else:
                 return array([0, 0, 1, 0, 0, 0])
@@ -888,11 +933,11 @@ class ET2(BaseET):
 
     @property
     def s(self) -> ndarray:  # pragma: nocover
-        if self.axis[0] == "R":
+        if self.kind[0] == "R":
             return array([0, 0, 0, 1])
-        if self.axis[1] == "x":
+        if self.kind[1] == "x":
             return array([1, 0, 0, 0])
-        elif self.axis[1] == "y":
+        elif self.kind[1] == "y":
             return array([0, 1, 0, 0])
         else:
             return array([0, 0, 1, 0])

@@ -193,22 +193,22 @@ class BaseETS(MutableSequence):
                 #     qvar = ""
 
                 if et.isflip:
-                    s = f"{et.axis}(-{qvar})"
+                    s = f"{et.kind}(-{qvar})"
                 else:
-                    s = f"{et.axis}({qvar})"
+                    s = f"{et.kind}({qvar})"
                 j += 1
 
             elif et.isrotation:
                 if issymbol(et.eta):
-                    s = f"{et.axis}({et.eta})"
+                    s = f"{et.kind}({et.eta})"
                 else:
-                    s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
+                    s = f"{et.kind}({et.eta * 180 / np.pi:.4g}°)"
 
             elif et.istranslation:
                 try:
-                    s = f"{et.axis}({et.eta:.4g})"
+                    s = f"{et.kind}({et.eta:.4g})"
                 except TypeError:  # pragma: nocover
-                    s = f"{et.axis}({et.eta})"
+                    s = f"{et.kind}({et.eta})"
 
             elif not et.iselementary:
                 s = str(et)
@@ -647,7 +647,7 @@ class BaseETS(MutableSequence):
         
         e1 = self._data[i]
         e2 = self._data[i + 1]
-        if e1.axis == e2.axis:
+        if e1.kind == e2.kind:
             self._data[i], self._data[i + 1] = self._data[i + 1], self._data[i]
             self._fknm_stale = True
         else:
@@ -683,7 +683,7 @@ class BaseETS(MutableSequence):
             raise IndexError("Index out of range")  # pragma: nocover
         e1 = self._data[i]
         e2 = self._data[i + 1]
-        if e1.axis != e2.axis:
+        if e1.kind != e2.kind:
             raise ValueError("Transforms are not the same type")  # pragma: nocover
 
         elif  (e1.isjoint + e2.isjoint) == 2:
@@ -2908,7 +2908,7 @@ class ETS2(BaseETS):
 
             # jindex = 0 if self[i].jindex is None else self[i].jindex
 
-            axis = self[i].axis
+            axis = self[i].kind
             if axis == "R":
                 dTdq = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].A(
                     q[jindex]  # type: ignore

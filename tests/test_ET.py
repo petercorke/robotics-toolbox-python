@@ -396,6 +396,45 @@ class TestET(unittest.TestCase):
         nt.assert_array_almost_equal(se.A(), sm.trot2(fl) @ sm.transl2(fl, 0))
         nt.assert_array_almost_equal(tyf.A(fl), sm.transl2(0, -fl))
 
+    def test_kind(self):
+        self.assertEqual(rtb.ET.Rx(1.0).kind, "Rx")
+        self.assertEqual(rtb.ET.Ry(1.0).kind, "Ry")
+        self.assertEqual(rtb.ET.Rz(1.0).kind, "Rz")
+        self.assertEqual(rtb.ET.tx(1.0).kind, "tx")
+        self.assertEqual(rtb.ET.ty(1.0).kind, "ty")
+        self.assertEqual(rtb.ET.tz(1.0).kind, "tz")
+        self.assertEqual(rtb.ET.SE3(SE3.Rx(0.5)).kind, "SE3")
+
+        self.assertEqual(rtb.ET2.R(1.0).kind, "R")
+        self.assertEqual(rtb.ET2.tx(1.0).kind, "tx")
+        self.assertEqual(rtb.ET2.ty(1.0).kind, "ty")
+        self.assertEqual(rtb.ET2.SE2(sm.trot2(0.5)).kind, "SE2")
+
+    def test_axis_deprecated(self):
+        # .axis is a permanent deprecated alias for .kind (never repurposed
+        # for the x/y/z meaning - see .ax below)
+        e = rtb.ET.Rx(1.0)
+
+        with self.assertWarns(DeprecationWarning):
+            axis = e.axis
+
+        self.assertEqual(axis, e.kind)
+        self.assertEqual(axis, "Rx")
+
+    def test_ax(self):
+        self.assertEqual(rtb.ET.Rx(1.0).ax, "x")
+        self.assertEqual(rtb.ET.Ry(1.0).ax, "y")
+        self.assertEqual(rtb.ET.Rz(1.0).ax, "z")
+        self.assertEqual(rtb.ET.tx(1.0).ax, "x")
+        self.assertEqual(rtb.ET.ty(1.0).ax, "y")
+        self.assertEqual(rtb.ET.tz(1.0).ax, "z")
+        self.assertIsNone(rtb.ET.SE3(SE3.Rx(0.5)).ax)
+
+        self.assertIsNone(rtb.ET2.R(1.0).ax)
+        self.assertEqual(rtb.ET2.tx(1.0).ax, "x")
+        self.assertEqual(rtb.ET2.ty(1.0).ax, "y")
+        self.assertIsNone(rtb.ET2.SE2(sm.trot2(0.5)).ax)
+
 
 if __name__ == "__main__":
     unittest.main()

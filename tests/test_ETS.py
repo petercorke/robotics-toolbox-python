@@ -636,7 +636,7 @@ class TestETS(unittest.TestCase):
         e.merge(1)
 
         self.assertEqual(len(e), n - 1)
-        self.assertEqual(e[1].axis, "tx")
+        self.assertEqual(e[1].kind, "tx")
         self.assertAlmostEqual(e[1].eta, 3.0)  # type: ignore
         nt.assert_almost_equal(e.fkine(q).A, ans.A)
 
