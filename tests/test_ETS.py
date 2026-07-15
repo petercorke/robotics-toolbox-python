@@ -602,7 +602,7 @@ class TestETS(unittest.TestCase):
         e.swap(0)
         self.assertFalse(e[0].isjoint)
         self.assertTrue(e[1].isjoint)
-        self.assertAlmostEqual(e[0].eta, 1.0)  # type: ignore
+        self.assertAlmostEqual(e[0].param, 1.0)  # type: ignore
         nt.assert_almost_equal(e.fkine(q).A, ans.A)
 
         # swap back and check we're symmetric
@@ -637,7 +637,7 @@ class TestETS(unittest.TestCase):
 
         self.assertEqual(len(e), n - 1)
         self.assertEqual(e[1].kind, "tx")
-        self.assertAlmostEqual(e[1].eta, 3.0)  # type: ignore
+        self.assertAlmostEqual(e[1].param, 3.0)  # type: ignore
         nt.assert_almost_equal(e.fkine(q).A, ans.A)
 
     def test_merge_not_same_type(self):

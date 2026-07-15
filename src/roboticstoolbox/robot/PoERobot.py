@@ -108,8 +108,8 @@ class PoELink(Link):
             ET.Ry(rpy[1]),
             ET.Rx(rpy[0]),
         ]
-        # remove ETs with empty transform (eta=None means joint variable, skip)
-        et_list = [et for et in et_list if et.eta is None or not np.isclose(et.eta, 0.0)]  # type: ignore[arg-type]
+        # remove ETs with empty transform (param=None means joint variable, skip)
+        et_list = [et for et in et_list if et.param is None or not np.isclose(et.param, 0.0)]  # type: ignore[arg-type]
 
         # assign joint variable at the end of list (if the frame is not base or tool
         # frame)
@@ -315,7 +315,7 @@ class PoERobot(Robot):
                 ET.Rx(rpy[0]),
             ]
             # remove ETs with empty transform
-            et_list = [et for et in et_list if et.eta is None or not np.isclose(et.eta, 0.0)]  # type: ignore[arg-type]
+            et_list = [et for et in et_list if et.param is None or not np.isclose(et.param, 0.0)]  # type: ignore[arg-type]
 
             # assign joint variable with corresponding index
             if self.links[i].isrevolute:

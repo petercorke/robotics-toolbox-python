@@ -37,26 +37,51 @@ else:  # pragma: nocover
     Sym = None
 
 
+def _resolve_param(
+    param: "float | Sym | None", eta: "float | None"
+) -> "float | Sym | None":
+    """
+    Merge the `param` kwarg with the deprecated `eta` kwarg.
+
+    `eta` (η) is the name used in the original Elementary Transform Sequence
+    paper; `param` is its replacement. If `eta` is passed, warn and use it
+    as `param` - this keeps every existing `eta=...` call working
+    unchanged, since `param` didn't exist before 1.4.0.
+    """
+    if eta is not None:
+        warnings.warn(
+            "the `eta` keyword is deprecated since 1.4.0, use `param` instead",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        return eta
+    return param
+
+
 class BaseET:
     def __init__(
         self,
         axis: str,
-        eta: float | Sym | None = None,
+        param: float | Sym | None = None,
         axis_func: Callable[[float | Sym], ndarray] | None = None,
         T: ndarray | None = None,
         jindex: int | None = None,
         unit: str = "rad",
         flip: bool = False,
         qlim: ArrayLike | None = None,
+        *,
+        eta: float | None = None,
     ):
+        param = _resolve_param(param, eta)
+
         self._kind = axis
 
         # A flag to check if the ET is a static joint with a symbolic value
-        # Defaults to False as is set to True if eta is a symbol below
+        # Defaults to False as is set to True if param is a symbol below
         self._isstaticsym = False
 
-        # axis_func/flip/jindex/qlim must all be set before `eta` below:
-        # the `eta` setter (for the static, eta-is-not-None case) reads
+        # axis_func/flip/jindex/qlim must all be set before `param` below:
+        # the `param` setter (for the static, param-is-not-None case) reads
         # `self.axis_func` to (re)compute `self._T`, and subclasses that add
         # compiled acceleration (see ET._accel_update) need jindex/qlim/flip
         # already in place too.
@@ -69,8 +94,8 @@ class BaseET:
         else:
             self._qlim: NDArray | None = None
 
-        if eta is None:
-            self._eta = None
+        if param is None:
+            self._param = None
             if T is None:
                 self._joint = True
                 self._T = eye(4).copy(order="F")
@@ -81,64 +106,64 @@ class BaseET:
                 self._T = T.copy(order="F")
         else:
             if axis[0] == "R" and unit.lower().startswith("deg"):
-                if not issymbol(eta):
-                    eta = deg2rad(float(eta))
-            # This is a static joint. The `eta` setter validates axis_func,
+                if not issymbol(param):
+                    param = deg2rad(float(param))
+            # This is a static joint. The `param` setter validates axis_func,
             # computes `_T`, sets `_isstaticsym`/`_joint`, and (for ET)
             # syncs the compiled acceleration struct.
-            self.eta = eta
+            self.param = param
 
     def __str__(self):
-        eta_str = ""
+        param_str = ""
 
         if self.isjoint:
             if self.jindex is None:
-                eta_str = "q"
+                param_str = "q"
             else:
-                eta_str = f"q{self.jindex}"
-        elif issymbol(self.eta):
+                param_str = f"q{self.jindex}"
+        elif issymbol(self.param):
             # Check if symbolic
-            eta_str = f"{self.eta}"
-        elif self.isrotation and self.eta is not None:
-            eta_str = f"{self.eta * (180.0 / pi):.4g}°"
+            param_str = f"{self.param}"
+        elif self.isrotation and self.param is not None:
+            param_str = f"{self.param * (180.0 / pi):.4g}°"
         elif not self.iselementary:
             if isinstance(self, ET):
                 T = self.A()
                 rpy = tr2rpy(T) * 180.0 / pi
                 if T[:3, -1].any() and rpy.any():
-                    eta_str = (
+                    param_str = (
                         f"{T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g};"
                         f" {rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
                     )
                 elif T[:3, -1].any():
-                    eta_str = f"{T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g}"
+                    param_str = f"{T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g}"
                 elif rpy.any():
-                    eta_str = f"{rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
+                    param_str = f"{rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
                 else:
-                    eta_str = ""  # pragma: nocover
+                    param_str = ""  # pragma: nocover
             elif isinstance(self, ET2):
                 T = self.A()
                 xyt = tr2xyt(T)
                 xyt[2] *= 180 / pi
-                eta_str = f"{xyt[0]:.4g}, {xyt[1]:.4g}; {xyt[2]:.4g}°"
+                param_str = f"{xyt[0]:.4g}, {xyt[1]:.4g}; {xyt[2]:.4g}°"
 
         else:
-            eta_str = f"{self.eta:.4g}"
+            param_str = f"{self.param:.4g}"
 
-        return f"{self.kind}({eta_str})"
+        return f"{self.kind}({param_str})"
 
     def __repr__(self):
-        s_eta = "" if self.eta is None else f"eta={self.eta}"
+        s_param = "" if self.param is None else f"param={self.param}"
         s_T = (
             f"T={repr(self._T)}"
-            if (self.eta is None and self.axis_func is None)
+            if (self.param is None and self.axis_func is None)
             else ""
         )
         s_flip = "" if not self.isflip else f"flip={self.isflip}"
         s_qlim = "" if self.qlim is None else f"qlim={repr(self.qlim)}"
         s_jindex = "" if self.jindex is None else f"jindex={self.jindex}"
 
-        kwargs = [s_eta, s_T, s_jindex, s_flip, s_qlim]
+        kwargs = [s_param, s_T, s_jindex, s_flip, s_qlim]
         s_kwargs = ", ".join(filter(None, kwargs))
 
         start = "ET" if isinstance(self, ET) else "ET2"
@@ -186,7 +211,7 @@ class BaseET:
     # ------------------------------------------------------------------
     # Compiled-acceleration hooks. BaseET (and so ET2) is pure Python; ET
     # overrides both to build/refresh the compiled C++ struct. Keeping
-    # these as no-op hooks here means the eta/qlim/jindex setters and
+    # these as no-op hooks here means the param/qlim/jindex setters and
     # inv()/__deepcopy__ below don't need to know or care whether the
     # concrete class has acceleration at all.
     # ------------------------------------------------------------------
@@ -197,11 +222,11 @@ class BaseET:
         pass
 
     @property
-    def eta(self) -> float | Sym | None:
+    def param(self) -> float | Sym | None:
         """
         Get the transform constant
 
-        :returns: The constant η if set
+        :returns: The constant value if set
         :rtype: float or Sym or None
 
         Examples
@@ -211,47 +236,80 @@ class BaseET:
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
-            >>> e.eta
+            >>> e.param
             >>> e = ET.Rx(90, 'deg')
-            >>> e.eta
+            >>> e.param
             >>> e = ET.ty()
-            >>> e.eta
+            >>> e.param
 
         .. rubric:: Notes
 
         - If the value was given in degrees it will be converted and
             stored internally in radians
+        - Historically called `eta` (η), after the notation used in the
+            original Elementary Transform Sequence paper (Haviland & Corke,
+            "Manipulator Differential Kinematics"). `eta` is kept as a
+            deprecated alias below.
         """
-        return self._eta
+        return self._param
 
-    @eta.setter
-    def eta(self, value: float | Sym) -> None:
+    @param.setter
+    def param(self, value: float | Sym) -> None:
         """
         Set the transform constant
 
-        :param value: The transform constant η
+        :param value: The transform constant
 
         .. rubric:: Notes
 
         - No unit conversions are applied, it is assumed to be in
             radians.
-        - Setting `eta` always makes the ET a static (non-joint) transform:
+        - Setting `param` always makes the ET a static (non-joint) transform:
             `_T` is recomputed from `axis_func`, and (for ET) the compiled
             acceleration struct is refreshed. This is also what ETS.merge()
             relies on when it combines two adjacent static ETs.
         """
         if self.axis_func is None:
             raise TypeError(
-                "For a static joint either both `eta` and `axis_func` "
+                "For a static joint either both `param` and `axis_func` "
                 "must be specified otherwise `T` must be supplied"
             )
 
-        self._eta = value if issymbol(value) else float(value)
+        self._param = value if issymbol(value) else float(value)
         self._isstaticsym = issymbol(value)
         self._joint = False
-        self._T = self.axis_func(self._eta).copy(order="F")
+        self._T = self.axis_func(self._param).copy(order="F")
 
         self._accel_update()
+
+    @property
+    def eta(self) -> float | Sym | None:
+        """
+        Get the transform constant
+
+        .. deprecated:: 1.4.0
+            `eta` (η) is the name used in the original Elementary Transform
+            Sequence paper; kept as a permanent alias for :attr:`param`,
+            which is otherwise identical.
+
+        :returns: The constant value if set
+        :rtype: float or Sym or None
+        """
+        warnings.warn(
+            "ET.eta is deprecated since 1.4.0, use .param instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self._param
+
+    @eta.setter
+    def eta(self, value: float | Sym) -> None:
+        warnings.warn(
+            "ET.eta is deprecated since 1.4.0, use .param instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.param = value
 
     @property
     def axis_func(
@@ -511,9 +569,9 @@ class BaseET:
             inv._flip ^= True
         elif not inv.iselementary:
             inv._T = npinv(inv._T).copy(order="F")
-        elif inv._eta is not None:
+        elif inv._param is not None:
             inv._T = npinv(inv._T).copy(order="F")
-            inv._eta = -inv._eta
+            inv._param = -inv._param
 
         inv._accel_update()
 
@@ -560,13 +618,13 @@ class ET(BaseET):
 
     def __init__(self, **kwargs):
         # Set before super().__init__() runs: BaseET.__init__ may invoke
-        # the `eta` setter (for a static ET), which calls _accel_update()
+        # the `param` setter (for a static ET), which calls _accel_update()
         # below. `None` here tells _accel_update() the compiled struct
         # doesn't exist yet, so it skips the sync instead of touching an
         # attribute that isn't there yet.
         self.__fknm = None
         super().__init__(**kwargs)
-        # Now that BaseET.__init__ has finished (axis/eta/T/joint/etc. are
+        # Now that BaseET.__init__ has finished (axis/param/T/joint/etc. are
         # all final), do the one real build of the compiled struct.
         self._accel_init()
 
@@ -618,7 +676,7 @@ class ET(BaseET):
     def _accel_update(self) -> None:
         """
         Push current Python-side state to the compiled struct. Called
-        whenever eta/qlim/jindex change after construction. A no-op while
+        whenever param/qlim/jindex change after construction. A no-op while
         the struct doesn't exist yet (i.e. mid-__init__, before
         _accel_init() has run for the first time).
         """
@@ -701,20 +759,25 @@ class ET(BaseET):
 
     @classmethod
     def Rx(
-        cls, eta: float | Sym | None = None, unit: str = "rad", **kwargs
+        cls,
+        param: float | Sym | None = None,
+        unit: str = "rad",
+        *,
+        eta: float | None = None,
+        **kwargs,
     ) -> "ET":
         """
         Pure rotation about the x-axis
 
-        :param η: rotation about the x-axis
+        :param param: rotation about the x-axis
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET
 
-        - ``ET.Rx(η)`` is an elementary rotation about the x-axis by a
-          constant angle η
+        - ``ET.Rx(param)`` is an elementary rotation about the x-axis by a
+          constant angle
         - ``ET.Rx()`` is an elementary rotation about the x-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
@@ -726,25 +789,30 @@ class ET(BaseET):
 
         :SymPy: supported
         """
-
-        return cls(axis="Rx", eta=eta, axis_func=trotx, unit=unit, **kwargs)
+        param = _resolve_param(param, eta)
+        return cls(axis="Rx", param=param, axis_func=trotx, unit=unit, **kwargs)
 
     @classmethod
     def Ry(
-        cls, eta: float | Sym | None = None, unit: str = "rad", **kwargs
+        cls,
+        param: float | Sym | None = None,
+        unit: str = "rad",
+        *,
+        eta: float | None = None,
+        **kwargs,
     ) -> "ET":
         """
         Pure rotation about the y-axis
 
-        :param η: rotation about the y-axis
+        :param param: rotation about the y-axis
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET
 
-        - ``ET.Ry(η)`` is an elementary rotation about the y-axis by a
-          constant angle η
+        - ``ET.Ry(param)`` is an elementary rotation about the y-axis by a
+          constant angle
         - ``ET.Ry()`` is an elementary rotation about the y-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
@@ -756,24 +824,30 @@ class ET(BaseET):
 
         :SymPy: supported
         """
-        return cls(axis="Ry", eta=eta, axis_func=troty, unit=unit, **kwargs)
+        param = _resolve_param(param, eta)
+        return cls(axis="Ry", param=param, axis_func=troty, unit=unit, **kwargs)
 
     @classmethod
     def Rz(
-        cls, eta: float | Sym | None = None, unit: str = "rad", **kwargs
+        cls,
+        param: float | Sym | None = None,
+        unit: str = "rad",
+        *,
+        eta: float | None = None,
+        **kwargs,
     ) -> "ET":
         """
         Pure rotation about the z-axis
 
-        :param η: rotation about the z-axis
+        :param param: rotation about the z-axis
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET
 
-        - ``ET.Rz(η)`` is an elementary rotation about the z-axis by a
-          constant angle η
+        - ``ET.Rz(param)`` is an elementary rotation about the z-axis by a
+          constant angle
         - ``ET.Rz()`` is an elementary rotation about the z-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
@@ -785,21 +859,28 @@ class ET(BaseET):
 
         :SymPy: supported
         """
-        return cls(axis="Rz", eta=eta, axis_func=trotz, unit=unit, **kwargs)
+        param = _resolve_param(param, eta)
+        return cls(axis="Rz", param=param, axis_func=trotz, unit=unit, **kwargs)
 
     @classmethod
-    def tx(cls, eta: float | Sym | None = None, **kwargs) -> "ET":
+    def tx(
+        cls,
+        param: float | Sym | None = None,
+        *,
+        eta: float | None = None,
+        **kwargs,
+    ) -> "ET":
         """
         Pure translation along the x-axis
 
-        :param η: translation distance along the x-axis
+        :param param: translation distance along the x-axis
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET
 
-        - ``ET.tx(η)`` is an elementary translation along the x-axis by a
-          distance constant η
+        - ``ET.tx(param)`` is an elementary translation along the x-axis by a
+          distance constant
         - ``ET.tx()`` is an elementary translation along the x-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
@@ -811,33 +892,40 @@ class ET(BaseET):
 
         :SymPy: supported
         """
+        param = _resolve_param(param, eta)
 
         # this method is 3x faster than using lambda x: transl(x, 0, 0)
-        def axis_func(eta):
+        def axis_func(param):
             # fmt: off
             return array([
-                [1, 0, 0, eta],
+                [1, 0, 0, param],
                 [0, 1, 0, 0],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1]
             ])
             # fmt: on
 
-        return cls(axis="tx", axis_func=axis_func, eta=eta, **kwargs)
+        return cls(axis="tx", axis_func=axis_func, param=param, **kwargs)
 
     @classmethod
-    def ty(cls, eta: float | Sym | None = None, **kwargs) -> "ET":
+    def ty(
+        cls,
+        param: float | Sym | None = None,
+        *,
+        eta: float | None = None,
+        **kwargs,
+    ) -> "ET":
         """
         Pure translation along the y-axis
 
-        :param η: translation distance along the y-axis
+        :param param: translation distance along the y-axis
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET
 
-        - ``ET.ty(η)`` is an elementary translation along the y-axis by a
-          distance constant η
+        - ``ET.ty(param)`` is an elementary translation along the y-axis by a
+          distance constant
         - ``ET.ty()`` is an elementary translation along the y-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
@@ -849,32 +937,39 @@ class ET(BaseET):
 
         :SymPy: supported
         """
+        param = _resolve_param(param, eta)
 
-        def axis_func(eta):
+        def axis_func(param):
             # fmt: off
             return array([
                 [1, 0, 0, 0],
-                [0, 1, 0, eta],
+                [0, 1, 0, param],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1]
             ])
             # fmt: on
 
-        return cls(axis="ty", eta=eta, axis_func=axis_func, **kwargs)
+        return cls(axis="ty", param=param, axis_func=axis_func, **kwargs)
 
     @classmethod
-    def tz(cls, eta: float | Sym | None = None, **kwargs) -> "ET":
+    def tz(
+        cls,
+        param: float | Sym | None = None,
+        *,
+        eta: float | None = None,
+        **kwargs,
+    ) -> "ET":
         """
         Pure translation along the z-axis
 
-        :param η: translation distance along the z-axis
+        :param param: translation distance along the z-axis
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET
 
-        - ``ET.tz(η)`` is an elementary translation along the z-axis by a
-          distance constant η
+        - ``ET.tz(param)`` is an elementary translation along the z-axis by a
+          distance constant
         - ``ET.tz()`` is an elementary translation along the z-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
@@ -886,18 +981,19 @@ class ET(BaseET):
 
         :SymPy: supported
         """
+        param = _resolve_param(param, eta)
 
-        def axis_func(eta):
+        def axis_func(param):
             # fmt: off
             return array([
                 [1, 0, 0, 0],
                 [0, 1, 0, 0],
-                [0, 0, 1, eta],
+                [0, 0, 1, param],
                 [0, 0, 0, 1]
             ])
             # fmt: on
 
-        return cls(axis="tz", axis_func=axis_func, eta=eta, **kwargs)
+        return cls(axis="tz", axis_func=axis_func, param=param, **kwargs)
 
     @classmethod
     def SE3(cls, T: ndarray | SE3, **kwargs) -> "ET":
@@ -944,19 +1040,24 @@ class ET2(BaseET):
 
     @classmethod
     def R(
-        cls, eta: float | Sym | None = None, unit: str = "rad", **kwargs
+        cls,
+        param: float | Sym | None = None,
+        unit: str = "rad",
+        *,
+        eta: float | None = None,
+        **kwargs,
     ) -> "ET2":
         """
         Pure rotation
 
-        :param η: rotation angle
+        :param param: rotation angle
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET2
 
-        - ``ET2.R(η)`` is an elementary rotation by a constant angle η
+        - ``ET2.R(param)`` is an elementary rotation by a constant angle
         - ``ET2.R()`` is an elementary rotation by a variable angle, i.e. a
           revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
@@ -971,26 +1072,31 @@ class ET2(BaseET):
         :func:`ET2`, :func:`isrotation`
 
         """
-
+        param = _resolve_param(param, eta)
         return cls(
-            axis="R", eta=eta, axis_func=lambda theta: trot2(theta), unit=unit, **kwargs
+            axis="R", param=param, axis_func=lambda theta: trot2(theta), unit=unit, **kwargs
         )
 
     @classmethod
     def tx(
-        cls, eta: float | Sym | None = None, unit: str = "rad", **kwargs
+        cls,
+        param: float | Sym | None = None,
+        unit: str = "rad",
+        *,
+        eta: float | None = None,
+        **kwargs,
     ) -> "ET2":
         """
         Pure translation along the x-axis
 
-        :param η: translation distance along the x-axis
+        :param param: translation distance along the x-axis
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET2
 
-        - ``ET2.tx(η)`` is an elementary translation along the x-axis by a
-          distance constant η
+        - ``ET2.tx(param)`` is an elementary translation along the x-axis by a
+          distance constant
         - ``ET2.tx()`` is an elementary translation along the x-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
@@ -1001,24 +1107,29 @@ class ET2(BaseET):
         :func:`istranslation`
 
         """
-
-        return cls(axis="tx", eta=eta, axis_func=lambda x: transl2(x, 0), **kwargs)
+        param = _resolve_param(param, eta)
+        return cls(axis="tx", param=param, axis_func=lambda x: transl2(x, 0), **kwargs)
 
     @classmethod
     def ty(
-        cls, eta: float | Sym | None = None, unit: str = "rad", **kwargs
+        cls,
+        param: float | Sym | None = None,
+        unit: str = "rad",
+        *,
+        eta: float | None = None,
+        **kwargs,
     ) -> "ET2":
         """
         Pure translation along the y-axis
 
-        :param η: translation distance along the y-axis
+        :param param: translation distance along the y-axis
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
         :rtype: ET2
 
-        - ``ET2.ty(η)`` is an elementary translation along the y-axis by a
-          distance constant η
+        - ``ET2.ty(param)`` is an elementary translation along the y-axis by a
+          distance constant
         - ``ET2.ty()`` is an elementary translation along the y-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
@@ -1028,8 +1139,8 @@ class ET2(BaseET):
         :func:`ET2`
 
         """
-
-        return cls(axis="ty", eta=eta, axis_func=lambda y: transl2(0, y), **kwargs)
+        param = _resolve_param(param, eta)
+        return cls(axis="ty", param=param, axis_func=lambda y: transl2(0, y), **kwargs)
 
     @classmethod
     def SE2(cls, T: ndarray | SE2, **kwargs) -> "ET2":

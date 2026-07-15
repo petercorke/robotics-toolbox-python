@@ -113,8 +113,8 @@ class TestET(unittest.TestCase):
         tx = rtb.ET.tx(1.543, jindex=5, flip=True, qlim=[-1, 1])
         se = rtb.ET.SE3(SE3.Rx(0.3) * SE3.Ry(0.5), jindex=5, flip=True, qlim=[-1, 1])
 
-        arx = "ET.Rx(eta=1.543, jindex=5, flip=True, qlim=array([-1.,  1.]))"
-        atx = "ET.tx(eta=1.543, jindex=5, flip=True, qlim=array([-1.,  1.]))"
+        arx = "ET.Rx(param=1.543, jindex=5, flip=True, qlim=array([-1.,  1.]))"
+        atx = "ET.tx(param=1.543, jindex=5, flip=True, qlim=array([-1.,  1.]))"
         ase = "ET.SE3(T=array([[ 0.87758256,  0.        ,  0.47942554,  0.        ],"
 
         print(repr(se))
@@ -191,7 +191,7 @@ class TestET(unittest.TestCase):
             BaseET("Rx")
 
         with nt.assert_raises(TypeError):
-            BaseET("Rx", eta=0.5)
+            BaseET("Rx", param=0.5)
 
     def test_jindex(self):
         et1 = rtb.ET.Rx(1.5, jindex=2)
@@ -339,16 +339,16 @@ class TestET(unittest.TestCase):
         with self.assertRaises(ValueError):
             r1.jindex = -2
 
-    def test_eta_setter_updates_transform(self):
-        # ETS.merge() reassigns `.eta` on an already-constructed ET (to
+    def test_param_setter_updates_transform(self):
+        # ETS.merge() reassigns `.param` on an already-constructed ET (to
         # combine two adjacent static transforms). The compiled fast path
         # (`.A()` -> ET_T) and the qlim/jindex the C struct also carries
         # must reflect the new value, not the value at construction time.
         r1 = rtb.ET.tx(1.0)
         nt.assert_almost_equal(r1.A(), sm.transl(1.0, 0, 0))
 
-        r1.eta = 3.0
-        self.assertEqual(r1.eta, 3.0)
+        r1.param = 3.0
+        self.assertEqual(r1.param, 3.0)
         nt.assert_almost_equal(r1.A(), sm.transl(3.0, 0, 0))
 
         # deepcopy must rebuild its own compiled struct from the updated
@@ -368,9 +368,9 @@ class TestET(unittest.TestCase):
         self.assertFalse(hasattr(e, "fknm"))
         self.assertFalse(hasattr(e, "_ET__fknm"))
 
-        # eta/qlim/jindex updates on ET2 must not attempt to touch a
+        # param/qlim/jindex updates on ET2 must not attempt to touch a
         # compiled struct that doesn't exist
-        e.eta = 2.0
+        e.param = 2.0
         nt.assert_almost_equal(e.A(), sm.transl2(2.0, 0))
         e.qlim = (-1, 1)
         e.jindex = 0
@@ -434,6 +434,37 @@ class TestET(unittest.TestCase):
         self.assertEqual(rtb.ET2.tx(1.0).ax, "x")
         self.assertEqual(rtb.ET2.ty(1.0).ax, "y")
         self.assertIsNone(rtb.ET2.SE2(sm.trot2(0.5)).ax)
+
+    def test_eta_property_deprecated(self):
+        # .eta is a permanent deprecated alias for .param - both getter and
+        # setter must warn and behave identically to .param
+        e = rtb.ET.tx(1.0)
+
+        with self.assertWarns(DeprecationWarning):
+            value = e.eta
+
+        self.assertEqual(value, e.param)
+        self.assertEqual(value, 1.0)
+
+        with self.assertWarns(DeprecationWarning):
+            e.eta = 2.0
+
+        self.assertEqual(e.param, 2.0)
+        nt.assert_almost_equal(e.A(), sm.transl(2.0, 0, 0))
+
+    def test_eta_kwarg_deprecated(self):
+        # eta= is a permanent deprecated alias for param= on every factory
+        # classmethod and on BaseET.__init__ directly
+        with self.assertWarns(DeprecationWarning):
+            e = rtb.ET.tx(eta=1.5)
+
+        self.assertEqual(e.param, 1.5)
+        nt.assert_almost_equal(e.A(), sm.transl(1.5, 0, 0))
+
+        with self.assertWarns(DeprecationWarning):
+            e2 = BaseET("tx", eta=1.5, axis_func=lambda x: sm.transl(x, 0, 0))
+
+        self.assertEqual(e2.param, 1.5)
 
 
 if __name__ == "__main__":

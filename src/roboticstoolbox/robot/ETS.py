@@ -199,16 +199,16 @@ class BaseETS(MutableSequence):
                 j += 1
 
             elif et.isrotation:
-                if issymbol(et.eta):
-                    s = f"{et.kind}({et.eta})"
+                if issymbol(et.param):
+                    s = f"{et.kind}({et.param})"
                 else:
-                    s = f"{et.kind}({et.eta * 180 / np.pi:.4g}°)"
+                    s = f"{et.kind}({et.param * 180 / np.pi:.4g}°)"
 
             elif et.istranslation:
                 try:
-                    s = f"{et.kind}({et.eta:.4g})"
+                    s = f"{et.kind}({et.param:.4g})"
                 except TypeError:  # pragma: nocover
-                    s = f"{et.kind}({et.eta})"
+                    s = f"{et.kind}({et.param})"
 
             elif not et.iselementary:
                 s = str(et)
@@ -690,7 +690,7 @@ class BaseETS(MutableSequence):
             raise ValueError("Transforms are both joints")  # pragma: nocover
 
         else:
-            self._data[i].eta = e1.eta + e2.eta
+            self._data[i].param = e1.param + e2.param
             del self._data[i + 1]
             self._fknm_stale = True
 

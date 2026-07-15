@@ -637,7 +637,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                                 elif et.qlim is not None:  # pragma nocover
                                     d += max(et.qlim)
                             else:
-                                d += abs(et.eta)
+                                d += abs(et.param)
                     link = link.parent
                     if link is None or isinstance(link, str):
                         d_all.append(d)
@@ -1911,7 +1911,7 @@ class Robot2(BaseRobot[Link2]):
                                 elif et.qlim is not None:  # pragma nocover
                                     d += max(et.qlim)
                             else:
-                                d += abs(et.eta)
+                                d += abs(et.param)
                     link = link.parent
                     if link is None or isinstance(link, str):
                         d_all.append(d)
