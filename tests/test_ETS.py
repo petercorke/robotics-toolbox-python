@@ -661,6 +661,17 @@ class TestETS(unittest.TestCase):
         with self.assertRaises(IndexError):
             e.merge(1)
 
+    def test_joint_descriptor_ets_str(self):
+        # ETS.__str__ has its own joint-formatting logic, independent of
+        # each ET's own __str__ - a custom name from a string `param`
+        # descriptor (e.g. "theta2") must show up there too, since printing
+        # a full kinematic chain (not a lone ET) is the primary use case.
+        ets = rtb.ET.Rx("theta0") * rtb.ET.tx("q1") * rtb.ET.Rz("-q(2)") * rtb.ET.Ry()
+
+        self.assertEqual(str(ets), "Rx(theta0) ⊕ tx(q1) ⊕ Rz(-q(2)) ⊕ Ry(q3)")
+        self.assertEqual([e.jindex for e in ets], [0, 1, 2, 3])
+        self.assertEqual([e.isflip for e in ets], [False, False, True, False])
+
     def test_jacob0(self):
         q = [0.0]
         rx = rtb.ETS(rtb.ET.Rx())

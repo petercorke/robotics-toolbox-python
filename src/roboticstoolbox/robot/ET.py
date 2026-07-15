@@ -17,6 +17,7 @@ from spatialmath.base import (
     transl2,
     tr2xyt,
 )
+import re
 import warnings
 from copy import deepcopy
 from roboticstoolbox.robot.fknm import ET_T, ET_init, ET_update
@@ -58,16 +59,37 @@ def _resolve_param(
     return param
 
 
+def _parse_joint_descriptor(s: str) -> "tuple[int | None, bool]":
+    """
+    Parse a joint descriptor string into (jindex, flip).
+
+    A leading '-' sets flip (and is stripped); a leading '+' is stripped and
+    ignored. The first run of digits found anywhere in what remains becomes
+    the joint index - this treats 'theta2', 'q2', 'q(3)' and 'θ_3' the same
+    regardless of how the index is set off from the rest of the name. If no
+    digit is found, jindex is None, so the joint falls through to ETS's
+    existing auto-numbering for unassigned joints.
+    """
+    flip = s.startswith("-")
+    if s[:1] in "+-":
+        s = s[1:]
+
+    match = re.search(r"\d+", s)
+    jindex = int(match.group()) if match else None
+
+    return jindex, flip
+
+
 class BaseET:
     def __init__(
         self,
         axis: str,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         axis_func: Callable[[float | Sym], ndarray] | None = None,
         T: ndarray | None = None,
         jindex: int | None = None,
         unit: str = "rad",
-        flip: bool = False,
+        flip: bool | None = None,
         qlim: ArrayLike | None = None,
         *,
         eta: float | None = None,
@@ -75,6 +97,32 @@ class BaseET:
         param = _resolve_param(param, eta)
 
         self._kind = axis
+
+        # A custom joint display name, e.g. "theta2" from a string `param`
+        # descriptor below - printed by __str__ in place of the generic
+        # "q2" when set.
+        self._joint_name = None
+
+        # A string `param` that doesn't parse as a plain number is a joint
+        # descriptor (e.g. "theta2", "-q(3)", "θ_3"): regex-parsed for
+        # jindex/flip and remembered for __str__, then treated as a
+        # variable joint (param=None) from here on. `jindex`/`flip` must
+        # not also be given explicitly in this case - one form or the
+        # other, not a silent merge of both.
+        if isinstance(param, str):
+            try:
+                param = float(param)
+            except ValueError:
+                if jindex is not None or flip is not None:
+                    raise ValueError(
+                        "cannot specify `jindex` or `flip` alongside a string "
+                        "joint descriptor for `param`"
+                    )
+                jindex, flip = _parse_joint_descriptor(param)
+                self._joint_name = param
+                param = None
+
+        flip = bool(flip)  # None (not given, and not set above) -> False
 
         # A flag to check if the ET is a static joint with a symbolic value
         # Defaults to False as is set to True if param is a symbol below
@@ -117,7 +165,9 @@ class BaseET:
         param_str = ""
 
         if self.isjoint:
-            if self.jindex is None:
+            if self._joint_name is not None:
+                param_str = self._joint_name
+            elif self.jindex is None:
                 param_str = "q"
             else:
                 param_str = f"q{self.jindex}"
@@ -760,7 +810,7 @@ class ET(BaseET):
     @classmethod
     def Rx(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         unit: str = "rad",
         *,
         eta: float | None = None,
@@ -795,7 +845,7 @@ class ET(BaseET):
     @classmethod
     def Ry(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         unit: str = "rad",
         *,
         eta: float | None = None,
@@ -830,7 +880,7 @@ class ET(BaseET):
     @classmethod
     def Rz(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         unit: str = "rad",
         *,
         eta: float | None = None,
@@ -865,7 +915,7 @@ class ET(BaseET):
     @classmethod
     def tx(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         *,
         eta: float | None = None,
         **kwargs,
@@ -910,7 +960,7 @@ class ET(BaseET):
     @classmethod
     def ty(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         *,
         eta: float | None = None,
         **kwargs,
@@ -954,7 +1004,7 @@ class ET(BaseET):
     @classmethod
     def tz(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         *,
         eta: float | None = None,
         **kwargs,
@@ -1041,7 +1091,7 @@ class ET2(BaseET):
     @classmethod
     def R(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         unit: str = "rad",
         *,
         eta: float | None = None,
@@ -1080,7 +1130,7 @@ class ET2(BaseET):
     @classmethod
     def tx(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         unit: str = "rad",
         *,
         eta: float | None = None,
@@ -1113,7 +1163,7 @@ class ET2(BaseET):
     @classmethod
     def ty(
         cls,
-        param: float | Sym | None = None,
+        param: float | Sym | str | None = None,
         unit: str = "rad",
         *,
         eta: float | None = None,

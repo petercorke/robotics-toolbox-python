@@ -181,6 +181,16 @@ class BaseETS(MutableSequence):
         # which come from the named tuple
         for et in self._data:
             if et.isjoint:
+                # A custom name from a string `param` descriptor (e.g.
+                # "theta2") already encodes any leading sign itself, so it
+                # takes over the whole "q0"/"-q0" formatting below rather
+                # than combining with it.
+                if et._joint_name is not None:
+                    s = f"{et.kind}({et._joint_name})"
+                    j += 1
+                    es.append(s)
+                    continue
+
                 if q is not None:
                     if et.jindex is None:  # pragma: nocover  this is no longer possible
                         _j = j

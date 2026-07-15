@@ -466,6 +466,54 @@ class TestET(unittest.TestCase):
 
         self.assertEqual(e2.param, 1.5)
 
+    def test_joint_descriptor_string(self):
+        cases = [
+            ("theta2", 2, False),
+            ("q2", 2, False),
+            ("-q(3)", 3, True),
+            ("θ_3", 3, False),
+        ]
+        for s, jindex, flip in cases:
+            e = rtb.ET.Rx(s)
+            self.assertTrue(e.isjoint)
+            self.assertEqual(e.jindex, jindex, s)
+            self.assertEqual(e.isflip, flip, s)
+            self.assertEqual(str(e), f"Rx({s})")
+
+        # ET2 gets the same treatment, no special-casing needed
+        e2 = rtb.ET2.R("-q(4)")
+        self.assertEqual(e2.jindex, 4)
+        self.assertTrue(e2.isflip)
+
+    def test_joint_descriptor_kinematics(self):
+        # the parsed descriptor must behave exactly like a normal joint
+        e = rtb.ET.Rx("-q(3)")
+        nt.assert_almost_equal(e.A(0.5), sm.trotx(-0.5))
+
+        e2 = rtb.ET.Rx("theta2")
+        nt.assert_almost_equal(e2.A(0.5), sm.trotx(0.5))
+
+    def test_joint_descriptor_no_digit_falls_back_to_auto_numbering(self):
+        e = rtb.ET.Rx("theta")
+        self.assertTrue(e.isjoint)
+        self.assertIsNone(e.jindex)
+        self.assertFalse(e.isflip)
+
+    def test_joint_descriptor_numeric_string_is_static_value(self):
+        # a string that parses as a plain number is a static value, not a
+        # joint descriptor
+        e = rtb.ET.tx("1.5")
+        self.assertFalse(e.isjoint)
+        self.assertEqual(e.param, 1.5)
+        nt.assert_almost_equal(e.A(), sm.transl(1.5, 0, 0))
+
+    def test_joint_descriptor_conflict_raises(self):
+        with self.assertRaises(ValueError):
+            rtb.ET.Rx("theta2", jindex=5)
+
+        with self.assertRaises(ValueError):
+            rtb.ET.Rx("theta2", flip=True)
+
 
 if __name__ == "__main__":
     unittest.main()
