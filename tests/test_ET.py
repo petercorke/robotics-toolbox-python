@@ -11,7 +11,7 @@ import roboticstoolbox as rtb
 import spatialmath.base as sm
 from spatialmath import SE3
 import unittest
-from roboticstoolbox.ets.ET import BaseET
+from roboticstoolbox.ets._ET import BaseET
 import sympy
 from copy import copy, deepcopy
 
@@ -513,6 +513,37 @@ class TestET(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             rtb.ET.Rx("theta2", flip=True)
+
+    def test_free_functions(self):
+        # roboticstoolbox.ets.ET/.ET2 expose Rx/Ry/Rz/tx/ty/tz/SE3 and
+        # R/tx/ty/SE2 respectively as bare module-level functions (not just
+        # ET.Rx/ET2.tx classmethods), so `from roboticstoolbox.ets.ET import *`
+        # works. tx/ty deliberately mean different things (3D vs 2D) between
+        # the two modules - that's the one thing wildcard-importing both at
+        # once can't avoid.
+        from roboticstoolbox.ets import ET as ET_module
+        from roboticstoolbox.ets import ET2 as ET2_module
+
+        # Rx/tx/etc are bound classmethods, so a fresh attribute access
+        # (ET_module.Rx vs rtb.ET.Rx) produces a distinct-but-equal bound
+        # method object each time - compare with == (same __func__/__self__),
+        # not `is`.
+        self.assertEqual(ET_module.Rx, rtb.ET.Rx)
+        self.assertEqual(ET_module.tx, rtb.ET.tx)
+        self.assertEqual(ET_module.SE3, rtb.ET.SE3)
+
+        self.assertEqual(ET2_module.R, rtb.ET2.R)
+        self.assertEqual(ET2_module.tx, rtb.ET2.tx)
+        self.assertEqual(ET2_module.SE2, rtb.ET2.SE2)
+
+        nt.assert_almost_equal(
+            ET_module.tx(1.5).A(), rtb.ET.tx(1.5).A()
+        )
+        nt.assert_almost_equal(
+            ET2_module.tx(1.5).A(), rtb.ET2.tx(1.5).A()
+        )
+        # confirm they really are different (3D vs 2D), not the same object
+        self.assertNotEqual(ET_module.tx(1.5).A().shape, ET2_module.tx(1.5).A().shape)
 
 
 if __name__ == "__main__":

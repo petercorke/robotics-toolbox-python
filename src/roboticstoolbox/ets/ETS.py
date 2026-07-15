@@ -38,7 +38,9 @@ from roboticstoolbox.ets.fknm import (
     IK_LM_c,
 )
 from copy import deepcopy
-from roboticstoolbox.ets.ET import ET, ET2, BaseET
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ET2 import ET2
+from roboticstoolbox.ets._ET import BaseET
 from typing import overload, TypeVar
 from typing import Literal as L
 from roboticstoolbox.tools.types import ArrayLike, NDArray
