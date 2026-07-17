@@ -1096,3 +1096,64 @@ the real dependency becomes explicit rather than implicit.
 `/robot`, see the ETS/fknm refactor entry above) is underway — worth
 revisiting together since the import surface `IK.py` needs from the new
 package location is the same shape this protocol would formalize.
+
+## `URDF.UR5`'s `gripper_link_index=7` is a hardcoded position, not a stable identifier
+
+### Background
+
+Found 2026-07-17: CI failed on `URDF.UR5` construction (`ValueError:
+incorrect vector length: expected 4, got (6,)` from `addconfiguration_attr`)
+across every OS/Python combination, while local runs passed. Root cause:
+`pyproject.toml`'s `robot_descriptions` dependency had no upper bound, and
+`robot_descriptions` 3.0.0 (uploaded 2026-07-11) changed which upstream repo
+"ur5" resolves to — `Universal_Robots_ROS2_Description` instead of whatever
+2.0.0 pointed at. `UR5.__init__` calls `super().__init__("ur5", ...,
+gripper_link_index=7)`, a raw positional index into the parsed link list
+meant to mark the gripper/tool attachment link. The two versions parse to
+different link counts (11 vs. 13) and orderings, so index `7` now lands on
+`wrist_2_link` — a real arm joint — instead of the intended attachment
+point, silently dropping 2 of 6 joints from `self.n`.
+
+`gripper_link_index` was calibrated against `UR5.py`'s older local, vendored
+xacro file (before it was switched to the bare name `"ur5"`, which triggers
+live `robot_descriptions` resolution) — it was never designed to survive the
+upstream source changing under it, which is now possible on every fresh
+install.
+
+**Immediate fix**: pinned `robot_descriptions>=2.0,<3.0` in `pyproject.toml`
+(same floor+ceiling pattern already used for `rtb-data`), restoring the
+known-working data. This does not fix the underlying fragility, just stops
+it from firing today.
+
+### Confirmed: a name/structure-based fix is viable, not a dead end
+
+Compared the full raw link lists (`URDF_file("ur5")`, independent of the
+gripper-link logic) between the two `robot_descriptions` versions:
+
+- 2.0.0 (11 links): `world, base_link, shoulder_link, upper_arm_link,
+  forearm_link, wrist_1_link, wrist_2_link, wrist_3_link, ee_link, base,
+  tool0`
+- 3.0.0 (13 links): `world, base_link, base_link_inertia, shoulder_link,
+  upper_arm_link, forearm_link, wrist_1_link, wrist_2_link, wrist_3_link,
+  ft_frame, base, flange, tool0`
+
+All 6 real arm joints have identical names and `isjoint` status in both.
+Only the gripper-attachment link's name differs (`ee_link` in 2.0.0), but
+`tool0` exists in **both** — just at a different index (9 vs. 12). So a
+name-based lookup (`"tool0"`) or, more robustly, a structural one ("the
+first fixed link after the last actuated joint") would survive this exact
+upstream change, unlike the index.
+
+### Proposed fix
+
+Replace `gripper_link_index: int` with a lookup that doesn't depend on
+absolute position — either match by a small set of known tool-frame names
+(`tool0`, `ee_link`, `flange`, ...) with a fallback, or derive it
+structurally (first non-actuated link following the last actuated one in
+the kinematic chain). Worth checking how many other `URDF.*` models pass a
+raw `gripper_link_index` the same fragile way before deciding on the
+general fix — this UR5 case is likely not unique.
+
+**Deferred**: not fixed now, since the pin already resolves the immediate
+CI break and this needs its own design pass rather than a rushed fix
+bundled into a dependency-pin PR.
