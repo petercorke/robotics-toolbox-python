@@ -652,8 +652,8 @@ class TestRobot(unittest.TestCase):
     def test_dotfile2(self):
         # branched robot built dynamically — two end-effectors sharing a common base
         from roboticstoolbox.robot.Link import Link
-        from roboticstoolbox.robot.ET import ET
-        from roboticstoolbox.robot.ETS import ETS
+        from roboticstoolbox.ets.ET import ET
+        from roboticstoolbox.ets.ETS import ETS
 
         L0 = Link(name="base")
         L1 = Link(ETS(ET.Rz()), name="joint1", parent=L0)

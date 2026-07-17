@@ -10,9 +10,9 @@ from roboticstoolbox.tools.types import NDArray, ArrayLike
 
 
 def angle_axis(T, Td) -> NDArray:
-    # deferred: roboticstoolbox.robot.fknm imports the robot package, which
+    # deferred: roboticstoolbox.ets.fknm imports the ets package, which
     # depends on roboticstoolbox.tools being fully initialised first
-    from roboticstoolbox.robot.fknm import Angle_Axis
+    from roboticstoolbox.ets.fknm import Angle_Axis
 
     try:
         e: NDArray = Angle_Axis(T, Td)

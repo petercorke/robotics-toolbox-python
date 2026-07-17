@@ -40,7 +40,8 @@ from roboticstoolbox.robot.BaseRobot import BaseRobot
 from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link, Link2
-from roboticstoolbox.robot.ETS import ETS, ETS2
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.ets.ETS2 import ETS2
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.tools.data import rtb_path_to_datafile
@@ -108,8 +109,15 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 # We're passed an ETS string
                 links = []
                 # chop it up into segments, a link frame after every joint
+                # split()'s default "last" method folds any base content into
+                # the first segment, so `base` is always empty and dropped;
+                # `gripper` holds trailing constant content, if any, and
+                # becomes one extra static (non-joint) link.
+                _, *segs, gripper = arg.split()
+                if gripper:
+                    segs.append(gripper)
                 parent = None
-                for j, ets_j in enumerate(arg.split()):
+                for j, ets_j in enumerate(segs):
                     elink = Link(ETS(ets_j), parent=parent, name=f"link{j:d}")
                     if (
                         elink.qlim is None
@@ -637,7 +645,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                                 elif et.qlim is not None:  # pragma nocover
                                     d += max(et.qlim)
                             else:
-                                d += abs(et.eta)
+                                d += abs(et.param)
                     link = link.parent
                     if link is None or isinstance(link, str):
                         d_all.append(d)
@@ -1804,8 +1812,15 @@ class Robot2(BaseRobot[Link2]):
             # we're passed an ETS string
             links = []
             # chop it up into segments, a link frame after every joint
+            # split()'s default "last" method folds any base content into
+            # the first segment, so `base` is always empty and dropped;
+            # `gripper` holds trailing constant content, if any, and
+            # becomes one extra static (non-joint) link.
+            _, *segs, gripper = arg.split()
+            if gripper:
+                segs.append(gripper)
             parent = None
-            for j, ets_j in enumerate(arg.split()):
+            for j, ets_j in enumerate(segs):
                 elink = Link2(ETS2(ets_j), parent=parent, name=f"link{j:d}")
                 parent = elink
                 if (
@@ -1911,7 +1926,7 @@ class Robot2(BaseRobot[Link2]):
                                 elif et.qlim is not None:  # pragma nocover
                                     d += max(et.qlim)
                             else:
-                                d += abs(et.eta)
+                                d += abs(et.param)
                     link = link.parent
                     if link is None or isinstance(link, str):
                         d_all.append(d)

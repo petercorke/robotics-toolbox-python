@@ -7,6 +7,11 @@ Created on Fri May 1 14:04:04 2020
 
 import numpy.testing as nt
 import roboticstoolbox as rtb
+
+# Rx/Ry/Rz/tx/ty/tz free functions for terser ET construction; ET also
+# exports SE3 (a constant-transform ET constructor) via __all__, so this
+# must precede the spatialmath SE3 import below to let that one win
+from roboticstoolbox.ets.ET import *
 import numpy as np
 
 # import spatialmath.base as sm
@@ -18,8 +23,8 @@ import sympy
 
 class TestETS(unittest.TestCase):
     def test_bad_arg(self):
-        rx = rtb.ET.Rx(1.543)
-        ry = rtb.ET.Ry(1.543)
+        rx = Rx(1.543)
+        ry = Ry(1.543)
 
         with self.assertRaises(TypeError):
             rtb.ETS([rx, ry, 1.0])  # type: ignore
@@ -32,36 +37,36 @@ class TestETS(unittest.TestCase):
         # mm = 1e-3
         # tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         r1 = l0 + l1 + l2 + l3 + l3 + l4 + l5
         r2 = l0 * l1 * l2 * l3 * l3 * l4 * l5
         r3 = rtb.ETS(l0 + l1 + l2 + l3 + l3 + l4 + l5)
         r4 = rtb.ETS([l0, l1, l2, l3, l3, l4, l5])
-        r5 = rtb.ETS([l0, l1, l2, l3, l3, l4, rtb.ET.Rx(90 * deg), rtb.ET.Rz(jindex=5)])
+        r5 = rtb.ETS([l0, l1, l2, l3, l3, l4, Rx(90 * deg), Rz(jindex=5)])
         # r6 = rtb.ETS([r1])
-        r7 = rtb.ETS(rtb.ET.Rx(1.0))
+        r7 = rtb.ETS(Rx(1.0))
 
         self.assertEqual(r1, r2)
         self.assertEqual(r1, r3)
         self.assertEqual(r1, r4)
         self.assertEqual(r1, r5)
-        self.assertEqual(r7[0], rtb.ET.Rx(1.0))
+        self.assertEqual(r7[0], Rx(1.0))
         self.assertEqual(r1 + rtb.ETS(), r2)
 
     def test_empty(self):
@@ -70,13 +75,13 @@ class TestETS(unittest.TestCase):
         self.assertEqual(r.m, 0)
 
     def test_str(self):
-        rx = rtb.ET.Rx(1.543)
-        ry = rtb.ET.Ry(1.543)
-        rz = rtb.ET.Rz(1.543)
-        a = rtb.ET.Rx()
-        b = rtb.ET.Ry()
-        c = rtb.ET.Rz()
-        d = rtb.ET.tx(1.0)
+        rx = Rx(1.543)
+        ry = Ry(1.543)
+        rz = Rz(1.543)
+        a = Rx()
+        b = Ry()
+        c = Rz()
+        d = tx(1.0)
         e = rtb.ET.SE3(SE3.Rx(1.0))
         ets = rx * ry * rz * d
         ets2 = rx * a * b * c
@@ -90,39 +95,39 @@ class TestETS(unittest.TestCase):
         )
 
     def test_str_jindex(self):
-        rx = rtb.ET.Rx(1.543)
-        a = rtb.ET.Rx(jindex=2)
-        b = rtb.ET.Ry(jindex=5)
-        c = rtb.ET.Rz(jindex=7)
+        rx = Rx(1.543)
+        a = Rx(jindex=2)
+        b = Ry(jindex=5)
+        c = Rz(jindex=7)
         ets = rx * a * b * c
 
         self.assertEqual(str(ets), "Rx(88.41°) ⊕ Rx(q2) ⊕ Ry(q5) ⊕ Rz(q7)")
 
     def test_str_flip(self):
-        rx = rtb.ET.Rx(1.543)
-        a = rtb.ET.Rx(jindex=2, flip=True)
-        b = rtb.ET.Ry(jindex=5)
-        c = rtb.ET.Rz(jindex=7)
+        rx = Rx(1.543)
+        a = Rx(jindex=2, flip=True)
+        b = Ry(jindex=5)
+        c = Rz(jindex=7)
         ets = rx * a * b * c
 
         self.assertEqual(str(ets), "Rx(88.41°) ⊕ Rx(-q2) ⊕ Ry(q5) ⊕ Rz(q7)")
 
     def test_str_sym(self):
         x = sympy.Symbol("x")
-        rx = rtb.ET.Rx(x)  # type: ignore
-        a = rtb.ET.Rx(jindex=2)
-        b = rtb.ET.Ry(jindex=5)
-        c = rtb.ET.Rz(jindex=7)
+        rx = Rx(x)  # type: ignore
+        a = Rx(jindex=2)
+        b = Ry(jindex=5)
+        c = Rz(jindex=7)
         ets = rx * a * b * c
 
         self.assertEqual(str(ets), "Rx(x) ⊕ Rx(q2) ⊕ Ry(q5) ⊕ Rz(q7)")
 
     def ets_mul(self):
-        rx = rtb.ET.Rx(1.543)
-        ry = rtb.ET.Ry(1.543)
-        rz = rtb.ET.Rz(1.543)
-        a = rtb.ET.Rx()
-        b = rtb.ET.Ry()
+        rx = Rx(1.543)
+        ry = Ry(1.543)
+        rz = Rz(1.543)
+        a = Rx()
+        b = Ry()
 
         ets1 = rx * ry
         ets2 = a * b
@@ -136,11 +141,11 @@ class TestETS(unittest.TestCase):
         self.assertIsInstance(ets2, rtb.ETS)
 
     def test_n(self):
-        rx = rtb.ET.Rx(1.543)
-        ry = rtb.ET.Ry(1.543)
-        # rz = rtb.ET.Rz(1.543)
-        a = rtb.ET.Rx()
-        b = rtb.ET.Ry()
+        rx = Rx(1.543)
+        ry = Ry(1.543)
+        # rz = Rz(1.543)
+        a = Rx()
+        b = Ry()
 
         ets1 = rx * ry
         ets2 = a * b
@@ -154,20 +159,20 @@ class TestETS(unittest.TestCase):
 
     def test_fkine(self):
         q = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
-        rx = rtb.ET.Rx(1.543)
-        ry = rtb.ET.Ry(1.543)
-        rz = rtb.ET.Rz(1.543)
-        tx = rtb.ET.tx(1.543)
-        ty = rtb.ET.ty(1.543)
-        tz = rtb.ET.tz(1.543)
-        a = rtb.ET.Rx(jindex=0)
-        b = rtb.ET.Ry(jindex=1)
-        c = rtb.ET.Rz(jindex=2)
-        d = rtb.ET.tx(jindex=3)
-        e = rtb.ET.ty(jindex=4)
-        f = rtb.ET.tz(jindex=5)
+        rx = Rx(1.543)
+        ry = Ry(1.543)
+        rz = Rz(1.543)
+        t_x = tx(1.543)
+        t_y = ty(1.543)
+        t_z = tz(1.543)
+        a = Rx(jindex=0)
+        b = Ry(jindex=1)
+        c = Rz(jindex=2)
+        d = tx(jindex=3)
+        e = ty(jindex=4)
+        f = tz(jindex=5)
 
-        r = rx * ry * rz * tx * ty * tz * a * b * c * d * e * f
+        r = rx * ry * rz * t_x * t_y * t_z * a * b * c * d * e * f
 
         ans = (
             SE3.Rx(1.543)
@@ -193,9 +198,9 @@ class TestETS(unittest.TestCase):
 
         q = np.array([y, z])
         qt = np.array([[1.0, y], [z, y], [x, 2.0]])
-        a = rtb.ET.Rx(x)  # type: ignore
-        b = rtb.ET.Ry(jindex=0)
-        c = rtb.ET.tz(jindex=1)
+        a = Rx(x)  # type: ignore
+        b = Ry(jindex=0)
+        c = tz(jindex=1)
 
         r = a * b * c
 
@@ -220,7 +225,7 @@ class TestETS(unittest.TestCase):
         tool = SE3.Tz(0.5)
         ans5 = base * ans1
 
-        r2 = rtb.ETS([rtb.ET.Rx(jindex=0)])
+        r2 = rtb.ETS([Rx(jindex=0)])
 
         nt.assert_almost_equal(r.fkine(q, base=base).A, sympy.simplify(ans5.A))
         # nt.assert_almost_equal(r.fkine(q, base=base), ans5.A)  # type: ignore
@@ -236,12 +241,12 @@ class TestETS(unittest.TestCase):
     def test_fkine_traj(self):
         robot = rtb.ERobot(
             [
-                rtb.Link(rtb.ET.Rx()),
-                rtb.Link(rtb.ET.Ry()),
-                rtb.Link(rtb.ET.Rz()),
-                rtb.Link(rtb.ET.tx()),
-                rtb.Link(rtb.ET.ty()),
-                rtb.Link(rtb.ET.tz()),
+                rtb.Link(Rx()),
+                rtb.Link(Ry()),
+                rtb.Link(Rz()),
+                rtb.Link(tx()),
+                rtb.Link(ty()),
+                rtb.Link(tz()),
             ]
         )
 
@@ -264,31 +269,31 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
 
         r = l0 + l1 + l2 + l3 + l4 + l5 + l6 + ee
 
@@ -367,24 +372,24 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l0 = tz(0.333) * Rz(jindex=0)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
 
         r = l0 + l1 + l2 + l3 + l4 + l5 + l6 + ee
 
@@ -399,10 +404,10 @@ class TestETS(unittest.TestCase):
 
     def test_pop(self):
         q = [1.0, 2.0, 3.0]
-        a = rtb.ET.Rx(jindex=0)
-        b = rtb.ET.Ry(jindex=1)
-        c = rtb.ET.Rz(jindex=2)
-        d = rtb.ET.tz(1.543)
+        a = Rx(jindex=0)
+        b = Ry(jindex=1)
+        c = Rz(jindex=2)
+        d = tz(1.543)
 
         ans1 = SE3.Rx(q[0]) * SE3.Ry(q[1]) * SE3.Rz(q[2]) * SE3.Tz(1.543)
         ans2 = SE3.Rx(q[0]) * SE3.Rz(q[2]) * SE3.Tz(1.543)
@@ -422,10 +427,10 @@ class TestETS(unittest.TestCase):
 
     def test_inv(self):
         q = [1.0, 2.0, 3.0]
-        a = rtb.ET.Rx(jindex=0)
-        b = rtb.ET.Ry(jindex=1)
-        c = rtb.ET.Rz(jindex=2)
-        d = rtb.ET.tz(1.543)
+        a = Rx(jindex=0)
+        b = Ry(jindex=1)
+        c = Rz(jindex=2)
+        d = tz(1.543)
 
         ans1 = SE3.Rx(q[0]) * SE3.Ry(q[1]) * SE3.Rz(q[2]) * SE3.Tz(1.543)
 
@@ -436,10 +441,10 @@ class TestETS(unittest.TestCase):
 
     def test_jointset(self):
         # q = [1.0, 2.0, 3.0]
-        a = rtb.ET.Rx(jindex=0)
-        b = rtb.ET.Ry(jindex=1)
-        c = rtb.ET.Rz(jindex=2)
-        d = rtb.ET.tz(1.543)
+        a = Rx(jindex=0)
+        b = Ry(jindex=1)
+        c = Rz(jindex=2)
+        d = tz(1.543)
 
         ans = set((0, 1, 2))
 
@@ -451,50 +456,57 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
 
-        segs = [l0, l1, l2, l3, l4, l5, l6, ee]
-        segs3 = [l0, l1, l2, l3, l4, l5, l6, rtb.ETS([rtb.ET.Rx(0.5)])]
+        segs = [l0, l1, l2, l3, l4, l5, l6]
         r = l0 * l1 * l2 * l3 * l4 * l5 * l6 * ee
         r2 = l0 * l1 * l2 * l3 * l4 * l5 * l6
-        r3 = l0 * l1 * l2 * l3 * l4 * l5 * l6 * rtb.ET.Rx(0.5)
+        r3 = l0 * l1 * l2 * l3 * l4 * l5 * l6 * Rx(0.5)
 
-        split = r.split()
-        split2 = r2.split()
-        split3 = r3.split()
-
+        # split() returns [base, *segments, gripper]; base is always empty
+        # for the default "last" method (leading content is folded into the
+        # first segment)
+        base, *split, gripper = r.split()
+        self.assertEqual(len(base), 0)
         for i, link in enumerate(segs):
             self.assertEqual(link, split[i])
+        self.assertEqual(gripper, ee)
 
-        for i, link in enumerate(split2):
-            self.assertEqual(link, segs[i])
+        base2, *split2, gripper2 = r2.split()
+        self.assertEqual(len(base2), 0)
+        for i, link in enumerate(segs):
+            self.assertEqual(link, split2[i])
+        self.assertEqual(len(gripper2), 0)
 
-        for i, link in enumerate(split3):
-            self.assertEqual(link, segs3[i])
+        base3, *split3, gripper3 = r3.split()
+        self.assertEqual(len(base3), 0)
+        for i, link in enumerate(segs):
+            self.assertEqual(link, split3[i])
+        self.assertEqual(gripper3, rtb.ETS([Rx(0.5)]))
 
     def test_compile(self):
         q = [0, 1.0, 2, 3, 4, 5, 6]
@@ -502,31 +514,31 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
 
         r = l0 * l1 * l2 * l3 * l4 * l5 * l6 * ee
         r2 = r.compile()
@@ -540,31 +552,31 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
 
         r = l0 * l1 * l2 * l3 * l4 * l5 * l6 * ee
 
@@ -575,32 +587,117 @@ class TestETS(unittest.TestCase):
         r3.append(ee)
 
         r4 = l0 * l1 * l2 * l3 * l4 * l5 * l6
-        r4.append(rtb.ET.tz(tool_offset))
-        r4.append(rtb.ET.Rz(-np.pi / 4))
+        r4.append(tz(tool_offset))
+        r4.append(Rz(-np.pi / 4))
 
         r5 = l0 * l1 * l2 * l3 * l4 * l6 * ee
-        r5.insert(14, rtb.ET.Rx(90 * deg))
-        r5.insert(15, rtb.ET.Rz(jindex=5))
+        r5.insert(14, Rx(90 * deg))
+        r5.insert(15, Rz(jindex=5))
 
         nt.assert_almost_equal(r.eval(q), r2.eval(q))
         nt.assert_almost_equal(r.eval(q), r3.eval(q))
         nt.assert_almost_equal(r.eval(q), r4.eval(q))
         nt.assert_almost_equal(r.fkine(q).A, r5.fkine(q).A)
 
+    def test_swap(self):
+        q = [1.0]
+        e = Rz(jindex=0) * Rz(1) * tx(2)
+
+        ans = SE3.Rz(q[0]) * SE3.Rz(1) * SE3.Tx(2)
+
+        self.assertTrue(e[0].isjoint)
+        self.assertFalse(e[1].isjoint)
+        nt.assert_almost_equal(e.fkine(q).A, ans.A)
+
+        # swap two adjacent transforms that share the same axis - the
+        # kinematics must be unaffected since same-axis rotations commute
+        e.swap(0)
+        self.assertFalse(e[0].isjoint)
+        self.assertTrue(e[1].isjoint)
+        self.assertAlmostEqual(e[0].param, 1.0)  # type: ignore
+        nt.assert_almost_equal(e.fkine(q).A, ans.A)
+
+        # swap back and check we're symmetric
+        e.swap(0)
+        self.assertTrue(e[0].isjoint)
+        self.assertFalse(e[1].isjoint)
+        nt.assert_almost_equal(e.fkine(q).A, ans.A)
+
+    def test_swap_not_commutative(self):
+        e = tx(1) * Rz(jindex=0) * Rz(1)
+
+        with self.assertRaises(ValueError):
+            e.swap(0)
+
+    def test_swap_bad_index(self):
+        e = tx(1) * tx(2)
+
+        with self.assertRaises(IndexError):
+            e.swap(-1)
+
+        with self.assertRaises(IndexError):
+            e.swap(1)
+
+    def test_merge(self):
+        q = [1.0]
+        e = Rz(jindex=0) * tx(1) * tx(2) * Rz(1)
+
+        ans = SE3.Rz(q[0]) * SE3.Tx(3) * SE3.Rz(1)
+
+        n = len(e)
+        e.merge(1)
+
+        self.assertEqual(len(e), n - 1)
+        self.assertEqual(e[1].kind, "tx")
+        self.assertAlmostEqual(e[1].param, 3.0)  # type: ignore
+        nt.assert_almost_equal(e.fkine(q).A, ans.A)
+
+    def test_merge_not_same_type(self):
+        e = tx(1) * Rz(1)
+
+        with self.assertRaises(ValueError):
+            e.merge(0)
+
+    def test_merge_both_joints(self):
+        e = Rz(jindex=0) * Rz(jindex=1)
+
+        with self.assertRaises(ValueError):
+            e.merge(0)
+
+    def test_merge_bad_index(self):
+        e = tx(1) * tx(2)
+
+        with self.assertRaises(IndexError):
+            e.merge(-1)
+
+        with self.assertRaises(IndexError):
+            e.merge(1)
+
+    def test_joint_descriptor_ets_str(self):
+        # ETS.__str__ has its own joint-formatting logic, independent of
+        # each ET's own __str__ - a custom name from a string `param`
+        # descriptor (e.g. "theta2") must show up there too, since printing
+        # a full kinematic chain (not a lone ET) is the primary use case.
+        ets = Rx("theta0") * tx("q1") * Rz("-q(2)") * Ry()
+
+        self.assertEqual(str(ets), "Rx(theta0) ⊕ tx(q1) ⊕ Rz(-q(2)) ⊕ Ry(q3)")
+        self.assertEqual([e.jindex for e in ets], [0, 1, 2, 3])
+        self.assertEqual([e.isflip for e in ets], [False, False, True, False])
+
     def test_jacob0(self):
         q = [0.0]
-        rx = rtb.ETS(rtb.ET.Rx())
-        ry = rtb.ETS(rtb.ET.Ry())
-        rz = rtb.ETS(rtb.ET.Rz())
-        tx = rtb.ETS(rtb.ET.tx())
-        ty = rtb.ETS(rtb.ET.ty())
-        tz = rtb.ETS(rtb.ET.tz())
+        rx = rtb.ETS(Rx())
+        ry = rtb.ETS(Ry())
+        rz = rtb.ETS(Rz())
+        t_x = rtb.ETS(tx())
+        t_y = rtb.ETS(ty())
+        t_z = rtb.ETS(tz())
 
-        r = tx + ty + tz + rx + ry + rz
+        r = t_x + t_y + t_z + rx + ry + rz
 
-        nt.assert_almost_equal(tx.jacob0(q), np.array([[1, 0, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(ty.jacob0(q), np.array([[0, 1, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(tz.jacob0(q), np.array([[0, 0, 1, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_x.jacob0(q), np.array([[1, 0, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_y.jacob0(q), np.array([[0, 1, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_z.jacob0(q), np.array([[0, 0, 1, 0, 0, 0]]).T)
         nt.assert_almost_equal(rx.jacob0(q), np.array([[0, 0, 0, 1, 0, 0]]).T)
         nt.assert_almost_equal(ry.jacob0(q), np.array([[0, 0, 0, 0, 1, 0]]).T)
         nt.assert_almost_equal(rz.jacob0(q), np.array([[0, 0, 0, 0, 0, 1]]).T)
@@ -608,18 +705,18 @@ class TestETS(unittest.TestCase):
 
     def test_jacobe(self):
         q = [0.0]
-        rx = rtb.ETS(rtb.ET.Rx())
-        ry = rtb.ETS(rtb.ET.Ry())
-        rz = rtb.ETS(rtb.ET.Rz())
-        tx = rtb.ETS(rtb.ET.tx())
-        ty = rtb.ETS(rtb.ET.ty())
-        tz = rtb.ETS(rtb.ET.tz())
+        rx = rtb.ETS(Rx())
+        ry = rtb.ETS(Ry())
+        rz = rtb.ETS(Rz())
+        t_x = rtb.ETS(tx())
+        t_y = rtb.ETS(ty())
+        t_z = rtb.ETS(tz())
 
-        r = tx + ty + tz + rx + ry + rz
+        r = t_x + t_y + t_z + rx + ry + rz
 
-        nt.assert_almost_equal(tx.jacobe(q), np.array([[1, 0, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(ty.jacobe(q), np.array([[0, 1, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(tz.jacobe(q), np.array([[0, 0, 1, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_x.jacobe(q), np.array([[1, 0, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_y.jacobe(q), np.array([[0, 1, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_z.jacobe(q), np.array([[0, 0, 1, 0, 0, 0]]).T)
         nt.assert_almost_equal(rx.jacobe(q), np.array([[0, 0, 0, 1, 0, 0]]).T)
         nt.assert_almost_equal(ry.jacobe(q), np.array([[0, 0, 0, 0, 1, 0]]).T)
         nt.assert_almost_equal(rz.jacobe(q), np.array([[0, 0, 0, 0, 0, 1]]).T)
@@ -629,21 +726,21 @@ class TestETS(unittest.TestCase):
         x = sympy.Symbol("x")
         q1 = np.array([x, x])
         q2 = np.array([0, x])
-        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
-        ry = rtb.ETS(rtb.ET.Ry(jindex=0))
-        rz = rtb.ETS(rtb.ET.Rz(jindex=0))
-        tx = rtb.ETS(rtb.ET.tx(jindex=0))
-        ty = rtb.ETS(rtb.ET.ty(jindex=0))
-        tz = rtb.ETS(rtb.ET.tz(jindex=1))
+        rx = rtb.ETS(Rx(jindex=0))
+        ry = rtb.ETS(Ry(jindex=0))
+        rz = rtb.ETS(Rz(jindex=0))
+        t_x = rtb.ETS(tx(jindex=0))
+        t_y = rtb.ETS(ty(jindex=0))
+        t_z = rtb.ETS(tz(jindex=1))
         a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
 
-        r = tx + ty + tz + rx + ry + rz + a
+        r = t_x + t_y + t_z + rx + ry + rz + a
 
         print(r.jacob0(q2))
 
-        nt.assert_almost_equal(tx.jacob0(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(ty.jacob0(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(tz.jacob0(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_x.jacob0(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_y.jacob0(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_z.jacob0(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
         nt.assert_almost_equal(rx.jacob0(q1), np.array([[0, 0, 0, 1, 0, 0]]).T)
         nt.assert_almost_equal(ry.jacob0(q1), np.array([[0, 0, 0, 0, 1, 0]]).T)
         nt.assert_almost_equal(rz.jacob0(q1), np.array([[0, 0, 0, 0, 0, 1]]).T)
@@ -655,21 +752,21 @@ class TestETS(unittest.TestCase):
         x = sympy.Symbol("x")
         q1 = np.array([x, x])
         q2 = np.array([0, x])
-        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
-        ry = rtb.ETS(rtb.ET.Ry(jindex=0))
-        rz = rtb.ETS(rtb.ET.Rz(jindex=0))
-        tx = rtb.ETS(rtb.ET.tx(jindex=0))
-        ty = rtb.ETS(rtb.ET.ty(jindex=0))
-        tz = rtb.ETS(rtb.ET.tz(jindex=1))
+        rx = rtb.ETS(Rx(jindex=0))
+        ry = rtb.ETS(Ry(jindex=0))
+        rz = rtb.ETS(Rz(jindex=0))
+        t_x = rtb.ETS(tx(jindex=0))
+        t_y = rtb.ETS(ty(jindex=0))
+        t_z = rtb.ETS(tz(jindex=1))
         a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
 
-        r = tx + ty + tz + rx + ry + rz + a
+        r = t_x + t_y + t_z + rx + ry + rz + a
 
         print(r.jacobe(q2))
 
-        nt.assert_almost_equal(tx.jacobe(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(ty.jacobe(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(tz.jacobe(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_x.jacobe(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_y.jacobe(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(t_z.jacobe(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
         nt.assert_almost_equal(rx.jacobe(q1), np.array([[0, 0, 0, 1, 0, 0]]).T)
         nt.assert_almost_equal(ry.jacobe(q1), np.array([[0, 0, 0, 0, 1, 0]]).T)
         nt.assert_almost_equal(rz.jacobe(q1), np.array([[0, 0, 0, 0, 0, 1]]).T)
@@ -682,31 +779,31 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
 
         r = l0 + l1 + l2 + l3 + l4 + l5 + l6 + ee
 
@@ -1132,31 +1229,31 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
         ee = ee.fkine([])
 
         r = l0 + l1 + l2 + l3 + l4 + l5 + l6
@@ -1583,31 +1680,31 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
 
         r = l0 + l1 + l2 + l3 + l4 + l5 + l6 + ee
 
@@ -1640,31 +1737,31 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
         ee = ee.fkine([])
 
         r = l0 + l1 + l2 + l3 + l4 + l5 + l6
@@ -1696,15 +1793,15 @@ class TestETS(unittest.TestCase):
     def test_hessian_sym(self):
         x = sympy.Symbol("x")
         q2 = np.array([0, x])
-        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
-        ry = rtb.ETS(rtb.ET.Ry(jindex=0))
-        rz = rtb.ETS(rtb.ET.Rz(jindex=0))
-        tx = rtb.ETS(rtb.ET.tx(jindex=0))
-        ty = rtb.ETS(rtb.ET.ty(jindex=0))
-        tz = rtb.ETS(rtb.ET.tz(jindex=1))
+        rx = rtb.ETS(Rx(jindex=0))
+        ry = rtb.ETS(Ry(jindex=0))
+        rz = rtb.ETS(Rz(jindex=0))
+        t_x = rtb.ETS(tx(jindex=0))
+        t_y = rtb.ETS(ty(jindex=0))
+        t_z = rtb.ETS(tz(jindex=1))
         a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
 
-        r = tx + ty + tz + rx + ry + rz + a
+        r = t_x + t_y + t_z + rx + ry + rz + a
 
         J0 = r.jacob0(q2)
         Je = r.jacobe(q2)
@@ -1770,27 +1867,27 @@ class TestETS(unittest.TestCase):
 
     def test_plot(self):
         q2 = np.array([0, 1, 2, 3, 4, 5])
-        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
-        ry = rtb.ETS(rtb.ET.Ry(jindex=1))
-        rz = rtb.ETS(rtb.ET.Rz(jindex=2))
-        tx = rtb.ETS(rtb.ET.tx(jindex=3, qlim=[-1, 1]))
-        ty = rtb.ETS(rtb.ET.ty(jindex=4, qlim=[-1, 1]))
-        tz = rtb.ETS(rtb.ET.tz(jindex=5, qlim=[-1, 1]))
+        rx = rtb.ETS(Rx(jindex=0))
+        ry = rtb.ETS(Ry(jindex=1))
+        rz = rtb.ETS(Rz(jindex=2))
+        t_x = rtb.ETS(tx(jindex=3, qlim=[-1, 1]))
+        t_y = rtb.ETS(ty(jindex=4, qlim=[-1, 1]))
+        t_z = rtb.ETS(tz(jindex=5, qlim=[-1, 1]))
         a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
-        r = tx + ty + tz + rx + ry + rz + a
+        r = t_x + t_y + t_z + rx + ry + rz + a
         r.plot(q=q2, block=False, backend="pyplot")
 
     def test_teach(self):
         # x = sympy.Symbol("x")
         q2 = np.array([0, 1, 2, 3, 4, 5])
-        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
-        ry = rtb.ETS(rtb.ET.Ry(jindex=1))
-        rz = rtb.ETS(rtb.ET.Rz(jindex=2))
-        tx = rtb.ETS(rtb.ET.tx(jindex=3, qlim=[-1, 1]))
-        ty = rtb.ETS(rtb.ET.ty(jindex=4, qlim=[-1, 1]))
-        tz = rtb.ETS(rtb.ET.tz(jindex=5, qlim=[-1, 1]))
+        rx = rtb.ETS(Rx(jindex=0))
+        ry = rtb.ETS(Ry(jindex=1))
+        rz = rtb.ETS(Rz(jindex=2))
+        t_x = rtb.ETS(tx(jindex=3, qlim=[-1, 1]))
+        t_y = rtb.ETS(ty(jindex=4, qlim=[-1, 1]))
+        t_z = rtb.ETS(tz(jindex=5, qlim=[-1, 1]))
         a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
-        r = tx + ty + tz + rx + ry + rz + a
+        r = t_x + t_y + t_z + rx + ry + rz + a
         r.teach(q=q2, block=False, backend="pyplot")
 
     def test_partial_fkine(self):
@@ -1798,31 +1895,31 @@ class TestETS(unittest.TestCase):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l0 = tz(0.333) * Rz(jindex=0)
 
-        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l1 = Rx(-90 * deg) * Rz(jindex=1)
 
-        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l2 = Rx(90 * deg) * tz(0.316) * Rz(jindex=2)
 
-        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l3 = tx(0.0825) * Rx(90 * deg) * Rz(jindex=3)
 
         l4 = (
-            rtb.ET.tx(-0.0825)
-            * rtb.ET.Rx(-90 * deg)
-            * rtb.ET.tz(0.384)
-            * rtb.ET.Rz(jindex=4)
+            tx(-0.0825)
+            * Rx(-90 * deg)
+            * tz(0.384)
+            * Rz(jindex=4)
         )
 
-        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l5 = Rx(90 * deg) * Rz(jindex=5)
 
         l6 = (
-            rtb.ET.tx(0.088)
-            * rtb.ET.Rx(90 * deg)
-            * rtb.ET.tz(0.107)
-            * rtb.ET.Rz(jindex=6)
+            tx(0.088)
+            * Rx(90 * deg)
+            * tz(0.107)
+            * Rz(jindex=6)
         )
 
-        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+        ee = tz(tool_offset) * Rz(-np.pi / 4)
 
         r = l0 + l1 + l2 + l3 + l4 + l5 + l6 + ee
         r2 = rtb.Robot(r)
@@ -4263,37 +4360,37 @@ class TestETS(unittest.TestCase):
         nt.assert_almost_equal(fk2, ans)
 
     def test_qlim1(self):
-        rx = rtb.ETS(rtb.ET.Rx())
+        rx = rtb.ETS(Rx())
 
         q = rx.qlim
         nt.assert_equal(q, np.array([[-np.pi], [np.pi]]))
 
     def test_qlim2(self):
-        rx = rtb.ETS(rtb.ET.Rx(qlim=[-1, 1]))
+        rx = rtb.ETS(Rx(qlim=[-1, 1]))
 
         q = rx.qlim
         nt.assert_equal(q, np.array([[-1], [1]]))
 
     def test_qlim3(self):
-        rx = rtb.ETS(rtb.ET.tx(qlim=[-1, 1]))
+        rx = rtb.ETS(tx(qlim=[-1, 1]))
 
         q = rx.qlim
         nt.assert_equal(q, np.array([[-1], [1]]))
 
     def test_qlim4(self):
-        rx = rtb.ETS(rtb.ET.tx())
+        rx = rtb.ETS(tx())
 
         with self.assertRaises(ValueError):
             rx.qlim
 
     def test_random_q(self):
-        rx = rtb.ETS(rtb.ET.Rx(qlim=[-1, 1]))
+        rx = rtb.ETS(Rx(qlim=[-1, 1]))
 
         q = rx.random_q()
         self.assertTrue(-1 <= q <= 1)
 
     def test_random_q2(self):
-        rx = rtb.ETS([rtb.ET.Rx(qlim=[-1, 1]), rtb.ET.Rx(qlim=[1, 2])])
+        rx = rtb.ETS([Rx(qlim=[-1, 1]), Rx(qlim=[1, 2])])
 
         q = rx.random_q(10)
 

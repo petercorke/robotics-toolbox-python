@@ -12,9 +12,8 @@ from roboticstoolbox.robot.PoERobot import PoELink, PoERobot, PoERevolute, PoEPr
 from roboticstoolbox.robot.ERobot import ERobot, ERobot2
 
 from roboticstoolbox.robot.ELink import ELink, ELink2
-from roboticstoolbox.robot.ETS import ETS, ETS2
+from roboticstoolbox.ets import ET, ET2, ETS, ETS2
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.ET import ET, ET2
 
 
 from roboticstoolbox.robot.IK import IKSolution, IKSolver, IK_LM, IK_NR, IK_GN, IK_QP

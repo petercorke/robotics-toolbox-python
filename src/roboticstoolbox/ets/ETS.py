@@ -6,8 +6,7 @@
 """
 
 from __future__ import annotations
-from collections.abc import MutableSequence
-from functools import wraps, cached_property
+from functools import cached_property
 import numpy as np
 from numpy.random import uniform
 from numpy.linalg import inv, det, cond, svd
@@ -26,7 +25,7 @@ from spatialmath.base import (
 from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP
 
-from roboticstoolbox.robot.fknm import (
+from roboticstoolbox.ets.fknm import (
     ETS_init,
     ETS_fkine,
     ETS_jacob0,
@@ -38,617 +37,12 @@ from roboticstoolbox.robot.fknm import (
     IK_LM_c,
 )
 from copy import deepcopy
-from roboticstoolbox.robot.ET import ET, ET2, BaseET
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets._ET import BaseET
+from roboticstoolbox.ets._ETS import BaseETS, T, _dirties_fknm
 from typing import overload, TypeVar
 from typing import Literal as L
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-
-T = TypeVar("T", bound="BaseETS")
-
-
-def _dirties_fknm(func):
-    @wraps(func)
-    def wrapper(self, *args, **kwargs):
-        result = func(self, *args, **kwargs)
-        self._fknm_stale = True
-        return result
-    return wrapper
-
-
-class BaseETS(MutableSequence):
-    def __init__(self):
-        self._data: list = []
-        self._fknm_stale = True
-        self._BaseETS__fknm = None
-
-    # ------------------------------------------------------------------
-    # MutableSequence abstract methods
-    # ------------------------------------------------------------------
-
-    def __len__(self) -> int:
-        return len(self._data)
-
-    def __getitem__(self, i):
-        return self._data[i]
-
-    @_dirties_fknm
-    def __setitem__(self, i, value):
-        self._data[i] = value
-
-    @_dirties_fknm
-    def __delitem__(self, i):
-        del self._data[i]
-
-    @_dirties_fknm
-    def insert(self, index: int, value) -> None:
-        self._data.insert(index, value)
-
-    def __repr__(self) -> str:
-        return repr(self._data)
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, BaseETS):
-            return self._data == other._data
-        return NotImplemented
-
-    __hash__ = None  # type: ignore[assignment]
-
-    # ------------------------------------------------------------------
-    # C handle: lazy build on first use after any mutation
-    # ------------------------------------------------------------------
-
-    @property
-    def _fknm(self):
-        if self._fknm_stale:
-            self._copy_to_cpp()
-        return self._BaseETS__fknm
-
-    def _copy_to_cpp(self):
-        self._BaseETS__fknm = ETS_init(
-            [et.fknm for et in self._data],
-            self.n,
-            self.m,
-        )
-        self._fknm_stale = False
-
-    def __str__(self, q: str | None = None):
-        """
-        Pretty prints the ETS
-
-        ``q`` controls how the joint variables are displayed:
-
-        - None, format depends on number of joint variables
-            - one, display joint variable as q
-            - more, display joint variables as q0, q1, ...
-            - if a joint index was provided, use this value
-        - "", display all joint variables as empty parentheses ``()``
-        - "θ", display all joint variables as ``(θ)``
-        - format string with passed joint variables ``(j, j+1)``, so "θ{0}"
-          would display joint variables as θ0, θ1, ... while "θ{1}" would
-          display joint variables as θ1, θ2, ...  ``j`` is either the joint
-          index, if provided, otherwise a sequential value.
-
-        :param q: control how joint variables are displayed
-        :returns: Pretty printed ETS
-        :rtype: str
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz()
-            >>> print(e[:2])
-            >>> print(e)
-            >>> print(e.__str__(""))
-            >>> print(e.__str__("θ{0}"))  # numbering from 0
-            >>> print(e.__str__("θ{1}"))  # numbering from 1
-            >>> # explicit joint indices
-            >>> e = ET.Rz(jindex=3) * ET.tx(1) * ET.Rz(jindex=4)
-            >>> print(e)
-            >>> print(e.__str__("θ{0}"))
-
-        Angular parameters are converted to degrees, except if they
-        are symbolic.
-
-        .. runblock:: pycon
-        >>> from roboticstoolbox import ET
-        >>> from spatialmath.base import symbol
-        >>> theta, d = symbol('theta, d')
-        >>> e = ET.Rx(theta) * ET.tx(2) * ET.Rx(45, 'deg') * ET.Ry(0.2) * ET.ty(d)
-        >>> str(e)
-
-        """
-
-        es = []
-        j = 0
-        c = 0
-        s = None
-        unicode = rtb_get_param("unicode")
-
-        # An empty SE3
-        if len(self._data) == 0:
-            return "SE3()"
-
-        if q is None:
-            if len(self.joints()) > 1:
-                q = "q{0}"
-            else:
-                q = "q"
-
-        # For et in the object, display it, data comes from properties
-        # which come from the named tuple
-        for et in self._data:
-            if et.isjoint:
-                if q is not None:
-                    if et.jindex is None:  # pragma: nocover  this is no longer possible
-                        _j = j
-                    else:
-                        _j = et.jindex
-                    qvar = q.format(
-                        _j, _j + 1
-                    )
-                # else:
-                #     qvar = ""
-
-                if et.isflip:
-                    s = f"{et.axis}(-{qvar})"
-                else:
-                    s = f"{et.axis}({qvar})"
-                j += 1
-
-            elif et.isrotation:
-                if issymbol(et.eta):
-                    s = f"{et.axis}({et.eta})"
-                else:
-                    s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
-
-            elif et.istranslation:
-                try:
-                    s = f"{et.axis}({et.eta:.4g})"
-                except TypeError:  # pragma: nocover
-                    s = f"{et.axis}({et.eta})"
-
-            elif not et.iselementary:
-                s = str(et)
-                c += 1
-
-            es.append(s)
-
-        if unicode:
-            return " \u2295 ".join(es)
-        else:  # pragma: nocover
-            return " * ".join(es)
-
-    def _repr_pretty_(self, p, cycle):
-        """
-        Pretty string for IPython
-
-        Print stringified version when variable is displayed in IPython, ie. on
-        a line by itself.
-
-        :param p: pretty printer handle (ignored)
-        :param cycle: pretty printer flag (ignored)
-
-        Examples
-        --------
-
-        In [1]: e
-        Out [1]: R(q0) ⊕ tx(1) ⊕ R(q1) ⊕ tx(1)
-
-        """
-
-        print(self.__str__())  # pragma: nocover
-
-    def joint_idx(self) -> list[int]:
-        """
-        Get index of joint transforms
-
-        :returns: indices of transforms that are joints
-        :rtype: ndarray
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e.joint_idx()
-
-        """
-
-        return np.where([e.isjoint for e in self])[0]  # type: ignore
-
-    def joints(self) -> list[ET]:
-        """
-        Get a list of the variable ETs with this ETS
-
-        :returns: list of ETs that are joints
-        :rtype: list[ET]
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e.joints()
-
-        """
-
-        return [e for e in self if e.isjoint]
-
-    def jindex_set(self) -> set[int]:  #
-        """
-        Get set of joint indices
-
-        :returns: set of unique joint indices
-        :rtype: set[int]
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
-            >>> e.jointset()
-
-        """
-
-        return set([self[j].jindex for j in self.joint_idx()])  # type: ignore
-
-    @cached_property
-    def jindices(self) -> NDArray:
-        """
-        Get an array of joint indices
-
-        :returns: array of unique joint indices
-        :rtype: ndarray
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
-            >>> e.jointset()
-
-        """
-
-        return np.array([j.jindex for j in self.joints()])  # type: ignore
-
-    @property
-    def qlim(self):
-        r"""
-        Get/Set Joint limits
-
-        Limits are extracted from the link objects.  If joints limits are
-        not set for:
-
-        - a revolute joint [-𝜋. 𝜋] is returned
-        - a prismatic joint an exception is raised
-
-        :param new_qlim: new joint limits to set
-        :type new_qlim: ndarray(2,n)
-        :returns: array of joint limit values
-        :rtype: ndarray(2,n)
-        :raises ValueError: unset limits for a prismatic joint
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.qlim
-
-        """
-
-        limits = np.zeros((2, self.n))
-
-        for i, et in enumerate(self.joints()):
-            if et.isrotation:
-                if et.qlim is None:
-                    v = [-np.pi, np.pi]
-                else:
-                    v = et.qlim
-            elif et.istranslation:
-                if et.qlim is None:
-                    raise ValueError("undefined prismatic joint limit")
-                else:
-                    v = et.qlim
-            else:
-                raise ValueError("Undefined Joint Type")  # pragma: nocover
-            limits[:, i] = v
-
-        return limits
-
-    @qlim.setter
-    def qlim(self, new_qlim: ArrayLike):
-        new_qlim = np.array(new_qlim)
-
-        if new_qlim.shape == (2,) and self.n == 1:
-            new_qlim = new_qlim.reshape(2, 1)
-
-        if new_qlim.shape != (2, self.n):
-            raise ValueError("new_qlim must be of shape (2, n)")
-
-        for j, i in enumerate(self.joint_idx()):
-            et = self[i]
-            et.qlim = new_qlim[:, j]
-            self[i] = et
-
-    @property
-    def structure(self) -> str:
-        """
-        Joint structure string
-
-        A string comprising the characters 'R' or 'P' which indicate the types
-        of joints in order from left to right.
-
-        :returns: a string indicating the joint types
-        :rtype: str
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e.structure
-
-        """
-
-        return "".join(
-            ["R" if self._data[i].isrotation else "P" for i in self.joint_idx()]
-        )
-
-    @property
-    def n(self) -> int:
-        """
-        Number of joints
-
-        :returns: the number of joints in the ETS
-        :rtype: int
-
-        Counts the number of joints in the ETS.
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rx() * ET.tx(1) * ET.tz()
-            >>> e.n
-
-        See Also
-        --------
-        :func:`joints`
-
-        """
-
-        return sum(1 for et in self._data if et.isjoint)
-
-    @property
-    def m(self) -> int:
-        """
-        Number of transforms
-
-        :returns: the number of transforms in the ETS
-        :rtype: int
-
-        Counts the number of transforms in the ETS.
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rx() * ET.tx(1) * ET.tz()
-            >>> e.m
-
-        """
-
-        return len(self._data)
-
-    @overload
-    def data(self: "ETS") -> list[ET]: ...  # pragma: nocover
-
-    @overload
-    def data(self: "ETS2") -> list[ET2]: ...  # pragma: nocover
-
-    @property
-    def data(self):
-        return self._data
-
-    @data.setter
-    @overload
-    def data(self: "ETS", new_data: list[ET]): ...  # pragma: nocover
-
-    @data.setter
-    @overload
-    def data(self: "ETS", new_data: list[ET2]): ...  # pragma: nocover
-
-    @data.setter
-    def data(self, new_data):
-        self._data = new_data
-        self._fknm_stale = True
-
-    @overload
-    def split(self: "ETS") -> list["ETS"]: ...  # pragma: nocover
-
-    @overload
-    def split(self: "ETS2") -> list["ETS2"]: ...  # pragma: nocover
-
-    def split(self):
-        """
-        Split ETS into link segments
-
-        :returns: a list of ETS, each one, apart from the last, ends with a variable ET.
-
-        """
-
-        segments = []
-        start = 0
-
-        for j, k in enumerate(self.joint_idx()):
-            ets_j = self._data[start : k + 1]
-            start = k + 1
-            segments.append(self.__class__(ets_j))
-
-        tail = self._data[start:]
-
-        if len(tail) > 0:
-            segments.append(self.__class__(tail))
-
-        return segments
-
-    def inv(self: T) -> T:
-        r"""
-        Inverse of ETS
-
-        The inverse of a given ETS.  It is computed as the inverse of the
-        individual ETs in the reverse order.
-
-        .. math::
-
-            (\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )
-
-        :returns: Inverse of the ETS
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz(jindex=2) * ET.tx(1) * ET.Rx(jindex=3,flip=True) * ET.tx(1)
-            >>> print(e)
-            >>> print(e.inv())
-
-        .. rubric:: Notes
-
-        - It is essential to use explicit joint indices to account for
-            the reversed order of the transforms.
-
-        """
-
-        return self.__class__([et.inv() for et in reversed(self._data)])  # type: ignore[call-arg]
-
-    @overload
-    def __getitem__(self: "BaseETS", i: int) -> BaseET: ...
-
-    @overload
-    def __getitem__(self: "ETS", i: int) -> ET: ...
-
-    @overload
-    def __getitem__(self: "ETS", i: slice) -> list[ET]: ...
-
-    @overload
-    def __getitem__(self: "ETS2", i: int) -> ET2: ...
-
-    @overload
-    def __getitem__(self: "ETS2", i: slice) -> list[ET2]: ...
-
-    def __getitem__(self, i):
-        """
-        Index or slice an ETS
-
-        :param i: the index or slice
-        :returns: elementary transform
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e[0]
-            >>> e[1]
-            >>> e[1:3]
-
-        """
-        return self._data[i]  # can be [2] or slice, eg. [3:5]
-
-    def __deepcopy__(self, memo):
-        new_data = []
-
-        for data in self:
-            new_data.append(deepcopy(data))
-
-        cls = self.__class__
-        result = cls(new_data)
-        memo[id(self)] = result
-        return result
-
-    def plot(self, *args, **kwargs):
-        from roboticstoolbox.robot.Robot import Robot, Robot2
-
-        if isinstance(self, ETS):
-            robot = Robot(self)
-        else:
-            robot = Robot2(self)
-
-        robot.plot(*args, **kwargs)
-
-    def teach(self, *args, **kwargs):
-        from roboticstoolbox.robot.Robot import Robot, Robot2
-
-        if isinstance(self, ETS):
-            robot = Robot(self)
-        else:
-            robot = Robot2(self)
-
-        robot.teach(*args, **kwargs)
-
-    def random_q(self, i: int = 1) -> NDArray:
-        """
-        Generate a random valid joint configuration
-
-        :param i: number of configurations to generate
-        :returns: random joint configuration
-        :rtype: ndarray(n,) or ndarray(i,n)
-
-        Generates a random q vector within the joint limits defined by
-        ``self.qlim``.
-
-        Examples
-        --------
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.Panda()
-            >>> ets = robot.ets()
-            >>> q = ets.random_q()
-            >>> q
-
-        """
-
-        if i == 1:
-            q = np.zeros(self.n)
-
-            for i in range(self.n):
-                q[i] = uniform(self.qlim[0, i], self.qlim[1, i])
-
-        else:
-            q = np.zeros((i, self.n))
-
-            for j in range(i):
-                for i in range(self.n):
-                    q[j, i] = uniform(self.qlim[0, i], self.qlim[1, i])
-
-        return q
 
 
 class ETS(BaseETS):
@@ -2466,406 +1860,154 @@ class ETS(BaseETS):
 
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
-
-class ETS2(BaseETS):
-    """
-    This class implements an elementary transform sequence (ETS) for 2D
-
-    :param arg: Function to compute ET value
-
-    An instance can contain an elementary transform (ET) or an elementary
-    transform sequence (ETS). It has list-like properties by subclassing
-    UserList, which means we can perform indexing, slicing pop, insert, as well
-    as using it as an iterator over its values.
-
-    - ``ETS()`` an empty ETS list
-    - ``ET2.XY(η)`` is a constant elementary transform
-    - ``ET2.XY(η, 'deg')`` as above but the angle is expressed in degrees
-    - ``ET2.XY()`` is a joint variable, the value is left free until evaluation
-      time
-    - ``ET2.XY(j=J)`` as above but the joint index is explicitly given, this
-      might correspond to the joint number of a multi-joint robot.
-    - ``ET2.XY(flip=True)`` as above but the joint moves in the opposite sense
-
-    where ``XY`` is one of ``R``, ``tx``, ``ty``.
-
-    Example:
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ETS2 as ET2
-            >>> e = ET2.R(0.3)  # a single ET, rotation about z
-            >>> len(e)
-            >>> e = ET2.R(0.3) * ET2.tx(2)  # an ETS
-            >>> len(e)                      # of length 2
-            >>> e[1]                        # an ET sliced from the ETS
-
-    :references:
-        - Kinematic Derivatives using the Elementary Transform Sequence,
-          J. Haviland and P. Corke
-
-    :seealso: :func:`r`, :func:`tx`, :func:`ty`
-    """
-
-    def __init__(
-        self,
-        arg: list[ETS2 | ET2] | list[ET2] | list[ETS2] | ET2 | ETS2 | None = None,
-    ):
-        super().__init__()
-        if isinstance(arg, list):
-            for item in arg:
-                if isinstance(item, ET2):
-                    self._data.append(deepcopy(item))
-                elif isinstance(item, ETS2):
-                    for ets_item in item:
-                        self._data.append(deepcopy(ets_item))
-                else:
-                    raise TypeError("bad arg")
-        elif isinstance(arg, ET2):
-            self._data.append(deepcopy(arg))
-        elif isinstance(arg, ETS2):
-            for ets_item in arg:
-                self._data.append(deepcopy(ets_item))
-        elif arg is not None:
-            raise TypeError("bad arg")
-        self._ndims = 2
-        self._auto_jindex = False
-
-        # Check if jindices are set
-        joints = self.joints()
-
-        # Number of joints with a jindex
-        jindices = 0
-
-        # Number of joints with a sequential jindex (j[2] -> jindex = 2)
-        seq_jindex = 0
-
-        # Count them up
-        for j, joint in enumerate(joints):
-            if joint.jindex is not None:
-                jindices += 1
-                if joint.jindex == j:
-                    seq_jindex += 1
-
-        if (
-            jindices == self.n - 1
-            and seq_jindex == self.n - 1
-            and joints[-1].jindex is None
-        ):
-            # ets has sequential jindicies, except for the last.
-            joints[-1].jindex = self.n - 1
-            self._auto_jindex = True
-        elif jindices > 0 and not jindices == self.n:
-            raise ValueError(
-                "You can not have some jindices set for the ET's in arg. It must be all"
-                " or none"
-            )  # pragma: nocover
-        elif jindices == 0 and self.n > 0:
-            # Set them ourself
-            for j, joint in enumerate(joints):
-                joint.jindex = j
-            self._auto_jindex = True
-
-    def __mul__(self, other: ET2 | ETS2) -> "ETS2":
-        if isinstance(other, ET2):
-            return ETS2([*self._data, other])
-        else:
-            return ETS2([*self._data, *other._data])  # pragma: nocover
-
-    def __rmul__(self, other: ET2 | ETS2) -> "ETS2":
-        return ETS2([other, *self._data])  # pragma: nocover
-
-    def __imul__(self, rest: "ETS2"):
-        return self + rest  # pragma: nocover
-
-    def __add__(self, rest) -> "ETS2":
-        return self.__mul__(rest)  # pragma: nocover
-
-    def compile(self) -> "ETS2":
+    @staticmethod
+    def _template_consume(elements: list["BaseET"], template: list[str]) -> int:
         """
-        Compile an ETS2
+        Greedily match a run of ETs against an ordered template of ``kind``
+        strings, where each template slot is optional but present slots must
+        occur in the given order.
 
-        :return: optimised ETS2
-
-        Perform constant folding for faster evaluation.  Consecutive constant
-        ETs are compounded, leading to a constant ET which is denoted by
-        ``SE3`` when displayed.
-
-        :seealso: :func:`isconstant`
+        :param elements: ETs to match, in the order they occur in the ETS
+        :param template: ordered ``kind`` strings the elements may occupy
+        :returns: number of leading ``elements`` consumed before the first
+            one that fits no remaining template slot
         """
-        const = None
-        ets = ETS2()
-
-        for et in self:
-            if et.isjoint:
-                # a joint
-                if const is not None:
-                    # flush the constant
-                    if not np.array_equal(const, np.eye(3)):
-                        ets *= ET2.SE2(const)
-                    const = None
-                ets *= et  # emit the joint ET
+        slot = 0
+        consumed = 0
+        for et in elements:
+            if et.kind in template[slot:]:
+                slot = template.index(et.kind, slot) + 1
+                consumed += 1
             else:
-                # not a joint
-                if const is None:
-                    const = et.A()
-                else:
-                    const = const @ et.A()
+                break
+        return consumed
 
-        if const is not None:
-            # flush the constant, tool transform
-            if not np.array_equal(const, np.eye(3)):
-                ets *= ET2.SE2(const)
-        return ets
-
-    def insert(  # type: ignore[override]
-        self,
-        i: int,
-        arg: ET2 | ETS2,
-    ) -> None:
+    def _split_convention(self, template: list[str], joint_slots: set[int], exposed: str):
         """
-        Insert value
+        Split according to a DH-like convention.
 
-        :param i: position to insert at
-        :param arg: the elementary transform or sequence to insert
-
-        Inserts an ET or ETS into the ET sequence.  The inserted value is at position
-        ``i``.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET2
-            >>> e = ET2.R() * ET2.tx(1) * ET2.R() * ET2.tx(1)
-            >>> f = ET2.R()
-            >>> e.insert(2, f)
-            >>> e
+        A segment is a 4-slot ordered ``template`` (e.g. Rz, tz, tx, Rx for
+        DH); each slot is optional except that exactly one of the two
+        ``joint_slots`` must be occupied by the segment's joint. Content
+        between two joints must fully account for the gap in template
+        order, else ``ValueError``. The end named by ``exposed`` (``"head"``
+        or ``"tail"``) is reported separately and unvalidated; the other end
+        is folded into the boundary segment.
         """
+        idx = list(self.joint_idx())
+        if len(idx) == 0:
+            raise ValueError("ETS has no joints")
 
-        if isinstance(arg, ET2):
-            self._data.insert(i, arg)
-        elif isinstance(arg, ETS2):
-            for j, et in enumerate(arg):
-                self._data.insert(i + j, et)
-        self._fknm_stale = True
-
-    def fkine(
-        self,
-        q: ArrayLike,
-        base: NDArray | SE2 | None = None,
-        tool: NDArray | SE2 | None = None,
-        include_base: bool = True,
-    ) -> SE2:
-        """
-        Forward kinematics
-
-        :param q: joint coordinates
-        :param base: base transform, optional
-        :param tool: tool transform, optional
-        :returns: transformation matrix representing the end-effector pose
-        :rtype: SE2
-
-        ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
-        joint configuration ``q``.
-
-        **Trajectory operation**: If ``q`` has multiple rows (mxn), it is considered a
-        trajectory and the result is an ``SE2`` instance with ``m`` values.
-
-        .. note::
-
-            - The robot's base tool transform, if set, is incorporated into the result.
-            - A tool transform, if provided, is incorporated into the result.
-            - Works from the end-effector link to the base
-
-        .. rubric:: References
-
-        - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
-        """
-
-        ret = SE2.Empty()
-        fk = self.eval(q, base, tool, include_base)
-
-        if fk.dtype == "O":
-            # symbolic
-            fk = np.array(simplify(fk))
-
-        if fk.ndim == 3:
-            for T in fk:
-                ret.append(SE2(T, check=False))  # type: ignore
-        else:
-            ret = SE2(fk, check=False)
-
-        return ret
-
-    def eval(
-        self,
-        q: ArrayLike,
-        base: NDArray | SE2 | None = None,
-        tool: NDArray | SE2 | None = None,
-        include_base: bool = True,
-    ) -> NDArray:
-        """
-        Forward kinematics (returns raw ndarray)
-
-        :param q: joint coordinates
-        :param base: base transform, optional
-        :param tool: tool transform, optional
-        :returns: transformation matrix representing the end-effector pose
-        :rtype: ndarray(3,3) or ndarray(m,3,3)
-
-        ``T = ets.eval(q)`` evaluates forward kinematics for the robot at
-        joint configuration ``q``, returning the raw ndarray.
-
-        **Trajectory operation**: If ``q`` has multiple rows (mxn), it is considered a
-        trajectory and the result is an ndarray of shape (m,3,3).
-
-        .. note::
-
-            - The robot's base tool transform, if set, is incorporated into the result.
-            - A tool transform, if provided, is incorporated into the result.
-            - Works from the end-effector link to the base
-
-        .. rubric:: References
-
-        - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
-        """
-
-        q = getmatrix(q, (None, None))
-        l, _ = q.shape  # type: ignore
-        end = self[-1]
-
-        if base is None:
-            bases = None
-        elif isinstance(base, SE2):
-            bases = np.array(base.A)
-        elif np.array_equal(base, np.eye(3)):  # pragma: nocover
-            bases = None
-        else:  # pragma: nocover
-            bases = base
-
-        if tool is None:
-            tools = None
-        elif isinstance(tool, SE2):
-            tools = np.array(tool.A)
-        elif np.array_equal(tool, np.eye(3)):  # pragma: nocover
-            tools = None
-        else:  # pragma: nocover
-            tools = tool
-
-        if l > 1:
-            T = np.zeros((l, 3, 3), dtype=object)
-        else:
-            T = np.zeros((3, 3), dtype=object)
-
-        for k, qk in enumerate(q):  # type: ignore
-            link = end  # start with last link
-
-            jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-            Tk = link.A(qk[jindex])
-
-            if tools is not None:
-                Tk = Tk @ tools
-
-            # add remaining links, back toward the base
-            for i in range(self.m - 2, -1, -1):
-                link = self._data[i]
-
-                jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-                A = link.A(qk[jindex])
-
-                if A is not None:
-                    Tk = A @ Tk
-
-            # add base transform if it is set
-            if include_base is True and bases is not None:
-                Tk = bases @ Tk
-
-            # append
-            if l > 1:
-                T[k, :, :] = Tk
-                # ret.append(SE2(Tk, check=False))  # type: ignore
-            else:
-                T = Tk
-                # ret = SE2(Tk, check=False)
-
-        return T
-
-    def jacob0(
-        self,
-        q: ArrayLike,
-    ) -> NDArray:
-        # very inefficient implementation, just put a 1 in last row
-        # if its a rotation joint
-        q = getvector(q)
-
-        j = 0
-        J = np.zeros((3, self.n))
-        etjoints = self.joint_idx()
-
-        if not np.all(np.array([self[i].jindex for i in etjoints])):
-            # not all joints have a jindex it is required, set them
-            for j in range(self.n):
-                i = etjoints[j]
-                self[i].jindex = j
-
-        for j in range(self.n):
-            i = etjoints[j]
-
-            if self[i].jindex is not None:
-                jindex = self[i].jindex
-            else:
-                jindex = 0  # pragma: nocover
-
-            # jindex = 0 if self[i].jindex is None else self[i].jindex
-
-            axis = self[i].axis
-            if axis == "R":
-                dTdq = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].A(
-                    q[jindex]  # type: ignore
+        def joint_slot(et: "ET") -> int:
+            if et.kind not in template or template.index(et.kind) not in joint_slots:
+                raise ValueError(
+                    "ETS is not a valid DH/MDH parameterisation: "
+                    f"{et} is not a permitted joint for this convention"
                 )
-            elif axis == "tx":
-                dTdq = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]])
-            elif axis == "ty":
-                dTdq = np.array([[0, 0, 0], [0, 0, 1], [0, 0, 0]])
-            else:  # pragma: nocover
-                raise TypeError("Invalid axes")
+            return template.index(et.kind)
 
-            E0 = ETS2(self[:i])
-            if len(E0) > 0:
-                dTdq = E0.fkine(q).A @ dTdq
+        slots = [joint_slot(self[k]) for k in idx]
+        start = [0] * len(idx)
+        end = [0] * len(idx)
 
-            Ef = ETS2(self[i + 1 :])
-            if len(Ef) > 0:
-                dTdq = dTdq @ Ef.fkine(q).A
+        if exposed == "head":
+            gap = list(reversed(self[0 : idx[0]]))
+            sub = list(reversed(template[0 : slots[0]]))
+            consumed = self._template_consume(gap, sub)
+            start[0] = idx[0] - consumed
+            head = self[0 : start[0]]
+        else:
+            head = self[0:0]
 
-            T = self.fkine(q).A
-            dRdt = dTdq[:2, :2] @ T[:2, :2].T
+        for i, k in enumerate(idx):
+            hi_bound = idx[i + 1] if i + 1 < len(idx) else len(self)
+            consumed = self._template_consume(
+                list(self[k + 1 : hi_bound]), template[slots[i] + 1 :]
+            )
+            end[i] = k + 1 + consumed
 
-            J[:2, j] = dTdq[:2, 2]
-            J[2, j] = dRdt[1, 0]
+            if i + 1 < len(idx):
+                gap = self[end[i] : idx[i + 1]]
+                gap_consumed = self._template_consume(
+                    list(gap), template[0 : slots[i + 1]]
+                )
+                if gap_consumed != len(gap):
+                    raise ValueError(
+                        "ETS is not a valid DH/MDH parameterisation: "
+                        f"unexpected term at index {end[i] + gap_consumed}"
+                    )
+                start[i + 1] = end[i]
 
-        return J
+        if exposed == "tail":
+            tail = self[end[-1] :]
+        else:
+            end[-1] = len(self)
+            tail = self[0:0]
 
-    def jacobe(
-        self,
-        q: ArrayLike,
-    ):
+        segments = [self.__class__(self[start[i] : end[i]]) for i in range(len(idx))]
+        return segments, head, tail
+
+    def split(self, method: str = "last") -> list["ETS"]:
         r"""
-        Jacobian in end-effector frame
+        Split ETS into link segments
 
-        :param q: joint coordinates
-        :returns: Jacobian matrix
-        :rtype: ndarray(3,n)
+        :param method: one of ``"first"``, ``"last"`` (default), ``"dh"``, or ``"mdh"``.
+        :returns: ``[base, *segments, gripper]`` -- a list of length
+            ``n_joints + 2``. ``base``/``gripper`` are empty ETS when the
+            method has no concept of one (e.g. ``"dh"`` never populates
+            ``gripper``, ``"mdh"`` never populates ``base``).
 
-        ``jacobe(q)`` is the manipulator Jacobian matrix which maps joint
-        velocity to end-effector spatial velocity.
+        Split an ETS into segments representing links, plus a base and gripper segment.
+        Unpack with ``base, *segments, gripper = ets.split(method)``.
 
-        End-effector spatial velocity :math:`\nu = (v_x, v_y, \omega)^T`
-        is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
+        The behaviour depends on the ``method`` argument:
 
-        :seealso: :func:`jacob0`, :func:`hessian0`
+        * ``"first"``: each link segment begins with a joint and continues upto, but not
+          including the next joint. Any constant ET before the first joint are part of
+          the base. There are no gripper ET, they are included in the last link segment.
+        * ``"last"``: each link segment ends with a joint and include all ET after the
+          previous joint. Any constant ET after the last joint are part of the gripper.
+          There are no base ET, they are included in the first link segment.
+        * ``"dh"``: similar to ``"first"`` but each segment is validated against the
+          Denavit-Hartenberg convention: an ordered, 4-slot template
+          Rz($θ_j$) tz($d_j$) tx($a_j$) Rx($α_j$), exactly one of Rz/tz being the
+          segment's joint and the rest optional (but present slots must occur in
+          this order). Content between two joints that cannot be accounted for by
+          the template raises ``ValueError``. The base (content before the first
+          joint's template slots) is unvalidated and reported separately; trailing
+          content past the last joint's template is folded into the last segment.
+        * ``"mdh"``: similar to ``"last"`` but validated against the modified
+          Denavit-Hartenberg convention, template tx($a_{j-1}$) Rx($α_{j-1}$)
+          Rz($θ_j$) tz($d_j$), same rules as ``"dh"`` mirrored: the gripper
+          (content past the last joint's template slots) is unvalidated and
+          reported separately; leading content before the first joint's template
+          is folded into the first segment.
+
+        .. runblock:: pycon
+            >>> from roboticstoolbox.ets.ETS import *
+            >>> e = tz(1) * Rx("q1") * tx(2) * Ry("q2") * ty(3) * Rz("q3") * tz(4)
+            >>> base, *segments, gripper = e.split("first")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
+            >>> base, *segments, gripper = e.split("last")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
+            >>> e = tz(1) * Rz("q1") * tx(2) * Rx(90, 'deg') * Rz("q2") * tz(4) * Rz(180, 'deg') * tz("q3") * Rz(270, 'deg') * tz(4)
+            >>> base, *segments, gripper = e.split("dh")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
+            >>> base, *segments, gripper = e.split("mdh")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
         """
 
-        T = self.fkine(q, include_base=False).A
-        return tr2jac2(T.T) @ self.jacob0(q)
+        match method.lower():
+            case "dh":
+                segments, head, tail = self._split_convention(
+                    ["Rz", "tz", "tx", "Rx"], {0, 1}, exposed="head"
+                )
+            case "mdh":
+                segments, head, tail = self._split_convention(
+                    ["tx", "Rx", "Rz", "tz"], {2, 3}, exposed="tail"
+                )
+            case _:
+                return super().split(method)  # type: ignore
+
+        return [head] + segments + [tail]  # type: ignore
+

@@ -10,7 +10,7 @@ from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
 from functools import lru_cache
 from typing import TypeVar, Generic, Callable
-from roboticstoolbox.robot.fknm import Robot_link_T
+from roboticstoolbox.ets.fknm import Robot_link_T
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.robot.Link import BaseLink
 

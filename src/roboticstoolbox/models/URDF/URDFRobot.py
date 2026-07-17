@@ -22,8 +22,8 @@ from xacrodoc import XacroDoc, packages
 
 from roboticstoolbox.tools.urdf import URDF
 from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.robot.ET import ET
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
 from roboticstoolbox.robot.Robot import Robot
 
 

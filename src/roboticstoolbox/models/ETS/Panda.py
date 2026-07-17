@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Link import Link
 
