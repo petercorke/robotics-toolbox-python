@@ -545,6 +545,51 @@ class TestET(unittest.TestCase):
         # confirm they really are different (3D vs 2D), not the same object
         self.assertNotEqual(ET_module.tx(1.5).A().shape, ET2_module.tx(1.5).A().shape)
 
+    def test_sum(self):
+        # __add__ is an alias for __mul__ (composition) on ET/ET2, and
+        # __radd__ (treating a start value of 0 as identity) is what lets
+        # sum() work without an explicit start
+        e1 = rtb.ET.Rz(jindex=0)
+        e2 = rtb.ET.tx(1)
+        e3 = rtb.ET.Rz(jindex=1)
+        expected = e1 * e2 * e3
+
+        r_add = e1 + e2 + e3
+        self.assertIsInstance(r_add, rtb.ETS)
+        self.assertEqual(r_add, expected)
+
+        r_sum = sum([e1, e2, e3])
+        self.assertIsInstance(r_sum, rtb.ETS)
+        self.assertEqual(r_sum, expected)
+
+        f1 = rtb.ET2.R(jindex=0)
+        f2 = rtb.ET2.tx(1)
+        f3 = rtb.ET2.R(jindex=1)
+        expected2 = f1 * f2 * f3
+
+        s_add = f1 + f2 + f3
+        self.assertIsInstance(s_add, rtb.ETS2)
+        self.assertEqual(s_add, expected2)
+
+        s_sum = sum([f1, f2, f3])
+        self.assertIsInstance(s_sum, rtb.ETS2)
+        self.assertEqual(s_sum, expected2)
+
+        # BaseETS.__radd__ makes sum() work on a list of ETS/ETS2 too, not
+        # just their individual elements
+        ets_sum = sum([e1 * e2, e3])
+        self.assertIsInstance(ets_sum, rtb.ETS)
+        self.assertEqual(ets_sum, expected)
+
+        ets2_sum = sum([f1 * f2, f3])
+        self.assertIsInstance(ets2_sum, rtb.ETS2)
+        self.assertEqual(ets2_sum, expected2)
+
+        # a genuinely bad start value still fails loudly rather than being
+        # silently swallowed
+        with self.assertRaises(TypeError):
+            sum([e1, e2, e3], 5)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -109,8 +109,15 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 # We're passed an ETS string
                 links = []
                 # chop it up into segments, a link frame after every joint
+                # split()'s default "last" method folds any base content into
+                # the first segment, so `base` is always empty and dropped;
+                # `gripper` holds trailing constant content, if any, and
+                # becomes one extra static (non-joint) link.
+                _, *segs, gripper = arg.split()
+                if gripper:
+                    segs.append(gripper)
                 parent = None
-                for j, ets_j in enumerate(arg.split()):
+                for j, ets_j in enumerate(segs):
                     elink = Link(ETS(ets_j), parent=parent, name=f"link{j:d}")
                     if (
                         elink.qlim is None
@@ -1805,8 +1812,15 @@ class Robot2(BaseRobot[Link2]):
             # we're passed an ETS string
             links = []
             # chop it up into segments, a link frame after every joint
+            # split()'s default "last" method folds any base content into
+            # the first segment, so `base` is always empty and dropped;
+            # `gripper` holds trailing constant content, if any, and
+            # becomes one extra static (non-joint) link.
+            _, *segs, gripper = arg.split()
+            if gripper:
+                segs.append(gripper)
             parent = None
-            for j, ets_j in enumerate(arg.split()):
+            for j, ets_j in enumerate(segs):
                 elink = Link2(ETS2(ets_j), parent=parent, name=f"link{j:d}")
                 parent = elink
                 if (

@@ -73,9 +73,6 @@ class BaseETS(MutableSequence):
     def __len__(self) -> int:
         return len(self._data)
 
-    def __getitem__(self, i):
-        return self._data[i]
-
     @_dirties_fknm
     def __setitem__(self, i, value):
         self._data[i] = value
@@ -97,6 +94,14 @@ class BaseETS(MutableSequence):
         return NotImplemented
 
     __hash__ = None  # type: ignore[assignment]
+
+    def __radd__(self, other):
+        # lets sum() work without an explicit start value, since its
+        # default start is the int 0, which has no idea how to compose
+        # with an ETS/ETS2
+        if other == 0:
+            return self
+        return NotImplemented
 
     # ------------------------------------------------------------------
     # C handle: lazy build on first use after any mutation
@@ -295,6 +300,63 @@ class BaseETS(MutableSequence):
         """
 
         return [e for e in self if e.isjoint]
+
+    def split(self, method: str = "last") -> list["BaseETS"]:
+        """
+        Split ETS into link segments
+
+        :param method: one of ``"first"`` or ``"last"`` (default).
+        :returns: ``[base, *segments, gripper]`` -- a list of length
+            ``n_joints + 2``. ``base``/``gripper`` are empty ETS when the
+            method has no concept of one.
+
+        Split an ETS into segments representing links, plus a base and gripper segment.
+        Unpack with ``base, *segments, gripper = ets.split(method)``.
+
+        The behaviour depends on the ``method`` argument:
+
+        * ``"first"``: each link segment begins with a joint and continues upto, but not
+          including the next joint. Any constant ET before the first joint are part of
+          the base. There are no gripper ET, they are included in the last link segment.
+        * ``"last"``: each link segment ends with a joint and include all ET after the
+          previous joint. Any constant ET after the last joint are part of the gripper.
+          There are no base ET, they are included in the first link segment.
+
+        .. runblock:: pycon
+            >>> from roboticstoolbox.ets.ETS import *
+            >>> e = tz(1) * Rx("q1") * tx(2) * Ry("q2") * ty(3) * Rz("q3") * tz(4)
+            >>> base, *segments, gripper = e.split("first")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
+            >>> base, *segments, gripper = e.split("last")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
+        """
+
+        segments = []
+        joint_idx = self.joint_idx()
+        head = self[0:0]
+        tail = self[0:0]
+
+        match method.lower():
+
+            case "first":
+                head = self[0:joint_idx[0]]
+                start = len(head)
+                for k in joint_idx[1:]:
+                    ets_j = self[start: k]
+                    start = k
+                    segments.append(self.__class__(ets_j))
+                segments.append(self.__class__(self[joint_idx[-1]:]))
+            case "last":
+                start = 0
+                for k in joint_idx:
+                    ets_j = self[start : k + 1]
+                    start = k + 1
+                    segments.append(self.__class__(ets_j))
+                tail = self[start:]
+            case _:
+                raise ValueError(f"unknown split method '{method}'")
+
+        return [head] + segments + [tail]  # type: ignore
 
     def jindex_set(self) -> set[int]:  #
         """
@@ -537,20 +599,22 @@ class BaseETS(MutableSequence):
     def __getitem__(self: "ETS", i: int) -> ET: ...
 
     @overload
-    def __getitem__(self: "ETS", i: slice) -> list[ET]: ...
+    def __getitem__(self: "ETS", i: slice) -> "ETS": ...
 
     @overload
     def __getitem__(self: "ETS2", i: int) -> ET2: ...
 
     @overload
-    def __getitem__(self: "ETS2", i: slice) -> list[ET2]: ...
+    def __getitem__(self: "ETS2", i: slice) -> "ETS2": ...
 
     def __getitem__(self, i):
         """
         Index or slice an ETS
 
         :param i: the index or slice
-        :returns: elementary transform
+        :returns: elementary transform if ``i`` is an int, otherwise an ETS
+            of the same concrete type as ``self`` (a slice of an ETS is
+            still an ETS)
 
         Examples
         --------
@@ -564,7 +628,9 @@ class BaseETS(MutableSequence):
             >>> e[1:3]
 
         """
-        return self._data[i]  # can be [2] or slice, eg. [3:5]
+        if isinstance(i, slice):
+            return self.__class__(self._data[i])
+        return self._data[i]
 
     def __deepcopy__(self, memo):
         new_data = []

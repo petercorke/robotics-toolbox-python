@@ -1860,27 +1860,154 @@ class ETS(BaseETS):
 
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
-    def split(self) -> list["ETS"]:
+    @staticmethod
+    def _template_consume(elements: list["BaseET"], template: list[str]) -> int:
         """
+        Greedily match a run of ETs against an ordered template of ``kind``
+        strings, where each template slot is optional but present slots must
+        occur in the given order.
+
+        :param elements: ETs to match, in the order they occur in the ETS
+        :param template: ordered ``kind`` strings the elements may occupy
+        :returns: number of leading ``elements`` consumed before the first
+            one that fits no remaining template slot
+        """
+        slot = 0
+        consumed = 0
+        for et in elements:
+            if et.kind in template[slot:]:
+                slot = template.index(et.kind, slot) + 1
+                consumed += 1
+            else:
+                break
+        return consumed
+
+    def _split_convention(self, template: list[str], joint_slots: set[int], exposed: str):
+        """
+        Split according to a DH-like convention.
+
+        A segment is a 4-slot ordered ``template`` (e.g. Rz, tz, tx, Rx for
+        DH); each slot is optional except that exactly one of the two
+        ``joint_slots`` must be occupied by the segment's joint. Content
+        between two joints must fully account for the gap in template
+        order, else ``ValueError``. The end named by ``exposed`` (``"head"``
+        or ``"tail"``) is reported separately and unvalidated; the other end
+        is folded into the boundary segment.
+        """
+        idx = list(self.joint_idx())
+        if len(idx) == 0:
+            raise ValueError("ETS has no joints")
+
+        def joint_slot(et: "ET") -> int:
+            if et.kind not in template or template.index(et.kind) not in joint_slots:
+                raise ValueError(
+                    "ETS is not a valid DH/MDH parameterisation: "
+                    f"{et} is not a permitted joint for this convention"
+                )
+            return template.index(et.kind)
+
+        slots = [joint_slot(self[k]) for k in idx]
+        start = [0] * len(idx)
+        end = [0] * len(idx)
+
+        if exposed == "head":
+            gap = list(reversed(self[0 : idx[0]]))
+            sub = list(reversed(template[0 : slots[0]]))
+            consumed = self._template_consume(gap, sub)
+            start[0] = idx[0] - consumed
+            head = self[0 : start[0]]
+        else:
+            head = self[0:0]
+
+        for i, k in enumerate(idx):
+            hi_bound = idx[i + 1] if i + 1 < len(idx) else len(self)
+            consumed = self._template_consume(
+                list(self[k + 1 : hi_bound]), template[slots[i] + 1 :]
+            )
+            end[i] = k + 1 + consumed
+
+            if i + 1 < len(idx):
+                gap = self[end[i] : idx[i + 1]]
+                gap_consumed = self._template_consume(
+                    list(gap), template[0 : slots[i + 1]]
+                )
+                if gap_consumed != len(gap):
+                    raise ValueError(
+                        "ETS is not a valid DH/MDH parameterisation: "
+                        f"unexpected term at index {end[i] + gap_consumed}"
+                    )
+                start[i + 1] = end[i]
+
+        if exposed == "tail":
+            tail = self[end[-1] :]
+        else:
+            end[-1] = len(self)
+            tail = self[0:0]
+
+        segments = [self.__class__(self[start[i] : end[i]]) for i in range(len(idx))]
+        return segments, head, tail
+
+    def split(self, method: str = "last") -> list["ETS"]:
+        r"""
         Split ETS into link segments
 
-        :returns: a list of ETS, each one, apart from the last, ends with a variable ET.
+        :param method: one of ``"first"``, ``"last"`` (default), ``"dh"``, or ``"mdh"``.
+        :returns: ``[base, *segments, gripper]`` -- a list of length
+            ``n_joints + 2``. ``base``/``gripper`` are empty ETS when the
+            method has no concept of one (e.g. ``"dh"`` never populates
+            ``gripper``, ``"mdh"`` never populates ``base``).
 
+        Split an ETS into segments representing links, plus a base and gripper segment.
+        Unpack with ``base, *segments, gripper = ets.split(method)``.
+
+        The behaviour depends on the ``method`` argument:
+
+        * ``"first"``: each link segment begins with a joint and continues upto, but not
+          including the next joint. Any constant ET before the first joint are part of
+          the base. There are no gripper ET, they are included in the last link segment.
+        * ``"last"``: each link segment ends with a joint and include all ET after the
+          previous joint. Any constant ET after the last joint are part of the gripper.
+          There are no base ET, they are included in the first link segment.
+        * ``"dh"``: similar to ``"first"`` but each segment is validated against the
+          Denavit-Hartenberg convention: an ordered, 4-slot template
+          Rz($θ_j$) tz($d_j$) tx($a_j$) Rx($α_j$), exactly one of Rz/tz being the
+          segment's joint and the rest optional (but present slots must occur in
+          this order). Content between two joints that cannot be accounted for by
+          the template raises ``ValueError``. The base (content before the first
+          joint's template slots) is unvalidated and reported separately; trailing
+          content past the last joint's template is folded into the last segment.
+        * ``"mdh"``: similar to ``"last"`` but validated against the modified
+          Denavit-Hartenberg convention, template tx($a_{j-1}$) Rx($α_{j-1}$)
+          Rz($θ_j$) tz($d_j$), same rules as ``"dh"`` mirrored: the gripper
+          (content past the last joint's template slots) is unvalidated and
+          reported separately; leading content before the first joint's template
+          is folded into the first segment.
+
+        .. runblock:: pycon
+            >>> from roboticstoolbox.ets.ETS import *
+            >>> e = tz(1) * Rx("q1") * tx(2) * Ry("q2") * ty(3) * Rz("q3") * tz(4)
+            >>> base, *segments, gripper = e.split("first")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
+            >>> base, *segments, gripper = e.split("last")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
+            >>> e = tz(1) * Rz("q1") * tx(2) * Rx(90, 'deg') * Rz("q2") * tz(4) * Rz(180, 'deg') * tz("q3") * Rz(270, 'deg') * tz(4)
+            >>> base, *segments, gripper = e.split("dh")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
+            >>> base, *segments, gripper = e.split("mdh")
+            >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
         """
 
-        segments = []
-        start = 0
+        match method.lower():
+            case "dh":
+                segments, head, tail = self._split_convention(
+                    ["Rz", "tz", "tx", "Rx"], {0, 1}, exposed="head"
+                )
+            case "mdh":
+                segments, head, tail = self._split_convention(
+                    ["tx", "Rx", "Rz", "tz"], {2, 3}, exposed="tail"
+                )
+            case _:
+                return super().split(method)  # type: ignore
 
-        for j, k in enumerate(self.joint_idx()):
-            ets_j = self._data[start : k + 1]
-            start = k + 1
-            segments.append(self.__class__(ets_j))
-
-        tail = self._data[start:]
-
-        if len(tail) > 0:
-            segments.append(self.__class__(tail))
-
-        return segments
-
+        return [head] + segments + [tail]  # type: ignore
 

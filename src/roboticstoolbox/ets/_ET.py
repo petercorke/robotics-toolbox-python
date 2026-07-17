@@ -257,6 +257,14 @@ class BaseET:
     def __eq__(self, other):
         return repr(self) == repr(other)
 
+    def __radd__(self, other):
+        # lets sum() work without an explicit start value, since its
+        # default start is the int 0, which has no idea how to compose
+        # with an ET/ET2
+        if other == 0:
+            return self
+        return NotImplemented
+
     # ------------------------------------------------------------------
     # Compiled-acceleration hooks. BaseET (and so ET2) is pure Python; ET
     # overrides both to build/refresh the compiled C++ struct. Keeping

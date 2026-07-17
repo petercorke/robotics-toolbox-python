@@ -228,29 +228,6 @@ class ETS2(BaseETS):
                 self._data.insert(i + j, et)
         self._fknm_stale = True
 
-    def split(self) -> list["ETS2"]:
-        """
-        Split ETS2 into link segments
-
-        :returns: a list of ETS2, each one, apart from the last, ends with a variable ET.
-
-        """
-
-        segments = []
-        start = 0
-
-        for j, k in enumerate(self.joint_idx()):
-            ets_j = self._data[start : k + 1]
-            start = k + 1
-            segments.append(self.__class__(ets_j))
-
-        tail = self._data[start:]
-
-        if len(tail) > 0:
-            segments.append(self.__class__(tail))
-
-        return segments
-
     def fkine(
         self,
         q: ArrayLike,
