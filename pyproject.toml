@@ -97,10 +97,11 @@ dev = [
     "ruff",
     "coal; sys_platform != 'win32'",
     "trimesh",
+    "nbmake",
 ]
 
 # Backward-compatible alias; notebook tooling is included in "dev".
-nb = ["pytest-nbmake"]
+nb = ["nbmake"]
 
 docs = [
     "sphinx",
@@ -108,6 +109,7 @@ docs = [
     "sphinx-autorun",
     "sphinx_autodoc_typehints",
     "sphinx-favicon",
+    "sphinxcontrib-bibtex",
 ]
 
 

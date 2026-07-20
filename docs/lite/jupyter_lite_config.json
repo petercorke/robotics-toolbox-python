@@ -1,0 +1,7 @@
+{
+    "PyodideAddon": {
+        "pipliteUrls": [
+            "pypi/all.json"
+        ]
+    }
+}

@@ -37,7 +37,7 @@ class rx200(URDFRobot):
         )
 
         self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4, 0])
-        self.qz = np.zeros(7)
+        self.qz = np.zeros(8)
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)

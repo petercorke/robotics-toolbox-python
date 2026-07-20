@@ -1288,7 +1288,7 @@ class DHRobot(Robot):
         :return: Hessian matrix
         :rtype: ndarray(6,n,n)
 
-        This method calculcates the Hessisan in the base frame. One of ``J0`` or
+        This method calculates the Hessian in the base frame. One of ``J0`` or
         ``q`` is required. If ``J0`` is already calculated for the joint
         coordinates ``q`` it can be passed in to to save computation time.
 
@@ -1950,12 +1950,12 @@ class DHRobot(Robot):
 
         :param Tep: The desired end-effector pose or pose trajectory
         :param q0: initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
+            configuration constrained by the joint limits of the robot)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
         :param tol: final error tolerance
         :param reject_jl: constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
+            the robot (reject solution with invalid joint configurations and perform
             another search up to the slimit)
         :param we: a mask vector which weights the end-effector error priority.
             Corresponds to translation in X, Y and Z and rotation about X, Y and Z
@@ -2054,12 +2054,12 @@ class DHRobot(Robot):
 
         :param Tep: The desired end-effector pose or pose trajectory
         :param q0: initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
+            configuration constrained by the joint limits of the robot)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
         :param tol: final error tolerance
         :param reject_jl: constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
+            the robot (reject solution with invalid joint configurations and perform
             another search up to the slimit)
         :param we: a mask vector which weights the end-effector error priority.
             Corresponds to translation in X, Y and Z and rotation about X, Y and Z
@@ -2158,12 +2158,12 @@ class DHRobot(Robot):
 
         :param Tep: The desired end-effector pose or pose trajectory
         :param q0: initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
+            configuration constrained by the joint limits of the robot)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
         :param tol: final error tolerance
         :param reject_jl: constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
+            the robot (reject solution with invalid joint configurations and perform
             another search up to the slimit)
         :param we: a mask vector which weights the end-effector error priority.
             Corresponds to translation in X, Y and Z and rotation about X, Y and Z
@@ -2263,12 +2263,12 @@ class DHRobot(Robot):
 
         :param Tep: The desired end-effector pose or pose trajectory
         :param q0: initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
+            configuration constrained by the joint limits of the robot)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
         :param tol: final error tolerance
         :param reject_jl: constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
+            the robot (reject solution with invalid joint configurations and perform
             another search up to the slimit)
         :param we: a mask vector which weights the end-effector error priority.
             Corresponds to translation in X, Y and Z and rotation about X, Y and Z
@@ -2370,12 +2370,12 @@ class DHRobot(Robot):
 
         :param Tep: The desired end-effector pose or pose trajectory
         :param q0: initial joint configuration (default to random valid joint
-            configuration contrained by the joint limits of the robot)
+            configuration constrained by the joint limits of the robot)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
         :param tol: final error tolerance
         :param reject_jl: constrain the solution to being within the joint limits of
-            the robot (reject solution with invalid joint configurations and perfrom
+            the robot (reject solution with invalid joint configurations and perform
             another search up to the slimit)
         :param we: a mask vector which weights the end-effector error priority.
             Corresponds to translation in X, Y and Z and rotation about X, Y and Z

@@ -87,7 +87,7 @@ class CurvaturePolyPlanner(PlannerBase):
 
     def query(self, start, goal):
         r"""
-        Find a path betwee two configurations
+        Find a path between two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
         :type start: array_like(3), optional

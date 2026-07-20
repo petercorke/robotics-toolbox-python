@@ -553,7 +553,7 @@ class IK_NR(IKSolver):
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
-    :param pinv: If True, will use the psuedoinverse in the `step` method instead of
+    :param pinv: If True, will use the pseudoinverse in the `step` method instead of
         the normal inverse
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
         completely from the solution
@@ -950,7 +950,7 @@ class IK_GN(IKSolver):
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
-    :param pinv: If True, will use the psuedoinverse in the `step` method instead of
+    :param pinv: If True, will use the pseudoinverse in the `step` method instead of
         the normal inverse
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
         completely from the solution

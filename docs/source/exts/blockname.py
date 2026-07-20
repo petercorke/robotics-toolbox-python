@@ -32,12 +32,17 @@ def block_name(name, rawtext, text, lineno, inliner, options={}, content=[]):
     </table>
     """
 
-    # this is the path to the icons within the github repo
-    path = (
-        "https://github.com/petercorke/robotics-toolbox-python/raw/master/roboticstoolbox/blocks/Icons/"
-        + text.lower()
-        + ".png"
-    )
+    # icons are copied from src/roboticstoolbox/blocks/Icons into _static/
+    # by html_static_path in conf.py, and served from there at build time --
+    # avoids depending on a live network fetch (and a hardcoded branch/path)
+    # for every docs build. The relative prefix accounts for how deeply
+    # nested the current page is, matching Sphinx's own pathto() semantics
+    # for _static references, so this keeps working if these pages ever
+    # move into a subdirectory.
+    env = inliner.document.settings.env
+    depth = env.docname.count("/")
+    prefix = "../" * depth
+    path = f"{prefix}_static/{text.lower()}.png"
     html_node = nodes.raw(text=html.format(text, path), format="html")
     return [html_node], []
 

@@ -11,6 +11,7 @@ Provides:
 
 from pathlib import Path
 import importlib
+import sys
 import warnings
 from typing import Callable, TextIO
 
@@ -102,6 +103,26 @@ def _load_rd_module(robot_name: str):
         except ImportError as e:
             last_error = e
             continue
+        except Exception as e:
+            # robot_descriptions clones a git repository (via GitPython,
+            # which shells out to a real git binary) the first time a given
+            # model is imported. Pyodide/JupyterLite has no subprocess
+            # execution and no git binary, so this always fails there --
+            # not a bug, an environment limitation. The exact exception type
+            # depends on how GitPython fails in that sandbox, so this is
+            # deliberately broad, but only ever intercepts on Pyodide.
+            if sys.platform == "emscripten":
+                raise ValueError(
+                    f"Toolbox uses {_rd_link()} to provide URDF robot models, "
+                    "which clones a git repository on first use. That isn't "
+                    "possible in this browser (Pyodide/JupyterLite) sandbox -- "
+                    f'this is an expected limitation loading "{robot_name}" '
+                    "here, not a bug. Try a DH- or ETS-based model instead "
+                    "(e.g. rtb.models.DH.Panda()), or run this notebook in a "
+                    "regular Python environment to use robot_descriptions-"
+                    "backed models."
+                ) from e
+            raise
 
     renamed_to = _find_rd_rename(robot_name, candidates)
     if renamed_to is not None:

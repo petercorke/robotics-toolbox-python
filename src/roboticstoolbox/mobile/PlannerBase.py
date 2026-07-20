@@ -824,7 +824,7 @@ class PlannerBase(ABC):
             - inflated occupied cells in pink
 
         If distance is provided, or the planner has a distancemap attribute
-        the the distance field will be used as the background and obstacle cells
+        the distance field will be used as the background and obstacle cells
         (actual or inflated) will be shown in red. A colorbar is added.
         """
         if self._occgrid is None:

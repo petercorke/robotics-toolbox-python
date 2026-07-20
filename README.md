@@ -1,46 +1,60 @@
 # Robotics Toolbox for Python
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/docs/figs/RobToolBox_RoundLogoB.png" width="390">
+  <br>
+  <em>Robotics without the cruft</em>
+  <br>
+  <strong>A high-productivity framework for robotics research and education.</strong>
+  <br><br>
+
+[![JupyterLite](https://img.shields.io/badge/Try_it_Now-JupyterLite-orange?style=for-the-badge&logo=jupyter)](https://petercorke.github.io/robotics-toolbox-python/lite/lab?path=robotics.ipynb)
+  [![PyPI version](https://img.shields.io/pypi/v/roboticstoolbox-python?style=for-the-badge&color=blue)](https://pypi.org/project/roboticstoolbox-python/)
+  [![Documentation](https://img.shields.io/badge/Docs-View_Online-blue?style=for-the-badge)](https://petercorke.github.io/robotics-toolbox-python)
+
+  <p>
+    <a href="https://github.com/petercorke/robotics-toolbox-python">GitHub</a> •
+    <a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Wiki</a> •
+    <a href="https://github.com/petercorke/robotics-toolbox-python/blob/main/CHANGELOG.md">Changelog</a> •
+    <a href="#getting-going">Installation</a>
+  </p>
+</div>
+
+---
+
+### Status & Ecosystem
+
 [![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/.github/svg/py_collection.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
-[![Powered by Spatial Maths](https://raw.githubusercontent.com/petercorke/spatialmath-python/master/.github/svg/sm_powered.min.svg)](https://github.com/petercorke/spatialmath-python)
 [![QUT Centre for Robotics Open Source](https://github.com/qcr/qcr.github.io/raw/master/misc/badge.svg)](https://qcr.github.io)
-
-[![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)](https://badge.fury.io/py/roboticstoolbox-python)
-[![Anaconda version](https://anaconda.org/conda-forge/roboticstoolbox-python/badges/version.svg)](https://anaconda.org/conda-forge/roboticstoolbox-python)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
-
 [![Build Status](https://github.com/petercorke/robotics-toolbox-python/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/petercorke/robotics-toolbox-python/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/petercorke/robotics-toolbox-python/graph/badge.svg?token=0rqN39PDEO)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
-[![PyPI - Downloads](https://img.shields.io/pypi/dw/roboticstoolbox-python)](https://pypistats.org/packages/roboticstoolbox-python)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI - Downloads](https://img.shields.io/pypi/dw/roboticstoolbox-python)](https://pypistats.org/packages/roboticstoolbox-python)
+[![Anaconda version](https://anaconda.org/conda-forge/roboticstoolbox-python/badges/version.svg)](https://anaconda.org/conda-forge/roboticstoolbox-python)
 
-<table style="border:0px">
-<tr style="border:0px">
-<td style="border:0px">
-<img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/docs/figs/RobToolBox_RoundLogoB.png" width="200"></td>
-<td style="border:0px">
-A Python implementation of the <a href="https://github.com/petercorke/robotics-toolbox-matlab">Robotics Toolbox for MATLAB<sup>&reg;</sup></a>
-<ul>
-<li><a href="https://github.com/petercorke/robotics-toolbox-python">GitHub repository </a></li>
-<li><a href="https://petercorke.github.io/robotics-toolbox-python">Documentation</a></li>
-<li><a href="#toolbox-icra-paper-and-citation-info">ICRA Paper</a></li>
-<li><a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Wiki (examples and details)</a></li>
-</ul>
-</td>
-</tr>
-</table>
+### Powered by
+
+[![Powered by Spatial Maths](https://raw.githubusercontent.com/petercorke/spatialmath-python/master/.github/svg/sm_powered.min.svg)](https://github.com/petercorke/spatialmath-python)
 
 <!-- <br> -->
 
 ## Contents
+
+<!-- Kept as a manual list deliberately: this file is also PyPI's project
+     description (see pyproject.toml's `readme`), which has no native
+     table-of-contents widget the way GitHub does. Keep in sync with the
+     headings below when adding/renaming a section. -->
 
 - [Synopsis](#synopsis)
 - [Getting going](#getting-going)
 - [Tutorials](#tutorials)
 - [Code Examples](#code-examples)
 - [Toolbox Research Applications](#toolbox-research-applications)
-- [Toolbox ICRA Paper and Citation Info](#toolbox-icra-paper-and-citation-info)
+- [References](#references)
 - [Using the Toolbox in your Open Source Code?](#using-the-toolbox-in-your-open-source-code)
 - [Common Issues and Solutions](#common-issues-and-solutions)
+- [Build a JupyterLite/Pyodide Wasm wheel](#build-a-jupyterlitepyodide-wasm-wheel)
 
 <br>
 
@@ -54,7 +68,7 @@ mybinder.org), and documentation (sphinx).
 
 The Toolbox provides tools for representing the kinematics and dynamics of
 serial-link manipulators - you can easily create your own in Denavit-Hartenberg
-form, import a URDF file, or use over 30 supplied models for well-known
+form, import a URDF file, or use over 50 supplied models for well-known
 contemporary robots from Franka-Emika, Kinova, Universal Robotics, Rethink as
 well as classical robots such as the Puma 560 and the Stanford arm.
 
@@ -163,7 +177,7 @@ cd robotics-toolbox-python
 pip install -e .
 ```
 
-To generate a Wasm wheel that will run in the browser see the [instructions here](#build-a-jupyterlitepyodide-wasm-wheel-cp313).
+To generate a Wasm wheel that will run in the browser see the [instructions here](#build-a-jupyterlitepyodide-wasm-wheel).
 
 
 ## Tutorials
@@ -315,9 +329,25 @@ The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/mai
 
 <br>
 
-## Toolbox ICRA Paper and Citation Info
+## References
 
-Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/3ChcyNp).
+### Key papers
+
+- P. Corke, "A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB," Proc. National Conf. Australian Robot Association, pp. 319–330, Melbourne, July 1995. [[PDF]](http://www.petercorke.com/RTB/ARA95.pdf)
+- P. Corke, "A robotics toolbox for MATLAB," IEEE Robotics and Automation Magazine, 3(1):24–32, Sept. 1996. [[IEEE Xplore]](https://ieeexplore.ieee.org/document/486658)
+- P. Corke, "A simple and systematic approach to assigning Denavit-Hartenberg parameters," IEEE Transactions on Robotics, 23(3):590–594, 2007. [[IEEE Xplore]](https://ieeexplore.ieee.org/document/4252158) — introduces the Elementary Transform Sequence (ETS) notation used throughout the Toolbox.
+- J. Haviland and P. Corke, "A systematic approach to computing the manipulator Jacobian and Hessian using the elementary transform sequence," arXiv preprint, 2020. [[arXiv]](https://arxiv.org/abs/2010.08696)
+- P. Corke and J. Haviland, "Not your grandmother's toolbox – the Robotics Toolbox reinvented for Python," Proc. ICRA 2021. [[IEEE Xplore]](https://ieeexplore.ieee.org/document/9561366) [[PDF]](https://bit.ly/3ChcyNp)
+
+### Talks
+
+- [Peter Corke – The Robotics Toolbox: 30 Years Old and Still Going Strong](https://www.youtube.com/watch?v=U37NMe7anXc&list=PL1pxneANaikCP5jwrw91UBkrCklkQXlyr&index=1) — a retrospective on the Toolbox's history and motivation, a good starting point before diving into the API.
+
+### Related book
+
+The Toolbox is a companion to Peter Corke's textbook [*Robotics, Vision & Control*](https://petercorke.com/books/robotics-vision-control-all-versions/) (Springer) — many docstrings and examples reference specific figures/sections from the book.
+
+### Citing the Toolbox
 
 If the toolbox helped you in your research, please cite
 
@@ -366,7 +396,7 @@ See the common issues with fixes [here](https://github.com/petercorke/robotics-t
 
 ### Using the Toolbox with Windows?
 
-Graphical visualisation via swift is currently not supported under Windows. However there is a hotfix, by changing in ```SwiftRoute.py```
+Graphical visualisation via Swift is currently not supported under Windows. However there is a hotfix, by changing in ```SwiftRoute.py```
 
 ```self.path[9:]``` to  ```self.path[10:]```
 
@@ -422,27 +452,62 @@ K. He, R. Newbury, T. Tran, J. Haviland, B. Burgess-Limerick, D. Kulić, P. Cork
 
 <br>
 
-## Build a JupyterLite/Pyodide Wasm wheel (cp313)
+## Build a JupyterLite/Pyodide Wasm wheel
 
-This project includes a reproducible wasm wheel build target aligned to current
-JupyterLite runtimes based on Python 3.13.
+[Pyodide](https://pyodide.org/) is a full CPython distribution compiled to
+WebAssembly, which is what lets the "Try it Now" JupyterLite deployment above
+run this toolbox entirely client-side, no server required. Each Pyodide
+release embeds one specific CPython version, and a wasm wheel is tagged with
+the CPython version it was built for (`cp312`, `cp313`, ...) -— a wheel only
+loads if its tag matches the CPython embedded in the Pyodide runtime actually
+running. JupyterLite doesn't bundle Pyodide directly either: the
+`jupyterlite-pyodide-kernel` package pulls in a specific Pyodide version per
+its own release, so bumping that one package can silently change which wheel
+tag your deployment now needs -— this is the single sharpest edge in this
+whole pipeline. This repo's live deployment currently pins
+`jupyterlite-pyodide-kernel==0.6.1` (see `.github/workflows/ci.yml`), which
+embeds Pyodide 0.27.6 / CPython 3.12 — hence `cp312` below.
 
-Build using cibuildwheel's Pyodide platform:
+Also note Pyodide's own version numbering changed in 2026: releases up to
+`0.29.x` used an independent `0.x` scheme, but from Pyodide `314.0.0` onward
+the version number tracks the embedded CPython version directly (`314` =
+Python 3.14). "Current" no longer means a `0.x` version.
+
+### Use the published wheel (recommended)
+
+PyPI rejects the `pyodide_*` platform tag, so Wasm wheels can't be published
+there -— instead, every GitHub release attaches ready-built wheels (for each
+supported CPython version) as release assets. Download the one matching your
+deployment's CPython version, e.g.:
+
+```shell script
+gh release download --repo petercorke/robotics-toolbox-python --pattern '*cp312*pyodide*'
+```
+
+This is exactly what `ci.yml`'s `docs-build` job does to populate the live
+"Try it Now" site — most people should do this rather than building locally.
+
+### Build locally
+
+Only needed to test an unreleased change, or to target a different
+CPython/Pyodide pin than the current release. Uses cibuildwheel's Pyodide
+platform:
 
 ```shell script
 make wheel-pyodide
 ```
 
-Optionally pin the Pyodide runtime family to match your JupyterLite deployment:
+Optionally pin the Pyodide runtime to match a different JupyterLite
+deployment than this project's own:
 
 ```shell script
-PYODIDE_VERSION=0.28.3 make wheel-pyodide
+PYODIDE_VERSION=0.27.6 make wheel-pyodide
 ```
 
 The target writes to `dist/` and runs `make wheel-pyodide-check`, which validates
 the wheel filename contains:
 
-- `cp313-cp313`
+- `cp312-cp312`
 - `wasm32`
 - `pyemscripten_<major>_<minor>` or `pyodide_<major>_<minor>`
 
@@ -451,5 +516,15 @@ To inspect the produced artifact path:
 ```shell script
 ls -1 dist/*wasm32*.whl
 ```
+
+### References
+
+- [Pyodide release notes](https://github.com/pyodide/pyodide/releases) —
+  confirms what CPython version a given Pyodide tag embeds, including the
+  2026 versioning-scheme change.
+- [jupyterlite-pyodide-kernel changelog](https://github.com/jupyterlite/pyodide-kernel/blob/main/CHANGELOG.md) —
+  the authoritative source for which Pyodide version a given kernel package
+  release bundles.
+- [cibuildwheel Pyodide platform docs](https://cibuildwheel.pypa.io/en/stable/platforms/#pyodide-webassembly).
 
 <br>
