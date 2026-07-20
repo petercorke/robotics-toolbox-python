@@ -69,10 +69,8 @@ class Hyper3d(DHRobot):
             links, name="Hyper3d" + str(N), keywords=("symbolic",), symbolic=symbolic
         )
 
-        self.qr = np.array(N)
         self.qz = np.zeros(N)
 
-        self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
 
 

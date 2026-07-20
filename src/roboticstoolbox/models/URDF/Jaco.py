@@ -35,8 +35,10 @@ class Jaco(URDFRobot):
             gripper_link_index=9,
         )
 
-        self.qr = np.array([0, 45, 60, 0, 0, 0]) * np.pi / 180
-        self.qz = np.zeros(6)
+        # 6 arm joints + 4 gripper joints (2 fingers x [finger, finger_tip]),
+        # gripper joints left at 0 (fully open) for both named configurations
+        self.qr = np.array([0, 45, 60, 0, 0, 0, 0, 0, 0, 0]) * np.pi / 180
+        self.qz = np.zeros(10)
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)

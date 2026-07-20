@@ -69,10 +69,8 @@ class Hyper(DHRobot):
             links, name="Hyper" + str(N), keywords=("symbolic",), symbolic=symbolic
         )
 
-        self.qr = np.array(N)
         self.qz = np.zeros(N)
 
-        self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
 
 

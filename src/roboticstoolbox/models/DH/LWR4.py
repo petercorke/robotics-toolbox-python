@@ -21,10 +21,7 @@ class LWR4(DHRobot):
 
     Defined joint configurations are:
 
-    - qz, zero joint angle configuration, 'L' shaped configuration
-    - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the X direction
-    - qn, arm is at a nominal non-singular configuration
+    - qz, zero joint angle configuration
 
     .. note:: SI units are used.
 
@@ -73,10 +70,8 @@ class LWR4(DHRobot):
 
         # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
 
-        self.qr = np.array(7)
         self.qz = np.zeros(7)
 
-        self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
 
 

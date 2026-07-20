@@ -33,7 +33,7 @@ class AL5D(DHRobot):
 
     :References:
 
-        - 'Reference of the robot <http://www.lynxmotion.com/c-130-al5d.aspx>'_
+        - `Reference of the robot <http://www.lynxmotion.com/c-130-al5d.aspx>`_
 
     .. codeauthor:: Tassos Natsakis
     """  # noqa
@@ -85,7 +85,7 @@ class AL5D(DHRobot):
 
         links = []
 
-        for j in range(3):
+        for j in range(4):
             link = RevoluteMDH(
                 d=d[j],
                 a=a[j],
