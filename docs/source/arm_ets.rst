@@ -70,7 +70,7 @@ ETS - 3D
 --------
 
 .. autoclass:: roboticstoolbox.ets.ETS.ETS
-   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jointset, split, inv, compile, insert, fkine, jacob0, jacobe, hessian0, hessiane
+   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jindex_set, split, inv, compile, insert, fkine, jacob0, jacobe, hessian0, hessiane
    :undoc-members:
    :show-inheritance:
    :member-order: bysource
@@ -79,7 +79,7 @@ ETS - 2D
 --------
 
 .. autoclass:: roboticstoolbox.ets.ETS2.ETS2
-   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jointset, split, inv, compile, insert, fkine, jacob0, jacobe
+   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jindex_set, split, inv, compile, insert, fkine, jacob0, jacobe
    :undoc-members:
    :show-inheritance:
 

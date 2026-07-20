@@ -281,12 +281,12 @@ class BaseETS(MutableSequence):
 
         return np.where([e.isjoint for e in self])[0]  # type: ignore
 
-    def joints(self) -> list[ET]:
+    def joints(self) -> list[BaseET]:
         """
         Get a list of the variable ETs with this ETS
 
         :returns: list of ETs that are joints
-        :rtype: list[ET]
+        :rtype: list[BaseET]
 
         Examples
         --------
@@ -372,7 +372,7 @@ class BaseETS(MutableSequence):
 
             >>> from roboticstoolbox import ET
             >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
-            >>> e.jointset()
+            >>> e.jindex_set()
 
         """
 
@@ -393,7 +393,7 @@ class BaseETS(MutableSequence):
 
             >>> from roboticstoolbox import ET
             >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
-            >>> e.jointset()
+            >>> e.jindices
 
         """
 
