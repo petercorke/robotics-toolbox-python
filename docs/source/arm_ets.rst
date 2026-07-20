@@ -69,7 +69,7 @@ The ETS inherits list-like properties and has methods like ``reverse`` and ``pop
 ETS - 3D
 --------
 
-.. autoclass:: roboticstoolbox.robot.ETS.ETS
+.. autoclass:: roboticstoolbox.ets.ETS.ETS
    :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jointset, split, inv, compile, insert, fkine, jacob0, jacobe, hessian0, hessiane
    :undoc-members:
    :show-inheritance:
@@ -78,7 +78,7 @@ ETS - 3D
 ETS - 2D
 --------
 
-.. autoclass:: roboticstoolbox.robot.ETS.ETS2
+.. autoclass:: roboticstoolbox.ets.ETS2.ETS2
    :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jointset, split, inv, compile, insert, fkine, jacob0, jacobe
    :undoc-members:
    :show-inheritance:
