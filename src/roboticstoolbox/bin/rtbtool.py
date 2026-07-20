@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
+"""
+Interactive Robotics Toolbox shell — starts an IPython session with NumPy,
+RTB, and SpatialMath pre-imported.
 
-# a simple Robotics Toolbox "shell", runs Python3 and loads in NumPy, RTB, SMTB
-#
-# Run it from the shell
-#  % rtb.py
-#
-# or setup an alias
-#
-#  alias rtb=PATH/rtb.py   # sh/bash
-#  alias rtb PATH/rtb.py   # csh/tcsh
-#
-# % rtb
+Usage::
+
+    $ rtbtool
+    $ rtbtool myscript.py
+"""
 
 # import stuff
 from pygments.token import Token
@@ -20,9 +17,12 @@ from traitlets.config import Config
 import IPython
 import argparse
 from pathlib import Path
+import shlex
 import sys
 import os
 from importlib.metadata import version
+
+from roboticstoolbox.bin._bintools import LineWrapRawTextDefaultsHelpFormatter
 
 try:
     from colored import fg, bg, attr
@@ -53,24 +53,59 @@ from spatialgeometry import *  # lgtm [py/polluting-import]
 
 from roboticstoolbox import *  # lgtm [py/unused-import]
 
+_OPTIONS_ENVVAR = "RTB_OPTIONS"
+
+
+def env_arguments(parser):
+    """Return command-line style options from the environment.
+
+    :param parser: argument parser used for error reporting
+    :type parser: :class:`argparse.ArgumentParser`
+    :return: tokenised environment arguments
+    :rtype: list[str]
+    """
+    options = os.environ.get(_OPTIONS_ENVVAR)
+    if not options:
+        return []
+
+    try:
+        return shlex.split(options)
+    except ValueError as exc:
+        parser.error(f"invalid {_OPTIONS_ENVVAR}: {exc}")
+
 
 def parse_arguments():
-    parser = argparse.ArgumentParser("Robotics Toolbox shell")
+    parser = argparse.ArgumentParser(
+        description="Robotics Toolbox shell",
+        formatter_class=LineWrapRawTextDefaultsHelpFormatter,
+        epilog=(
+            "options can be set via the environment variable RTB_OPTIONS, "
+            "for example:\n\n"
+            "    $ export RTB_OPTIONS=\"--backend TkAgg --prompt 'rtb> ' "
+            '--reload --showassign"\n'
+        ),
+    )
     parser.add_argument("script", default=None, nargs="?", help="specify script to run")
     parser.add_argument(
         "--backend", "-B", default=None, help="specify graphics backend"
     )
     parser.add_argument(
-        "--color",
-        "-c",
+        "--theme",
+        "-t",
         default="neutral",
-        help="specify terminal color scheme (neutral, lightbg, nocolor, linux), linux is for dark mode",
+        help="specify terminal color theme (neutral, lightbg, nocolor, linux), linux is for dark mode",
     )
-    parser.add_argument("--confirmexit", "-x", default=False, help="confirm exit")
-    parser.add_argument("--prompt", "-p", default="(rtb) >>> ", help="input prompt")
+    parser.add_argument(
+        "--confirmexit",
+        "-x",
+        default=False,
+        action="store_true",
+        help="confirm exit",
+    )
+    parser.add_argument("--prompt", "-P", default="(rtb) >>> ", help="input prompt")
     parser.add_argument(
         "--resultprefix",
-        "-r",
+        "-R",
         default=None,
         help="execution result prefix, include {} for execution count number",
     )
@@ -81,7 +116,6 @@ def parse_arguments():
         help="enable autoreload of any imported modules, same as IPython's builtin %%autoreload 2",
     )
     parser.add_argument(
-        "-b",
         "--no-banner",
         dest="banner",
         default=True,
@@ -121,20 +155,14 @@ def parse_arguments():
         action="store_true",
         help="use Swift as default backend",
     )
-    args, rest = parser.parse_known_args()
 
-    # remove the arguments we've just parsed from sys.argv so that IPython can have a
-    # go at them later
-    sys.argv = [sys.argv[0]] + rest
-
-    # TODO more options
-    # color scheme, light/dark
-    # silent startup
+    argv = env_arguments(parser) + sys.argv[1:]
+    args, rest = parser.parse_known_args(argv)
 
     if args.script is not None:
         args.banner = False
 
-    return args
+    return args, rest
 
 
 def make_banner():
@@ -194,7 +222,7 @@ def startup():
 
 def main():
 
-    args = parse_arguments()
+    args, ipython_args = parse_arguments()
 
     # setup defaults
     np.set_printoptions(
@@ -269,7 +297,7 @@ def main():
     # set configuration options, there are lots, see
     # https://ipython.readthedocs.io/en/stable/config/options/terminal.html
     c = Config()
-    c.InteractiveShellEmbed.colors = args.color
+    c.InteractiveShellEmbed.colors = args.theme
     c.InteractiveShell.confirm_exit = args.confirmexit
     # c.InteractiveShell.prompts_class = ClassicPrompts
     c.InteractiveShell.prompts_class = MyPrompt
@@ -300,7 +328,10 @@ def main():
     c.InteractiveShellApp.exec_lines = code
     namespace = {k: v for k, v in globals().items() if not k.startswith("__")}
     namespace.update({"puma": puma, "panda": panda})
-    IPython.start_ipython(config=c, user_ns=namespace)
+
+    # clear argv so IPython doesn't try to reparse arguments we've already consumed
+    sys.argv = sys.argv[:1]
+    IPython.start_ipython(config=c, user_ns=namespace, argv=ipython_args)
 
 
 if __name__ == "__main__":
