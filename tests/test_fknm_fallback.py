@@ -1,13 +1,25 @@
 """
 Safety-net tests for the ETS / fknm / frne refactor (Phase 0).
 
-Each test runs an ETS function twice:
-  1. via the C extension (fknm) — the normal path
-  2. via the pure-Python fallback — forced by patching the C function to raise
+Two tiers of test here, and they check different things:
 
-Both paths must produce numerically identical results.  These tests will catch
-any regression introduced by the Facade refactor (Phase 1), the BaseETS
-redesign (Phase 2), or the nanobind port (Phase 3).
+  Tier 1 ("*Fallback" classes, ``test_matches_c_path`` methods): runs an ETS
+  function twice, once via the C extension (the normal, unpatched call) and
+  once via the pure-Python fallback (forced by patching the C-calling
+  function to raise), and checks they agree. This is only meaningful when
+  the C extension is actually built -- if it isn't, the "C path" call
+  silently dispatches to Python too (see fknm.py/frne.py), and the
+  comparison degrades to Python-vs-itself without any indication. These are
+  gated with ``@unittest.skipUnless(_C_AVAILABLE, ...)`` so that case shows
+  as an explicit skip, never a false pass.
+
+  Tier 2 ("*Reference" classes): compares whichever path is actually active
+  against hardcoded ground-truth values, computed once against the C
+  extension (which Tier 1 already shows agrees with Python). These run
+  regardless of ``_C_AVAILABLE`` -- they're what actually guarantees a
+  pure-Python build (no compiled extension at all, e.g. the pyodide/wasm
+  wheel) is numerically correct on its own terms, not merely "consistent
+  with itself".
 
 Robot used: Franka Panda (7-DOF) for ETS functions; Puma560 (6-DOF DH) for rne.
 """
@@ -22,6 +34,9 @@ from unittest.mock import patch
 import numpy as np
 import numpy.testing as nt
 import sympy
+
+from roboticstoolbox.ets.fknm import _C_AVAILABLE as _FKNM_C_AVAILABLE
+from roboticstoolbox.robot.frne import _C_AVAILABLE as _FRNE_C_AVAILABLE
 
 import roboticstoolbox as rtb
 # roboticstoolbox/ets/ETS.py defines a class also called ETS, and
@@ -43,6 +58,9 @@ import roboticstoolbox as rtb
 # works on every version.
 _ETS_module = sys.modules["roboticstoolbox.ets.ETS"]
 from spatialmath import SE3
+
+_NO_FKNM_C = "compiled _fknm_c extension not built -- can't cross-validate against C"
+_NO_FRNE_C = "compiled _frne_c extension not built -- can't cross-validate against C"
 
 
 # ---------------------------------------------------------------------------
@@ -148,6 +166,7 @@ def _no_c_hessiane():
 # eval() / fkine() fallback
 # ---------------------------------------------------------------------------
 
+@unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
 class TestEvalFallback(unittest.TestCase):
     """eval() Python fallback produces numerically identical results to C path."""
 
@@ -223,6 +242,7 @@ class TestFkineFallback(unittest.TestCase):
             result = self.ets.fkine(self.q)
         self.assertIsInstance(result, SE3)
 
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_matches_c_path(self):
         c = self.ets.fkine(self.q)
         with _no_c_fkine():
@@ -253,11 +273,13 @@ class TestJacob0Fallback(unittest.TestCase):
             py = self.ets.jacob0(self.q)
         self.assertEqual(py.shape, (6, self.ets.n))
 
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_matches_c_path(self):
         with _no_c_jacob0():
             py = self.ets.jacob0(self.q)
         nt.assert_array_almost_equal(py, self.c_result)
 
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_with_tool(self):
         tool = SE3.Tz(0.1).A
         c = self.ets.jacob0(self.q, tool=tool)
@@ -283,11 +305,13 @@ class TestJacobeFallback(unittest.TestCase):
             py = self.ets.jacobe(self.q)
         self.assertEqual(py.shape, (6, self.ets.n))
 
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_matches_c_path(self):
         with _no_c_jacobe():
             py = self.ets.jacobe(self.q)
         nt.assert_array_almost_equal(py, self.c_result)
 
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_with_tool(self):
         tool = SE3.Tz(0.1).A
         c = self.ets.jacobe(self.q, tool=tool)
@@ -315,11 +339,13 @@ class TestHessian0Fallback(unittest.TestCase):
         n = self.ets.n
         self.assertEqual(py.shape, (n, 6, n))
 
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_matches_c_path(self):
         with _no_c_hessian0():
             py = self.ets.hessian0(self.q, J0=self.J0)
         nt.assert_array_almost_equal(py, self.c_result)
 
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_without_precomputed_J0(self):
         """hessian0 should compute J0 internally when not supplied."""
         c = self.ets.hessian0(self.q)
@@ -350,10 +376,78 @@ class TestHessianeFallback(unittest.TestCase):
         n = self.ets.n
         self.assertEqual(py.shape, (n, 6, n))
 
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_matches_c_path(self):
         with _no_c_hessiane():
             py = self.ets.hessiane(self.q, Je=self.Je)
         nt.assert_array_almost_equal(py, self.c_result)
+
+
+# ---------------------------------------------------------------------------
+# Reference values: fkine/jacob0 against known Panda results (regression
+# guard, independent of C).
+#
+# Unlike test_matches_c_path above, these do NOT compare the C path against
+# the Python path -- they compare whichever path is actually active against
+# hardcoded ground truth. That makes them meaningful in every environment,
+# including the pure-Python (no _fknm_c) case the pyodide wheel ships:
+# when C is unavailable, ets.fkine()/jacob0() already dispatch to the
+# Python implementation automatically (ETS_init returns None), so this is
+# exactly what a C-less install needs to prove it's still correct on its
+# own terms, not just "consistent with itself".
+#
+# Values computed once against the C extension (see TestFkineFallback /
+# TestJacob0Fallback, which already show the two paths agree) using
+# ets.fkine(PANDA_Q) / ets.jacob0(PANDA_Q) on Franka Panda.
+# ---------------------------------------------------------------------------
+
+class TestFkineReference(unittest.TestCase):
+    """fkine() on Panda against hardcoded reference values."""
+
+    def setUp(self):
+        self.ets = _panda_ets()
+
+    def test_fkine(self):
+        nt.assert_array_almost_equal(
+            self.ets.fkine(PANDA_Q).A,
+            [
+                [-0.50827907, -0.57904589, 0.63746234, 0.44707793],
+                [0.83014553, -0.52639462, 0.18375824, 0.16175746],
+                [0.22915229, 0.62258699, 0.74824773, 0.96828043],
+                [0.00000000, 0.00000000, 0.00000000, 1.00000000],
+            ],
+            decimal=6,
+        )
+
+
+class TestJacob0Reference(unittest.TestCase):
+    """jacob0() on Panda against hardcoded reference values."""
+
+    def setUp(self):
+        self.ets = _panda_ets()
+
+    def test_jacob0(self):
+        nt.assert_array_almost_equal(
+            self.ets.jacob0(PANDA_Q),
+            [
+                [-1.61757460e-01, 1.07976800e-01, -3.41587423e-02,
+                 3.35336541e-01, -1.07172949e-02, 1.03491264e-01, 0.0],
+                [4.47077932e-01, 6.26036931e-01, 4.16714460e-01,
+                 -8.05054464e-02, 7.78094113e-02, -1.17637200e-02, 0.0],
+                [-6.03103094e-17, -2.35392404e-01, -8.20662027e-02,
+                 -5.14331129e-01, -9.97831132e-03, -2.02887489e-01, 0.0],
+                [4.61988821e-17, -9.85449730e-01, 3.37672585e-02,
+                 -6.16735653e-02, 6.68449878e-01, -1.35361558e-01,
+                 6.37462344e-01],
+                [9.61515015e-18, 1.69967143e-01, 1.95778638e-01,
+                 9.79165111e-01, 1.84470262e-01, 9.82748279e-01,
+                 1.83758244e-01],
+                [1.00000000e+00, -7.36706147e-17, 9.80066578e-01,
+                 -1.93473657e-01, 7.20517510e-01, -1.26028049e-01,
+                 7.48247732e-01],
+            ],
+            decimal=6,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -419,6 +513,7 @@ class TestSymbolicFkine(unittest.TestCase):
 # rne: C path vs rne_python (pure Python NE)
 # ---------------------------------------------------------------------------
 
+@unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
 class TestRNEFallback(unittest.TestCase):
     """rne() C path (frne/ne.c) agrees with rne_python() on Puma560."""
 
@@ -549,22 +644,19 @@ class TestPathTiming(unittest.TestCase):
             f"  Python path: {t_py * 1000 / self.N:.3f} ms/call",
         )
 
-    @unittest.skipIf(not __import__("roboticstoolbox.ets.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
-                     "C extension not built")
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_eval_c_faster_than_python(self):
         t_c = self._time_c("eval", self.q)
         t_py = self._time_python(_no_c_fkine, "eval", self.q)
         self._assert_c_faster(t_c, t_py)
 
-    @unittest.skipIf(not __import__("roboticstoolbox.ets.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
-                     "C extension not built")
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_jacob0_c_faster_than_python(self):
         t_c = self._time_c("jacob0", self.q)
         t_py = self._time_python(_no_c_jacob0, "jacob0", self.q)
         self._assert_c_faster(t_c, t_py)
 
-    @unittest.skipIf(not __import__("roboticstoolbox.ets.fknm", fromlist=["_C_AVAILABLE"])._C_AVAILABLE,
-                     "C extension not built")
+    @unittest.skipUnless(_FKNM_C_AVAILABLE, _NO_FKNM_C)
     def test_jacobe_c_faster_than_python(self):
         t_c = self._time_c("jacobe", self.q)
         t_py = self._time_python(_no_c_jacobe, "jacobe", self.q)
