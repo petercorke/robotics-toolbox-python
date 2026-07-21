@@ -1225,3 +1225,61 @@ Decide on one ownership model and stop straddling both:
 
 Either way, the current arrangement (vendored copy + redundant external
 git install in CI) should not persist indefinitely without a decision.
+
+## JupyterLite "Try it Now" notebook: `ci.yml` stopgap for an upstream piplite indexing bug
+
+### Background
+
+Found and fixed (stopgap) 2026-07-21. The live JupyterLite deployment's
+`docs/lite/pypi/all.json` package index only listed a `cp313` wasm wheel
+for `roboticstoolbox-python`, even though the pinned
+`jupyterlite-pyodide-kernel==0.6.1` (see the "Build JupyterLite site" step
+in `ci.yml`) embeds Pyodide 0.27.6 / CPython 3.12 and needs a `cp312`
+wheel. Confirmed on the deployed site: both the `cp312` and `cp313` wheel
+*files* were present at `docs/lite/pypi/`, but only `cp313` made it into
+`all.json`. Result: `piplite.install(["roboticstoolbox-python"])` in the
+notebook's first cell fails with `ValueError: Can't find a pure Python 3
+wheel for 'roboticstoolbox-python'` — micropip correctly rejects the
+mismatched `cp313` entry, finds nothing else locally, falls through to
+real PyPI, and PyPI has no wasm-tagged wheel at all (rejects the
+`pyodide_*` platform tag).
+
+Root cause is upstream, in `jupyterlite_pyodide_kernel/addons/piplite.py`'s
+`get_wheel_index()`:
+
+```python
+all_json[normalized_name]["releases"][version] = [release]
+```
+
+This assigns a fresh single-item list per `(name, version)` key instead of
+appending — so when a release carries wasm wheels for more than one
+CPython version (as this repo's releases do: `cibuildwheel`'s pyodide
+platform builds one per supported interpreter, e.g. `cp312` and `cp313`
+both tagged version `1.3.1`), whichever wheel sorts alphabetically last
+silently overwrites the others in the generated index. No build error —
+the site builds and deploys fine, it just fails at runtime in the
+browser. Confirmed this is not fixed in `jupyterlite_pyodide_kernel`
+0.7.1 either (latest as of 2026-07-21), so it isn't something bumping the
+pin resolves.
+
+### Fix applied (stopgap)
+
+Narrowed the `gh release download --pattern` in `ci.yml`'s "Fetch pyodide
+wheel for JupyterLite" step from `*pyodide*` to `*cp312*pyodide*`, so only
+the one wheel the pinned kernel actually needs ever reaches
+`docs/lite/pypi/`, sidestepping the upstream overwrite bug entirely
+rather than depending on it getting fixed.
+
+### Proposed real fix
+
+This whole fetch-a-prebuilt-wasm-wheel-from-a-GitHub-release mechanism,
+and the CPython-tag pinning it depends on, is a maintenance burden in its
+own right (see the "aspire to a pure-Python wheel" discussion elsewhere).
+The real fix is a genuine `py3-none-any` pure-Python wheel published to
+real PyPI (no compiled `_fknm_c`/`_frne_c`) — Pyodide's micropip resolves
+that automatically via its own standard fallback logic, no custom
+JupyterLite piplite index or GitHub-release-asset fetching required at
+all. Once that lands, this stopgap (and the "Fetch pyodide wheel"/"Build
+JupyterLite site" steps generally) should be revisited — possibly
+removable outright. Tracked as a follow-on to the RNE correctness work
+(`rne.md`), which is queued first.
