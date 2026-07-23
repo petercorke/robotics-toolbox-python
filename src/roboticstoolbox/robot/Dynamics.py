@@ -1,14 +1,29 @@
 """
 Rigid-body dynamics functionality of the Toolbox.
 
-Requires access to:
+``DynamicsMixin`` holds *derived* dynamics quantities -- ``accel``,
+``gravload``, ``coriolis``, ``inertia``, ``itorque``, ``pay``, etc. --
+implemented generically, in terms of a small set of primitives (``rne``,
+``jacob0``, ...) declared abstractly by ``RobotProto``. This mixin never
+touches representation-specific internals (DH parameters, ETS chains, the
+compiled extension) directly.
 
-    * ``links`` list of ``Link`` objects, atttribute
-    * ``rne()`` the inverse dynamics method
+``rne()`` itself is deliberately *not* defined here -- it's a primitive,
+implemented differently per concrete class: ``Robot``'s generic Featherstone
+spatial-vector recursion (ETS-based, used by ``ERobot``/URDF robots, which
+have no DH/MDH concept at all) vs. ``DHRobot``'s two DH-specific
+implementations (``rne_python()``, hand-derived; ``rne()``, the compiled
+``ne.c`` extension). Keeping those out of this file preserves the
+representation-agnostic boundary above.
 
-so must be subclassed by ``DHRobot`` class.
-
-:todo: perhaps these should be abstract properties, methods of this calss
+Known issue (rne.md, tech-debt.md): ``Robot.rne()`` is currently wrong for
+ETS chains with joint-first-in-segment structure (which any standard-DH
+derived chain has) -- ``ne.c``/``rne_python()`` don't share this bug (``ne.c``
+handles both DH conventions; ``rne_python()`` is explicitly documented as
+standard-DH-only). This matters more than a typical "wrong for one
+convention" bug because ``Robot.rne()`` is the *only* dynamics
+implementation available to ``ERobot``/URDF/general robots -- there's no
+alternative to fall back on the way ``DHRobot`` has two.
 """
 
 from collections import namedtuple
@@ -397,8 +412,10 @@ class DynamicsMixin:
         :type qd: ndarray(n,) or ndarray(m,n)
         :param torque: Joint torques of the robot
         :type torque: ndarray(n,) or ndarray(m,n)
-        :param gravity: Gravitational acceleration (Optional, if not supplied will
-            use the ``gravity`` attribute of self).
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); if not supplied, uses the
+            ``gravity`` attribute of self
         :returns: Joint accelerations
         :rtype: ndarray(n,)
 
@@ -815,8 +832,10 @@ class DynamicsMixin:
 
         :param q: Joint coordinates
         :type q: ndarray(n,) or ndarray(m,n)
-        :param gravity: Gravitational acceleration (Optional, if not supplied will
-            use the stored gravity values).
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); if not supplied, uses the
+            stored gravity values
         :type gravity: ndarray(3,)
         :returns: The generalised joint force/torques due to gravity
         :rtype: ndarray(n,)
@@ -1107,8 +1126,10 @@ class DynamicsMixin:
 
         :param q: Joint coordinates
         :type q: ndarray(n,) or ndarray(m,n)
-        :param gravity: Gravitational acceleration (Optional, if not supplied will
-            use the ``gravity`` attribute of self).
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); if not supplied, uses the
+            ``gravity`` attribute of self
         :type gravity: ndarray(3,)
         :param pinv: use pseudo inverse rather than inverse (Default value = False)
         :param representation: the type of analytical Jacobian to use, default is
@@ -1224,8 +1245,10 @@ class DynamicsMixin:
         :type xd: ndarray(6,)
         :param wrench: Wrench applied to the end-effector
         :type wrench: ndarray(6,)
-        :param gravity: Gravitational acceleration (Optional, if not supplied will
-            use the ``gravity`` attribute of self).
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); if not supplied, uses the
+            ``gravity`` attribute of self
         :param pinv: use pseudo inverse rather than inverse
         :param representation: the type of analytical Jacobian to use, default is
             ``'rpy/xyz'``

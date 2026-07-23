@@ -1860,21 +1860,6 @@ class DHRobot(Robot):
                 f = R @ f
                 wbase[k, :] = np.r_[f, nn]
 
-        # if self.symbolic:
-        #     # simplify symbolic expressions
-        #     print(
-        #       'start symbolic simplification, this might take a while...')
-        #     # from sympy import trigsimp
-
-        #     # tau = trigsimp(tau)
-        #     # consider using multiprocessing to spread over cores
-        #     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy
-        #     print('done')
-        #     if tau.shape[0] == 1:
-        #         return tau.reshape(self.n)
-        #     else:
-        #         return tau
-
         if base_wrench:
             if tau.shape[0] == 1:
                 return tau.flatten(), wbase.flatten()

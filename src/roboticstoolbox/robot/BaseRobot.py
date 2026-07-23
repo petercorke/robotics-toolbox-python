@@ -843,18 +843,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Get/set default gravitational acceleration (Robot superclass)
 
-        - ``robot.name`` is the default gravitational acceleration
-        - ``robot.name = ...`` checks and sets default gravitational
+        - ``robot.gravity`` is the default gravitational acceleration
+        - ``robot.gravity = ...`` checks and sets default gravitational
             acceleration
 
-
-        :param gravity: the new gravitational acceleration for this robot
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive)
         :returns: gravitational acceleration
-
-        .. rubric:: Notes
-
-        If the z-axis is upward, out of the Earth, this should be
-        a positive number.
 
         """
 
