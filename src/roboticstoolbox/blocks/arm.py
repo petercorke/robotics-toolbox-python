@@ -1039,8 +1039,10 @@ class IDyn(FunctionBlock):
         """
         :param robot: Robot model
         :type robot: Robot subclass
-        :param gravity: gravitational acceleration
-        :type gravity: float
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive)
+        :type gravity: ndarray(3)
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
@@ -1051,7 +1053,7 @@ class IDyn(FunctionBlock):
         # self.type = "inverse-dynamics"
 
         self.robot = robot
-        self.gravity = gravity
+        self.gravity = None if gravity is None else smb.getvector(gravity, 3)
 
         # state vector is [q qd]
 
@@ -1107,8 +1109,10 @@ class Gravload(FunctionBlock):
         """
         :param robot: Robot model
         :type robot: Robot subclass
-        :param gravity: gravitational acceleration
-        :type gravity: float
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive)
+        :type gravity: ndarray(3)
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
@@ -1119,7 +1123,7 @@ class Gravload(FunctionBlock):
         # self.type = "gravload"
 
         self.robot = robot
-        self.gravity = gravity
+        self.gravity = None if gravity is None else smb.getvector(gravity, 3)
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
 
@@ -1171,8 +1175,10 @@ class Gravload_X(FunctionBlock):
         :type robot: Robot subclass
         :param representation: task-space representation, defaults to "rpy/xyz"
         :type representation: str
-        :param gravity: gravitational acceleration
-        :type gravity: float
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive)
+        :type gravity: ndarray(3)
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
@@ -1183,7 +1189,7 @@ class Gravload_X(FunctionBlock):
         # self.type = "gravload-x"
 
         self.robot = robot
-        self.gravity = gravity
+        self.gravity = None if gravity is None else smb.getvector(gravity, 3)
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
         self.representation = representation

@@ -57,6 +57,56 @@ in a major version increment, retaining `Robot` as a deprecated alias.
 **Best done alongside:** the ETS/fknm refactor — the type picture simplifies
 dramatically if hierarchy and representation are both cleaned up together.
 
+### Related: `Robot.rne()`'s misuse guard checks `mdh`, not class identity
+
+`Robot.rne()` (`Robot.py`) assumes Featherstone's joint-last-in-segment
+structure. A cheap runtime guard rejects the incompatible case:
+
+```python
+assert getattr(self, "mdh", True), ...
+```
+
+Two design questions came up while adding this guard 2026-07-21, both worth
+recording since they'll resurface if the class hierarchy redesign above
+happens:
+
+1. **Blocklist vs. allowlist.** First attempt was a class-name blocklist
+   (`assert not any(c.__name__ == "DHRobot" for c in type(self).__mro__)`).
+   An allowlist (`Robot`/`ERobot`/`URDFRobot` by name) was considered and
+   rejected: it would have wrongly rejected `PoERobot`, a fully compliant
+   type (its `_update_ets()` also appends the joint ET last) that was easy
+   to overlook — demonstrating exactly the fragility an allowlist has here.
+2. **Class identity was the wrong axis entirely.** `DHLink._to_ets()` shows
+   joint-last compliance actually tracks the `mdh` flag, not the `DHRobot`
+   class: the MDH branch reorders a revolute link's `d` translation to
+   *precede* the joint rotation (valid — a z-rotation and z-translation
+   about/along the same axis commute), so the joint ET is last regardless
+   of `d`. A `DHRobot(mdh=True)` instance is therefore structurally fine
+   through `Robot.rne()`, while `mdh=False` is not — the class-name check
+   would have wrongly rejected the compliant MDH case too. The final guard
+   checks `self.mdh` directly (defaulting to `True` via `getattr` for
+   non-DHRobot types, which have no DH-convention concept and are already
+   guaranteed joint-last some other way).
+
+Verifying the MDH case numerically (nonzero `d`, `alpha`, mass, and full
+inertia tensor, compared against `rne_python()`) surfaced a real, separate
+bug it would otherwise have masked: `SpatialInertia(m=link.m, r=link.r)` in
+`Robot.rne()`'s inertia accumulation never passed `I=link.I` — the
+rotational inertia tensor was silently dropped for every link, for every
+`Robot`/`ERobot`/`URDFRobot`/`PoERobot`/MDH-`DHRobot` call, not just the MDH
+edge case. Fixed alongside this guard. Not caught earlier because the
+`TwoLink`-based `Robot.rne()`-vs-`rne_python()` equivalence tests used
+default (zero) inertia; the tests that *did* set `inertia=True` only
+compared the C path against `rne_python()`, never `Robot.rne()`.
+
+**Revisit when the class hierarchy redesign above happens.** If `DHRobot`
+stops being a `Robot` subclass (e.g. becomes `Robot[DHLink]` under the
+generic-`LinkType` proposal, or the "one Robot class, polymorphic `Link.A(q)`"
+design below is adopted), the whole question may become moot — either there's
+only one `Robot` class and the guard is unnecessary, or the DH-convention
+distinction is structurally explicit rather than a name-based/attribute-based
+runtime check.
+
 ---
 
 ## Forward-looking design: one Robot class, polymorphic Link.A(q)
@@ -1209,6 +1259,57 @@ Decide on one ownership model and stop straddling both:
 Either way, the current arrangement (vendored copy + redundant external
 git install in CI) should not persist indefinitely without a decision.
 
+## `src/roboticstoolbox/blocks/` has essentially no type hints
+
+Noticed 2026-07-21 while fixing `blocks/arm.py`'s `gravity` parameter
+(docstring claimed `float`, actual runtime value is always a 3-vector
+passed straight through to `Robot.rne()`/`gravload()` -- the annotation
+was simply wrong, and nothing caught it because there was no annotation
+to check against).
+
+`blocks/` has 5 files (`arm.py`, `mobile.py`, `quad_model.py`,
+`spatial.py`, `uav.py`) defining `bdsim` block classes -- `arm.py` alone
+has 16 `__init__` methods, none with parameter or return type hints.
+Unlike the rest of the codebase (which follows the modern-syntax type
+hint convention in this repo's global instructions), these blocks are
+essentially undocumented at the type level, so mismatches like the
+`gravity: float` one can and did sit unnoticed.
+
+## `examples/ik_speed.py` doesn't run — stale imports, predates this session
+
+Found 2026-07-23 while adding a portable CPU-info one-liner to
+`examples/rne_speed.py` (a new RNE timing-comparison script) and looking
+for a sibling to riff off. `ik_speed.py` fails immediately: `import fknm`
+at module scope (line 4) — `fknm` hasn't existed as a top-level importable
+module since the fknm/frne refactor moved it to
+`roboticstoolbox.robot.fknm` (merged to `main` 2026-07-03, well before this
+session). Not caused by, or related to, the current dynamics-overhaul
+branch — pre-existing breakage that had gone unnoticed.
+
+Also stale, found by inspection while there (none blocking, all part of the
+same cleanup):
+
+- Unused imports: `swift`, `spatialgeometry as sg`, `sys`, `from numpy
+  import ndarray`, `from typing import Union, overload, List, Set`.
+- No type hints (consistent with the `blocks/` entry above — this predates
+  the modern-syntax convention too).
+
+**Proposed fix:** update the `fknm` import to `from roboticstoolbox.robot
+import fknm` (or import the specific facade functions actually used),
+verify the script runs end-to-end again, then sweep the unused imports.
+While there, port over the `cpu_info()` helper added to `rne_speed.py`
+(portable one-line CPU description — name, core count, clock speed where
+the OS exposes one) so `ik_speed.py`'s output reports what machine it ran
+on too. Since that would make it the *second* real call site, worth
+factoring `cpu_info()` into a small shared `examples/` helper at that point
+rather than copy-pasting it again.
+
+**Proposed fix:** add type hints throughout `blocks/`, following the same
+convention as the rest of the codebase (`NDArray`/`ArrayLike` in
+signatures, `X | None` not `Optional[X]`, etc. -- see this user's global
+CLAUDE.md type-hint rules). Not urgent on its own, but worth doing
+opportunistically whenever a block class is touched for another reason,
+and worth a dedicated pass if `blocks/` sees more maintenance.
 ## JupyterLite "Try it Now" notebook: `ci.yml` stopgap for an upstream piplite indexing bug
 
 ### Background

@@ -90,7 +90,7 @@ void newton_euler (
 	double	*tau,		/*!< returned joint torques */
 	double	*qd,		/*!< joint velocities */
 	double	*qdd,		/*!< joint accelerations */
-	double	*fext,		/*!< external force on manipulator tip */
+	double	*fext,		/*!< wrench applied to end-effector */
 	int	stride		/*!< indexing stride for qd, qdd */
 );
 #endif

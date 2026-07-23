@@ -12,7 +12,7 @@
  *
  *	Requires:	qd	current joint velocities
  *			qdd	current joint accelerations
- *			f	applied tip force or load
+ *			f	applied end-effector force or load
  *			grav	the gravitational constant
  *
  *	Returns:	tau	vector of bias torques
@@ -67,7 +67,7 @@ newton_euler (
 	double	*tau,		/*!< returned joint torques */
 	double	*qd,		/*!< joint velocities */
 	double	*qdd,		/*!< joint accelerations */
-	double	*fext,		/*!< external force on manipulator tip */
+	double	*fext,		/*!< wrench applied to end-effector */
 	int	stride		/*!< indexing stride for qd, qdd */
 ) {
 	Vect	t1, t2, t3, t4;
@@ -75,8 +75,8 @@ newton_euler (
 	Vect	F, N;
 	Vect	z0 = {0.0, 0.0, 1.0};
 	Vect	zero = {0.0, 0.0, 0.0};
-	Vect	f_tip = {0.0, 0.0, 0.0};
-	Vect	n_tip = {0.0, 0.0, 0.0};
+	Vect	f_ee = {0.0, 0.0, 0.0};
+	Vect	n_ee = {0.0, 0.0, 0.0};
 	int 	j;
 	double	t;
 	Link	*links = robot->links;
@@ -89,12 +89,12 @@ newton_euler (
 
 	/* setup external force/moment vectors */
 	if (fext) {
-		f_tip.x = fext[0];
-		f_tip.y = fext[1];
-		f_tip.z = fext[2];
-		n_tip.x = fext[3];
-		n_tip.y = fext[4];
-		n_tip.z = fext[5];
+		f_ee.x = fext[0];
+		f_ee.y = fext[1];
+		f_ee.z = fext[2];
+		n_ee.x = fext[3];
+		n_ee.y = fext[4];
+		n_ee.z = fext[5];
 	}
 
 #ifdef DEBUG
@@ -368,7 +368,7 @@ newton_euler (
 		 * compute f[j]
 		 */
 		if (j == (robot->njoints-1))
-			t1 = f_tip;
+			t1 = f_ee;
 		else
 			rot_vect_mult (&t1, ROT(j+1), f(j+1));
 		vect_add (f(j), &t1, &F);
@@ -385,7 +385,7 @@ newton_euler (
 		  * compute n[j]
 		  */
 		if (j == (robot->njoints-1))
-			t1 = n_tip;
+			t1 = n_ee;
 		else {
 			rot_vect_mult(&t1, ROT(j+1), n(j+1));
 			rot_vect_mult(&t4, ROT(j+1), f(j+1));
@@ -418,7 +418,7 @@ newton_euler (
 			rot_vect_mult (&t1, ROT(j+1), f(j+1));
 			vect_add (f(j), &t4, &t1);
 		} else
-			vect_add (f(j), &t4, &f_tip);
+			vect_add (f(j), &t4, &f_ee);
 
 		 /*
 		  * compute n[j]
@@ -439,11 +439,11 @@ newton_euler (
 			vect_add(&t1, &t1, &t2);
 		} else {
 			/* cross(R'*pstar,f) */
-			vect_cross(&t2, PSTAR(j), &f_tip);
+			vect_cross(&t2, PSTAR(j), &f_ee);
 
 			/* nn += R*(nn + cross(R'*pstar,f)) */
 			vect_add(&t1, &t1, &t2);
-			vect_add(&t1, &t1, &n_tip);
+			vect_add(&t1, &t1, &n_ee);
 		}
 
 		mat_vect_mult(&t2, INERTIA(j), OMEGADOT(j));

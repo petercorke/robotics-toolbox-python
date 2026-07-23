@@ -56,6 +56,23 @@ else:
 # A generic type variable representing any subclass of BaseLink
 LinkType = TypeVar("LinkType", bound=BaseLink)
 
+# Link attributes scanned for symbolic (e.g. SymPy) content at build time --
+# DH kinematic parameters plus dynamics parameters; getattr(..., None) below
+# skips whichever of these don't exist on a given Link subclass (e.g. a
+# non-DH Link has no a/alpha/theta/d).
+_SYMBOLIC_LINK_ATTRS = (
+    "a", "alpha", "theta", "d", "offset",
+    "m", "r", "I", "Jm", "G", "B", "Tc",
+)
+
+
+def _is_symbolic(value: Any) -> bool:
+    """True if value holds non-numeric (e.g. SymPy) content -- same
+    object-dtype test used by roboticstoolbox.ets.fknm._is_symbolic."""
+    if value is None:
+        return False
+    return np.asarray(value).dtype == object
+
 
 class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[LinkType]):
     def __init__(
@@ -130,6 +147,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self._urdf_filepath = ""
 
         # Time to checkout the links for geometry information
+        auto_symbolic = False
         for link in self.links:
             # Add link back to robot object
             link._robot = self
@@ -144,6 +162,21 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             if isinstance(link, Link):
                 if len(link.geometry) > 0:
                     self._hasgeometry = True
+
+            # Detect symbolic (e.g. SymPy) model parameters regardless of
+            # whether the caller remembered to pass symbolic=True -- see
+            # rne.md issue 3/4: forgetting the flag previously left
+            # self.symbolic False even with genuinely symbolic link
+            # parameters, which broke rne_python()'s own float64
+            # allocation, not just the C dispatch. symbolic= is kept as an
+            # override (OR'd in below), not the source of truth.
+            if not auto_symbolic:
+                for attr in _SYMBOLIC_LINK_ATTRS:
+                    if _is_symbolic(getattr(link, attr, None)):
+                        auto_symbolic = True
+                        break
+
+        self._symbolic = self._symbolic or auto_symbolic
 
         # Current joint configuraiton, velocity, acceleration
         self.q = np.zeros(self.n)
@@ -810,18 +843,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Get/set default gravitational acceleration (Robot superclass)
 
-        - ``robot.name`` is the default gravitational acceleration
-        - ``robot.name = ...`` checks and sets default gravitational
+        - ``robot.gravity`` is the default gravitational acceleration
+        - ``robot.gravity = ...`` checks and sets default gravitational
             acceleration
 
-
-        :param gravity: the new gravitational acceleration for this robot
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive)
         :returns: gravitational acceleration
-
-        .. rubric:: Notes
-
-        If the z-axis is upward, out of the Earth, this should be
-        a positive number.
 
         """
 

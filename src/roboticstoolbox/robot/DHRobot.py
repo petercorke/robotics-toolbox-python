@@ -11,6 +11,7 @@ import warnings
 import copy
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
+from roboticstoolbox.robot.BaseRobot import _is_symbolic
 from roboticstoolbox.ets.ETS import ETS, ET
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.tools.params import rtb_set_param
@@ -55,7 +56,9 @@ class DHRobot(Robot):
     :type base: SE3
     :param tool: Location of the tool
     :type tool: SE3
-    :param gravity: Gravitational acceleration vector
+    :param gravity: gravitational acceleration in the world frame,
+        downwards gravitational force is equivalent to robot base
+        acceleration upwards (positive)
     :type gravity: ndarray(3)
 
     A concrete superclass for arm type robots defined using Denavit-Hartenberg
@@ -1362,8 +1365,7 @@ class DHRobot(Robot):
 
         if self._frne is not None:
             delete(self._frne)
-        # we negate gravity here, since the C code has the sign wrong
-        self._frne = init(self.n, self.mdh, L, -self.gravity)
+        self._frne = init(self.n, self.mdh, L)
         self._frne_stale = False
 
     def delete_rne(self):
@@ -1387,9 +1389,11 @@ class DHRobot(Robot):
         :type qd: ndarray(n)
         :param qdd: The joint accelerations of the robot
         :type qdd: ndarray(n)
-        :param gravity: Gravitational acceleration to override robot's gravity
-            value
-        :type gravity: ndarray(6)
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); overrides robot's gravity
+            value if given
+        :type gravity: ndarray(3)
         :param fext: Specify wrench acting on the end-effector
                      :math:`W=[F_x F_y F_z M_x M_y M_z]`
         :type fext: ndarray(6)
@@ -1412,62 +1416,100 @@ class DHRobot(Robot):
         :seealso: :func:`rne_python`
         """
 
-        if self._frne is None or self._frne_stale:
-            self._copy_to_cpp()
-
-        if self._frne is None or base_wrench:
+        # Symbolic-aware dispatch (rne.md issues 1/2/4): the C extension
+        # requires float64 link/state data throughout, so route straight to
+        # rne_python() -- the always-works fallback -- if the model itself
+        # was built from symbolic parameters (self.symbolic, now
+        # auto-detected at construction time regardless of whether the
+        # caller remembered to pass symbolic=True -- see BaseRobot.__init__)
+        # or if q/qd/qdd for *this call* are symbolic, mirroring the same
+        # is-symbolic-before-touching-C idiom used throughout
+        # roboticstoolbox.ets.fknm for fkine/jacobian dispatch.
+        if self.symbolic or _is_symbolic(q) or _is_symbolic(qd) or _is_symbolic(qdd):
             return self.rne_python(
                 q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
             )
 
-        trajn = 1
+        if self._frne is None or self._frne_stale:
+            self._copy_to_cpp()
 
-        try:
-            q = getvector(q, self.n, "row")
-            qd = getvector(qd, self.n, "row")
-            qdd = getvector(qdd, self.n, "row")
-        except ValueError:
-            trajn = q.shape[0]
-            verifymatrix(q, (trajn, self.n))
-            verifymatrix(qd, (trajn, self.n))
-            verifymatrix(qdd, (trajn, self.n))
-
-        # Ensure row slices are C-contiguous (frne C code assumes stride-1 arrays)
-        q = np.ascontiguousarray(q, dtype=float)
-        qd = np.ascontiguousarray(qd, dtype=float)
-        qdd = np.ascontiguousarray(qdd, dtype=float)
-
-        if gravity is None:
-            gravity = self.gravity
-        else:
-            gravity = getvector(gravity, 3)
-
-        # The c function doesn't handle base rotation, so we need to hack the
-        # gravity vector instead
-        gravity = self.base.R.T @ gravity
-
-        if fext is None:
-            fext = np.zeros(6)
-        else:
-            fext = getvector(fext, 6)
-
-        tau = np.zeros((trajn, self.n))
-
-        for i in range(trajn):
-            tau[i, :] = frne(
-                # we negate gravity here, since the C code has the sign wrong
-                self._frne,
-                q[i, :],
-                qd[i, :],
-                qdd[i, :],
-                -gravity,
-                fext,
+        if self._frne is None:
+            return self.rne_python(
+                q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
             )
 
-        if trajn == 1:
-            return tau[0, :]
+        # Belt-and-suspenders: any *other* unanticipated incompatibility
+        # with the C path (e.g. a shape/type quirk the checks above didn't
+        # anticipate) degrades gracefully to the pure-Python implementation
+        # rather than propagating a raw TypeError/ValueError from the C
+        # extension's argument marshalling.
+        q_in, qd_in, qdd_in = q, qd, qdd
+        try:
+            trajn = 1
+
+            try:
+                q = getvector(q, self.n, "row")
+                qd = getvector(qd, self.n, "row")
+                qdd = getvector(qdd, self.n, "row")
+            except ValueError:
+                trajn = q.shape[0]
+                verifymatrix(q, (trajn, self.n))
+                verifymatrix(qd, (trajn, self.n))
+                verifymatrix(qdd, (trajn, self.n))
+
+            # Ensure row slices are C-contiguous (frne C code assumes stride-1 arrays)
+            q = np.ascontiguousarray(q, dtype=float)
+            qd = np.ascontiguousarray(qd, dtype=float)
+            qdd = np.ascontiguousarray(qdd, dtype=float)
+
+            if gravity is None:
+                gravity = self.gravity
+            else:
+                gravity = getvector(gravity, 3)
+            gravity = np.ascontiguousarray(gravity, dtype=float)
+
+            # base rotation and the gravity sign convention are handled inside
+            # frne() itself now -- pass self.base.R through rather than
+            # pre-rotating/negating by hand (see tech-debt.md / rne.md)
+            base_rot = np.ascontiguousarray(self.base.R, dtype=float)
+
+            if fext is None:
+                fext = np.zeros(6)
+            else:
+                fext = getvector(fext, 6)
+
+            # Whole trajectory in a single C call -- frne() loops over all
+            # trajn rows internally now, rather than once per Python->C
+            # round trip (rne.md plan step 7: ~35% of wall time on a
+            # 1000-row trajectory was previously Python-side looping/
+            # marshalling overhead, not the C computation itself).
+            tau_flat, wbase_flat = frne(
+                self._frne,
+                q,
+                qd,
+                qdd,
+                gravity,
+                base_rot,
+                fext,
+            )
+            tau = np.asarray(tau_flat).reshape(trajn, self.n)
+            wbase = np.asarray(wbase_flat).reshape(trajn, 6)
+        except (TypeError, ValueError):
+            return self.rne_python(
+                q_in, qd_in, qdd_in,
+                gravity=gravity, fext=fext, base_wrench=base_wrench,
+            )
+
+        if base_wrench:
+            if trajn == 1:
+                return tau[0, :], wbase[0, :]
+            else:
+                return tau, wbase
         else:
-            return tau
+            if trajn == 1:
+                return tau[0, :]
+            else:
+                return tau
 
     def rne_python(
         self,
@@ -1485,8 +1527,9 @@ class DHRobot(Robot):
         :param Q: Joint coordinates
         :param QD: Joint velocity
         :param QDD: Joint acceleration
-        :param gravity: gravitational acceleration, defaults to attribute
-            of self
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); defaults to attribute of self
         :type gravity: array_like(3), optional
         :param fext: end-effector wrench, defaults to None
         :type fext: array-like(6), optional
@@ -1498,17 +1541,17 @@ class DHRobot(Robot):
         :return: Joint force/torques
         :rtype: NumPy array
 
-        Recursive Newton-Euler for standard Denavit-Hartenberg notation.
+        Recursive Newton-Euler for standard or modified Denavit-Hartenberg notation.
 
-        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n is
-          the number of robot joints.  The result has shape (n,).
-        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (m,n) where n
-          is the number of robot joints and where m is the number of steps in
-          the joint trajectory.  The result has shape (m,n).
-        - ``rne_dh(p)`` where the input is a 1D array ``p`` = [q, qd, qdd] with
-          shape (3n,), and the result has shape (n,).
-        - ``rne_dh(p)`` where the input is a 2D array ``p`` = [q, qd, qdd] with
-          shape (m,3n) and the result has shape (m,n).
+        - ``rne_python(q, qd, qdd)`` where the arguments have shape (n,) where
+          n is the number of robot joints.  The result has shape (n,).
+        - ``rne_python(q, qd, qdd)`` where the arguments have shape (m,n)
+          where n is the number of robot joints and where m is the number of
+          steps in the joint trajectory.  The result has shape (m,n).
+        - ``rne_python(p)`` where the input is a 1D array ``p`` = [q, qd, qdd]
+          with shape (3n,), and the result has shape (n,).
+        - ``rne_python(p)`` where the input is a 2D array ``p`` = [q, qd, qdd]
+          with shape (m,3n) and the result has shape (m,n).
 
         .. note::
             - This is a pure Python implementation and slower than the .rne()
@@ -1529,7 +1572,19 @@ class DHRobot(Robot):
 
         n = self.n
 
-        if self.symbolic:
+        # dtype must reflect this *call's* symbolic-ness, not just the
+        # model's: self.symbolic is a construction-time flag over the link
+        # parameters, but Q/QD/QDD can be symbolic even for a robot built
+        # entirely from numeric parameters (e.g. differentiating tau
+        # symbolically w.r.t. q for a concrete, numeric-mass robot) -- see
+        # rne.md issue 4. Using only self.symbolic here left rne_python()
+        # allocating float64 arrays that crashed on the first symbolic
+        # intermediate value, even though it's supposed to be the
+        # always-works fallback DHRobot.rne() dispatches to.
+        symbolic_call = (
+            self.symbolic or _is_symbolic(Q) or _is_symbolic(QD) or _is_symbolic(QDD)
+        )
+        if symbolic_call:
             dtype = "O"
         else:
             dtype = None
@@ -1568,7 +1623,10 @@ class DHRobot(Robot):
 
         tau = np.zeros((nk, n), dtype=dtype)
         if base_wrench:
-            wbase = np.zeros((nk, n), dtype=dtype)
+            # always 6 (a wrench), not n (joint count) -- previously used n,
+            # which happened to work for 6-DOF robots by coincidence and
+            # crashed with a shape mismatch for any other DOF count
+            wbase = np.zeros((nk, 6), dtype=dtype)
 
         for k in range(nk):
             # take the k'th row of data
@@ -1604,7 +1662,10 @@ class DHRobot(Robot):
                 Rb = t2r(base).T
                 w = Rb @ w
                 wd = Rb @ wd
-                vd = Rb @ gravity
+                # rotate the already-negated vd (was missing the negation --
+                # this branch used to compute +Rb @ gravity while the
+                # identity-base case above correctly used -gravity)
+                vd = Rb @ vd
 
             # ----------------  initialize some variables ----------------- #
 
@@ -1626,10 +1687,14 @@ class DHRobot(Robot):
                 alpha = link.alpha
                 if self.mdh:
                     pstar = np.r_[link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
-                    if j == 0:
-                        if base:
-                            Tj = base @ Tj
-                            pstar = base @ pstar
+                    # NOT baking base into Tj/pstar here (this block used to,
+                    # before being removed): base rotation is already applied
+                    # exactly once, to gravity/vd before this loop starts.
+                    # Also folding it into Rm[0] here double-counted it --
+                    # confirmed by tracing TwoLink(mdh=True)'s gravity-only
+                    # case, where vd ended up rotated by the base twice.
+                    # ne.c matches this: it only ever rotates gravity by the
+                    # base (in the nanobind glue), never any per-link R.
                 else:
                     pstar = np.r_[link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
 
@@ -1651,7 +1716,14 @@ class DHRobot(Robot):
                         # revolute axis
                         w_ = Rt @ w + z0 * qd_k[j]
                         wd_ = Rt @ wd + z0 * qdd_k[j] + _cross(Rt @ w, z0 * qd_k[j])
-                        vd_ = Rt @ _cross(wd, pstar) + _cross(w, _cross(w, pstar)) + vd
+                        # Rt must distribute over the whole bracket, not just
+                        # the first term -- matches ne.c's MODIFIED-DH branch,
+                        # which does rot_trans_vect_mult() (= Rt @ ...) on the
+                        # full OMEGADOT(j-1)xPSTAR + OMEGA(j-1)x(OMEGA(j-1)xPSTAR)
+                        # + ACC(j-1) sum. The prismatic case below already has
+                        # this right; this revolute case was missing the
+                        # parentheses (and therefore wrong for any MDH robot).
+                        vd_ = Rt @ (_cross(wd, pstar) + _cross(w, _cross(w, pstar)) + vd)
                     else:
                         # prismatic axis
                         w_ = Rt @ w
@@ -1722,7 +1794,12 @@ class DHRobot(Robot):
                     nn_ = (
                         R @ nn
                         + _cross(pstar, R @ f)
-                        + _cross(pstar, Fm[:, j])
+                        # this link's own force acts through its own CoM
+                        # offset r, not pstar (which is the offset to the
+                        # *next* link's origin) -- matches ne.c's MODIFIED
+                        # branch: vect_cross(&t2, R_COG(j), &F) uses R_COG(j)
+                        # (this link's r), not PSTAR(j+1)
+                        + _cross(r, Fm[:, j])
                         + Nm[:, j]
                     )
                     f = f_
@@ -1767,7 +1844,7 @@ class DHRobot(Robot):
                 tau[k, j] = (
                     t
                     + link.G**2 * link.Jm * qdd_k[j]
-                    - link.friction(qd_k[j], coulomb=not self.symbolic)
+                    - link.friction(qd_k[j], coulomb=not symbolic_call)
                 )
                 if debug:
                     print(
@@ -1782,21 +1859,6 @@ class DHRobot(Robot):
                 nn = R @ nn
                 f = R @ f
                 wbase[k, :] = np.r_[f, nn]
-
-        # if self.symbolic:
-        #     # simplify symbolic expressions
-        #     print(
-        #       'start symbolic simplification, this might take a while...')
-        #     # from sympy import trigsimp
-
-        #     # tau = trigsimp(tau)
-        #     # consider using multiprocessing to spread over cores
-        #     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy
-        #     print('done')
-        #     if tau.shape[0] == 1:
-        #         return tau.reshape(self.n)
-        #     else:
-        #         return tau
 
         if base_wrench:
             if tau.shape[0] == 1:

@@ -33,6 +33,21 @@ jobs:
       - name: Install package (core, no swift)
         run: pip install .[dev]
 
+      - name: Verify compiled extensions built
+        # Catches a silent build/import regression for _fknm_c/_frne_c --
+        # without this, tests/test_fknm_fallback.py's C-vs-Python
+        # cross-validation tests would just skip (they're gated on
+        # _C_AVAILABLE precisely so a missing extension can't masquerade as
+        # a passing comparison), and nothing else would notice.
+        shell: bash
+        run: |
+          python -c '
+          from roboticstoolbox.ets.fknm import _C_AVAILABLE as fknm_c
+          from roboticstoolbox.robot.frne import _C_AVAILABLE as frne_c
+          assert fknm_c and frne_c, f"compiled extension missing: fknm={fknm_c} frne={frne_c}"
+          print("OK: both _fknm_c and _frne_c built")
+          '
+
       - name: Test (core)
         run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
 
@@ -69,6 +84,17 @@ jobs:
 
       - name: Install package
         run: pip install .[dev]
+
+      - name: Verify compiled extensions built
+        # See the same step in test-core for why this matters.
+        shell: bash
+        run: |
+          python -c '
+          from roboticstoolbox.ets.fknm import _C_AVAILABLE as fknm_c
+          from roboticstoolbox.robot.frne import _C_AVAILABLE as frne_c
+          assert fknm_c and frne_c, f"compiled extension missing: fknm={fknm_c} frne={frne_c}"
+          print("OK: both _fknm_c and _frne_c built")
+          '
 
       - name: Test
         run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
