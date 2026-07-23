@@ -4,6 +4,17 @@ project(${SKBUILD_PROJECT_NAME} LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Pyodide/Emscripten builds a genuine pure-Python wheel instead: both
+# extensions have complete, tested pure-Python fallbacks (roboticstoolbox
+# routes to them automatically whenever the compiled modules are absent --
+# see fknm.py/frne.py), so there is nothing to gain from cross-compiling to
+# wasm and a real cost (Emscripten toolchain fragility, ABI/Pyodide-version
+# coupling -- see tech-debt.md's "aspire to a pure-Python wheel" writeup).
+# CMAKE_SYSTEM_NAME is set to "Emscripten" by the toolchain file scikit-
+# build-core picks up automatically when cibuildwheel's CIBW_PLATFORM=pyodide
+# invokes this build.
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+
 # Locate Python (interpreter needed to find nanobind cmake dir)
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 
@@ -44,3 +55,5 @@ target_include_directories(_fknm_c PRIVATE
 )
 
 install(TARGETS _frne_c _fknm_c DESTINATION roboticstoolbox)
+
+endif()

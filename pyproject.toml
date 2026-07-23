@@ -169,9 +169,17 @@ archs = [
 archs = ["AMD64"]
 
 [tool.cibuildwheel.pyodide]
-# Pyodide (wasm32-emscripten) — used by JupyterLite
-# cibuildwheel manages the Emscripten SDK; scikit-build-core picks up
-# the toolchain file automatically from the PYODIDE environment.
+# Pyodide (wasm32-emscripten) — used by JupyterLite. A genuine pure-Python
+# wheel, not a wasm cross-compile of the C extensions: both _fknm_c and
+# _frne_c have complete, tested pure-Python fallbacks (see fknm.py/frne.py),
+# so there is nothing to gain from compiling to wasm and a real cost
+# (Emscripten toolchain fragility, ABI/Pyodide-version coupling -- see
+# tech-debt.md's "aspire to a pure-Python wheel" writeup). CMakeLists.txt
+# skips both nanobind_add_module() targets entirely when
+# CMAKE_SYSTEM_NAME is "Emscripten" (the toolchain scikit-build-core picks
+# up automatically here), so this is a real no-compilation build, not just
+# a relabelled one.
+environment = { SKBUILD_WHEEL_PLATLIB = "false" }
 
 
 [tool.pytest.ini_options]
