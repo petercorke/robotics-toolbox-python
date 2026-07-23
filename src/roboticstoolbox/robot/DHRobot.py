@@ -1416,6 +1416,20 @@ class DHRobot(Robot):
         :seealso: :func:`rne_python`
         """
 
+        # Symbolic-aware dispatch (rne.md issues 1/2/4): the C extension
+        # requires float64 link/state data throughout, so route straight to
+        # rne_python() -- the always-works fallback -- if the model itself
+        # was built from symbolic parameters (self.symbolic, now
+        # auto-detected at construction time regardless of whether the
+        # caller remembered to pass symbolic=True -- see BaseRobot.__init__)
+        # or if q/qd/qdd for *this call* are symbolic, mirroring the same
+        # is-symbolic-before-touching-C idiom used throughout
+        # roboticstoolbox.ets.fknm for fkine/jacobian dispatch.
+        if self.symbolic or _is_symbolic(q) or _is_symbolic(qd) or _is_symbolic(qdd):
+            return self.rne_python(
+                q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
+            )
+
         if self._frne is None or self._frne_stale:
             self._copy_to_cpp()
 
@@ -1424,51 +1438,66 @@ class DHRobot(Robot):
                 q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
             )
 
-        trajn = 1
-
+        # Belt-and-suspenders: any *other* unanticipated incompatibility
+        # with the C path (e.g. a shape/type quirk the checks above didn't
+        # anticipate) degrades gracefully to the pure-Python implementation
+        # rather than propagating a raw TypeError/ValueError from the C
+        # extension's argument marshalling.
+        q_in, qd_in, qdd_in = q, qd, qdd
         try:
-            q = getvector(q, self.n, "row")
-            qd = getvector(qd, self.n, "row")
-            qdd = getvector(qdd, self.n, "row")
-        except ValueError:
-            trajn = q.shape[0]
-            verifymatrix(q, (trajn, self.n))
-            verifymatrix(qd, (trajn, self.n))
-            verifymatrix(qdd, (trajn, self.n))
+            trajn = 1
 
-        # Ensure row slices are C-contiguous (frne C code assumes stride-1 arrays)
-        q = np.ascontiguousarray(q, dtype=float)
-        qd = np.ascontiguousarray(qd, dtype=float)
-        qdd = np.ascontiguousarray(qdd, dtype=float)
+            try:
+                q = getvector(q, self.n, "row")
+                qd = getvector(qd, self.n, "row")
+                qdd = getvector(qdd, self.n, "row")
+            except ValueError:
+                trajn = q.shape[0]
+                verifymatrix(q, (trajn, self.n))
+                verifymatrix(qd, (trajn, self.n))
+                verifymatrix(qdd, (trajn, self.n))
 
-        if gravity is None:
-            gravity = self.gravity
-        else:
-            gravity = getvector(gravity, 3)
-        gravity = np.ascontiguousarray(gravity, dtype=float)
+            # Ensure row slices are C-contiguous (frne C code assumes stride-1 arrays)
+            q = np.ascontiguousarray(q, dtype=float)
+            qd = np.ascontiguousarray(qd, dtype=float)
+            qdd = np.ascontiguousarray(qdd, dtype=float)
 
-        # base rotation and the gravity sign convention are handled inside
-        # frne() itself now -- pass self.base.R through rather than
-        # pre-rotating/negating by hand (see tech-debt.md / rne.md)
-        base_rot = np.ascontiguousarray(self.base.R, dtype=float)
+            if gravity is None:
+                gravity = self.gravity
+            else:
+                gravity = getvector(gravity, 3)
+            gravity = np.ascontiguousarray(gravity, dtype=float)
 
-        if fext is None:
-            fext = np.zeros(6)
-        else:
-            fext = getvector(fext, 6)
+            # base rotation and the gravity sign convention are handled inside
+            # frne() itself now -- pass self.base.R through rather than
+            # pre-rotating/negating by hand (see tech-debt.md / rne.md)
+            base_rot = np.ascontiguousarray(self.base.R, dtype=float)
 
-        tau = np.zeros((trajn, self.n))
-        wbase = np.zeros((trajn, 6))
+            if fext is None:
+                fext = np.zeros(6)
+            else:
+                fext = getvector(fext, 6)
 
-        for i in range(trajn):
-            tau[i, :], wbase[i, :] = frne(
+            # Whole trajectory in a single C call -- frne() loops over all
+            # trajn rows internally now, rather than once per Python->C
+            # round trip (rne.md plan step 7: ~35% of wall time on a
+            # 1000-row trajectory was previously Python-side looping/
+            # marshalling overhead, not the C computation itself).
+            tau_flat, wbase_flat = frne(
                 self._frne,
-                q[i, :],
-                qd[i, :],
-                qdd[i, :],
+                q,
+                qd,
+                qdd,
                 gravity,
                 base_rot,
                 fext,
+            )
+            tau = np.asarray(tau_flat).reshape(trajn, self.n)
+            wbase = np.asarray(wbase_flat).reshape(trajn, 6)
+        except (TypeError, ValueError):
+            return self.rne_python(
+                q_in, qd_in, qdd_in,
+                gravity=gravity, fext=fext, base_wrench=base_wrench,
             )
 
         if base_wrench:

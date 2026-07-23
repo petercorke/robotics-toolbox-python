@@ -21,6 +21,7 @@ extern "C" {
 #include "frne.h"   // Robot, Link, Vect, Rot, DHType, newton_euler
 }
 
+#include <algorithm>
 #include <math.h>
 
 // ── Robot wrapper ─────────────────────────────────────────────────────────────
@@ -126,6 +127,13 @@ NB_MODULE(_frne_c, m) {
         });
 
     // ── frne ──────────────────────────────────────────────────────────────────
+    // q_arr/qd_arr/qdd_arr are (trajn, njoints) -- a full trajectory, looped
+    // over entirely in C++ rather than once per Python->C call (previously
+    // DHRobot.rne() called this once per row; ~35% of wall time on a 1000-row
+    // trajectory was that Python-side looping/marshalling overhead, not the
+    // C computation itself -- see rne.md issue 5/plan step 7). gravity,
+    // base_rot and fext are constant across the whole trajectory, matching
+    // what the old per-row Python loop already passed every iteration.
     m.def("frne",
         [](RobotObj *obj,
            nb::ndarray<double> q_arr,
@@ -138,6 +146,7 @@ NB_MODULE(_frne_c, m) {
         {
             Robot *robot = obj->ptr;
             int nj = robot->njoints;
+            int trajn = (int)q_arr.shape(0);
 
             const double *q    = (const double *)q_arr.data();
             const double *qd   = (const double *)qd_arr.data();
@@ -151,7 +160,8 @@ NB_MODULE(_frne_c, m) {
             // (previously done by hand in DHRobot.rne()/_copy_to_cpp(),
             // duplicated and easy to get wrong -- see tech-debt.md /
             // rne.md). base_rot_arr is self.base.R, row-major flattened;
-            // Rot's n/o/a are its columns.
+            // Rot's n/o/a are its columns. Computed once -- constant across
+            // the trajectory.
             const double *br = (const double *)base_rot_arr.data();
             Rot base_R;
             base_R.n = {br[0], br[3], br[6]};
@@ -165,41 +175,56 @@ NB_MODULE(_frne_c, m) {
             robot->gravity->y = -grav_root.y;
             robot->gravity->z = -grav_root.z;
 
-            // Allocate temporaries (newton_euler takes non-const)
-            std::vector<double> qd_buf(qd, qd + nj);
-            std::vector<double> qdd_buf(qdd, qdd + nj);
             std::vector<double> fext_buf(fext, fext + 6);
-            std::vector<double> tau(nj, 0.0);
+            std::vector<double> tau(trajn * nj, 0.0);
+            std::vector<double> wbase(trajn * 6, 0.0);
 
-            for (int j = 0; j < nj; j++) {
-                Link *l = &robot->links[j];
-                switch (l->jointtype) {
-                case REVOLUTE:
-                    rot_mat(l, q[j] + l->offset, l->D, robot->dhtype);
-                    break;
-                case PRISMATIC:
-                    rot_mat(l, l->theta, q[j] + l->offset, robot->dhtype);
-                    break;
-                default:
-                    throw nb::value_error("Invalid joint type (expect R or P)");
+            // Per-row temporaries, reused across the trajectory rather than
+            // reallocated each iteration.
+            std::vector<double> qd_buf(nj), qdd_buf(nj), tau_row(nj);
+
+            for (int i = 0; i < trajn; i++) {
+                const double *qi   = q   + i * nj;
+                const double *qdi  = qd  + i * nj;
+                const double *qddi = qdd + i * nj;
+
+                std::copy(qdi,  qdi  + nj, qd_buf.begin());
+                std::copy(qddi, qddi + nj, qdd_buf.begin());
+
+                for (int j = 0; j < nj; j++) {
+                    Link *l = &robot->links[j];
+                    switch (l->jointtype) {
+                    case REVOLUTE:
+                        rot_mat(l, qi[j] + l->offset, l->D, robot->dhtype);
+                        break;
+                    case PRISMATIC:
+                        rot_mat(l, l->theta, qi[j] + l->offset, robot->dhtype);
+                        break;
+                    default:
+                        throw nb::value_error("Invalid joint type (expect R or P)");
+                    }
                 }
+
+                newton_euler(robot, tau_row.data(), qd_buf.data(), qdd_buf.data(),
+                             fext_buf.data(), 1);
+                std::copy(tau_row.begin(), tau_row.end(), tau.begin() + i * nj);
+
+                // Base wrench: f(0)/n(0) are already computed by the backward
+                // recursion above (force/moment on link 0 due to the base) --
+                // just not previously exposed. Rotate out of link 0's own
+                // frame into the base/world frame, matching rne_python's
+                // wbase convention (Rm[0] @ f, Rm[0] @ n).
+                Link *l0 = &robot->links[0];
+                Vect f_base, n_base;
+                rot_vect_mult(&f_base, &l0->R, &l0->f);
+                rot_vect_mult(&n_base, &l0->R, &l0->n);
+                wbase[i * 6 + 0] = f_base.x;
+                wbase[i * 6 + 1] = f_base.y;
+                wbase[i * 6 + 2] = f_base.z;
+                wbase[i * 6 + 3] = n_base.x;
+                wbase[i * 6 + 4] = n_base.y;
+                wbase[i * 6 + 5] = n_base.z;
             }
-
-            newton_euler(robot, tau.data(), qd_buf.data(), qdd_buf.data(),
-                         fext_buf.data(), 1);
-
-            // Base wrench: f(0)/n(0) are already computed by the backward
-            // recursion above (force/moment on link 0 due to the base) --
-            // just not previously exposed. Rotate out of link 0's own
-            // frame into the base/world frame, matching rne_python's
-            // wbase convention (Rm[0] @ f, Rm[0] @ n).
-            Link *l0 = &robot->links[0];
-            Vect f_base, n_base;
-            rot_vect_mult(&f_base, &l0->R, &l0->f);
-            rot_vect_mult(&n_base, &l0->R, &l0->n);
-            std::vector<double> wbase = {
-                f_base.x, f_base.y, f_base.z, n_base.x, n_base.y, n_base.z,
-            };
 
             return {tau, wbase};
         });

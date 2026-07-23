@@ -1092,6 +1092,91 @@ class TestTwoLinkAbsoluteGroundTruth(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
+# Trajectory correctness, all 3 implementations, deliberately varying rows.
+#
+# frne() (C) now loops the whole trajectory internally in C++ rather than
+# once per Python call (rne.md plan step 7) -- a real code path change with
+# its own row-indexing arithmetic (i*nj offsets into flat buffers). A
+# trajectory of *identical* rows (e.g. np.tile, as rne_compare.py's timing
+# section uses) cannot distinguish "row i's output is correct" from "row i's
+# output is actually some other row's result" -- every row looks right
+# either way. These use a distinct, randomly-generated pose per row
+# specifically to catch that class of bug.
+# ---------------------------------------------------------------------------
+
+class TestRneTrajectoryVaryingRows(unittest.TestCase):
+    """C, rne_python, and (where structurally valid) Robot.rne must all
+    agree row-by-row on a trajectory of *distinct* poses, not just a single
+    pose or a tiled/repeated one."""
+
+    N = 25
+
+    def _random_trajectory(self, n, seed):
+        rng = np.random.default_rng(seed)
+        Q = rng.uniform(-np.pi, np.pi, (self.N, n))
+        QD = rng.uniform(-2.0, 2.0, (self.N, n))
+        QDD = rng.uniform(-2.0, 2.0, (self.N, n))
+        return Q, QD, QDD
+
+    @unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+    def test_c_matches_rne_python_panda_mdh_trajectory(self):
+        panda = rtb.models.DH.Panda()
+        Q, QD, QDD = self._random_trajectory(panda.n, seed=1)
+
+        tau_c = panda.rne(Q, QD, QDD)
+        tau_py = panda.rne_python(Q, QD, QDD)
+        self.assertEqual(tau_c.shape, (self.N, panda.n))
+        nt.assert_array_almost_equal(tau_c, tau_py, decimal=6)
+
+    @unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+    def test_c_matches_rne_python_base_wrench_trajectory(self):
+        panda = rtb.models.DH.Panda()
+        Q, QD, QDD = self._random_trajectory(panda.n, seed=2)
+
+        tau_c, wbase_c = panda.rne(Q, QD, QDD, base_wrench=True)
+        tau_py, wbase_py = panda.rne_python(Q, QD, QDD, base_wrench=True)
+        self.assertEqual(wbase_c.shape, (self.N, 6))
+        nt.assert_array_almost_equal(tau_c, tau_py, decimal=6)
+        nt.assert_array_almost_equal(wbase_c, wbase_py, decimal=6)
+
+    @unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+    def test_c_matches_rne_python_twolink_std_dh_trajectory(self):
+        robot = _twolink()
+        Q, QD, QDD = self._random_trajectory(robot.n, seed=3)
+        nt.assert_array_almost_equal(
+            robot.rne(Q, QD, QDD), robot.rne_python(Q, QD, QDD), decimal=6
+        )
+
+    @unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+    def test_c_matches_rne_python_twolink_mdh_trajectory(self):
+        robot = TwoLink(mdh=True)
+        Q, QD, QDD = self._random_trajectory(robot.n, seed=4)
+        nt.assert_array_almost_equal(
+            robot.rne(Q, QD, QDD), robot.rne_python(Q, QD, QDD), decimal=6
+        )
+
+    def test_robot_rne_matches_rne_python_panda_mdh_trajectory(self):
+        from roboticstoolbox.robot.Robot import Robot as RobotBase
+
+        panda = rtb.models.DH.Panda()
+        Q, QD, QDD = self._random_trajectory(panda.n, seed=5)
+
+        tau_base = RobotBase.rne(panda, Q, QD, QDD)
+        tau_py = panda.rne_python(Q, QD, QDD)
+        nt.assert_array_almost_equal(tau_base, tau_py, decimal=6)
+
+    def test_robot_rne_matches_rne_python_twolink_mdh_trajectory(self):
+        from roboticstoolbox.robot.Robot import Robot as RobotBase
+
+        robot = TwoLink(mdh=True)
+        Q, QD, QDD = self._random_trajectory(robot.n, seed=6)
+
+        tau_base = RobotBase.rne(robot, Q, QD, QDD)
+        tau_py = robot.rne_python(Q, QD, QDD)
+        nt.assert_array_almost_equal(tau_base, tau_py, decimal=6)
+
+
+# ---------------------------------------------------------------------------
 # Path verification via timing
 # ---------------------------------------------------------------------------
 
