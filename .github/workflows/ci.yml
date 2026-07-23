@@ -139,11 +139,26 @@ jobs:
         # means the "Try it Now" experience tracks the latest release, not
         # bleeding-edge main -- deliberate, since a full Pyodide/Emscripten
         # rebuild on every docs push would be slow.
+        #
+        # STOPGAP (see tech-debt.md): only fetch the cp312 wheel, matching
+        # jupyterlite-pyodide-kernel==0.6.1 below. A release can carry wasm
+        # wheels for more than one CPython version (cibuildwheel's pyodide
+        # platform builds one per supported interpreter), and
+        # jupyterlite-pyodide-kernel's all.json generator keys entries by
+        # (name, version) and *overwrites* rather than accumulates, so
+        # fetching more than one wheel for the same package+version
+        # silently drops all but the alphabetically-last from the piplite
+        # index -- no build error, just a runtime "can't find a pure
+        # Python 3 wheel" in the browser. Confirmed still present in
+        # jupyterlite_pyodide_kernel 0.7.1 (latest as of 2026-07-21), not
+        # just 0.6.1 -- an upstream bug to route around, not a version to
+        # bump past. Intended to be removed once the pure-Python wasm
+        # wheel work lands and this whole fetch step goes away.
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p docs/lite/pypi
-          gh release download --repo "$GITHUB_REPOSITORY" --pattern '*pyodide*' --dir docs/lite/pypi --clobber
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern '*cp312*pyodide*' --dir docs/lite/pypi --clobber
 
       - name: Sync notebooks into JupyterLite content
         # Copies *.ipynb plus any local asset directories (e.g.
