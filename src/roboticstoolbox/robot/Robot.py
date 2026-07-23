@@ -1703,7 +1703,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             for idx in group:
                 link = self.links[idx]
 
-                I_int = I_int + SpatialInertia(m=link.m, r=link.r)
+                I_int = I_int + SpatialInertia(m=link.m, r=link.r, I=link.I)
 
                 if link.v is not None:
                     s.append(link.v.s)  # type: ignore[union-attr]

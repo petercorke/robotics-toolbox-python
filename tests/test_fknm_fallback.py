@@ -920,6 +920,69 @@ class TestTwoLinkActuatorDynamics(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
+# Robot.rne() (ETS/Featherstone) dropped the rotational inertia tensor
+# entirely: SpatialInertia(m=link.m, r=link.r) never passed I=link.I. Never
+# caught by TestTwoLinkDHMDHEquivalence above because TwoLink's default
+# (zero) inertia makes the missing term a no-op, and TwoLink's d=alpha=0
+# (planar) also hides it even with inertia=True. Needs nonzero d *and*
+# alpha *and* a real inertia tensor together -- see tech-debt.md.
+# ---------------------------------------------------------------------------
+
+class TestRobotRneInertiaTensor(unittest.TestCase):
+    """Robot.rne() must use the full inertia tensor, not just mass+COM."""
+
+    def _robot(self):
+        from roboticstoolbox import DHRobot, RevoluteMDH
+
+        links = [
+            RevoluteMDH(
+                d=0.5, a=0.3, alpha=0.6,
+                m=2.0, r=[0.1, 0.05, 0.02],
+                I=[0.01, 0.02, 0.03, 0.001, 0.002, 0.003],
+            ),
+            RevoluteMDH(
+                d=0.2, a=0.25, alpha=0.8,
+                m=1.5, r=[0.08, 0.0, 0.01],
+                I=[0.005, 0.006, 0.007, 0.0001, 0.0002, 0.0003],
+            ),
+        ]
+        return DHRobot(links, name="rne_inertia_test")
+
+    def test_robot_rne_matches_rne_python_with_full_inertia_tensor(self):
+        from roboticstoolbox.robot.Robot import Robot as RobotBase
+
+        robot = self._robot()
+        q = np.array([0.3, -0.5])
+        qd = np.array([0.4, -0.2])
+        qdd = np.array([0.1, 0.3])
+
+        truth = robot.rne_python(q, qd, qdd)
+        result = RobotBase.rne(robot, q, qd, qdd)
+        nt.assert_array_almost_equal(result, truth, decimal=8)
+
+    def test_robot_rne_matches_rne_python_static_and_random_poses(self):
+        from roboticstoolbox.robot.Robot import Robot as RobotBase
+
+        robot = self._robot()
+        z = np.zeros(2)
+
+        # static (gravity only) -- agreed even before the fix, since it
+        # doesn't exercise qdd, but kept as a baseline
+        truth = robot.rne_python(np.array([0.3, -0.5]), z, z)
+        result = RobotBase.rne(robot, np.array([0.3, -0.5]), z, z)
+        nt.assert_array_almost_equal(result, truth, decimal=8)
+
+        rng = np.random.default_rng(1)
+        for _ in range(20):
+            q = rng.uniform(-np.pi, np.pi, 2)
+            qd = rng.uniform(-2, 2, 2)
+            qdd = rng.uniform(-2, 2, 2)
+            truth = robot.rne_python(q, qd, qdd)
+            result = RobotBase.rne(robot, q, qd, qdd)
+            nt.assert_array_almost_equal(result, truth, decimal=6)
+
+
+# ---------------------------------------------------------------------------
 # Path verification via timing
 # ---------------------------------------------------------------------------
 
