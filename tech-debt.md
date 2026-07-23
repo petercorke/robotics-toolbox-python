@@ -1277,32 +1277,31 @@ essentially undocumented at the type level, so mismatches like the
 
 ## `examples/ik_speed.py` doesn't run — stale imports, predates this session
 
-Found 2026-07-23 while adding a portable CPU-info one-liner to
-`examples/rne_speed.py` (a new RNE timing-comparison script) and looking
-for a sibling to riff off. `ik_speed.py` fails immediately: `import fknm`
-at module scope (line 4) — `fknm` hasn't existed as a top-level importable
-module since the fknm/frne refactor moved it to
+**FIXED 2026-07-24.** Found 2026-07-23 while adding a portable CPU-info
+one-liner to `examples/rne_speed.py` (a new RNE timing-comparison script)
+and looking for a sibling to riff off. `ik_speed.py` failed immediately:
+`import fknm` at module scope (line 4) — `fknm` hasn't existed as a
+top-level importable module since the fknm/frne refactor moved it to
 `roboticstoolbox.robot.fknm` (merged to `main` 2026-07-03, well before this
-session). Not caused by, or related to, the current dynamics-overhaul
-branch — pre-existing breakage that had gone unnoticed.
+session). Not caused by, or related to, the dynamics-overhaul branch —
+pre-existing breakage that had gone unnoticed.
 
-Also stale, found by inspection while there (none blocking, all part of the
-same cleanup):
+Also stale, beyond the `fknm` import:
 
-- Unused imports: `swift`, `spatialgeometry as sg`, `sys`, `from numpy
-  import ndarray`, `from typing import Union, overload, List, Set`.
-- No type hints (consistent with the `blocks/` entry above — this predates
-  the modern-syntax convention too).
+- Unused imports: `swift`, `spatialgeometry as sg`, `sys` (originally),
+  `from numpy import ndarray`, `from typing import Union, overload, List,
+  Set`.
+- The IK method names themselves had moved on: `ets.ik_lm_chan`/`ik_nr`/
+  `ik_gn` no longer exist — current API is `ets.ik_LM(method="chan"/
+  "wampler"/"sugihara")`, `ets.ik_NR`, `ets.ik_GN`, with renamed parameters
+  (`we`→`mask`, `reject_jl`→`joint_limits`, `λ`→`k`, `use_pinv`→`pinv`).
+  Not caught until the `fknm` import was fixed and the script actually ran.
 
-**Proposed fix:** update the `fknm` import to `from roboticstoolbox.robot
-import fknm` (or import the specific facade functions actually used),
-verify the script runs end-to-end again, then sweep the unused imports.
-While there, port over the `cpu_info()` helper added to `rne_speed.py`
-(portable one-line CPU description — name, core count, clock speed where
-the OS exposes one) so `ik_speed.py`'s output reports what machine it ran
-on too. Since that would make it the *second* real call site, worth
-factoring `cpu_info()` into a small shared `examples/` helper at that point
-rather than copy-pasting it again.
+**Fix applied:** rewrote `ik_speed.py` against the current `ik_NR`/`ik_GN`/
+`ik_LM` API, added modern type hints, and ported `cpu_info()` — this being
+the second real call site, it was factored out into a new shared
+`examples/_cpu_info.py` module rather than copy-pasted, and `rne_speed.py`
+now imports from there too. Verified end-to-end on both scripts.
 
 **Proposed fix:** add type hints throughout `blocks/`, following the same
 convention as the rest of the codebase (`NDArray`/`ArrayLike` in
