@@ -290,6 +290,7 @@ def URDF_file(
     file: "str | Path | TextIO",
     model: "str | None" = None,
     patch: "Callable[[str], str] | None" = None,
+    extra_packages: "dict[str, str] | None" = None,
 ) -> tuple:
     """Parse a URDF or xacro file, return (elinks, name).
 
@@ -306,12 +307,25 @@ def URDF_file(
     the upstream repo or the bundled `rtb-data` copy. See ``Valkyrie.py``
     and ``Fetch.py`` for real examples — each documents exactly which
     upstream bug its patch works around.
+
+    ``extra_packages``, if given, maps additional xacro package names to
+    paths relative to the bundled ``rtb-data`` xacro root. Use it when an
+    upstream file does ``$(find some_package)`` for a package name that
+    doesn't match any directory name rtb-data actually ships under — xacro's
+    package lookup only auto-discovers directories that are already known by
+    name, it doesn't fall back to searching by content. See ``LBR.py`` for a
+    real example.
     """
     import rtbdata
 
     xacro_root = Path(rtbdata.__file__).parent / "xacro"
     pkg_map = {d.name: str(d) for d in xacro_root.iterdir() if d.is_dir()}
     packages.update_package_cache(pkg_map)
+
+    if extra_packages is not None:
+        packages.update_package_cache(
+            {name: str(xacro_root / path) for name, path in extra_packages.items()}
+        )
 
     xacro_args = None
     if isinstance(file, str):
@@ -376,9 +390,12 @@ class URDFRobot(Robot):
         manufacturer: str = "",
         gripper_link_index: "int | None" = None,
         patch: "Callable[[str], str] | None" = None,
+        extra_packages: "dict[str, str] | None" = None,
         **kwargs,
     ):
-        elinks, name, filepath = URDF_file(urdf_path, patch=patch)
+        elinks, name, filepath = URDF_file(
+            urdf_path, patch=patch, extra_packages=extra_packages
+        )
         if gripper_link_index is not None:
             kwargs["gripper_links"] = elinks[gripper_link_index]
         super().__init__(elinks, name=name, manufacturer=manufacturer, **kwargs)
