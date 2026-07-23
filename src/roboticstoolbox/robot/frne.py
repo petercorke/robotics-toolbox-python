@@ -21,16 +21,23 @@ except ImportError:
     _C_AVAILABLE = False
 
 
-def init(njoints, mdh, L, gravity):
+def init(njoints, mdh, L):
     """Create the C Robot struct handle; returns None when C extension is absent."""
     if _C_AVAILABLE:
-        return _c_init(njoints, mdh, L, gravity)
+        return _c_init(njoints, mdh, L)
     return None
 
 
-def frne(robot, q, qd, qdd, gravity, fext):
-    """Run Newton-Euler via C; caller must check that robot handle is not None."""
-    return _c_frne(robot, q, qd, qdd, gravity, fext)
+def frne(robot, q, qd, qdd, gravity, base_rot, fext):
+    """Run Newton-Euler via C; caller must check that robot handle is not None.
+
+    ``gravity`` is given in the world frame; ``base_rot`` (the robot's
+    ``self.base.R``, flattened row-major) is applied internally to rotate
+    it into the root link frame before use -- callers no longer need to do
+    this by hand. Returns ``(tau, wbase)`` where ``wbase`` is the wrench
+    the base experiences, in the base/world frame.
+    """
+    return _c_frne(robot, q, qd, qdd, gravity, base_rot, fext)
 
 
 def delete(robot):

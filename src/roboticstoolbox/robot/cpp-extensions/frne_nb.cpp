@@ -11,6 +11,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
+#include <nanobind/stl/pair.h>
 #include <nanobind/stl/unique_ptr.h>
 #include <nanobind/stl/vector.h>
 
@@ -81,8 +82,7 @@ NB_MODULE(_frne_c, m) {
     // ── init ──────────────────────────────────────────────────────────────────
     m.def("init",
         [](int njoints, int mdh,
-           nb::ndarray<double> L_arr,
-           nb::ndarray<double> grav_arr) -> std::unique_ptr<RobotObj>
+           nb::ndarray<double> L_arr) -> std::unique_ptr<RobotObj>
         {
             auto obj = std::make_unique<RobotObj>();
 
@@ -92,12 +92,10 @@ NB_MODULE(_frne_c, m) {
             robot->njoints = njoints;
             robot->dhtype  = (DHType)mdh;
             robot->links   = (Link *)PyMem_RawCalloc(njoints, sizeof(Link));
-            robot->gravity = (Vect *)PyMem_RawMalloc(sizeof(Vect));
-
-            const double *grav = (const double *)grav_arr.data();
-            robot->gravity->x = grav[0];
-            robot->gravity->y = grav[1];
-            robot->gravity->z = grav[2];
+            // gravity is set per-call in frne() (it's cheap and lets callers
+            // override it per-call, same as before) -- zero-init here only
+            // so the pointer is never read uninitialized.
+            robot->gravity = (Vect *)PyMem_RawCalloc(1, sizeof(Vect));
 
             const double *L = (const double *)L_arr.data();
             int idx = 0;
@@ -134,7 +132,9 @@ NB_MODULE(_frne_c, m) {
            nb::ndarray<double> qd_arr,
            nb::ndarray<double> qdd_arr,
            nb::ndarray<double> grav_arr,
-           nb::ndarray<double> fext_arr) -> std::vector<double>
+           nb::ndarray<double> base_rot_arr,
+           nb::ndarray<double> fext_arr)
+           -> std::pair<std::vector<double>, std::vector<double>>
         {
             Robot *robot = obj->ptr;
             int nj = robot->njoints;
@@ -145,9 +145,25 @@ NB_MODULE(_frne_c, m) {
             const double *grav = (const double *)grav_arr.data();
             const double *fext = (const double *)fext_arr.data();
 
-            robot->gravity->x = grav[0];
-            robot->gravity->y = grav[1];
-            robot->gravity->z = grav[2];
+            // gravity is given in the world frame; ne.c's recursion has
+            // always implicitly expected it pre-rotated into the root link
+            // frame and negated to the effective upward acceleration
+            // (previously done by hand in DHRobot.rne()/_copy_to_cpp(),
+            // duplicated and easy to get wrong -- see tech-debt.md /
+            // rne.md). base_rot_arr is self.base.R, row-major flattened;
+            // Rot's n/o/a are its columns.
+            const double *br = (const double *)base_rot_arr.data();
+            Rot base_R;
+            base_R.n = {br[0], br[3], br[6]};
+            base_R.o = {br[1], br[4], br[7]};
+            base_R.a = {br[2], br[5], br[8]};
+
+            Vect grav_world = {grav[0], grav[1], grav[2]};
+            Vect grav_root;
+            rot_trans_vect_mult(&grav_root, &base_R, &grav_world);
+            robot->gravity->x = -grav_root.x;
+            robot->gravity->y = -grav_root.y;
+            robot->gravity->z = -grav_root.z;
 
             // Allocate temporaries (newton_euler takes non-const)
             std::vector<double> qd_buf(qd, qd + nj);
@@ -171,7 +187,21 @@ NB_MODULE(_frne_c, m) {
 
             newton_euler(robot, tau.data(), qd_buf.data(), qdd_buf.data(),
                          fext_buf.data(), 1);
-            return tau;
+
+            // Base wrench: f(0)/n(0) are already computed by the backward
+            // recursion above (force/moment on link 0 due to the base) --
+            // just not previously exposed. Rotate out of link 0's own
+            // frame into the base/world frame, matching rne_python's
+            // wbase convention (Rm[0] @ f, Rm[0] @ n).
+            Link *l0 = &robot->links[0];
+            Vect f_base, n_base;
+            rot_vect_mult(&f_base, &l0->R, &l0->f);
+            rot_vect_mult(&n_base, &l0->R, &l0->n);
+            std::vector<double> wbase = {
+                f_base.x, f_base.y, f_base.z, n_base.x, n_base.y, n_base.z,
+            };
+
+            return {tau, wbase};
         });
 
     // ── delete ────────────────────────────────────────────────────────────────

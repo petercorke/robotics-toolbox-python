@@ -55,7 +55,9 @@ class DHRobot(Robot):
     :type base: SE3
     :param tool: Location of the tool
     :type tool: SE3
-    :param gravity: Gravitational acceleration vector
+    :param gravity: gravitational acceleration in the world frame,
+        downwards gravitational force is equivalent to robot base
+        acceleration upwards (positive)
     :type gravity: ndarray(3)
 
     A concrete superclass for arm type robots defined using Denavit-Hartenberg
@@ -1362,8 +1364,7 @@ class DHRobot(Robot):
 
         if self._frne is not None:
             delete(self._frne)
-        # we negate gravity here, since the C code has the sign wrong
-        self._frne = init(self.n, self.mdh, L, -self.gravity)
+        self._frne = init(self.n, self.mdh, L)
         self._frne_stale = False
 
     def delete_rne(self):
@@ -1387,9 +1388,11 @@ class DHRobot(Robot):
         :type qd: ndarray(n)
         :param qdd: The joint accelerations of the robot
         :type qdd: ndarray(n)
-        :param gravity: Gravitational acceleration to override robot's gravity
-            value
-        :type gravity: ndarray(6)
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); overrides robot's gravity
+            value if given
+        :type gravity: ndarray(3)
         :param fext: Specify wrench acting on the end-effector
                      :math:`W=[F_x F_y F_z M_x M_y M_z]`
         :type fext: ndarray(6)
@@ -1415,7 +1418,7 @@ class DHRobot(Robot):
         if self._frne is None or self._frne_stale:
             self._copy_to_cpp()
 
-        if self._frne is None or base_wrench:
+        if self._frne is None:
             return self.rne_python(
                 q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
             )
@@ -1441,10 +1444,12 @@ class DHRobot(Robot):
             gravity = self.gravity
         else:
             gravity = getvector(gravity, 3)
+        gravity = np.ascontiguousarray(gravity, dtype=float)
 
-        # The c function doesn't handle base rotation, so we need to hack the
-        # gravity vector instead
-        gravity = self.base.R.T @ gravity
+        # base rotation and the gravity sign convention are handled inside
+        # frne() itself now -- pass self.base.R through rather than
+        # pre-rotating/negating by hand (see tech-debt.md / rne.md)
+        base_rot = np.ascontiguousarray(self.base.R, dtype=float)
 
         if fext is None:
             fext = np.zeros(6)
@@ -1452,22 +1457,29 @@ class DHRobot(Robot):
             fext = getvector(fext, 6)
 
         tau = np.zeros((trajn, self.n))
+        wbase = np.zeros((trajn, 6))
 
         for i in range(trajn):
-            tau[i, :] = frne(
-                # we negate gravity here, since the C code has the sign wrong
+            tau[i, :], wbase[i, :] = frne(
                 self._frne,
                 q[i, :],
                 qd[i, :],
                 qdd[i, :],
-                -gravity,
+                gravity,
+                base_rot,
                 fext,
             )
 
-        if trajn == 1:
-            return tau[0, :]
+        if base_wrench:
+            if trajn == 1:
+                return tau[0, :], wbase[0, :]
+            else:
+                return tau, wbase
         else:
-            return tau
+            if trajn == 1:
+                return tau[0, :]
+            else:
+                return tau
 
     def rne_python(
         self,
@@ -1485,8 +1497,9 @@ class DHRobot(Robot):
         :param Q: Joint coordinates
         :param QD: Joint velocity
         :param QDD: Joint acceleration
-        :param gravity: gravitational acceleration, defaults to attribute
-            of self
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); defaults to attribute of self
         :type gravity: array_like(3), optional
         :param fext: end-effector wrench, defaults to None
         :type fext: array-like(6), optional
@@ -1498,17 +1511,17 @@ class DHRobot(Robot):
         :return: Joint force/torques
         :rtype: NumPy array
 
-        Recursive Newton-Euler for standard Denavit-Hartenberg notation.
+        Recursive Newton-Euler for standard or modified Denavit-Hartenberg notation.
 
-        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n is
-          the number of robot joints.  The result has shape (n,).
-        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (m,n) where n
-          is the number of robot joints and where m is the number of steps in
-          the joint trajectory.  The result has shape (m,n).
-        - ``rne_dh(p)`` where the input is a 1D array ``p`` = [q, qd, qdd] with
-          shape (3n,), and the result has shape (n,).
-        - ``rne_dh(p)`` where the input is a 2D array ``p`` = [q, qd, qdd] with
-          shape (m,3n) and the result has shape (m,n).
+        - ``rne_python(q, qd, qdd)`` where the arguments have shape (n,) where
+          n is the number of robot joints.  The result has shape (n,).
+        - ``rne_python(q, qd, qdd)`` where the arguments have shape (m,n)
+          where n is the number of robot joints and where m is the number of
+          steps in the joint trajectory.  The result has shape (m,n).
+        - ``rne_python(p)`` where the input is a 1D array ``p`` = [q, qd, qdd]
+          with shape (3n,), and the result has shape (n,).
+        - ``rne_python(p)`` where the input is a 2D array ``p`` = [q, qd, qdd]
+          with shape (m,3n) and the result has shape (m,n).
 
         .. note::
             - This is a pure Python implementation and slower than the .rne()
@@ -1568,7 +1581,10 @@ class DHRobot(Robot):
 
         tau = np.zeros((nk, n), dtype=dtype)
         if base_wrench:
-            wbase = np.zeros((nk, n), dtype=dtype)
+            # always 6 (a wrench), not n (joint count) -- previously used n,
+            # which happened to work for 6-DOF robots by coincidence and
+            # crashed with a shape mismatch for any other DOF count
+            wbase = np.zeros((nk, 6), dtype=dtype)
 
         for k in range(nk):
             # take the k'th row of data
@@ -1604,7 +1620,10 @@ class DHRobot(Robot):
                 Rb = t2r(base).T
                 w = Rb @ w
                 wd = Rb @ wd
-                vd = Rb @ gravity
+                # rotate the already-negated vd (was missing the negation --
+                # this branch used to compute +Rb @ gravity while the
+                # identity-base case above correctly used -gravity)
+                vd = Rb @ vd
 
             # ----------------  initialize some variables ----------------- #
 

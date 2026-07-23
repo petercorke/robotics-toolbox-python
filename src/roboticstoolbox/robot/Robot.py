@@ -1594,7 +1594,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param qd: Joint velocity
         :param qdd: Joint acceleration
         :param symbolic: If True, supports symbolic expressions
-        :param gravity: Gravitational acceleration, defaults to attribute of self
+        :param gravity: gravitational acceleration in the world frame,
+            downwards gravitational force is equivalent to robot base
+            acceleration upwards (positive); defaults to attribute of self
         :returns: Joint force/torques
 
         ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n is
@@ -1668,9 +1670,21 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             I[i] = I_int
 
         if gravity is None:
-            a_grav = -SpatialAcceleration(self.gravity)
-        else:  # pragma nocover
-            a_grav = -SpatialAcceleration(gravity)
+            gravity = self.gravity
+        # no dtype= here: gravity may contain SymPy symbols (test_symdyn),
+        # and forcing float would break that -- let numpy infer object dtype
+        gravity = np.asarray(gravity)
+        # gravity is defined in the world frame; rotate into the root link
+        # frame via the base orientation before negating to the effective
+        # upward acceleration RNE expects -- see rne_python()'s equivalent
+        # handling, and rne.md for the bug this fixes (previously ignored
+        # self.base entirely). Skipped for an identity base rather than
+        # multiplying by R.T unconditionally: with symbolic gravity
+        # components, an identity-matrix matmul still introduces spurious
+        # "1.0*" float literals into the resulting expression.
+        if not np.array_equal(self.base.R, np.eye(3)):
+            gravity = self.base.R.T @ gravity
+        a_grav = -SpatialAcceleration(gravity)
 
         # For the following, v, a, f, I, s, Xup are all lists of length n
         # where the indices correspond to the index of the group within

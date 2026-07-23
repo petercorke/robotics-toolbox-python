@@ -37,6 +37,7 @@ import sympy
 
 from roboticstoolbox.ets.fknm import _C_AVAILABLE as _FKNM_C_AVAILABLE
 from roboticstoolbox.robot.frne import _C_AVAILABLE as _FRNE_C_AVAILABLE
+from roboticstoolbox.models.DH.TwoLink import TwoLink
 
 import roboticstoolbox as rtb
 # roboticstoolbox/ets/ETS.py defines a class also called ETS, and
@@ -80,6 +81,13 @@ def _panda_ets():
 
 def _puma():
     return rtb.models.DH.Puma560()
+
+
+def _twolink():
+    # Standard-DH, non-identity base (SE3.Rx(pi/2)) -- unlike Puma560
+    # (identity base), this exercises the self.base rotation path in
+    # rne()/rne_python()/Robot.rne().
+    return rtb.models.DH.TwoLink()
 
 
 # ---------------------------------------------------------------------------
@@ -600,6 +608,136 @@ class TestRNEReference(unittest.TestCase):
         nt.assert_array_almost_equal(
             self.puma.rne(self.puma.qn, self.z, self.z, fext=[1, 2, 3, 1, 2, 3]),
             [0.642756, 29.0866, 4.70321, 2.82843, -1.97175, 3],
+            decimal=4,
+        )
+
+
+
+
+# ---------------------------------------------------------------------------
+# rne: C path vs rne_python on a rotated-base robot (TwoLink)
+#
+# Puma560 (used above) has an identity base, so it never exercised the
+# base-rotation handling in either path. TwoLink's base is SE3.Rx(pi/2) --
+# this is what regresses the bug where Robot.rne() ignored self.base
+# entirely and rne_python()'s rotated-base branch was missing a negation
+# (see rne.md / tech-debt.md).
+# ---------------------------------------------------------------------------
+
+@unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+class TestRNERotatedBaseFallback(unittest.TestCase):
+    """rne() C path agrees with rne_python() on TwoLink (rotated base)."""
+
+    def setUp(self):
+        self.robot = _twolink()
+        self.z = np.zeros(2)
+
+    def _compare(self, q, qd, qdd, **kwargs):
+        c = self.robot.rne(q, qd, qdd, **kwargs)
+        py = self.robot.rne_python(q, qd, qdd, **kwargs)
+        nt.assert_array_almost_equal(c, py, decimal=4)
+
+    def test_gravity_only(self):
+        self._compare([0.3, 0.5], self.z, self.z)
+
+    def test_other_pose(self):
+        self._compare([1.2, -0.7], self.z, self.z)
+
+
+class TestRNERotatedBaseReference(unittest.TestCase):
+    """rne() on TwoLink (rotated base) against hardcoded reference values.
+
+    Independently verified against the Lagrangian identity (ground truth
+    via numerical differentiation of gravitational potential energy,
+    convention-independent of either RNE implementation) -- see the
+    TwoLink section of rne.md.
+    """
+
+    def setUp(self):
+        self.robot = _twolink()
+        self.z = np.zeros(2)
+
+    def test_gravity_only(self):
+        nt.assert_array_almost_equal(
+            self.robot.rne([0.3, 0.5], self.z, self.z),
+            [-17.457309, -3.413863],
+            decimal=4,
+        )
+
+
+# ---------------------------------------------------------------------------
+# base_wrench: C path vs rne_python, on both an identity-base (Puma560) and
+# rotated-base (TwoLink) robot, with and without a wrench applied to the
+# end-effector.
+# ---------------------------------------------------------------------------
+
+@unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+class TestBaseWrenchFallback(unittest.TestCase):
+    """rne(base_wrench=True) C path agrees with rne_python()."""
+
+    # wrench applied to end-effector: [Fx, Fy, Fz, Mx, My, Mz]
+    FEXT = [0.5, 0.7, 0.7, 0.1, 0.2, 0.3]
+
+    def _compare(self, robot, q, fext=None):
+        n = robot.n
+        z = np.zeros(n)
+        tau_c, wbase_c = robot.rne(q, z, z, fext=fext, base_wrench=True)
+        tau_py, wbase_py = robot.rne_python(q, z, z, fext=fext, base_wrench=True)
+        nt.assert_array_almost_equal(tau_c, tau_py, decimal=4)
+        nt.assert_array_almost_equal(wbase_c, wbase_py, decimal=4)
+
+    def test_puma_no_fext(self):
+        puma = _puma()
+        self._compare(puma, puma.qn)
+
+    def test_puma_with_ee_wrench(self):
+        puma = _puma()
+        self._compare(puma, puma.qn, fext=self.FEXT)
+
+    def test_twolink_no_fext(self):
+        self._compare(_twolink(), [0.3, 0.5])
+
+    def test_twolink_with_ee_wrench(self):
+        self._compare(_twolink(), [0.3, 0.5], fext=self.FEXT)
+
+    def test_ee_wrench_changes_tau(self):
+        """Sanity check the comparison above isn't vacuously trivial: an
+        end-effector wrench should actually change the joint torques."""
+        puma = _puma()
+        z = np.zeros(puma.n)
+        tau_plain = puma.rne(puma.qn, z, z)
+        tau_wrench = puma.rne(puma.qn, z, z, fext=self.FEXT)
+        self.assertGreater(np.abs(tau_wrench - tau_plain).max(), 0.1)
+
+
+class TestBaseWrenchReference(unittest.TestCase):
+    """base_wrench against hardcoded reference values, independent of C."""
+
+    FEXT = [0.5, 0.7, 0.7, 0.1, 0.2, 0.3]
+
+    def test_puma_with_ee_wrench(self):
+        puma = _puma()
+        z = np.zeros(puma.n)
+        tau, wbase = puma.rne(puma.qn, z, z, fext=self.FEXT, base_wrench=True)
+        nt.assert_array_almost_equal(
+            tau,
+            [0.422447, 31.151777, 5.913429, 0.282843, -0.171747, 0.300000],
+            decimal=4,
+        )
+        nt.assert_array_almost_equal(
+            wbase,
+            [0.700000, 0.700000, 229.544500, -48.487576, -30.681496, 0.422447],
+            decimal=4,
+        )
+
+    def test_twolink_with_ee_wrench(self):
+        robot = _twolink()
+        z = np.zeros(robot.n)
+        tau, wbase = robot.rne([0.3, 0.5], z, z, fext=self.FEXT, base_wrench=True)
+        nt.assert_array_almost_equal(tau, [-15.603289, -2.413863], decimal=4)
+        nt.assert_array_almost_equal(
+            wbase,
+            [-0.153796, -18.753627, 0.700000, 0.635213, -0.945353, -15.603289],
             decimal=4,
         )
 
