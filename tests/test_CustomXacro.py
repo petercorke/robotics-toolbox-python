@@ -10,8 +10,11 @@ from roboticstoolbox import Robot
 from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 from spatialmath import SE3
 
+from tests import skip_on_pyodide
+
 
 class TestCustomXacro(unittest.TestCase):
+    @skip_on_pyodide
     def test_custom(self):
         class CustomPanda(Robot):
             def __init__(self):

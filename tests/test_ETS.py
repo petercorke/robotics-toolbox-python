@@ -20,6 +20,8 @@ from spatialmath.base import tr2jac
 import unittest
 import sympy
 
+from tests import skip_on_pyodide
+
 
 class TestETS(unittest.TestCase):
     def test_bad_arg(self):
@@ -1886,6 +1888,7 @@ class TestETS(unittest.TestCase):
         r = t_x + t_y + t_z + rx + ry + rz + a
         r.plot(q=q2, block=False, backend="pyplot")
 
+    @skip_on_pyodide
     def test_teach(self):
         # x = sympy.Symbol("x")
         q2 = np.array([0, 1, 2, 3, 4, 5])

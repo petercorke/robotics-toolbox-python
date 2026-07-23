@@ -16,6 +16,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests import skip_on_pyodide
+
 _TIMEOUT = 15
 
 
@@ -30,6 +32,7 @@ def _run(args: list[str], **kwargs) -> subprocess.CompletedProcess:
     )
 
 
+@skip_on_pyodide
 class TestRtbtool(unittest.TestCase):
     def test_help(self):
         result = _run(["roboticstoolbox.bin.rtbtool", "--help"])

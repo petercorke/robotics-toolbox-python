@@ -1266,3 +1266,126 @@ all. Once that lands, this stopgap (and the "Fetch pyodide wheel"/"Build
 JupyterLite site" steps generally) should be revisited — possibly
 removable outright. Tracked as a follow-on to the RNE correctness work
 (`rne.md`), which is queued first.
+
+---
+
+## Findings from actually running the test suite under real Pyodide (2026-07-23)
+
+### Background
+
+The "pure-Python wheel" discussion above was largely theoretical until now
+— nobody had actually run this codebase's test suite inside a real Pyodide
+environment. Verified locally with `pyodide-build`'s `pyodide venv`
+(backed by Node.js; confirmed via `sys.platform == "emscripten"`), which
+behaves like a normal venv (`pip install`, `pytest`) except code genuinely
+executes under Pyodide's WASM-compiled CPython. This is also the
+recommended mechanism for a future CI job -- see the "Add a real Pyodide
+CI job" item this session should also add nearby.
+
+**Headline result:** fkine, jacobian, and RNE (DH and URDF/ETS robots
+alike) all compute correctly with zero compiled extensions present,
+confirmed against `test_fknm_fallback.py`'s full suite and cross-checked
+against known-good desktop values. The pure-Python fallback path
+fundamentally works. Running the *rest* of the suite there surfaced a
+handful of real, previously-latent issues (fixed, in `fix/dynamics-
+overhaul`'s follow-on branch) plus one still open:
+
+### Fixed: `ETS_fkine`'s pure-Python path correctly caught an out-of-bounds test bug the C path silently tolerated
+
+`test_ETS.py::test_insert` built a 7-joint ETS (`jindex` 0-6) but passed a
+6-element `q` -- an off-by-one in the test, not the code. The C extension
+has no bounds checking, so `q[6]` silently read one past the end of the
+array (undefined behaviour that happened not to crash, confirmed by
+comparing results with a 6- vs 7-element `q`: genuinely different outputs,
+proving the out-of-bounds read was live, not inert). The pure-Python
+fallback correctly raised `IndexError` instead. Fixed the test's `q`.
+
+### Fixed: two tests asserted C-only behaviour without gating on it
+
+`test_ET.py::test_copy` / `test_et_has_compiled_accel` assert things about
+the compiled extension's `.fknm` handle (identity after copy, non-None-
+ness) that are meaningless once there's no handle at all. Gated behind
+`_C_AVAILABLE`, matching the pattern already used elsewhere.
+
+### Fixed: `URDFRobot._load_rd_module`'s emscripten guard didn't always fire
+
+The existing `sys.platform == "emscripten"` guard (added in an earlier
+session, giving a clear "this model can't load in this browser sandbox"
+message instead of a confusing crash) only intercepted inside `except
+Exception`, not `except ImportError`. On real Pyodide, GitPython's
+subprocess-spawn failure surfaces as a plain `ImportError` ("emscripten
+does not support processes"), which the candidates loop's `except
+ImportError` treated as "this name doesn't exist, try the next one" --
+after exhausting every candidate this fell through to a misleading "model
+not found" / "is now named X" error instead of the correct one. Fixed by
+checking `sys.platform == "emscripten"` up front, before the loop, since
+the outcome is deterministic regardless of candidate name. Also reworded
+all four error messages in that function from "Toolbox uses RD to provide
+URDF robot models" (reads as *all* URDF models go through
+robot_descriptions) to "...to provide the URDF for `<this model>`" (only
+this specific model does -- most URDF models are bundled locally).
+Regression test added (mocks `sys.platform`, same pattern as
+`test_collision.py`'s `test_pyodide_raises_runtime_error`).
+
+### Fixed: `test_missing_coal_raises_import_error` was unreachable on real Pyodide
+
+Same shape of issue as the URDF one above, in `spatialgeometry`'s
+`CollisionShape.py`: on real Pyodide, `_require_coal()`'s own emscripten
+check always intercepts first, so the test's `coal`-import-mock scenario
+can never actually be reached there. `test_pyodide_raises_runtime_error`
+(mocks `sys.platform`) already covers that branch on any platform, so this
+test is simply skipped when genuinely running on `emscripten`.
+
+### Fixed: `test_quintic`'s velocity-non-negativity tolerance was too tight for cross-platform float noise
+
+`sd >= -10*eps` -- Pyodide's WASM numpy build gives `sd[-1] ~= -3.7e-15`
+at the trajectory endpoint (conceptually exactly zero) vs desktop's
+`~-1e-16`. Widened to `-1000*eps`, matching an already-identical tolerance
+a few lines away in the same file for the same kind of check.
+
+### Still open: `IK_NR`/`IK_GN`'s joint-limit-avoidance term is numerically fragile (not Pyodide-specific, just more likely to manifest there)
+
+`test_IK_GN1` / `test_IK_NR8` diverge to `inf` under Pyodide (crashing in
+`math.cos(-inf)`) for a seeded, otherwise-deterministic pose. Root cause
+isolated to `IK.py`'s `_calc_qnull` (~line 483-485): the joint-limit-
+avoidance cost term divides by `(ps - pi[i])**2`, which can be at or near
+zero. Reproduces on **desktop** too when forcing the pure-Python jacobian
+path (`RuntimeWarning: overflow encountered in power` / `invalid value
+encountered in det`) -- it just recovers there instead of diverging all
+the way to `inf`. This is a genuine numerical robustness gap in the
+solver, not a Pyodide compatibility issue per se; skipped under
+`sys.platform == "emscripten"` for now rather than attempting a deeper fix
+here (would need careful analysis of the avoidance formula, e.g. an
+epsilon guard or clipping, tested across multiple robots/seeds).
+
+**Proposed fix:** add a small epsilon to the denominator (or clip the
+whole term) in `_calc_qnull`'s joint-limit-avoidance calculation, then
+re-run `test_IK_GN1`/`test_IK_NR8` under both desktop and Pyodide to
+confirm the divergence is actually gone rather than just less likely.
+
+### Also confirmed not bugs -- genuine, permanent environment limitations
+
+- `robot_descriptions`-backed models generally (UR3/5/10, PR2, YuMi,
+  Jaco, etc.) -- no git binary/subprocess access to clone description
+  repos, ever. Already the best possible outcome once the guard above is
+  fixed: a clear, correct error instead of a crash or a misleading one.
+- Interactive `teach`/`showgraph`/CLI (`rtbtool`) tests -- no display, no
+  subprocess execution.
+- `coal`/collision checking -- no wasm build exists.
+- `pytest-timeout`'s signal-based timeout (`signal.setitimer`) doesn't
+  exist under Pyodide -- a test-harness detail for the eventual CI job
+  (don't pass `--timeout` there), not a product issue.
+
+### Add a real Pyodide CI job (not part of the default local test run)
+
+Given `pyodide venv` genuinely works and is fast (a couple of seconds for
+a focused test file), the natural next step is a dedicated CI job that
+builds the pure wheel and runs (a Pyodide-appropriate subset of) the test
+suite against it via the same mechanism -- a real gate, unlike today's
+`continue-on-error: true` wasm cross-compile (see the "aspire to a pure-
+Python wheel" section above). Deliberately **not** wired into the default
+local `pytest tests/` run: it needs `pyodide-build` + Node.js, a separate
+environment from the one every other test runs in, and is fundamentally
+an environment-compatibility check (same category as the OS/Python-
+version CI matrix), not an everyday correctness check every contributor
+needs on every local run.

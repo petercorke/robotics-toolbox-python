@@ -9,7 +9,7 @@ import unittest
 import os
 import spatialgeometry as sg
 from spatialmath.base import tr2jac
-from tests import skip_no_collision_checking
+from tests import skip_no_collision_checking, skip_on_pyodide
 
 # from spatialmath import SE3
 
@@ -631,6 +631,7 @@ class TestRobot(unittest.TestCase):
             )
         self.assertEqual(r.n, 4)
 
+    @skip_on_pyodide
     def test_showgraph(self):
         r = rtb.models.Panda()
 
@@ -690,6 +691,7 @@ class TestRobot(unittest.TestCase):
 
         r.fkine_all(r.q)
 
+    @skip_on_pyodide
     def test_fkine_all2(self):
         r = rtb.models.YuMi()
 

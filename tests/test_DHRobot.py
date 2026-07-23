@@ -11,6 +11,8 @@ import unittest
 import math
 import pytest
 
+from tests import skip_on_pyodide
+
 
 class TestDHRobot(unittest.TestCase):
     def test_DHRobot(self):
@@ -1407,11 +1409,13 @@ class TestDHRobot(unittest.TestCase):
     #     nt.assert_array_almost_equal(q2[0, :], qres, decimal=4)
     #     nt.assert_array_almost_equal(q2[1, :], qres, decimal=4)
 
+    @skip_on_pyodide
     def test_teach(self):
         panda = rp.models.DH.Panda()
         e = panda.teach(panda.q, block=False)
         e.close()
 
+    @skip_on_pyodide
     def test_teach_withq(self):
         panda = rp.models.DH.Panda()
         e = panda.teach(q=panda.qr, block=False)
@@ -1422,6 +1426,7 @@ class TestDHRobot(unittest.TestCase):
         e = panda.plot(panda.qr, block=False, backend="pyplot")
         e.close()
 
+    @skip_on_pyodide
     def test_teach_basic(self):
         l0 = rp.DHLink(d=2)
         r0 = rp.DHRobot([l0, l0.copy()])

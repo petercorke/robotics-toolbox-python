@@ -63,6 +63,13 @@ class TestEnvironmentGuards:
             with pytest.raises(RuntimeError, match="browser"):
                 _mod._require_coal()
 
+    @pytest.mark.skipif(
+        sys.platform == "emscripten",
+        reason="unreachable on real Pyodide: _require_coal()'s emscripten "
+        "check always intercepts first, regardless of coal's import "
+        "state -- see test_pyodide_raises_runtime_error above, which "
+        "covers that branch via mocking on any platform",
+    )
     def test_missing_coal_raises_import_error(self):
         _reset_coal()
         with patch.dict(sys.modules, {"coal": None}):

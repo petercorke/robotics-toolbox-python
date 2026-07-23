@@ -14,7 +14,7 @@ import unittest
 import spatialmath as sm
 import spatialgeometry as gm
 from math import pi, sin, cos
-from tests import skip_no_collision_checking
+from tests import skip_no_collision_checking, skip_on_pyodide
 
 try:
     from sympy import symbols
@@ -278,6 +278,7 @@ class TestERobot2(unittest.TestCase):
         e = robot.plot(robot.qz, block=False, name=True)
         e.close()
 
+    @skip_on_pyodide
     def test_teach(self):
         robot = rtb.models.ETS.Planar2()
         e = robot.teach(robot.qz, block=False)

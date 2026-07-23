@@ -19,6 +19,8 @@ from spatialmath import SE2
 import unittest
 import sympy
 
+from tests import skip_on_pyodide
+
 
 class TestETS2(unittest.TestCase):
     def test_bad_arg(self):
@@ -461,6 +463,7 @@ class TestETS2(unittest.TestCase):
         r = t_x + t_y + rz + a
         r.plot(q=q2, block=False)
 
+    @skip_on_pyodide
     def test_teach(self):
         x = sympy.Symbol("x")
         q2 = np.array([0, 1, 2])

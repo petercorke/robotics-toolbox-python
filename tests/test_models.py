@@ -7,6 +7,8 @@ import roboticstoolbox as rp
 import unittest
 import numpy.testing as nt
 
+from tests import skip_on_pyodide
+
 
 # @unittest.skip("BUG in .models()")
 class TestModels(unittest.TestCase):
@@ -41,16 +43,19 @@ class TestModels(unittest.TestCase):
         panda.qr
         panda.qz
 
+    @skip_on_pyodide
     def test_UR3(self):
         ur = rp.models.UR3()
         ur.qr
         ur.qz
 
+    @skip_on_pyodide
     def test_UR5(self):
         ur = rp.models.UR5()
         ur.qr
         ur.qz
 
+    @skip_on_pyodide
     def test_UR10(self):
         ur = rp.models.UR10()
         ur.qr
@@ -101,6 +106,7 @@ class TestModels(unittest.TestCase):
         r.qr
         r.qz
 
+    @skip_on_pyodide
     def test_Jaco(self):
         r = rp.models.Jaco()
         r.qr
@@ -142,6 +148,7 @@ class TestModels(unittest.TestCase):
         r = rp.models.DH.Cobra600()
         r.qz
 
+    @skip_on_pyodide
     def test_pr2(self):
         rp.models.PR2()
 
@@ -163,6 +170,7 @@ class TestModelSmoke(unittest.TestCase):
     # failure unexpectedly started passing).
     EXPECTED_FAILURES = set()
 
+    @skip_on_pyodide
     def test_all_models_construct(self):
         unexpected_failures = []
         unexpected_passes = []

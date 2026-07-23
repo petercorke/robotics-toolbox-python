@@ -10,11 +10,39 @@ from roboticstoolbox import Link, ETS, ET, Robot
 from spatialmath import SE3
 import unittest
 from copy import deepcopy
+from unittest.mock import patch
+import sys
 
 from roboticstoolbox.robot.Robot import BaseRobot
+from tests import skip_on_pyodide
+
+
+class TestLoadRDModulePyodideGuard(unittest.TestCase):
+    """_load_rd_module's sys.platform == "emscripten" check must fire
+    before the candidates loop, not rely on catching whatever exception
+    type GitPython happens to raise in that sandbox. Confirmed on real
+    Pyodide (pyodide-build's `pyodide venv`) that a git-clone failure there
+    surfaces as a plain ImportError ("emscripten does not support
+    processes") -- indistinguishable, to the loop's `except ImportError`,
+    from "this candidate name doesn't exist". Without the up-front check,
+    every candidate name "fails to import" this way and the loop falls
+    through to a misleading "model not found"/"is now named X" error
+    instead of the correct, actionable one. Mocked here (rather than
+    requiring a real Pyodide environment to test) so this runs on every
+    platform, same pattern as test_collision.py's
+    test_pyodide_raises_runtime_error.
+    """
+
+    def test_emscripten_raises_before_candidates_loop(self):
+        from roboticstoolbox.models.URDF.URDFRobot import _load_rd_module
+
+        with patch.object(sys, "platform", "emscripten"):
+            with self.assertRaisesRegex(ValueError, "browser"):
+                _load_rd_module("panda")
 
 
 class TestBaseRobot(unittest.TestCase):
+    @skip_on_pyodide
     def test_init(self):
         from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 
@@ -90,6 +118,7 @@ class TestBaseRobot(unittest.TestCase):
         with self.assertRaises(TypeError):
             BaseRobot(links=links)  # type: ignore
 
+    @skip_on_pyodide
     def test_init9(self):
 
         robot = rtb.models.Panda()
@@ -353,6 +382,7 @@ class TestBaseRobot(unittest.TestCase):
 
         self.assertIsInstance(panda.manufacturer, str)
 
+    @skip_on_pyodide
     def test_str(self):
         panda = rtb.models.Panda()
         pr2 = rtb.models.PR2()
@@ -485,6 +515,7 @@ class TestBaseRobot(unittest.TestCase):
         with self.assertRaises(TypeError):
             panda._getlink(2.0)
 
+    @skip_on_pyodide
     def test_limits(self):
         r = rtb.models.YuMi()
 
@@ -524,6 +555,7 @@ class TestBaseRobot(unittest.TestCase):
 
         self.assertEqual(ets.n, 0)
 
+    @skip_on_pyodide
     def test_ets_gripper2(self):
         r = rtb.models.YuMi()
 
@@ -607,6 +639,7 @@ class TestBaseRobot(unittest.TestCase):
 
         r.hierarchy()
 
+    @skip_on_pyodide
     def test_segments2(self):
         r = rtb.models.YuMi()
 
@@ -622,6 +655,7 @@ class TestBaseRobot(unittest.TestCase):
         # swift is optional; default backend falls back to PyPlot if unavailable.
         self.assertIn(type(be).__name__, ["Swift", "PyPlot"])
 
+    @skip_on_pyodide
     def test_teach(self):
         robot = rtb.models.ETS.Panda()
         e = robot.teach(q=None, block=False, vellipse=True, fellipse=True)
