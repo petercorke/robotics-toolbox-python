@@ -63,7 +63,6 @@ jobs:
     name: Build Pyodide (wasm32) wheel
     needs: verify_version
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
 
@@ -74,6 +73,13 @@ jobs:
           pip3 show cibuildwheel 2>/dev/null || echo "cibuildwheel not installed locally (normal)"
           echo "PYODIDE_VERSION=${{ vars.PYODIDE_VERSION || '0.27.5' }}"
 
+      # A genuine pure-Python wheel (py3-none-any), not a wasm cross-compile
+      # of the C extensions -- see CMakeLists.txt / pyproject.toml's
+      # [tool.cibuildwheel.pyodide]. cibuildwheel's pyodide platform is
+      # still what sets CMAKE_SYSTEM_NAME=Emscripten (so CMakeLists.txt
+      # knows to skip the compiled targets) and installs the matching
+      # Pyodide cross-build environment, even though nothing actually gets
+      # compiled -- it is real packaging work, not a no-op job.
       - name: Build Pyodide wheel
         uses: pypa/cibuildwheel@v3.4.1
         env:
@@ -139,30 +145,9 @@ jobs:
           name: sdist
           path: dist
 
-      # Exclude Pyodide wheels — PyPI rejects the pyodide_* platform tag.
-      # They are uploaded as release assets in the next step instead.
-      - name: Remove Pyodide wheels from PyPI upload set
-        run: rm -f dist/*pyodide*.whl
-
+      # The Pyodide wheel is now a genuine py3-none-any (see build_pyodide
+      # above) -- PyPI accepts it like any other pure-Python wheel, no
+      # special-casing or separate GitHub-release-asset upload needed.
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip_existing: true
-
-  upload_pyodide_asset:
-    name: Attach Pyodide wheel to GitHub release
-    needs: build_pyodide
-    if: github.event_name == 'release' && needs.build_pyodide.result == 'success'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: wheels-pyodide
-          path: pyodide-dist
-
-      - name: Upload Pyodide wheel as release asset
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: pyodide-dist/*.whl

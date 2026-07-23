@@ -73,6 +73,60 @@ jobs:
       - name: Test
         run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
 
+  test-pyodide:
+    # Runs the test suite for real inside Pyodide (pyodide-build's `pyodide
+    # venv`, backed by Node.js -- confirmed via sys.platform == "emscripten"),
+    # not just on the assumption that the pure-Python fallback path is
+    # correct because desktop coverage passes. This is what actually caught
+    # the real bugs logged in tech-debt.md's "Findings from actually
+    # running the test suite under real Pyodide" section. Deliberately its
+    # own CI-only job, not part of the default local `pytest tests/` run:
+    # needs pyodide-build + Node.js, a separate environment from every
+    # other job here, and is fundamentally an environment-compatibility
+    # check (same category as the os/python-version matrix in the `test`
+    # job below), not an everyday correctness check every contributor
+    # needs locally.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Create a Pyodide virtual environment
+        run: |
+          pip install pyodide-build
+          pyodide venv .venv-pyodide
+
+      - name: Install roboticstoolbox and test dependencies into it
+        # Not `.[dev]`: several dev extras (coal, swift-sim) have no wasm
+        # build and never will -- collision-checking/Swift are correctly
+        # unavailable in the browser (see tech-debt.md), not something to
+        # chase here. Just the package itself plus what pytest needs.
+        #
+        # SKBUILD_WHEEL_PLATLIB=false: a plain `pip install .` here doesn't
+        # go through cibuildwheel, so it doesn't pick up
+        # [tool.cibuildwheel.pyodide]'s environment setting -- the wheel
+        # it builds still has zero compiled extensions (CMakeLists.txt's
+        # Emscripten check doesn't depend on this var), just the wrong tag
+        # without it. Set explicitly here so this job builds and tests the
+        # exact same artifact shape that actually gets published.
+        env:
+          SKBUILD_WHEEL_PLATLIB: "false"
+        run: |
+          source .venv-pyodide/bin/activate
+          pip install .
+          pip install pytest pytest-timeout sympy
+
+      - name: Test under real Pyodide
+        # No --timeout: pytest-timeout's default signal-based method needs
+        # signal.setitimer, unavailable under Pyodide (no real OS signals).
+        run: |
+          source .venv-pyodide/bin/activate
+          pytest tests/ --ignore=tests/test_blocks.py --ignore=tests/test_swift.py -q
+
   coverage:
     needs: [test-core, test]
     runs-on: ubuntu-latest
@@ -129,36 +183,31 @@ jobs:
           cd docs && make SPHINXOPTS="--keep-going" html
           touch build/html/.nojekyll
 
-      - name: Fetch pyodide wheel for JupyterLite
-        # A plain `pip wheel`/`build` here would produce a native
-        # macOS/Linux wheel with the compiled _fknm_c/_frne_c extensions --
-        # useless in Pyodide (WASM). release.yml already cross-compiles a
-        # genuine wasm32 wheel via cibuildwheel (CIBW_PLATFORM=pyodide) and
-        # attaches it to each GitHub Release (PyPI rejects the pyodide_*
-        # platform tag), so reuse that rather than rebuilding here. This
-        # means the "Try it Now" experience tracks the latest release, not
-        # bleeding-edge main -- deliberate, since a full Pyodide/Emscripten
-        # rebuild on every docs push would be slow.
+      - name: Build pyodide wheel for JupyterLite
+        # A genuine pure-Python wheel (py3-none-any), not a wasm
+        # cross-compile of the C extensions -- see CMakeLists.txt /
+        # pyproject.toml's [tool.cibuildwheel.pyodide]. Built fresh from
+        # this checkout rather than fetched from the last GitHub release:
+        # cheap now that there's no Emscripten compilation involved (just
+        # packaging), so "Try it Now" tracks this branch/PR directly. This
+        # also retires the old jupyterlite_pyodide_kernel piplite
+        # multiple-wheel-overwrite bug workaround entirely (see
+        # tech-debt.md) -- there is only ever one wheel to fetch/build now,
+        # and no CPython-version-specific wasm ABI to match, so nothing
+        # to pin against.
         #
-        # STOPGAP (see tech-debt.md): only fetch the cp312 wheel, matching
-        # jupyterlite-pyodide-kernel==0.6.1 below. A release can carry wasm
-        # wheels for more than one CPython version (cibuildwheel's pyodide
-        # platform builds one per supported interpreter), and
-        # jupyterlite-pyodide-kernel's all.json generator keys entries by
-        # (name, version) and *overwrites* rather than accumulates, so
-        # fetching more than one wheel for the same package+version
-        # silently drops all but the alphabetically-last from the piplite
-        # index -- no build error, just a runtime "can't find a pure
-        # Python 3 wheel" in the browser. Confirmed still present in
-        # jupyterlite_pyodide_kernel 0.7.1 (latest as of 2026-07-21), not
-        # just 0.6.1 -- an upstream bug to route around, not a version to
-        # bump past. Intended to be removed once the pure-Python wasm
-        # wheel work lands and this whole fetch step goes away.
+        # SKBUILD_WHEEL_PLATLIB=false: `pyodide build` invoked directly
+        # (not through the cibuildwheel action) doesn't read
+        # [tool.cibuildwheel.pyodide]'s environment setting -- that table
+        # is cibuildwheel-specific config. Set explicitly here so this
+        # produces the same py3-none-any tag release.yml's build_pyodide
+        # job does, not a correctly-empty-but-wrongly-tagged wheel.
         env:
-          GH_TOKEN: ${{ github.token }}
+          SKBUILD_WHEEL_PLATLIB: "false"
         run: |
+          pip install pyodide-build
           mkdir -p docs/lite/pypi
-          gh release download --repo "$GITHUB_REPOSITORY" --pattern '*cp312*pyodide*' --dir docs/lite/pypi --clobber
+          pyodide build -o docs/lite/pypi
 
       - name: Sync notebooks into JupyterLite content
         # Copies *.ipynb plus any local asset directories (e.g.
@@ -201,14 +250,14 @@ jobs:
           PY
 
       - name: Build JupyterLite site
-        # jupyterlite-pyodide-kernel is pinned deliberately: newer versions
-        # bundle a newer Pyodide runtime than the cp312 wasm wheel attached
-        # to releases targets, which manifests as a silent hang in the
-        # browser (no error, just a kernel that never responds) rather than
-        # a build-time failure. See toolbox-infrastructure.md for the full
-        # version-skew story before bumping this.
+        # jupyterlite-pyodide-kernel no longer needs pinning: the old
+        # version-skew hazard (a compiled wasm wheel's ABI tied to one
+        # specific Pyodide runtime, silently hanging if the kernel bundled
+        # a newer/older one) doesn't apply to a pure-Python wheel -- it
+        # has no ABI to match at all. See toolbox-infrastructure.md for
+        # the historical version-skew story.
         run: |
-          pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server
+          pip install jupyterlite-core jupyterlite-pyodide-kernel jupyter-server
           cd docs/lite && jupyter lite build --output-dir ../build/html/lite
 
       - name: Upload Pages artifact
