@@ -743,6 +743,167 @@ class TestBaseWrenchReference(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
+# TwoLink(mdh=True) vs TwoLink(mdh=False): two different DH parameterizations
+# of the *same physical robot* -- this is what actually caught the bug where
+# TwoLink's mdh=True variant just copied the standard-DH `a`/`alpha` values
+# onto RevoluteMDH links, which is not how the DH<->MDH conversion works (it
+# shifts `a`/`alpha` to the previous link index). A single hand-checked pose
+# (qn = [pi/6, -pi/6]) happened to agree by coincidence -- qn is symmetric
+# (q2 = -q1) -- while every other pose diverged by up to ~0.7 in fkine.
+# Random poses, not just qn, are the point of this test.
+#
+# This pairing also gives a genuinely independent cross-check of the DH/MDH
+# convention finding (issue 6, rne.md). Originally: rne_python() trusted
+# only for standard DH, Robot.rne() only for modified DH. Exercising
+# rne_python() on this MDH+rotated-base pair (apparently never hit before)
+# found and fixed three real bugs in its MDH branch (see
+# test_mdh_rne_python_now_agrees) -- rne_python() is now correct for both
+# conventions. Robot.rne() (the separate ETS/Featherstone implementation) is
+# joint-last-compliant, and thus correct, for mdh=True DHRobot instances
+# (test_robot_rne_on_mdh_variant_matches_standard_dh_rne_python); for
+# mdh=False it now asserts rather than silently returning a wrong answer
+# (test_robot_rne_rejects_standard_dh) -- see rne.md/tech-debt.md.
+# ---------------------------------------------------------------------------
+
+class TestTwoLinkDHMDHEquivalence(unittest.TestCase):
+    """TwoLink(mdh=False) and TwoLink(mdh=True) are the same physical robot."""
+
+    def setUp(self):
+        self.std = _twolink()
+        self.mdh = TwoLink(mdh=True)
+        self.poses = [
+            np.array([0.3, 0.5]),
+            np.array([1.2, -0.7]),
+            np.array([0.2, 0.3]),
+        ]
+
+    def test_fkine_agrees(self):
+        for q in self.poses:
+            nt.assert_array_almost_equal(
+                self.std.fkine(q).A, self.mdh.fkine(q).A, decimal=10
+            )
+
+    def test_fkine_agrees_random_poses(self):
+        rng = np.random.default_rng(0)
+        for _ in range(50):
+            q = rng.uniform(-np.pi, np.pi, 2)
+            nt.assert_array_almost_equal(
+                self.std.fkine(q).A, self.mdh.fkine(q).A, decimal=10
+            )
+
+    def test_rne_agrees_between_parameterizations(self):
+        """rne() (the single ne.c implementation, dispatched per-robot via
+        its own dhtype: STANDARD vs MODIFIED) gives matching torques for
+        both parameterizations of the same physical robot -- evidence that
+        ne.c's two dhtype branches are mutually consistent, not that
+        there are two separate C implementations to compare."""
+        z = np.zeros(2)
+        for q in self.poses:
+            tau_std_py = self.std.rne_python(q, z, z)
+            tau_std = self.std.rne(q, z, z)
+            tau_mdh = self.mdh.rne(q, z, z)
+            nt.assert_array_almost_equal(tau_std_py, tau_std, decimal=4)
+            nt.assert_array_almost_equal(tau_std, tau_mdh, decimal=4)
+
+    def test_robot_rne_on_mdh_variant_matches_standard_dh_rne_python(self):
+        """The core rne.md finding, checked against a real matched pair
+        rather than the synthetic 1-link case: Robot.rne() (trusted for
+        MDH) applied to the MDH parameterization must agree with
+        rne_python() (trusted for standard DH) applied to the standard-DH
+        parameterization of the same physical robot."""
+        from roboticstoolbox.robot.Robot import Robot as RobotBase
+
+        z = np.zeros(2)
+        for q in self.poses:
+            tau_std_py = self.std.rne_python(q, z, z)
+            tau_mdh_base = RobotBase.rne(self.mdh, q, z, z)
+            nt.assert_array_almost_equal(tau_std_py, tau_mdh_base, decimal=4)
+
+    def test_mdh_rne_python_now_agrees(self):
+        """rne_python() on the MDH parameterization -- exercising this
+        (mdh=True + a non-identity base) found three real bugs, none of
+        them issue 6:
+
+        1. Base rotation applied to gravity twice: once (correctly)
+           before the recursion loop, and again via Tj = base @ Tj for
+           the first link -- double-counted, not just wrong.
+        2. Missing parentheses in the MDH revolute case's linear
+           acceleration formula: `Rt @ cross(wd, pstar) + cross(w,
+           cross(w, pstar)) + vd` should distribute Rt over the whole
+           sum, per ne.c's MODIFIED-DH branch (rot_trans_vect_mult
+           applied to the full bracket) -- the prismatic case right
+           below it already had this right.
+        3. The backward recursion's moment equation used `pstar` (the
+           *next* link's offset) where it should use `r` (this link's
+           own CoM offset) for the this-link-force-to-torque term --
+           ne.c's equivalent is `R_COG(j) x F`, not `PSTAR(j+1) x F`.
+
+        With all three fixed, rne_python() is now correct for MDH too,
+        not just standard DH -- see test_robot_rne_rejects_standard_dh
+        for the one implementation (Robot.rne(), the ETS/Featherstone
+        one, unrelated code) that still can't handle standard DH (by
+        design, guarded, not silently wrong).
+        """
+        z = np.zeros(2)
+        for q in self.poses:
+            truth = self.std.rne_python(q, z, z)
+            mdh_py = self.mdh.rne_python(q, z, z)
+            nt.assert_array_almost_equal(mdh_py, truth, decimal=4)
+
+
+# ---------------------------------------------------------------------------
+# Actuator dynamics (Jm, G, B, Tc) and non-zero link inertia: C vs
+# rne_python() consistency on TwoLink, for both DH conventions. TwoLink is
+# zero for all of these by default (per its own docstring: "Motor inertia
+# is 0 ... Viscous and Coulomb friction is 0", link inertias also 0 unless
+# inertia=True) -- so nothing before this exercised the actuator-dynamics
+# terms (ne.c:485-491 / Link.friction()) or a non-zero inertia tensor
+# through rne() at all.
+# ---------------------------------------------------------------------------
+
+@unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+class TestTwoLinkActuatorDynamics(unittest.TestCase):
+    """rne() (C) vs rne_python() with non-zero Jm/G/B/Tc and link inertia."""
+
+    def _with_actuator_dynamics(self, robot):
+        for i, link in enumerate(robot.links):
+            link.Jm = 0.05 * (i + 1)
+            link.G = 100.0 * (i + 1)
+            link.B = 0.01 * (i + 1)
+            link.Tc = [0.3 * (i + 1), -0.2 * (i + 1)]
+        return robot
+
+    def setUp(self):
+        self.std = self._with_actuator_dynamics(TwoLink(mdh=False, inertia=True))
+        self.mdh = self._with_actuator_dynamics(TwoLink(mdh=True, inertia=True))
+        # non-zero qd/qdd: needed to actually exercise B/Tc (velocity-
+        # dependent) and Jm (acceleration-dependent) -- the gravity-only
+        # (qd=qdd=0) tests elsewhere in this file wouldn't touch them
+        self.q = np.array([0.3, 0.5])
+        self.qd = np.array([0.4, -0.6])
+        self.qdd = np.array([0.2, 0.7])
+
+    def test_std_dh_c_matches_python(self):
+        tau_c = self.std.rne(self.q, self.qd, self.qdd)
+        tau_py = self.std.rne_python(self.q, self.qd, self.qdd)
+        nt.assert_array_almost_equal(tau_c, tau_py, decimal=4)
+
+    def test_mdh_c_matches_python(self):
+        tau_c = self.mdh.rne(self.q, self.qd, self.qdd)
+        tau_py = self.mdh.rne_python(self.q, self.qd, self.qdd)
+        nt.assert_array_almost_equal(tau_c, tau_py, decimal=4)
+
+    def test_inertia_and_actuator_dynamics_actually_matter(self):
+        """Sanity check the comparisons above aren't vacuous: non-zero
+        inertia/Jm/G/B/Tc must actually change the result relative to the
+        all-zero-by-default TwoLink()."""
+        bare = TwoLink(mdh=False)
+        tau_bare = bare.rne(self.q, self.qd, self.qdd)
+        tau_with = self.std.rne(self.q, self.qd, self.qdd)
+        self.assertGreater(np.abs(tau_with - tau_bare).max(), 0.1)
+
+
+# ---------------------------------------------------------------------------
 # Path verification via timing
 # ---------------------------------------------------------------------------
 

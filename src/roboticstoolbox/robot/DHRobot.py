@@ -1645,10 +1645,14 @@ class DHRobot(Robot):
                 alpha = link.alpha
                 if self.mdh:
                     pstar = np.r_[link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
-                    if j == 0:
-                        if base:
-                            Tj = base @ Tj
-                            pstar = base @ pstar
+                    # NOT baking base into Tj/pstar here (this block used to,
+                    # before being removed): base rotation is already applied
+                    # exactly once, to gravity/vd before this loop starts.
+                    # Also folding it into Rm[0] here double-counted it --
+                    # confirmed by tracing TwoLink(mdh=True)'s gravity-only
+                    # case, where vd ended up rotated by the base twice.
+                    # ne.c matches this: it only ever rotates gravity by the
+                    # base (in the nanobind glue), never any per-link R.
                 else:
                     pstar = np.r_[link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
 
@@ -1670,7 +1674,14 @@ class DHRobot(Robot):
                         # revolute axis
                         w_ = Rt @ w + z0 * qd_k[j]
                         wd_ = Rt @ wd + z0 * qdd_k[j] + _cross(Rt @ w, z0 * qd_k[j])
-                        vd_ = Rt @ _cross(wd, pstar) + _cross(w, _cross(w, pstar)) + vd
+                        # Rt must distribute over the whole bracket, not just
+                        # the first term -- matches ne.c's MODIFIED-DH branch,
+                        # which does rot_trans_vect_mult() (= Rt @ ...) on the
+                        # full OMEGADOT(j-1)xPSTAR + OMEGA(j-1)x(OMEGA(j-1)xPSTAR)
+                        # + ACC(j-1) sum. The prismatic case below already has
+                        # this right; this revolute case was missing the
+                        # parentheses (and therefore wrong for any MDH robot).
+                        vd_ = Rt @ (_cross(wd, pstar) + _cross(w, _cross(w, pstar)) + vd)
                     else:
                         # prismatic axis
                         w_ = Rt @ w
@@ -1741,7 +1752,12 @@ class DHRobot(Robot):
                     nn_ = (
                         R @ nn
                         + _cross(pstar, R @ f)
-                        + _cross(pstar, Fm[:, j])
+                        # this link's own force acts through its own CoM
+                        # offset r, not pstar (which is the offset to the
+                        # *next* link's origin) -- matches ne.c's MODIFIED
+                        # branch: vect_cross(&t2, R_COG(j), &F) uses R_COG(j)
+                        # (this link's r), not PSTAR(j+1)
+                        + _cross(r, Fm[:, j])
                         + Nm[:, j]
                     )
                     f = f_
