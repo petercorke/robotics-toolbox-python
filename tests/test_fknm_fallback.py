@@ -24,6 +24,7 @@ Two tiers of test here, and they check different things:
 Robot used: Franka Panda (7-DOF) for ETS functions; Puma560 (6-DOF DH) for rne.
 """
 
+import math
 import os
 import sys
 import timeit
@@ -980,6 +981,114 @@ class TestRobotRneInertiaTensor(unittest.TestCase):
             truth = robot.rne_python(q, qd, qdd)
             result = RobotBase.rne(robot, q, qd, qdd)
             nt.assert_array_almost_equal(result, truth, decimal=6)
+
+
+def _spong_two_link_tau(
+    q1, q2, q1_dot, q2_dot, q1_ddot, q2_ddot,
+    m1, m2, l1, l2, lc1, lc2, I1, I2, g=9.81,
+):
+    """Analytical inverse dynamics for a planar 2R elbow manipulator.
+
+    Equation (7.87) of Spong, Hutchinson, Vidyasagar, "Robot Modeling and
+    Control", Wiley 2006 -- an independent, closed-form ground truth. Shares
+    no code with rne_python()/rne()/Robot.rne(), unlike every other check in
+    this file, which only ever compares those implementations against each
+    other and so cannot catch a bug they all share.
+    """
+    h = -m2 * l1 * lc2 * math.sin(q2)
+    d11 = m1 * (lc1**2) + m2 * (l1**2 + lc2**2 + 2 * l1 * lc2 * math.cos(q2)) + I1 + I2
+    d12 = m2 * (lc2**2 + l1 * lc2 * math.cos(q2)) + I2
+    d21 = d12
+    d22 = m2 * (lc2**2) + I2
+    g1 = (m1 * lc1 + m2 * l1) * g * math.cos(q1) + m2 * lc2 * g * math.cos(q1 + q2)
+    g2 = m2 * lc2 * g * math.cos(q1 + q2)
+    c121 = h
+    c211 = h
+    c221 = h
+    c112 = -h
+    tau1 = (
+        d11 * q1_ddot + d12 * q2_ddot
+        + c121 * q1_dot * q2_dot + c211 * q2_dot * q1_dot + c221 * (q2_dot**2)
+        + g1
+    )
+    tau2 = d21 * q1_ddot + d22 * q2_ddot + c112 * (q1_dot**2) + g2
+    return tau1, tau2
+
+
+def _twolink_ground_truth(q, qd, qdd, I1=0.0, I2=0.0):
+    """TwoLink's expected joint torques, from the independent Spong
+    closed-form solution above, in TwoLink's own joint-angle/torque sign
+    convention.
+
+    TwoLink's convention is the mirror image of Spong's (TwoLink's
+    ``base = SE3.Rx(pi/2)`` puts the arm in a different orientation than
+    Spong's own diagram) -- empirically calibrated 2026-07-21 against
+    rne_python() and confirmed exact to machine precision across several
+    q/qd/qdd combinations, not just the gravity-only case:
+    ``tau_rtb(q, qd, qdd) == -tau_spong(-q, -qd, -qdd)``.
+    """
+    t1, t2 = _spong_two_link_tau(
+        -q[0], -q[1], -qd[0], -qd[1], -qdd[0], -qdd[1],
+        m1=1.0, m2=1.0, l1=1.0, l2=1.0, lc1=0.5, lc2=0.5,
+        I1=I1, I2=I2, g=9.8,
+    )
+    return np.array([-t1, -t2])
+
+
+class TestTwoLinkAbsoluteGroundTruth(unittest.TestCase):
+    """Absolute correctness check, not just relative agreement between our
+    own implementations: TwoLink's torques against an independent
+    closed-form solution (Spong et al., Eq 7.87) that shares no code with
+    rne_python(), rne() (C), or Robot.rne(). Every other test in this file
+    only checks these implementations against each other or against
+    hand-derived reference numbers computed the same way rne_python() is --
+    none of that can catch a bug all of them share.
+    """
+
+    def setUp(self):
+        self.std = _twolink()  # mdh=False
+        self.mdh = TwoLink(mdh=True)
+        self.poses = [
+            (np.array([0.3, 0.5]), np.zeros(2), np.zeros(2)),
+            (np.array([0.3, 0.9]), np.array([0.4, -0.6]), np.array([0.2, 1.1])),
+            (np.array([-1.1, 2.0]), np.array([-0.9, 1.3]), np.array([0.5, -0.7])),
+        ]
+
+    def test_rne_python_std_dh_matches_spong(self):
+        for q, qd, qdd in self.poses:
+            truth = _twolink_ground_truth(q, qd, qdd)
+            nt.assert_array_almost_equal(
+                self.std.rne_python(q, qd, qdd), truth, decimal=6
+            )
+
+    def test_rne_python_mdh_matches_spong(self):
+        for q, qd, qdd in self.poses:
+            truth = _twolink_ground_truth(q, qd, qdd)
+            nt.assert_array_almost_equal(
+                self.mdh.rne_python(q, qd, qdd), truth, decimal=6
+            )
+
+    @unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+    def test_rne_c_std_dh_matches_spong(self):
+        for q, qd, qdd in self.poses:
+            truth = _twolink_ground_truth(q, qd, qdd)
+            nt.assert_array_almost_equal(self.std.rne(q, qd, qdd), truth, decimal=6)
+
+    @unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
+    def test_rne_c_mdh_matches_spong(self):
+        for q, qd, qdd in self.poses:
+            truth = _twolink_ground_truth(q, qd, qdd)
+            nt.assert_array_almost_equal(self.mdh.rne(q, qd, qdd), truth, decimal=6)
+
+    def test_robot_rne_mdh_matches_spong(self):
+        """Robot.rne() (ETS/Featherstone) is only valid for mdh=True."""
+        from roboticstoolbox.robot.Robot import Robot as RobotBase
+
+        for q, qd, qdd in self.poses:
+            truth = _twolink_ground_truth(q, qd, qdd)
+            nt.assert_array_almost_equal(
+                RobotBase.rne(self.mdh, q, qd, qdd), truth, decimal=6
+            )
 
 
 # ---------------------------------------------------------------------------
