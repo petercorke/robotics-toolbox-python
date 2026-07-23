@@ -850,6 +850,22 @@ class TestTwoLinkDHMDHEquivalence(unittest.TestCase):
             mdh_py = self.mdh.rne_python(q, z, z)
             nt.assert_array_almost_equal(mdh_py, truth, decimal=4)
 
+    def test_robot_rne_rejects_standard_dh(self):
+        """Robot.rne() (the ETS/Featherstone implementation, used by
+        ERobot/URDF/PoERobot) genuinely cannot handle a standard-DH
+        (mdh=False) DHRobot -- the joint isn't the last element of its own
+        ETS segment. Rather than silently returning a wrong torque (the
+        old behaviour -- see rne.md/tech-debt.md), it now asserts. This
+        confirms the guard fires for the one case it must, complementing
+        test_robot_rne_on_mdh_variant_matches_standard_dh_rne_python (which
+        confirms it does *not* fire, and gives correct results, for the
+        mdh=True case)."""
+        from roboticstoolbox.robot.Robot import Robot as RobotBase
+
+        z = np.zeros(2)
+        with self.assertRaises(AssertionError):
+            RobotBase.rne(self.std, self.poses[0], z, z)
+
 
 # ---------------------------------------------------------------------------
 # Actuator dynamics (Jm, G, B, Tc) and non-zero link inertia: C vs

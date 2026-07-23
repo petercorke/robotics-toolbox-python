@@ -1617,7 +1617,48 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         - This version supports symbolic model parameters
         - Verified against MATLAB code
 
+        .. warning::
+
+            Assumes each link's joint is the *last* element of its own ETS
+            segment (Featherstone's spatial-vector convention -- fixed
+            geometry gets you *to* the joint, the joint is the last thing
+            applied before the next link's frame). This is guaranteed for
+            any ``Robot``/``ERobot`` built normally, either from a raw ETS
+            (``Robot.__init__`` splits it via ``ETS.split()``, whose
+            default "last" method enforces this per segment), from a URDF
+            (each link's ETS is built fixed-transform-then-joint, in that
+            order), or from a ``PoERobot`` (``_update_ets()`` appends the
+            joint ET last too). It does **not** hold for a ``DHRobot``
+            using standard DH conventions (``mdh=False``), where the joint
+            comes *first*, followed by ``d``/``a``/``alpha`` -- calling
+            ``Robot.rne(dh_instance, ...)`` directly (bypassing
+            ``DHRobot``'s own correct ``rne()``/``rne_python()``) gives
+            silently wrong answers. A ``DHRobot`` built with ``mdh=True``
+            *is* joint-last (``DHLink._to_ets()``'s MDH branch reorders a
+            revolute link's ``d`` translation to precede the joint
+            rotation -- valid since a z-rotation and a z-translation
+            commute -- so the joint ET is always last regardless of ``d``)
+            and works correctly through this path. See rne.md /
+            tech-debt.md.
         """
+
+        # Checked via the `mdh` attribute rather than isinstance/class name:
+        # joint-last compliance tracks the DH convention actually in use
+        # (DHLink._to_ets() puts the joint last for mdh=True, not for
+        # mdh=False), not the DHRobot class itself -- a DHRobot(mdh=True)
+        # instance is structurally fine here (verified numerically against
+        # rne_python() with nonzero d/alpha/mass/inertia). Non-DHRobot
+        # types have no `mdh` attribute and default (via getattr) to True,
+        # since their construction (ETS.split(), URDF, PoERobot's
+        # _update_ets()) already guarantees joint-last independently of DH
+        # conventions.
+        assert getattr(self, "mdh", True), (
+            "Robot.rne() assumes each link's joint is the last element of "
+            "its own ETS segment, which does not hold for a DHRobot built "
+            "with mdh=False (standard DH). Call DHRobot's own "
+            "rne()/rne_python() instead of Robot.rne(dh_instance, ...) "
+            "directly."
+        )
 
         n = self.n
         # n = len(self.links)
