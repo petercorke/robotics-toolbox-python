@@ -49,7 +49,7 @@ They can be listed by:
 .. runblock:: pycon
 
    >>> import roboticstoolbox as rtb 
-   >>> rtb.models.list(mtype="ETS")
+   >>> rtb.models.catalog(mtype="ETS")
 
 .. automodule:: roboticstoolbox.models.ETS
    :members:
@@ -65,7 +65,7 @@ standard or modified.  They can be listed by:
 .. runblock:: pycon
 
    >>> import roboticstoolbox as rtb 
-   >>> rtb.models.list(mtype="URDF")
+   >>> rtb.models.catalog(mtype="URDF")
 
 .. automodule:: roboticstoolbox.models.URDF
    :members:

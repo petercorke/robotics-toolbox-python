@@ -8,12 +8,16 @@ import unittest
 import numpy.testing as nt
 
 
-#@unittest.skip("BUG in .models()")
+# @unittest.skip("BUG in .models()")
 class TestModels(unittest.TestCase):
-    def test_list(self):
-        rp.models.list()
-        rp.models.list("UR", 6)
-        rp.models.list(mtype="DH")
+    def test_catalog(self):
+        rp.models.catalog()
+        rp.models.catalog("UR", 6)
+        rp.models.catalog(mtype="DH")
+
+    def test_list_deprecated(self):
+        with self.assertWarns(FutureWarning):
+            rp.models.list(mtype="DH")
 
     def test_puma(self):
         puma = rp.models.DH.Puma560()
@@ -157,13 +161,7 @@ class TestModelSmoke(unittest.TestCase):
     # Remove an entry once its underlying issue is actually fixed -- if you
     # don't, this test starts failing for the *opposite* reason (a listed
     # failure unexpectedly started passing).
-    EXPECTED_FAILURES = {
-        # Bundled rtb-data xacro tree names this directory "kuka_lbr_iiwa",
-        # but the xacro file's own $(find kuka_lbr_iiwa_support) expects
-        # the "_support" suffix -- needs an rtb-data rename + republish.
-        # See tech-debt.md, "rtb-data" section.
-        ("URDF", "LBR"),
-    }
+    EXPECTED_FAILURES = set()
 
     def test_all_models_construct(self):
         unexpected_failures = []

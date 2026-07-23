@@ -32,9 +32,14 @@ class LBR(URDFRobot):
 
     def __init__(self):
 
+        # The bundled file does $(find kuka_lbr_iiwa_support) to locate its
+        # own macro file, but rtb-data ships that content under the
+        # directory name "kuka_lbr_iiwa" (no "_support" suffix), so xacro's
+        # package lookup can't find it without this alias.
         super().__init__(
             "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro",
             manufacturer="Kuka",
+            extra_packages={"kuka_lbr_iiwa_support": "kuka_description/kuka_lbr_iiwa"},
         )
 
         # self.qdlim = np.array([

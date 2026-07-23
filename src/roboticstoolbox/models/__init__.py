@@ -1,7 +1,7 @@
 from roboticstoolbox.models.URDF import *  # noqa
 from roboticstoolbox.models import ETS  # noqa
 from roboticstoolbox.models import DH  # noqa
-from roboticstoolbox.models.list import list
+from roboticstoolbox.models.catalog import catalog, list
 
 
-__all__ = ["list", "ETS", "DH"]
+__all__ = ["catalog", "list", "ETS", "DH"]

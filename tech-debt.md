@@ -504,8 +504,7 @@ in flight.
 
 ### Bundled xacro tree has a naming mismatch: `LBR` (Kuka)
 
-Found 2026-07-05 while investigating a runblock `unbound prefix`/`unknown
-macro`/`PackageNotFoundError` sweep. `LBR.py` loads
+Found 2026-07-05, fixed 2026-07-20. `LBR.py` loads
 `"kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro"` from the
 bundled `rtb-data` xacro tree (an explicit `.xacro` suffix path, so this
 doesn't go through `robot_descriptions` at all — see below). The xacro file
@@ -518,16 +517,24 @@ itself does:
 but the bundled directory is named `kuka_lbr_iiwa` (no `_support` suffix), so
 `$(find kuka_lbr_iiwa_support)` fails to resolve —
 `xacrodoc.packages.PackageNotFoundError: Package not found:
-kuka_lbr_iiwa_support`. `kuka_lbr_iiwa_support` is the real upstream ROS
-package name (confirmed against the actual macro file's own `$(find ...)`
-reference), so the bundled folder's name is simply wrong, not the xacro
-content.
+kuka_lbr_iiwa_support`.
 
-**Proposed fix:** rename the bundled directory
-`rtb-data/xacro/kuka_description/kuka_lbr_iiwa/` →
-`.../kuka_lbr_iiwa_support/` to match what the xacro file already expects.
-No xacro content needs editing. Requires an `rtb-data` release (can't be
-fixed from `roboticstoolbox-python` alone).
+The originally-proposed fix (rename the bundled directory to
+`kuka_lbr_iiwa_support/`, requiring an `rtb-data` release) turned out not to
+work even in isolation: `XacroDoc.from_file()`'s package auto-discovery
+doesn't register a directory as a package purely by name-matching against
+its own `$(find ...)` references — nothing in the bundled data carries a ROS
+`package.xml` marker for it to key off. So renaming the directory alone,
+tested empirically against a throwaway copy, still raised the same
+`PackageNotFoundError`.
+
+**Actual fix:** `URDFRobot.__init__`/`URDF_file()` gained an
+`extra_packages: dict[str, str] | None` kwarg (mirroring the existing
+`patch=` convention for known-broken upstream references) that registers
+additional package-name aliases via `xacrodoc.packages.update_package_cache()`
+before parsing. `LBR.py` now passes
+`extra_packages={"kuka_lbr_iiwa_support": "kuka_description/kuka_lbr_iiwa"}`.
+No `rtb-data` release needed — fixed entirely within `roboticstoolbox-python`.
 
 ### `Valkyrie` and `Fetch` load via `robot_descriptions`, whose supplied files are broken upstream — patched on the way in
 
@@ -996,36 +1003,12 @@ just systematically rather than one-off as each breaks the build.
 
 ## `roboticstoolbox.models.list()` shadows the builtin `list`
 
-### Background
-
-Found 2026-07-05 while fixing a stale `mtype=` kwarg in the docs
-(`arm_dh.rst`/`arm_erobot.rst` runblock examples called
-`rtb.models.list(mtype="DH")`, but the function's parameter had been
-renamed to `type` at some point without updating the docs).
-
-Two things stood out while looking at `src/roboticstoolbox/models/list.py`:
-
-1. The function itself is named `list`, shadowing the builtin `list`
-   within any scope that does `from roboticstoolbox.models.list import
-   list` or `import roboticstoolbox.models as models; models.list(...)`.
-   It's always called qualified (`rtb.models.list(...)`) in practice, so
-   this hasn't bitten anyone yet, but it's a landmine for future edits to
-   that file — reaching for `list(...)` to build an actual list inside the
-   function body would silently recurse/shadow instead of erroring.
-2. (Already fixed, see commit around 2026-07-05) one of its parameters was
-   named `type`, shadowing the builtin `type`. This has been renamed to
-   `mtype` — matching what the docs already (mistakenly, but presciently)
-   assumed the parameter was called — and all call sites (docs, tests)
-   updated to match.
-
-### Proposed fix
-
-Renaming the function itself (e.g. to `list_models`) would fix the
-remaining shadowing, but `list` is public API (`rtb.models.list`) and a
-rename is a breaking change for any external callers — deferred rather
-than done opportunistically. If/when a broader API-breaking pass happens
-on this module (or at the next major version bump), rename `list` to
-something that doesn't shadow a builtin.
+Found 2026-07-05, fixed 2026-07-20. `src/roboticstoolbox/models/list.py`
+renamed to `catalog.py`, function renamed `list` → `catalog`. `models.list()`
+is kept as a deprecated `FutureWarning`-emitting shim (public API, so not
+removed outright) that forwards to `catalog()`; to be dropped in a future
+major version. Docs (`arm_dh.rst`/`arm_erobot.rst`) and `tests/test_models.py`
+updated to call `catalog()` directly.
 
 ---
 
@@ -1327,3 +1310,60 @@ signatures, `X | None` not `Optional[X]`, etc. -- see this user's global
 CLAUDE.md type-hint rules). Not urgent on its own, but worth doing
 opportunistically whenever a block class is touched for another reason,
 and worth a dedicated pass if `blocks/` sees more maintenance.
+## JupyterLite "Try it Now" notebook: `ci.yml` stopgap for an upstream piplite indexing bug
+
+### Background
+
+Found and fixed (stopgap) 2026-07-21. The live JupyterLite deployment's
+`docs/lite/pypi/all.json` package index only listed a `cp313` wasm wheel
+for `roboticstoolbox-python`, even though the pinned
+`jupyterlite-pyodide-kernel==0.6.1` (see the "Build JupyterLite site" step
+in `ci.yml`) embeds Pyodide 0.27.6 / CPython 3.12 and needs a `cp312`
+wheel. Confirmed on the deployed site: both the `cp312` and `cp313` wheel
+*files* were present at `docs/lite/pypi/`, but only `cp313` made it into
+`all.json`. Result: `piplite.install(["roboticstoolbox-python"])` in the
+notebook's first cell fails with `ValueError: Can't find a pure Python 3
+wheel for 'roboticstoolbox-python'` — micropip correctly rejects the
+mismatched `cp313` entry, finds nothing else locally, falls through to
+real PyPI, and PyPI has no wasm-tagged wheel at all (rejects the
+`pyodide_*` platform tag).
+
+Root cause is upstream, in `jupyterlite_pyodide_kernel/addons/piplite.py`'s
+`get_wheel_index()`:
+
+```python
+all_json[normalized_name]["releases"][version] = [release]
+```
+
+This assigns a fresh single-item list per `(name, version)` key instead of
+appending — so when a release carries wasm wheels for more than one
+CPython version (as this repo's releases do: `cibuildwheel`'s pyodide
+platform builds one per supported interpreter, e.g. `cp312` and `cp313`
+both tagged version `1.3.1`), whichever wheel sorts alphabetically last
+silently overwrites the others in the generated index. No build error —
+the site builds and deploys fine, it just fails at runtime in the
+browser. Confirmed this is not fixed in `jupyterlite_pyodide_kernel`
+0.7.1 either (latest as of 2026-07-21), so it isn't something bumping the
+pin resolves.
+
+### Fix applied (stopgap)
+
+Narrowed the `gh release download --pattern` in `ci.yml`'s "Fetch pyodide
+wheel for JupyterLite" step from `*pyodide*` to `*cp312*pyodide*`, so only
+the one wheel the pinned kernel actually needs ever reaches
+`docs/lite/pypi/`, sidestepping the upstream overwrite bug entirely
+rather than depending on it getting fixed.
+
+### Proposed real fix
+
+This whole fetch-a-prebuilt-wasm-wheel-from-a-GitHub-release mechanism,
+and the CPython-tag pinning it depends on, is a maintenance burden in its
+own right (see the "aspire to a pure-Python wheel" discussion elsewhere).
+The real fix is a genuine `py3-none-any` pure-Python wheel published to
+real PyPI (no compiled `_fknm_c`/`_frne_c`) — Pyodide's micropip resolves
+that automatically via its own standard fallback logic, no custom
+JupyterLite piplite index or GitHub-release-asset fetching required at
+all. Once that lands, this stopgap (and the "Fetch pyodide wheel"/"Build
+JupyterLite site" steps generally) should be revisited — possibly
+removable outright. Tracked as a follow-on to the RNE correctness work
+(`rne.md`), which is queued first.

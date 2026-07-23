@@ -77,7 +77,7 @@ standard or modified.  They can be listed by:
 .. runblock:: pycon
 
    >>> import roboticstoolbox as rtb 
-   >>> rtb.models.list(mtype="DH")
+   >>> rtb.models.catalog(mtype="DH")
 
 .. automodule:: roboticstoolbox.models.DH
    :members:
