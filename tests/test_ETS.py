@@ -547,7 +547,16 @@ class TestETS(unittest.TestCase):
         self.assertTrue(len(r) > len(r2))
 
     def test_insert(self):
-        q = [1.0, 2, 3, 4, 5, 6]
+        # 7 joints (l0..l6, jindex 0-6) need 7 values -- q previously had
+        # only 6, an off-by-one that silently "worked" only because the C
+        # extension has no bounds checking (q[6] read past the end of the
+        # array, undefined behaviour that happened not to crash). Confirmed
+        # by comparing r.eval() with 6 vs 7 elements: they give genuinely
+        # different results, proving index 6 really is read and used, not
+        # just harmlessly ignored. Found via the pure-Python fallback
+        # (_python_fkine), which correctly raises IndexError instead of
+        # silently reading garbage -- see tech-debt.md.
+        q = [1.0, 2, 3, 4, 5, 6, 7]
         deg = np.pi / 180
         mm = 1e-3
         tool_offset = (103) * mm

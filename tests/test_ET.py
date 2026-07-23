@@ -12,8 +12,11 @@ import spatialmath.base as sm
 from spatialmath import SE3
 import unittest
 from roboticstoolbox.ets._ET import BaseET
+from roboticstoolbox.ets.fknm import _C_AVAILABLE
 import sympy
 from copy import copy, deepcopy
+
+_NO_C = "compiled _fknm_c extension not built -- .fknm has no compiled handle to compare"
 
 
 class TestET(unittest.TestCase):
@@ -247,8 +250,13 @@ class TestET(unittest.TestCase):
         nt.assert_array_almost_equal(r2.A(1.0), sm.trotx(-1.0))
         nt.assert_array_almost_equal(r3.A(1.0), sm.trotx(-1.0))
 
-        self.assertEqual(r1.fknm, r2.fknm)
-        self.assertNotEqual(r1.fknm, r3.fknm)
+        if _C_AVAILABLE:
+            # .fknm is the compiled handle -- shallow copy shares it, deep
+            # copy gets a distinct one. Without the C extension there's no
+            # handle to compare (.fknm is None for all three), so this
+            # check is meaningless rather than failing -- skip it.
+            self.assertEqual(r1.fknm, r2.fknm)
+            self.assertNotEqual(r1.fknm, r3.fknm)
 
     def test_eq(self):
         r1 = rtb.ET.Rx(2.5)
@@ -375,6 +383,7 @@ class TestET(unittest.TestCase):
         e.qlim = (-1, 1)
         e.jindex = 0
 
+    @unittest.skipUnless(_C_AVAILABLE, _NO_C)
     def test_et_has_compiled_accel(self):
         # Counterpart to test_et2_no_compiled_accel: ET (3D) does build a
         # compiled struct, and it survives deepcopy as a distinct object
