@@ -11,6 +11,7 @@ import warnings
 import copy
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
+from roboticstoolbox.robot.BaseRobot import _is_symbolic
 from roboticstoolbox.ets.ETS import ETS, ET
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.tools.params import rtb_set_param
@@ -1542,7 +1543,19 @@ class DHRobot(Robot):
 
         n = self.n
 
-        if self.symbolic:
+        # dtype must reflect this *call's* symbolic-ness, not just the
+        # model's: self.symbolic is a construction-time flag over the link
+        # parameters, but Q/QD/QDD can be symbolic even for a robot built
+        # entirely from numeric parameters (e.g. differentiating tau
+        # symbolically w.r.t. q for a concrete, numeric-mass robot) -- see
+        # rne.md issue 4. Using only self.symbolic here left rne_python()
+        # allocating float64 arrays that crashed on the first symbolic
+        # intermediate value, even though it's supposed to be the
+        # always-works fallback DHRobot.rne() dispatches to.
+        symbolic_call = (
+            self.symbolic or _is_symbolic(Q) or _is_symbolic(QD) or _is_symbolic(QDD)
+        )
+        if symbolic_call:
             dtype = "O"
         else:
             dtype = None
@@ -1802,7 +1815,7 @@ class DHRobot(Robot):
                 tau[k, j] = (
                     t
                     + link.G**2 * link.Jm * qdd_k[j]
-                    - link.friction(qd_k[j], coulomb=not self.symbolic)
+                    - link.friction(qd_k[j], coulomb=not symbolic_call)
                 )
                 if debug:
                     print(
