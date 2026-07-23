@@ -10,11 +10,6 @@ Usage::
 """
 
 # import stuff
-from pygments.token import Token
-from IPython.terminal.prompts import Prompts
-from IPython.terminal.prompts import ClassicPrompts
-from traitlets.config import Config
-import IPython
 import argparse
 from pathlib import Path
 import shlex
@@ -221,6 +216,17 @@ def startup():
 
 
 def main():
+    try:
+        import IPython
+        from IPython.terminal.prompts import Prompts
+        from pygments.token import Token
+        from traitlets.config import Config
+    except ImportError as e:
+        sys.exit(
+            f"rtbtool requires IPython and pygments, which are not "
+            f"installed ({e}).\nInstall them with:\n\n"
+            "    pip install roboticstoolbox-python[tool]\n"
+        )
 
     args, ipython_args = parse_arguments()
 

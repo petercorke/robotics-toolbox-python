@@ -16,7 +16,8 @@ Available extras:
 - ``swift`` install `Swift <https://github.com/jhavl/swift>`_, a web-based visualizer
 - ``qp`` install quadratic-programming IK dependencies (``qpsolvers``, ``quadprog``)
 - ``collision`` install collision checking with `coal <https://github.com/coal-library/coal>`_ and ``trimesh``
-- ``all`` install ``swift``, ``qp``, and ``collision``
+- ``tool`` install ``IPython`` and ``pygments``, needed to run the ``rtbtool`` interactive shell
+- ``all`` install ``swift``, ``qp``, ``collision``, and ``tool``
 
 .. warning:: ``coal`` does not publish Windows wheels on PyPI, so the
     ``collision``/``all`` extras skip it on Windows and collision checking
@@ -46,7 +47,11 @@ Install matrix:
 
     pip install roboticstoolbox-python[collision]
 
-- Everything (swift + qp + collision)::
+- ``rtbtool`` interactive shell dependencies only::
+
+    pip install roboticstoolbox-python[tool]
+
+- Everything (swift + qp + collision + tool)::
 
     pip install roboticstoolbox-python[all]
 
