@@ -1802,6 +1802,17 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 # next line could be dot(), but fails for symbolic arguments
                 Q[k, j] = sum(f[j].A * s[j])
 
+                # add armature inertia and friction -- consistent with
+                # DHRobot.rne_python()/ne.c, which both add G^2*Jm*qdd
+                # (armature) and subtract link.friction() (viscous B +
+                # Coulomb Tc). Previously missing entirely from this
+                # implementation -- see tech-debt.md.
+                jindex = joint.jindex
+                Q[k, j] += (
+                    joint.G**2 * joint.Jm * qddk[jindex]
+                    - joint.friction(qdk[jindex], coulomb=not symbolic)
+                )
+
                 if first_link.parent is not None:
                     # The index of `link`s parent within self.links
                     parent_idx = self.links.index(first_link.parent)
