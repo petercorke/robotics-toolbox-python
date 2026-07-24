@@ -14,6 +14,7 @@ authors = [
 dependencies = [
     "numpy",
     "spatialmath-python>=1.1.16",
+    "spatialgeometry>=1.2.0",
     "pgraph-python",
     "scipy",
     "matplotlib",
@@ -128,10 +129,9 @@ build-backend = "scikit_build_core.build"
 
 
 [tool.scikit-build]
-wheel.packages = ["src/roboticstoolbox", "src/spatialgeometry"]
+wheel.packages = ["src/roboticstoolbox"]
 sdist.include = [
     "src/roboticstoolbox",
-    "src/spatialgeometry",
     "tests",
     "CMakeLists.txt",
     "README.md",

@@ -5,6 +5,12 @@
 # current PyPI releases were compiled against NumPy 1.x and crash under 2.x.
 # Once numpy-2-compatible releases are published, remove those two steps and
 # use plain `pip install .[dev]`.
+#
+# spatialgeometry now installs from jhavl/spatialgeometry@future directly
+# (not the petercorke fork -- that copy is stale and missing the Hatchling/
+# NumPy-2/Coal-collision-backend work that already landed on jhavl's future
+# branch). swift still installs from the petercorke fork, since its NumPy 2
+# fix hasn't been pushed to jhavl/swift yet.
 
 name: CI
 
@@ -29,6 +35,13 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+
+      - name: Install spatialgeometry from source (NumPy 2 compatible)
+        # PyPI's spatialgeometry doesn't satisfy the >=1.2.0 pin yet (still
+        # NumPy 1.x-only) -- see the file header for why this installs from
+        # GitHub. No swift here deliberately, matching this job's "core"
+        # scope.
+        run: pip install git+https://github.com/jhavl/spatialgeometry.git@future
 
       - name: Install package (core, no swift)
         run: pip install .[dev]
@@ -79,7 +92,7 @@ jobs:
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
             pip install "websockets<11"
-            pip install git+https://github.com/petercorke/spatialgeometry.git@future
+            pip install git+https://github.com/jhavl/spatialgeometry.git@future
             pip install git+https://github.com/petercorke/swift.git@future
 
       - name: Install package
@@ -113,7 +126,7 @@ jobs:
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
           pip install "websockets<11"
-          pip install git+https://github.com/petercorke/spatialgeometry.git@future
+          pip install git+https://github.com/jhavl/spatialgeometry.git@future
           pip install git+https://github.com/petercorke/swift.git@future
 
       - name: Install package
@@ -140,7 +153,7 @@ jobs:
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
           pip install "websockets<11"
-          pip install git+https://github.com/petercorke/spatialgeometry.git@future
+          pip install git+https://github.com/jhavl/spatialgeometry.git@future
           pip install git+https://github.com/petercorke/swift.git@future
 
       - name: Install docs dependencies
