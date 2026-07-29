@@ -1,5 +1,26 @@
 # Technical Debt
 
+## `roboticstoolbox.ets.fknm.r2q()` is broken and unused
+
+Found 2026-07-29 while investigating whether `swift` should use this for
+faster quaternion conversion (see `swift`'s own `tech-debt.md` for the
+full writeup -- decided not to pursue, for unrelated correctness-risk
+reasons). Two separate problems:
+
+- Grepped every call site in this repo: nothing calls it. Dead code.
+- It's also currently broken if anything did call it: the Python facade
+  is `def r2q(R): return _c_r2q(R)` (one argument), but the real
+  nanobind binding requires two -- `r2q(r_in, q_out)`, writing into a
+  caller-supplied output array. Calling it as documented raises
+  `TypeError: r2q() takes 1 positional argument but 2 were given`.
+
+Not fixed -- not worth fixing something with zero callers. Noted here
+in case it resurfaces (e.g. if the `swift` r2q idea is ever revisited)
+so whoever gets there doesn't waste time assuming the facade works
+because it exists.
+
+---
+
 ## Robot class hierarchy redesign
 
 ### Background
@@ -1367,3 +1388,128 @@ all. Once that lands, this stopgap (and the "Fetch pyodide wheel"/"Build
 JupyterLite site" steps generally) should be revisited — possibly
 removable outright. Tracked as a follow-on to the RNE correctness work
 (`rne.md`), which is queued first.
+
+---
+
+## Vendored Eigen (3.4.0, Aug 2021) is untrimmed and increasingly stale
+
+### Background
+
+`src/roboticstoolbox/ets/cpp-extensions/Eigen/` vendors Eigen 3.4.0 in
+full (337 files) for `fknm.cpp`. Latest Eigen is 5.0.0 (Sept 2025) — a
+major version gap. During the spatialgeometry Coal migration
+(2026-07, `petercorke/spatialgeometry`), the same vendored-Eigen-3.4.0
+situation was found there too, and trimmed from 337 to 175 files (kept
+only `Eigen/Core` + `src/Core/` + `src/plugins/`) since `scene_nb.cpp`
+only uses `Matrix4d`/`Vector4d`/`Map`/basic multiply — verified no
+cross-references from Core into the removed modules
+(Cholesky/LU/QR/SVD/Eigenvalues/Geometry/Sparse*) before deleting.
+
+RTB's `fknm.cpp` almost certainly uses more of Eigen than that (FK,
+Jacobian, Hessian, IK all live here) — the same trim likely doesn't
+directly apply without first auditing what modules are actually
+`#include`d. Not attempted this session; flagging the parallel so
+whoever picks this up doesn't have to rediscover the spatialgeometry
+precedent from scratch.
+
+### Proposed fix
+
+Two independent pieces of work, either deferrable on its own:
+
+1. **Trim to what's actually used** — audit `fknm.cpp`'s Eigen
+   `#include`s and any transitive module dependencies, then delete
+   unused modules the same way spatialgeometry did (verify no
+   cross-references first).
+2. **Version bump 3.4.0 → 5.0.0** — real risk, not attempted: Eigen 5
+   tightens const-correctness on `Map` objects, modernizes its CMake,
+   and makes some previously-tolerated internal-header inclusions a
+   hard error. Needs its own dedicated pass with the full fknm test
+   suite (Phase 0 of the ETS/fknm/frne refactor above) as the
+   regression net, not bundled into unrelated work.
+
+Sequence 1 before 2 if both are ever done — trimming first makes the
+version-bump diff much smaller to review.
+
+---
+
+## `Robot`/`Link` mix kinematic-model state with scene-graph/rendering state
+
+### Background
+
+Directly related to `desiderata.md`'s already-documented "Stateless
+over stateful" aspiration (`.q` retained as persistent state, "not yet
+achieved"). Discussed 2026-07-26 in the context of redesigning Swift's
+animation-loop API (`swift` repo): `Robot`/`Link` currently carry not
+just `.q` but also `SceneNode`/`_propogate_scene_tree()` machinery —
+world-transform bookkeeping that exists purely to support rendering
+(Swift, PyPlot), mixed directly into the kinematic model classes.
+
+### Direction agreed (not yet implemented)
+
+Long-term: `Robot`/`Link` become a pure kinematic model (links,
+DH/ETS/PoE parameters, joint limits, geometry *attachments* — but not
+live world-transform state). A separate viz-owned "instance handle"
+(returned from `env.add(robot)` in Swift) would own the actual mutable
+per-simulation state (`q`, and plausibly `base`/`tool` — see below) and
+compute part poses via the *pure* FK path (`fkine`/`fkine_all` taking
+`q` explicitly) rather than depending on `SceneNode`. This is also
+Swift-side tech debt (see `swift`'s own `tech-debt.md`) — the two
+should be tackled together, since Swift's `add()`/protocol is the only
+current consumer of the scene-graph machinery on `Robot`/`Link`.
+
+**Partial progress (2026-07-26):** implemented the narrow-scope version
+of this, deliberately short of the full redesign. `Robot.fkine_geometry(q,
+robot_alpha, collision_alpha)` (`Robot.py`, next to `fkine_all`) computes
+the world pose of every geometry part (main chain + grippers) purely
+from an explicit `q`, via `fkine_all` and each geometry's fixed local
+offset (`geom._T`) — verified bit-for-bit against the existing
+`SceneNode`-based path (`test_Robot.py::test_fkine_geometry_matches_scene_graph`,
+base offset + gripper joints included) to ~1e-9 precision. `Robot`/
+`Link` themselves are **unchanged** — still carry `.q`, still have
+`SceneNode` — this only adds a pure alternative *next to* the existing
+stateful path, it doesn't remove anything. Swift's per-step rendering
+loop (`_draw_all()`/`_step_robot()`) now calls this instead of
+`_update_link_tf()`/`_propogate_scene_tree()`, so Swift's hot path no
+longer depends on the scene-graph mutation machinery — but `robot.q`
+itself is still read as ordinary mutable state each step, not passed
+in from an external handle. The full redesign (handle owns `q`/`base`/
+`tool`, `SceneNode` actually removed from `Robot`/`Link`, PyPlot/teach
+also updated) is still not done — deliberately deferred, this was
+scoped as the minimum change that gets Swift off the scene-graph
+dependency without touching PyPlot/teach or breaking the public
+`robot.q` API.
+
+Also **not yet made pure**: gripper joints. `fkine_geometry` reads
+`gripper.q` directly (ordinary state read, not a parameter) rather
+than taking it explicitly — grippers keep their own separate joint
+state that this pass didn't touch. The `base`/`tool` question below is
+also still open; `fkine_geometry` uses `self.base` (the model's current
+value) exactly as `fkine_all` already did.
+
+**Handle implemented, swift side (2026-07-27):** the "instance handle"
+described above is now real, on the `swift` side: `env.add(robot)`
+returns a `RobotHandle` (`swift/Handle.py`) owning `q`/`qd`/
+`control_mode` for that instance, computed via `robot.fkine_geometry`.
+`Robot`/`Link` themselves are still unchanged here (still carry `.q`,
+still have `SceneNode`) — this repo's half of the redesign remains just
+`fkine_geometry` as a pure alternative path, nothing removed. The old
+pattern (mutate `robot.q`/`robot.qd` directly, ignore the handle) still
+works from swift, bridged by a sync-and-warn-once `DeprecationWarning` —
+scoped to swift's animation loop specifically, not a general deprecation
+of `Robot.q`/`Robot.qd` in RTB itself, which remain first-class API used
+throughout plotting/dynamics/etc. `base`/`tool` still live on the model,
+not the handle — see below, still unresolved. Full details: `swift`'s
+own `tech-debt.md`, "Robot/Shape instance handle redesign".
+
+### Related: `base`/`tool` aren't treated as part of one holistic kinematic model
+
+Raised in the same discussion: some models genuinely need `base`/`tool`
+transforms as part of their kinematic definition (e.g. a fixed pedestal
+offset), while for others they're purely an "instance placement"
+concern indistinguishable from `q`. Currently there's no single
+formalized answer — `base`/`tool` are handled piecemeal rather than as
+a deliberately-scoped part of "the full kinematic model." Worth
+resolving as part of the same redesign above, not in isolation — the
+`Robot`/`Link` purification and the handle design both need an answer
+to "does this instance own `base`/`tool`, or does the model?" before
+either can be implemented.
