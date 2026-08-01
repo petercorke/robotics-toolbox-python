@@ -65,7 +65,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: rtb-data-dist
           path: dist
@@ -82,7 +82,7 @@ jobs:
     permissions:
       id-token: write # required for OIDC trusted publishing
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: rtb-data-dist
           path: dist
