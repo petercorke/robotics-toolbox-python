@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.4.1
+        uses: pypa/cibuildwheel@v4.1.1
 
       - uses: actions/upload-artifact@v7
         with:
@@ -75,7 +75,7 @@ jobs:
           echo "PYODIDE_VERSION=${{ vars.PYODIDE_VERSION || '0.27.5' }}"
 
       - name: Build Pyodide wheel
-        uses: pypa/cibuildwheel@v3.4.1
+        uses: pypa/cibuildwheel@v4.1.1
         env:
           CIBW_PLATFORM: pyodide
 
