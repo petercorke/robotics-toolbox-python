@@ -16,20 +16,18 @@ Common properties (`BaseLink`):
 * the transform may be constant or parameterised by a single joint variable $q$
 * implements `A(q)`, returning an `SE3` (or `SE2`) object for the transform at $q$
 * the parameterisation is arbitrary: DH parameters, screws, ETs, etc.
-* joint value limits, joint velocity limits
-* *(open question: joint acceleration limits — is this in scope for `BaseLink`, or does it belong only to the trajectory layer?)*
+* joint value limits
 * a shape for rendering: primitive (box, sphere, ...) or mesh
 * a shape for collision checking: primitive or mesh
 * inertial parameters: mass, CoG, inertia tensor
-* actuator parameters: motor inertia, gear ratio, motor friction (viscous + Coulomb)
+* actuator parameters: motor inertia, gear ratio, motor friction (viscous + Coulomb), joint velocity limits, joint acceleration limits
 
 ### Concrete link classes: `DHLink`, `POELink`, `ETSLink`
 
 All three:
 
 * represent a physical rigid body
-* define a local, intermediate frame
-* implement `A(q)`, depending on exactly one variable
+* implement `A(q)`, depending on exactly one variable which is the transformation from frame i-1 to frame i.
 * support visual mesh and collision-shape attachments
 * support local inertial parameters and actuator friction models
 
