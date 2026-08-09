@@ -1101,8 +1101,8 @@ class BaseLink(SceneNode, ABC):
 
         if not skip:
             self.robot._update_link_tf(self.robot.q)  # type: ignore
-            self._propogate_scene_tree()
-            shape._propogate_scene_tree()
+            self._propagate_scene_tree()
+            shape._propagate_scene_tree()
 
         d = 10000
         p1 = None
@@ -1134,8 +1134,8 @@ class BaseLink(SceneNode, ABC):
 
         if not skip:
             self.robot._update_link_tf(self.robot.q)  # type: ignore
-            self._propogate_scene_tree()
-            shape._propogate_scene_tree()
+            self._propagate_scene_tree()
+            shape._propagate_scene_tree()
 
         for col in self.collision:
             if col.iscollided(shape):

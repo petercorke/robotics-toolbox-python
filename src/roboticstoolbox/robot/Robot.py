@@ -1289,8 +1289,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         if not skip:
             self._update_link_tf(q)
-            self._propogate_scene_tree()
-            shape._propogate_scene_tree()
+            self._propagate_scene_tree()
+            shape._propagate_scene_tree()
 
         d = 10000
         p1 = None
@@ -1324,8 +1324,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         if not skip:
             self._update_link_tf(q)
-            self._propogate_scene_tree()
-            shape._propogate_scene_tree()
+            self._propagate_scene_tree()
+            shape._propagate_scene_tree()
 
         for link in self.links:
             if link.iscollided(shape, skip=True):
