@@ -375,14 +375,27 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_equal(panda.islimit(), ans)
 
     def test_isspherical(self):
-        l0 = rp.RevoluteDH()
-        l1 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l2 = rp.RevoluteDH(alpha=np.pi / 2)
-        l3 = rp.RevoluteDH()
+        # Each DHRobot gets its own fresh link instances -- a link's
+        # scene_parent is single-valued, so reusing the same instances
+        # across differently-ordered robots (as r2 does here, relative to
+        # r0/r1) is a genuine scene-graph conflict, not just a convenience
+        # shortcut. isspherical() itself is purely DH-parameter-based (see
+        # DHRobot.isspherical()), so fresh instances with the same
+        # parameter values are equivalent for this test's purposes.
+        def links():
+            return [
+                rp.RevoluteDH(),
+                rp.RevoluteDH(alpha=-np.pi / 2),
+                rp.RevoluteDH(alpha=np.pi / 2),
+                rp.RevoluteDH(),
+            ]
 
+        l0, l1, l2, l3 = links()
         r0 = rp.DHRobot([l0, l1, l2, l3])
         r1 = rp.DHRobot([l0, l1])
-        r2 = rp.DHRobot([l1, l2, l3, l0])
+
+        m0, m1, m2, m3 = links()
+        r2 = rp.DHRobot([m1, m2, m3, m0])
 
         self.assertTrue(r0.isspherical())
         self.assertFalse(r1.isspherical())
