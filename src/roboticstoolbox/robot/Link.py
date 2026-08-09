@@ -164,11 +164,11 @@ class BaseLink(SceneNode, ABC):
             self._name = name
 
         # Link geometry
-        self._geometry = SceneGroup(scene_children=geometry)
+        self._geometry = SceneGroup(geometry)
         self._scene_children.append(self._geometry)
 
         # Collision Geometry
-        self._collision = SceneGroup(scene_children=collision)
+        self._collision = SceneGroup(collision)
         self._scene_children.append(self._collision)
 
         # Link dynamic Parameters

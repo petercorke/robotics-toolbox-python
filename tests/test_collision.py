@@ -405,14 +405,20 @@ class TestToDict:
         d = gm.Cuboid(None).to_dict()
         assert d["scale"] == [1.0, 1.0, 1.0]
 
-    def test_mesh_stype(self):
-        assert gm.Mesh("robot.stl").to_dict()["stype"] == "mesh"
+    def test_mesh_stype(self, tmp_path):
+        f = tmp_path / "robot.stl"
+        f.touch()
+        assert gm.Mesh(str(f)).to_dict()["stype"] == "mesh"
 
-    def test_mesh_filename(self):
-        assert gm.Mesh("robot.stl").to_dict()["filename"] == "robot.stl"
+    def test_mesh_filename(self, tmp_path):
+        f = tmp_path / "robot.stl"
+        f.touch()
+        assert gm.Mesh(str(f)).to_dict()["filename"] == str(f)
 
-    def test_mesh_scale(self):
-        assert gm.Mesh("robot.stl", scale=[2, 2, 2]).to_dict()["scale"] == [2.0, 2.0, 2.0]
+    def test_mesh_scale(self, tmp_path):
+        f = tmp_path / "robot.stl"
+        f.touch()
+        assert gm.Mesh(str(f), scale=[2, 2, 2]).to_dict()["scale"] == [2.0, 2.0, 2.0]
 
 
 # ── _init_coal collision=False direct call ────────────────────────────────────
@@ -421,8 +427,10 @@ class TestToDict:
 class TestInitCoalDirect:
     """Call _init_coal() directly, matching the pattern in the original suite."""
 
-    def test_mesh_collision_false(self):
-        s = gm.Mesh("test.stl", collision=False)
+    def test_mesh_collision_false(self, tmp_path):
+        f = tmp_path / "test.stl"
+        f.touch()
+        s = gm.Mesh(str(f), collision=False)
         _mod._require_coal()   # ensure coal loaded so _init_coal can proceed
         with pytest.raises(ValueError, match="collision=False"):
             s._init_coal()

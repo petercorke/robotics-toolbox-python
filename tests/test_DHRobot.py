@@ -375,14 +375,34 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_equal(panda.islimit(), ans)
 
     def test_isspherical(self):
-        l0 = rp.RevoluteDH()
-        l1 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l2 = rp.RevoluteDH(alpha=np.pi / 2)
-        l3 = rp.RevoluteDH()
+        # Sharing link instances across robots (as r2 does here, relative
+        # to r0/r1) should be fine -- links are meant to be stateless
+        # (desiderata.md). It breaks today only because Link/BaseLink
+        # currently inherits SceneNode, so a link's scene_parent is
+        # single-valued scene-graph state bolted onto what should be a
+        # pure kinematic-model object; SG's cycle detection then (rightly)
+        # rejects the same instance having two different parents across
+        # r0's and r2's differing link order. Workaround here, not a
+        # statement that link-sharing itself is wrong -- see #571 (Robot/
+        # Link vs scene-graph state decoupling) for the real fix. Once
+        # that lands, this can go back to sharing l0-l3 directly.
+        # isspherical() is purely DH-parameter-based (DHRobot.py), so
+        # fresh instances with the same parameter values are
+        # behaviour-equivalent in the meantime.
+        def links():
+            return [
+                rp.RevoluteDH(),
+                rp.RevoluteDH(alpha=-np.pi / 2),
+                rp.RevoluteDH(alpha=np.pi / 2),
+                rp.RevoluteDH(),
+            ]
 
+        l0, l1, l2, l3 = links()
         r0 = rp.DHRobot([l0, l1, l2, l3])
         r1 = rp.DHRobot([l0, l1])
-        r2 = rp.DHRobot([l1, l2, l3, l0])
+
+        m0, m1, m2, m3 = links()
+        r2 = rp.DHRobot([m1, m2, m3, m0])
 
         self.assertTrue(r0.isspherical())
         self.assertFalse(r1.isspherical())
