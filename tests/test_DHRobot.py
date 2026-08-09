@@ -375,13 +375,20 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_equal(panda.islimit(), ans)
 
     def test_isspherical(self):
-        # Each DHRobot gets its own fresh link instances -- a link's
-        # scene_parent is single-valued, so reusing the same instances
-        # across differently-ordered robots (as r2 does here, relative to
-        # r0/r1) is a genuine scene-graph conflict, not just a convenience
-        # shortcut. isspherical() itself is purely DH-parameter-based (see
-        # DHRobot.isspherical()), so fresh instances with the same
-        # parameter values are equivalent for this test's purposes.
+        # Sharing link instances across robots (as r2 does here, relative
+        # to r0/r1) should be fine -- links are meant to be stateless
+        # (desiderata.md). It breaks today only because Link/BaseLink
+        # currently inherits SceneNode, so a link's scene_parent is
+        # single-valued scene-graph state bolted onto what should be a
+        # pure kinematic-model object; SG's cycle detection then (rightly)
+        # rejects the same instance having two different parents across
+        # r0's and r2's differing link order. Workaround here, not a
+        # statement that link-sharing itself is wrong -- see #571 (Robot/
+        # Link vs scene-graph state decoupling) for the real fix. Once
+        # that lands, this can go back to sharing l0-l3 directly.
+        # isspherical() is purely DH-parameter-based (DHRobot.py), so
+        # fresh instances with the same parameter values are
+        # behaviour-equivalent in the meantime.
         def links():
             return [
                 rp.RevoluteDH(),
