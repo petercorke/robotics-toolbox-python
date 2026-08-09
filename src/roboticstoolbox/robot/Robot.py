@@ -1638,8 +1638,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             revolute link's ``d`` translation to precede the joint
             rotation -- valid since a z-rotation and a z-translation
             commute -- so the joint ET is always last regardless of ``d``)
-            and works correctly through this path. See rne.md /
-            tech-debt.md.
+            and works correctly through this path. See rne.md. Revisit this
+            guard if the Robot/Link class hierarchy is ever redesigned --
+            see https://github.com/petercorke/robotics-toolbox-python/issues/571.
         """
 
         # Checked via the `mdh` attribute rather than isinstance/class name:
@@ -1805,8 +1806,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 # add armature inertia and friction -- consistent with
                 # DHRobot.rne_python()/ne.c, which both add G^2*Jm*qdd
                 # (armature) and subtract link.friction() (viscous B +
-                # Coulomb Tc). Previously missing entirely from this
-                # implementation -- see tech-debt.md.
+                # Coulomb Tc).
                 jindex = joint.jindex
                 Q[k, j] += (
                     joint.G**2 * joint.Jm * qddk[jindex]

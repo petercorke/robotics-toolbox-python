@@ -166,7 +166,8 @@ jobs:
         # bleeding-edge main -- deliberate, since a full Pyodide/Emscripten
         # rebuild on every docs push would be slow.
         #
-        # STOPGAP (see tech-debt.md): only fetch the cp312 wheel, matching
+        # STOPGAP (see https://github.com/petercorke/robotics-toolbox-python/issues/579):
+        # only fetch the cp312 wheel, matching
         # jupyterlite-pyodide-kernel==0.6.1 below. A release can carry wasm
         # wheels for more than one CPython version (cibuildwheel's pyodide
         # platform builds one per supported interpreter), and
