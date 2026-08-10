@@ -54,6 +54,28 @@ class TestRtbtool(unittest.TestCase):
         self.assertEqual(result.returncode, 0, msg=result.stderr.decode())
         self.assertIn(b"SENTINEL_OUTPUT Panda", result.stdout)
 
+    def test_smoke_test_flag(self):
+        """--test should run non-interactively and report all checks passing."""
+        result = _run(["roboticstoolbox.bin.rtbtool", "--test"])
+        self.assertEqual(result.returncode, 0, msg=result.stderr.decode())
+        out = result.stdout.decode()
+        self.assertIn("[PASS] fknm compiled extension loaded", out)
+        self.assertIn("[PASS] frne compiled extension loaded", out)
+        self.assertIn("[PASS] Panda.fkine(qr) matches expected", out)
+        self.assertIn("rtbtool --test: 3/3 checks passed", out)
+
+    def test_smoke_test_reports_distinct_package_versions(self):
+        # Regression test: the banner/--test version line once printed
+        # spatialmath-python's version twice (once labelled SG) instead of
+        # spatialgeometry's own -- catch any recurrence by requiring the
+        # two version numbers to actually be looked up independently.
+        from importlib.metadata import version
+
+        result = _run(["roboticstoolbox.bin.rtbtool", "--test"])
+        out = result.stdout.decode()
+        self.assertIn(f"SMTB=={version('spatialmath-python')}", out)
+        self.assertIn(f"SG=={version('spatialgeometry')}", out)
+
     def test_options_envvar(self):
         """RTB_OPTIONS should be parsed the same as command-line arguments."""
         env = dict(os.environ, RTB_OPTIONS="--prompt envtest>")

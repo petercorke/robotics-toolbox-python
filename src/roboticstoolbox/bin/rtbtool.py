@@ -150,6 +150,14 @@ def parse_arguments():
         action="store_true",
         help="use Swift as default backend",
     )
+    parser.add_argument(
+        "--test",
+        default=False,
+        action="store_true",
+        help="non-interactive environment smoke test: print package versions, "
+        "exercise one real numeric code path per package, exit 0/1 "
+        "instead of starting an interactive shell",
+    )
 
     argv = env_arguments(parser) + sys.argv[1:]
     args, rest = parser.parse_known_args(argv)
@@ -158,6 +166,18 @@ def parse_arguments():
         args.banner = False
 
     return args, rest
+
+
+def get_versions() -> list[str]:
+    """Package version strings shown in the banner and by --test."""
+    return [
+        f"RTB=={version('roboticstoolbox-python')}",
+        f"SMTB=={version('spatialmath-python')}",
+        f"SG=={version('spatialgeometry')}",
+        f"NumPy=={version('numpy')}",
+        f"SciPy=={version('scipy')}",
+        f"Matplotlib=={version('matplotlib')}",
+    ]
 
 
 def make_banner():
@@ -171,16 +191,8 @@ def make_banner():
 
     for Python"""
 
-    versions = []
-    versions.append(f"RTB=={version('roboticstoolbox-python')}")
-    versions.append(f"SMTB=={version('spatialmath-python')}")
-    versions.append(f"SG=={version('spatialmath-python')}")
-    versions.append(f"NumPy=={version('numpy')}")
-    versions.append(f"SciPy=={version('scipy')}")
-    versions.append(f"Matplotlib=={version('matplotlib')}")
-
     # create banner
-    banner += " (" + ", ".join(versions) + ")"
+    banner += " (" + ", ".join(get_versions()) + ")"
     banner += r"""
 
     import math
@@ -215,7 +227,56 @@ def startup():
     plt.ion()
 
 
+def run_smoke_test() -> bool:
+    """Non-interactive environment sanity check, used by --test.
+
+    Not a substitute for the pytest suite -- a fast, human- or script-run
+    "did this environment actually come together correctly" check: real
+    versions, confirmation the compiled extensions loaded, and one real
+    numeric result compared against a known-correct value. The last part
+    matters specifically because a compiled extension built against the
+    wrong NumPy ABI can load successfully and still compute garbage --
+    checking that it merely *imported* wouldn't catch that.
+    """
+    print(", ".join(get_versions()))
+
+    from roboticstoolbox.ets.fknm import _C_AVAILABLE as fknm_c
+    from roboticstoolbox.robot.frne import _C_AVAILABLE as frne_c
+
+    panda = models.DH.Panda()
+    T = panda.fkine(panda.qr).A
+    expected = np.array(
+        [
+            [9.9500416528e-01, 0.0000000000e00, 9.9833416647e-02, 4.8400688203e-01],
+            [0.0000000000e00, -1.0000000000e00, -1.2032944640e-16, -6.8775459668e-17],
+            [9.9833416647e-02, 1.2490009027e-16, -9.9500416528e-01, 4.1302777713e-01],
+            [0.0000000000e00, 0.0000000000e00, 0.0000000000e00, 1.0000000000e00],
+        ]
+    )
+
+    checks = [
+        ("fknm compiled extension loaded", fknm_c),
+        ("frne compiled extension loaded", frne_c),
+        (
+            "Panda.fkine(qr) matches expected (1e-9)",
+            bool(np.allclose(T, expected, atol=1e-9)),
+        ),
+    ]
+
+    for name, passed in checks:
+        print(f"[{'PASS' if passed else 'FAIL'}] {name}")
+
+    n_passed = sum(1 for _, passed in checks if passed)
+    print(f"rtbtool --test: {n_passed}/{len(checks)} checks passed")
+    return n_passed == len(checks)
+
+
 def main():
+    args, ipython_args = parse_arguments()
+
+    if args.test:
+        sys.exit(0 if run_smoke_test() else 1)
+
     try:
         import IPython
         from IPython.terminal.prompts import Prompts
@@ -227,8 +288,6 @@ def main():
             f"installed ({e}).\nInstall them with:\n\n"
             "    pip install roboticstoolbox-python[tool]\n"
         )
-
-    args, ipython_args = parse_arguments()
 
     # setup defaults
     np.set_printoptions(
