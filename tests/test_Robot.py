@@ -695,6 +695,46 @@ class TestRobot(unittest.TestCase):
 
         r.fkine_all(r.q)
 
+    def test_fkine_geometry_matches_scene_graph(self):
+        # fkine_geometry() computes geometry-part world poses purely
+        # from q (see Robot.fkine_geometry's docstring) -- this checks
+        # it agrees with the existing SceneNode-based
+        # _update_link_tf()/_propogate_scene_tree()/_fk_dict() path
+        # (main chain, base offset, and gripper joints) to numerical
+        # precision, for a robot with a gripper.
+        from spatialmath import SE3
+        from spatialmath.base import r2q
+
+        np.random.seed(0)
+        panda = rtb.models.Panda()
+
+        for trial in range(5):
+            q = panda.qr if trial == 0 else np.random.uniform(-1, 1, panda.n)
+            panda.q = q
+            if trial == 2:
+                panda.base = SE3(0.3, -0.2, 0.1) * SE3.RPY(0.1, 0.2, 0.3)
+            if trial >= 3:
+                panda.grippers[0].q = np.random.uniform(0, 0.03, panda.grippers[0].n)
+                panda.grippers[0]._update_link_tf()
+
+            panda._update_link_tf()
+            panda._propogate_scene_tree()
+
+            expected = panda._fk_dict(robot_alpha=1.0, collision_alpha=0.0)
+            actual = panda.fkine_geometry(q, robot_alpha=1.0, collision_alpha=0.0)
+
+            self.assertEqual(len(expected), len(actual))
+
+            for e, a in zip(expected, actual):
+                nt.assert_allclose(e["t"], a.t, atol=1e-9)
+                aq = r2q(a.R, order="xyzs")
+                # quaternion sign is ambiguous (q and -q are the same
+                # rotation), so accept either
+                self.assertTrue(
+                    np.allclose(e["q"], aq, atol=1e-9)
+                    or np.allclose(e["q"], -np.array(aq), atol=1e-9)
+                )
+
     def test_yoshi(self):
         puma = rtb.models.Puma560()
         q = puma.qn  # type: ignore

@@ -14,6 +14,10 @@ authors = [
 dependencies = [
     "numpy",
     "spatialmath-python>=1.1.16",
+    # Pinned to a commit on SG's unreleased main (1.4 draft) -- Link.py's
+    # SceneGroup(initlist) call requires the API there. Switch to a normal
+    # ">=1.4.0" constraint once spatialgeometry actually cuts that release.
+    "spatialgeometry @ git+https://github.com/jhavl/spatialgeometry.git@ce69b8bbe23ec79c0c395e007725512081808487",
     "pgraph-python",
     "scipy",
     "matplotlib",
@@ -76,6 +80,8 @@ collision = ["coal; sys_platform != 'win32'", "trimesh"]
 
 qp = ["qpsolvers", "quadprog"]
 
+tool = ["ipython", "pygments"]
+
 all = [
     "swift-sim>=1.0.0",
     "websockets",
@@ -83,6 +89,8 @@ all = [
     "quadprog",
     "coal; sys_platform != 'win32'",
     "trimesh",
+    "ipython",
+    "pygments",
 ]
 
 dev = [
@@ -128,10 +136,9 @@ build-backend = "scikit_build_core.build"
 
 
 [tool.scikit-build]
-wheel.packages = ["src/roboticstoolbox", "src/spatialgeometry"]
+wheel.packages = ["src/roboticstoolbox"]
 sdist.include = [
     "src/roboticstoolbox",
-    "src/spatialgeometry",
     "tests",
     "CMakeLists.txt",
     "README.md",

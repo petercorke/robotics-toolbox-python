@@ -709,6 +709,82 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return linkframes
 
+    def fkine_geometry(
+        self, q: ArrayLike, robot_alpha: float = 1.0, collision_alpha: float = 0.0
+    ) -> list[SE3]:
+        """
+        Compute the world-frame pose of every rendered geometry part
+
+        :param q: the joint configuration of the main kinematic chain
+        :param robot_alpha: include visual geometry if > 0, matches
+            ``_to_dict``/``_fk_dict``'s own gating
+        :param collision_alpha: include collision geometry if > 0
+        :returns: one pose per geometry part, in the same order as
+            ``_to_dict()``/``_fk_dict()``
+        :rtype: list of SE3
+
+        Pure with respect to ``q`` -- computed directly via
+        :meth:`fkine_all` and each geometry's fixed local offset
+        (``geom._T``, spatialgeometry's ``SceneNode``), not via
+        ``SceneNode._propogate_scene_tree()``'s cached/mutated world
+        transform. Intended for consumers (e.g. a Swift animation loop)
+        that want link/geometry poses without needing a robot to carry
+        live scene-graph state.
+
+        Gripper geometry is included, using each gripper's own current
+        ``.q`` (grippers keep their own separate joint state -- not a
+        parameter of this method, and not yet part of the pure-`q`
+        computation this method provides for the main chain).
+        """
+        linkframes = self.fkine_all(q)
+
+        poses: list[SE3] = []
+
+        for link in self.links:
+            if robot_alpha > 0:
+                for gi in link.geometry:
+                    poses.append(linkframes[link.number] * SE3(gi._T, check=False))
+            if collision_alpha > 0:
+                for gi in link.collision:
+                    poses.append(linkframes[link.number] * SE3(gi._T, check=False))
+
+        for gripper in self.grippers:
+            attach_link = next(
+                l for l in self.links if l.name == gripper.links[0].parent_name
+            )
+            base_T = linkframes[attach_link.number]
+
+            gripper_frames: dict[str, SE3] = {}
+
+            def recurse(Tparent, link):
+                T = Tparent
+                while True:
+                    T = T * SE3(link.A(gripper.q[link.jindex]), check=False)
+                    gripper_frames[link.name] = T
+
+                    if link.nchildren == 0:
+                        return
+                    elif link.nchildren == 1:
+                        link = link.children[0]
+                        continue
+                    else:
+                        for child in link.children:
+                            recurse(T, child)
+                        return
+
+            recurse(base_T, gripper.links[0])
+
+            for link in gripper.links:
+                T_link = gripper_frames[link.name]
+                if robot_alpha > 0:
+                    for gi in link.geometry:
+                        poses.append(T_link * SE3(gi._T, check=False))
+                if collision_alpha > 0:
+                    for gi in link.collision:
+                        poses.append(T_link * SE3(gi._T, check=False))
+
+        return poses
+
     @overload
     def manipulability(
         self,

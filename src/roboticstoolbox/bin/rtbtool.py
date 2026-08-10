@@ -10,13 +10,8 @@ Usage::
 """
 
 # import stuff
-from pygments.token import Token
-from IPython.terminal.prompts import Prompts
-from IPython.terminal.prompts import ClassicPrompts
-from traitlets.config import Config
-import IPython
 import argparse
-from pathlib import Path
+import pathlib
 import shlex
 import sys
 import os
@@ -213,7 +208,7 @@ def make_banner():
 
 def examples_path():
     # Repository layout: <root>/src/roboticstoolbox/bin/rtbtool.py
-    return Path(__file__).resolve().parents[3] / "examples"
+    return pathlib.Path(__file__).resolve().parents[3] / "examples"
 
 
 def startup():
@@ -221,6 +216,17 @@ def startup():
 
 
 def main():
+    try:
+        import IPython
+        from IPython.terminal.prompts import Prompts
+        from pygments.token import Token
+        from traitlets.config import Config
+    except ImportError as e:
+        sys.exit(
+            f"rtbtool requires IPython and pygments, which are not "
+            f"installed ({e}).\nInstall them with:\n\n"
+            "    pip install roboticstoolbox-python[tool]\n"
+        )
 
     args, ipython_args = parse_arguments()
 
@@ -310,7 +316,7 @@ def main():
     # set up a script to be executed by IPython when we get there
     code = None
     if args.script is not None:
-        path = Path(args.script)
+        path = pathlib.Path(args.script)
         if not path.exists():
             raise ValueError(f"script does not exist: {args.script}")
         code = path.open("r").readlines()

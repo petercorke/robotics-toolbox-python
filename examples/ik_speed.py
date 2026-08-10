@@ -1,16 +1,17 @@
-import numpy as np
-import roboticstoolbox as rtb
-import spatialmath as sm
-import fknm
-import time
-import swift
-import spatialgeometry as sg
-import sys
-from ansitable import ANSITable
+#!/usr/bin/env python
+"""Benchmark the fast, C-only numerical IK solvers (ik_LM's three variants)
+over a batch of random reachable poses.
+"""
 
-from numpy import ndarray
-from spatialmath import SE3
-from typing import Union, overload, List, Set
+import time
+import sys
+
+import numpy as np
+from ansitable import ANSITable, Column
+
+import roboticstoolbox as rtb
+
+from _cpu_info import cpu_info
 
 # Our robot and ETS
 robot = rtb.models.Panda()
@@ -18,18 +19,18 @@ ets = robot.ets()
 
 ### Experiment parameters
 # Number of problems to solve
-problems = 10000
+nproblems = 10_000
 
 # Cartesion DoF priority matrix
-we = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+mask = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
 
 # random valid q values which will define Tep
-q_rand = ets.random_q(problems)
+q_rand = ets.random_q(nproblems)
 
 # Our desired end-effector poses
-Tep = np.zeros((problems, 4, 4))
+Tep = np.zeros((nproblems, 4, 4))
 
-for i in range(problems):
+for i in range(nproblems):
     Tep[i] = ets.eval(q_rand[i])
 
 # Maximum iterations allowed in a search
@@ -43,94 +44,99 @@ tol = 1e-6
 
 
 solvers = [
-    # lambda Tep: ets.ik_nr(
-    #     Tep,
-    #     q0=None,
-    #     ilimit=ilimit,
-    #     slimit=slimit,
-    #     tol=tol,
-    #     reject_jl=False,
-    #     we=we,
-    #     use_pinv=True,
-    #     pinv_damping=0.0,
-    # ),
-    # lambda Tep: ets.ik_gn(
-    #     Tep,
-    #     q0=None,
-    #     ilimit=ilimit,
-    #     slimit=slimit,
-    #     tol=tol,
-    #     reject_jl=False,
-    #     we=we,
-    #     use_pinv=False,
-    #     pinv_damping=0.2,
-    # ),
-    lambda Tep: ets.ik_lm_chan(
+    lambda Tep: ets.ik_NR(
         Tep,
         q0=None,
         ilimit=ilimit,
         slimit=slimit,
         tol=tol,
-        reject_jl=True,
-        we=we,
-        λ=0.1,
+        joint_limits=False,
+        mask=mask,
+        pinv=True,
+        pinv_damping=0.0,
     ),
-    lambda Tep: ets.ik_lm_wampler(
+    lambda Tep: ets.ik_GN(
         Tep,
         q0=None,
         ilimit=ilimit,
         slimit=slimit,
         tol=tol,
-        reject_jl=True,
-        we=we,
-        λ=1e-4,
+        joint_limits=False,
+        mask=mask,
+        pinv=False,
+        pinv_damping=0.2,
     ),
-    lambda Tep: ets.ik_lm_sugihara(
+    lambda Tep: ets.ik_LM(
         Tep,
         q0=None,
         ilimit=ilimit,
         slimit=slimit,
         tol=tol,
-        reject_jl=True,
-        we=we,
-        λ=0.1,
+        joint_limits=True,
+        mask=mask,
+        k=0.1,
+        method="chan",
+    ),
+    lambda Tep: ets.ik_LM(
+        Tep,
+        q0=None,
+        ilimit=ilimit,
+        slimit=slimit,
+        tol=tol,
+        joint_limits=True,
+        mask=mask,
+        k=1e-4,
+        method="wampler",
+    ),
+    lambda Tep: ets.ik_LM(
+        Tep,
+        q0=None,
+        ilimit=ilimit,
+        slimit=slimit,
+        tol=tol,
+        joint_limits=True,
+        mask=mask,
+        k=0.1,
+        method="sugihara",
     ),
 ]
 
-times = []
+times: list[float] = []
 
 solver_names = [
-    # "Newton Raphson",
-    # "Gauss Newton",
+    "Newton Raphson",
+    "Gauss Newton",
     "LM Chan",
     "LM Wampler",
     "LM Sugihara",
 ]
 
+print(f"\nNumerical Inverse Kinematics Methods benchmark:\n  * running on {cpu_info()},\n  * robot is {robot.name} with {robot.n} DoF,\n  * for a batch of {nproblems} random configurations.\n\nTime per IK solution:\n")
+
 for solver in solvers:
-    print("Next Solver")
+    print(".", file=sys.stdout, end="", flush=True) # show activity
 
     start = time.time()
 
-    for i in range(problems):
+    for i in range(nproblems):
         solver(Tep[i])
 
     total_time = time.time() - start
     times.append(total_time)
 
 
-print(f"\nNumerical Inverse Kinematics Methods Compared over {problems} problems\n")
+print("\r", end="") # clear the progress line
 
 table = ANSITable(
-    "Method",
-    "Time",
+    Column("Method", colalign="<", headalign="^"),
+    Column("Time (μs)", fmt="{:.1f}", headalign="^"),
     border="thin",
 )
 
 for name, t in zip(solver_names, times):
     table.row(
         name,
-        (t / problems) * 1e6,
+        (t / nproblems) * 1e6,
     )
 
 table.print()
