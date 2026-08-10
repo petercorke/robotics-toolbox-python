@@ -410,13 +410,19 @@ class TestDHRobot(unittest.TestCase):
 
     def test_payload(self):
         panda = rp.models.DH.Panda()
-        nt.assert_array_almost_equal(panda.r[:, 6], np.zeros(3))
+        # link 6's inherent centre of mass (Franka-published dynamic
+        # parameters, see Panda.py) -- not zero, per PR #304
+        nt.assert_array_almost_equal(
+            panda.r[:, 6], [1.0517e-02, -4.252e-03, -4.5403e-02]
+        )
         # nt.assert_array_almost_equal(panda.links[6].m, 0)
 
         m = 6
         p = [1, 2, 3]
         panda.payload(m, p)
 
+        # payload() overwrites the link's m/r outright (see Dynamics.py),
+        # so this holds regardless of the link's inherent r above
         nt.assert_array_almost_equal(panda.r[:, 6], p)
         nt.assert_array_almost_equal(panda.links[6].m, m)
 
