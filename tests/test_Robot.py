@@ -685,6 +685,76 @@ class TestRobot(unittest.TestCase):
         except PermissionError:
             pass
 
+    def test_graph_dot_matches_dotfile(self):
+        r = rtb.models.Panda()
+
+        import io
+
+        stream = io.StringIO()
+        r.dotfile(stream)
+
+        self.assertEqual(r.graph(format="dot"), stream.getvalue())
+
+    def test_graph_dot_kwargs_forwarded(self):
+        r = rtb.models.Panda()
+
+        text = r.graph(format="dot", jtype=True, etsbox=True)
+        self.assertIn("_ets", text)  # etsbox=True boxes the ETS as its own node
+
+    def test_graph_mermaid(self):
+        r = rtb.models.Panda()
+
+        text = r.graph(format="mermaid")
+        self.assertTrue(text.startswith("flowchart LR\n"))
+        self.assertIn('BASE["BASE"]', text)
+        # end-effector rendered as a double circle
+        self.assertIn('(("panda_link8"))', text)
+        # gripper links rendered as hexagons
+        self.assertIn('{{"panda_hand"}}', text)
+        # revolute joints labelled R<jindex>, prismatic P<jindex>
+        self.assertIn("|R0|", text)
+        self.assertIn("|P0|", text)
+
+    def test_graph_mermaid_fenced(self):
+        r = rtb.models.Panda()
+
+        text = r.graph(format="mermaid_fenced")
+        self.assertTrue(text.startswith("```mermaid\nflowchart LR\n"))
+        self.assertTrue(text.endswith("```\n"))
+
+    def test_graph_multiple_end_effectors(self):
+        # branched robot — two end-effectors sharing a common base, same
+        # construction as test_dotfile2
+        from roboticstoolbox.robot.Link import Link
+        from roboticstoolbox.ets.ET import ET
+        from roboticstoolbox.ets.ETS import ETS
+
+        L0 = Link(name="base")
+        L1 = Link(ETS(ET.Rz()), name="joint1", parent=L0)
+        L2 = Link(ETS(ET.Rz()), name="joint2", parent=L1)
+        L3 = Link(ETS(ET.Rz()), name="branch_a", parent=L1)
+        r = rtb.Robot([L0, L1, L2, L3], name="branched")
+
+        text = r.graph(format="mermaid")
+        self.assertIn('(("joint2"))', text)
+        self.assertIn('(("branch_a"))', text)
+
+    def test_graph_writes_to_filename(self):
+        r = rtb.models.Panda()
+
+        r.graph(format="mermaid", filename="test_graph.mmd")
+        try:
+            with open("test_graph.mmd", encoding="utf-8") as f:
+                self.assertTrue(f.read().startswith("flowchart LR\n"))
+        finally:
+            os.remove("test_graph.mmd")
+
+    def test_graph_bad_format_raises(self):
+        r = rtb.models.Panda()
+
+        with self.assertRaises(ValueError):
+            r.graph(format="not-a-real-format")  # type: ignore
+
     def test_fkine_all(self):
         r = rtb.models.ETS.Panda()
 

@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 # import sys
+import io
 from abc import ABC
 from copy import deepcopy
 from functools import lru_cache
@@ -2265,7 +2266,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`dotfile`
+        :func:`dotfile` :func:`graph`
 
         """
 
@@ -2335,12 +2336,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`showgraph`
+        :func:`showgraph` :func:`graph`
 
         """
 
         if isinstance(filename, str):
-            file = open(filename, "w")
+            file = open(filename, "w", encoding="utf-8")
         else:
             file = filename
 
@@ -2398,7 +2399,7 @@ graph [rankdir=LR];
             else:
                 # put the ets fragment as an edge label
                 if not link.isjoint and static:
-                    edge_options += 'fontcolor="blue"'
+                    edge_options += ', fontcolor="blue"'
                 if ets == "full":
                     estr = link.ets.__str__(q=f"q{link.jindex}")
                 elif ets == "brief":
@@ -2454,3 +2455,112 @@ graph [rankdir=LR];
 
         if isinstance(filename, str):
             file.close()
+
+    def graph(
+        self,
+        format: L["dot", "mermaid", "mermaid_fenced"] = "dot",
+        filename: str | IO[str] | None = None,
+        **kwargs,
+    ) -> str:
+        """
+        Render a link transform graph as text
+
+        :param format: graph output format: ``"dot"``, ``"mermaid"`` or
+            ``"mermaid_fenced"``, defaults to ``"dot"``
+        :param filename: destination path or open text stream, defaults to
+            None
+        :param kwargs: for ``format="dot"``, forwarded to :meth:`dotfile`
+            (``etsbox``, ``ets``, ``jtype``, ``static``); ignored otherwise
+        :return: rendered graph text
+
+        Creates graph text representing the robot's link transform graph --
+        the same structure :meth:`dotfile`/:meth:`showgraph` render, in a
+        choice of formats. If ``filename`` is provided, the rendered text
+        is also written to it.
+
+        ``"dot"`` produces the same GraphViz output as :meth:`dotfile`,
+        just returned as a string rather than requiring a real file --
+        ``etsbox``/``ets``/``jtype``/``static`` behave exactly as they do
+        there.
+
+        ``"mermaid"``/``"mermaid_fenced"`` render a simplified `Mermaid
+        <https://mermaid.js.org>`_ flowchart: one node per link (a double
+        circle for end-effectors, a hexagon for gripper links), edges
+        labelled with the joint type (``R``/``P``) and joint index for
+        actuated joints. Mermaid has no equivalent of DOT's per-edge
+        arrowhead/colour styling, so ``jtype``/``static``/``etsbox`` only
+        affect ``"dot"`` output. ``"mermaid_fenced"`` wraps the same text
+        in a fenced ``mermaid`` code block, ready to paste into Markdown
+        or render directly in a Jupyter cell::
+
+            from IPython.display import Markdown, display
+            display(Markdown(robot.graph(format="mermaid_fenced")))
+
+        :seealso: :meth:`dotfile` :meth:`showgraph`
+        """
+        graph_format = format.lower().replace("-", "_")
+
+        if graph_format == "dot":
+            stream = io.StringIO()
+            self.dotfile(stream, **kwargs)
+            text = stream.getvalue()
+
+        elif graph_format in ("mermaid", "mermaid_fenced"):
+            lines = ["flowchart LR"]
+            node_ids: dict[Any, str] = {}
+
+            def node_id(link) -> str:
+                return node_ids.setdefault(link, f"n{len(node_ids)}")
+
+            lines.append('    BASE["BASE"]')
+
+            for link in self:
+                nid = node_id(link)
+                if link in self.ee_links:
+                    lines.append(f'    {nid}(("{link.name}"))')
+                else:
+                    lines.append(f'    {nid}["{link.name}"]')
+
+            for gripper in self.grippers:
+                for link in gripper.links:
+                    lines.append(f'    {node_id(link)}{{{{"{link.name}"}}}}')
+
+            def edge_label(link) -> str:
+                if not link.isjoint:
+                    return ""
+                kind = "P" if link.isprismatic else "R"
+                return f"|{kind}{link.jindex}|"
+
+            for link in self:
+                parent = "BASE" if link.parent is None else node_id(link.parent)
+                lines.append(f"    {parent} -->{edge_label(link)} {node_id(link)}")
+
+            for gripper in self.grippers:
+                for link in gripper.links:
+                    parent = (
+                        "BASE" if link.parent is None else node_id(link.parent)
+                    )
+                    lines.append(
+                        f"    {parent} -->{edge_label(link)} {node_id(link)}"
+                    )
+
+            mermaid_text = "\n".join(lines) + "\n"
+            if graph_format == "mermaid_fenced":
+                text = f"```mermaid\n{mermaid_text}```\n"
+            else:
+                text = mermaid_text
+
+        else:
+            raise ValueError(
+                f"unsupported graph format {format!r}, expected 'dot', "
+                "'mermaid' or 'mermaid_fenced'"
+            )
+
+        if filename is not None:
+            if isinstance(filename, str):
+                with open(filename, "w", encoding="utf-8") as f:
+                    f.write(text)
+            else:
+                filename.write(text)
+
+        return text
