@@ -80,6 +80,8 @@ collision = ["coal; sys_platform != 'win32'", "trimesh"]
 
 qp = ["qpsolvers", "quadprog"]
 
+tool = ["ipython", "pygments"]
+
 all = [
     "swift-sim>=1.0.0",
     "websockets",
@@ -87,6 +89,8 @@ all = [
     "quadprog",
     "coal; sys_platform != 'win32'",
     "trimesh",
+    "ipython",
+    "pygments",
 ]
 
 dev = [
