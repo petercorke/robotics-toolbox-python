@@ -16,12 +16,13 @@ implementations (``rne_python()``, hand-derived; ``rne()``, the compiled
 ``ne.c`` extension). Keeping those out of this file preserves the
 representation-agnostic boundary above.
 
-Known issue (rne.md, tech-debt.md): ``Robot.rne()`` is currently wrong for
-ETS chains with joint-first-in-segment structure (which any standard-DH
-derived chain has) -- ``ne.c``/``rne_python()`` don't share this bug (``ne.c``
-handles both DH conventions; ``rne_python()`` is explicitly documented as
-standard-DH-only). This matters more than a typical "wrong for one
-convention" bug because ``Robot.rne()`` is the *only* dynamics
+``Robot.rne()`` cannot represent ETS chains with joint-first-in-segment
+structure (which any standard-DH derived chain has) -- ``ne.c``/``rne_python()``
+don't share this limitation (``ne.c`` handles both DH conventions;
+``rne_python()`` is explicitly documented as standard-DH-only). Rather than
+silently miscomputing this case, ``Robot.rne()`` now guards and rejects it
+(see rne.md for the full investigation). This matters more than a typical
+"one convention only" limitation because ``Robot.rne()`` is the *only* dynamics
 implementation available to ``ERobot``/URDF/general robots -- there's no
 alternative to fall back on the way ``DHRobot`` has two.
 """

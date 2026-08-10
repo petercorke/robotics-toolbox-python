@@ -218,8 +218,9 @@ for one DH sub-convention, for two structurally different reasons:**
   **Action taken:** rather than teach `Robot.rne()` a second, DH-aware
   recursion, it now asserts on the incompatible case
   (`assert getattr(self, "mdh", True)` in `Robot.rne()`) instead of silently
-  returning a wrong answer — see tech-debt.md for the blocklist-vs-allowlist
-  design discussion behind this specific check, and
+  returning a wrong answer — see
+  https://github.com/petercorke/robotics-toolbox-python/issues/571 for the
+  blocklist-vs-allowlist design discussion behind this specific check, and
   `test_robot_rne_rejects_standard_dh` for the regression test.
 
 - **A separate, previously-masked bug**, found while numerically verifying

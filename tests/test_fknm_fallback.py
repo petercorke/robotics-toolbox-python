@@ -622,7 +622,7 @@ class TestRNEReference(unittest.TestCase):
 # base-rotation handling in either path. TwoLink's base is SE3.Rx(pi/2) --
 # this is what regresses the bug where Robot.rne() ignored self.base
 # entirely and rne_python()'s rotated-base branch was missing a negation
-# (see rne.md / tech-debt.md).
+# (see rne.md).
 # ---------------------------------------------------------------------------
 
 @unittest.skipUnless(_FRNE_C_AVAILABLE, _NO_FRNE_C)
@@ -763,7 +763,7 @@ class TestBaseWrenchReference(unittest.TestCase):
 # joint-last-compliant, and thus correct, for mdh=True DHRobot instances
 # (test_robot_rne_on_mdh_variant_matches_standard_dh_rne_python); for
 # mdh=False it now asserts rather than silently returning a wrong answer
-# (test_robot_rne_rejects_standard_dh) -- see rne.md/tech-debt.md.
+# (test_robot_rne_rejects_standard_dh) -- see rne.md.
 # ---------------------------------------------------------------------------
 
 class TestTwoLinkDHMDHEquivalence(unittest.TestCase):
@@ -856,7 +856,7 @@ class TestTwoLinkDHMDHEquivalence(unittest.TestCase):
         ERobot/URDF/PoERobot) genuinely cannot handle a standard-DH
         (mdh=False) DHRobot -- the joint isn't the last element of its own
         ETS segment. Rather than silently returning a wrong torque (the
-        old behaviour -- see rne.md/tech-debt.md), it now asserts. This
+        old behaviour -- see rne.md), it now asserts. This
         confirms the guard fires for the one case it must, complementing
         test_robot_rne_on_mdh_variant_matches_standard_dh_rne_python (which
         confirms it does *not* fire, and gives correct results, for the
@@ -926,7 +926,7 @@ class TestTwoLinkActuatorDynamics(unittest.TestCase):
 # caught by TestTwoLinkDHMDHEquivalence above because TwoLink's default
 # (zero) inertia makes the missing term a no-op, and TwoLink's d=alpha=0
 # (planar) also hides it even with inertia=True. Needs nonzero d *and*
-# alpha *and* a real inertia tensor together -- see tech-debt.md.
+# alpha *and* a real inertia tensor together (fixed -- see rne.md).
 # ---------------------------------------------------------------------------
 
 class TestRobotRneInertiaTensor(unittest.TestCase):

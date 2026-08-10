@@ -153,7 +153,7 @@ class TestModelSmoke(unittest.TestCase):
     The tests above are hand-written per model, so a model can be added to
     __all__ and never get a dedicated test -- Valkyrie, Fetch, KinovaGen3,
     FetchCamera and LBR all sat with zero test coverage this way, three of
-    them silently broken (see tech-debt.md for details/history). Iterating
+    them silently broken). Iterating
     __all__ directly means newly-added models are covered automatically.
     """
 
@@ -191,7 +191,7 @@ class TestModelSmoke(unittest.TestCase):
             self.fail(
                 "Model(s) in EXPECTED_FAILURES now construct successfully -- "
                 "remove from EXPECTED_FAILURES (and close out the matching "
-                "tech-debt.md entry):\n" + "\n".join(unexpected_passes)
+                "tracking issue):\n" + "\n".join(unexpected_passes)
             )
 
 

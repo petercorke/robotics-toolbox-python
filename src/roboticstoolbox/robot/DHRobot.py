@@ -1470,7 +1470,7 @@ class DHRobot(Robot):
 
             # base rotation and the gravity sign convention are handled inside
             # frne() itself now -- pass self.base.R through rather than
-            # pre-rotating/negating by hand (see tech-debt.md / rne.md)
+            # pre-rotating/negating by hand (see rne.md)
             base_rot = np.ascontiguousarray(self.base.R, dtype=float)
 
             if fext is None:

@@ -180,7 +180,7 @@ napoleon_include_special_with_doc = True
 # into otherwise-reST docstrings should use explicit directives
 # (.. rubric:: Notes, etc.) instead — Napoleon's heuristic recognition of
 # those bare headers can conflict with sphinx_autodoc_typehints (see
-# tech-debt.md, 2026-07-05).
+# https://github.com/petercorke/robotics-toolbox-python/issues/574).
 
 # -------- Options AutoSummary -------------------------------------------------------#
 
