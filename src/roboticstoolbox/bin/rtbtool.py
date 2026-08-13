@@ -382,7 +382,8 @@ def main():
     if code is None:
         code = [
             "startup()",
-            "%precision %.3g",
+            "_prec = get_ipython().run_line_magic('precision', '%.3g'); "
+            "print(f'Default numeric formatting: {_prec}')",
         ]
     else:
         code.append("plt.ion()")
