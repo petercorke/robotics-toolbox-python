@@ -2207,11 +2207,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         env._add_teach_panel(self, q)
 
         if vellipse:
-            vell = self.vellipse(q, centre="ee", scale=0.5, add=False)
+            vell = self.vellipse(q, centre="ee", add=False)
+            env._teach_vellipse = vell
             env.add(vell)
 
         if fellipse:
             fell = self.fellipse(q, centre="ee", add=False)
+            env._teach_fellipse = fell
             env.add(fell)
 
         # Keep the plot open
