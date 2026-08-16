@@ -1,4 +1,5 @@
 from typing import Type
+import warnings
 import numpy as np
 from math import sin, cos, atan2, tan, sqrt, pi
 
@@ -81,9 +82,30 @@ class Bicycle(ContinuousBlock):
         :type x0: array_like(3), optional
         :param blockargs: |BlockOptions|
         :type blockargs: dict
+
+        .. deprecated:: the ``vlim`` and ``slim`` keywords are deprecated,
+            use ``speed_max`` and ``steer_max`` instead.
         """
         # TODO: add option to model the effect of steering arms, responds to
         #  gamma dot
+
+        vlim = blockargs.pop("vlim", None)
+        if vlim is not None:
+            warnings.warn(
+                "vlim is deprecated, use speed_max instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            speed_max = vlim
+
+        slim = blockargs.pop("slim", None)
+        if slim is not None:
+            warnings.warn(
+                "slim is deprecated, use steer_max instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            steer_max = slim
 
         super().__init__(nstates=3, **blockargs)
         self.type = "bicycle"

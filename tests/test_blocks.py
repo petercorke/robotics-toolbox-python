@@ -285,6 +285,13 @@ class MobileBlockTest(unittest.TestCase):
             [10 * np.cos(x[2]), 10 * np.sin(x[2]), 10 / 3 * np.tan(0.3)],
         )
 
+    def test_bicycle_vlim_slim_deprecated(self):
+
+        with self.assertWarns(DeprecationWarning):
+            block = Bicycle(vlim=2, slim=1.3)
+        self.assertEqual(block.vehicle.speed_max, 2)
+        self.assertEqual(block.vehicle.steer_max, 1.3)
+
     def test_unicycle(self):
 
         x = [2, 3, np.pi / 2]
