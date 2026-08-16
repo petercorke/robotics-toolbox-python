@@ -8,6 +8,7 @@ import warnings
 
 # import scipy as sp
 from spatialmath import base
+from spatialmath import SE3
 import matplotlib.pyplot as plt
 
 
@@ -37,12 +38,14 @@ class ShapePlot:
         if self.shape.stype == "cuboid":
             # scale
             self.mpl = base.plot_cuboid(
-                sides=self.shape.scale, pose=self.shape.base, ax=ax
+                sides=self.shape.scale, pose=SE3(self.shape.T, check=False), ax=ax
             )
 
         elif self.shape.stype == "sphere":
-            print(self.shape.base.t)
-            self.mpl = base.plot_sphere(self.shape.radius, pose=self.shape.base, ax=ax)
+            # print(self.shape.base.t)
+            self.mpl = base.plot_sphere(
+                self.shape.radius, pose=SE3(self.shape.T, check=False), ax=ax
+            )
 
         elif self.shape.stype == "cylinder":
             # radius, length
