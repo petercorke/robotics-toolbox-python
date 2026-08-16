@@ -79,8 +79,8 @@ jobs:
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
             pip install "websockets<11"
-            pip install --no-cache-dir git+https://github.com/petercorke/spatialgeometry.git@future
-            pip install --no-cache-dir git+https://github.com/petercorke/swift.git@future
+            pip install git+https://github.com/jhavl/spatialgeometry.git@future
+            pip install git+https://github.com/jhavl/swift.git@future
 
       - name: Install package
         run: pip install .[dev]
@@ -126,8 +126,8 @@ jobs:
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
           pip install "websockets<11"
-          pip install --no-cache-dir git+https://github.com/petercorke/spatialgeometry.git@future
-          pip install --no-cache-dir git+https://github.com/petercorke/swift.git@future
+          pip install git+https://github.com/jhavl/spatialgeometry.git@future
+          pip install git+https://github.com/jhavl/swift.git@future
 
       - name: Install package
         run: pip install .[dev]
@@ -153,8 +153,8 @@ jobs:
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
           pip install "websockets<11"
-          pip install --no-cache-dir git+https://github.com/petercorke/spatialgeometry.git@future
-          pip install --no-cache-dir git+https://github.com/petercorke/swift.git@future
+          pip install git+https://github.com/jhavl/spatialgeometry.git@future
+          pip install git+https://github.com/jhavl/swift.git@future
 
       - name: Install docs dependencies
         run: |
