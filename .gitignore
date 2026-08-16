@@ -1,5 +1,9 @@
 .DS_Store
 
+# Scratch/local-only files not meant to be tracked, relocated here in bulk
+# 2026-08-16 rather than committed piecemeal or left cluttering repo root.
+/UNTRACKED/
+
 .pyodide*/**
 *.doctree
 
