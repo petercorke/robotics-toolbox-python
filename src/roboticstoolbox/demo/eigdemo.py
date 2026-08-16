@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Eigenvalue demonstration
 
@@ -82,7 +83,7 @@ def main():
         print("eigdemo a b c d  # uses matrix [a b; c d]")
         sys.exit(0)
 
-    if sys.argv in ("-h", "--help", "help"):
+    if any(arg in ("-h", "--help", "help") for arg in sys.argv[1:]):
         help()
 
     if len(sys.argv) == 5:
