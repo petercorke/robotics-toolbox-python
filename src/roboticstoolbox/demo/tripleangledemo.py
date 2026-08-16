@@ -4,6 +4,7 @@
 @author Jesse Haviland
 """
 
+import sys
 import swift
 from math import pi
 import roboticstoolbox as rtb
@@ -78,7 +79,7 @@ def update_gimbals(theta, ring):
     plane.T = convert(R1 * R2 * R3 * SO3.Ry(pi / 2) * SO3.Rz(pi / 2))
 
 
-def demo():
+def demo(test: bool = False):
     # TODO
     #  rotate the rings according to the rotation axis, so that the axles
     #  point the right way
@@ -224,12 +225,14 @@ def demo():
     update_gimbals(0, 2)
     update_gimbals(0, 3)
 
-    while True:
-        env.step(0)
+    # duration=None runs until the browser disconnects (or forever, ^C to
+    # stop); a bounded duration lets --test smoke-test this demo without
+    # needing a browser at all (see SWIFT_HEADLESS in swift's launch()).
+    env.run(duration=0.5 if test else None)
 
 
 def main():
-    demo()
+    demo(test="--test" in sys.argv[1:])
 
 
 if __name__ == "__main__":

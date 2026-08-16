@@ -123,9 +123,9 @@ docs = [
 
 [project.scripts]
 
-eigdemo = "roboticstoolbox.examples.eigdemo:main"
-tripleangledemo = "roboticstoolbox.examples.tripleangledemo:main"
-twistdemo = "roboticstoolbox.examples.twistdemo:main"
+eigdemo = "roboticstoolbox.demo.eigdemo:main"
+tripleangledemo = "roboticstoolbox.demo.tripleangledemo:main"
+twistdemo = "roboticstoolbox.demo.twistdemo:main"
 rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 
@@ -188,4 +188,4 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-omit = ["src/roboticstoolbox/examples/*", "test_*.py"]
+omit = ["src/roboticstoolbox/demo/*", "test_*.py"]
