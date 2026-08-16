@@ -77,6 +77,12 @@ def eigdemo(A):
 
 
 def main():
+    # eigdemo() prints λ1/λ2 -- on Windows, stdout defaults to the legacy
+    # cp1252 console codepage (which can't encode λ) whenever it isn't a
+    # real console, e.g. piped/redirected output. reconfigure() (3.7+)
+    # forces UTF-8 regardless.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
 
     def help():
         print("eigdemo          # uses default matrix [1 2; 3 4]")
