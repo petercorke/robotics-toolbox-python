@@ -416,7 +416,6 @@ class ArmPlot(GraphicsBlock):
             self.q0,
             backend=self.backend,
             fig=self.fig,
-            ax=self.ax,
             block=False,
         )
 
