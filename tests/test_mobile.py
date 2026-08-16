@@ -108,6 +108,15 @@ class RangeBearingSensorTest(unittest.TestCase):
 
         self.assertIsInstance(str(self.rs), str)
 
+    def test_animate_deprecated(self):
+
+        with self.assertWarns(DeprecationWarning):
+            rs = RangeBearingSensor(self.veh, self.map, animate=True)
+        self.assertTrue(rs._animate)
+
+        with self.assertRaises(TypeError):
+            RangeBearingSensor(self.veh, self.map, bogus_kwarg=True)
+
     def test_reading(self):
 
         z, lm_id = self.rs.reading()
