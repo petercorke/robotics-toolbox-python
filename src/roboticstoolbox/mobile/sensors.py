@@ -1,4 +1,5 @@
 from abc import ABC
+import warnings
 import numpy as np
 import scipy as sp
 from math import pi, sin, cos
@@ -56,6 +57,7 @@ class SensorBase(ABC):
         delay=0.1,
         seed=0,
         verbose=False,
+        **kwargs,
     ):
         """Sensor.Sensor Sensor object constructor
         %
@@ -73,6 +75,12 @@ class SensorBase(ABC):
         # - Animation shows a ray from the vehicle position to the selected
         #   landmark.
         """
+        if kwargs:
+            raise TypeError(
+                f"SensorBase.__init__() got unexpected keyword argument(s): "
+                f"{', '.join(kwargs)}"
+            )
+
         self._robot = robot
         self._map = map
         self._every = every
@@ -266,9 +274,19 @@ class RangeBearingSensor(SensorBase):
             >>> print(sensor)
 
         :seealso: :class:`~roboticstoolbox.mobile.LandmarkMap` :class:`~roboticstoolbox.mobile.EKF`
+
+        .. deprecated:: the ``animate`` keyword is deprecated, use ``plot``
+            instead.
         """
 
-        # TODO change plot option to animate, but RVC3 uses plot
+        animate = kwargs.pop("animate", None)
+        if animate is not None:
+            warnings.warn(
+                "animate is deprecated, use plot instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            plot = animate
 
         # call the superclass constructor
         super().__init__(robot, map, **kwargs)
