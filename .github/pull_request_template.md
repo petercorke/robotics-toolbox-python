@@ -1,11 +1,23 @@
-We thank you in advance for your pull request, and for your interest and support of the Robotics Toolbox for Python.
+Thanks for contributing to RTB!
 
-You could help us a lot by:
+## Summary
 
-* Making your pull request relative to the `main` branch.
-* Including a reference/link to any related issues.
-* Providing a clear description of the problem you are addressing with the pull request, the changes proposed, and their rationale.
-  * We appreciate code comments explaining what your added block of code does.
-  * If your PR tackles a number of different issues, please submit multiple smaller/simpler PRs that we can individually accept or not.  Otherwise we have to ask you to modify your PR and leave some changes out. Unfortunately GH doesn't let us pick and choose.
-* Making your PR as small as possible. Don't include test files, data files, or notebooks that are specific to your project; ensure that notebooks, if of general interest, are saved with output values cleared, and that robot models include only those files required.  PyPI has strict size limits on packages, and already RTB is split into a toolbox and data package.
- 
+<!-- What does this PR do, and why? -->
+
+## Related issue
+
+<!-- Fixes #123 / Closes #123 — if applicable -->
+
+## Checklist
+
+Only the first item below is checked automatically — the rest are a self-check for you before requesting review, nothing currently verifies them for you.
+
+- [ ] PR title follows [Conventional Commits](https://www.conventionalcommits.org/) (`type: description`) — checked automatically, see the "Check PR title" status
+- [ ] Tests pass locally (`pytest`)
+- [ ] Added/updated tests for this change, if applicable
+- [ ] New/changed code is type-hinted with modern syntax (`X | Y`, `list[X]`, not `Union`/`Optional`/`List`)
+- [ ] Docstrings updated (reST style: `:param:`, `:returns:`; type hints in the signature cover types now, `:type:`/`:rtype:` are rarely needed)
+- [ ] PR is as small/focused as practical — if it tackles several unrelated things, consider splitting it so each can be reviewed and accepted independently
+- [ ] No test files, data files, or notebooks specific to your own project — PyPI has strict package size limits, and RTB is already split into a toolbox and a data package. Notebooks, if of general interest, should have output cleared before committing.
+
+<!-- Target branch is `main`. -->

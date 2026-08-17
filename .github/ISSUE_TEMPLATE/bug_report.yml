@@ -1,0 +1,50 @@
+name: Bug report
+description: Report unexpected behavior or a crash
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: RTB version
+      description: >-
+        Output of `pip show roboticstoolbox-python`. If you think this is
+        related to Swift (3D visualizer) or Spatial Maths, also include
+        `pip show swift-sim` / `pip show spatialmath-python`.
+      placeholder: "e.g. 1.3.0"
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "e.g. 3.12.4"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Linux, macOS, Windows, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproducible example
+      description: A short, self-contained code snippet that reproduces the issue
+      render: python
+    validations:
+      required: true
