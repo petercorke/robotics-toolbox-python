@@ -333,6 +333,26 @@ while not arrived:
 	<img src="./docs/figs/panda3.gif">
 </p>
 
+### Loading models from robot_descriptions
+
+The Panda example above uses one of the ~50 models shipped with the Toolbox, but many more
+robots are available on demand via the [robot_descriptions](https://github.com/robot-descriptions/robot_descriptions.py)
+package, which is installed automatically as a dependency. Passing a bare name (no file suffix)
+to `URDFRobot` fetches and loads it from there:
+
+```python
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
+ur5 = URDFRobot("ur5")
+```
+
+`rtb.models.catalog()` lists everything available — the models built into the Toolbox as well
+as those it can load from `robot_descriptions` — with filtering by keyword/DoF/model type and
+column sorting:
+
+```python
+rtb.models.catalog(mtype="URDF", sorton="name")
+```
+
 ### Run some examples
 
 The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/main/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub. Additionally, have a look in the [`examples`](https://github.com/petercorke/robotics-toolbox-python/tree/main/roboticstoolbox/examples) folder for many ready to run examples.

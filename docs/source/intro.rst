@@ -243,8 +243,44 @@ To load an arbitrary URDF or xacro file we can use::
 which will preprocess and parse the file, and loads any associated mesh assets.
 
 If `filename` is a plain name with no suffix, like `"ur5"`, the Toolbox will attempt to dynamically load
-the model from the `robot_descriptions <https://github.com/robot-descriptions/robot_descriptions.py>`_ package, which is a collection of URDF and xacro files for many robots.  
+the model from the `robot_descriptions <https://github.com/robot-descriptions/robot_descriptions.py>`_ package, which is a collection of URDF and xacro files for many robots.
 This package is installed automatically with RTB-P.
+
+To see what's available -- both the models shipped with the Toolbox and those it can load
+on demand from ``robot_descriptions`` -- use :func:`~roboticstoolbox.models.catalog.catalog`::
+
+    >>> from roboticstoolbox.models import catalog
+    >>> catalog(dof=6, mtype="URDF", sorton="name")
+
+.. code-block:: text
+
+    ┌─────────┬────────────┬────────────────────┬────────────┬─────┬──────┬──────────────────┬──────────┬──────────┬──────────┐
+    │  class  │ robot name │    manufacturer    │ model type │ DoF │ dims │        structure │ dynamics │ geometry │ keywords │
+    ├─────────┼────────────┼────────────────────┼────────────┼─────┼──────┼──────────────────┼──────────┼──────────┼──────────┤
+    │ Puma560 │ Puma560    │ Unimation          │ URDF       │ 6   │ 3d   │ RRRRRR           │          │ Y        │          │
+    │ UR10    │ ur10       │ Universal Robotics │ URDF       │ 6   │ 3d   │ RRRRRR           │ Y        │ Y        │          │
+    │ UR3     │ ur3        │ Universal Robotics │ URDF       │ 6   │ 3d   │ RRRRRR           │ Y        │ Y        │          │
+    │ UR5     │ ur5        │ Universal Robotics │ URDF       │ 6   │ 3d   │ RRRRRR           │ Y        │ Y        │          │
+    └─────────┴────────────┴────────────────────┴────────────┴─────┴──────┴──────────────────┴──────────┴──────────┴──────────┘
+
+    Importable from robot_descriptions:
+
+    ┌─────────────────────────┬────────────┬───────────────┬────────────┬─────┬────────────────┐
+    │ robot_descriptions name │ robot name │ manufacturer  │ model type │ DoF │    keywords    │
+    ├─────────────────────────┼────────────┼───────────────┼────────────┼─────┼────────────────┤
+    │ bolt                    │ Bolt       │ ODRI          │ URDF       │ 6   │ biped          │
+    │ skydio_x2               │ Skydio X2  │ Skydio        │ URDF       │ 6   │ drone          │
+    │ upkie                   │ Upkie      │ Tast's Robots │ URDF       │ 6   │ biped, wheeled │
+    └─────────────────────────┴────────────┴───────────────┴────────────┴─────┴────────────────┘
+
+This example is shown as static text rather than a live-executed block: the
+``robot_descriptions`` listing runs to hundreds of rows unfiltered, and the real output
+embeds a terminal hyperlink escape sequence around "robot_descriptions" that only
+degrades gracefully in an interactive terminal, not in captured/static output.
+
+The listing can be filtered by ``keywords`` or ``dof``, and sorted on ``name``, ``manufacturer``
+or ``dof``. Rows in the ``robot_descriptions`` table give the name to pass to ``URDFRobot()``, e.g.
+``URDFRobot("bolt")`` for the Bolt above, not the class name shown for Toolbox-wrapped models.
 
 
 Trajectories
