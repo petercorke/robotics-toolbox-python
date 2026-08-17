@@ -197,6 +197,7 @@ rst_epilog = """
 .. role:: raw-html(raw)
    :format: html
 .. |BlockOptions| replace:: :raw-html:`<a href="https://petercorke.github.io/bdsim/internals.html?highlight=block%20__init__#bdsim.Block.__init__">common Block options</a>`
+.. |GraphicsBlockOptions| replace:: :raw-html:`<a href="https://petercorke.github.io/bdsim/internals.html?highlight=graphicsblock%20__init__#bdsim.GraphicsBlock.__init__">common GraphicsBlock options</a>`
 """
 
 # -------- Suppress common noisy warnings ----------------------------------------#
