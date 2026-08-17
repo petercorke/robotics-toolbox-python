@@ -114,10 +114,12 @@ nb = ["nbmake"]
 docs = [
     "sphinx",
     "sphinx_rtd_theme",
-    "sphinx-autorun",
+    "sphinx-pyrunblock",
     "sphinx_autodoc_typehints",
     "sphinx-favicon",
     "sphinxcontrib-bibtex",
+    "sphinx-copybutton",
+    "sphinx-codeautolink",
 ]
 
 

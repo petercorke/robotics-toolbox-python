@@ -11,7 +11,8 @@
 import os
 import sys
 import re
-from datetime import date
+
+from sphinx_codeautolink import clean_ipython, clean_pycon
 
 # Defined relative to configuration directory which is where this file conf.py lives
 sys.path.append(os.path.abspath("exts"))
@@ -19,7 +20,7 @@ sys.path.append(os.path.abspath("exts"))
 # -------- Project information -------------------------------------------------------#
 
 project = "Robotics Toolbox for Python"
-copyright = f"{date.today().year}, Jesse Haviland and Peter Corke"
+copyright = "2020-present, Jesse Haviland and Peter Corke"
 author = "Jesse Haviland and Peter Corke"
 
 # Parse version number out of pyproject.toml
@@ -50,9 +51,11 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     # "scanpydoc.elegant_typehints",
-    "sphinx_autorun",
+    "sphinx_pyrunblock",
     "sphinx_favicon",
     "sphinxcontrib.bibtex",
+    "sphinx_copybutton",
+    "sphinx_codeautolink",
 ]
 
 bibtex_bibfiles = ["refs.bib"]
@@ -65,7 +68,8 @@ templates_path = ["_templates"]
 
 exclude_patterns = ["test_*"]
 
-# Options for spinx_autorun, used for inline examples
+# Options for sphinx_pyrunblock, used for inline examples (same config API
+# as its predecessor sphinx_autorun, which it renamed/replaced from)
 # choose UTF-8 encoding to allow for Unicode characters, eg. ansitable
 # Python session setup, turn off color printing for SE3, set NumPy precision
 autorun_languages = {}
@@ -93,7 +97,7 @@ html_theme_options = {
 }
 
 html_logo = "../figs/RobToolBox_RoundLogoB.png"
-html_last_updated_fmt = "%d-%b-%Y"
+html_last_updated_fmt = "%Y-%m-%d"
 html_show_sourcelink = False
 show_authors = True
 html_show_sphinx = False
@@ -164,6 +168,7 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "spatialmath": ("https://spatialmath-python.rai-inst.com/", None),
+    "pgraph": ("https://petercorke.github.io/pgraph-python/", None),
 }
 
 
@@ -209,7 +214,28 @@ rst_epilog = """
 suppress_warnings = [
     "ref.python",  # ambiguous cross-references (multiple targets for 'n', 'm', etc.)
     "ref.citation",  # duplicate citations (Yoshikawa85 etc in both arm_*.rst and docstrings)
+    "codeautolink.match_block",
+    "codeautolink.match_name",
+    "config.cache",  # codeautolink_custom_blocks holds function refs, not picklable
 ]
+
+# -------- sphinx-codeautolink options --------------------------------------------#
+
+codeautolink_custom_blocks = {
+    "pycon": clean_pycon,
+    "ipython": clean_ipython,
+    "ipython3": clean_ipython,
+}
+# Ensure pycon (Python console) blocks are included in the autolink search.
+codeautolink_search_css_classes = ["highlight-python", "highlight-pycon"]
+
+# -------- sphinx-copybutton options ----------------------------------------------#
+# Strip interactive prompts (Python and shell) when users copy code snippets.
+
+copybutton_prompt_text = r">>> |\.\.\. |\$ "
+copybutton_prompt_is_regexp = True
+copybutton_only_copy_prompt_lines = False
+copybutton_remove_prompts = True
 
 # -------- Options favicon -------------------------------------------------------#
 
