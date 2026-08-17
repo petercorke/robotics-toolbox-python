@@ -446,7 +446,7 @@ K. He, R. Newbury, T. Tran, J. Haviland, B. Burgess-Limerick, D. Kulić, P. Cork
 
 <p>
   <a href="https://youtu.be/vobLvg4E3kM">
-    <img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/docs/figs/vmc_youtube.png" width="560">
+    <img src="https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/main/docs/figs/vmc_youtube.png" width="560">
   </a>
 </p>
 
