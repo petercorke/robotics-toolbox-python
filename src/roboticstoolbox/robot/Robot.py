@@ -49,6 +49,13 @@ from roboticstoolbox.tools.data import rtb_path_to_datafile
 # A generic type variable representing any subclass of BaseLink
 LinkType = TypeVar("LinkType", bound=BaseLink)
 
+# Shared default objects for Robot.__init__'s gravity/keywords parameters,
+# identity-compared in the clone-from-Robot branch to detect "caller didn't
+# override this" (a plain equality/falsy check can't tell a genuine [0, 0,
+# -9.81] override apart from the unset default).
+_GRAVITY_DEFAULT: list[float] = [0, 0, -9.81]
+_KEYWORDS_DEFAULT: list[str] = []
+
 
 # ==================================================================================== #
 # ================= Robot Class ====================================================== #
@@ -67,8 +74,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         comment: str = "",
         base: NDArray | SE3 | None = None,
         tool: NDArray | SE3 | None = None,
-        gravity: ArrayLike = [0, 0, -9.81],
-        keywords: list[str] | tuple[str, ...] = [],
+        gravity: ArrayLike = _GRAVITY_DEFAULT,
+        keywords: list[str] | tuple[str, ...] = _KEYWORDS_DEFAULT,
         symbolic: bool = False,
         configs: dict[str, NDArray] | None = None,
         check_jindex: bool = True,
@@ -98,7 +105,24 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     link._parent_name = link.parent.name
                     link._parent = None
 
-            super().__init__(links, gripper_links=gripper_links)
+            # Clone the source robot's own attributes for anything the
+            # caller didn't explicitly override (name="" / base=None /
+            # etc. are the "not given" markers matching this signature's
+            # own defaults above).
+            super().__init__(
+                links,
+                gripper_links=gripper_links,
+                name=name or arg.name,
+                manufacturer=manufacturer or arg.manufacturer,
+                comment=comment or arg.comment,
+                base=base if base is not None else arg.base,
+                tool=tool if tool is not None else arg.tool,
+                gravity=gravity if gravity is not _GRAVITY_DEFAULT else arg.gravity,
+                keywords=keywords if keywords is not _KEYWORDS_DEFAULT else arg.keywords,
+                symbolic=symbolic,
+                configs=configs if configs is not None else arg.configs,
+                check_jindex=check_jindex,
+            )
 
             for i, gripper in enumerate(self.grippers):
                 gripper.tool = arg.grippers[i].tool.copy()
