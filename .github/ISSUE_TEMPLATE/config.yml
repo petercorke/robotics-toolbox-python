@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Common issues
-    url: https://github.com/petercorke/robotics-toolbox-python/wiki/Common-Issues
+  - name: FAQ / Common issues
+    url: https://github.com/petercorke/robotics-toolbox-python/wiki/FAQ
     about: Check here first — your issue may already have a known fix or workaround.
   - name: Ask a question
     url: https://github.com/petercorke/robotics-toolbox-python/discussions
