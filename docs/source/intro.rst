@@ -218,7 +218,7 @@ other link in order to determine the pose of that link's coordinate frame.
 Most URDF models come with meshes provided as Collada file which provide
 detailed geometry and color.  This can be visualized using the Swift simulator:
 
-.. runblock:: pycon
+.. code-block:: pycon
 
     >>> from roboticstoolbox.models.URDF import Panda
     >>> panda = Panda()
