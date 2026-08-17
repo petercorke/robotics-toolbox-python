@@ -13,3 +13,19 @@
       overflow: visible !important;
    }
 }
+
+/* Footer layout: copyright on the left, GitHub link on the right in smaller font. */
+div[role="contentinfo"] {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+}
+
+div[role="contentinfo"] p {
+    margin: 0;
+}
+
+.footer-github-link {
+    font-size: 0.85em;
+}

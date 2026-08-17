@@ -159,7 +159,7 @@ jobs:
       - name: Install docs dependencies
         run: |
           pip install .[docs]
-          pip install git+https://github.com/petercorke/sphinx-autorun.git sympy
+          pip install sympy
           sudo apt-get install -y graphviz
 
       - name: Build docs

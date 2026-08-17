@@ -1,0 +1,13 @@
+{% extends "!footer.html" %}
+{% block contentinfo %}
+  <p>
+  {%- if show_copyright %}
+    {%- trans copyright=copyright|e %}Copyright &#169; {{ copyright }}{% endtrans -%}
+  {%- endif %}
+  {%- if last_updated %}
+    {%- trans last_updated=last_updated|e %}: built {{ last_updated }}{% endtrans %}
+  {%- endif -%}
+  .
+  </p>
+  <a href="https://github.com/petercorke/robotics-toolbox-python" class="footer-github-link">GitHub</a>
+{% endblock %}
