@@ -265,7 +265,7 @@ class DynamicsMixin:
         >>> def myfunc(robot, t, q, qd, qstar, P, D):
         >>>     return (qstar - q) * P + qd * D  # P, D are (6,)
 
-        >>> tg = robot.fdyn(10, q0, myfunc, torque_args=(qstar, P, D)) )
+        >>> tg = robot.fdyn(10, q0, myfunc, torque_args=(qstar, P, D))
 
         Many integrators have variable step length which is problematic if we
         want to animate the result.  If ``dt`` is specified then the solver

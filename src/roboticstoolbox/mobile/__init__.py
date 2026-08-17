@@ -24,7 +24,7 @@ from roboticstoolbox.mobile.OccGrid import (
 
 # localization and state estimation
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
-from roboticstoolbox.mobile.sensors import RangeBearingSensor
+from roboticstoolbox.mobile.sensors import SensorBase, RangeBearingSensor
 from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.Animations import (
     VehicleAnimationBase,
@@ -59,6 +59,7 @@ __all__ = [
     "RandomPath",
     "PurePursuit",
     "LandmarkMap",
+    "SensorBase",
     "RangeBearingSensor",
     "PoseGraph",
     "PolygonMap",

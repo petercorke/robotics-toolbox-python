@@ -34,14 +34,14 @@ To specify a kinematic model using DH notation, we create a new Robot instance a
 a list of DH link objects.  For example, a Puma560 is simply::
 
     >>> robot = DHRobot(
-        [
-            RevoluteDH(alpha=pi/2),
-            RevoluteDH(a=0.4318),
-            RevoluteDH(d=0.15005, a=0.0203, alpha=-pi/2),
-            RevoluteDH(d=0.4318, alpha=pi/2),
-            RevoluteDH(alpha=-pi/2),
-            RevoluteDH()
-        ], name="Puma560")
+    ...     [
+    ...         RevoluteDH(alpha=pi/2),
+    ...         RevoluteDH(a=0.4318),
+    ...         RevoluteDH(d=0.15005, a=0.0203, alpha=-pi/2),
+    ...         RevoluteDH(d=0.4318, alpha=pi/2),
+    ...         RevoluteDH(alpha=-pi/2),
+    ...         RevoluteDH()
+    ...     ], name="Puma560")
 
 
 where only the non-zero parameters need to be specified. In this case we used
