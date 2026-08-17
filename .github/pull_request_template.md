@@ -2,7 +2,7 @@ We thank you in advance for your pull request, and for your interest and support
 
 You could help us a lot by:
 
-* Making your pull request relative to the `future` branch.  This is where we fix issues and merge pull requests prior to pushing out a new release.
+* Making your pull request relative to the `main` branch.
 * Including a reference/link to any related issues.
 * Providing a clear description of the problem you are addressing with the pull request, the changes proposed, and their rationale.
   * We appreciate code comments explaining what your added block of code does.

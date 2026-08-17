@@ -1,5 +1,5 @@
 # Run tests, coverage, and build docs across all supported platforms
-# Triggers on pushes/PRs to main and the active dev branch.
+# Triggers on pushes/PRs to main.
 #
 # spatialgeometry and swift-sim are installed from GitHub HEAD because the
 # current PyPI releases were compiled against NumPy 1.x and crash under 2.x.
@@ -10,9 +10,9 @@ name: CI
 
 on:
   push:
-    branches: [main, future]
+    branches: [main]
   pull_request:
-    branches: [main, future]
+    branches: [main]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
