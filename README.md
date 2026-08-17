@@ -422,7 +422,7 @@ copy the following
 
 ## Common Issues and Solutions
 
-See the common issues with fixes [here](https://github.com/petercorke/robotics-toolbox-python/wiki/Common-Issues).
+See the common issues with fixes [here](https://github.com/petercorke/robotics-toolbox-python/wiki/FAQ).
 
 ### Using the Toolbox with Windows?
 
