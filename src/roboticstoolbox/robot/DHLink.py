@@ -616,7 +616,7 @@ class DHLink(Link):
         sa = _sin(self.alpha)
         ca = _cos(self.alpha)
 
-        if self.ets[-1].isflip:
+        if self.isflip:
             q = -q + self.offset
         else:
             q = q + self.offset
