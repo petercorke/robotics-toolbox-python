@@ -168,6 +168,33 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(r0.qlim, ans)
         nt.assert_array_almost_equal(r1.qlim, np.c_[qlim])
 
+    def test_A_flip_standard_dh(self):
+        q = 0.3
+
+        flipped = rp.RevoluteDH(
+            d=0.2, a=0.3, alpha=0.4, offset=0.1, flip=True
+        )
+        normal = rp.RevoluteDH(
+            d=0.2, a=0.3, alpha=0.4, offset=0.1
+        )
+
+        nt.assert_array_almost_equal(
+            flipped.A(q).A,
+            normal.A(-q).A,
+        )
+
+        flipped = rp.PrismaticDH(
+            theta=0.2, a=0.3, alpha=0.4, offset=0.1, flip=True
+        )
+        normal = rp.PrismaticDH(
+            theta=0.2, a=0.3, alpha=0.4, offset=0.1
+        )
+
+        nt.assert_array_almost_equal(
+            flipped.A(q).A,
+            normal.A(-q).A,
+        )
+
     def test_fkine(self):
         l0 = rp.PrismaticDH()
         l1 = rp.RevoluteDH()
