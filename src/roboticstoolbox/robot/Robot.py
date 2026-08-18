@@ -160,11 +160,11 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         for link in self.links:
             if robot_alpha > 0:
                 for gi in link.geometry:
-                    gi.set_alpha(robot_alpha)
+                    gi.opacity = robot_alpha
                     ob.append(gi.to_dict())
             if collision_alpha > 0:
                 for gi in link.collision:
-                    gi.set_alpha(collision_alpha)
+                    gi.opacity = collision_alpha
                     ob.append(gi.to_dict())
 
         # Do the grippers now
@@ -172,11 +172,11 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             for link in gripper.links:
                 if robot_alpha > 0:
                     for gi in link.geometry:
-                        gi.set_alpha(robot_alpha)
+                        gi.opacity = robot_alpha
                         ob.append(gi.to_dict())
                 if collision_alpha > 0:
                     for gi in link.collision:
-                        gi.set_alpha(collision_alpha)
+                        gi.opacity = collision_alpha
                         ob.append(gi.to_dict())
 
         # for o in ob:
