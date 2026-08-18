@@ -22,6 +22,7 @@ from roboticstoolbox.tools.data import (
 )
 from roboticstoolbox.tools.plot import xplot
 from roboticstoolbox.tools.params import rtb_set_param, rtb_get_param
+from roboticstoolbox.tools.trchain import TrChainToken, trchain, trchain2
 from roboticstoolbox.tools.types import ArrayLike, NDArray, PyArrayLike
 
 __all__ = [
@@ -48,6 +49,9 @@ __all__ = [
     "rtb_path_to_datafile",
     "rtb_set_param",
     "rtb_get_param",
+    "TrChainToken",
+    "trchain",
+    "trchain2",
     "PyArrayLike",
     "ArrayLike",
     "NDArray",
