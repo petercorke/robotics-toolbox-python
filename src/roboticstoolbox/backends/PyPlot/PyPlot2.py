@@ -357,7 +357,7 @@ class PyPlot2(Connector):
     # def _plot_handler(self, sig, frame):
     #     plt.pause(0.001)
 
-    def _add_teach_panel(self, robot, q):
+    def _add_teach_panel(self, robot, q, handle=None, block=True):
         """
         Add a teach panel
 
@@ -365,6 +365,15 @@ class PyPlot2(Connector):
         :type robot: ERobot class
         :param q: inital joint angles in radians
         :type q: array_like(n)
+        :param handle: unused here -- PyPlot2 has no AssemblyHandle
+            concept, it drives the panel by mutating robot.q directly
+            below. Only meaningful for the Swift backend's own
+            _add_teach_panel().
+        :param block: unused here -- matplotlib's own GUI mainloop
+            (entered via this backend's env.hold()) already processes
+            slider events on its own, unlike Swift's hold() which needs
+            an active step() loop. Only meaningful for the Swift
+            backend's own _add_teach_panel().
         """
         fig = self.fig
 
