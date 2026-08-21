@@ -33,6 +33,24 @@ jobs:
       - name: Install package (core, no swift)
         run: pip install .[dev]
 
+      # Model tests (YuMi, Valkyrie, ...) load URDFs via the robot_descriptions
+      # package, which does NOT bundle the actual asset data -- on first use of
+      # a given model it lazily `git clone`s a large upstream asset repo
+      # straight into this cache dir. That clone is real network I/O and can
+      # be slow or occasionally flaky (timeout) on a cold runner. Caching the
+      # directory means only the first run after this lands pays that cost.
+      # Keyed by python-version too (not just OS) -- see the "Removed:
+      # robot_descriptions CI caching" tech-debt entry (git history,
+      # tech-debt.md as of commit f46b5c83^) for why a previous attempt at
+      # this (PR #530) didn't actually help: an OS-only key can't distinguish
+      # between the os x python-version matrix's parallel jobs. Bump "v2" to
+      # force a clean re-fetch if the cache ever ends up corrupted/stale.
+      - name: Cache robot_descriptions assets
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/robot_descriptions
+          key: robot-descriptions-v2-${{ runner.os }}-3.12
+
       - name: Verify compiled extensions built
         # Catches a silent build/import regression for _fknm_c/_frne_c --
         # without this, tests/test_fknm_fallback.py's C-vs-Python
@@ -82,6 +100,14 @@ jobs:
       - name: Install package
         run: pip install .[dev]
 
+      # See the "Cache robot_descriptions assets" step in test-core above --
+      # same reasoning, this job hits the same lazily-cloned model data.
+      - name: Cache robot_descriptions assets
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/robot_descriptions
+          key: robot-descriptions-v2-${{ runner.os }}-${{ matrix.python-version }}
+
       - name: Verify compiled extensions built
         # See the same step in test-core for why this matters.
         shell: bash
@@ -129,6 +155,14 @@ jobs:
       - name: Install package
         run: pip install .[dev]
 
+      # See the "Cache robot_descriptions assets" step in test-core above --
+      # same reasoning, this job hits the same lazily-cloned model data.
+      - name: Cache robot_descriptions assets
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/robot_descriptions
+          key: robot-descriptions-v2-${{ runner.os }}-3.12
+
       - name: Run coverage
         run: pytest tests/ --ignore=tests/test_blocks.py --cov=src/roboticstoolbox --cov-report=xml:coverage.xml -q
 
@@ -158,6 +192,14 @@ jobs:
           pip install .[docs]
           pip install sympy
           sudo apt-get install -y graphviz
+
+      # See the "Cache robot_descriptions assets" step in test-core above --
+      # intro.rst's YuMi runblock example loads via robot_descriptions too.
+      - name: Cache robot_descriptions assets
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/robot_descriptions
+          key: robot-descriptions-v2-${{ runner.os }}-3.12
 
       - name: Build docs
         # TODO: add -W once warning count reaches zero
