@@ -179,20 +179,27 @@ archs = ["AMD64"]
 # cibuildwheel manages the Emscripten SDK; scikit-build-core picks up
 # the toolchain file automatically from the PYODIDE environment.
 #
-# Pinned to cp312's default explicitly (matching release.yml's
-# CIBW_BUILD: cp312-pyodide_wasm32 override) rather than left to
-# cibuildwheel's own default, which is cp313/0.29.4 as of 4.1.1 -- that
-# silently broke docs-build's JupyterLite step once already (2026-08-23).
-# This is deliberately NOT the latest Pyodide cibuildwheel can target:
-# Pyodide only ships cp313+ support from 0.28.0a1 onward, by which point
-# JSPI ("stack switching") was already on by default (since 0.27.7) --
-# and Safari has no JSPI support, Firefox only behind a flag. cp312/0.27.x
-# is the newest JSPI-safe line. jupyterlite-pyodide-kernel's pin in
-# ci.yml must match (jupyterlite-pyodide-kernel==0.6.1, bundling Pyodide
-# 0.27.6) -- see that file's "Fetch pyodide wheel for JupyterLite" step,
-# and the toolbox-maintainer skill's JupyterLite version-pinning section
-# for the full JSPI/Safari story before changing either pin.
-pyodide-version = "0.27.7"
+# Deliberately NO explicit `pyodide-version` override here -- the
+# `build_pyodide` job in release.yml is pinned to cibuildwheel 3.4.1
+# specifically (not the 4.1.1 used for native wheels) so it self-resolves
+# its own default (cp312/Pyodide 0.27.7), matching spatialgeometry's own
+# config exactly. An explicit `pyodide-version = "0.27.7"` override was
+# tried and failed here: cibuildwheel 3.4.1's bundled pyodide-build
+# (0.33.0) rejected it outright as "not compatible" even though it's
+# that same tool's own documented default -- the override and the tool's
+# internal default-resolution logic aren't equivalent, and only the
+# latter actually works. Don't add one back without testing against a
+# real build first.
+#
+# Why cp312/0.27.x specifically: Pyodide only ships cp313+ support from
+# 0.28.0a1 onward, by which point WebAssembly JSPI ("stack switching")
+# was already on by default (since 0.27.7) -- and Safari has no JSPI
+# support, Firefox only behind a flag. cp312/0.27.x is the newest
+# JSPI-safe line. jupyterlite-pyodide-kernel's pin in ci.yml must match
+# (jupyterlite-pyodide-kernel==0.6.1, bundling Pyodide 0.27.6) -- see
+# that file's "Fetch pyodide wheel for JupyterLite" step, and the
+# toolbox-maintainer skill's JupyterLite version-pinning section for the
+# full JSPI/Safari story before changing any of this.
 
 
 [tool.pytest.ini_options]
