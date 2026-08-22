@@ -14,10 +14,7 @@ authors = [
 dependencies = [
     "numpy",
     "spatialmath-python>=1.1.16",
-    # Pinned to a commit on SG's unreleased main (1.4 draft) -- Link.py's
-    # SceneGroup(initlist) call requires the API there. Switch to a normal
-    # ">=1.4.0" constraint once spatialgeometry actually cuts that release.
-    "spatialgeometry @ git+https://github.com/jhavl/spatialgeometry.git@ce69b8bbe23ec79c0c395e007725512081808487",
+    "spatialgeometry>=1.4.0",
     "pgraph-python",
     "scipy",
     "matplotlib",
@@ -74,7 +71,7 @@ repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 [project.optional-dependencies]
 
-swift = ["swift-sim>=1.0.0", "websockets"]
+swift = ["swift-sim>=2.0.0", "websockets"]
 
 collision = ["coal; sys_platform != 'win32'", "trimesh"]
 
@@ -83,7 +80,7 @@ qp = ["qpsolvers", "quadprog"]
 tool = ["ipython", "pygments"]
 
 all = [
-    "swift-sim>=1.0.0",
+    "swift-sim>=2.0.0",
     "websockets",
     "qpsolvers",
     "quadprog",
