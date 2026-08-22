@@ -108,11 +108,11 @@ def demo(test: bool = False):
         update_gimbals(float(x), 3)
 
     r_one = swift.Slider(
-        set_one, min=-180, max=180, step=1, value=0, desc="Outer gimbal", unit="&#176;"
+        set_one, min=-180, max=180, step=1, value=0, label="Outer gimbal", unit="&#176;"
     )
 
     r_two = swift.Slider(
-        set_two, min=-180, max=180, step=1, value=0, desc="Middle gimbal", unit="&#176;"
+        set_two, min=-180, max=180, step=1, value=0, label="Middle gimbal", unit="&#176;"
     )
 
     r_three = swift.Slider(
@@ -121,24 +121,24 @@ def demo(test: bool = False):
         max=180,
         step=1,
         value=0,
-        desc="Inner gimbal",
+        label="Inner gimbal",
         unit="&#176;",
     )
 
     # buttons to set a 3-angle sequence
     ZYX_button = swift.Button(
-        lambda x: change_sequence("ZYX"), desc="ZYX (roll-pitch-yaw angles)"
+        lambda x: change_sequence("ZYX"), label="ZYX (roll-pitch-yaw angles)"
     )
 
     XYZ_button = swift.Button(
-        lambda x: change_sequence("XYZ"), desc="XYZ (roll-pitch-yaw angles)"
+        lambda x: change_sequence("XYZ"), label="XYZ (roll-pitch-yaw angles)"
     )
 
     ZYZ_button = swift.Button(
-        lambda x: change_sequence("ZYZ"), desc="ZYZ (Euler angles)"
+        lambda x: change_sequence("ZYZ"), label="ZYZ (Euler angles)"
     )
 
-    swift.Button(lambda x: set("ZYX"), desc="Set to Zero")
+    swift.Button(lambda x: set("ZYX"), label="Set to Zero")
 
     # button to reset joint angles
     def reset(e):
@@ -147,7 +147,7 @@ def demo(test: bool = False):
         r_three.value = 0
         # env.step(0)
 
-    zero_button = swift.Button(reset, desc="Set to Zero")
+    zero_button = swift.Button(reset, label="Set to Zero")
 
     def update_all_sliders():
         update_gimbals(float(r_one.value), 1)
@@ -184,7 +184,7 @@ def demo(test: bool = False):
 
     ring3_axis = swift.Radio(lambda x: angle(x, 2), options=["X", "Y", "Z"], checked=0)
 
-    label = swift.Label(desc="Triple angle")
+    label = swift.Label(label="Triple angle")
 
     # def chekked(e, el):
     #     nlabel = "s: "
@@ -204,7 +204,7 @@ def demo(test: bool = False):
     #     if e[3]:
     #         el.value = 1
 
-    #     label.desc = nlabel
+    #     label.label = nlabel
 
     env.add(label)
     env.add(r_one)
