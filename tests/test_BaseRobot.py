@@ -626,3 +626,77 @@ class TestBaseRobot(unittest.TestCase):
         robot = rtb.models.ETS.Panda()
         e = robot.teach(q=None, block=False, vellipse=True, fellipse=True)
         e.close()
+
+    def test_teach_swift(self):
+        try:
+            import swift  # noqa: F401
+        except ImportError:
+            self.skipTest("swift-sim not installed")
+
+        import os
+        from unittest.mock import patch
+
+        robot = rtb.models.Panda()
+        with patch.dict(os.environ, {"SWIFT_HEADLESS": "1"}):
+            e = robot.teach(q=robot.qr, block=False, backend="swift")
+        try:
+            self.assertEqual(type(e).__name__, "Swift")
+            e.step(0.05)
+            nt.assert_almost_equal(e.swift_objects[0].q, robot.qr)
+        finally:
+            e.close()
+
+    def test_teach_default_backend_resolves_to_swift(self):
+        # rtb.models.Panda() has hasgeometry=True, so teach() with no
+        # explicit backend= should resolve to Swift now that
+        # supports_teach=True -- matches plot()'s existing default, but
+        # is a real behaviour change (used to only ever be PyPlot/PyPlot2,
+        # since Swift always raised TypeError before this).
+        try:
+            import swift  # noqa: F401
+        except ImportError:
+            self.skipTest("swift-sim not installed")
+
+        import os
+        from unittest.mock import patch
+
+        robot = rtb.models.Panda()
+        self.assertTrue(robot.hasgeometry)
+        with patch.dict(os.environ, {"SWIFT_HEADLESS": "1"}):
+            e = robot.teach(q=robot.qr, block=False)
+        try:
+            self.assertEqual(type(e).__name__, "Swift")
+        finally:
+            e.close()
+
+    def test_teach_swift_writes_final_q_back_to_robot(self):
+        # PyPlot's teach() mutates robot.q throughout its own session, so
+        # a caller naturally finds the final taught pose in robot.q once
+        # teach() returns. Swift's AssemblyHandle deliberately never
+        # mirrors handle.q into robot.q *during* a session -- but
+        # _add_teach_panel() must still write it back once, at the point
+        # the session ends (block=True), so callers see the same thing
+        # regardless of backend.
+        try:
+            from roboticstoolbox.backends.swift import Swift
+        except ImportError:
+            self.skipTest("swift-sim not installed")
+
+        import os
+        from unittest.mock import patch
+
+        robot = rtb.models.Panda()
+
+        # block=True's own step loop (env.run()) would run forever in
+        # headless mode (nothing to disconnect from) -- not what this
+        # test cares about, only that the write-back after it runs.
+        # Patching it to a no-op isolates that.
+        with patch.object(Swift, "run", lambda self: None):
+            with patch.dict(os.environ, {"SWIFT_HEADLESS": "1"}):
+                e = robot.teach(q=robot.qz, block=True, backend="swift")
+        try:
+            handle = e.swift_objects[0]
+            nt.assert_almost_equal(robot.q, handle.q)
+            nt.assert_almost_equal(robot.q, robot.qz)
+        finally:
+            e.close()

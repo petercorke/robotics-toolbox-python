@@ -53,7 +53,7 @@ class TestPyPlotCapabilities(unittest.TestCase):
 
 
 class TestSwiftCapabilities(unittest.TestCase):
-    """RTB Swift wrapper opts out of teach and ellipse."""
+    """RTB Swift wrapper supports teach but opts out of ellipse (for now)."""
 
     def setUp(self):
         # Skip if swift-sim is not installed
@@ -62,18 +62,18 @@ class TestSwiftCapabilities(unittest.TestCase):
         except (ImportError, ModuleNotFoundError):
             self.skipTest("swift-sim not installed")
 
-    def test_swift_class_supports_teach_false(self):
+    def test_swift_class_supports_teach_true(self):
         from roboticstoolbox.backends.swift import Swift
-        self.assertFalse(Swift.supports_teach)
+        self.assertTrue(Swift.supports_teach)
 
     def test_swift_class_supports_ellipse_false(self):
         from roboticstoolbox.backends.swift import Swift
         self.assertFalse(Swift.supports_ellipse)
 
-    def test_load_backend_swift_supports_teach_false(self):
+    def test_load_backend_swift_supports_teach_true(self):
         from roboticstoolbox.backends import load_backend
         env = load_backend("swift")
-        self.assertFalse(env.supports_teach)
+        self.assertTrue(env.supports_teach)
 
     def test_load_backend_swift_supports_ellipse_false(self):
         from roboticstoolbox.backends import load_backend
