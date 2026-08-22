@@ -385,7 +385,7 @@ class ArmPlot(GraphicsBlock):
         :type q0: ndarray(N)
         :param backend: RTB backend name, defaults to 'pyplot'
         :type backend: str, optional
-        :param blockargs: |BlockOptions|
+        :param blockargs: |GraphicsBlockOptions|
         :type blockargs: dict
         """
         if robot is None:
