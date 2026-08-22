@@ -41,12 +41,12 @@ def update_pose_labels(q):
     T = robot.fkine(q)
     t = np.round(T.t, 3)
     r = np.round(T.rpy(unit="deg"), 3)
-    pose_labels[0].desc = f"x: {t[0]}"
-    pose_labels[1].desc = f"y: {t[1]}"
-    pose_labels[2].desc = f"z: {t[2]}"
-    pose_labels[3].desc = f"r: {r[0]}&#176;"
-    pose_labels[4].desc = f"p: {r[1]}&#176;"
-    pose_labels[5].desc = f"y: {r[2]}&#176;"
+    pose_labels[0].label = f"x: {t[0]}"
+    pose_labels[1].label = f"y: {t[1]}"
+    pose_labels[2].label = f"z: {t[2]}"
+    pose_labels[3].label = f"r: {r[0]}&#176;"
+    pose_labels[4].label = f"p: {r[1]}&#176;"
+    pose_labels[5].label = f"y: {r[2]}&#176;"
 
 
 def teach_update(t, values):
@@ -84,7 +84,7 @@ for j in range(robot.n):
             max=float(hi_disp),
             step=step,
             value=float(val_disp),
-            desc=f"{robot.name} joint {j}",
+            label=f"{robot.name} joint {j}",
             unit=unit,
             precision=2,
         ),
