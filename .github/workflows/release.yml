@@ -74,28 +74,32 @@ jobs:
           pip3 show cibuildwheel 2>/dev/null || echo "cibuildwheel not installed locally (normal)"
 
       - name: Build Pyodide wheel
-        # Forced to cp312 deliberately -- Pyodide only ships JSPI-default-on
-        # (WebAssembly "stack switching") starting at 0.27.7, and Pyodide's
-        # cp313 support only starts at 0.28.0a1, i.e. *after* JSPI became the
-        # default. There is no JSPI-safe cp313 (or later) Pyodide build.
-        # Safari has no JSPI support; Firefox only behind a flag. Without
-        # this override, cibuildwheel 4.1.1's own default silently targets
-        # cp313 instead of cp312 -- exactly what broke this job once already
-        # (2026-08-23). See pyproject.toml's [tool.cibuildwheel.pyodide]
+        # Pinned to cibuildwheel 3.4.1 deliberately -- NOT the same version
+        # as the native wheel builds below (4.1.1) -- because the tag
+        # *format* pyodide-build emits turns out to be a property of the
+        # pyodide-build tool version, not of which Pyodide version it
+        # targets. Confirmed directly: forcing cibuildwheel 4.1.1 to build
+        # cp312/Pyodide 0.27.7 (via CIBW_BUILD + CIBW_ENABLE overrides)
+        # still produced a wheel tagged `pyemscripten_2024_0_wasm32` (the
+        # new PEP-783 tag), which Pyodide 0.27.6's micropip -- like every
+        # pre-PEP-783 Pyodide release -- hard-rejects with "Wheel was built
+        # with Emscripten vpyemscripten.2024.0 but Pyodide was built with
+        # Emscripten v3.1.58". There is no `pyodide-version` override that
+        # fixes this: cibuildwheel 4.1.1 cannot produce an old-tag wheel at
+        # all. cibuildwheel 3.4.1 predates the tag-format change and
+        # defaults to cp312/Pyodide 0.27.7 unprompted (matches
+        # spatialgeometry's own pyodide build, same version, same reason).
+        #
+        # This is why cp312/Pyodide 0.27.x matters at all: Pyodide only
+        # ships cp313+ support from 0.28.0a1 onward, by which point
+        # WebAssembly JSPI ("stack switching") was already on by default
+        # (since 0.27.7) -- and Safari has no JSPI support, Firefox only
+        # behind a flag. See pyproject.toml's [tool.cibuildwheel.pyodide]
         # comment and the toolbox-maintainer skill's JupyterLite
         # version-pinning section for the full story before changing this.
-        #
-        # CIBW_ENABLE: pyodide-eol is required too -- cibuildwheel 4.1.1
-        # considers cp312/0.27.x "end of life" now that cp313/0.29.x is its
-        # new default, and refuses to build it at all without this explicit
-        # opt-in (confirmed directly: omitting it fails outright with
-        # "Invalid build selector: 'cp312-pyodide_wasm32'. This selector
-        # matches a group that wasn't enabled").
-        uses: pypa/cibuildwheel@v4.1.1
+        uses: pypa/cibuildwheel@v3.4.1
         env:
           CIBW_PLATFORM: pyodide
-          CIBW_BUILD: cp312-pyodide_wasm32
-          CIBW_ENABLE: pyodide-eol
 
       - uses: actions/upload-artifact@v7
         if: success()
