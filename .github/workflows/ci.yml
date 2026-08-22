@@ -1,10 +1,5 @@
 # Run tests, coverage, and build docs across all supported platforms
 # Triggers on pushes/PRs to main.
-#
-# spatialgeometry and swift-sim are installed from GitHub HEAD because the
-# current PyPI releases were compiled against NumPy 1.x and crash under 2.x.
-# Once numpy-2-compatible releases are published, remove those two steps and
-# use plain `pip install .[dev]`.
 
 name: CI
 
@@ -91,14 +86,8 @@ jobs:
           "TEMP=C:\T" >> $env:GITHUB_ENV
           "TMP=C:\T"  >> $env:GITHUB_ENV
 
-      - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
-        run: |
-            pip install "websockets<11"
-            pip install git+https://github.com/jhavl/spatialgeometry.git@future
-            pip install git+https://github.com/jhavl/swift.git@future
-
       - name: Install package
-        run: pip install .[dev]
+        run: pip install .[dev,swift]
 
       # See the "Cache robot_descriptions assets" step in test-core above --
       # same reasoning, this job hits the same lazily-cloned model data.
@@ -146,14 +135,8 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
-        run: |
-          pip install "websockets<11"
-          pip install git+https://github.com/jhavl/spatialgeometry.git@future
-          pip install git+https://github.com/jhavl/swift.git@future
-
       - name: Install package
-        run: pip install .[dev]
+        run: pip install .[dev,swift]
 
       # See the "Cache robot_descriptions assets" step in test-core above --
       # same reasoning, this job hits the same lazily-cloned model data.
@@ -180,12 +163,6 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-
-      - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
-        run: |
-          pip install "websockets<11"
-          pip install git+https://github.com/jhavl/spatialgeometry.git@future
-          pip install git+https://github.com/jhavl/swift.git@future
 
       - name: Install docs dependencies
         run: |
