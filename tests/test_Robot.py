@@ -592,6 +592,37 @@ class TestRobot(unittest.TestCase):
 
         self.assertEqual(r.n, r2.n)
 
+    def test_copy_init_inherits_source_attributes(self):
+        # Cloning via Robot(other_robot) with no overrides should carry
+        # over the source robot's own name/base/tool/etc, not silently
+        # reset them to the class defaults.
+        from spatialmath import SE3
+
+        r = rtb.models.Panda()
+
+        r2 = rtb.Robot(r)
+
+        self.assertEqual(r2.name, r.name)
+        self.assertEqual(r2.manufacturer, r.manufacturer)
+        nt.assert_array_almost_equal(r2.base.A, r.base.A)
+        nt.assert_array_almost_equal(r2.tool.A, r.tool.A)
+        nt.assert_array_almost_equal(r2.gravity, r.gravity)
+
+    def test_copy_init_overrides_attributes(self):
+        # Cloning via Robot(other_robot, name=..., base=..., tool=...)
+        # should apply the overrides rather than dropping them.
+        from spatialmath import SE3
+
+        r = rtb.models.Panda()
+        base = SE3(0.1, 0.2, 0.3)
+        tool = SE3(0, 0, 0.05)
+
+        r2 = rtb.Robot(r, name="panda2", base=base, tool=tool)
+
+        self.assertEqual(r2.name, "panda2")
+        nt.assert_array_almost_equal(r2.base.A, base.A)
+        nt.assert_array_almost_equal(r2.tool.A, tool.A)
+
     def test_init2(self):
         r = rtb.Robot(rtb.ETS(rtb.ET.Ry(qlim=[-1, 1])))
 
