@@ -39,7 +39,7 @@ for link in panda.links:
                 max=np.round(np.rad2deg(link.qlim[1]), 2),
                 step=1,
                 value=np.round(np.rad2deg(panda.q[j]), 2),
-                desc="Panda Joint " + str(j),
+                label="Panda Joint " + str(j),
                 unit="&#176;",
             )
         )
