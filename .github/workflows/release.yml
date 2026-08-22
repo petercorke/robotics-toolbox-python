@@ -84,10 +84,18 @@ jobs:
         # (2026-08-23). See pyproject.toml's [tool.cibuildwheel.pyodide]
         # comment and the toolbox-maintainer skill's JupyterLite
         # version-pinning section for the full story before changing this.
+        #
+        # CIBW_ENABLE: pyodide-eol is required too -- cibuildwheel 4.1.1
+        # considers cp312/0.27.x "end of life" now that cp313/0.29.x is its
+        # new default, and refuses to build it at all without this explicit
+        # opt-in (confirmed directly: omitting it fails outright with
+        # "Invalid build selector: 'cp312-pyodide_wasm32'. This selector
+        # matches a group that wasn't enabled").
         uses: pypa/cibuildwheel@v4.1.1
         env:
           CIBW_PLATFORM: pyodide
           CIBW_BUILD: cp312-pyodide_wasm32
+          CIBW_ENABLE: pyodide-eol
 
       - uses: actions/upload-artifact@v7
         if: success()
