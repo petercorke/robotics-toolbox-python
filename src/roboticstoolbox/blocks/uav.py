@@ -676,7 +676,7 @@ class MultiRotorPlot(GraphicsBlock):
         :type flapscale: float
         :param projection: 3D projection, one of: 'ortho' [default], 'perspective'
         :type projection: str
-        :param blockargs: |BlockOptions|
+        :param blockargs: |GraphicsBlockOptions|
         :type blockargs: dict
         """
         if model is None:
