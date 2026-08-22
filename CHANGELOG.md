@@ -2,6 +2,9 @@
 
 ## [1.4.0](https://github.com/petercorke/robotics-toolbox-python/compare/v1.3.1...v1.4.0) (2026-08-22)
 
+**Highlights**: using significantly reworked versions of [Swift](https://github.com/jhavl/swift) (v2.0.0) and [Spatial Geometry](https://github.com/jhavl/spatialgeometry) (v1.3.0) -- lots of bug fixes, new features and documentation.  Collision detection changed from PyBullet (no longer well maintained to [Coal](https://github.com/coal-library/coal).  Integrates with [Robot Descriptions](https://github.com/robot-descriptions) for access to over 150 URDF models, loaded dynamically and cached locally -- this means that RTB can now ship with a very minimum set of mesh models.  Significant work on RNE models (DH Python, DH C, ETS Featherstone) all consistent and checked against analytic model.  Additional work on docs, build system, and testing.  
+
+Significant amount of tech debt identified, these are now tracked in Issues. Happy for help from **first time contributors**, projects from bite size to a full meal.
 
 ### Features
 
