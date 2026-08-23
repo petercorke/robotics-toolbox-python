@@ -4,7 +4,7 @@ name = "roboticstoolbox-python"
 
 description = "A Python library for robotics education and research"
 
-version = "1.3.0"
+version = "1.4.0"
 
 authors = [
     { name = "Jesse Haviland", email = "j.haviland@qut.edu.au" },
@@ -14,10 +14,7 @@ authors = [
 dependencies = [
     "numpy",
     "spatialmath-python>=1.1.16",
-    # Pinned to a commit on SG's unreleased main (1.4 draft) -- Link.py's
-    # SceneGroup(initlist) call requires the API there. Switch to a normal
-    # ">=1.4.0" constraint once spatialgeometry actually cuts that release.
-    "spatialgeometry @ git+https://github.com/jhavl/spatialgeometry.git@ce69b8bbe23ec79c0c395e007725512081808487",
+    "spatialgeometry>=1.4.0",
     "pgraph-python",
     "scipy",
     "matplotlib",
@@ -74,7 +71,7 @@ repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 [project.optional-dependencies]
 
-swift = ["swift-sim>=1.0.0", "websockets"]
+swift = ["swift-sim>=2.0.0", "websockets"]
 
 collision = ["coal; sys_platform != 'win32'", "trimesh"]
 
@@ -83,7 +80,7 @@ qp = ["qpsolvers", "quadprog"]
 tool = ["ipython", "pygments"]
 
 all = [
-    "swift-sim>=1.0.0",
+    "swift-sim>=2.0.0",
     "websockets",
     "qpsolvers",
     "quadprog",
@@ -181,6 +178,28 @@ archs = ["AMD64"]
 # Pyodide (wasm32-emscripten) — used by JupyterLite
 # cibuildwheel manages the Emscripten SDK; scikit-build-core picks up
 # the toolchain file automatically from the PYODIDE environment.
+#
+# Deliberately NO explicit `pyodide-version` override here -- the
+# `build_pyodide` job in release.yml is pinned to cibuildwheel 3.4.1
+# specifically (not the 4.1.1 used for native wheels) so it self-resolves
+# its own default (cp312/Pyodide 0.27.7), matching spatialgeometry's own
+# config exactly. An explicit `pyodide-version = "0.27.7"` override was
+# tried and failed here: cibuildwheel 3.4.1's bundled pyodide-build
+# (0.33.0) rejected it outright as "not compatible" even though it's
+# that same tool's own documented default -- the override and the tool's
+# internal default-resolution logic aren't equivalent, and only the
+# latter actually works. Don't add one back without testing against a
+# real build first.
+#
+# Why cp312/0.27.x specifically: Pyodide only ships cp313+ support from
+# 0.28.0a1 onward, by which point WebAssembly JSPI ("stack switching")
+# was already on by default (since 0.27.7) -- and Safari has no JSPI
+# support, Firefox only behind a flag. cp312/0.27.x is the newest
+# JSPI-safe line. jupyterlite-pyodide-kernel's pin in ci.yml must match
+# (jupyterlite-pyodide-kernel==0.6.1, bundling Pyodide 0.27.6) -- see
+# that file's "Fetch pyodide wheel for JupyterLite" step, and the
+# toolbox-maintainer skill's JupyterLite version-pinning section for the
+# full JSPI/Safari story before changing any of this.
 
 
 [tool.pytest.ini_options]

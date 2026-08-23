@@ -72,10 +72,32 @@ jobs:
           python3 --version
           pip3 --version
           pip3 show cibuildwheel 2>/dev/null || echo "cibuildwheel not installed locally (normal)"
-          echo "PYODIDE_VERSION=${{ vars.PYODIDE_VERSION || '0.27.5' }}"
 
       - name: Build Pyodide wheel
-        uses: pypa/cibuildwheel@v4.1.1
+        # Pinned to cibuildwheel 3.4.1 deliberately -- NOT the same version
+        # as the native wheel builds below (4.1.1) -- because the tag
+        # *format* pyodide-build emits turns out to be a property of the
+        # pyodide-build tool version, not of which Pyodide version it
+        # targets. Confirmed directly: forcing cibuildwheel 4.1.1 to build
+        # cp312/Pyodide 0.27.7 (via CIBW_BUILD + CIBW_ENABLE overrides)
+        # still produced a wheel tagged `pyemscripten_2024_0_wasm32` (the
+        # new PEP-783 tag), which Pyodide 0.27.6's micropip -- like every
+        # pre-PEP-783 Pyodide release -- hard-rejects with "Wheel was built
+        # with Emscripten vpyemscripten.2024.0 but Pyodide was built with
+        # Emscripten v3.1.58". There is no `pyodide-version` override that
+        # fixes this: cibuildwheel 4.1.1 cannot produce an old-tag wheel at
+        # all. cibuildwheel 3.4.1 predates the tag-format change and
+        # defaults to cp312/Pyodide 0.27.7 unprompted (matches
+        # spatialgeometry's own pyodide build, same version, same reason).
+        #
+        # This is why cp312/Pyodide 0.27.x matters at all: Pyodide only
+        # ships cp313+ support from 0.28.0a1 onward, by which point
+        # WebAssembly JSPI ("stack switching") was already on by default
+        # (since 0.27.7) -- and Safari has no JSPI support, Firefox only
+        # behind a flag. See pyproject.toml's [tool.cibuildwheel.pyodide]
+        # comment and the toolbox-maintainer skill's JupyterLite
+        # version-pinning section for the full story before changing this.
+        uses: pypa/cibuildwheel@v3.4.1
         env:
           CIBW_PLATFORM: pyodide
 
@@ -139,14 +161,19 @@ jobs:
           name: sdist
           path: dist
 
-      # Exclude Pyodide wheels — PyPI rejects the pyodide_* platform tag.
-      # They are uploaded as release assets in the next step instead.
+      # Exclude the Pyodide wheel -- PyPI rejects the old, pre-standard
+      # `pyodide_*` platform tag this cp312 build produces. Deliberately
+      # staying on this tag (not the newer PEP-783 `pyemscripten_*` one) to
+      # keep the wasm build JSPI-safe for Safari/Firefox -- see the
+      # `build_pyodide` job's comment and the toolbox-maintainer skill's
+      # JupyterLite version-pinning section. It's attached as a GitHub
+      # Release asset in the next job instead.
       - name: Remove Pyodide wheels from PyPI upload set
         run: rm -f dist/*pyodide*.whl
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip_existing: true
+          skip-existing: true
 
   upload_pyodide_asset:
     name: Attach Pyodide wheel to GitHub release

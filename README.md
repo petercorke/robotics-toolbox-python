@@ -310,24 +310,29 @@ env = swift.Swift()
 env.launch(realtime=True)
 
 panda = rtb.models.Panda()
-panda.q = panda.qr
+handle = env.add(panda)
+handle.q = panda.qr
 
-Tep = panda.fkine(panda.q) * sm.SE3.Trans(0.2, 0.2, 0.45)
+Tep = panda.fkine(handle.q) * sm.SE3.Trans(0.2, 0.2, 0.45)
 
 arrived = False
-env.add(panda)
 
 dt = 0.05
 
 while not arrived:
 
-    v, arrived = rtb.p_servo(panda.fkine(panda.q), Tep, 1)
-    panda.qd = np.linalg.pinv(panda.jacobe(panda.q)) @ v
+    v, arrived = rtb.p_servo(panda.fkine(handle.q), Tep, 1)
+    handle.qd = np.linalg.pinv(panda.jacobe(handle.q)) @ v
     env.step(dt)
 
 # Uncomment to stop the browser tab from closing
 # env.hold()
 ```
+
+`env.add(panda)` returns a handle owning this instance's live joint state --
+drive the simulation via `handle.q`/`handle.qd`, not `panda.q`/`panda.qd`
+directly. `panda` itself stays a plain, shareable kinematic model, so the
+same `panda` object can back several independent handles/instances at once.
 
 <p align="center">
 	<img src="./docs/figs/panda3.gif">
