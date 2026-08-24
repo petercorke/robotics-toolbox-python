@@ -1138,6 +1138,35 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(qdd1[0, :], res, decimal=4)
         nt.assert_array_almost_equal(qdd1[1, :], res, decimal=4)
 
+    def test_accel_x(self):
+        puma = rp.models.DH.Puma560()
+        q = np.array([0.2, -0.7, 0.4, 0.3, 0.5, -0.2])
+        xd = np.array([0.1, -0.2, 0.15, 0.05, -0.1, 0.2])
+        wrench = np.array([1.0, -0.5, 0.25, 0.1, -0.2, 0.3])
+
+        xdd = puma.accel_x(q, xd, wrench)
+        xdd_traj = puma.accel_x(
+            np.vstack((q, q)),
+            np.vstack((xd, xd)),
+            np.vstack((wrench, wrench)),
+        )
+
+        nt.assert_allclose(
+            xdd,
+            [-1.645157, 4.489468, -4.854711, 3.818259, 6.472284, -2.428306],
+            rtol=1e-5,
+            atol=1e-6,
+        )
+        nt.assert_allclose(xdd_traj, np.vstack((xdd, xdd)))
+
+    def test_accel_x_redundant_robot_returns_cartesian_acceleration(self):
+        panda = rp.models.DH.Panda()
+
+        xdd = panda.accel_x(panda.qr, np.zeros(6), np.zeros(6))
+
+        self.assertEqual(xdd.shape, (6,))
+        self.assertTrue(np.isfinite(xdd).all())
+
     def test_inertia(self):
         puma = rp.models.DH.Puma560()
         puma.q = puma.qn
