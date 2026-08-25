@@ -1256,21 +1256,23 @@ class DynamicsMixin:
         :returns: Operational space accelerations of the end-effector
         :rtype: ndarray(6,)
 
-        ``xdd = accel_x(q, qd, wrench)`` is the operational space acceleration
+        ``xdd = accel_x(q, xd, wrench)`` is the operational space acceleration
         due to ``wrench`` applied to the end-effector of a robot in joint
-        configuration ``q`` and joint velocity ``qd``.
+        configuration ``q`` and operational space velocity ``xd``.
 
         .. math::
 
-            \ddot{x} = \mathbf{J}(q) \mathbf{M}(q)^{-1} \left(
-                \mathbf{J}(q)^T w - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)
+            \ddot{x} = \dot{\mathbf{J}}_a(q, \dot{q})\dot{q}
+                + \mathbf{J}_a(q) \mathbf{M}(q)^{-1} \left(
+                    \mathbf{J}_a(q)^T w - \mathbf{C}(q)\dot{q}
+                    - \mathbf{g}(q)
                 \right)
 
         **Trajectory operation**
 
-        If `q`, `qd`, torque are matrices (m,n) then ``qdd`` is a matrix (m,n)
-        where each row is the acceleration corresponding to the equivalent rows
-        of q, qd, wrench.
+        If ``q`` is a matrix (m,n), and ``xd`` and ``wrench`` are matrices
+        (m,6), then ``xdd`` is a matrix (m,6) where each row is the acceleration
+        corresponding to the equivalent rows of ``q``, ``xd``, and ``wrench``.
 
         .. rubric:: Notes
 
@@ -1294,7 +1296,7 @@ class DynamicsMixin:
         if q.shape[1] != 6:
             pinv = True
 
-        xdd = np.zeros((q.shape[0], self.n))
+        xdd = np.zeros((q.shape[0], 6))
 
         for k, (qk, xdk, wk) in enumerate(zip(q, xd, w)):
             Ja = self.jacob0_analytical(qk, representation=representation)
@@ -1322,16 +1324,10 @@ class DynamicsMixin:
 
             # xd = Ja qd
             # xdd = Jad qd + Ja qdd
-            #
-            # Ja = T J
-            # Jad = Td J + T Jd
-            # assume Td = 0, not sure how valid that is
-
-            # need Jacobian dot
             qdk = Ji @ xdk
-            Jd = self.jacob0_dot(qk, qdk, J0=Ja)
+            Jad = self.jacob0_dot(qk, qdk, representation=representation)
 
-            xdd[k, :] = T @ (Jd @ qdk + J @ qdd)
+            xdd[k, :] = Jad @ qdk + Ja @ qdd
 
         if q.shape[0] == 1:
             return xdd[0, :]
