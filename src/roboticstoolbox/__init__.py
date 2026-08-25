@@ -61,6 +61,9 @@ __all__ = [
     "rtb_path_to_datafile",
     "rtb_set_param",
     "rtb_get_param",
+    "TrChainToken",
+    "trchain",
+    "trchain2",
     # mobile
     "VehicleBase",
     "Bicycle",

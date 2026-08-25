@@ -188,33 +188,63 @@ jobs:
         # A plain `pip wheel`/`build` here would produce a native
         # macOS/Linux wheel with the compiled _fknm_c/_frne_c extensions --
         # useless in Pyodide (WASM). release.yml already cross-compiles a
-        # genuine wasm32 wheel via cibuildwheel (CIBW_PLATFORM=pyodide) and
-        # attaches it to each GitHub Release (PyPI rejects the pyodide_*
-        # platform tag), so reuse that rather than rebuilding here. This
-        # means the "Try it Now" experience tracks the latest release, not
-        # bleeding-edge main -- deliberate, since a full Pyodide/Emscripten
-        # rebuild on every docs push would be slow.
+        # genuine wasm32 wheel via cibuildwheel (CIBW_PLATFORM=pyodide),
+        # forced to cp312 (see release.yml's build_pyodide job and
+        # pyproject.toml's [tool.cibuildwheel.pyodide] comment) and
+        # attaches it to each GitHub Release, since PyPI rejects this old,
+        # pre-standard `pyodide_*` platform tag. This means the "Try it
+        # Now" experience tracks the latest *release*, not bleeding-edge
+        # main -- deliberate, since a full Pyodide/Emscripten rebuild on
+        # every docs push would be slow.
         #
-        # STOPGAP (see https://github.com/petercorke/robotics-toolbox-python/issues/579):
-        # only fetch the cp312 wheel, matching
-        # jupyterlite-pyodide-kernel==0.6.1 below. A release can carry wasm
-        # wheels for more than one CPython version (cibuildwheel's pyodide
-        # platform builds one per supported interpreter), and
+        # Deliberately staying on cp312/the old tag rather than the newer
+        # PEP-783 `pyemscripten_*` tag PyPI now accepts: Pyodide only
+        # supports cp313+ from 0.28.0a1 onward, by which point WebAssembly
+        # JSPI ("stack switching") was already on by default (since
+        # 0.27.7) -- and Safari has no JSPI support, Firefox only behind a
+        # flag. cp312/0.27.x is the newest JSPI-safe line. See the
+        # toolbox-maintainer skill's JupyterLite version-pinning section
+        # before "modernizing" this away.
+        #
+        # The `--pattern '*cp312*pyodide*'` filter also guards against a
+        # real upstream bug (https://github.com/petercorke/robotics-toolbox-python/issues/579):
         # jupyterlite-pyodide-kernel's all.json generator keys entries by
-        # (name, version) and *overwrites* rather than accumulates, so
-        # fetching more than one wheel for the same package+version
-        # silently drops all but the alphabetically-last from the piplite
-        # index -- no build error, just a runtime "can't find a pure
-        # Python 3 wheel" in the browser. Confirmed still present in
-        # jupyterlite_pyodide_kernel 0.7.1 (latest as of 2026-07-21), not
-        # just 0.6.1 -- an upstream bug to route around, not a version to
-        # bump past. Intended to be removed once the pure-Python wasm
-        # wheel work lands and this whole fetch step goes away.
+        # (name, version) and *overwrites* rather than accumulates, so if a
+        # release ever carried wasm wheels for more than one CPython
+        # version, fetching more than one would silently drop all but the
+        # alphabetically-last from the piplite index -- no build error,
+        # just a runtime "can't find a pure Python 3 wheel" in the browser.
+        # release.yml's CIBW_BUILD restriction means only one wasm wheel
+        # (cp312) is ever built now, so this shouldn't trigger in practice,
+        # but the filter costs nothing to keep as a defence-in-depth guard.
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p docs/lite/pypi
           gh release download --repo "$GITHUB_REPOSITORY" --pattern '*cp312*pyodide*' --dir docs/lite/pypi --clobber
+
+      - name: Fetch spatialgeometry pyodide wheel for JupyterLite
+        # spatialgeometry is an unconditional runtime dependency of
+        # roboticstoolbox-python (since it stopped vendoring a pure-Python
+        # copy internally at 1.4.0), so `piplite.install` needs a wasm
+        # wheel for it too, staged in the same local index. Fetched from
+        # spatialgeometry's own GitHub Release (jhavl/spatialgeometry) --
+        # it doesn't publish this to PyPI at all (tech debt raised
+        # upstream: jhavl/spatialgeometry#46, though note that issue's
+        # "publish via the new PEP-783 tag" suggestion has the same
+        # JSPI/Safari problem as RTB's own wheel above if it means moving
+        # off cp312). Matching RTB's own wheel above, this fetches the
+        # cp312 build specifically. Low-risk despite the cross-repo fetch:
+        # spatialgeometry's own pyproject.toml notes its CMake build skips
+        # the compiled nanobind extension entirely under Emscripten, so
+        # this wheel is genuinely pure Python -- no Pyodide ABI-version
+        # coupling to track here, unlike the JSPI/cp312 discipline the
+        # RTB wheel above needs.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download --repo jhavl/spatialgeometry \
+            --pattern '*cp312*pyodide*wasm32*' --dir docs/lite/pypi --clobber
 
       - name: Sync notebooks into JupyterLite content
         # Copies *.ipynb plus any local asset directories (e.g.
@@ -257,12 +287,23 @@ jobs:
           PY
 
       - name: Build JupyterLite site
-        # jupyterlite-pyodide-kernel is pinned deliberately: newer versions
-        # bundle a newer Pyodide runtime than the cp312 wasm wheel attached
-        # to releases targets, which manifests as a silent hang in the
-        # browser (no error, just a kernel that never responds) rather than
-        # a build-time failure. See toolbox-infrastructure.md for the full
-        # version-skew story before bumping this.
+        # jupyterlite-pyodide-kernel is pinned deliberately -- NOT just for
+        # wasm-ABI matching with the cp312 wheel fetched above, but because
+        # newer kernel releases bundle Pyodide >=0.27.7, which turned
+        # WebAssembly JSPI ("stack switching") on by default for
+        # run_until_complete(). Browsers without JSPI support (Safari has
+        # none as of 2026-08; Firefox only behind a flag) either crash the
+        # kernel outright or, with the enableRunUntilComplete: false
+        # workaround, turn run_until_complete into a fire-and-forget no-op --
+        # letting a cell's package/import machinery run before an install has
+        # actually finished landing (confirmed live on bdsim: intermittent
+        # ModuleNotFoundError despite a successful-looking install cell).
+        # jupyterlite-pyodide-kernel==0.6.1 bundles Pyodide 0.27.6, genuinely
+        # predating this whole mechanism -- matches MVTB's and bdsim's
+        # existing pins. See the toolbox-maintainer skill's JupyterLite
+        # version-pinning section for the full story before bumping this.
+        # Once Safari (and Firefox out-of-flag) ship JSPI, revisit this pin
+        # across RTB/MVTB/bdsim together.
         run: |
           pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server
           cd docs/lite && jupyter lite build --output-dir ../build/html/lite
