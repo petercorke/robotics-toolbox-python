@@ -62,12 +62,12 @@ class RobotPlottingMPLMixin:
 
         """
 
-        from matplotlib import cm, colors
+        from matplotlib import colormaps, colors
 
-        if isinstance(linkcolors, list) and len(linkcolors) == self.n:  # type: ignore[attr-defined]  # pragma: nocover
+        if isinstance(linkcolors, list) and len(linkcolors) == self.n:  # type: ignore[attr-defined]
             return colors.ListedColormap(linkcolors)
-        else:  # pragma: nocover
-            return cm.get_cmap(linkcolors, 6)  # type: ignore[arg-type]
+        else:
+            return colormaps.get_cmap(linkcolors).resampled(6)
 
     # ------------------------------------------------------------------
     # Ellipse creation
