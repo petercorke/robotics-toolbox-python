@@ -69,6 +69,27 @@ class TestPyPlot(unittest.TestCase):
             env.launch(fig=fig, ax=ax)
         plt.close(fig)
 
+    def test_options_scalar_override(self):
+        # Issue #418: options={"jointaxislength": ...} (a plain scalar
+        # default, unlike the dict-valued color/linewidth options) used to
+        # crash with "'float' object is not a mapping" instead of
+        # overriding the value.
+        panda = rp.models.DH.Panda()
+        from roboticstoolbox.backends.PyPlot import PyPlot
+
+        env = PyPlot()
+        env.launch()
+        env.add(panda, options={"jointaxislength": 50, "eelength": 3})
+        robot_plot = env.robots[-1]
+        self.assertEqual(robot_plot.options["jointaxislength"], 50)
+        self.assertEqual(robot_plot.options["eelength"], 3)
+        # dict-valued options must still merge, not get replaced outright
+        env.add(panda, options={"robot": {"linewidth": 10}})
+        robot_plot2 = env.robots[-1]
+        self.assertEqual(robot_plot2.options["robot"]["linewidth"], 10)
+        self.assertIn("color", robot_plot2.options["robot"])
+        env.close()
+
 
 if __name__ == "__main__":
     unittest.main()
