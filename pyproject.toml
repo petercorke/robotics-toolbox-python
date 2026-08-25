@@ -145,6 +145,23 @@ sdist.include = [
 ]
 sdist.exclude = ["rtb-data/**"]
 
+# Set RTB_PURE_WHEEL=1 to build a genuinely pure-Python wheel: skips both
+# compiled extensions (CMakeLists.txt's RTB_BUILD_EXTENSIONS option) and
+# forces the wheel tag to py3-none-any (wheel.platlib=false — confirmed by
+# reading scikit-build-core's own wheel_tag.py: root_is_purelib forces
+# plats=["any"], abi="none", pyvers=["py3"]). Used for the Pyodide/
+# JupyterLite build (see release.yml's build_pyodide job) -- both _fknm_c
+# and _frne_c have complete, tested pure-Python fallbacks (fknm.py/frne.py,
+# tests/test_fknm_fallback.py), so there's nothing missing at runtime.
+# pip always prefers a platform-specific compiled wheel over py3-none-any
+# when both are published (packaging.tags ranks specific tags higher) --
+# this wheel is only ever selected where no compiled wheel exists, i.e.
+# Pyodide today.
+[[tool.scikit-build.overrides]]
+if.env.RTB_PURE_WHEEL = true
+wheel.platlib = false
+cmake.define.RTB_BUILD_EXTENSIONS = "OFF"
+
 
 [tool.ruff]
 line-length = 88
@@ -174,32 +191,12 @@ archs = [
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
 
-[tool.cibuildwheel.pyodide]
-# Pyodide (wasm32-emscripten) — used by JupyterLite
-# cibuildwheel manages the Emscripten SDK; scikit-build-core picks up
-# the toolchain file automatically from the PYODIDE environment.
-#
-# Deliberately NO explicit `pyodide-version` override here -- the
-# `build_pyodide` job in release.yml is pinned to cibuildwheel 3.4.1
-# specifically (not the 4.1.1 used for native wheels) so it self-resolves
-# its own default (cp312/Pyodide 0.27.7), matching spatialgeometry's own
-# config exactly. An explicit `pyodide-version = "0.27.7"` override was
-# tried and failed here: cibuildwheel 3.4.1's bundled pyodide-build
-# (0.33.0) rejected it outright as "not compatible" even though it's
-# that same tool's own documented default -- the override and the tool's
-# internal default-resolution logic aren't equivalent, and only the
-# latter actually works. Don't add one back without testing against a
-# real build first.
-#
-# Why cp312/0.27.x specifically: Pyodide only ships cp313+ support from
-# 0.28.0a1 onward, by which point WebAssembly JSPI ("stack switching")
-# was already on by default (since 0.27.7) -- and Safari has no JSPI
-# support, Firefox only behind a flag. cp312/0.27.x is the newest
-# JSPI-safe line. jupyterlite-pyodide-kernel's pin in ci.yml must match
-# (jupyterlite-pyodide-kernel==0.6.1, bundling Pyodide 0.27.6) -- see
-# that file's "Fetch pyodide wheel for JupyterLite" step, and the
-# toolbox-maintainer skill's JupyterLite version-pinning section for the
-# full JSPI/Safari story before changing any of this.
+# No [tool.cibuildwheel.pyodide] section -- the wasm/Pyodide wheel is no
+# longer built via cibuildwheel's Pyodide platform (cross-compiling for a
+# specific Emscripten/Pyodide ABI version was the whole source of the
+# JSPI/tag-matching saga, see git history on this file and release.yml).
+# It's built as an ordinary pure-Python wheel on a normal runner instead --
+# see the RTB_PURE_WHEEL override above and release.yml's build_pyodide job.
 
 
 [tool.pytest.ini_options]

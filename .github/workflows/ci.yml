@@ -184,44 +184,24 @@ jobs:
           cd docs && make SPHINXOPTS="--keep-going" html
           touch build/html/.nojekyll
 
-      - name: Fetch pyodide wheel for JupyterLite
-        # A plain `pip wheel`/`build` here would produce a native
-        # macOS/Linux wheel with the compiled _fknm_c/_frne_c extensions --
-        # useless in Pyodide (WASM). release.yml already cross-compiles a
-        # genuine wasm32 wheel via cibuildwheel (CIBW_PLATFORM=pyodide),
-        # forced to cp312 (see release.yml's build_pyodide job and
-        # pyproject.toml's [tool.cibuildwheel.pyodide] comment) and
-        # attaches it to each GitHub Release, since PyPI rejects this old,
-        # pre-standard `pyodide_*` platform tag. This means the "Try it
-        # Now" experience tracks the latest *release*, not bleeding-edge
-        # main -- deliberate, since a full Pyodide/Emscripten rebuild on
-        # every docs push would be slow.
-        #
-        # Deliberately staying on cp312/the old tag rather than the newer
-        # PEP-783 `pyemscripten_*` tag PyPI now accepts: Pyodide only
-        # supports cp313+ from 0.28.0a1 onward, by which point WebAssembly
-        # JSPI ("stack switching") was already on by default (since
-        # 0.27.7) -- and Safari has no JSPI support, Firefox only behind a
-        # flag. cp312/0.27.x is the newest JSPI-safe line. See the
-        # toolbox-maintainer skill's JupyterLite version-pinning section
-        # before "modernizing" this away.
-        #
-        # The `--pattern '*cp312*pyodide*'` filter also guards against a
-        # real upstream bug (https://github.com/petercorke/robotics-toolbox-python/issues/579):
-        # jupyterlite-pyodide-kernel's all.json generator keys entries by
-        # (name, version) and *overwrites* rather than accumulates, so if a
-        # release ever carried wasm wheels for more than one CPython
-        # version, fetching more than one would silently drop all but the
-        # alphabetically-last from the piplite index -- no build error,
-        # just a runtime "can't find a pure Python 3 wheel" in the browser.
-        # release.yml's CIBW_BUILD restriction means only one wasm wheel
-        # (cp312) is ever built now, so this shouldn't trigger in practice,
-        # but the filter costs nothing to keep as a defence-in-depth guard.
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Build pure-Python wheel for JupyterLite
+        # RTB_PURE_WHEEL=1 (see pyproject.toml's scikit-build-core override)
+        # skips _fknm_c/_frne_c and forces a py3-none-any tag -- both have
+        # complete, tested pure-Python fallbacks, so nothing is missing at
+        # runtime. This used to require fetching a wasm32 wheel
+        # cross-compiled by release.yml's build_pyodide job (via
+        # cibuildwheel's Pyodide platform) from the latest GitHub Release,
+        # since building that wheel here on every docs push would've been
+        # slow, and PyPI rejected its old-format tag outright. A pure wheel
+        # needs neither: it's fast enough to build fresh on every push (no
+        # compilation at all, see build_pyodide's comment in release.yml),
+        # so "Try it Now" now tracks bleeding-edge main instead of lagging
+        # behind the last release, and py3-none-any needs no cross-repo
+        # GitHub Release fetch at all.
         run: |
           mkdir -p docs/lite/pypi
-          gh release download --repo "$GITHUB_REPOSITORY" --pattern '*cp312*pyodide*' --dir docs/lite/pypi --clobber
+          pip install build
+          RTB_PURE_WHEEL=1 python3 -m build --wheel --outdir docs/lite/pypi
 
       - name: Fetch spatialgeometry pyodide wheel for JupyterLite
         # spatialgeometry is an unconditional runtime dependency of
@@ -229,17 +209,17 @@ jobs:
         # copy internally at 1.4.0), so `piplite.install` needs a wasm
         # wheel for it too, staged in the same local index. Fetched from
         # spatialgeometry's own GitHub Release (jhavl/spatialgeometry) --
-        # it doesn't publish this to PyPI at all (tech debt raised
-        # upstream: jhavl/spatialgeometry#46, though note that issue's
-        # "publish via the new PEP-783 tag" suggestion has the same
-        # JSPI/Safari problem as RTB's own wheel above if it means moving
-        # off cp312). Matching RTB's own wheel above, this fetches the
-        # cp312 build specifically. Low-risk despite the cross-repo fetch:
-        # spatialgeometry's own pyproject.toml notes its CMake build skips
-        # the compiled nanobind extension entirely under Emscripten, so
-        # this wheel is genuinely pure Python -- no Pyodide ABI-version
-        # coupling to track here, unlike the JSPI/cp312 discipline the
-        # RTB wheel above needs.
+        # it doesn't publish this to PyPI at all. SG's own CMake build
+        # already skips its compiled nanobind extension entirely under
+        # Emscripten (same idea as RTB_PURE_WHEEL above), so this wheel's
+        # *content* is genuinely pure Python -- but SG hasn't adopted the
+        # scikit-build-core override that makes the wheel *itself*
+        # py3-none-any yet, so it's still tagged cp312-cp312-pyodide_wasm32
+        # and still needs this cross-repo GitHub Release fetch rather than
+        # a plain PyPI install. Tech debt raised upstream:
+        # jhavl/spatialgeometry#46 -- once SG applies the same fix RTB just
+        # did, this step (and the cp312 filter) can go away in favour of a
+        # plain `pip download`/PyPI dependency resolution.
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
