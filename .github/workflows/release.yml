@@ -60,49 +60,43 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_pyodide:
-    name: Build Pyodide (wasm32) wheel
+    name: Build pure-Python wheel (for Pyodide/JupyterLite)
     needs: verify_version
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
 
-      - name: Diagnostics
-        run: |
-          python3 --version
-          pip3 --version
-          pip3 show cibuildwheel 2>/dev/null || echo "cibuildwheel not installed locally (normal)"
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
 
-      - name: Build Pyodide wheel
-        # Pinned to cibuildwheel 3.4.1 deliberately -- NOT the same version
-        # as the native wheel builds below (4.1.1) -- because the tag
-        # *format* pyodide-build emits turns out to be a property of the
-        # pyodide-build tool version, not of which Pyodide version it
-        # targets. Confirmed directly: forcing cibuildwheel 4.1.1 to build
-        # cp312/Pyodide 0.27.7 (via CIBW_BUILD + CIBW_ENABLE overrides)
-        # still produced a wheel tagged `pyemscripten_2024_0_wasm32` (the
-        # new PEP-783 tag), which Pyodide 0.27.6's micropip -- like every
-        # pre-PEP-783 Pyodide release -- hard-rejects with "Wheel was built
-        # with Emscripten vpyemscripten.2024.0 but Pyodide was built with
-        # Emscripten v3.1.58". There is no `pyodide-version` override that
-        # fixes this: cibuildwheel 4.1.1 cannot produce an old-tag wheel at
-        # all. cibuildwheel 3.4.1 predates the tag-format change and
-        # defaults to cp312/Pyodide 0.27.7 unprompted (matches
-        # spatialgeometry's own pyodide build, same version, same reason).
-        #
-        # This is why cp312/Pyodide 0.27.x matters at all: Pyodide only
-        # ships cp313+ support from 0.28.0a1 onward, by which point
-        # WebAssembly JSPI ("stack switching") was already on by default
-        # (since 0.27.7) -- and Safari has no JSPI support, Firefox only
-        # behind a flag. See pyproject.toml's [tool.cibuildwheel.pyodide]
-        # comment and the toolbox-maintainer skill's JupyterLite
-        # version-pinning section for the full story before changing this.
-        uses: pypa/cibuildwheel@v3.4.1
-        env:
-          CIBW_PLATFORM: pyodide
+      # Not a cross-compile: RTB_PURE_WHEEL=1 (see pyproject.toml's
+      # scikit-build-core override) skips both _fknm_c/_frne_c (they have
+      # complete, tested pure-Python fallbacks -- fknm.py/frne.py,
+      # tests/test_fknm_fallback.py) and forces the wheel tag to
+      # py3-none-any. No Emscripten SDK, no cibuildwheel Pyodide platform,
+      # no Pyodide-version coupling at all -- a plain wheel built on a
+      # normal runner. This replaced an earlier approach that cross-compiled
+      # a real wasm32 binary via cibuildwheel's Pyodide platform, which tied
+      # the wheel to one specific Pyodide/Emscripten ABI version and, worse,
+      # to a JSPI-safe-vs-unsafe split (Safari/Firefox lack WebAssembly JSPI,
+      # which Pyodide >=0.27.7 needs) -- see git history on this job and on
+      # pyproject.toml for that saga. A pure-Python wheel has no ABI to be
+      # wrong about, so none of that applies here.
+      - name: Build pure-Python wheel
+        run: |
+          pip install build
+          RTB_PURE_WHEEL=1 python3 -m build --wheel --outdir wheelhouse
+
+      - name: Verify wheel is genuinely pure Python
+        run: |
+          ls wheelhouse/
+          case "$(ls wheelhouse/)" in
+            *-py3-none-any.whl) echo "OK: py3-none-any" ;;
+            *) echo "ERROR: expected a py3-none-any wheel"; exit 1 ;;
+          esac
 
       - uses: actions/upload-artifact@v7
-        if: success()
         with:
           name: wheels-pyodide
           path: ./wheelhouse/*.whl
@@ -161,35 +155,9 @@ jobs:
           name: sdist
           path: dist
 
-      # Exclude the Pyodide wheel -- PyPI rejects the old, pre-standard
-      # `pyodide_*` platform tag this cp312 build produces. Deliberately
-      # staying on this tag (not the newer PEP-783 `pyemscripten_*` one) to
-      # keep the wasm build JSPI-safe for Safari/Firefox -- see the
-      # `build_pyodide` job's comment and the toolbox-maintainer skill's
-      # JupyterLite version-pinning section. It's attached as a GitHub
-      # Release asset in the next job instead.
-      - name: Remove Pyodide wheels from PyPI upload set
-        run: rm -f dist/*pyodide*.whl
-
+      # The pyodide wheel (py3-none-any) uploads to PyPI like any other
+      # wheel now -- no tag rejection, no GitHub-Release-asset workaround.
+      # See build_pyodide's comment for why.
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
-
-  upload_pyodide_asset:
-    name: Attach Pyodide wheel to GitHub release
-    needs: build_pyodide
-    if: github.event_name == 'release' && needs.build_pyodide.result == 'success'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v8
-        with:
-          name: wheels-pyodide
-          path: pyodide-dist
-
-      - name: Upload Pyodide wheel as release asset
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: pyodide-dist/*.whl
