@@ -634,11 +634,12 @@ the default ``PyPlot`` backend which draws a "noodle robot" using the PyPlot bac
 
 The more general solution, and what is implemented inside ``plot`` in the example above, is::
 
-    >>> pyplot = roboticstoolbox.backends.PyPlot()
+    >>> from roboticstoolbox.backends.PyPlot import PyPlot
+    >>> pyplot = PyPlot()
     >>> pyplot.launch()
     >>> pyplot.add(puma)
     >>> puma.q = q
-    >>> puma.step()
+    >>> pyplot.step()
 
 This makes it possible to animate multiple robots in the one graphical window, or the one robot in various environments either graphical
 or real.
