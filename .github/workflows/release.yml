@@ -1,7 +1,29 @@
-# Build wheels for all platforms and publish to PyPI.
-# Triggered on GitHub release creation or manually via workflow_dispatch.
+# Single workflow: release-please proposes/cuts releases, and the same run
+# builds + publishes wheels once a release is actually created.
 #
-# Uses OIDC trusted publishing — no stored PyPI token required.
+# Previously release-please.yml and this file were separate workflows, with
+# this one triggered on `release: created`. That event never fired in
+# practice: release-please-action creates the GitHub Release using the
+# default GITHUB_TOKEN, and GitHub deliberately does not cascade events
+# triggered by that token to *other* workflows (anti-recursion protection).
+# Confirmed the hard way shipping v1.4.0 (2026-08-23): release-please's PR
+# merged, the tag+release were created, and release.yml simply never ran --
+# required a manual `workflow_dispatch` to publish, which in turn skipped
+# `upload_pyodide_asset` (gated on `github.event_name == 'release'`),
+# leaving the release with no wasm asset until a manual backfill.
+#
+# Fix: merge both into one workflow so the build/publish jobs are downstream
+# jobs of release-please's own job in the *same* run, gated on its
+# `release_created`/`tag_name` outputs -- this sidesteps the cross-workflow
+# trigger restriction entirely, since nothing needs to fire a second time.
+# This is release-please-action's own documented pattern for this problem.
+#
+# `workflow_dispatch` is kept for manual rebuilds (e.g. to regenerate
+# artifacts for a backfill) -- on that trigger the release-please job is
+# skipped, `verify_version` skips its tag-match check, and
+# `upload_pyodide_asset` is skipped entirely (nothing to attach to).
+#
+# Uses OIDC trusted publishing for PyPI -- no stored PyPI token required.
 # macOS uses macos-14 (arm64); cibuildwheel cross-compiles x86_64 as well
 # (see [tool.cibuildwheel.macos] archs in pyproject.toml).
 # Check for latest cibuildwheel: https://github.com/pypa/cibuildwheel/releases
@@ -9,24 +31,52 @@
 name: Release
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
+  release-please:
+    name: Release Please
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          config-file: .github/release-please-config.json
+          manifest-file: .github/.release-please-manifest.json
+
   verify_version:
     name: Verify tag matches package version
+    needs: release-please
+    # Runs on workflow_dispatch (manual rebuild) or on a push that release-please
+    # just turned into a real release. `always()` is required here because the
+    # release-please job is skipped on workflow_dispatch, and a skipped `needs`
+    # job would otherwise auto-skip this one under the default `if: success()`.
+    if: >
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+       (needs.release-please.result == 'success' && needs.release-please.outputs.release_created == 'true'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Check version
-        # Skip check on manual workflow_dispatch runs (no release tag exists)
-        if: github.event_name == 'release'
+        # Skip on manual workflow_dispatch runs (no fresh tag to check against)
+        if: needs.release-please.outputs.release_created == 'true'
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+          TAG="${TAG#v}"
           PKG=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
           echo "Tag version : $TAG"
           echo "Package version: $PKG"
