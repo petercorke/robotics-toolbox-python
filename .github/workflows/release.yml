@@ -19,9 +19,9 @@
 # This is release-please-action's own documented pattern for this problem.
 #
 # `workflow_dispatch` is kept for manual rebuilds (e.g. to regenerate
-# artifacts for a backfill) -- on that trigger the release-please job is
-# skipped, `verify_version` skips its tag-match check, and
-# `upload_pyodide_asset` is skipped entirely (nothing to attach to).
+# artifacts) -- on that trigger the release-please job is skipped and
+# `verify_version` skips its tag-match check (no fresh tag to check
+# against).
 #
 # Uses OIDC trusted publishing for PyPI -- no stored PyPI token required.
 # macOS uses macos-14 (arm64); cibuildwheel cross-compiles x86_64 as well
@@ -85,6 +85,12 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }} (${{ matrix.arch }})
     needs: verify_version
+    # always() + explicit check, not the default if:success() -- success()
+    # walks the *entire transitive* needs chain, not just direct needs, so
+    # it would see release-please's skip (verify_version's own ancestor)
+    # and auto-skip this job too even though verify_version itself
+    # succeeded. Confirmed empirically via a workflow_dispatch rehearsal.
+    if: always() && needs.verify_version.result == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -112,6 +118,9 @@ jobs:
   build_pyodide:
     name: Build pure-Python wheel (for Pyodide/JupyterLite)
     needs: verify_version
+    # See build_wheels' comment above for why always() + an explicit check
+    # is needed instead of the default if:success().
+    if: always() && needs.verify_version.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -154,6 +163,9 @@ jobs:
   build_sdist:
     name: Build source distribution
     needs: verify_version
+    # See build_wheels' comment above for why always() + an explicit check
+    # is needed instead of the default if:success().
+    if: always() && needs.verify_version.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -169,6 +181,9 @@ jobs:
   smoke_test:
     name: Smoke-test Linux wheel
     needs: build_wheels
+    # See build_wheels' comment above for why always() + an explicit check
+    # is needed instead of the default if:success().
+    if: always() && needs.build_wheels.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-python@v7
@@ -189,6 +204,14 @@ jobs:
 
   upload_pypi:
     needs: [build_wheels, build_pyodide, build_sdist, smoke_test]
+    # See build_wheels' comment above for why always() + an explicit check
+    # is needed instead of the default if:success().
+    if: >
+      always() &&
+      needs.build_wheels.result == 'success' &&
+      needs.build_pyodide.result == 'success' &&
+      needs.build_sdist.result == 'success' &&
+      needs.smoke_test.result == 'success'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
