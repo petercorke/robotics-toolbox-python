@@ -3,14 +3,51 @@
 @author: Jesse Haviland
 """
 
-import numpy.testing as nt
-import numpy as np
-import roboticstoolbox as rtb
-import spatialmath as sm
 import unittest
+
+import numpy as np
+import numpy.testing as nt
+import spatialmath as sm
+import sympy
+
+import roboticstoolbox as rtb
 
 
 class Testtools(unittest.TestCase):
+    def test_trchain(self):
+        T, tokens = rtb.trchain(
+            "Tx(a) Rx(q1) Ry(45) Tz(2)",
+            [90],
+            "deg",
+            variables={"a": 1},
+            return_tokens=True,
+        )
+        expected = (
+            sm.SE3.Tx(1)
+            * sm.SE3.Rx(90, unit="deg")
+            * sm.SE3.Ry(45, unit="deg")
+            * sm.SE3.Tz(2)
+        )
+        nt.assert_allclose(T, expected.A)
+        nt.assert_allclose(rtb.trchain(tokens, [90], unit="deg", variables={"a": 1}), T)
+
+        q1, a = sympy.symbols("q1 a", real=True)
+        symbolic = rtb.trchain("Rz(q1) Tx(a)", [q1], variables={"a": a})
+        self.assertEqual(sympy.simplify(symbolic[0, 3] - a * sympy.cos(q1)), 0)
+
+        with self.assertRaises(ValueError):
+            rtb.trchain("Tx(__import__('os'))")
+
+    def test_trchain2(self):
+        T = rtb.trchain2(
+            "R(theta1 - pi / 2) Tx(a) Rz(theta2) Ty(2)",
+            [np.pi / 2, np.pi / 4],
+            qvar="theta",
+            variables={"a": 1},
+        )
+        expected = sm.SE2.Rot(0) * sm.SE2.Tx(1) * sm.SE2.Rot(np.pi / 4) * sm.SE2.Ty(2)
+        nt.assert_allclose(T, expected.A)
+
     def test_null(self):
 
         a0 = np.array([1, 2, 3])
