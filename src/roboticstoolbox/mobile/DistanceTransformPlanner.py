@@ -9,7 +9,7 @@ from spatialmath.pose2d import SE2
 from spatialmath import base
 from scipy.ndimage import *
 import matplotlib.pyplot as plt
-from matplotlib import cm
+from matplotlib import colormaps
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 
 
@@ -324,9 +324,7 @@ def distancexform(occgrid, goal, metric="cityblock", animate=False, summary=Fals
                 plt.ylabel("y")
                 ax = plt.gca()
                 plt.pause(0.001)
-                cmap = cm.get_cmap("gray")
-                cmap.set_bad("red")
-                cmap.set_over("white")
+                cmap = colormaps.get_cmap("gray").with_extremes(bad="red", over="white")
                 h = plt.imshow(display, cmap=cmap)
                 plt.colorbar(label="distance")
             else:
