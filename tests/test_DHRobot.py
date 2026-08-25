@@ -168,6 +168,32 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(r0.qlim, ans)
         nt.assert_array_almost_equal(r1.qlim, np.c_[qlim])
 
+    def test_A_flip_standard_dh(self):
+        # Issue #563: DHLink.A() honoured flip only when the joint ET
+        # happened to be the last ET in the sequence, which broke for any
+        # standard-DH link with a nonzero d/a/alpha. Covers both revolute
+        # and prismatic, complementing test_flip_with_nonzero_a's ETS
+        # ground-truth cross-check below with a self-consistency check
+        # (flipping the joint should equal negating q on the unflipped
+        # version). Ported from PR #618 (tahazarif10).
+        q = 0.3
+
+        flipped = rp.RevoluteDH(d=0.2, a=0.3, alpha=0.4, offset=0.1, flip=True)
+        normal = rp.RevoluteDH(d=0.2, a=0.3, alpha=0.4, offset=0.1)
+
+        nt.assert_array_almost_equal(
+            flipped.A(q).A,
+            normal.A(-q).A,
+        )
+
+        flipped = rp.PrismaticDH(theta=0.2, a=0.3, alpha=0.4, offset=0.1, flip=True)
+        normal = rp.PrismaticDH(theta=0.2, a=0.3, alpha=0.4, offset=0.1)
+
+        nt.assert_array_almost_equal(
+            flipped.A(q).A,
+            normal.A(-q).A,
+        )
+
     def test_fkine(self):
         l0 = rp.PrismaticDH()
         l1 = rp.RevoluteDH()
