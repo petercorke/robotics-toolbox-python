@@ -796,6 +796,92 @@ class TestRobot(unittest.TestCase):
 
         r.fkine_all(r.q)
 
+    def test_fkine_all_past_ee_link(self):
+        # fkine_all() used to stop recursing the instant it reached a
+        # link registered in self.ee_links, even when that link has real
+        # children (e.g. Panda's panda_link8 -> panda_hand -> fingers) --
+        # those children's poses were silently left at the Alloc()
+        # default (identity) rather than computed. Also checks that
+        # gripper-owned joints correctly source their value from the
+        # gripper's own separate .q, not the main arm q passed in here.
+        from spatialmath import SE3
+
+        panda = rtb.models.Panda()
+        panda.q = panda.qr
+        panda.grippers[0].q = [0.01, 0.02]
+
+        T_all = panda.fkine_all(panda.q)
+
+        hand, leftfinger, rightfinger = panda.grippers[0].links
+
+        self.assertIn("panda_link8", [l.name for l in panda.ee_links])
+
+        # panda_hand is past the nominal ee_links (panda_link8) -- must
+        # match fkine(end=...) exactly, not sit at the identity default.
+        nt.assert_allclose(
+            T_all[hand.number].A,
+            panda.fkine(panda.q, end="panda_hand").A,
+            atol=1e-9,
+        )
+
+        # finger poses must be hand's pose composed with each finger's
+        # own A(), evaluated at the gripper's own q -- not the arm's q.
+        T_hand = T_all[hand.number]
+        nt.assert_allclose(
+            T_all[leftfinger.number].A,
+            (T_hand * SE3(leftfinger.A(panda.grippers[0].q[0]))).A,
+            atol=1e-9,
+        )
+        nt.assert_allclose(
+            T_all[rightfinger.number].A,
+            (T_hand * SE3(rightfinger.A(panda.grippers[0].q[1]))).A,
+            atol=1e-9,
+        )
+
+    def test_fkine_all_gripper_q_moves_fingers(self):
+        # Changing gripper.q must actually move the finger link poses
+        # returned by fkine_all() -- individually (each finger tracks
+        # only its own jindex) and together -- and must never disturb
+        # panda_hand or the main arm chain, which don't depend on
+        # gripper.q at all.
+        panda = rtb.models.Panda()
+        panda.q = panda.qr
+
+        hand, leftfinger, rightfinger = panda.grippers[0].links
+
+        def poses():
+            T = panda.fkine_all(panda.q)
+            return T[hand.number].A.copy(), T[leftfinger.number].A.copy(), T[
+                rightfinger.number
+            ].A.copy()
+
+        panda.grippers[0].q = [0.0, 0.0]
+        hand0, left0, right0 = poses()
+
+        # move only the left finger
+        panda.grippers[0].q = [0.03, 0.0]
+        hand1, left1, right1 = poses()
+        nt.assert_allclose(hand1, hand0, atol=1e-9)
+        self.assertFalse(np.allclose(left1, left0))
+        nt.assert_allclose(right1, right0, atol=1e-9)
+
+        # move only the right finger
+        panda.grippers[0].q = [0.0, 0.03]
+        hand2, left2, right2 = poses()
+        nt.assert_allclose(hand2, hand0, atol=1e-9)
+        nt.assert_allclose(left2, left0, atol=1e-9)
+        self.assertFalse(np.allclose(right2, right0))
+
+        # move both together
+        panda.grippers[0].q = [0.03, 0.03]
+        hand3, left3, right3 = poses()
+        nt.assert_allclose(hand3, hand0, atol=1e-9)
+        self.assertFalse(np.allclose(left3, left0))
+        self.assertFalse(np.allclose(right3, right0))
+        # combined motion matches each finger's individually-moved pose
+        nt.assert_allclose(left3, left1, atol=1e-9)
+        nt.assert_allclose(right3, right2, atol=1e-9)
+
     def test_fkine_geometry_matches_scene_graph(self):
         # fkine_geometry() computes geometry-part world poses purely
         # from q (see Robot.fkine_geometry's docstring) -- this checks
