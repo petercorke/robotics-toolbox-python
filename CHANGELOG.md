@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.4.1](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.0...v1.4.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **ci:** add CIBW_ENABLE=pyodide-eol, required to build the cp312 pyodide target ([2243fc2](https://github.com/petercorke/robotics-toolbox-python/commit/2243fc2990197baa5e60d53e49d8d32af8daa185))
+* **ci:** drop the explicit pyodide-version override, let cibuildwheel 3.4.1 self-resolve ([394d258](https://github.com/petercorke/robotics-toolbox-python/commit/394d258f9e65acebc94374eb1bf93fde980c2fd6))
+* **ci:** keep JupyterLite wasm build on JSPI-safe cp312, not cibuildwheel's new cp313 default ([a315095](https://github.com/petercorke/robotics-toolbox-python/commit/a3150958dee84285f147702b40e5fe3b13f2283c))
+* **ci:** pin cibuildwheel 3.4.1 for the pyodide build job, not 4.1.1 ([e428935](https://github.com/petercorke/robotics-toolbox-python/commit/e428935b9fdb8c33647bbcfb1e011999a147eb3a))
+* **ci:** stop skip-cascade from release-please poisoning downstream jobs ([f252325](https://github.com/petercorke/robotics-toolbox-python/commit/f2523251a95f19d73d4fb393a15878cc3fbc7803))
+* compute accel_x with analytical Jacobian derivative ([1c4ffe6](https://github.com/petercorke/robotics-toolbox-python/commit/1c4ffe6145ddc2a42584006a44147094d0f537b4))
+* **plot:** use matplotlib colormaps registry instead of removed cm.get_cmap ([ad14468](https://github.com/petercorke/robotics-toolbox-python/commit/ad1446895c15bb679acf0ff35ffd901e1d591362))
+* two real bugs found by running the suite against the pure-Python path ([d4d2af3](https://github.com/petercorke/robotics-toolbox-python/commit/d4d2af3a81dc18731019dbd04c562c588d628e81))
+
+
+### Build System
+
+* add RTB_PURE_WHEEL to build a genuine py3-none-any wheel ([d61729c](https://github.com/petercorke/robotics-toolbox-python/commit/d61729c38db2174fbe6933f59a9d85447a03339e))
+
 ## [1.4.0](https://github.com/petercorke/robotics-toolbox-python/compare/v1.3.1...v1.4.0) (2026-08-22)
 
 **Highlights**: using significantly reworked versions of [Swift](https://github.com/jhavl/swift) (v2.0.0) and [Spatial Geometry](https://github.com/jhavl/spatialgeometry) (v1.4.0) -- lots of bug fixes, new features and documentation.  Collision detection changed from PyBullet (no longer well maintained) to [Coal](https://github.com/coal-library/coal).  Integrates with [Robot Descriptions](https://github.com/robot-descriptions) for access to over 150 URDF models, loaded dynamically and cached locally -- this means that RTB can now ship with a very minimum set of mesh models.  Significant work on RNE models (DH Python, DH C, ETS Featherstone) all consistent and checked against analytic model.  `robot.teach()` now supports the Swift backend directly, and the docs site gained a JupyterLite-powered "Try it Now" in-browser notebook -- no install required.  Additional work on docs, build system, and testing.  
