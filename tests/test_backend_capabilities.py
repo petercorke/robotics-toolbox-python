@@ -112,6 +112,20 @@ class TestMPLMixinOnRobot(unittest.TestCase):
         robot = self._make_robot()
         self.assertTrue(hasattr(robot, "linkcolormap"))
 
+    def test_linkcolormap_from_name(self):
+        # Regression test: linkcolormap() used matplotlib.cm.get_cmap(),
+        # removed in matplotlib 3.9, so any named colormap raised
+        # AttributeError instead of returning a 6-entry colormap.
+        robot = self._make_robot()
+        cmap = robot.linkcolormap("inferno")
+        self.assertEqual(cmap.N, 6)
+
+    def test_linkcolormap_from_list(self):
+        robot = self._make_robot()
+        colors = ["red", "g", (0, 0.5, 0), "#0f8040", "yellow", "cyan"]
+        cmap = robot.linkcolormap(colors)
+        self.assertEqual(cmap.N, len(colors))
+
     def test_mixin_present_in_mro(self):
         import roboticstoolbox as rtb
         from roboticstoolbox.robot.RobotPlottingMPL import RobotPlottingMPLMixin
