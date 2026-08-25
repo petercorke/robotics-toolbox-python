@@ -421,7 +421,7 @@ class VehiclePlot(GraphicsBlock):
         :type size: float or array_like, optional
         :param polyargs: arguments passed to :meth:`Animation.Polygon`
         :type polyargs: dict
-        :param blockargs: |BlockOptions|
+        :param blockargs: |GraphicsBlockOptions|
         :type blockargs: dict
 
         .. note::

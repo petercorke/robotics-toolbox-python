@@ -2138,15 +2138,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         limits: ArrayLike | None = None,
         vellipse: bool = False,
         fellipse: bool = False,
-        backend: L["pyplot", "pyplot2"] | None = None,
+        backend: L["swift", "pyplot", "pyplot2"] | None = None,
     ) -> Connector:
         """
         Graphical teach pendant
 
-        ``robot.teach(q)`` creates a matplotlib plot which allows the user to
-        "drive" a graphical robot using a graphical slider panel. The robot's
-        inital joint configuration is ``q``. The plot will autoscale with an
-        aspect ratio of 1.
+        ``robot.teach(q)`` opens a graphical view (PyPlot or Swift --
+        see ``backend``) which allows the user to "drive" a graphical
+        robot using a graphical slider panel. The robot's inital joint
+        configuration is ``q``.
 
         ``robot.teach()`` as above except the robot's stored value of ``q``
         is used.
@@ -2155,20 +2155,33 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             if not supplied will use the stored q values).
         :param block: Block operation of the code and keep the figure open
         :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
+            autoscale, [x1, x2, y1, y2, z1, z2] (this option is for
+            'pyplot'/'pyplot2' only)
         :param vellipse: (Plot Option) Plot the velocity ellipse at the
             end-effector (this option is for 'pyplot' only)
         :param fellipse: (Plot Option) Plot the force ellipse at the
             end-effector (this option is for 'pyplot' only)
+        :param backend: The graphical backend to use -- 'swift', 'pyplot',
+            or 'pyplot2'. Defaults to whatever :meth:`plot` would pick for
+            this robot (see its own ``backend`` for the resolution rule).
 
-        :returns: A reference to the PyPlot object which controls the matplotlib figure
+        :returns: A reference to the environment object which controls
+            the figure/view
 
         .. rubric:: Notes
 
         - Program execution is blocked until the teach window is
           dismissed.  If ``block=False`` the method is non-blocking but
-          you need to poll the window manager to ensure that the window
+          you need to poll the window manager (PyPlot) or keep calling
+          ``env.step()`` yourself (Swift) to ensure the window/panel
           remains responsive.
+        - Once ``teach()`` returns (``block=True``), ``robot.q`` holds
+          the final pose the sliders were left at -- true for every
+          backend, even though Swift's own live joint state during the
+          session lives on the returned environment's handle
+          (``env.swift_objects[0].q``), not ``robot.q`` itself, to keep
+          the robot model plain and shareable while teaching is
+          in progress (see swift's ``AssemblyHandle``).
         - The slider limits are derived from the joint limit properties.
           If not set then:
 
@@ -2192,8 +2205,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             )
 
         # Add the self to the figure in readonly mode
-        env.launch("Teach " + self.name, limits=limits)
-        env.add(
+        env.launch(name="Teach " + self.name, limits=limits)
+        handle = env.add(
             self,
             readonly=True,
             # jointaxes=jointaxes,
@@ -2204,18 +2217,30 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         )
         self._active_plot_env = env
 
-        env._add_teach_panel(self, q)
+        # True if _add_teach_panel already fully handled block=True itself
+        # (Swift's own env.run() loop -- see its docstring) -- PyPlot/
+        # PyPlot2 never do (their own env.hold() below is what actually
+        # enters matplotlib's blocking GUI mainloop), so their
+        # _add_teach_panel implicitly returns None here, same as always.
+        already_blocked = env._add_teach_panel(self, q, handle, block)
 
         if vellipse:
-            vell = self.vellipse(q, centre="ee", scale=0.5, add=False)
+            vell = self.vellipse(q, centre="ee", add=False)
+            env._teach_vellipse = vell
             env.add(vell)
 
         if fellipse:
             fell = self.fellipse(q, centre="ee", add=False)
+            env._teach_fellipse = fell
             env.add(fell)
 
-        # Keep the plot open
-        if block:  # pragma nocover
+        # Keep the plot open -- skipped if the backend already blocked
+        # itself above: calling this a second time isn't just wasteful,
+        # it can hang outright for Swift (env.hold()'s disconnect-poll
+        # never expires in headless mode, and even non-headless there's
+        # a race where close() doesn't synchronously guarantee the
+        # websocket's been dropped from socket.USERS before returning).
+        if block and not already_blocked:  # pragma nocover
             env.hold()
 
         return env

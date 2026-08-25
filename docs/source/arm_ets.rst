@@ -66,6 +66,28 @@ The ETS inherits list-like properties and has methods like ``reverse`` and ``pop
    - `A simple and systematic approach to assigning Denavit-Hartenberg parameters <https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters>`_.
      Peter I. Corke, IEEE Transactions on Robotics, 23(3), pp 590-594, June 2007.
 
+Transform chains
+----------------
+
+The :func:`~roboticstoolbox.tools.trchain.trchain` and
+:func:`~roboticstoolbox.tools.trchain.trchain2` functions provide the compact
+string notation used by the MATLAB Toolbox for one-off SE(3) and SE(2)
+transform chains.  Joint variables are numbered from one, while named
+constants are passed explicitly in ``variables``.
+
+.. runblock:: pycon
+
+   >>> import roboticstoolbox as rtb
+   >>> rtb.trchain("Rz(q1) Tx(a)", [0.3], variables={"a": 1})
+   >>> rtb.trchain2("R(q1) Tx(a)", [0.3], variables={"a": 1})
+
+Parsed tokens can also be returned and reused when evaluating the same chain
+for different joint values.
+
+.. autofunction:: roboticstoolbox.tools.trchain.trchain
+
+.. autofunction:: roboticstoolbox.tools.trchain.trchain2
+
 ETS - 3D
 --------
 
@@ -82,4 +104,3 @@ ETS - 2D
    :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jindex_set, split, inv, compile, insert, fkine, jacob0, jacobe
    :undoc-members:
    :show-inheritance:
-

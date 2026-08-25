@@ -94,7 +94,7 @@ def demo(test: bool = False):
         max=1,
         step=0.01,
         value=0,
-        desc="x position",
+        label="x position",
     )
 
     twist_y = swift.Slider(
@@ -103,7 +103,7 @@ def demo(test: bool = False):
         max=1,
         step=0.01,
         value=0,
-        desc="y position",
+        label="y position",
     )
 
     twist_rollangle = swift.Slider(
@@ -112,7 +112,7 @@ def demo(test: bool = False):
         max=180,
         step=1,
         value=0,
-        desc="roll angle (rx)",
+        label="roll angle (rx)",
         unit="&#176;",
     )
 
@@ -122,7 +122,7 @@ def demo(test: bool = False):
         max=180,
         step=1,
         value=0,
-        desc="pitch angle (ry)",
+        label="pitch angle (ry)",
         unit="&#176;",
     )
 
@@ -132,18 +132,18 @@ def demo(test: bool = False):
         max=1,
         step=0.02,
         value=0,
-        desc="screw pitch",
+        label="screw pitch",
     )
 
     twist_theta = swift.Slider(
-        update_plane, min=0, max=10, step=0.02, value=0, desc="Twist rotation"
+        update_plane, min=0, max=10, step=0.02, value=0, label="Twist rotation"
     )
 
-    button = swift.Button(reset_twist, desc="Set to Zero")
-    quit = swift.Button(lambda x: sys.exit(0), desc="Quit")
+    button = swift.Button(reset_twist, label="Set to Zero")
+    quit = swift.Button(lambda x: sys.exit(0), label="Quit")
 
-    label1 = swift.Label(desc="Twist parameters")
-    label2 = swift.Label(desc="Twist application")
+    label1 = swift.Label(label="Twist parameters")
+    label2 = swift.Label(label="Twist application")
 
     env.add(label1)
     env.add(twist_x)
