@@ -90,6 +90,31 @@ def _load_rd_module(robot_name: str):
             "URDF model."
         )
 
+    # robot_descriptions clones a git repository (via GitPython, which shells
+    # out to a real git binary) the first time a given model is imported.
+    # Pyodide/JupyterLite has no subprocess execution and no git binary, so
+    # this always fails there -- not a bug, an environment limitation.
+    # Checked up front, before the candidates loop below, rather than caught
+    # per-attempt: GitPython's failure in this sandbox surfaces as a plain
+    # ImportError (message: "emscripten does not support processes"), which
+    # the loop's `except ImportError` treats as "this candidate name doesn't
+    # exist, try the next one" -- so after exhausting every candidate it fell
+    # through to a misleading "model not found"/"renamed" error instead of
+    # this one. The outcome here is deterministic regardless of which
+    # candidate name is tried, so there is nothing to gain by attempting the
+    # loop at all on this platform.
+    if sys.platform == "emscripten":
+        raise ValueError(
+            f"Toolbox uses {_rd_link()} to provide URDF robot models, "
+            "which clones a git repository on first use. That isn't "
+            "possible in this browser (Pyodide/JupyterLite) sandbox -- "
+            f'this is an expected limitation loading "{robot_name}" '
+            "here, not a bug. Try a DH- or ETS-based model instead "
+            "(e.g. rtb.models.DH.Panda()), or run this notebook in a "
+            "regular Python environment to use robot_descriptions-"
+            "backed models."
+        )
+
     candidates = [f"{robot_name}_description", f"{robot_name}_official_description"]
     last_error: ImportError | None = None
     for candidate in candidates:
@@ -103,26 +128,6 @@ def _load_rd_module(robot_name: str):
         except ImportError as e:
             last_error = e
             continue
-        except Exception as e:
-            # robot_descriptions clones a git repository (via GitPython,
-            # which shells out to a real git binary) the first time a given
-            # model is imported. Pyodide/JupyterLite has no subprocess
-            # execution and no git binary, so this always fails there --
-            # not a bug, an environment limitation. The exact exception type
-            # depends on how GitPython fails in that sandbox, so this is
-            # deliberately broad, but only ever intercepts on Pyodide.
-            if sys.platform == "emscripten":
-                raise ValueError(
-                    f"Toolbox uses {_rd_link()} to provide URDF robot models, "
-                    "which clones a git repository on first use. That isn't "
-                    "possible in this browser (Pyodide/JupyterLite) sandbox -- "
-                    f'this is an expected limitation loading "{robot_name}" '
-                    "here, not a bug. Try a DH- or ETS-based model instead "
-                    "(e.g. rtb.models.DH.Panda()), or run this notebook in a "
-                    "regular Python environment to use robot_descriptions-"
-                    "backed models."
-                ) from e
-            raise
 
     renamed_to = _find_rd_rename(robot_name, candidates)
     if renamed_to is not None:
