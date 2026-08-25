@@ -1564,6 +1564,17 @@ class TestDHRobot(unittest.TestCase):
 
         nt.assert_array_almost_equal(r0.alpha, np.r_[1, 0, -1, 1, -1, 0] * math.pi / 2)
 
+    def test_flip_with_nonzero_a(self):
+        # Issue #563: DHLink.A() honoured flip only when the joint ET happened
+        # to be the last ET. For a link with a nonzero a/d/alpha the joint ET is
+        # not last, so flip=True was silently ignored and q was not negated.
+        q = 0.5
+        L = rp.RevoluteDH(a=1.0, flip=True)
+        # A(q) must agree with the link's own ETS evaluation, which honours flip.
+        nt.assert_array_almost_equal(L.A(q).A, L.ets.eval([q]))
+        # The rotation uses the negated angle, so the [1, 0] entry is sin(-q).
+        nt.assert_almost_equal(L.A(q).A[1, 0], math.sin(-q))
+
     def test_ets(self):
         panda = rp.models.DH.Panda()
         panda.ets()
