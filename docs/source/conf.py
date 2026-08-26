@@ -198,6 +198,7 @@ rst_epilog = """
    :format: html
 .. |BlockOptions| replace:: :raw-html:`<a href="https://petercorke.github.io/bdsim/internals.html?highlight=block%20__init__#bdsim.Block.__init__">common Block options</a>`
 .. |GraphicsBlockOptions| replace:: :raw-html:`<a href="https://petercorke.github.io/bdsim/internals.html?highlight=graphicsblock%20__init__#bdsim.GraphicsBlock.__init__">common GraphicsBlock options</a>`
+.. |ikargs| replace:: additional keyword arguments accepted by the underlying numerical IK solver -- ``ilimit``, ``slimit``, ``tol``, ``mask``, ``joint_limits``, ``seed``, ``k``, ``method``, ``kq``, ``km`` -- see :meth:`~roboticstoolbox.ETS.ikine_LM` for details of each
 """
 
 # -------- Suppress common noisy warnings ----------------------------------------#

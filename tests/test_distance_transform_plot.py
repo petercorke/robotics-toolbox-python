@@ -27,6 +27,14 @@ def test_distance_transform_next_before_plan_raises():
         planner.next((0, 0))
 
 
+def test_distance_transform_next_uses_all_diagonals():
+    floorplan = np.zeros((5, 5), dtype=int)
+    planner = rtb.DistanceTransformPlanner(floorplan, metric="euclidean")
+    planner.plan((3, 1))
+
+    np.testing.assert_array_equal(planner.next((1, 3)), np.array([2, 2]))
+
+
 def test_distancexform_animate():
     # Regression test: the animate path used matplotlib.cm.get_cmap(),
     # removed in matplotlib 3.9, so plan(animate=True) raised

@@ -492,6 +492,18 @@ class TestBaseRobot(unittest.TestCase):
 
         self.assertEqual(end.name, "r_gripper")
 
+    def test_yumi_gripper_parents(self):
+        # r_gripper/l_gripper must sit under their own arm's final link, not
+        # the other arm's -- previously swapped, so end='r_gripper' silently
+        # solved for the left arm and vice versa.
+        r = rtb.models.YuMi()
+
+        r_gripper = r._getlink("r_gripper")
+        l_gripper = r._getlink("l_gripper")
+
+        self.assertEqual(r_gripper.parent.name, "gripper_r_base")
+        self.assertEqual(l_gripper.parent.name, "gripper_l_base")
+
     def test_limits2(self):
         r = rtb.models.Panda()
 

@@ -2000,23 +2000,24 @@ class DHRobot(Robot):
         self,
         Tep: np.ndarray | SE3,
         q0: ArrayLike | None = None,
-        ilimit: int = 30,
-        slimit: int = 100,
-        tol: float = 1e-6,
-        joint_limits: bool = False,
-        mask: ArrayLike | None = None,
-        seed: int | None = None,
+        **ikargs,
     ):
-        return self.ets().ikine_LM(
-            Tep=Tep,
-            q0=q0,
-            ilimit=ilimit,
-            slimit=slimit,
-            tol=tol,
-            joint_limits=joint_limits,
-            mask=mask,
-            seed=seed,
-        )
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization
+
+        :param Tep: The desired end-effector pose
+        :param q0: The initial joint coordinate vector
+        :param ikargs: |ikargs|
+        :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
+        :rtype: IKSolution
+
+        This is a thin wrapper around :meth:`ETS.ikine_LM` -- see that
+        method for the full description of the Levenberg-Marquadt solver
+        and its ``method``/``kq``/``km`` variants.
+
+        .. seealso:: :meth:`ikine_LM` (:class:`~roboticstoolbox.ETS`)
+        """
+        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)
 
 
 class SerialLink(DHRobot):

@@ -31,31 +31,25 @@ elif example == "panda":
 #  - the statement to execute for timeit
 ikfuncs = [
     (
-        robot.ikine_LM,  # Levenberg-Marquadt
+        lambda T, q0: robot.ikine_LM(T, q0=q0),  # Levenberg-Marquadt
         "ikine_LM",
-        "sol = robot.ikine_LM(T, q0)",
+        "sol = robot.ikine_LM(T, q0=q0)",
     ),
     (
-        robot.ikine_LMS,  # Levenberg-Marquadt (Sugihara)
-        "ikine_LMS",
-        "sol = robot.ikine_LMS(T, q0)",
+        lambda T, q0: robot.ikine_LM(T, q0=q0, method="sugihara", k=0.0001),
+        "ikine_LM (sugihara)",
+        "sol = robot.ikine_LM(T, q0=q0, method='sugihara', k=0.0001)",
     ),
     (
-        robot.ikine_min,  # numerical solution with no constraints
-        "ikine_min(qlim=False)",
-        "sol = robot.ikine_min(T, q0)",
+        lambda T, q0: robot.ikine_LM(T, q0=q0, joint_limits=False),
+        "ikine_LM(qlim=False)",
+        "sol = robot.ikine_LM(T, q0=q0, joint_limits=False)",
     ),
     (
-        lambda T, q0: robot.ikine_min(
-            T, q0, qlim=True
-        ),  # numerical solution with constraints
-        "ikine_min(qlim=True)",
-        "sol = robot.ikine_min(T, q0, qlim=True)",
+        lambda T, q0: robot.ikine_LM(T, q0=q0, joint_limits=True),
+        "ikine_LM(qlim=True)",
+        "sol = robot.ikine_LM(T, q0=q0, joint_limits=True)",
     ),
-    # (robot.ikine_mmc, #numerical solution with no constraints
-    #     "ikine_min(qlim=False)",
-    #     "sol = robot.ikine_min(T, q0)"
-    # ),
 ]
 if hasattr(robot, "ikine_a"):
     a = (

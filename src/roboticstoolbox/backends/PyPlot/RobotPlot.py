@@ -74,7 +74,15 @@ class RobotPlot:
 
         if options is not None:
             for key, value in options.items():
-                defaults[key] = {**defaults[key], **options[key]}
+                # Most options (colors, linewidths) are per-artefact dicts to
+                # merge with the default; a few (jointaxislength, eelength)
+                # are plain scalars to override outright -- **-unpacking a
+                # float raises TypeError, so only merge when both sides are
+                # dicts.
+                if isinstance(defaults.get(key), dict) and isinstance(value, dict):
+                    defaults[key] = {**defaults[key], **value}
+                else:
+                    defaults[key] = value
         self.options = defaults
 
     def draw(self):

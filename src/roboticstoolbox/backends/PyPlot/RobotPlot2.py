@@ -35,7 +35,12 @@ class RobotPlot2(RobotPlot):
 
         if options is not None:
             for key, value in options.items():
-                defaults[key] = {**defaults[key], **options[key]}
+                # See RobotPlot.__init__'s comment: eelength is a plain
+                # scalar to override outright, not a dict to merge.
+                if isinstance(defaults.get(key), dict) and isinstance(value, dict):
+                    defaults[key] = {**defaults[key], **value}
+                else:
+                    defaults[key] = value
         self.options = defaults
 
     def draw(self):
