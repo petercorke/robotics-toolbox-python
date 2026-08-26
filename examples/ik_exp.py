@@ -1,16 +1,6 @@
 import numpy as np
 import roboticstoolbox as rtb
-import spatialmath as sm
-import fknm
-import time
-import swift
-import spatialgeometry as sg
-import sys
 from ansitable import ANSITable
-
-from numpy import ndarray
-from spatialmath import SE3
-from typing import Union, overload, List, Set
 
 # Our robot and ETS
 robot = rtb.models.Panda()
@@ -42,7 +32,7 @@ slimit = 100
 tol = 1e-6
 
 # Reject solutions with invalid joint limits
-reject_jl = True
+joint_limits = True
 
 
 class IK:
@@ -64,164 +54,74 @@ class IK:
 
 
 solvers = [
-    # IK(
-    #     "Newton Raphson",
-    #     lambda Tep: ets.ik_nr(
-    #         Tep,
-    #         q0=None,
-    #         ilimit=ilimit,
-    #         slimit=slimit,
-    #         tol=tol,
-    #         reject_jl=reject_jl,
-    #         we=we,
-    #         use_pinv=False,
-    #         pinv_damping=0.0,
-    #     ),
-    # ),
-    # IK(
-    #     "Gauss Newton",
-    #     lambda Tep: ets.ik_gn(
-    #         Tep,
-    #         q0=None,
-    #         ilimit=ilimit,
-    #         slimit=slimit,
-    #         tol=tol,
-    #         reject_jl=reject_jl,
-    #         we=we,
-    #         use_pinv=False,
-    #         pinv_damping=0.0,
-    #     ),
-    # ),
     IK(
         "Newton Raphson Pinv",
-        lambda Tep: ets.ik_nr(
+        lambda Tep: ets.ik_NR(
             Tep,
             q0=None,
             ilimit=ilimit,
             slimit=slimit,
             tol=tol,
-            reject_jl=reject_jl,
-            we=we,
-            use_pinv=True,
+            joint_limits=joint_limits,
+            mask=we,
+            pinv=True,
             pinv_damping=0.0,
         ),
     ),
     IK(
         "Gauss Newton Pinv",
-        lambda Tep: ets.ik_gn(
+        lambda Tep: ets.ik_GN(
             Tep,
             q0=None,
             ilimit=ilimit,
             slimit=slimit,
             tol=tol,
-            reject_jl=reject_jl,
-            we=we,
-            use_pinv=True,
+            joint_limits=joint_limits,
+            mask=we,
+            pinv=True,
             pinv_damping=0.0,
         ),
     ),
     IK(
         "LM Chan 0.1",
-        lambda Tep: ets.ik_lm_chan(
+        lambda Tep: ets.ik_LM(
             Tep,
             q0=None,
             ilimit=ilimit,
             slimit=slimit,
             tol=tol,
-            reject_jl=reject_jl,
-            we=we,
-            λ=0.1,
+            joint_limits=joint_limits,
+            mask=we,
+            k=0.1,
+            method="chan",
         ),
     ),
-    # IK(
-    #     "LM Chan 1.0",
-    #     lambda Tep: ets.ik_lm_chan(
-    #         Tep,
-    #         q0=None,
-    #         ilimit=ilimit,
-    #         slimit=slimit,
-    #         tol=tol,
-    #         reject_jl=reject_jl,
-    #         we=we,
-    #         λ=1.0,
-    #     ),
-    # ),
-    # IK(
-    #     "LM Wampler",
-    #     lambda Tep: ets.ik_lm_wampler(
-    #         Tep,
-    #         q0=None,
-    #         ilimit=ilimit,
-    #         slimit=slimit,
-    #         tol=tol,
-    #         reject_jl=reject_jl,
-    #         we=we,
-    #         λ=1e-2,
-    #     ),
-    # ),
     IK(
         "LM Wampler 1e-4",
-        lambda Tep: ets.ik_lm_wampler(
+        lambda Tep: ets.ik_LM(
             Tep,
             q0=None,
             ilimit=ilimit,
             slimit=slimit,
             tol=tol,
-            reject_jl=reject_jl,
-            we=we,
-            λ=1e-4,
+            joint_limits=joint_limits,
+            mask=we,
+            k=1e-4,
+            method="wampler",
         ),
     ),
-    # IK(
-    #     "LM Wampler 1e-6",
-    #     lambda Tep: ets.ik_lm_wampler(
-    #         Tep,
-    #         q0=None,
-    #         ilimit=ilimit,
-    #         slimit=slimit,
-    #         tol=tol,
-    #         reject_jl=reject_jl,
-    #         we=we,
-    #         λ=1e-6,
-    #     ),
-    # ),
-    # IK(
-    #     "LM Sugihara 0.001",
-    #     lambda Tep: ets.ik_lm_sugihara(
-    #         Tep,
-    #         q0=None,
-    #         ilimit=ilimit,
-    #         slimit=slimit,
-    #         tol=tol,
-    #         reject_jl=reject_jl,
-    #         we=we,
-    #         λ=0.001,
-    #     ),
-    # ),
-    # IK(
-    #     "LM Sugihara 0.01",
-    #     lambda Tep: ets.ik_lm_sugihara(
-    #         Tep,
-    #         q0=None,
-    #         ilimit=ilimit,
-    #         slimit=slimit,
-    #         tol=tol,
-    #         reject_jl=reject_jl,
-    #         we=we,
-    #         λ=0.01,
-    #     ),
-    # ),
     IK(
         "LM Sugihara 0.1",
-        lambda Tep: ets.ik_lm_sugihara(
+        lambda Tep: ets.ik_LM(
             Tep,
             q0=None,
             ilimit=ilimit,
             slimit=slimit,
             tol=tol,
-            reject_jl=reject_jl,
-            we=we,
-            λ=0.1,
+            joint_limits=joint_limits,
+            mask=we,
+            k=0.1,
+            method="sugihara",
         ),
     ),
 ]
@@ -230,13 +130,13 @@ for i in range(problems):
     print(i + 1)
 
     for solver in solvers:
-        _, success, iterations, searches, residual = solver.solve(Tep[i])
+        sol = solver.solve(Tep[i])
 
-        if success:
-            solver.success[i] = success
-            solver.iterations[i] = iterations
-            solver.searches[i] = searches
-            solver.residual[i] = residual
+        if sol.success:
+            solver.success[i] = sol.success
+            solver.iterations[i] = sol.iterations
+            solver.searches[i] = sol.searches
+            solver.residual[i] = sol.residual
             solver.total_iterations += solver.iterations[i]
             solver.total_searches += solver.searches[i]
         else:
