@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.4.2](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.1...v1.4.2) (2026-08-26)
+
+**Headline**: Fixes to inverse kinematics and forward kinematics for branched robots. Arising from a big trawl through long standing issues (thanks to all those users), many were resolved by recent work, but some were not.
+Issues down from 104 to 43 of which 20 are `tech-debt` to be worked through.
+
+### Features
+
+* **ets:** fkine/jacob0/jacobe/hessian0/hessiane accept compact q ([#653](https://github.com/petercorke/robotics-toolbox-python/issues/653)) ([d5b6990](https://github.com/petercorke/robotics-toolbox-python/commit/d5b699025e48afeca147fb2e8b246557d2059c47))
+* **examples:** add ikine_XX (C++ and pure-Python ETS) to ik_speed.py ([2f41a71](https://github.com/petercorke/robotics-toolbox-python/commit/2f41a711eba92f97ad1ed38dcd4fa69a87bccb26))
+* **examples:** add ikine_XX timing columns to ik_speed.py ([#654](https://github.com/petercorke/robotics-toolbox-python/issues/654)) ([2f41a71](https://github.com/petercorke/robotics-toolbox-python/commit/2f41a711eba92f97ad1ed38dcd4fa69a87bccb26))
+
+
+### Bug Fixes
+
+* **blocks:** FDyn_X.output() crashed/asserted on unset xdd before deriv() ran ([#647](https://github.com/petercorke/robotics-toolbox-python/issues/647)) ([8caa363](https://github.com/petercorke/robotics-toolbox-python/commit/8caa363a98c158621d6418ccad8f0bbdc93fee11))
+* **examples,dhrobot:** repair broken ikine_LMS/ikine_min example references ([#650](https://github.com/petercorke/robotics-toolbox-python/issues/650)) ([6691113](https://github.com/petercorke/robotics-toolbox-python/commit/66911133fdbdb5cf73cb24fcca058f457270099c))
+* **ik:** _random_q() silently produces garbage for non-finite joint limits ([#648](https://github.com/petercorke/robotics-toolbox-python/issues/648)) ([2f43a3c](https://github.com/petercorke/robotics-toolbox-python/commit/2f43a3c2812dc8f30d8601a54d453ef158c8b8e0))
+* **ik:** unify ik_XX/ikine_XX return types and fix IK docs ([#652](https://github.com/petercorke/robotics-toolbox-python/issues/652)) ([07a60f4](https://github.com/petercorke/robotics-toolbox-python/commit/07a60f4a9fe9bf3de94aaf2428f93f75a7d77d3f))
+* **kinematics:** fkine_all() computes wrong poses for links past a nominal end-effector ([#643](https://github.com/petercorke/robotics-toolbox-python/issues/643)) ([25eedcd](https://github.com/petercorke/robotics-toolbox-python/commit/25eedcd4294856cab0a8de346c72ce0a48a50b2e))
+* **mobile:** restore missing distance-transform diagonal ([835457e](https://github.com/petercorke/robotics-toolbox-python/commit/835457e0428ade74b68220395a09224737f40d79))
+* **models,ik:** correct YuMi gripper parents and IK failure-path q compaction ([#649](https://github.com/petercorke/robotics-toolbox-python/issues/649)) ([7c40242](https://github.com/petercorke/robotics-toolbox-python/commit/7c40242dec4dafcc12940c3eeb9da67f9d2aa7fa))
+* **pyplot:** robot.plot(..., movie=...) crashes on save ([#645](https://github.com/petercorke/robotics-toolbox-python/issues/645)) ([2e2bfe2](https://github.com/petercorke/robotics-toolbox-python/commit/2e2bfe2ada4c43f3212db48f052986b25da6254d))
+* **pyplot:** scalar plot options (jointaxislength, eelength) crash on override ([a4aea19](https://github.com/petercorke/robotics-toolbox-python/commit/a4aea193354631dc5e208f00f556ff181ba713bb))
+* **pyplot:** scalar plot options crash on override ([#642](https://github.com/petercorke/robotics-toolbox-python/issues/642)) ([a4aea19](https://github.com/petercorke/robotics-toolbox-python/commit/a4aea193354631dc5e208f00f556ff181ba713bb))
+
+
+### Documentation
+
+* fix broken PyPlot backend example in intro.rst ([#641](https://github.com/petercorke/robotics-toolbox-python/issues/641)) ([5e8d2f9](https://github.com/petercorke/robotics-toolbox-python/commit/5e8d2f96f557d2a0014217e8820cbadcd9136889))
+
+
+### Miscellaneous
+
+* release 1.4.2 ([440a9ec](https://github.com/petercorke/robotics-toolbox-python/commit/440a9eca955430e1fd6f97ed63781e86648d1026))
+
 ## [1.4.1](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.0...v1.4.1) (2026-08-25)
 
 
