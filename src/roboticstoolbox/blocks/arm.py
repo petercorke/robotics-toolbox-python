@@ -1528,30 +1528,32 @@ class FDyn_X(ContinuousBlock):
             q0 = smb.getvector(q0, robot.n)
         # append qd0, assumed to be zero
         self._x0 = np.r_[q0, np.zeros((robot.n,))]
-        self._qdd = None
+        # Zero-acceleration placeholder for xdd until deriv() has run at
+        # least once. output() must not compute this itself: bdsim calls a
+        # continuous block's output() wherever the compute graph needs its
+        # *state*-derived ports (q, qd, x, xd here), which can happen before
+        # this block's own input is resolved -- notably here, where w
+        # (this block's input) is itself downstream of xd (this block's
+        # output) via the force-control feedback path in opspace.py. deriv()
+        # doesn't have that problem: the integrator only calls it with a
+        # genuinely resolved input. See petercorke/bdsim#81 for the general
+        # case (stateful blocks whose output() needs a resolved input).
+        self._qdd = np.zeros((robot.n,))
 
     def output(self, t, inports, x):
         n = self.robot.n
         q = x[:n]
         qd = x[n:]
-        qdd = self._qdd  # from last deriv
+        qdd = self._qdd  # cached from the last deriv() call, or the zero placeholder
 
         T = self.robot.fkine(q)
         x = smb.tr2x(T.A)
 
         Ja = self.robot.jacob0_analytical(q, self.representation)
         xd = Ja @ qd
-        # print(q)
-        # print(qd)
-        # print(xd)
-        # print(Ja)
-        # print()
 
-        if qdd is None:
-            xdd = None
-        else:
-            Ja_dot = self.robot.jacob0_dot(q, qd, J0=Ja)
-            xdd = Ja @ qdd + Ja_dot @ qd
+        Ja_dot = self.robot.jacob0_dot(q, qd, J0=Ja)
+        xdd = Ja @ qdd + Ja_dot @ qd
 
         return [q, qd, x, xd, xdd]
 

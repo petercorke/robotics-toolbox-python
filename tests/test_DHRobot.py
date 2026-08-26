@@ -1029,14 +1029,18 @@ class TestDHRobot(unittest.TestCase):
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=4)
 
-    # def test_ikine_LMS(self):
-    #     puma = rp.models.DH.Puma560()
+    def test_ikine_LM_ikargs_forwarding(self):
+        # DHRobot.ikine_LM forwards **ikargs straight through to
+        # ETS.ikine_LM -- confirm a non-default method/k actually reaches
+        # the underlying solver (regression: DHRobot.ikine_LM used to have
+        # its own narrow signature that silently dropped method/k/kq/km).
+        puma = rp.models.DH.Puma560()
 
-    #     T = puma.fkine(puma.qn)
+        T = puma.fkine(puma.qn)
 
-    #     sol = puma.ikine_LM(T)
-    #     self.assertTrue(sol.success)
-    #     self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
+        sol = puma.ikine_LM(T, method="sugihara", k=0.0001, tol=1e-10, seed=0)
+        self.assertTrue(sol.success)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=4)
 
     # def test_ikine_unc(self):
     #     puma = rp.models.DH.Puma560()

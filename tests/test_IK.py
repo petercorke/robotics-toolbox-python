@@ -828,6 +828,25 @@ class TestIK(unittest.TestCase):
 
         self.assertEqual(s, ans)
 
+    def test_ik_lm_failure_returns_compact_q(self):
+        # regression: the failure-return branch of IK.py's _solve() must
+        # compact q via ets.jindices, just like the success branch does --
+        # otherwise a solver on a sub-chain whose jindex doesn't start at 0
+        # (e.g. YuMi's l_gripper, jindex 7-13) returns a zero-padded,
+        # wrong-length q on failure instead of length ets.n.
+        from spatialmath import SE3
+
+        yumi = rtb.models.YuMi()
+        ets = yumi.ets(end="l_gripper")
+
+        Tep = SE3(0.6, -0.2, 0.3) * SE3.Rx(0.2)
+
+        solver = rtb.IK_LM(ilimit=1, slimit=1)
+        sol = solver.solve(ets, Tep)
+
+        self.assertFalse(sol.success)
+        self.assertEqual(sol.q.shape[0], ets.n)
+
     def test_iter_iksol(self):
         sol = rtb.IKSolution(
             np.array([1.0, 2.0, 3.0]),
@@ -845,6 +864,37 @@ class TestIK(unittest.TestCase):
         self.assertEqual(d, 100)
         self.assertEqual(e, 0.1)
         self.assertEqual(f, "")
+
+    def test_random_q_rejects_non_finite_qlim(self):
+        # _random_q() used to sample straight from ets.qlim with no check --
+        # a joint with a bad (non-finite) limit baked into its model data
+        # would silently produce garbage (NaN, or an opaque numpy internal
+        # error) instead of a clear diagnostic. A finite joint's random_q
+        # should be unaffected.
+        et = rtb.ET.Rz(qlim=[-np.inf, np.inf])
+        ets = rtb.ETS([et])
+        solver = rtb.IK_LM()
+
+        with self.assertRaises(ValueError):
+            solver._random_q(ets, 1)
+
+        good_et = rtb.ET.Rz(qlim=[-np.pi, np.pi])
+        good_ets = rtb.ETS([good_et])
+        q = solver._random_q(good_ets, 5)
+        self.assertTrue(np.all(np.isfinite(q)))
+        self.assertEqual(q.shape, (5, 1))
+
+    def test_ik_lm_c_rejects_non_finite_qlim(self):
+        # Same guard, mirrored in the compiled fast-path solver (ets.ik_LM(),
+        # backed by ik.cpp's own _rand_q()) -- this is a genuinely separate
+        # implementation from IK_LM/_random_q() above, and used to silently
+        # return a NaN "solution" (success=0) after burning through every
+        # random restart, rather than raising.
+        et = rtb.ET.Rz(qlim=[-np.inf, np.inf])
+        ets = rtb.ETS([et])
+
+        with self.assertRaises(ValueError):
+            ets.ik_LM(np.eye(4))
 
 
 if __name__ == "__main__":

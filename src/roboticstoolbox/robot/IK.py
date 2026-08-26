@@ -344,7 +344,7 @@ class IKSolver(ABC):
             reason += ", solution found but violates joint limits"
 
         return IKSolution(
-            q=q,
+            q=q[ets.jindices],
             success=False,
             iterations=total_i,
             searches=self.slimit,
@@ -406,24 +406,35 @@ class IKSolver(ABC):
         :returns: An ``i x n`` ndarray of random valid joint configurations, where n
             is the number of joints in the ``ets``
         :rtype: numpy.ndarray
+        :raises ValueError: a joint's qlim is not finite (e.g. ``inf``/``-inf``
+            or ``NaN``, typically from a bad value in a robot model's own
+            joint-limit data)
 
         Generates a random q vector within the joint limits defined by ``ets.qlim``.
         """
+
+        qlim = ets.qlim
+
+        if not np.all(np.isfinite(qlim)):
+            bad = np.flatnonzero(~np.all(np.isfinite(qlim), axis=0))
+            raise ValueError(
+                f"Joint limit(s) for joint index(es) {bad.tolist()} are not "
+                f"finite (qlim={qlim[:, bad].tolist()}) -- can't generate a "
+                "random configuration within an infinite/undefined range."
+            )
 
         if i == 1:
             q = np.zeros((1, ets.n))
 
             for i in range(ets.n):
-                q[0, i] = self._private_random.uniform(ets.qlim[0, i], ets.qlim[1, i])
+                q[0, i] = self._private_random.uniform(qlim[0, i], qlim[1, i])
 
         else:
             q = np.zeros((i, ets.n))
 
             for j in range(i):
                 for i in range(ets.n):
-                    q[j, i] = self._private_random.uniform(
-                        ets.qlim[0, i], ets.qlim[1, i]
-                    )
+                    q[j, i] = self._private_random.uniform(qlim[0, i], qlim[1, i])
 
         return q
 

@@ -11,7 +11,9 @@ print(T)
 # IK
 
 T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ikine_LMS(T)  # solve IK, ignore additional outputs
+sol = robot.ikine_LM(
+    T, method="sugihara", k=0.0001
+)  # solve IK, ignore additional outputs
 print(sol.q)  # display joint angles
 # FK shows that desired end-effector pose was achieved
 print(robot.fkine(sol.q))
