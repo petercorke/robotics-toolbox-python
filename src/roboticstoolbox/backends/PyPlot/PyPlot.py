@@ -512,7 +512,8 @@ class PyPlot(Connector):
 
         # render the frame and save as a PIL image in the list
         canvas = self.fig.canvas
-        return _pil("RGB", canvas.get_width_height(), canvas.tostring_rgb())
+        image = _pil("RGBA", canvas.get_width_height(), bytes(canvas.buffer_rgba()))
+        return image.convert("RGB")
 
     def _push_inline_frame(self):
         # Push a snapshot into notebook output for inline animation.

@@ -2058,6 +2058,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         env = self._get_graphical_backend(backend)
 
+        if movie is not None:
+            from roboticstoolbox.backends.PyPlot import PyPlot
+
         launch_kwargs = {}
         for key in ("render_mode", "inline_every_n", "inline_format", "inline_dpi"):
             if key in kwargs:
