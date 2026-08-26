@@ -325,10 +325,17 @@ class ETS(BaseETS):
         """
         Forward kinematics (returns raw ndarray)
 
-        :param q: Joint coordinates
+        :param q: Joint coordinates -- either *global* (length
+            ``max(self.jindices) + 1``, addressed by each joint's own
+            ``jindex``) or *compact* (length ``self.n``, positionally
+            ordered to match :meth:`joints`). These only differ when this
+            ETS is one branch of a larger, branched robot -- e.g. it's what
+            ``ikine_LM``/``ik_LM`` return when solving for just this ETS.
+            For a whole, unbranched robot the two coincide.
         :param base: a base transform applied before the ETS
         :param tool: tool transform, optional
         :param include_base: set to True if the base transform should be considered
+        :raises ValueError: if ``q``'s length matches neither interpretation
         :returns: the transformation matrix representing the pose of the end-effector
         :rtype: ndarray(4,4) or ndarray(m,4,4)
 
@@ -360,6 +367,7 @@ class ETS(BaseETS):
 
         """
 
+        q = self._resolve_q(q, allow_trajectory=True)
         return ETS_fkine(self._fknm, q, base, tool, include_base, _data=self.data)
 
     def jacob0(
@@ -407,6 +415,7 @@ class ETS(BaseETS):
 
         """
 
+        q = self._resolve_q(q)
         return ETS_jacob0(self._fknm, q, tool, _data=self.data, _n=self.n)
 
     def jacobe(
@@ -454,6 +463,7 @@ class ETS(BaseETS):
 
         """
 
+        q = self._resolve_q(q)
         return ETS_jacobe(self._fknm, q, tool, _data=self.data, _n=self.n)
 
     def hessian0(
@@ -523,6 +533,8 @@ class ETS(BaseETS):
 
         """
 
+        if q is not None:
+            q = self._resolve_q(q)
         return ETS_hessian0(self._fknm, q, J0, tool, _data=self.data, _n=self.n)
 
     def hessiane(
@@ -592,6 +604,8 @@ class ETS(BaseETS):
 
         """
 
+        if q is not None:
+            q = self._resolve_q(q)
         return ETS_hessiane(self._fknm, q, Je, tool, _data=self.data, _n=self.n)
 
     def jacob0_analytical(
