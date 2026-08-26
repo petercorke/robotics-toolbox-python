@@ -846,6 +846,25 @@ class TestIK(unittest.TestCase):
         self.assertEqual(e, 0.1)
         self.assertEqual(f, "")
 
+    def test_random_q_rejects_non_finite_qlim(self):
+        # _random_q() used to sample straight from ets.qlim with no check --
+        # a joint with a bad (non-finite) limit baked into its model data
+        # would silently produce garbage (NaN, or an opaque numpy internal
+        # error) instead of a clear diagnostic. A finite joint's random_q
+        # should be unaffected.
+        et = rtb.ET.Rz(qlim=[-np.inf, np.inf])
+        ets = rtb.ETS([et])
+        solver = rtb.IK_LM()
+
+        with self.assertRaises(ValueError):
+            solver._random_q(ets, 1)
+
+        good_et = rtb.ET.Rz(qlim=[-np.pi, np.pi])
+        good_ets = rtb.ETS([good_et])
+        q = solver._random_q(good_ets, 5)
+        self.assertTrue(np.all(np.isfinite(q)))
+        self.assertEqual(q.shape, (5, 1))
+
 
 if __name__ == "__main__":
     unittest.main()
