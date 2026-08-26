@@ -35,10 +35,18 @@ class RobotKinematicsMixin:
         """
         Forward kinematics
 
-        :param q: Joint coordinates
+        :param q: Joint coordinates -- either *global* (length ``robot.n``,
+            addressed by each joint's ``jindex``, e.g. the whole robot's
+            current ``q``) or, when ``end``/``start`` select just one branch
+            of a branched robot, *compact* (length equal to the number of
+            joints on that branch, positionally ordered from ``start`` to
+            ``end`` -- exactly what ``ikine_LM``/``ik_LM`` etc. return when
+            solving for that same ``end``)
         :param end: end-effector or gripper to compute forward kinematics to
         :param start: the link to compute forward kinematics from
         :param tool: tool transform, optional
+        :raises ValueError: if ``q``'s length matches neither the compact
+            nor the global interpretation for the selected ``start``/``end``
         :returns: The transformation matrix representing the pose of the end-effector
 
         ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at
@@ -57,6 +65,18 @@ class RobotKinematicsMixin:
         >>> import roboticstoolbox as rtb
         >>> panda = rtb.models.Panda()
         >>> panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+        On a branched robot, ``end`` selects one branch, and ``q`` may be
+        *either* the whole robot's global ``q`` *or* just the solution for
+        that branch on its own -- both give the same result:
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> from spatialmath import SE3
+        >>> yumi = rtb.models.YuMi()
+        >>> sol = yumi.ikine_LM(SE3(0.4, 0.2, 0.3) * SE3.Rx(0.2), end="l_gripper", method="chan", k=0.1, seed=0)
+        >>> sol.q.shape
+        >>> yumi.fkine(sol.q, end="l_gripper")
 
         .. rubric:: Notes
 
