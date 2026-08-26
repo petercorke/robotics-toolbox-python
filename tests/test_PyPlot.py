@@ -89,15 +89,15 @@ class TestPyPlot(unittest.TestCase):
             env.close()
 
             self.assertTrue(os.path.exists(path))
-            img = Image.open(path)
-            n_frames = 0
-            try:
-                while True:
-                    img.seek(n_frames)
-                    n_frames += 1
-            except EOFError:
-                pass
-            self.assertEqual(n_frames, 3)
+            with Image.open(path) as img:
+                n_frames = 0
+                try:
+                    while True:
+                        img.seek(n_frames)
+                        n_frames += 1
+                except EOFError:
+                    pass
+                self.assertEqual(n_frames, 3)
 
 
 if __name__ == "__main__":
