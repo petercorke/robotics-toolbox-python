@@ -1,5 +1,5 @@
-IK_LM - Levemberg-Marquadt Numerical IK
----------------------------------------
+IK_LM - Levenberg-Marquardt Numerical IK
+----------------------------------------
 
 .. currentmodule:: roboticstoolbox.robot.IK
 

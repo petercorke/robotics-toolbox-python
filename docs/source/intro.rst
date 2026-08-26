@@ -103,7 +103,7 @@ All robots can generate a random joint configuration informed by joint limits, i
     >>> puma.random_q()
 
 ``ikine_LM`` is a generalised iterative numerical solution based on
-Levenberg-Marquadt minimization, and additional status results are also
+Levenberg-Marquardt minimization, and additional status results are also
 returned as part of a named tuple.  
 
 .. warning:: 

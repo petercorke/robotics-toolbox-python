@@ -23,7 +23,7 @@ from spatialmath.base import (
     getmatrix,
 )
 from roboticstoolbox.tools.params import rtb_get_param
-from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP
+from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution
 
 from roboticstoolbox.ets.fknm import (
     ETS_init,
@@ -1014,7 +1014,7 @@ class ETS(BaseETS):
         joint_limits: bool = True,
         k: float = 1.0,
         method: L["chan", "wampler", "sugihara"] = "chan",
-    ) -> tuple[NDArray, int, int, int, float]:
+    ) -> IKSolution:
         r"""
         Fast Levenberg-Marquardt numerical inverse kinematics solver
 
@@ -1027,8 +1027,18 @@ class ETS(BaseETS):
         :param joint_limits: reject solutions with joint limit violations
         :param k: gain value for the damping matrix Wn
         :param method: one of ``"chan"`` (default), ``"sugihara"`` or ``"wampler"``
-        :returns: tuple (q, success, iterations, searches, residual)
-        :rtype: tuple
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches`` and ``residual`` error value (``reason`` is
+            always empty -- this fast C++ solver doesn't produce a granular failure
+            reason string, unlike :meth:`ikine_LM`)
+        :rtype: IKSolution
+
+        .. warning::
+
+            This method requires the compiled C++ extension. It raises
+            ``RuntimeError`` if that extension is unavailable, e.g. in a
+            pure-Python build/wheel or under Pyodide/JupyterLite. Use
+            :meth:`ikine_LM` instead in those environments.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method. This is a fast solver implemented in C++.
@@ -1038,7 +1048,7 @@ class ETS(BaseETS):
 
         The operation is defined by the choice of the ``method`` kwarg.
 
-        The step is deined as
+        The step is defined as
 
         .. math::
 
@@ -1126,15 +1136,22 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        .. seealso:: :meth:`ik_NR` :meth:`ik_GN`
+        .. seealso:: :meth:`ik_NR` :meth:`ik_GN` :meth:`ikine_LM`
 
         .. versionchanged:: 1.0.4
             Merged the Levenberg-Marquardt IK solvers into the ik_LM method
 
         """
 
-        return IK_LM_c(
+        q, success, iterations, searches, residual = IK_LM_c(
             self._fknm, Tep, q0, ilimit, slimit, tol, joint_limits, mask, k, method
+        )
+        return IKSolution(
+            q=q,
+            success=bool(success),
+            iterations=iterations,
+            searches=searches,
+            residual=residual,
         )
 
     def ik_NR(
@@ -1148,7 +1165,7 @@ class ETS(BaseETS):
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> tuple[NDArray, int, int, int, float]:
+    ) -> IKSolution:
         r"""
         Fast numerical inverse kinematics using Newton-Raphson optimisation
 
@@ -1161,8 +1178,18 @@ class ETS(BaseETS):
         :param joint_limits: reject solutions with invalid joint configurations
         :param pinv: use the pseudo-inverse instead of the normal matrix inverse
         :param pinv_damping: damping factor for the pseudo-inverse
-        :returns: tuple (q, success, iterations, searches, residual)
-        :rtype: tuple
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches`` and ``residual`` error value (``reason`` is
+            always empty -- this fast C++ solver doesn't produce a granular failure
+            reason string, unlike :meth:`ikine_NR`)
+        :rtype: IKSolution
+
+        .. warning::
+
+            This method requires the compiled C++ extension. It raises
+            ``RuntimeError`` if that extension is unavailable, e.g. in a
+            pure-Python build/wheel or under Pyodide/JupyterLite. Use
+            :meth:`ikine_NR` instead in those environments.
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -1209,11 +1236,11 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        .. seealso:: :meth:`ik_LM` :meth:`ik_GN`
+        .. seealso:: :meth:`ik_LM` :meth:`ik_GN` :meth:`ikine_NR`
 
         """
 
-        return IK_NR_c(
+        q, success, iterations, searches, residual = IK_NR_c(
             self._fknm,
             Tep,
             q0,
@@ -1224,6 +1251,13 @@ class ETS(BaseETS):
             mask,
             pinv,
             pinv_damping,
+        )
+        return IKSolution(
+            q=q,
+            success=bool(success),
+            iterations=iterations,
+            searches=searches,
+            residual=residual,
         )
 
     def ik_GN(
@@ -1237,7 +1271,7 @@ class ETS(BaseETS):
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> tuple[NDArray, int, int, int, float]:
+    ) -> IKSolution:
         r"""
         Fast numerical inverse kinematics by Gauss-Newton optimisation
 
@@ -1313,11 +1347,11 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        .. seealso:: :meth:`ik_LM` :meth:`ik_NR`
+        .. seealso:: :meth:`ik_LM` :meth:`ik_NR` :meth:`ikine_GN`
 
         """
 
-        return IK_GN_c(
+        q, success, iterations, searches, residual = IK_GN_c(
             self._fknm,
             Tep,
             q0,
@@ -1328,6 +1362,13 @@ class ETS(BaseETS):
             mask,
             pinv,
             pinv_damping,
+        )
+        return IKSolution(
+            q=q,
+            success=bool(success),
+            iterations=iterations,
+            searches=searches,
+            residual=residual,
         )
 
     def ikine_LM(
@@ -1365,7 +1406,10 @@ class ETS(BaseETS):
         :param km: gain for manipulability maximisation (0.0 disables)
         :param ps: minimum joint approach distance to limit (radians or metres)
         :param pi: null-space influence distance (radians or metres)
-        :returns: IK solution
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches``, ``residual`` error value, and ``reason``
+            string if applicable
+        :rtype: IKSolution
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method.
@@ -1463,7 +1507,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        .. seealso:: :meth:`ikine_NR` :meth:`ikine_GN` :meth:`ikine_QP`
+        .. seealso:: :meth:`ikine_NR` :meth:`ikine_GN` :meth:`ikine_QP` :meth:`ik_LM`
 
         .. versionchanged:: 1.0.4
             Added the Levenberg-Marquardt IK solver method on the `ETS` class
@@ -1524,7 +1568,10 @@ class ETS(BaseETS):
         :param km: gain for manipulability maximisation (0.0 disables)
         :param ps: minimum joint approach distance to limit (radians or metres)
         :param pi: null-space influence distance (radians or metres)
-        :returns: IK solution
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches``, ``residual`` error value, and ``reason``
+            string if applicable
+        :rtype: IKSolution
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Newton-Raphson method.
@@ -1568,7 +1615,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        .. seealso:: :meth:`ikine_LM` :meth:`ikine_GN` :meth:`ikine_QP`
+        .. seealso:: :meth:`ikine_LM` :meth:`ikine_GN` :meth:`ikine_QP` :meth:`ik_NR`
 
         .. versionchanged:: 1.0.4
             Added the Newton-Raphson IK solver method on the `ETS` class
@@ -1628,7 +1675,10 @@ class ETS(BaseETS):
         :param km: gain for manipulability maximisation (0.0 disables)
         :param ps: minimum joint approach distance to limit (radians or metres)
         :param pi: null-space influence distance (radians or metres)
-        :returns: IK solution
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches``, ``residual`` error value, and ``reason``
+            string if applicable
+        :rtype: IKSolution
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Gauss-Newton method.
@@ -1687,7 +1737,7 @@ class ETS(BaseETS):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        .. seealso:: :meth:`ikine_LM` :meth:`ikine_NR` :meth:`ikine_QP`
+        .. seealso:: :meth:`ikine_LM` :meth:`ikine_NR` :meth:`ikine_QP` :meth:`ik_GN`
 
         .. versionchanged:: 1.0.4
             Added the Gauss-Newton IK solver method on the `ETS` class
@@ -1749,7 +1799,10 @@ class ETS(BaseETS):
         :param km: gain for manipulability maximisation (0.0 disables)
         :param ps: minimum joint approach distance to limit (radians or metres)
         :param pi: null-space influence distance (radians or metres)
-        :returns: IK solution
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches``, ``residual`` error value, and ``reason``
+            string if applicable
+        :rtype: IKSolution
         :raises ImportError: if the package ``qpsolvers`` is not installed
 
         A method that provides functionality to perform numerical inverse kinematics
