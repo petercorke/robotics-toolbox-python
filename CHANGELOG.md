@@ -2,7 +2,7 @@
 
 ## [1.4.2](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.1...v1.4.2) (2026-08-26)
 
-**Headline**: PRs arising from a big trawl through long standing issues (thanks to all those users), many were resolved by recent work, but some were not.
+**Headline**: Fixes to inverse kinematics and forward kinematics for branched robots. Arising from a big trawl through long standing issues (thanks to all those users), many were resolved by recent work, but some were not.
 Issues down from 104 to 43 of which 20 are `tech-debt` to be worked through.
 
 ### Features
