@@ -828,6 +828,25 @@ class TestIK(unittest.TestCase):
 
         self.assertEqual(s, ans)
 
+    def test_ik_lm_failure_returns_compact_q(self):
+        # regression: the failure-return branch of IK.py's _solve() must
+        # compact q via ets.jindices, just like the success branch does --
+        # otherwise a solver on a sub-chain whose jindex doesn't start at 0
+        # (e.g. YuMi's l_gripper, jindex 7-13) returns a zero-padded,
+        # wrong-length q on failure instead of length ets.n.
+        from spatialmath import SE3
+
+        yumi = rtb.models.YuMi()
+        ets = yumi.ets(end="l_gripper")
+
+        Tep = SE3(0.6, -0.2, 0.3) * SE3.Rx(0.2)
+
+        solver = rtb.IK_LM(ilimit=1, slimit=1)
+        sol = solver.solve(ets, Tep)
+
+        self.assertFalse(sol.success)
+        self.assertEqual(sol.q.shape[0], ets.n)
+
     def test_iter_iksol(self):
         sol = rtb.IKSolution(
             np.array([1.0, 2.0, 3.0]),

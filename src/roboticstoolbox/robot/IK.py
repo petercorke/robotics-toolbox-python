@@ -344,7 +344,7 @@ class IKSolver(ABC):
             reason += ", solution found but violates joint limits"
 
         return IKSolution(
-            q=q,
+            q=q[ets.jindices],
             success=False,
             iterations=total_i,
             searches=self.slimit,
