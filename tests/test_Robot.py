@@ -796,6 +796,26 @@ class TestRobot(unittest.TestCase):
 
         r.fkine_all(r.q)
 
+    def test_fkine_compact_q_branched_robot(self):
+        # regression (issue #379): fkine()/jacob0() on a branched robot
+        # must accept the compact, per-arm q that ikine_LM/ik_LM return for
+        # a sub-chain (e.g. YuMi's l_gripper, global jindex 7-13) directly,
+        # not just a full-robot, jindex-addressed q.
+        from spatialmath import SE3
+
+        robot = rtb.models.YuMi()
+        Tep = SE3(0.4, 0.2, 0.3) * SE3.Rx(0.2)
+
+        sol = robot.ikine_LM(Tep, end="l_gripper", method="chan", k=0.1, seed=0)
+        self.assertTrue(sol.success)
+        self.assertEqual(sol.q.shape[0], 7)
+
+        T = robot.fkine(sol.q, end="l_gripper")
+        nt.assert_almost_equal(T.A, Tep.A, decimal=4)
+
+        J = robot.jacob0(sol.q, end="l_gripper")
+        self.assertEqual(J.shape, (6, 7))
+
     def test_fkine_all_past_ee_link(self):
         # fkine_all() used to stop recursing the instant it reached a
         # link registered in self.ee_links, even when that link has real

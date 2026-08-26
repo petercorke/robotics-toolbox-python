@@ -399,6 +399,78 @@ class BaseETS(MutableSequence):
 
         return np.array([j.jindex for j in self.joints()])  # type: ignore
 
+    def _resolve_q(self, q: ArrayLike, allow_trajectory: bool = False) -> NDArray:
+        """
+        Resolve q to a full jindex-addressed vector
+
+        :param q: joint coordinates, either *compact* (length :attr:`n`,
+            positionally ordered to match this ETS's own :meth:`joints`) or
+            *global* (length ``max(jindices) + 1``, addressed by each
+            joint's global ``jindex`` -- e.g. the whole robot's ``q`` on a
+            branched robot, when this ETS is only one branch of it)
+        :param allow_trajectory: if True, ``q`` is normalised with
+            :func:`getmatrix` (preserving a genuine ``(m, n)`` trajectory's
+            row count, matching :meth:`eval`'s own convention); if False,
+            ``q`` is flattened with :func:`getvector` first, matching
+            :meth:`jacob0`/:meth:`jacobe`/:meth:`hessian0`/:meth:`hessiane`,
+            none of which accept a trajectory
+        :raises TypeError: if ``q`` isn't numeric (from :func:`getvector`)
+        :raises ValueError: if ``q``'s length matches neither interpretation
+        :returns: a global jindex-addressed array; unchanged if ``q`` was
+            already global, scattered via :attr:`jindices` if ``q`` was
+            compact
+
+        This is the single place that disambiguates the two ``q`` shapes
+        accepted by :meth:`eval`, :meth:`jacob0`, :meth:`jacobe`,
+        :meth:`hessian0` and :meth:`hessiane` -- everything downstream of
+        this (the C++ extension and the pure-Python fallback) only ever
+        sees a global, jindex-addressed vector, exactly as before this
+        method existed.
+
+        Checking the compact length first means the common case -- a
+        single-chain robot, or any ETS whose own joints already happen to
+        carry global jindex 0..n-1 in order -- is unaffected: scattering
+        via :attr:`jindices` is then just the identity.
+        """
+        n = self.n
+        jindices = self.jindices
+
+        q = getmatrix(q, (None, None)) if allow_trajectory else getvector(q, None)
+
+        if n == 0 or jindices.dtype == object:
+            # no joints, or at least one joint has no jindex assigned yet
+            # (e.g. an ETS2 instance before its lazy auto-assignment runs)
+            # -- nothing to safely disambiguate, leave q exactly as given
+            return q
+
+        global_len = int(jindices.max()) + 1
+        length = q.shape[-1]
+
+        if length == n and n < global_len:
+            # a genuine sub-chain (this ETS's own joints don't span the
+            # full global jindex range) -- scatter positionally
+            full = np.zeros(q.shape[:-1] + (global_len,), dtype=q.dtype)
+            full[..., jindices] = q
+            return full
+
+        if length >= global_len:
+            # already global-addressed; longer-than-needed is accepted
+            # (matches the pre-existing convention of indexing q by
+            # jindex and ignoring unused trailing entries). This also
+            # covers n == global_len, where compact and global lengths
+            # coincide -- always treating that as global (not scattering)
+            # matters when this ETS's own joints don't carry jindex in
+            # increasing order (e.g. a reversed chain from .inv()), where
+            # scattering would silently reorder q instead of leaving it
+            # alone.
+            return q
+
+        raise ValueError(
+            f"q has length {length}, expected {n} (compact, positionally "
+            f"matching this ETS's own joint order) or at least {global_len} "
+            f"(global, addressed by jindex -- e.g. the whole robot's q)"
+        )
+
     @property
     def qlim(self):
         r"""

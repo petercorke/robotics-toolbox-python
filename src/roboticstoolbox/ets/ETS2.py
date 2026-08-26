@@ -309,7 +309,7 @@ class ETS2(BaseETS):
         - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
         """
 
-        q = getmatrix(q, (None, None))
+        q = self._resolve_q(q, allow_trajectory=True)
         l, _ = q.shape  # type: ignore
         end = self[-1]
 
@@ -375,8 +375,6 @@ class ETS2(BaseETS):
     ) -> NDArray:
         # very inefficient implementation, just put a 1 in last row
         # if its a rotation joint
-        q = getvector(q)
-
         j = 0
         J = np.zeros((3, self.n))
         etjoints = self.joint_idx()
@@ -386,6 +384,9 @@ class ETS2(BaseETS):
             for j in range(self.n):
                 i = etjoints[j]
                 self[i].jindex = j
+            self.__dict__.pop("jindices", None)  # invalidate cached_property
+
+        q = self._resolve_q(q)
 
         for j in range(self.n):
             i = etjoints[j]
