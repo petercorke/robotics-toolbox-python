@@ -865,6 +865,18 @@ class TestIK(unittest.TestCase):
         self.assertTrue(np.all(np.isfinite(q)))
         self.assertEqual(q.shape, (5, 1))
 
+    def test_ik_lm_c_rejects_non_finite_qlim(self):
+        # Same guard, mirrored in the compiled fast-path solver (ets.ik_LM(),
+        # backed by ik.cpp's own _rand_q()) -- this is a genuinely separate
+        # implementation from IK_LM/_random_q() above, and used to silently
+        # return a NaN "solution" (success=0) after burning through every
+        # random restart, rather than raising.
+        et = rtb.ET.Rz(qlim=[-np.inf, np.inf])
+        ets = rtb.ETS([et])
+
+        with self.assertRaises(ValueError):
+            ets.ik_LM(np.eye(4))
+
 
 if __name__ == "__main__":
     unittest.main()

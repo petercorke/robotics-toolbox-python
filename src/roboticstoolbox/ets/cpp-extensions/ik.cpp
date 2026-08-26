@@ -7,9 +7,13 @@
 
 #include <Python.h>
 #include <math.h>
+#include <cmath>
 #include <iostream>
 #include <functional>
 #include <Eigen/Dense>
+#include <nanobind/nanobind.h>
+
+namespace nb = nanobind;
 
 // ---------------------------------------------------------------------------
 // Shared loop kernel — all five IK solvers use this.
@@ -289,6 +293,19 @@ extern "C"
     {
         Eigen::Map<Eigen::ArrayXd> qlim_l(ets->qlim_l, ets->n);
         Eigen::Map<Eigen::ArrayXd> q_range2(ets->q_range2, ets->n);
+
+        // A joint with a non-finite limit (inf/-inf/NaN, typically a bad
+        // value baked into a robot model's own joint-limit data) would
+        // otherwise silently propagate inf/NaN into q below, with no
+        // diagnostic at all -- mirrors the equivalent check in the
+        // pure-Python solver path (IK.py's _random_q()).
+        for (int i = 0; i < ets->n; i++)
+        {
+            if (!std::isfinite(qlim_l(i)) || !std::isfinite(q_range2(i)))
+                throw nb::value_error(
+                    "Joint limit(s) are not finite -- can't generate a "
+                    "random configuration within an infinite/undefined range.");
+        }
 
         q = VectorX::Random(ets->n);
 
