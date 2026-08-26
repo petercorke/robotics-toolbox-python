@@ -69,6 +69,36 @@ class TestPyPlot(unittest.TestCase):
             env.launch(fig=fig, ax=ax)
         plt.close(fig)
 
+    def test_plot_movie(self):
+        # robot.plot(..., movie=...) used to crash outright: BaseRobot.plot()
+        # referenced PyPlot in an isinstance check with no import anywhere in
+        # the module (NameError), and getframe() called the long-removed
+        # matplotlib Agg canvas method tostring_rgb() (AttributeError on
+        # modern matplotlib). Covers both bugs end-to-end via a real saved
+        # GIF, not just "no exception raised".
+        import tempfile
+        import os
+        from PIL import Image
+
+        panda = rp.models.Panda()
+        qt = rp.jtraj(panda.qr, panda.qz, 3)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "movie.gif")
+            env = panda.plot(qt.q, backend="pyplot", movie=path)
+            env.close()
+
+            self.assertTrue(os.path.exists(path))
+            img = Image.open(path)
+            n_frames = 0
+            try:
+                while True:
+                    img.seek(n_frames)
+                    n_frames += 1
+            except EOFError:
+                pass
+            self.assertEqual(n_frames, 3)
+
 
 if __name__ == "__main__":
     unittest.main()
