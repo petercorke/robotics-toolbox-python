@@ -828,6 +828,51 @@ class TestIK(unittest.TestCase):
 
         self.assertEqual(s, ans)
 
+    def test_getitem_iksol(self):
+        sol = rtb.IKSolution(
+            np.array([1.0, 2.0, 3.0]),
+            success=True,
+            iterations=10,
+            searches=100,
+            residual=0.1,
+            reason="ok",
+        )
+
+        nt.assert_almost_equal(sol[0], np.array([1.0, 2.0, 3.0]))  # type: ignore
+        self.assertEqual(sol[1], True)
+        self.assertEqual(sol[2], 10)
+        self.assertEqual(sol[3], 100)
+        self.assertEqual(sol[4], 0.1)
+        self.assertEqual(sol[5], "ok")
+
+    def test_repr_iksol(self):
+        sol = rtb.IKSolution(np.array([1.0, 2.0, 3.0]), success=True)
+        self.assertEqual(repr(sol), str(sol))
+
+    def test_ik_LM_returns_iksolution(self):
+        panda = rtb.models.Panda().ets()
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        sol = panda.ik_LM(Tep)
+        self.assertIsInstance(sol, rtb.IKSolution)
+        self.assertIsInstance(sol.success, bool)
+
+    def test_ik_NR_returns_iksolution(self):
+        panda = rtb.models.Panda().ets()
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        sol = panda.ik_NR(Tep)
+        self.assertIsInstance(sol, rtb.IKSolution)
+        self.assertIsInstance(sol.success, bool)
+
+    def test_ik_GN_returns_iksolution(self):
+        panda = rtb.models.Panda().ets()
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        sol = panda.ik_GN(Tep)
+        self.assertIsInstance(sol, rtb.IKSolution)
+        self.assertIsInstance(sol.success, bool)
+
     def test_iter_iksol(self):
         sol = rtb.IKSolution(
             np.array([1.0, 2.0, 3.0]),
