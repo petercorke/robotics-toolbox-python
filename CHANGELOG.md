@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.3](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.2...v1.4.3) (2026-08-29)
+
+
+### Documentation
+
+* expand trchain runblock examples ([#655](https://github.com/petercorke/robotics-toolbox-python/issues/655)) ([9e6c00c](https://github.com/petercorke/robotics-toolbox-python/commit/9e6c00c63b7cee1c94476bac5bc7e113e48cf9ab))
+* fix broken URL ([#657](https://github.com/petercorke/robotics-toolbox-python/issues/657)) ([2d24e0d](https://github.com/petercorke/robotics-toolbox-python/commit/2d24e0d8f75c15bd7937f78347b876b0d51d7cf4))
+* **readme:** remove wasm info ([#656](https://github.com/petercorke/robotics-toolbox-python/issues/656)) ([4ba11d1](https://github.com/petercorke/robotics-toolbox-python/commit/4ba11d19523ef79dcba1beede3fc79ca0cbe8f8f))
+* showcase trchain runblock examples ([9e6c00c](https://github.com/petercorke/robotics-toolbox-python/commit/9e6c00c63b7cee1c94476bac5bc7e113e48cf9ab))
+
 ## [1.4.2](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.1...v1.4.2) (2026-08-26)
 
 **Headline**: Fixes to inverse kinematics and forward kinematics for branched robots. Arising from a big trawl through long standing issues (thanks to all those users), many were resolved by recent work, but some were not.
