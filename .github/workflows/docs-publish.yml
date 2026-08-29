@@ -1,0 +1,22 @@
+# Manual escape hatch to rebuild + redeploy the Sphinx docs and JupyterLite
+# ("Try it Now") site without waiting on ci.yml's full test matrix first --
+# e.g. for a docs-only fix that doesn't need the whole suite to re-run.
+#
+# Calls the same reusable docs.yml as ci.yml, so the build/deploy steps
+# themselves are never duplicated between the two trigger paths. Deployment
+# still only happens when run against main (see docs.yml's docs-deploy
+# job) -- dispatching this from another branch just builds, it doesn't
+# publish.
+
+name: Docs Publish (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docs:
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
