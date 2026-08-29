@@ -8,7 +8,7 @@
 # job) -- dispatching this from another branch just builds, it doesn't
 # publish.
 
-name: Docs Publish (manual)
+name: Docs Publish
 
 on:
   workflow_dispatch:
