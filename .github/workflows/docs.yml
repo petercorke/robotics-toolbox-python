@@ -1,0 +1,180 @@
+# Build the Sphinx docs + JupyterLite ("Try it Now") site, and deploy the
+# combined output to GitHub Pages when run against main.
+#
+# Reusable workflow (workflow_call) -- called from ci.yml, gated on the
+# test matrix passing, and from docs-publish.yml, a manual workflow_dispatch
+# escape hatch for a docs-only change that doesn't need the full suite to
+# re-run first. Keeping the build/deploy steps in one place means the two
+# trigger paths can never drift out of sync with each other.
+
+name: Docs
+
+on:
+  workflow_call:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  MPLBACKEND: Agg
+  QT_QPA_PLATFORM: offscreen
+
+jobs:
+  docs-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install docs dependencies
+        run: |
+          pip install .[docs]
+          pip install sympy
+          sudo apt-get install -y graphviz
+
+      # See the "Cache robot_descriptions assets" step in ci.yml's test-core
+      # job -- intro.rst's YuMi runblock example loads via robot_descriptions
+      # too.
+      - name: Cache robot_descriptions assets
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/robot_descriptions
+          key: robot-descriptions-v2-${{ runner.os }}-3.12
+
+      - name: Build docs
+        # TODO: add -W once warning count reaches zero
+        run: |
+          cd docs && make SPHINXOPTS="--keep-going" html
+          touch build/html/.nojekyll
+
+      - name: Build pure-Python wheel for JupyterLite
+        # RTB_PURE_WHEEL=1 (see pyproject.toml's scikit-build-core override)
+        # skips _fknm_c/_frne_c and forces a py3-none-any tag -- both have
+        # complete, tested pure-Python fallbacks, so nothing is missing at
+        # runtime. This used to require fetching a wasm32 wheel
+        # cross-compiled by release.yml's build_pyodide job (via
+        # cibuildwheel's Pyodide platform) from the latest GitHub Release,
+        # since building that wheel here on every docs push would've been
+        # slow, and PyPI rejected its old-format tag outright. A pure wheel
+        # needs neither: it's fast enough to build fresh on every push (no
+        # compilation at all, see build_pyodide's comment in release.yml),
+        # so "Try it Now" now tracks bleeding-edge main instead of lagging
+        # behind the last release, and py3-none-any needs no cross-repo
+        # GitHub Release fetch at all.
+        run: |
+          mkdir -p docs/lite/pypi
+          pip install build
+          RTB_PURE_WHEEL=1 python3 -m build --wheel --outdir docs/lite/pypi
+
+      - name: Fetch spatialgeometry pyodide wheel for JupyterLite
+        # spatialgeometry is an unconditional runtime dependency of
+        # roboticstoolbox-python (since it stopped vendoring a pure-Python
+        # copy internally at 1.4.0), so `piplite.install` needs a wasm
+        # wheel for it too, staged in the same local index. Fetched from
+        # spatialgeometry's own GitHub Release (jhavl/spatialgeometry) --
+        # it doesn't publish this to PyPI at all. SG's own CMake build
+        # already skips its compiled nanobind extension entirely under
+        # Emscripten (same idea as RTB_PURE_WHEEL above), so this wheel's
+        # *content* is genuinely pure Python -- but SG hasn't adopted the
+        # scikit-build-core override that makes the wheel *itself*
+        # py3-none-any yet, so it's still tagged cp312-cp312-pyodide_wasm32
+        # and still needs this cross-repo GitHub Release fetch rather than
+        # a plain PyPI install. Tech debt raised upstream:
+        # jhavl/spatialgeometry#46 -- once SG applies the same fix RTB just
+        # did, this step (and the cp312 filter) can go away in favour of a
+        # plain `pip download`/PyPI dependency resolution.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download --repo jhavl/spatialgeometry \
+            --pattern '*cp312*pyodide*wasm32*' --dir docs/lite/pypi --clobber
+
+      - name: Sync notebooks into JupyterLite content
+        # Copies *.ipynb plus any local asset directories (e.g.
+        # docs/notebooks/figs/, referenced by relative path from markdown
+        # cells) -- but not the Makefile-generated *.py script conversions
+        # or other loose files. ik_benchmark.ipynb is excluded deliberately:
+        # it benchmarks numeric IK solver performance and uses the
+        # websocket-based Swift visualizer, neither of which is meaningful
+        # or functional inside the Pyodide sandbox -- it stays Colab-only.
+        run: |
+          mkdir -p docs/lite/files
+          rsync -a --exclude '.ipynb_checkpoints' --exclude '__pycache__' \
+            --exclude 'Untitled*.ipynb' --exclude '*.py' --exclude 'Makefile' \
+            --exclude 'ik_benchmark.ipynb' \
+            docs/notebooks/ docs/lite/files/
+
+      - name: Adapt staged notebooks for JupyterLite
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("docs/lite/files")
+          for nb_path in root.rglob("*.ipynb"):
+              with nb_path.open("r", encoding="utf-8") as f:
+                  nb = json.load(f)
+
+              meta = nb.setdefault("metadata", {})
+              meta["kernelspec"] = {
+                  "name": "python",
+                  "display_name": "Python (Pyodide)",
+                  "language": "python",
+              }
+              meta.setdefault("language_info", {})
+              meta["language_info"]["name"] = "python"
+
+              with nb_path.open("w", encoding="utf-8") as f:
+                  json.dump(nb, f, indent=1)
+                  f.write("\n")
+          PY
+
+      - name: Build JupyterLite site
+        # jupyterlite-pyodide-kernel is pinned deliberately -- NOT just for
+        # wasm-ABI matching with the cp312 wheel fetched above, but because
+        # newer kernel releases bundle Pyodide >=0.27.7, which turned
+        # WebAssembly JSPI ("stack switching") on by default for
+        # run_until_complete(). Browsers without JSPI support (Safari has
+        # none as of 2026-08; Firefox only behind a flag) either crash the
+        # kernel outright or, with the enableRunUntilComplete: false
+        # workaround, turn run_until_complete into a fire-and-forget no-op --
+        # letting a cell's package/import machinery run before an install has
+        # actually finished landing (confirmed live on bdsim: intermittent
+        # ModuleNotFoundError despite a successful-looking install cell).
+        # jupyterlite-pyodide-kernel==0.6.1 bundles Pyodide 0.27.6, genuinely
+        # predating this whole mechanism -- matches MVTB's and bdsim's
+        # existing pins. See the toolbox-maintainer skill's JupyterLite
+        # version-pinning section for the full story before bumping this.
+        # Once Safari (and Firefox out-of-flag) ship JSPI, revisit this pin
+        # across RTB/MVTB/bdsim together.
+        run: |
+          pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server
+          cd docs/lite && jupyter lite build --output-dir ../build/html/lite
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/build/html
+
+  # Separate job so the github-pages environment (and its deployment
+  # protection rules restricting it to main) is only ever touched on main —
+  # a job-level `environment:` triggers a deployment attempt as soon as the
+  # job starts, regardless of any step-level `if:`, so PR/dependabot runs
+  # (or a manual docs-publish.yml dispatch from a feature branch) would
+  # otherwise show a false "failed to deploy to github-pages".
+  docs-deploy:
+    needs: docs-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v5
