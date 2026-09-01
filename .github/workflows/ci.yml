@@ -41,7 +41,7 @@ jobs:
       # between the os x python-version matrix's parallel jobs. Bump "v2" to
       # force a clean re-fetch if the cache ever ends up corrupted/stale.
       - name: Cache robot_descriptions assets
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/robot_descriptions
           key: robot-descriptions-v2-${{ runner.os }}-3.12
@@ -92,7 +92,7 @@ jobs:
       # See the "Cache robot_descriptions assets" step in test-core above --
       # same reasoning, this job hits the same lazily-cloned model data.
       - name: Cache robot_descriptions assets
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/robot_descriptions
           key: robot-descriptions-v2-${{ runner.os }}-${{ matrix.python-version }}
@@ -141,7 +141,7 @@ jobs:
       # See the "Cache robot_descriptions assets" step in test-core above --
       # same reasoning, this job hits the same lazily-cloned model data.
       - name: Cache robot_descriptions assets
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/robot_descriptions
           key: robot-descriptions-v2-${{ runner.os }}-3.12

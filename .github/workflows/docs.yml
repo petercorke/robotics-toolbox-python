@@ -38,7 +38,7 @@ jobs:
       # job -- intro.rst's YuMi runblock example loads via robot_descriptions
       # too.
       - name: Cache robot_descriptions assets
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/robot_descriptions
           key: robot-descriptions-v2-${{ runner.os }}-3.12
