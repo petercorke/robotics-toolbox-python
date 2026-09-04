@@ -323,10 +323,11 @@ class IKSolver(ABC):
                 if E < self.tol:
                     q = q_prev
 
-                    # Wrap q to be within +- 180 deg
-                    # If your robot has larger than 180 deg range on a joint
-                    # this line should be modified in incorporate the extra range
-                    q = (q + np.pi) % (2 * np.pi) - np.pi
+                    # Canonicalise only rotational joints with implicit limits.
+                    # Prismatic coordinates are distances and must never be
+                    # wrapped as angles; explicit rotational limits are also
+                    # respected so ranges wider than one revolution survive.
+                    q = _wrap_revolute_joints(ets, q)
 
                     # Check if we have violated joint limits
                     jl_valid = self._check_jl(ets, q)
@@ -473,6 +474,27 @@ class IKSolver(ABC):
 
         # If we make it here, all the joints are fine
         return True
+
+
+def _wrap_revolute_joints(ets: "rtb.ETS", q: np.ndarray) -> np.ndarray:
+    """Canonicalise rotational joints without changing linear coordinates.
+
+    :param ets: the elementary transform sequence describing the joints
+    :param q: a global joint-coordinate vector addressed by ``jindex``
+    :returns: a floating-point copy with eligible rotational coordinates in
+        ``[-pi, pi]``
+
+    A missing rotational limit means the standard periodic representation is
+    appropriate.  Once a limit is explicitly supplied, the caller's range is
+    authoritative; this preserves revolute joints whose valid interval is
+    wider than the canonical one and all prismatic coordinates unchanged.
+    """
+
+    wrapped = np.array(q, dtype=float, copy=True)
+    for joint, jindex in zip(ets.joints(), ets.jindices):
+        if joint.isrotation and joint.qlim is None:
+            wrapped[jindex] = (wrapped[jindex] + np.pi) % (2 * np.pi) - np.pi
+    return wrapped
 
 
 def _null_Σ(ets: "rtb.ETS", q: NDArray, ps: float, pi: NDArray | float):
