@@ -11,6 +11,7 @@ import numpy.testing as nt
 # import sympy
 import pytest
 from tests import skip_no_qp
+from roboticstoolbox.robot.IK import _wrap_revolute_joints
 
 test_tol = 1e-5
 
@@ -940,6 +941,33 @@ class TestIK(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             ets.ik_LM(np.eye(4))
+
+    def test_numeric_ik_preserves_prismatic_coordinates(self):
+        # A translational joint value is a distance, not a periodic angle. The
+        # solver must return the 4 m solution rather than wrapping it to -2.28.
+        ets = rtb.ETS([rtb.ET.tx(qlim=[-10.0, 10.0])])
+        target = rtb.ETS([rtb.ET.tx(4.0)])
+
+        solver = rtb.IK_LM(ilimit=100, slimit=1, tol=1e-10, seed=0)
+        sol = solver.solve(ets, target.eval([]), q0=[0.0])
+
+        self.assertTrue(sol.success)
+        nt.assert_allclose(sol.q, [4.0], atol=1e-5)
+        nt.assert_allclose(ets.eval(sol.q), target.eval([]), atol=1e-5)
+
+    def test_wrap_helper_respects_joint_types_and_explicit_limits(self):
+        ets = rtb.ETS(
+            [
+                rtb.ET.tx(qlim=[-10.0, 10.0]),
+                rtb.ET.Rz(),
+                rtb.ET.Rx(qlim=[-4.0, 4.0]),
+            ]
+        )
+        q = np.array([4.0, 1.5 * np.pi, 3.5])
+
+        wrapped = _wrap_revolute_joints(ets, q)
+
+        nt.assert_allclose(wrapped, [4.0, -0.5 * np.pi, 3.5])
 
 
 if __name__ == "__main__":
