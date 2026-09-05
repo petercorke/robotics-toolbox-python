@@ -1418,12 +1418,16 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = np.zeros((n, n))
         Bin = np.zeros(n)
 
+        qlim_arr = np.array([link.qlim for link in self.links if link.isjoint][:n])
+        qlim_min, qlim_max = qlim_arr[:, 0], qlim_arr[:, 1]
+
         for i in range(n):
-            if self.q[i] - self.qlim[0, i] <= pi:
-                Bin[i] = -gain * (((self.qlim[0, i] - q[i]) + ps) / (pi - ps))
+            lmin, lmax = qlim_min[i], qlim_max[i]
+            if q[i] - lmin <= pi:
+                Bin[i] = -gain * (((lmin - q[i]) + ps) / (pi - ps))
                 Ain[i, i] = -1
-            if self.qlim[1, i] - self.q[i] <= pi:
-                Bin[i] = gain * ((self.qlim[1, i] - q[i]) - ps) / (pi - ps)
+            if lmax - q[i] <= pi:
+                Bin[i] = gain * ((lmax - q[i]) - ps) / (pi - ps)
                 Ain[i, i] = 1
 
         return Ain, Bin
@@ -1491,7 +1495,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 Je = self.jacobe(q, start=start, end=link, tool=link_col.T)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
-                l_Ain = np.zeros((1, n))
+                l_Ain = np.zeros((1, self.n))
 
                 l_Ain[0, :n_dim] = 1 * norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
