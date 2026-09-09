@@ -293,36 +293,21 @@ class IKSolver(ABC):
         linalg_error = 0
 
         # Initialise variables
-        E = 0.0
+        E = np.inf
         q = q0[0]
 
         for search in range(self.slimit):
             q = q0[search].copy()
             i = 0
 
-            while i < self.ilimit:
-                i += 1
+            # Check the initial configuration before attempting an update.
+            # An exact or already-converged q0 must not enter a solver step,
+            # which can be singular even though the requested pose is solved.
+            _, E = self.error(ets.eval(q), Tep)
 
-                # step() reports E for q as it was *before* this iteration's
-                # update. An undamped update (GN/NR) can overshoot, so if E is
-                # already below tol we must return this pre-step q, not the
-                # mutated one step() hands back - otherwise we can report
-                # success with a q whose actual residual is far above tol.
-                q_prev = q.copy()
-
-                # Attempt a step
-                try:
-                    E, q[ets.jindices] = self.step(ets, Tep, q)
-
-                except np.linalg.LinAlgError:
-                    # Abandon search and try again
-                    linalg_error += 1
-                    break
-
-                # Check if we have arrived
+            while True:
+                # Check convergence for the current q before another update.
                 if E < self.tol:
-                    q = q_prev
-
                     # Wrap q to be within +- 180 deg
                     # If your robot has larger than 180 deg range on a joint
                     # this line should be modified in incorporate the extra range
@@ -344,6 +329,21 @@ class IKSolver(ABC):
                             residual=E,
                             reason="Success",
                         )
+
+                if i >= self.ilimit:
+                    break
+
+                i += 1
+
+                # Attempt a step. step() reports E for the updated q.
+                try:
+                    E, q[ets.jindices] = self.step(ets, Tep, q)
+
+                except np.linalg.LinAlgError:
+                    # Abandon search and try again
+                    linalg_error += 1
+                    break
+
             total_i += i
 
         # If we make it here, then we have failed
@@ -709,6 +709,7 @@ class IK_NR(IKSolver):
         else:
             q[ets.jindices] += np.linalg.inv(J) @ e + qnull
 
+        _, E = self.error(ets.eval(q), Tep)
         return E, q[ets.jindices]
 
 
@@ -941,6 +942,7 @@ class IK_LM(IKSolver):
 
         q[ets.jindices] += np.linalg.inv(J.T @ self.We @ J + Wn) @ g + qnull
 
+        _, E = self.error(ets.eval(q), Tep)
         return E, q[ets.jindices]
 
 
@@ -1121,6 +1123,7 @@ class IK_GN(IKSolver):
         else:
             q[ets.jindices] += np.linalg.inv(J) @ e + qnull
 
+        _, E = self.error(ets.eval(q), Tep)
         return E, q[ets.jindices]
 
 
@@ -1388,6 +1391,7 @@ class IK_QP(IKSolver):
 
         q += xd[: ets.n]
 
+        _, E = self.error(ets.eval(q), Tep)
         return E, q
 
 
