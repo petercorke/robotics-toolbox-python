@@ -205,6 +205,26 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
+    def test_exact_q0_converges_without_solver_step(self):
+        panda = rtb.models.Panda().ets()
+        q0 = np.array([0.0, -0.3, 0.0, -2.2, 0.0, 2.0, np.pi / 4])
+        Tep = panda.eval(q0)
+
+        solvers = (
+            rtb.IK_LM(method="chan", slimit=1),
+            rtb.IK_NR(pinv=False, slimit=1),
+            rtb.IK_GN(pinv=False, slimit=1),
+        )
+
+        for solver in solvers:
+            with self.subTest(solver=solver.name):
+                sol = solver.solve(panda, Tep, q0=q0)
+
+                self.assertEqual(sol.success, True)
+                self.assertEqual(sol.iterations, 0)
+                self.assertLess(sol.residual, solver.tol)
+                nt.assert_allclose(sol.q, q0, atol=1e-12)
+
     def test_IK_LM2(self):
 
         tol = 1e-6
