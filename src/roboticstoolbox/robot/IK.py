@@ -308,13 +308,10 @@ class IKSolver(ABC):
             while True:
                 # Check convergence for the current q before another update.
                 if E < self.tol:
-                    # Wrap q to be within +- 180 deg
-                    # If your robot has larger than 180 deg range on a joint
-                    # this line should be modified in incorporate the extra range
-                    q = (q + np.pi) % (2 * np.pi) - np.pi
+                    self._normalise_q(ets, q)
 
                     # Check if we have violated joint limits
-                    jl_valid = self._check_jl(ets, q)
+                    jl_valid = self._check_jl(ets, q[ets.jindices])
 
                     if not jl_valid and self.joint_limits:
                         # Abandon search and try again
@@ -449,6 +446,46 @@ class IKSolver(ABC):
                     q[j, i] = self._private_random.uniform(qlim[0, i], qlim[1, i])
 
         return q
+
+    def _normalise_q(self, ets: "rtb.ETS", q: np.ndarray) -> None:
+        """
+        Choose equivalent revolute coordinates without changing prismatic joints.
+
+        :param ets: The ETS defining the joint types and limits
+        :param q: Joint coordinates, indexed by joint jindex, modified in place
+        :returns: None
+
+        Preserve coordinates already within their limits, including revolute joints
+        outside the principal interval. Otherwise prefer the principal angle, shifted
+        by whole turns towards the limits if necessary. If no equivalent angle lies
+        within the limits, the subsequent joint-limit check will reject the solution.
+        """
+        qlim = ets.qlim
+        for i, joint in enumerate(ets.joints()):
+            j = joint.jindex
+            lower, upper = qlim[:, i]
+            if not joint.isrotation or lower <= q[j] <= upper:
+                continue
+
+            # Avoid rounding a principal angle across a nearby joint limit.
+            angle = q[j]
+            if not -np.pi <= angle < np.pi:
+                angle = (angle + np.pi) % (2 * np.pi) - np.pi
+            if angle < lower:
+                angle += 2 * np.pi * np.ceil((lower - angle) / (2 * np.pi))
+            elif angle > upper:
+                angle -= 2 * np.pi * np.ceil((angle - upper) / (2 * np.pi))
+            if not lower <= angle <= upper:
+                # Argument reduction can round a limit plus whole turns just
+                # outside the closed interval. Accept that endpoint only when
+                # it reconstructs the original coordinate exactly, without an
+                # epsilon that could admit an unrelated out-of-limit angle.
+                for bound in (lower, upper):
+                    turns = np.rint((q[j] - bound) / (2 * np.pi))
+                    if turns != 0 and bound + turns * (2 * np.pi) == q[j]:
+                        angle = bound
+                        break
+            q[j] = angle
 
     def _check_jl(self, ets: "rtb.ETS", q: np.ndarray) -> bool:
         """
