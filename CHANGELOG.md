@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.4](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.3...v1.4.4) (2026-09-15)
+
+
+### Bug Fixes
+
+* **joint_velocity_damper:** fix bug in q usage ([#666](https://github.com/petercorke/robotics-toolbox-python/issues/666)) ([8246559](https://github.com/petercorke/robotics-toolbox-python/commit/8246559202dd1722f8b6538daad66aed735ca928))
+* preserve joint types and limits in numerical IK ([e122ccb](https://github.com/petercorke/robotics-toolbox-python/commit/e122ccb9a1ad003879a63ff0fa6d3accdcddde26))
+
 ## [1.4.3](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.2...v1.4.3) (2026-09-12)
 
 
