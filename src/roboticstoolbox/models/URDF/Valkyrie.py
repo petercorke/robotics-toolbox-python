@@ -41,6 +41,9 @@ class Valkyrie(Robot):
     from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
+    The model is loaded via the `robot_descriptions
+    <https://github.com/robot-descriptions/robot_descriptions.py>`_ package.
+
     .. runblock:: pycon
 
         >>> import roboticstoolbox as rtb
