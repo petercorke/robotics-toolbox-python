@@ -98,7 +98,7 @@ while not arrived:
     pi = 0.9
 
     # Form the joint limit velocity damper
-    Ain[:n, :n], bin[:n] = panda.joint_velocity_damper(ps, pi, n)
+    Ain[:n, :n], bin[:n] = panda.joint_velocity_damper(ps=ps, pi=pi, n=n)
 
     # Linear component of objective function: the manipulability Jacobian
     c = np.r_[-panda.jacobm().reshape((n,)), np.zeros(6)]
