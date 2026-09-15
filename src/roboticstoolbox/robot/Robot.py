@@ -1797,17 +1797,55 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 link_groups.append(current_group)
                 current_group = []
 
+        # A trailing run of static links after the *last* joint (e.g. a tool
+        # flange/mount link with no further joint after it, such as URDF
+        # Panda's panda_link8) never triggers the isjoint branch above, so
+        # current_group is left non-empty and was previously dropped on the
+        # floor here -- silently excluding that link's mass/inertia from
+        # every torque in the chain rather than raising or warning (#636).
+        # Fold it into the last real group instead of discarding it; the
+        # joint lookups below no longer assume the joint is positionally
+        # last within its group, so this is safe regardless of group order.
+        if current_group:
+            link_groups[-1].extend(current_group)
+
         # Make some intermediate variables
         for i, group in enumerate(link_groups):
             I_int = SpatialInertia()
 
+            # Links after the group's joint (trailing static links folded in
+            # above) are rigidly carried by that joint's own output frame,
+            # but link.r/link.I are each expressed in that *link's own*
+            # frame, not the joint's. Compose their fixed transforms
+            # relative to the joint and carry the CoM/inertia into the
+            # joint's frame before summing -- otherwise (as originally
+            # written) a trailing link's mass lands in I_int with the wrong
+            # moment arm relative to this joint (effectively r=0), which
+            # for a non-negligible offset silently drops its contribution
+            # to this joint's torque. Links at-or-before the joint are
+            # summed as before (unchanged, uses the group's own existing,
+            # separately-verified convention -- see #636 for the case this
+            # does and does not cover).
+            past_joint = False
+            T_from_joint = None
             for idx in group:
                 link = self.links[idx]
 
-                I_int = I_int + SpatialInertia(m=link.m, r=link.r, I=link.I)
+                if past_joint:
+                    T_from_joint = (
+                        SE3(link.A())
+                        if T_from_joint is None
+                        else T_from_joint * SE3(link.A())
+                    )
+                    r = T_from_joint.R @ np.asarray(link.r) + T_from_joint.t
+                    Ir = T_from_joint.R @ link.I @ T_from_joint.R.T
+                    I_int = I_int + SpatialInertia(m=link.m, r=r, I=Ir)
+                else:
+                    I_int = I_int + SpatialInertia(m=link.m, r=link.r, I=link.I)
 
                 if link.v is not None:
                     s.append(link.v.s)  # type: ignore[union-attr]
+                    past_joint = True
 
             I[i] = I_int
 
@@ -1842,14 +1880,22 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
             # forward recursion
             for j, group in enumerate(link_groups):
-                # The joint is the last link in the group
-                joint = self.links[group[-1]]
+                # The joint may not be the last link in the group -- a
+                # trailing run of static links with no further joint after
+                # them (see above) is folded onto the end of the last
+                # group, after its joint.
+                joint = next(self.links[idx] for idx in group if self.links[idx].isjoint)
                 jindex = joint.jindex
 
                 vJ = SpatialVelocity(s[j] * qdk[jindex])
 
-                # transform from parent(j) to j
-                # Xup_int = SE3()
+                # transform from parent(j) to j -- stop at the joint itself.
+                # Any trailing static links after it (see above) are rigidly
+                # carried by the joint's own output frame and are folded
+                # into I[j] directly instead, not into this kinematic
+                # frame -- v[j]/a[j] stay defined at the joint's own output,
+                # matching s[j]/vJ, which are themselves only ever
+                # expressed there.
                 first_element = True
                 for idx in group:
                     link = self.links[idx]
@@ -1860,6 +1906,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                             first_element = False
                         else:
                             Xup_int = Xup_int * SE3(link.A(qk[link.jindex]))
+                        break
                     else:
                         if first_element:
                             Xup_int = SE3(link.A())
@@ -1896,7 +1943,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             # Backward recursion
             for j in reversed(range(n)):
                 group = link_groups[j]
-                joint = self.links[group[-1]]
+                joint = next(self.links[idx] for idx in group if self.links[idx].isjoint)
                 first_link = self.links[group[0]]
                 # link = self.links[j]
 
