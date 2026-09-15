@@ -1418,14 +1418,12 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = np.zeros((n, n))
         Bin = np.zeros(n)
 
-        qlim_min, qlim_max = self.qlim[0], self.qlim[1]
         for i in range(n):
-            lmin, lmax = qlim_min[i], qlim_max[i]
-            if q[i] - lmin <= pi:
-                Bin[i] = -gain * (((lmin - q[i]) + ps) / (pi - ps))
+            if q[i] - self.qlim[0, i] <= pi:
+                Bin[i] = -gain * (((self.qlim[0, i] - q[i]) + ps) / (pi - ps))
                 Ain[i, i] = -1
-            if lmax - q[i] <= pi:
-                Bin[i] = gain * ((lmax - q[i]) - ps) / (pi - ps)
+            if self.qlim[1, i] - q[i] <= pi:
+                Bin[i] = gain * ((self.qlim[1, i] - q[i]) - ps) / (pi - ps)
                 Ain[i, i] = 1
 
         return Ain, Bin
