@@ -1491,7 +1491,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 Je = self.jacobe(q, start=start, end=link, tool=link_col.T)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
-                l_Ain = np.zeros((1, self.n))
+                l_Ain = np.zeros((1, n))
 
                 l_Ain[0, :n_dim] = 1 * norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
