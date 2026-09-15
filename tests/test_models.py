@@ -41,6 +41,23 @@ class TestModels(unittest.TestCase):
         panda.qr
         panda.qz
 
+        # default: bundled qut_frankie_description xacro -- has collision
+        # geometry but no inertial data at all (see wiki's "Panda models"
+        # page and issue #686)
+        self.assertTrue(all(link.m == 0.0 for link in panda.links))
+
+    def test_PandaURDF_robot_descriptions(self):
+        panda = rp.models.URDF.Panda(use_robot_descriptions=True)
+        panda.qr
+        panda.qz
+
+        # robot_descriptions source has real inertial data for the arm
+        # links (the trailing gripper-mount link, panda_link8, is
+        # genuinely massless in this source too)
+        self.assertTrue(any(link.m > 0.0 for link in panda.links))
+        self.assertEqual(panda.n, 7)
+        self.assertEqual(len(panda.grippers), 1)
+
     def test_UR3(self):
         ur = rp.models.UR3()
         ur.qr
