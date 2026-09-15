@@ -1385,7 +1385,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def joint_velocity_damper(
         self,
-        q=None,
+        q: NDArray | None = None,
         ps: float = 0.05,
         pi: float = 0.1,
         n: int | None = None,
@@ -1413,7 +1413,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             n = self.n
 
         if q is None:
-            q = np.copy(self.q)
+            q = self.q
 
         Ain = np.zeros((n, n))
         Bin = np.zeros(n)
