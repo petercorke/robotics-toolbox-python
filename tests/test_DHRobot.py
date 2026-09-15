@@ -1015,6 +1015,20 @@ class TestDHRobot(unittest.TestCase):
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
+    def test_ikine_a_with_tool(self):
+        # regression test for #640/#491: ikine_6s (used internally by
+        # ikine_a) undid the tool transform on the wrong side, so a
+        # round trip through ikine_a -> fkine did not recover the
+        # original target pose when a nonzero tool was set.
+        puma = rp.models.DH.Puma560()
+        puma.tool = sm.SE3.Tz(0.1)
+
+        T = puma.fkine(puma.qn)
+
+        sol = puma.ikine_a(T)
+        self.assertTrue(sol.success)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
+
     def test_ikine_LM(self):
         puma = rp.models.DH.Puma560()
 
