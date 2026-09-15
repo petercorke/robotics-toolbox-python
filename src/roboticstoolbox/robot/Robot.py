@@ -1507,9 +1507,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
             if collision_list is None:
                 col_list = link.collision
-
-                for c in col_list:
-                    pass
             else:
                 col_list = [collision_list[j - 1]]  # pragma nocover
 
