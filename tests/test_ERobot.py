@@ -271,6 +271,52 @@ class TestERobot(unittest.TestCase):
         tau = robot.rne(q, z, np.array([1, 1]))
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
+    def test_invdyn_trailing_static_link(self):
+        # Regression test for #636: a run of static (fixed) links *after*
+        # the last joint -- e.g. a tool-mount flange with no further joint
+        # after it, such as URDF Panda's panda_link8 -- was silently
+        # dropped from link_groups entirely, excluding its mass/inertia
+        # from every torque in the chain rather than raising or warning.
+        #
+        # joint1 (Ry, massless) -> l2 (fixed, tx(1), m=1, r=[0.5,0,0],
+        # trailing -- no joint after it). l2's own CoM sits 1.5 total from
+        # the joint (1.0 from l2's own fixed offset + 0.5 from its own r),
+        # rotating rigidly with joint1, so gravity torque is the standard
+        # single-point-mass pendulum formula -m*g*r*cos(q) at r=1.5.
+        joint1 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], name="joint1")
+        l2 = Link(ets=ETS(ET.tx(1)), m=1, r=[0.5, 0, 0], parent=joint1, name="l2")
+        robot = ERobot([joint1, l2], name="joint then trailing static link")
+        self.assertEqual(robot.n, 1)
+
+        z = np.zeros(robot.n)
+        for q in (0.0, 0.5, -1.2, pi / 2):
+            tau = robot.rne(np.r_[q], z, z, gravity=[0, 0, -9.81])
+            expected = -1.0 * 9.81 * 1.5 * cos(q)
+            self.assertAlmostEqual(tau[0], expected, places=9)
+
+    def test_invdyn_trailing_static_link_with_inertia(self):
+        # Same as above, but the trailing static link also carries a
+        # nonzero inertia tensor and an off-axis r, exercising the general
+        # CoM/inertia transform into the joint's frame rather than just a
+        # simple point mass on the rotation axis.
+        joint1 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], name="joint1")
+        l2 = Link(
+            ets=ETS(ET.tx(0.30)),
+            m=2,
+            r=[0.05, 0, 0],
+            I=np.diag([0.001, 0.002, 0.003]),
+            parent=joint1,
+            name="l2",
+        )
+        robot = ERobot([joint1, l2], name="joint then trailing static link 2")
+        self.assertEqual(robot.n, 1)
+
+        z = np.zeros(robot.n)
+        for q in (0.0, 0.5, -1.2):
+            tau = robot.rne(np.r_[q], z, z, gravity=[0, 0, -9.81])
+            expected = -2.0 * 9.81 * 0.35 * cos(q)
+            self.assertAlmostEqual(tau[0], expected, places=9)
+
 
 class TestERobot2(unittest.TestCase):
     def test_plot(self):
