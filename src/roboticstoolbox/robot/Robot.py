@@ -1418,9 +1418,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = np.zeros((n, n))
         Bin = np.zeros(n)
 
-        qlim_arr = np.array([link.qlim for link in self.links if link.isjoint][:n])
-        qlim_min, qlim_max = qlim_arr[:, 0], qlim_arr[:, 1]
-
+        qlim_min, qlim_max = self.qlim[0], self.qlim[1]
         for i in range(n):
             lmin, lmax = qlim_min[i], qlim_max[i]
             if q[i] - lmin <= pi:
