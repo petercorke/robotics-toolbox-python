@@ -1460,12 +1460,20 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         end, start, _ = self._get_limit_links(start=start, end=end)
 
-        links, n, _ = self.get_path(start=start, end=end)
+        links, _, _ = self.get_path(start=start, end=end)
 
         q = np.array(q)
         j = 0
         Ain = None
         bin = None
+
+        def get_link_joint_index(link: Link | None) -> int:
+            curr = link
+            while curr is not None:
+                if curr.isjoint and curr.jindex is not None:
+                    return curr.jindex
+                curr = curr.parent
+            return 0
 
         def indiv_calculation(link: Link, link_col: CollisionShape, q: NDArray):
             d, wTlp, wTcp = link_col.closest_point(shape, di)
@@ -1491,9 +1499,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 Je = self.jacobe(q, start=start, end=link, tool=link_col.T)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
-                l_Ain = np.zeros((1, n))
+                l_Ain = np.zeros((1, self.n))
 
-                l_Ain[0, :n_dim] = 1 * norm_h @ Je
+                start_jidx = get_link_joint_index(start)
+                l_Ain[0, start_jidx : start_jidx + n_dim] = 1 * norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
             else:  # pragma nocover
                 l_Ain = None
