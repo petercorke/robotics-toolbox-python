@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.4.3](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.2...v1.4.3) (2026-09-12)
+
+
+### Bug Fixes
+
+* check IK convergence before solver step ([aabe415](https://github.com/petercorke/robotics-toolbox-python/commit/aabe415af02c0fe9336fd9eb3693e962b5b577e2))
+
+
+### Documentation
+
+* expand trchain runblock examples ([#655](https://github.com/petercorke/robotics-toolbox-python/issues/655)) ([9e6c00c](https://github.com/petercorke/robotics-toolbox-python/commit/9e6c00c63b7cee1c94476bac5bc7e113e48cf9ab))
+* fix broken URL ([#657](https://github.com/petercorke/robotics-toolbox-python/issues/657)) ([2d24e0d](https://github.com/petercorke/robotics-toolbox-python/commit/2d24e0d8f75c15bd7937f78347b876b0d51d7cf4))
+* **readme:** remove wasm info ([#656](https://github.com/petercorke/robotics-toolbox-python/issues/656)) ([4ba11d1](https://github.com/petercorke/robotics-toolbox-python/commit/4ba11d19523ef79dcba1beede3fc79ca0cbe8f8f))
+* rewrite CONTRIBUTING.md ([cd9c619](https://github.com/petercorke/robotics-toolbox-python/commit/cd9c619040f3f98acaea9a67520c67b3d74b30e9))
+* showcase trchain runblock examples ([9e6c00c](https://github.com/petercorke/robotics-toolbox-python/commit/9e6c00c63b7cee1c94476bac5bc7e113e48cf9ab))
+
+
+### Build System
+
+* **deps:** bump actions/cache from 4 to 6 ([1ebf302](https://github.com/petercorke/robotics-toolbox-python/commit/1ebf302c125f0cec4fb368eac8ce4d0c7364cad2))
+* **deps:** bump pypa/cibuildwheel from 4.1.1 to 4.2.0 ([efbca2a](https://github.com/petercorke/robotics-toolbox-python/commit/efbca2a27d287fd4aa6e69e3c2f1c7ede875fc3b))
+
 ## [1.4.2](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.1...v1.4.2) (2026-08-26)
 
 **Headline**: Fixes to inverse kinematics and forward kinematics for branched robots. Arising from a big trawl through long standing issues (thanks to all those users), many were resolved by recent work, but some were not.

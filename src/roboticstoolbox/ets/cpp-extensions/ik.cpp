@@ -51,8 +51,52 @@ static void _IK_loop(
 
             if (*E < tol)
             {
-                for (int i = 0; i < ets->n; i++)
-                    q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
+                // Preserve translations and coordinates already within their limits.
+                // Other revolute coordinates may move only by whole turns, so the
+                // converged end-effector pose is unchanged (see IKSolver._normalise_q).
+                int j = 0;
+                for (int i = 0; i < ets->m; i++)
+                {
+                    ET *et = ets->ets[i];
+                    if (!et->isjoint)
+                        continue;
+
+                    double lower = ets->qlim_l[j];
+                    double upper = ets->qlim_h[j];
+                    if (et->axis < 3 && !(lower <= q(j) && q(j) <= upper))
+                    {
+                        // Avoid rounding a principal angle across a nearby limit.
+                        double angle = q(j);
+                        if (!(angle >= -PI && angle < PI))
+                        {
+                            // Unlike Python's %, fmod can return a negative remainder.
+                            angle = std::fmod(angle + PI, PI_x2);
+                            if (angle < 0)
+                                angle += PI_x2;
+                            angle -= PI;
+                        }
+                        if (angle < lower)
+                            angle += PI_x2 * std::ceil((lower - angle) / PI_x2);
+                        else if (angle > upper)
+                            angle -= PI_x2 * std::ceil((angle - upper) / PI_x2);
+                        if (!(lower <= angle && angle <= upper))
+                        {
+                            // Recover rounded endpoints only if whole turns
+                            // reconstruct the original coordinate exactly.
+                            for (double bound : {lower, upper})
+                            {
+                                double turns = std::round((q(j) - bound) / PI_x2);
+                                if (turns != 0 && bound + turns * PI_x2 == q(j))
+                                {
+                                    angle = bound;
+                                    break;
+                                }
+                            }
+                        }
+                        q(j) = angle;
+                    }
+                    j++;
+                }
                 *solution = reject_jl ? _check_lim(ets, q) : 1;
                 break;
             }

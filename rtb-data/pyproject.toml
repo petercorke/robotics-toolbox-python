@@ -15,8 +15,8 @@ classifiers = [
 ]
 
 [project.urls]
-Source = "https://github.com/petercorke/roboticstoolbox-python"
-Homepage = "https://github.com/petercorke/roboticstoolbox-python"
+Source = "https://github.com/petercorke/robotics-toolbox-python"
+Homepage = "https://github.com/petercorke/robotics-toolbox-python"
 
 [build-system]
 requires = ["hatchling>=1.25"]

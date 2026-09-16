@@ -60,6 +60,14 @@ For example when using a 3 DOF manipulator tool orientation might be unimportant
 
 setting ``joint_limits = True`` will reject solutions with joint limit violations. Note that finding a solution with valid joint coordinates is likely to take longer than without.
 
+After convergence, prismatic joint coordinates are left unchanged. Revolute
+coordinates already within their limits are preserved, including limits outside
+the principal interval of :math:`[-\pi, \pi]`. Other revolute coordinates are
+reduced to the principal angle and, if necessary, shifted by whole turns towards
+their limits. If no equivalent angle is within the limits, the solution is
+rejected when ``joint_limits = True``. Setting ``joint_limits = False`` disables
+this rejection; it does not change a prismatic distance into an angle.
+
 .. rubric:: Others
 
 There are other arguments which may be unique to the solver, so check the documentation of the solver you wish to use for a complete list and explanation of arguments.
