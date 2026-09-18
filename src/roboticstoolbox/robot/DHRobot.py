@@ -1889,7 +1889,7 @@ class DHRobot(Robot):
         if base is not None:
             T = base.inv() * T
         if tool is not None:
-            T = tool.inv() * T
+            T = T * tool.inv()
 
         # q = np.zeros((6,))
         solutions = []
