@@ -383,10 +383,16 @@ class URDFRobot(Robot):
                 super().__init__(
                     "ur5",
                     manufacturer="Universal Robotics",
-                    gripper_link_index=7,
+                    gripper_link_name=["tool0", "ee_link"],
                 )
                 self.qz = np.zeros(6)
                 ...
+
+    ``gripper_link_name`` (a name, or a list of candidate names tried in
+    order) survives an upstream URDF reordering that would silently break a
+    raw positional ``gripper_link_index`` -- see #578. Prefer it for new
+    models; ``gripper_link_index`` remains for models where a stable,
+    well-known link name isn't available.
     """
 
     def __init__(
@@ -394,6 +400,7 @@ class URDFRobot(Robot):
         urdf_path: "str | Path",
         manufacturer: str = "",
         gripper_link_index: "int | None" = None,
+        gripper_link_name: "str | list[str] | None" = None,
         patch: "Callable[[str], str] | None" = None,
         extra_packages: "dict[str, str] | None" = None,
         **kwargs,
@@ -401,7 +408,26 @@ class URDFRobot(Robot):
         elinks, name, filepath = URDF_file(
             urdf_path, patch=patch, extra_packages=extra_packages
         )
-        if gripper_link_index is not None:
+        if gripper_link_name is not None:
+            candidates = (
+                [gripper_link_name]
+                if isinstance(gripper_link_name, str)
+                else gripper_link_name
+            )
+            for candidate in candidates:
+                match = next(
+                    (link for link in elinks if link.name == candidate), None
+                )
+                if match is not None:
+                    kwargs["gripper_links"] = match
+                    break
+            else:
+                raise ValueError(
+                    f"none of the candidate gripper link names {candidates!r} "
+                    f"were found in the parsed URDF for {name!r} (have: "
+                    f"{[link.name for link in elinks]})"
+                )
+        elif gripper_link_index is not None:
             kwargs["gripper_links"] = elinks[gripper_link_index]
         super().__init__(elinks, name=name, manufacturer=manufacturer, **kwargs)
         self._urdf_filepath = str(filepath) if filepath is not None else ""
