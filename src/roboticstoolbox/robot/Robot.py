@@ -1975,7 +1975,15 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                         i for i, group in enumerate(link_groups) if parent_idx in group
                     ][0]
 
-                    f[group_idx] = f[group_idx] + Xup[j] * f[j]
+                    # Xup[j] is the child<-parent motion transform (v_child =
+                    # Xup[j] * v_parent); propagating a force the other way,
+                    # child->parent, needs the transform in the other
+                    # direction too. spatialmath's SE3 * SpatialForce applies
+                    # the coadjoint of its left operand (since
+                    # spatialmath-python 1.1.18, rai-opensource/
+                    # spatialmath-python#207), so the un-inverted transform
+                    # (Xup[j].inv(), i.e. parent<-child) is what's needed here.
+                    f[group_idx] = f[group_idx] + Xup[j].inv() * f[j]
 
         # The current Q has the length equal to the number of links within the robot
         # rather than the number of joints. We need to remove the static links
