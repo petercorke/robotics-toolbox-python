@@ -202,7 +202,7 @@ def make_banner():
     from spatialmath import *
     from spatialmath.base import *
     from spatialmath.base import sym
-    from roboticstoolbox import *"
+    from roboticstoolbox import *
 
     # useful variables
     from math import pi

@@ -1385,7 +1385,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def joint_velocity_damper(
         self,
-        q=None,
+        q: NDArray | None = None,
         ps: float = 0.05,
         pi: float = 0.1,
         n: int | None = None,
@@ -1413,16 +1413,16 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             n = self.n
 
         if q is None:
-            q = np.copy(self.q)
+            q = self.q
 
         Ain = np.zeros((n, n))
         Bin = np.zeros(n)
 
         for i in range(n):
-            if self.q[i] - self.qlim[0, i] <= pi:
+            if q[i] - self.qlim[0, i] <= pi:
                 Bin[i] = -gain * (((self.qlim[0, i] - q[i]) + ps) / (pi - ps))
                 Ain[i, i] = -1
-            if self.qlim[1, i] - self.q[i] <= pi:
+            if self.qlim[1, i] - q[i] <= pi:
                 Bin[i] = gain * ((self.qlim[1, i] - q[i]) - ps) / (pi - ps)
                 Ain[i, i] = 1
 
@@ -1460,12 +1460,20 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         end, start, _ = self._get_limit_links(start=start, end=end)
 
-        links, n, _ = self.get_path(start=start, end=end)
+        links, _, _ = self.get_path(start=start, end=end)
 
         q = np.array(q)
         j = 0
         Ain = None
         bin = None
+
+        def get_link_joint_index(link: Link | None) -> int:
+            curr = link
+            while curr is not None:
+                if curr.isjoint and curr.jindex is not None:
+                    return curr.jindex
+                curr = curr.parent
+            return 0
 
         def indiv_calculation(link: Link, link_col: CollisionShape, q: NDArray):
             d, wTlp, wTcp = link_col.closest_point(shape, di)
@@ -1491,9 +1499,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 Je = self.jacobe(q, start=start, end=link, tool=link_col.T)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
-                l_Ain = np.zeros((1, n))
+                l_Ain = np.zeros((1, self.n))
 
-                l_Ain[0, :n_dim] = 1 * norm_h @ Je
+                start_jidx = get_link_joint_index(start)
+                l_Ain[0, start_jidx : start_jidx + n_dim] = 1 * norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
             else:  # pragma nocover
                 l_Ain = None
@@ -1507,9 +1516,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
             if collision_list is None:
                 col_list = link.collision
-
-                for c in col_list:
-                    pass
             else:
                 col_list = [collision_list[j - 1]]  # pragma nocover
 
@@ -1922,7 +1928,15 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                         i for i, group in enumerate(link_groups) if parent_idx in group
                     ][0]
 
-                    f[group_idx] = f[group_idx] + Xup[j] * f[j]
+                    # Xup[j] is the child<-parent motion transform (v_child =
+                    # Xup[j] * v_parent); propagating a force the other way,
+                    # child->parent, needs the transform in the other
+                    # direction too. spatialmath's SE3 * SpatialForce applies
+                    # the coadjoint of its left operand (since
+                    # spatialmath-python 1.1.18, rai-opensource/
+                    # spatialmath-python#207), so the un-inverted transform
+                    # (Xup[j].inv(), i.e. parent<-child) is what's needed here.
+                    f[group_idx] = f[group_idx] + Xup[j].inv() * f[j]
 
         # The current Q has the length equal to the number of links within the robot
         # rather than the number of joints. We need to remove the static links
