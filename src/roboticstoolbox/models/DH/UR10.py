@@ -27,6 +27,11 @@ class UR10(DHRobot):
 
     .. note::
         - SI units are used.
+        - The last link's inertia tensor has :math:`I_{xx} = 0` -- that's not
+          a bug in this model, it's what the manufacturer's own reference
+          (below) publishes. It makes the robot's inertia matrix near-singular
+          (``det(robot.inertia(q)) ~ 2e-6``), so dynamics work that needs a
+          well-conditioned inertia matrix should account for this.
 
     :References:
 
