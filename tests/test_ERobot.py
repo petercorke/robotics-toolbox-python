@@ -329,7 +329,7 @@ class TestERobot2(unittest.TestCase):
 
         self.assertEqual(
             str(Q[0]),
-            "a1**2*m2*qd0**2*sin(q1)*cos(q1) + a1*qd0*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1))*sin(q1) - a1*(m2*(a1*qd0*qd1*cos(q1) - a1*qdd0*sin(q1) - g*sin(q0)*cos(q1) - g*sin(q1)*cos(q0)) + (qd0 + qd1)*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1)))*sin(q1) - a1*(-a1*m2*qd0*(-qd0 - qd1)*sin(q1) - m2*r2*(qdd0 + qdd1) + m2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1)))*cos(q1) + g*m1*r1*cos(q0) + m1*qdd0*r1**2 + m2*r2**2*(qdd0 + qdd1) - m2*r2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1))",
+            "a1**2*m2*qd0**2*sin(q1)*cos(q1) + a1*qd0*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1))*sin(q1) + g*m1*r1*cos(q0) + m1*qdd0*r1**2 + m2*r2**2*(qdd0 + qdd1) - m2*r2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1)) - (a1*sin(q1)**2 + a1*cos(q1)**2)*(m2*(a1*qd0*qd1*cos(q1) - a1*qdd0*sin(q1) - g*sin(q0)*cos(q1) - g*sin(q1)*cos(q0)) + (qd0 + qd1)*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1)))*sin(q1) - (a1*sin(q1)**2 + a1*cos(q1)**2)*(-a1*m2*qd0*(-qd0 - qd1)*sin(q1) - m2*r2*(qdd0 + qdd1) + m2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1)))*cos(q1)",
         )
         self.assertEqual(
             str(Q[1]),
