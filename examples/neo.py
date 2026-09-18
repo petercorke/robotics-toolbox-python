@@ -90,7 +90,7 @@ def step():
     pi = 0.9
 
     # Form the joint limit velocity damper
-    Ain[:n, :n], bin[:n] = panda.joint_velocity_damper(ps, pi, n)
+    Ain[:n, :n], bin[:n] = panda.joint_velocity_damper(ps=ps, pi=pi, n=n)
 
     # For each collision in the scene
     for collision in collisions:
