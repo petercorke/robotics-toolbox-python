@@ -23,20 +23,40 @@ class Panda(URDFRobot):
 
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the x-direction
-    - qn, arm is at a nominal non-singular configuration
+
+    :param use_robot_descriptions: if ``True``, load the Panda URDF from the
+        `robot_descriptions <https://github.com/robot-descriptions/robot_descriptions.py>`_
+        package instead of the toolbox's own bundled ``qut_frankie_description``
+        xacro (the default, ``False``). The bundled model has real collision
+        geometry (a hand-built capsule approximation) but no inertial
+        (mass/CoM/inertia) data at all -- ``rne()``/``inertia()``/``coriolis()``/
+        ``gravload()`` are all silently zero. The ``robot_descriptions`` model
+        has real inertial data, but its collision geometry is plain meshes,
+        which are roughly an order of magnitude slower to collision-check
+        against than the bundled model's capsules -- noticeable in a
+        real-time reactive-avoidance loop (see ``examples/neo.py``). See the
+        wiki's `Panda models <https://github.com/petercorke/robotics-toolbox-python/wiki/Panda-models>`_
+        page for the full comparison and rationale.
+    :type use_robot_descriptions: bool
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self, use_robot_descriptions: bool = False):
 
-        super().__init__(
-            "qut_frankie_description/robots/panda_arm_hand.urdf.xacro",
-            manufacturer="Franka Emika",
-            gripper_link_index=9,
-        )
+        if use_robot_descriptions:
+            super().__init__(
+                "panda",
+                manufacturer="Franka Emika",
+                gripper_link_index=9,
+            )
+        else:
+            super().__init__(
+                "qut_frankie_description/robots/panda_arm_hand.urdf.xacro",
+                manufacturer="Franka Emika",
+                gripper_link_index=9,
+            )
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)
 
