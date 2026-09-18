@@ -134,7 +134,7 @@ def step():
 
     # Form the joint limit velocity damper
     Ain[: fetch.n, : fetch.n], bin[: fetch.n] = fetch.joint_velocity_damper(
-        ps, pi, fetch.n
+        ps=ps, pi=pi, n=fetch.n
     )
 
     Ain_torso, bin_torso = fetch_camera.joint_velocity_damper(0.0, 0.05, fetch_camera.n)

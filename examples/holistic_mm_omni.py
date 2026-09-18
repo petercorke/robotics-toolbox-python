@@ -55,7 +55,7 @@ def step_robot(r: rtb.ERobot, Tep):
     pi = 0.9
 
     # Form the joint limit velocity damper
-    Ain[: r.n, : r.n], bin[: r.n] = r.joint_velocity_damper(ps, pi, r.n)
+    Ain[: r.n, : r.n], bin[: r.n] = r.joint_velocity_damper(ps=ps, pi=pi, n=r.n)
 
     # Linear component of objective function: the manipulability Jacobian
     c = np.concatenate(
