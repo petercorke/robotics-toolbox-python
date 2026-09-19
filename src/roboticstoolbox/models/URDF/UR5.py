@@ -33,7 +33,16 @@ class UR5(URDFRobot):
 
     def __init__(self):
 
-        super().__init__("ur5", manufacturer="Universal Robotics", gripper_link_index=7)
+        # Name-based lookup, not a raw positional index: robot_descriptions
+        # 3.0.0 changed which upstream repo "ur5" resolves to, reordering
+        # links so index 7 silently pointed at a real arm joint instead of
+        # the tool attachment link (#578). tool0/ee_link/flange are stable
+        # names across the versions checked.
+        super().__init__(
+            "ur5",
+            manufacturer="Universal Robotics",
+            gripper_link_name=["tool0", "ee_link", "flange"],
+        )
 
         # for link in links:
         #     print(link)

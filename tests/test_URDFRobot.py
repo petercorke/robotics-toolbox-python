@@ -6,7 +6,43 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from roboticstoolbox.models.URDF.URDFRobot import _load_rd_module
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot, _load_rd_module
+
+
+class TestURDFRobotGripperLinkName(unittest.TestCase):
+    # Regression tests for #578: a raw positional gripper_link_index broke
+    # silently when an upstream robot_descriptions update reordered UR5's
+    # parsed links. gripper_link_name resolves by link name instead, which
+    # survives that kind of reordering.
+
+    def test_resolves_by_name(self):
+        robot = URDFRobot(
+            "ur5",
+            manufacturer="Universal Robotics",
+            gripper_link_name=["tool0", "ee_link", "flange"],
+        )
+        self.assertEqual(robot.n, 6)
+        self.assertEqual(len(robot.grippers), 1)
+        self.assertIn(robot.grippers[0].name, ("tool0", "ee_link", "flange"))
+
+    def test_falls_through_candidate_list_in_order(self):
+        # "tool0" exists on the UR5 URDF; a bogus first candidate should be
+        # skipped in favour of it, not raise.
+        robot = URDFRobot(
+            "ur5",
+            manufacturer="Universal Robotics",
+            gripper_link_name=["not_a_real_link_name", "tool0"],
+        )
+        self.assertEqual(robot.grippers[0].name, "tool0")
+
+    def test_raises_when_no_candidate_matches(self):
+        with self.assertRaises(ValueError) as cm:
+            URDFRobot(
+                "ur5",
+                manufacturer="Universal Robotics",
+                gripper_link_name=["definitely_not_a_real_link_name"],
+            )
+        self.assertIn("definitely_not_a_real_link_name", str(cm.exception))
 
 
 class TestURDFRobotEnvironmentGuards(unittest.TestCase):

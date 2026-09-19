@@ -27,8 +27,16 @@ class FrankieOmni(Robot):
 
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the x-direction
-    - qn, arm is at a nominal non-singular configuration
+
+    The arm is loaded from the same bundled ``qut_frankie_description`` xacro
+    as :class:`~roboticstoolbox.models.URDF.Panda.Panda`'s default (no
+    inertial data), spliced by hand onto a separately-loaded
+    ``clearpath_ridgeback_description`` mobile base -- it has no
+    ``use_robot_descriptions``-style option, since the base+arm splice is
+    done manually rather than through :class:`URDFRobot`'s own loader. See
+    the wiki's `Panda models
+    <https://github.com/petercorke/robotics-toolbox-python/wiki/Panda-models>`_
+    page for the full picture.
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke

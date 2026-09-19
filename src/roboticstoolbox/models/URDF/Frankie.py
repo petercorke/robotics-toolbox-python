@@ -26,8 +26,14 @@ class Frankie(URDFRobot):
 
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the x-direction
-    - qn, arm is at a nominal non-singular configuration
+
+    Loaded via the `robot_descriptions
+    <https://github.com/robot-descriptions/robot_descriptions.py>`_ package
+    (real inertial data, plain-mesh collision geometry), unlike
+    :class:`~roboticstoolbox.models.URDF.Panda.Panda`'s bundled default. See
+    the wiki's `Panda models
+    <https://github.com/petercorke/robotics-toolbox-python/wiki/Panda-models>`_
+    page for why the two differ.
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
