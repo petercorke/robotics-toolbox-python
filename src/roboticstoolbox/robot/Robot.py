@@ -1792,46 +1792,51 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         link_groups: list[list[int]] = []
 
-        # Group links together based on whether they are joints or not
-        # Static links are grouped with the first joint encountered
-        current_group = []
+        # Group each joint together with every static (fixed) link rigidly
+        # attached to -- and moving with -- its own output frame: found by
+        # walking each static link's ancestry (via .parent, not flat
+        # self.links order, so this is correct under branching too) up to
+        # its nearest joint. A static link ends up in that joint's group
+        # regardless of where it sits relative to the *next* joint in the
+        # chain -- immediately after this joint, sandwiched anywhere before
+        # the next one, or trailing after the very last joint with nothing
+        # further downstream (e.g. a tool flange/mount link, such as URDF
+        # Panda's panda_link8). A static link with no joint ancestor at all
+        # (rigidly mounted on the immovable base) contributes no joint
+        # torque and is dropped.
+        #
+        # An earlier version grouped a static link with the first joint
+        # encountered scanning *forward* -- correct for a trailing run
+        # (#636), but wrong for a sandwiched static link (joint_A -> static
+        # -> joint_B): that attaches the static link's mass to joint_B's
+        # group, when it's actually rigidly welded to joint_A's output and
+        # physically independent of joint_B's angle, silently misattributing
+        # its torque contribution to the wrong joint (#483).
+        group_of_link_idx: dict[int, int] = {}
         for i, link in enumerate(self.links):
-            current_group.append(i)
-
-            # Break after adding the first link
             if link.isjoint:
-                link_groups.append(current_group)
-                current_group = []
-
-        # A trailing run of static links after the *last* joint (e.g. a tool
-        # flange/mount link with no further joint after it, such as URDF
-        # Panda's panda_link8) never triggers the isjoint branch above, so
-        # current_group is left non-empty and was previously dropped on the
-        # floor here -- silently excluding that link's mass/inertia from
-        # every torque in the chain rather than raising or warning (#636).
-        # Fold it into the last real group instead of discarding it; the
-        # joint lookups below no longer assume the joint is positionally
-        # last within its group, so this is safe regardless of group order.
-        if current_group:
-            link_groups[-1].extend(current_group)
+                link_groups.append([i])
+                group_of_link_idx[i] = len(link_groups) - 1
+            elif link.parent is not None:
+                group_idx = group_of_link_idx.get(self.links.index(link.parent))
+                if group_idx is not None:
+                    link_groups[group_idx].append(i)
+                    group_of_link_idx[i] = group_idx
 
         # Make some intermediate variables
         for i, group in enumerate(link_groups):
             I_int = SpatialInertia()
 
-            # Links after the group's joint (trailing static links folded in
-            # above) are rigidly carried by that joint's own output frame,
-            # but link.r/link.I are each expressed in that *link's own*
-            # frame, not the joint's. Compose their fixed transforms
-            # relative to the joint and carry the CoM/inertia into the
-            # joint's frame before summing -- otherwise (as originally
-            # written) a trailing link's mass lands in I_int with the wrong
-            # moment arm relative to this joint (effectively r=0), which
-            # for a non-negligible offset silently drops its contribution
-            # to this joint's torque. Links at-or-before the joint are
-            # summed as before (unchanged, uses the group's own existing,
-            # separately-verified convention -- see #636 for the case this
-            # does and does not cover).
+            # group[0] is always the joint itself (see the grouping loop
+            # above); everything after it in the group is a static link
+            # rigidly carried by that joint's own output frame, but
+            # link.r/link.I are each expressed in that *link's own* frame,
+            # not the joint's. Compose their fixed transforms relative to
+            # the joint and carry the CoM/inertia into the joint's frame
+            # before summing -- otherwise a static link's mass lands in
+            # I_int with the wrong moment arm relative to this joint
+            # (effectively r=0), which for a non-negligible offset silently
+            # drops its contribution to this joint's torque (#636, #483).
             past_joint = False
             T_from_joint = None
             for idx in group:
@@ -1876,8 +1881,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         # where the indices correspond to the index of the group within
         # link_groups
         # As always, q, qd, qdd are lists of length n, where indices correspond
-        # to the jindex of the joint, which will be the last link in the group
-        # within link_groups
+        # to the jindex of the joint, which is always the first link in the
+        # group within link_groups
 
         for k in range(l):
             qk = q[k, :]
@@ -1886,51 +1891,32 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
             # forward recursion
             for j, group in enumerate(link_groups):
-                # The joint may not be the last link in the group -- a
-                # trailing run of static links with no further joint after
-                # them (see above) is folded onto the end of the last
-                # group, after its joint.
-                joint = next(self.links[idx] for idx in group if self.links[idx].isjoint)
+                # group[0] is always the joint (see the grouping loop
+                # above); any static links after it in the group are
+                # rigidly carried by this joint's own output frame and are
+                # folded into I[j] directly instead, not into this
+                # kinematic frame -- v[j]/a[j] stay defined at the joint's
+                # own output, matching s[j]/vJ, which are themselves only
+                # ever expressed there.
+                joint = self.links[group[0]]
                 jindex = joint.jindex
 
                 vJ = SpatialVelocity(s[j] * qdk[jindex])
 
-                # transform from parent(j) to j -- stop at the joint itself.
-                # Any trailing static links after it (see above) are rigidly
-                # carried by the joint's own output frame and are folded
-                # into I[j] directly instead, not into this kinematic
-                # frame -- v[j]/a[j] stay defined at the joint's own output,
-                # matching s[j]/vJ, which are themselves only ever
-                # expressed there.
-                first_element = True
-                for idx in group:
-                    link = self.links[idx]
-
-                    if link.isjoint and link.jindex is not None:
-                        if first_element:
-                            Xup_int = SE3(link.A(qk[link.jindex]))
-                            first_element = False
-                        else:
-                            Xup_int = Xup_int * SE3(link.A(qk[link.jindex]))
-                        break
-                    else:
-                        if first_element:
-                            Xup_int = SE3(link.A())
-                            first_element = False
-                        else:
-                            Xup_int = Xup_int * SE3(link.A())
-
+                # transform from parent(j) to j: joint.A() already
+                # incorporates any fixed transform within the joint link's
+                # own ETS (the joint variable is guaranteed to be the last
+                # element of its segment -- see this method's docstring),
+                # so no further composition is needed.
+                Xup_int = SE3(joint.A(qk[jindex]))
                 Xup[j] = Xup_int.inv()  # type: ignore[union-attr]
 
-                # The first link in the group
-                first_link = self.links[group[0]]
-
-                if first_link.parent is None:
+                if joint.parent is None:
                     v[j] = vJ
                     a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[jindex])
                 else:
-                    # The index of `link`s parent within self.links
-                    parent_idx = self.links.index(first_link.parent)
+                    # The index of `joint`s parent within self.links
+                    parent_idx = self.links.index(joint.parent)
 
                     # The index of the group that the parent link is in
                     group_idx = [
@@ -1949,9 +1935,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             # Backward recursion
             for j in reversed(range(n)):
                 group = link_groups[j]
-                joint = next(self.links[idx] for idx in group if self.links[idx].isjoint)
-                first_link = self.links[group[0]]
-                # link = self.links[j]
+                joint = self.links[group[0]]  # always the joint -- see above
 
                 # next line could be dot(), but fails for symbolic arguments
                 Q[k, j] = sum(f[j].A * s[j])
@@ -1966,9 +1950,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     - joint.friction(qdk[jindex], coulomb=not symbolic)
                 )
 
-                if first_link.parent is not None:
-                    # The index of `link`s parent within self.links
-                    parent_idx = self.links.index(first_link.parent)
+                if joint.parent is not None:
+                    # The index of `joint`s parent within self.links
+                    parent_idx = self.links.index(joint.parent)
 
                     # The index of the group that the parent link is in
                     group_idx = [

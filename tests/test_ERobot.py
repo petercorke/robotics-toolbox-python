@@ -214,62 +214,121 @@ class TestERobot(unittest.TestCase):
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
     def test_invdyn_static2(self):
-        # create a 2 link robot
-        # Example from Spong etal. 2nd edition, p. 260
+        # create a 3 link robot: joint1 (Ry) -> l2 (*fixed*, tx(1)) ->
+        # joint2 (Ry, massless -- l3 carries no mass, and l2 is rigidly
+        # welded to joint1's output with no rotational freedom of its own).
+        #
+        # Unlike test_invdyn (whose second link rotates with joint2), l2's
+        # position here depends only on q0, never on q1: joint2 has nothing
+        # downstream with mass, so its manipulator-inertia row/column and
+        # every velocity (Coriolis) term must be exactly zero, and M11 is a
+        # constant rather than a function of q1. Verified against an
+        # independent virtual-work (finite-difference of CoM height vs. q)
+        # ground truth and by hand (M11 = m1*r1^2 + m2*(offset+r2)^2 =
+        # 1*0.5^2 + 1*1.5^2 = 2.5), not just against rne() itself -- see
+        # #483, where a sandwiched static link's mass was misattributed to
+        # the *following* joint's group instead of the *preceding* one it's
+        # rigidly attached to, and this test's previous expected values
+        # (copied from test_invdyn's different topology, where l2 *does*
+        # rotate with joint2) matched that bug rather than catching it.
         l1 = Link(ets=ETS(ET.Ry()), m=1, r=[0.5, 0, 0], name="l1")
         l2 = Link(ets=ETS(ET.tx(1)), m=1, r=[0.5, 0, 0], parent=l1, name="l2")
         l3 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], parent=l2, name="l3")
         robot = ERobot([l1, l2, l3], name="simple 3 link")
         z = np.zeros(robot.n)
 
-        # check gravity load
+        # check gravity load -- tau1 is exactly zero at every configuration
         tau = robot.rne(z, z, z) / 9.81
-        nt.assert_array_almost_equal(tau, np.r_[-2, -0.5])
+        nt.assert_array_almost_equal(tau, np.r_[-2, 0])
 
         tau = robot.rne(np.array([0.0, -pi / 2.0]), z, z) / 9.81
-        nt.assert_array_almost_equal(tau, np.r_[-1.5, 0])
+        nt.assert_array_almost_equal(tau, np.r_[-2, 0])
 
         tau = robot.rne(np.array([-pi / 2, pi / 2]), z, z) / 9.81
-        nt.assert_array_almost_equal(tau, np.r_[-0.5, -0.5])
+        nt.assert_array_almost_equal(tau, np.r_[0, 0])
 
         tau = robot.rne(np.array([-pi / 2, 0]), z, z) / 9.81
         nt.assert_array_almost_equal(tau, np.r_[0, 0])
 
-        # check velocity terms
+        # check velocity terms -- M(q) doesn't depend on q at all (l2 is
+        # rigidly fixed, l3 is massless), so every Coriolis/centrifugal
+        # term is zero regardless of qd
         robot.gravity = [0, 0, 0]
         q = np.array([0, -pi / 2])
-        h = -0.5 * sin(q[1])
 
-        tau = robot.rne(q, np.array([0, 0]), z)
-        nt.assert_array_almost_equal(tau, np.r_[0, 0] * h)
+        for qd in (np.r_[0, 0], np.r_[1, 0], np.r_[0, 1], np.r_[1, 1]):
+            tau = robot.rne(q, qd, z)
+            nt.assert_array_almost_equal(tau, np.r_[0, 0])
 
-        tau = robot.rne(q, np.array([1, 0]), z)
-        nt.assert_array_almost_equal(tau, np.r_[0, -1] * h)
-
-        tau = robot.rne(q, np.array([0, 1]), z)
-        nt.assert_array_almost_equal(tau, np.r_[1, 0] * h)
-
-        tau = robot.rne(q, np.array([1, 1]), z)
-        nt.assert_array_almost_equal(tau, np.r_[3, -1] * h)
-
-        # check inertial terms
-
-        d11 = 1.5 + cos(q[1])
-        d12 = 0.25 + 0.5 * cos(q[1])
-        d21 = d12
-        d22 = 0.25
-
+        # check inertial terms -- M11=2.5 (constant), M12=M21=M22=0
         tau = robot.rne(q, z, np.array([0, 0]))
         nt.assert_array_almost_equal(tau, np.r_[0, 0])
 
         tau = robot.rne(q, z, np.array([1, 0]))
-        nt.assert_array_almost_equal(tau, np.r_[d11, d21])
+        nt.assert_array_almost_equal(tau, np.r_[2.5, 0])
 
         tau = robot.rne(q, z, np.array([0, 1]))
-        nt.assert_array_almost_equal(tau, np.r_[d12, d22])
+        nt.assert_array_almost_equal(tau, np.r_[0, 0])
 
         tau = robot.rne(q, z, np.array([1, 1]))
-        nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
+        nt.assert_array_almost_equal(tau, np.r_[2.5, 0])
+
+    def test_invdyn_sandwiched_static_link(self):
+        # Regression test for #483: a static (fixed) link *sandwiched*
+        # between two joints -- rigidly welded to the *preceding* joint's
+        # output, not the *following* one -- had its mass misattributed to
+        # the wrong joint's torque. The grouping logic fixed by #636
+        # attached a static link to whichever joint came next scanning
+        # forward through the link list, which is correct for a trailing
+        # run but wrong here.
+        #
+        # joint1 (Ry, massless) -> l2 (fixed, tx(1), m=1, r=[0.5,0,0]) ->
+        # joint2 (Ry, massless downstream -- nothing after it has mass).
+        # l2 has no rotational freedom of its own, so joint2's torque must
+        # be exactly zero at *every* configuration, for *any* q1 -- not
+        # just at a few sampled points.
+        joint1 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], name="joint1")
+        l2 = Link(ets=ETS(ET.tx(1)), m=1, r=[0.5, 0, 0], parent=joint1, name="l2")
+        joint2 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], parent=l2, name="joint2")
+        robot = ERobot([joint1, l2, joint2], name="joint, sandwiched static link, joint")
+        self.assertEqual(robot.n, 2)
+
+        z = np.zeros(robot.n)
+        for q0 in (0.0, 0.5, -1.2, pi / 2):
+            for q1 in (0.0, 0.7, -2.1, pi):
+                tau = robot.rne(np.r_[q0, q1], z, z, gravity=[0, 0, -9.81])
+                self.assertAlmostEqual(tau[1], 0.0, places=9)
+                # joint1 carries l2's full weight at its fixed 1.5 m offset,
+                # independent of q1 -- the standard single-point-mass
+                # pendulum formula
+                expected_tau0 = -1.0 * 9.81 * 1.5 * cos(q0)
+                self.assertAlmostEqual(tau[0], expected_tau0, places=9)
+
+    def test_invdyn_sandwiched_static_link_with_inertia(self):
+        # Same as above, but the sandwiched static link also carries a
+        # nonzero inertia tensor and an off-axis r, exercising the general
+        # CoM/inertia transform into the joint's frame rather than just a
+        # simple point mass on the rotation axis.
+        joint1 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], name="joint1")
+        l2 = Link(
+            ets=ETS(ET.tx(0.30)),
+            m=2,
+            r=[0.05, 0, 0],
+            I=np.diag([0.001, 0.002, 0.003]),
+            parent=joint1,
+            name="l2",
+        )
+        joint2 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], parent=l2, name="joint2")
+        robot = ERobot([joint1, l2, joint2], name="joint, sandwiched static link 2, joint")
+        self.assertEqual(robot.n, 2)
+
+        z = np.zeros(robot.n)
+        for q0 in (0.0, 0.5, -1.2):
+            for q1 in (0.0, 0.7, -2.1):
+                tau = robot.rne(np.r_[q0, q1], z, z, gravity=[0, 0, -9.81])
+                self.assertAlmostEqual(tau[1], 0.0, places=9)
+                expected_tau0 = -2.0 * 9.81 * 0.35 * cos(q0)
+                self.assertAlmostEqual(tau[0], expected_tau0, places=9)
 
     def test_invdyn_trailing_static_link(self):
         # Regression test for #636: a run of static (fixed) links *after*
