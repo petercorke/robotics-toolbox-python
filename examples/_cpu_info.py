@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-"""Shared helper for the benchmark scripts in this directory (rne_speed.py,
-ik_speed.py) -- factored out once a second script needed the same thing.
+"""Shared helper for the benchmark scripts in this directory (benchmark_rne.py,
+benchmark_ik.py) -- factored out once a second script needed the same thing.
 """
 
 import os

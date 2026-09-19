@@ -19,7 +19,7 @@ the whole trajectory inside a single C++ call rather than once per row --
 see rne.md plan step 7 and tests/test_fknm_fallback.py's
 TestRneTrajectoryVaryingRows for the correctness side of this).
 
-Riffs off ik_speed.py's ANSITable reporting and rne_compare.py's timing
+Riffs off benchmark_ik.py's ANSITable reporting and rne_compare.py's timing
 harness.
 """
 

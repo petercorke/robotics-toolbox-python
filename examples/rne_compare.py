@@ -13,7 +13,7 @@ ETS segments -- true for MDH DHRobots, false for Puma560 (standard DH) --
 and now asserts on the incompatible case instead of silently returning a
 wrong answer. So Robot.rne(puma, ...) below is *expected* to raise, and
 this script demonstrates that rather than crashing on it. For a 3-way
-comparison on a robot where all three genuinely apply, see rne_speed.py
+comparison on a robot where all three genuinely apply, see benchmark_rne.py
 (uses rtb.models.DH.Panda(), which is mdh=True).
 """
 
@@ -73,7 +73,7 @@ t_py = bench("pure Python (rne_python)", lambda: puma.rne_python(Q, QD, QDD))
 print()
 print(f"speedup rne_python -> C:  {t_py/t_c:6.1f}x")
 print("(Robot.rne skipped here -- Puma560 is standard DH, see note above."
-      " For a full 3-way timing comparison, see rne_speed.py.)")
+      " For a full 3-way timing comparison, see benchmark_rne.py.)")
 
 print()
 print("Per-row C-call count check (does rne() batch the trajectory into one")
