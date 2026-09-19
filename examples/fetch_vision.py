@@ -137,11 +137,13 @@ def step():
         ps=ps, pi=pi, n=fetch.n
     )
 
-    Ain_torso, bin_torso = fetch_camera.joint_velocity_damper(0.0, 0.05, fetch_camera.n)
+    Ain_torso, bin_torso = fetch_camera.joint_velocity_damper(
+        ps=0.0, pi=0.05, n=fetch_camera.n
+    )
     Ain[2, 2] = Ain_torso[2, 2]
     bin[2] = bin_torso[2]
 
-    Ain_cam, bin_cam = fetch_camera.joint_velocity_damper(ps, pi, fetch_camera.n)
+    Ain_cam, bin_cam = fetch_camera.joint_velocity_damper(ps=ps, pi=pi, n=fetch_camera.n)
     Ain[n_base + n_arm : n, n_base + n_arm : n] = Ain_cam[3:, 3:]
     bin[n_base + n_arm : n] = bin_cam[3:]
 
