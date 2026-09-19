@@ -1911,18 +1911,23 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 Xup_int = SE3(joint.A(qk[jindex]))
                 Xup[j] = Xup_int.inv()  # type: ignore[union-attr]
 
-                if joint.parent is None:
+                # group_of_link_idx also covers a joint whose immediate
+                # .parent is a static link, or a run of them, rather than
+                # another joint directly -- returning None (rather than
+                # raising) when that walk reaches the root with no joint
+                # ancestor at all (e.g. a static base link, such as URDF
+                # Panda's panda_link0), which is kinematically equivalent
+                # to .parent being None.
+                group_idx = (
+                    group_of_link_idx.get(self.links.index(joint.parent))
+                    if joint.parent is not None
+                    else None
+                )
+
+                if group_idx is None:
                     v[j] = vJ
                     a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[jindex])
                 else:
-                    # The index of `joint`s parent within self.links
-                    parent_idx = self.links.index(joint.parent)
-
-                    # The index of the group that the parent link is in
-                    group_idx = [
-                        i for i, group in enumerate(link_groups) if parent_idx in group
-                    ][0]
-
                     v[j] = Xup[j] * v[group_idx] + vJ
                     a[j] = (
                         Xup[j] * a[group_idx]
@@ -1950,15 +1955,17 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     - joint.friction(qdk[jindex], coulomb=not symbolic)
                 )
 
-                if joint.parent is not None:
-                    # The index of `joint`s parent within self.links
-                    parent_idx = self.links.index(joint.parent)
+                # See the forward recursion above: group_of_link_idx
+                # resolves through any static link(s) between this joint
+                # and its nearest joint ancestor, returning None if there
+                # isn't one (root).
+                group_idx = (
+                    group_of_link_idx.get(self.links.index(joint.parent))
+                    if joint.parent is not None
+                    else None
+                )
 
-                    # The index of the group that the parent link is in
-                    group_idx = [
-                        i for i, group in enumerate(link_groups) if parent_idx in group
-                    ][0]
-
+                if group_idx is not None:
                     # Xup[j] is the child<-parent motion transform (v_child =
                     # Xup[j] * v_parent); propagating a force the other way,
                     # child->parent, needs the transform in the other
