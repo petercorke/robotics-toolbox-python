@@ -330,6 +330,32 @@ class TestERobot(unittest.TestCase):
                 expected_tau0 = -2.0 * 9.81 * 0.35 * cos(q0)
                 self.assertAlmostEqual(tau[0], expected_tau0, places=9)
 
+    def test_invdyn_base_mounted_static_link(self):
+        # Regression test: a static (fixed) link *before* the first joint,
+        # rigidly mounted directly on the immovable base -- e.g. URDF
+        # Panda's panda_link0 -- has no joint ancestor at all. Grouping it
+        # correctly (attaching it to nothing, since it contributes no joint
+        # torque) previously broke the *kinematic* parent lookup for the
+        # first joint itself: that joint's own .parent is this static base
+        # link, and resolving its upstream group via raw list-membership
+        # search found the link in no group at all (since it was
+        # deliberately dropped, not kinematically missing) and crashed with
+        # IndexError, rather than being treated as having no upstream joint
+        # (the same as .parent being None outright).
+        base = Link(ets=ETS(), m=5, r=[0.1, 0, 0], name="base")
+        joint1 = Link(ets=ETS(ET.Ry()), m=1, r=[0.5, 0, 0], parent=base, name="joint1")
+        robot = ERobot([base, joint1], name="base-mounted static link then joint")
+        self.assertEqual(robot.n, 1)
+
+        z = np.zeros(robot.n)
+        for q in (0.0, 0.5, -1.2, pi / 2):
+            tau = robot.rne(np.r_[q], z, z, gravity=[0, 0, -9.81])
+            # base is rigidly fixed to the world -- it never moves, so it
+            # contributes nothing to any joint torque regardless of its
+            # own mass/r
+            expected = -1.0 * 9.81 * 0.5 * cos(q)
+            self.assertAlmostEqual(tau[0], expected, places=9)
+
     def test_invdyn_trailing_static_link(self):
         # Regression test for #636: a run of static (fixed) links *after*
         # the last joint -- e.g. a tool-mount flange with no further joint
