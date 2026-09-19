@@ -23,13 +23,18 @@ ets = robot.ets()
 
 ### Experiment parameters
 # Number of problems to solve for the C-accelerated columns (ik_XX and
-# ikine_XX with the C++ ETS)
-nproblems = 10_000
+# ikine_XX with the C++ ETS). Sized for a ~1-2 minute total run, not for
+# per-solver statistical precision: LM Sugihara converges far slower than
+# the other methods on random targets (tens of ms/problem even with the
+# C++ ETS, ~500x LM Chan's cost) and dominates this phase's total time, so
+# nproblems is capped by its cost rather than the cheaper solvers'.
+nproblems = 1_000
 
 # The pure-Python ETS fallback is interpreted at every iteration, not just
-# the outer solver loop -- 10,000 problems would take far too long, so use
-# a much smaller sample for that column alone.
-nproblems_slow = 1_000
+# the outer solver loop -- full nproblems would take far too long (LM
+# Sugihara alone runs ~2s/problem here), so use a much smaller sample for
+# that column alone. This is a rough comparison, not a precise one.
+nproblems_slow = 15
 
 # Cartesion DoF priority matrix
 mask = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
