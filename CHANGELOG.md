@@ -1,5 +1,75 @@
 # Changelog
 
+## Highlights
+
+**Correctness fix in inverse dynamics (RNE).** `Robot.rne()` — used by every
+URDF/ETS-based robot's inverse dynamics — was silently returning wrong
+torques for any robot with translational offsets between links (i.e.
+virtually all real robots), traced to an upstream `spatialmath-python`
+change to how spatial forces transform. Fixed, along with two related bugs
+in how static (non-actuated) link mass gets attributed to the correct
+joint. Verified against the compiled C++ reference path and textbook
+closed-form solutions.
+
+**Tool transforms now work everywhere.** `robot.tool`, once set, is
+automatically honored by `fkine`/`jacob0`/`jacobe`/`hessian0`/`hessiane`
+(previously silently ignored unless passed explicitly each call), and all
+seven IK solvers (`ik_LM`/`ik_NR`/`ik_GN`/`ikine_LM`/`ikine_NR`/`ikine_GN`/
+`ikine_QP`) now accept a `tool=` argument directly.
+
+**New:** `Panda(use_robot_descriptions=True)` — an opt-in alternate Panda
+model with real inertial data, for users who need correct dynamics rather
+than the default's faster collision geometry.
+
+**Bug fixes:** `joint_velocity_damper` keyword-argument misuse across
+several example scripts; `DHRobot.ikine_6s` undoing the tool transform on
+the wrong side; UR5's gripper link now resolved by name instead of a
+fragile raw index.
+
+**Wiki refresh (not reflected in this changelog — wiki edits are direct
+pushes to a separate repo, not commits here):** a full currency pass across
+all 26 pages, stale/incorrect content fixed, ROS references removed, and
+new pages added — Panda model comparison, reactive control, inverse
+kinematics, and IK/RNE benchmark results with real numbers.
+
+
+## [1.4.4](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.3...v1.4.4) (2026-09-20)
+
+
+### Features
+
+* **urdf:** Panda(use_robot_descriptions=True) option; doc the tradeoff ([#687](https://github.com/petercorke/robotics-toolbox-python/issues/687)) ([124882b](https://github.com/petercorke/robotics-toolbox-python/commit/124882b06880dff49c015e1156041435eaa0023c))
+
+
+### Bug Fixes
+
+* **dhrobot:** ikine_6s undoes the tool transform on the wrong side ([#680](https://github.com/petercorke/robotics-toolbox-python/issues/680)) ([9fbffc6](https://github.com/petercorke/robotics-toolbox-python/commit/9fbffc6f09265f084e1b53c04b09a75a4aced643)), closes [#640](https://github.com/petercorke/robotics-toolbox-python/issues/640)
+* **docs:** mock bdsim imports so blocks pages render in docs CI ([436e1f3](https://github.com/petercorke/robotics-toolbox-python/commit/436e1f3bbd26faa26eed97ddd47cbf47609bf216))
+* **examples:** call joint_velocity_damper with keyword args ([#690](https://github.com/petercorke/robotics-toolbox-python/issues/690)) ([95ac98e](https://github.com/petercorke/robotics-toolbox-python/commit/95ac98e31876b2226b9f51778ba149e105de78c7))
+* **examples:** call joint_velocity_damper with keyword args in fetch_vision.py ([#695](https://github.com/petercorke/robotics-toolbox-python/issues/695)) ([7aa2d31](https://github.com/petercorke/robotics-toolbox-python/commit/7aa2d317445c84e8eeb8ea64e78cafce2fb938d5))
+* **joint_velocity_damper:** fix bug in q usage ([#666](https://github.com/petercorke/robotics-toolbox-python/issues/666)) ([8246559](https://github.com/petercorke/robotics-toolbox-python/commit/8246559202dd1722f8b6538daad66aed735ca928))
+* **kinematics:** self.tool now applies by default; ik_LM/ik_NR/ik_GN/ikine_XX gain a tool= kwarg ([#697](https://github.com/petercorke/robotics-toolbox-python/issues/697)) ([61d078f](https://github.com/petercorke/robotics-toolbox-python/commit/61d078fcdf419199209ef5cf931c2c2ef51e0859))
+* link_collision_damper ([#685](https://github.com/petercorke/robotics-toolbox-python/issues/685)) ([c040522](https://github.com/petercorke/robotics-toolbox-python/commit/c04052208094fe458efd707c84fe970580ac2fe2))
+* preserve joint types and limits in numerical IK ([e122ccb](https://github.com/petercorke/robotics-toolbox-python/commit/e122ccb9a1ad003879a63ff0fa6d3accdcddde26))
+* **rne:** attribute a sandwiched static link's mass to its preceding joint, not the following one ([#693](https://github.com/petercorke/robotics-toolbox-python/issues/693)) ([bebede0](https://github.com/petercorke/robotics-toolbox-python/commit/bebede019601f4b641cdc5ed8e390f480fad766d))
+* **rne:** don't crash when a joint's kinematic parent is a base-mounted static link ([#696](https://github.com/petercorke/robotics-toolbox-python/issues/696)) ([dba179e](https://github.com/petercorke/robotics-toolbox-python/commit/dba179ed84eae8162257d434197d77609ceb0b15))
+* **rne:** propagate backward-pass force through the correct transform direction ([#691](https://github.com/petercorke/robotics-toolbox-python/issues/691)) ([a80c9c1](https://github.com/petercorke/robotics-toolbox-python/commit/a80c9c1c4c609c35494d7f127054c408f993635f))
+* **rne:** trailing static links after the last joint had their mass dropped ([#684](https://github.com/petercorke/robotics-toolbox-python/issues/684)) ([0d76187](https://github.com/petercorke/robotics-toolbox-python/commit/0d76187b21d86713fc13a36ed6bc00a275eab858))
+* **rtbtool:** drop stray quote in banner's import line ([#678](https://github.com/petercorke/robotics-toolbox-python/issues/678)) ([b36c398](https://github.com/petercorke/robotics-toolbox-python/commit/b36c398aa81de96bc0784c25601ade1bb95e7e73))
+* **urdf:** resolve UR5's gripper link by name, not a raw index ([#683](https://github.com/petercorke/robotics-toolbox-python/issues/683)) ([12ba598](https://github.com/petercorke/robotics-toolbox-python/commit/12ba598a58c1ae21db9145ce4dbca798e8065652)), closes [#578](https://github.com/petercorke/robotics-toolbox-python/issues/578)
+
+
+### Documentation
+
+* **models:** credit robot_descriptions in the 8 model classes that use it ([#681](https://github.com/petercorke/robotics-toolbox-python/issues/681)) ([5dc8618](https://github.com/petercorke/robotics-toolbox-python/commit/5dc86184df70ec4cc639db76d203fb534ce8a3f7))
+* **models:** note UR10's near-singular inertia matrix is manufacturer data ([#682](https://github.com/petercorke/robotics-toolbox-python/issues/682)) ([97b0a3f](https://github.com/petercorke/robotics-toolbox-python/commit/97b0a3fa554733ca1247793f199cc6a6d9ba40c1))
+* **readme:** move research applications section to the wiki ([#689](https://github.com/petercorke/robotics-toolbox-python/issues/689)) ([8facc5e](https://github.com/petercorke/robotics-toolbox-python/commit/8facc5eeef8fc5c9ec93b5f1c1f340b0a4fa03ea))
+
+
+### Miscellaneous
+
+* release as 1.4.4 ([758a81b](https://github.com/petercorke/robotics-toolbox-python/commit/758a81b26fe1302a660aeba3a47b79abb76c2855))
+
 ## [1.4.3](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.2...v1.4.3) (2026-09-12)
 
 
