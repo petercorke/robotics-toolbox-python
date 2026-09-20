@@ -21,6 +21,16 @@ class RobotKinematicsMixin:
 
     """
 
+    def _resolve_tool(self: KinematicsProtocol, tool: NDArray | SE3 | None) -> SE3:
+        """
+        Resolve an explicit ``tool`` argument, defaulting to the robot's
+        own :attr:`tool` (identity if never set) when not given explicitly
+        -- see :meth:`fkine`'s ``tool`` parameter.
+        """
+        if tool is None:
+            return self.tool
+        return tool if isinstance(tool, SE3) else SE3(tool, check=False)
+
     # --------------------------------------------------------------------- #
     # --------- Kinematic Methods ----------------------------------------- #
     # --------------------------------------------------------------------- #
@@ -85,9 +95,11 @@ class RobotKinematicsMixin:
             specify ``end``
         - For a robot with multiple end-effectors, the ``end`` must
             be specified.
-        - The robot's base tool transform, if set, is incorporated
-            into the result.
-        - A tool transform, if provided, is incorporated into the result.
+        - The robot's own base transform (``self.base``), if set, is
+            always incorporated into the result.
+        - The robot's own tool transform (``self.tool``), if set, is
+            incorporated into the result unless the ``tool`` parameter is
+            given explicitly, which overrides it.
         - Works from the end-effector link to the base
 
         .. rubric:: References
@@ -101,7 +113,10 @@ class RobotKinematicsMixin:
 
         return SE3(
             self.ets(start, end).fkine(
-                q, base=self._T, tool=tool, include_base=include_base
+                q,
+                base=self._T,
+                tool=self._resolve_tool(tool),
+                include_base=include_base,
             ),
             check=False,
         )
@@ -155,7 +170,7 @@ class RobotKinematicsMixin:
 
         """
 
-        return self.ets(start, end).jacob0(q, tool=tool)
+        return self.ets(start, end).jacob0(q, tool=self._resolve_tool(tool))
 
     def jacobe(
         self: KinematicsProtocol,
@@ -206,7 +221,7 @@ class RobotKinematicsMixin:
 
         """
 
-        return self.ets(start, end).jacobe(q, tool=tool)
+        return self.ets(start, end).jacobe(q, tool=self._resolve_tool(tool))
 
     @overload
     def hessian0(
@@ -306,7 +321,7 @@ class RobotKinematicsMixin:
 
         """
 
-        return self.ets(start, end).hessian0(q, J0=J0, tool=tool)
+        return self.ets(start, end).hessian0(q, J0=J0, tool=self._resolve_tool(tool))
 
     @overload
     def hessiane(
@@ -406,7 +421,7 @@ class RobotKinematicsMixin:
 
         """
 
-        return self.ets(start, end).hessiane(q, Je=Je, tool=tool)
+        return self.ets(start, end).hessiane(q, Je=Je, tool=self._resolve_tool(tool))
 
     def partial_fkine0(
         self: KinematicsProtocol,
@@ -506,7 +521,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).jacob0_analytical(
-            q, tool=tool, representation=representation
+            q, tool=self._resolve_tool(tool), representation=representation
         )
 
     # --------------------------------------------------------------------- #
@@ -526,6 +541,7 @@ class RobotKinematicsMixin:
         joint_limits: bool = True,
         k: float = 1.0,
         method: L["chan", "wampler", "sugihara"] = "chan",
+        tool: NDArray | SE3 | None = None,
     ) -> IKSolution:
         r"""
         Fast Levenberg-Marquardt Numerical Inverse Kinematics Solver
@@ -544,6 +560,9 @@ class RobotKinematicsMixin:
         :param k: Sets the gain value for the damping matrix Wn in the next iteration
         :param method: One of "chan", "sugihara" or "wampler". Defines which method is used
             to calculate the damping matrix Wn in the ``step`` method
+        :param tool: a static tool transformation matrix to apply to the
+            end of ``end``; defaults to the robot's own ``self.tool`` if
+            not given
         :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches`` and ``residual`` error value (``reason`` is
             always empty -- this fast C++ solver doesn't produce a granular failure
@@ -661,7 +680,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ik_LM(
-            Tep=Tep,
+            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -685,6 +704,7 @@ class RobotKinematicsMixin:
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
+        tool: NDArray | SE3 | None = None,
     ) -> IKSolution:
         r"""
         Fast numerical inverse kinematics using Newton-Raphson optimization
@@ -705,6 +725,9 @@ class RobotKinematicsMixin:
             another search up to the slimit)
         :param pinv: Use the pseudo-inverse instead of the normal matrix inverse
         :param pinv_damping: Damping factor for the pseudo-inverse
+        :param tool: a static tool transformation matrix to apply to the
+            end of ``end``; defaults to the robot's own ``self.tool`` if
+            not given
         :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches`` and ``residual`` error value (``reason`` is
             always empty -- this fast C++ solver doesn't produce a granular failure
@@ -782,7 +805,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ik_NR(
-            Tep=Tep,
+            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -806,6 +829,7 @@ class RobotKinematicsMixin:
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
+        tool: NDArray | SE3 | None = None,
     ) -> IKSolution:
         r"""
         Fast numerical inverse kinematics by Gauss-Newton optimization
@@ -826,6 +850,9 @@ class RobotKinematicsMixin:
             another search up to the slimit)
         :param pinv: Use the pseudo-inverse instead of the normal matrix inverse
         :param pinv_damping: Damping factor for the pseudo-inverse
+        :param tool: a static tool transformation matrix to apply to the
+            end of ``end``; defaults to the robot's own ``self.tool`` if
+            not given
         :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches`` and ``residual`` error value (``reason`` is
             always empty -- this fast C++ solver doesn't produce a granular failure
@@ -918,7 +945,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ik_GN(
-            Tep=Tep,
+            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -947,6 +974,7 @@ class RobotKinematicsMixin:
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
+        tool: NDArray | SE3 | None = None,
         **kwargs,
     ):
         r"""
@@ -976,6 +1004,9 @@ class RobotKinematicsMixin:
             allowed to approach to its limit
         :param pi: The influence angle/distance (in radians or metres) in null space motion
             becomes active
+        :param tool: a static tool transformation matrix to apply to the
+            end of ``end``; defaults to the robot's own ``self.tool`` if
+            not given
         :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
@@ -1096,7 +1127,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ikine_LM(
-            Tep=Tep,
+            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -1130,6 +1161,7 @@ class RobotKinematicsMixin:
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
+        tool: NDArray | SE3 | None = None,
         **kwargs,
     ):
         r"""
@@ -1158,6 +1190,9 @@ class RobotKinematicsMixin:
             allowed to approach to its limit
         :param pi: The influence angle/distance (in radians or metres) in null space motion
             becomes active
+        :param tool: a static tool transformation matrix to apply to the
+            end of ``end``; defaults to the robot's own ``self.tool`` if
+            not given
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Newton-Raphson method.
@@ -1222,7 +1257,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ikine_NR(
-            Tep=Tep,
+            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -1255,6 +1290,7 @@ class RobotKinematicsMixin:
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
+        tool: NDArray | SE3 | None = None,
         **kwargs,
     ):
         r"""
@@ -1283,6 +1319,9 @@ class RobotKinematicsMixin:
             allowed to approach to its limit
         :param pi: The influence angle/distance (in radians or metres) in null space motion
             becomes active
+        :param tool: a static tool transformation matrix to apply to the
+            end of ``end``; defaults to the robot's own ``self.tool`` if
+            not given
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Gauss-Newton method.
@@ -1362,7 +1401,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ikine_GN(
-            Tep=Tep,
+            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -1396,6 +1435,7 @@ class RobotKinematicsMixin:
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
+        tool: NDArray | SE3 | None = None,
         **kwargs,
     ):
         r"""
@@ -1424,6 +1464,9 @@ class RobotKinematicsMixin:
             allowed to approach to its limit
         :param pi: The influence angle/distance (in radians or metres) in null space motion
             becomes active
+        :param tool: a static tool transformation matrix to apply to the
+            end of ``end``; defaults to the robot's own ``self.tool`` if
+            not given
         :raises ImportError: If the package ``qpsolvers`` is not installed
         :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
@@ -1541,7 +1584,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ikine_QP(
-            Tep=Tep,
+            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
