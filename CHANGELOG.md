@@ -1,5 +1,38 @@
 # Changelog
 
+## Highlights
+
+**Correctness fix in inverse dynamics (RNE).** `Robot.rne()` — used by every
+URDF/ETS-based robot's inverse dynamics — was silently returning wrong
+torques for any robot with translational offsets between links (i.e.
+virtually all real robots), traced to an upstream `spatialmath-python`
+change to how spatial forces transform. Fixed, along with two related bugs
+in how static (non-actuated) link mass gets attributed to the correct
+joint. Verified against the compiled C++ reference path and textbook
+closed-form solutions.
+
+**Tool transforms now work everywhere.** `robot.tool`, once set, is
+automatically honored by `fkine`/`jacob0`/`jacobe`/`hessian0`/`hessiane`
+(previously silently ignored unless passed explicitly each call), and all
+seven IK solvers (`ik_LM`/`ik_NR`/`ik_GN`/`ikine_LM`/`ikine_NR`/`ikine_GN`/
+`ikine_QP`) now accept a `tool=` argument directly.
+
+**New:** `Panda(use_robot_descriptions=True)` — an opt-in alternate Panda
+model with real inertial data, for users who need correct dynamics rather
+than the default's faster collision geometry.
+
+**Bug fixes:** `joint_velocity_damper` keyword-argument misuse across
+several example scripts; `DHRobot.ikine_6s` undoing the tool transform on
+the wrong side; UR5's gripper link now resolved by name instead of a
+fragile raw index.
+
+**Wiki refresh (not reflected in this changelog — wiki edits are direct
+pushes to a separate repo, not commits here):** a full currency pass across
+all 26 pages, stale/incorrect content fixed, ROS references removed, and
+new pages added — Panda model comparison, reactive control, inverse
+kinematics, and IK/RNE benchmark results with real numbers.
+
+
 ## [1.4.4](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.3...v1.4.4) (2026-09-20)
 
 
