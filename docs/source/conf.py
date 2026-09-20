@@ -63,6 +63,14 @@ bibtex_bibfiles = ["refs.bib"]
 autosummary_generate = True
 autodoc_member_order = "bysource"
 
+# roboticstoolbox.blocks.* subclasses bdsim's block types, but bdsim is a
+# `dev`-only dependency here (unlike MVTB, where it's genuinely optional) --
+# the docs CI job installs `.[docs]` only, so bdsim is never actually
+# importable there. Mock it so autodoc can still introspect the blocks
+# modules' own classes/docstrings without a real bdsim install. Same fix as
+# MVTB's conf.py, which hit this first.
+autodoc_mock_imports = ["bdsim", "bdsim.block_types"]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
