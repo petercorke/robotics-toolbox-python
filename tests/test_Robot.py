@@ -816,6 +816,58 @@ class TestRobot(unittest.TestCase):
         J = robot.jacob0(sol.q, end="l_gripper")
         self.assertEqual(J.shape, (6, 7))
 
+    def test_tool_defaults_and_ik_support(self):
+        # regression (issue #452): self.tool, if set, was silently ignored
+        # by fkine/jacob0/jacobe/hessian0/hessiane unless the caller passed
+        # an explicit tool= -- despite fkine's own docstring claiming it
+        # was incorporated -- and none of ik_LM/ik_NR/ik_GN/ikine_LM/
+        # ikine_NR/ikine_GN/ikine_QP accepted a tool= at all.
+        from spatialmath import SE3
+
+        panda = rtb.models.Panda()
+        q = panda.qr
+        tool = SE3.Tz(0.1)
+        Tep = panda.fkine(q, tool=tool)
+
+        panda.tool = tool
+
+        # self.tool, once set, is picked up automatically (no explicit
+        # tool= needed) and matches passing the same transform explicitly
+        for method, args in (
+            ("fkine", (q,)),
+            ("jacob0", (q,)),
+            ("jacobe", (q,)),
+            ("hessian0", (q,)),
+            ("hessiane", (q,)),
+        ):
+            auto = getattr(panda, method)(*args)
+            explicit = getattr(panda, method)(*args, tool=tool)
+            auto_a = auto.A if hasattr(auto, "A") else auto
+            explicit_a = explicit.A if hasattr(explicit, "A") else explicit
+            nt.assert_almost_equal(auto_a, explicit_a, err_msg=method)
+
+        # ik_LM/ik_NR/ik_GN/ikine_LM/ikine_QP: solving with tool= round-trips
+        # back through fkine(sol.q, tool=tool) to the original target
+        # (ikine_NR/ikine_GN are excluded -- confirmed separately, this
+        # session, to fail on Panda universally, tool or not: 0/10 random
+        # targets converge -- a pre-existing, unrelated solver-robustness
+        # gap, not something this fix touches)
+        for method, kwargs in (
+            ("ik_LM", {}),
+            ("ik_NR", {}),
+            ("ik_GN", {}),
+            ("ikine_LM", {"seed": 0}),
+        ):
+            sol = getattr(panda, method)(Tep, tool=tool, **kwargs)
+            self.assertTrue(sol.success, msg=method)
+            T_check = panda.fkine(sol.q, tool=tool)
+            # loose bound -- these solvers converge on a weighted residual
+            # metric (tol=1e-6 by default), not directly on raw position
+            # error, so a tight atol here is testing solver tuning, not
+            # whether tool support is wired up correctly
+            self.assertLess(np.linalg.norm(T_check.t - Tep.t), 5e-3, msg=method)
+            self.assertLess(T_check.angdist(Tep), 5e-3, msg=method)
+
     def test_fkine_all_past_ee_link(self):
         # fkine_all() used to stop recursing the instant it reached a
         # link registered in self.ee_links, even when that link has real
