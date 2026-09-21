@@ -601,21 +601,62 @@ class DynamicsMixin:
         :param p: position in end-effector frame
         :type p: ndarray(3,)
 
-        payload(m, p) adds payload mass adds a payload with point mass m at
-        position p in the end-effector coordinate frame.
+        payload(m, p) adds a payload with point mass m at position p in the
+        end-effector coordinate frame.
 
-        payload(m) adds payload mass adds a payload with point mass m at
-        in the end-effector coordinate frame.
+        payload(m) adds a payload with point mass m at the origin of the
+        end-effector coordinate frame.
 
         payload(0) removes added payload.
 
+        The point mass is combined with the mass, centre of mass and inertia
+        of the end-effector link, and ``p`` is expressed in that link's frame.
+        The link's own parameters are kept, so each call replaces the payload
+        added by the previous one, and a payload of zero mass leaves the
+        dynamics unchanged.
+
+        .. note:: The end-effector link is ``ee_links[0]`` when the robot has
+            a single end-effector.  A robot with several end-effectors has no
+            single end-effector link, and the payload is added to
+            ``links[n - 1]`` as in earlier releases.
+
         """
 
-        p = getvector(p, 3, out="col")
-        lastlink = self.links[self.n - 1]
+        if len(self.ee_links) == 1:
+            link = self.ee_links[0]
+        else:
+            link = self.links[self.n - 1]
 
-        lastlink.m = m
-        lastlink.r = p
+        # the link's own mass, centre of mass and inertia, saved by the first
+        # call so that a later payload replaces this one rather than adding to it
+        own = getattr(link, "_payload_own", None)
+        if own is None:
+            own = (link.m, np.array(link.r), np.array(link.I))
+            link._payload_own = own
+        m0, r0, I0 = own
+
+        if m == 0:
+            link.m = m0
+            link.r = r0.copy()
+            link.I = I0.copy()
+            return
+
+        p = getvector(p, 3)
+        mc = m0 + m
+        rc = (m0 * r0 + m * p) / mc
+
+        # inertia about the combined centre of mass, by the parallel axis
+        # theorem, the point mass having no inertia about its own centre
+        d0 = r0 - rc
+        dp = p - rc
+        E = np.eye(3)
+        link.m = mc
+        link.r = rc
+        link.I = (
+            I0
+            + m0 * (np.dot(d0, d0) * E - np.outer(d0, d0))
+            + m * (np.dot(dp, dp) * E - np.outer(dp, dp))
+        )
 
     def jointdynamics(self: RobotProto, q, qd=None):
         """
