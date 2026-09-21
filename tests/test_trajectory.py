@@ -8,6 +8,7 @@ import roboticstoolbox.tools.trajectory as tr
 from roboticstoolbox import xplot
 import numpy as np
 import numpy.testing as nt
+import matplotlib.pyplot as plt
 import unittest
 from spatialmath import SE3
 from math import pi
@@ -16,6 +17,88 @@ _eps = np.finfo(np.float64).eps
 
 
 class TestTrajectory(unittest.TestCase):
+    def test_scalar_plot_time_origin(self) -> None:
+        elapsed = np.linspace(0, 3, 13)
+        for generator in (tr.quintic, tr.trapezoidal):
+            for start in (-5, -1, 5):
+                with self.subTest(generator=generator.__name__, start=start):
+                    times = elapsed + start
+                    trajectory = generator(0, 1, times)
+                    try:
+                        trajectory.plot()
+                        axes = plt.gcf().axes
+                        for axis in axes:
+                            nt.assert_allclose(axis.get_xlim(), [start, start + 3])
+                        for axis, values in zip(
+                            axes[1:], (trajectory.qd, trajectory.qdd)
+                        ):
+                            nt.assert_array_equal(axis.lines[0].get_xdata(), times)
+                            nt.assert_array_equal(axis.lines[0].get_ydata(), values)
+                        if generator is tr.trapezoidal:
+                            # A three-second default profile blends for one second.
+                            for line, samples, color in (
+                                (axes[0].lines[0], slice(0, 5), "red"),
+                                (axes[0].lines[1], slice(5, 9), "green"),
+                                (axes[0].lines[3], slice(9, 13), "blue"),
+                            ):
+                                self.assertEqual(line.get_color(), color)
+                                nt.assert_array_equal(line.get_xdata(), times[samples])
+                                nt.assert_array_equal(
+                                    line.get_ydata(), trajectory.q[samples]
+                                )
+                        else:
+                            nt.assert_array_equal(axes[0].lines[0].get_xdata(), times)
+                            nt.assert_array_equal(
+                                axes[0].lines[0].get_ydata(), trajectory.q
+                            )
+                    finally:
+                        plt.close(plt.gcf())
+
+    def test_quintic_time_origin(self) -> None:
+        elapsed = np.linspace(0, 2, 9)
+        expected = tr.quintic(0, 1, elapsed, qd0=0.2, qdf=-0.1)
+        for start in (-5, 5):
+            with self.subTest(start=start):
+                times = elapsed + start
+                actual = tr.quintic(0, 1, times, qd0=0.2, qdf=-0.1)
+                nt.assert_array_equal(actual.t, times)
+                self.assertTrue(actual.istime)
+                nt.assert_allclose(actual.q[[0, -1]], [0, 1], atol=1e-12)
+                nt.assert_allclose(actual.qd[[0, -1]], [0.2, -0.1], atol=1e-12)
+                for field in ("q", "qd", "qdd"):
+                    nt.assert_allclose(
+                        getattr(actual, field), getattr(expected, field), atol=1e-12
+                    )
+
+    def test_trapezoidal_time_origin(self) -> None:
+        elapsed = np.linspace(0, 2, 9)
+        for start in (-5, 5):
+            for velocity in (None, 0.75):
+                with self.subTest(start=start, velocity=velocity):
+                    times = elapsed + start
+                    expected = tr.trapezoidal(0, 1, elapsed, V=velocity)
+                    actual = tr.trapezoidal(0, 1, times, V=velocity)
+                    nt.assert_array_equal(actual.t, times)
+                    self.assertTrue(actual.istime)
+                    self.assertAlmostEqual(actual.tblend, expected.tblend)
+                    nt.assert_allclose(actual.q[[0, -1]], [0, 1], atol=1e-12)
+                    for field in ("q", "qd", "qdd"):
+                        nt.assert_allclose(
+                            getattr(actual, field), getattr(expected, field), atol=1e-12
+                        )
+
+    def test_mtraj_time_origin(self) -> None:
+        elapsed = np.linspace(0, 2, 9)
+        for generator in (tr.quintic, tr.trapezoidal):
+            with self.subTest(generator=generator.__name__):
+                expected = tr.mtraj(generator, [0, 2], [1, -1], elapsed)
+                actual = tr.mtraj(generator, [0, 2], [1, -1], elapsed + 5)
+                nt.assert_array_equal(actual.t, elapsed + 5)
+                for field in ("q", "qd", "qdd"):
+                    nt.assert_allclose(
+                        getattr(actual, field), getattr(expected, field), atol=1e-12
+                    )
+
     def test_quintic(self):
 
         s1 = 1
