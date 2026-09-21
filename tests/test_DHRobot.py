@@ -436,21 +436,80 @@ class TestDHRobot(unittest.TestCase):
 
     def test_payload(self):
         panda = rp.models.DH.Panda()
+        link = panda.links[6]
+        m0 = link.m
+        r0 = link.r.copy()
+        I0 = link.I.copy()
         # link 6's inherent centre of mass (Franka-published dynamic
         # parameters, see Panda.py) -- not zero, per PR #304
-        nt.assert_array_almost_equal(
-            panda.r[:, 6], [1.0517e-02, -4.252e-03, -4.5403e-02]
-        )
-        # nt.assert_array_almost_equal(panda.links[6].m, 0)
+        nt.assert_array_almost_equal(r0, [1.0517e-02, -4.252e-03, -4.5403e-02])
+
+        # a DH robot's end-effector link is its last link, the one payload()
+        # has always used
+        self.assertIs(panda.ee_links[0], link)
 
         m = 6
-        p = [1, 2, 3]
+        p = np.array([1, 2, 3])
         panda.payload(m, p)
 
-        # payload() overwrites the link's m/r outright (see Dynamics.py),
-        # so this holds regardless of the link's inherent r above
-        nt.assert_array_almost_equal(panda.r[:, 6], p)
-        nt.assert_array_almost_equal(panda.links[6].m, m)
+        # the payload is combined with the link's own mass and centre of
+        # mass rather than replacing them (#638)
+        nt.assert_array_almost_equal(link.m, m0 + m)
+        nt.assert_array_almost_equal(panda.r[:, 6], (m0 * r0 + m * p) / (m0 + m))
+
+        # payload(0) removes the payload, restoring the link's own parameters
+        panda.payload(0)
+        nt.assert_array_almost_equal(link.m, m0)
+        nt.assert_array_almost_equal(link.r, r0)
+        nt.assert_array_almost_equal(link.I, I0)
+
+    def test_payload_zero_is_noop(self):
+        # payload(0) used to zero the last link's own mass and centre of
+        # mass, changing the inverse dynamics (#638)
+        p560 = rp.models.DH.Puma560()
+        q = np.radians([45, 70, -100, 60, 25, -140])
+        z = np.zeros(p560.n)
+        tau = p560.rne(q, z, z)
+
+        p560.payload(m=0, p=np.zeros(3))
+
+        nt.assert_array_almost_equal(p560.rne(q, z, z), tau)
+        nt.assert_array_almost_equal(p560.links[5].m, 0.09)
+        nt.assert_array_almost_equal(p560.links[5].r, [0, 0, 0.032])
+
+    def test_payload_point_mass(self):
+        # a payload is a point mass rigidly attached to the end-effector
+        # frame: it adds m * Jp' Jp to the joint-space inertia matrix and
+        # -m * Jp' g to the gravity load, where Jp is the Jacobian of the
+        # point's position in the world frame
+        p560 = rp.models.DH.Puma560()
+        q = np.radians([45, 70, -100, 60, 25, -140])
+        m = 2.5
+        p = np.array([0.02, -0.03, 0.1])
+        M0 = p560.inertia(q)
+        G0 = p560.gravload(q)
+
+        p560.payload(m, p)
+
+        T = p560.fkine(q)
+        J = p560.jacob0(q)
+        Jp = J[:3, :] - sm.base.skew(T.R @ p) @ J[3:, :]
+        nt.assert_array_almost_equal(p560.inertia(q) - M0, m * Jp.T @ Jp)
+        nt.assert_array_almost_equal(p560.gravload(q) - G0, -m * Jp.T @ p560.gravity)
+
+    def test_payload_replaces_previous(self):
+        q = np.radians([45, 70, -100, 60, 25, -140])
+        qd = np.array([0.1, -0.2, 0.3, 0.4, -0.5, 0.6])
+        qdd = np.array([0.5, 0.4, -0.3, 0.2, 0.1, -0.1])
+
+        p560 = rp.models.DH.Puma560()
+        p560.payload(2, [0.1, 0, 0])
+        p560.payload(3, [0, 0.05, 0.2])
+
+        ref = rp.models.DH.Puma560()
+        ref.payload(3, [0, 0.05, 0.2])
+
+        nt.assert_array_almost_equal(p560.rne(q, qd, qdd), ref.rne(q, qd, qdd))
 
     def test_jointdynamics(self):
         puma = rp.models.DH.Puma560()

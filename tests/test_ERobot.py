@@ -402,6 +402,50 @@ class TestERobot(unittest.TestCase):
             expected = -2.0 * 9.81 * 0.35 * cos(q)
             self.assertAlmostEqual(tau[0], expected, places=9)
 
+    def test_payload_end_effector_link(self):
+        # The payload belongs on the end-effector link.  When static links
+        # follow the last joint, as in URDF models, links[n - 1] is not the
+        # end-effector and used to receive the payload instead (#638).
+        #
+        # joint1 (Ry, massless) -> l2 (fixed, tx(1), m=1, r=[0.5,0,0]), the
+        # end-effector.  A 2 kg payload at [0.25,0,0] in l2's frame sits
+        # 1.25 from the joint, next to l2's own centre of mass at 1.5.
+        joint1 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], name="joint1")
+        l2 = Link(ets=ETS(ET.tx(1)), m=1, r=[0.5, 0, 0], parent=joint1, name="l2")
+        robot = ERobot([joint1, l2], name="joint then trailing static link")
+        self.assertEqual(robot.ee_links, [l2])
+        self.assertIs(robot.links[robot.n - 1], joint1)
+
+        robot.payload(2, [0.25, 0, 0])
+
+        self.assertEqual(joint1.m, 0)
+        z = np.zeros(robot.n)
+        for q in (0.0, 0.5, -1.2, pi / 2):
+            tau = robot.rne(np.r_[q], z, z, gravity=[0, 0, -9.81])
+            expected = -9.81 * (1.0 * 1.5 + 2.0 * 1.25) * cos(q)
+            self.assertAlmostEqual(tau[0], expected, places=9)
+
+        robot.payload(0)
+        for q in (0.0, 0.5, -1.2):
+            tau = robot.rne(np.r_[q], z, z, gravity=[0, 0, -9.81])
+            self.assertAlmostEqual(tau[0], -9.81 * 1.5 * cos(q), places=9)
+
+    def test_payload_several_end_effectors(self):
+        # With more than one end-effector the choice is ambiguous, and the
+        # payload stays on links[n - 1] as it always has
+        joint1 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], name="joint1")
+        a = Link(ets=ETS(ET.tx(1)), m=1, r=[0.5, 0, 0], parent=joint1, name="a")
+        b = Link(ets=ETS(ET.tx(-1)), m=1, r=[-0.5, 0, 0], parent=joint1, name="b")
+        robot = ERobot([joint1, a, b], name="two end-effectors")
+        self.assertEqual(len(robot.ee_links), 2)
+
+        robot.payload(2, [0.25, 0, 0])
+
+        self.assertEqual(joint1.m, 2)
+        nt.assert_array_almost_equal(joint1.r, [0.25, 0, 0])
+        self.assertEqual(a.m, 1)
+        self.assertEqual(b.m, 1)
+
 
 class TestERobot2(unittest.TestCase):
     def test_plot(self):
