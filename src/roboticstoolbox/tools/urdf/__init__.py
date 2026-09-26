@@ -19,6 +19,7 @@ from roboticstoolbox.tools.urdf.urdf import (
     Joint,
     Link,
     URDF,
+    URDFError,
 )
 
 __all__ = [
@@ -42,4 +43,5 @@ __all__ = [
     "Joint",
     "Link",
     "URDF",
+    "URDFError",
 ]
