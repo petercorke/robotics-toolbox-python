@@ -24,6 +24,109 @@ from .utils import parse_origin, configure_origin
 _base_path = None
 
 
+class URDFError(ValueError):
+    """
+    A URDF or xacro file could not be loaded.
+
+    Raised by :meth:`URDF.loadstr` and by the model loaders in
+    :mod:`roboticstoolbox.models.URDF` instead of the bare ``ValueError``,
+    ``KeyError`` or XML parser errors they used to leak. It subclasses
+    :class:`ValueError`, so existing ``except ValueError`` handlers keep
+    working. ``str(err)`` is a multi-line report; the fields below let code
+    inspect the details.
+
+    :param msg: what went wrong
+    :param stage: ``"xml"`` (the text is not well-formed XML), ``"xacro"``
+        (xacro could not expand the file) or ``"urdf"`` (the XML is fine but
+        the robot description is not)
+    :param source: the file, or a description of the input, being loaded
+    :param line: 1-based line of the failure, when known
+    :param column: column of the failure, when known
+    :param element: the XML element being parsed when the failure happened;
+        enclosing elements are added as the error propagates outward, see
+        :meth:`add_context`
+    :param location: xacro's file and macro stack at the time of the failure
+    :param expanded_file: path of a saved copy of the xacro-expanded URDF,
+        which is what ``line`` refers to when it is set
+    """
+
+    def __init__(
+        self,
+        msg: str,
+        *,
+        stage: str = "urdf",
+        source: "str | os.PathLike | None" = None,
+        line: int | None = None,
+        column: int | None = None,
+        element: str | None = None,
+        location: list[str] | None = None,
+        expanded_file: "str | os.PathLike | None" = None,
+    ):
+        super().__init__(msg)
+        self.msg = msg
+        self.stage = stage
+        self.source = source
+        self.line = line
+        self.column = column
+        self.elements: list[str] = [element] if element else []
+        self.location: list[str] = list(location) if location else []
+        self.expanded_file = expanded_file
+
+    @property
+    def element(self) -> str | None:
+        """The innermost XML element being parsed when the failure happened."""
+        return self.elements[0] if self.elements else None
+
+    def add_context(self, element: str) -> None:
+        """Record an enclosing element, called as the error propagates outward."""
+        if not self.elements or self.elements[-1] != element:
+            self.elements.append(element)
+
+    def __str__(self) -> str:
+        lines = [self.msg]
+        if self.elements:
+            lines.append("  in " + " inside ".join(self.elements))
+        if self.line is not None:
+            where = f"line {self.line}"
+            if self.column is not None:
+                where += f", column {self.column}"
+            if self.expanded_file is not None:
+                lines.append(f"  at {where} of the expanded URDF")
+            elif self.source is not None:
+                lines.append(f"  at {where} of {self.source}")
+            else:
+                lines.append(f"  at {where}")
+        lines.extend(f"  {loc}" for loc in self.location)
+        if self.expanded_file is not None:
+            lines.append(f"  expanded URDF written to {self.expanded_file}")
+        return "\n".join(lines)
+
+
+def _describe(node) -> str:
+    """Short description of an XML element for error messages."""
+    name = node.attrib.get("name")
+    if name is None:
+        return f"<{node.tag}>"
+    return f'<{node.tag} name="{name}">'
+
+
+def _parse_child(cls, node, path):
+    """Call ``cls._from_xml(node, path)``, attaching element context to any error."""
+    try:
+        return cls._from_xml(node, path)
+    except URDFError as e:
+        e.add_context(_describe(node))
+        raise
+    except KeyError as e:
+        raise URDFError(
+            f"missing attribute {e.args[0]!r}", stage="urdf", element=_describe(node)
+        ) from e
+    except (ValueError, TypeError, AttributeError) as e:
+        raise URDFError(
+            str(e) or type(e).__name__, stage="urdf", element=_describe(node)
+        ) from e
+
+
 class URDFType():
     """Abstract base class for all URDF types.
     This has useful class methods for automatic parsing/unparsing
@@ -89,17 +192,32 @@ class URDFType():
         for a in cls._ATTRIBS:
             t, r = cls._ATTRIBS[a]  # t = type, r = required (bool)
             if r:
+                if a not in node.attrib:
+                    raise URDFError(
+                        f'missing required attribute "{a}"',
+                        stage="urdf",
+                        element=_describe(node),
+                    )
                 try:
                     v = cls._parse_attrib(t, node.attrib[a])
-                except Exception:  # pragma nocover
-                    raise ValueError(
-                        "Missing required attribute {} when parsing an object "
-                        "of type {}".format(a, cls.__name__)
-                    )
+                except (ValueError, TypeError) as e:
+                    raise URDFError(
+                        f'invalid value {node.attrib[a]!r} for attribute "{a}": {e}',
+                        stage="urdf",
+                        element=_describe(node),
+                    ) from e
             else:
                 v = None
                 if a in node.attrib:
-                    v = cls._parse_attrib(t, node.attrib[a])
+                    try:
+                        v = cls._parse_attrib(t, node.attrib[a])
+                    except (ValueError, TypeError) as e:
+                        raise URDFError(
+                            f'invalid value {node.attrib[a]!r} for attribute "{a}": '
+                            f"{e}",
+                            stage="urdf",
+                            element=_describe(node),
+                        ) from e
             kwargs[a] = v
         return kwargs
 
@@ -125,16 +243,23 @@ class URDFType():
             t, r, m = cls._ELEMENTS[a]
             if not m:
                 v = node.find(t._TAG)
-                if r or v is not None:
-                    v = t._from_xml(v, path)
+                if v is None and r:
+                    raise URDFError(
+                        f"missing required <{t._TAG}> element",
+                        stage="urdf",
+                        element=_describe(node),
+                    )
+                if v is not None:
+                    v = _parse_child(t, v, path)
             else:
                 vs = node.findall(t._TAG)
-                if len(vs) == 0 and r:  # pragma nocover
-                    raise ValueError(
-                        "Missing required subelement(s) of type {} when "
-                        "parsing an object of type {}".format(t.__name__, cls.__name__)
+                if len(vs) == 0 and r:
+                    raise URDFError(
+                        f"missing required <{t._TAG}> element(s)",
+                        stage="urdf",
+                        element=_describe(node),
                     )
-                v = [t._from_xml(n, path) for n in vs]
+                v = [_parse_child(t, n, path) for n in vs]
             kwargs[a] = v
         return kwargs
 
@@ -698,8 +823,29 @@ class Inertial(URDFType):
     @classmethod
     def _from_xml(cls, node, path):
         origin, _ = parse_origin(node)
-        mass = float(node.find("mass").attrib["value"])
+        mass_node = node.find("mass")
+        if mass_node is None or "value" not in mass_node.attrib:
+            raise URDFError(
+                '<inertial> needs a <mass value="..."/> element',
+                stage="urdf",
+                element=_describe(node),
+            )
+        mass = float(mass_node.attrib["value"])
         n = node.find("inertia")
+        if n is None:
+            raise URDFError(
+                "<inertial> needs an <inertia .../> element",
+                stage="urdf",
+                element=_describe(node),
+            )
+        keys = ("ixx", "ixy", "ixz", "iyy", "iyz", "izz")
+        missing = [k for k in keys if k not in n.attrib]
+        if missing:
+            raise URDFError(
+                f"<inertia> is missing attribute(s) {', '.join(missing)}",
+                stage="urdf",
+                element=_describe(node),
+            )
         xx = float(n.attrib["ixx"])
         xy = float(n.attrib["ixy"])
         xz = float(n.attrib["ixz"])
@@ -1555,7 +1701,21 @@ class Joint(URDFType):
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
+        if "type" not in node.attrib:
+            raise URDFError(
+                'joint is missing the required "type" attribute',
+                stage="urdf",
+                element=_describe(node),
+            )
         kwargs["joint_type"] = str(node.attrib["type"])
+        for role in ("parent", "child"):
+            ref = node.find(role)
+            if ref is None or "link" not in ref.attrib:
+                raise URDFError(
+                    f'joint is missing a <{role} link="..."/> element',
+                    stage="urdf",
+                    element=_describe(node),
+                )
         kwargs["parent"] = node.find("parent").attrib["link"]
         kwargs["child"] = node.find("child").attrib["link"]
         axis = node.find("axis")
@@ -1728,18 +1888,18 @@ class URDF(URDFType):
             self._material_map[x.name] = x
 
         # check for duplicate names
-        if len(self._links) > len(
-            set([x.name for x in self._links])
-        ):  # pragma nocover  # noqa
-            raise ValueError("Duplicate link names")
-        if len(self._joints) > len(
-            set([x.name for x in self._joints])
-        ):  # pragma nocover  # noqa
-            raise ValueError("Duplicate joint names")
-        if len(self._transmissions) > len(
-            set([x.name for x in self._transmissions])
-        ):  # pragma nocover  # noqa
-            raise ValueError("Duplicate transmission names")
+        for kind, items in (
+            ("link", self._links),
+            ("joint", self._joints),
+            ("transmission", self._transmissions),
+        ):
+            names = [x.name for x in items]
+            duplicates = sorted({n for n in names if names.count(n) > 1})
+            if duplicates:
+                raise URDFError(
+                    f"duplicate {kind} name(s): {', '.join(duplicates)}",
+                    stage="urdf",
+                )
 
     @property
     def name(self):
@@ -1886,20 +2046,19 @@ class URDF(URDFType):
             _base_path = base_path
 
         if isinstance(str_obj, str):
-            # if os.path.isfile(file_obj):
-                parser = ETT.XMLParser()
-                bytes_obj = BytesIO(bytes(str_obj, "utf-8"))
-                tree = ETT.parse(bytes_obj, parser=parser)
-                # path, _ = os.path.split(file_obj)
-
+            source = BytesIO(bytes(str_obj, "utf-8"))
         else:  # pragma nocover
-            parser = ETT.XMLParser()
-            tree = ETT.parse(file_obj, parser=parser)
-            path, _ = os.path.split(file_obj.name)
+            source = file_obj
 
-        node = tree.getroot()
-        path = None
-        return URDF._from_xml(node, path)
+        try:
+            tree = ETT.parse(source, parser=ETT.XMLParser())
+        except ETT.ParseError as e:
+            line, column = getattr(e, "position", (None, None))
+            raise URDFError(
+                f"not well-formed XML: {e}", stage="xml", line=line, column=column
+            ) from e
+
+        return _parse_child(URDF, tree.getroot(), None)
 
     def _validate_transmissions(self):
         """Raise an exception if any transmissions are invalidly specified.

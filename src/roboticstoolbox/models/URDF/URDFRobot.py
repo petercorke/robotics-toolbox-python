@@ -11,8 +11,11 @@ Provides:
 
 from pathlib import Path
 import importlib
+import re
 import sys
+import tempfile
 import warnings
+import xml.parsers.expat
 from typing import Callable, TextIO
 
 import numpy as np
@@ -21,7 +24,23 @@ from spatialmath.base import unitvec_norm, angvec2r, tr2rpy
 
 from xacrodoc import XacroDoc, packages
 
-from roboticstoolbox.tools.urdf import URDF
+try:
+    from xacro import XacroException
+except ImportError:  # pragma nocover
+
+    class XacroException(Exception):
+        pass
+
+
+try:
+    from xacrodoc.packages import PackageNotFoundError
+except ImportError:  # pragma nocover
+
+    class PackageNotFoundError(Exception):
+        pass
+
+
+from roboticstoolbox.tools.urdf import URDF, URDFError
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.ETS import ETS
@@ -174,10 +193,139 @@ def _load_urdf_from_RD(robot_name: str) -> "tuple[Path, dict | None]":
     return urdf_path, getattr(module, "XACRO_ARGS", None)
 
 
-def _parse_urdf(urdf_str: str):
-    """Parse a URDF string into (elinks, name)."""
-    urdf = URDF.loadstr(urdf_str, None)
+def _xacro_location() -> list[str]:
+    """Describe where xacro was when it failed, like xacro's own print_location()."""
+    try:
+        import xacro
+    except ImportError:  # pragma nocover
+        return []
 
+    lines = []
+    msg = "when instantiating macro:"
+    for m in reversed(getattr(xacro, "macrostack", None) or []):
+        try:
+            name = m.body.getAttribute("name")
+            where = m.history[-1][-1] or "???"
+        except Exception:  # pragma nocover
+            continue
+        lines.append(f"{msg} {name} ({where})")
+        msg = "instantiated from:"
+
+    msg = "in file:" if lines else "when processing file:"
+    for f in reversed(getattr(xacro, "filestack", None) or []):
+        if f is None:
+            continue
+        lines.append(f"{msg} {f}")
+        msg = "included from:"
+    return lines
+
+
+def _reset_xacro_stacks() -> None:
+    """Clear xacro's module-level include/macro stacks.
+
+    xacro does not unwind them when it raises, and xacrodoc never resets
+    them, so without this a failure inside an include or macro would leave
+    stale "in file: / when instantiating macro:" lines that a later,
+    unrelated failure would then report.
+    """
+    try:
+        import xacro
+
+        xacro.init_stacks(None)
+    except (ImportError, AttributeError):  # pragma nocover
+        pass
+
+
+def _package_not_found(e: BaseException) -> "PackageNotFoundError | None":
+    """Return the PackageNotFoundError at the root of a xacro error chain, if any.
+
+    xacro wraps the exceptions raised while evaluating ``$(find pkg)`` in one
+    or two layers of ``XacroException`` (each with the original in ``.exc``),
+    so the package failure has to be dug out to give the right hint.
+    """
+    cause = e
+    while isinstance(cause, XacroException) and getattr(cause, "exc", None):
+        cause = cause.exc
+    return cause if isinstance(cause, PackageNotFoundError) else None
+
+
+def _expand_xacro(source: str, expand: "Callable[[], XacroDoc]") -> XacroDoc:
+    """Run one of the XacroDoc constructors, converting its failures to URDFError."""
+    _reset_xacro_stacks()
+    try:
+        return expand()
+    except xml.parsers.expat.ExpatError as e:
+        raise URDFError(
+            f"{source} is not well-formed XML: {e}",
+            stage="xml",
+            source=source,
+            line=getattr(e, "lineno", None),
+            column=getattr(e, "offset", None),
+            location=_xacro_location(),
+        ) from e
+    except (PackageNotFoundError, XacroException) as e:
+        missing = _package_not_found(e)
+        if missing is not None:
+            raise URDFError(
+                f"xacro could not find a package while processing {source}: "
+                f"{missing}. Register its directory with "
+                "xacrodoc.packages.update_package_cache() or pass it via "
+                "extra_packages=",
+                stage="xacro",
+                source=source,
+                location=_xacro_location(),
+            ) from e
+        raise URDFError(
+            f"xacro failed while processing {source}: {e}",
+            stage="xacro",
+            source=source,
+            location=_xacro_location(),
+        ) from e
+
+
+def _attach_expanded(err: URDFError, urdf_str: str, source: str) -> None:
+    """Point a URDF parse error at a saved copy of the expanded text it came from.
+
+    xacro output is what actually failed to parse, so line numbers only make
+    sense against it. Write it to a temp file, record the path on the error,
+    and when the error names an element (``name="..."``) but has no line yet,
+    look the element up in the text to give one.
+    """
+    err.source = source
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".urdf", prefix="rtb-expanded-", delete=False, encoding="utf-8"
+    ) as f:
+        f.write(urdf_str)
+        err.expanded_file = f.name
+
+    if err.line is None:
+        for desc in err.elements:
+            m = re.search(r'name="([^"]*)"', desc)
+            if m is None:
+                continue
+            idx = urdf_str.find(f'name="{m.group(1)}"')
+            if idx >= 0:
+                err.line = urdf_str.count("\n", 0, idx) + 1
+            break
+
+
+def _parse_urdf(urdf_str: str, source: str = "<URDF text>"):
+    """Parse a URDF string into (elinks, name).
+
+    :raises URDFError: if the text is not well-formed XML or is not a valid
+        robot description; the error names the element, the line in a saved
+        copy of ``urdf_str``, and that copy's path
+    """
+    try:
+        urdf = URDF.loadstr(urdf_str, None)
+        return _links_from_urdf(urdf)
+    except URDFError as e:
+        _attach_expanded(e, urdf_str, source)
+        raise
+
+
+def _links_from_urdf(urdf: URDF):
+    """Convert a parsed :class:`URDF` into (elinks, name)."""
     elinks = []
     elinkdict = {}
 
@@ -213,6 +361,14 @@ def _parse_urdf(urdf_str: str):
             elink.collision = shapes
 
     for joint in urdf._joints:
+        for role, link_name in (("parent", joint.parent), ("child", joint.child)):
+            if link_name not in elinkdict:
+                raise URDFError(
+                    f'joint "{joint.name}" refers to {role} link "{link_name}", '
+                    f"which is not defined (defined links: {', '.join(elinkdict)})",
+                    stage="urdf",
+                    element=f'<joint name="{joint.name}">',
+                )
         childlink = elinkdict[joint.child]
         parentlink = elinkdict[joint.parent]
 
@@ -320,6 +476,14 @@ def URDF_file(
     package lookup only auto-discovers directories that are already known by
     name, it doesn't fall back to searching by content. See ``LBR.py`` for a
     real example.
+
+    :raises FileNotFoundError: if ``file`` is a path that does not exist
+    :raises URDFError: if xacro cannot expand the file, or the result is not
+        well-formed XML or not a valid robot description. The error reports
+        the stage that failed, the element and line involved, xacro's
+        include/macro stack, and the path of a saved copy of the expanded
+        URDF that the line number refers to. That copy is left in the
+        system temp directory for inspection
     """
     import rtbdata
 
@@ -342,23 +506,33 @@ def URDF_file(
     if isinstance(file, Path):
         if not file.is_absolute():
             file = xacro_root / file
+        if not file.is_file():
+            raise FileNotFoundError(f"URDF/xacro file not found: {file}")
         resolved_path = file
+        source = str(file)
         if patch is not None:
             # mirrors XacroDoc.from_file()'s own package-discovery step,
             # since we bypass from_file() here to patch the text first
             packages.walk_up_from(file)
-            doc = XacroDoc.from_string(
-                patch(file.read_text()), rootdir=file.parent, subargs=xacro_args
+            text = patch(file.read_text())
+            doc = _expand_xacro(
+                source,
+                lambda: XacroDoc.from_string(
+                    text, rootdir=file.parent, subargs=xacro_args
+                ),
             )
         else:
-            doc = XacroDoc.from_file(file, subargs=xacro_args)
+            doc = _expand_xacro(
+                source, lambda: XacroDoc.from_file(file, subargs=xacro_args)
+            )
     else:
+        source = getattr(file, "name", None) or "<URDF text>"
         text = file.read()
         if patch is not None:
             text = patch(text)
-        doc = XacroDoc.from_string(text)
+        doc = _expand_xacro(source, lambda: XacroDoc.from_string(text))
 
-    elinks, name = _parse_urdf(doc.to_urdf_string())
+    elinks, name = _parse_urdf(doc.to_urdf_string(), source=source)
     return elinks, name, resolved_path
 
 
