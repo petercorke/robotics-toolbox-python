@@ -7,7 +7,7 @@
 
 from swift import Swift
 import spatialmath.base.symbolic as sym
-from roboticstoolbox import ETS as ET
+from roboticstoolbox import ET
 from roboticstoolbox import *
 from spatialmath import *
 from spatialgeometry import *
@@ -77,20 +77,20 @@ l6 = 0.4318
 
 e = (
     ET.tz(l1)
-    * ET.rz()
+    * ET.Rz()
     * ET.ty(l2)
-    * ET.ry()
+    * ET.Ry()
     * ET.tz(l3)
     * ET.tx(l4)
     * ET.ty(l5)
-    * ET.ry()
+    * ET.Ry()
     * ET.tz(l6)
-    * ET.rz()
-    * ET.ry()
-    * ET.rz()
+    * ET.Rz()
+    * ET.Ry()
+    * ET.Rz()
 )
 
-robot = ERobot(e)
+robot = Robot(e)
 print(robot)
 
 panda = models.URDF.Panda()
@@ -100,7 +100,7 @@ print(panda)
 # ## B. Trajectories
 
 traj = jtraj(puma.qz, puma.qr, 100)
-qplot(traj.q)
+xplot(traj.q)
 
 t = np.arange(0, 2, 0.010)
 T0 = SE3(0.6, -0.5, 0.3)
@@ -158,8 +158,8 @@ qdd = puma.accel(puma.qn, tau, np.zeros((6,)))
 
 
 obstacle = Box([1, 1, 1], base=SE3(1, 0, 0))
-iscollision0 = panda.collided(panda.q, obstacle)  # boolean
-iscollision1 = panda.links[0].collided(obstacle)
+iscollision0 = panda.iscollided(panda.q, obstacle)  # boolean
+iscollision1 = panda.links[0].iscollided(obstacle)
 
 d, p1, p2 = panda.closest_point(panda.q, obstacle)
 print(d, p1, p2)
