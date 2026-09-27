@@ -3,6 +3,8 @@ import math
 import warnings
 from collections import namedtuple
 import matplotlib.pyplot as plt
+from numpy.typing import ArrayLike
+from spatialmath import SE3
 from spatialmath.base.argcheck import (
     isvector,
     getvector,
@@ -144,7 +146,12 @@ class Trajectory:
         else:
             return self.s.shape[1]
 
-    def plot(self, block=False, plotargs=None, textargs=None):
+    def plot(
+        self,
+        block: bool = False,
+        plotargs: dict[str, object] | None = None,
+        textargs: dict[str, object] | None = None,
+    ) -> None:
         """
         Plot trajectory
 
@@ -181,13 +188,14 @@ class Trajectory:
             ax.plot(self.t, self.s, **plotopts)
 
         elif self.name == "trapezoidal":
+            elapsed = self.t - self.t[0]
+            tf = elapsed[-1]
             # accel phase
-            tf = self.t[-1]
-            k = self.t <= self.tblend
+            k = elapsed <= self.tblend
             ax.plot(self.t[k], self.s[k], color="red", label="acceleration", **plotopts)
 
             # coast phase
-            k = (self.t > self.tblend) & (self.t <= (tf - self.tblend))
+            k = (elapsed > self.tblend) & (elapsed <= (tf - self.tblend))
             ax.plot(self.t[k], self.s[k], color="green", **plotopts)
             k = np.where(k)[0][0]
             ax.plot(
@@ -199,7 +207,7 @@ class Trajectory:
             )
 
             # decel phase
-            k = self.t > (tf - self.tblend)
+            k = elapsed > (tf - self.tblend)
             ax.plot(self.t[k], self.s[k], color="blue", **plotopts)
             k = np.where(k)[0][0]
             ax.plot(
@@ -218,7 +226,7 @@ class Trajectory:
             ax.legend([f"q{i + 1}" for i in range(self.naxes)])
 
         ax.grid(True)
-        ax.set_xlim(0, max(self.t))
+        ax.set_xlim(self.t[0], self.t[-1])
 
         if self.istime:
             ax.set_ylabel("$q(t)$", **textopts)
@@ -230,7 +238,7 @@ class Trajectory:
             ax = plt.subplot(3, 1, 2)
             ax.plot(self.t, self.sd, **plotopts)
             ax.grid(True)
-            ax.set_xlim(0, max(self.t))
+            ax.set_xlim(self.t[0], self.t[-1])
 
             if self.istime:
                 ax.set_ylabel(r"$\dot{{q}}(t)$", **textopts)
@@ -241,7 +249,7 @@ class Trajectory:
             ax = plt.subplot(3, 1, 3)
             ax.plot(self.t, self.sdd, **plotopts)
             ax.grid(True)
-            ax.set_xlim(0, max(self.t))
+            ax.set_xlim(self.t[0], self.t[-1])
 
             if self.istime:
                 ax.set_ylabel(rf"$\ddot{{q}}(t)$", **textopts)
@@ -268,7 +276,9 @@ class Trajectory:
 # -------------------------------------------------------------------------- #
 
 
-def quintic(q0, qf, t, qd0=0, qdf=0):
+def quintic(
+    q0: float, qf: float, t: int | ArrayLike, qd0: float = 0, qdf: float = 0
+) -> Trajectory:
     """
     Generate scalar polynomial trajectory
 
@@ -323,7 +333,8 @@ def quintic(q0, qf, t, qd0=0, qdf=0):
 
 
     .. note:: The time vector T is assumed to be monotonically increasing, and
-        time scaling is based on the first and last element.
+        time scaling is based on the first and last element. The returned
+        trajectory retains the supplied time vector.
 
     :References:
 
@@ -340,12 +351,12 @@ def quintic(q0, qf, t, qd0=0, qdf=0):
         istime = True
     else:
         raise TypeError("bad argument for time, must be int or vector")
-    tf = max(t)
+    tf = t[-1] - t[0]
 
     polyfunc = quintic_func(q0, qf, tf, qd0, qdf)
 
     # evaluate the polynomials
-    traj = polyfunc(t)
+    traj = polyfunc(t - t[0])
     p = traj[0]
     pd = traj[1]
     pdd = traj[2]
@@ -426,7 +437,9 @@ def lspb(*args, **kwargs):
 # -------------------------------------------------------------------------- #
 
 
-def trapezoidal(q0, qf, t, V=None):
+def trapezoidal(
+    q0: float, qf: float, t: int | ArrayLike, V: float | None = None
+) -> Trajectory:
     """
     Scalar trapezoidal trajectory
 
@@ -485,7 +498,8 @@ def trapezoidal(q0, qf, t, V=None):
 
         - For some values of ``V`` no solution is possible and an error is flagged.
         - The time vector, if given, is assumed to be monotonically increasing,
-          and time scaling is based on the first and last element.
+          and time scaling is based on the first and last element. The returned
+          trajectory retains the supplied time vector.
         - ``tg`` has an extra attribute ``tblend`` which is the blend duration.
 
     :References:
@@ -504,12 +518,12 @@ def trapezoidal(q0, qf, t, V=None):
     else:
         raise TypeError("bad argument for time, must be int or vector")
 
-    tf = max(t)
+    tf = t[-1] - t[0]
 
     trapezoidalfunc = trapezoidal_func(q0, qf, tf, V)
 
     # evaluate the polynomials
-    traj = trapezoidalfunc(t)
+    traj = trapezoidalfunc(t - t[0])
     p = traj[0]
     pd = traj[1]
     pdd = traj[2]
@@ -779,7 +793,9 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
 # -------------------------------------------------------------------------- #
 
 
-def ctraj(T0, T1, t=None, s=None):
+def ctraj(
+    T0: SE3, T1: SE3, t: int | ArrayLike | None = None, s: ArrayLike | None = None
+) -> SE3:
     """
     Cartesian trajectory between two poses
 
@@ -831,7 +847,9 @@ def ctraj(T0, T1, t=None, s=None):
         s = trapezoidal(0, 1, t).s
     elif isvector(t):
         t = getvector(t)
-        s = trapezoidal(0, 1, t / np.max(t)).s
+        t = t / np.max(t)
+        # Preserve sampling of the zero-origin profile, including unordered samples.
+        s = trapezoidal_func(0, 1, np.max(t))(t)[0]
     elif isvector(s):
         s = getvector(s)
     else:
