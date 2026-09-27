@@ -68,29 +68,6 @@ jobs:
           pip install build
           RTB_PURE_WHEEL=1 python3 -m build --wheel --outdir docs/lite/pypi
 
-      - name: Fetch spatialgeometry pyodide wheel for JupyterLite
-        # spatialgeometry is an unconditional runtime dependency of
-        # roboticstoolbox-python (since it stopped vendoring a pure-Python
-        # copy internally at 1.4.0), so `piplite.install` needs a wasm
-        # wheel for it too, staged in the same local index. Fetched from
-        # spatialgeometry's own GitHub Release (jhavl/spatialgeometry) --
-        # it doesn't publish this to PyPI at all. SG's own CMake build
-        # already skips its compiled nanobind extension entirely under
-        # Emscripten (same idea as RTB_PURE_WHEEL above), so this wheel's
-        # *content* is genuinely pure Python -- but SG hasn't adopted the
-        # scikit-build-core override that makes the wheel *itself*
-        # py3-none-any yet, so it's still tagged cp312-cp312-pyodide_wasm32
-        # and still needs this cross-repo GitHub Release fetch rather than
-        # a plain PyPI install. Tech debt raised upstream:
-        # jhavl/spatialgeometry#46 -- once SG applies the same fix RTB just
-        # did, this step (and the cp312 filter) can go away in favour of a
-        # plain `pip download`/PyPI dependency resolution.
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release download --repo jhavl/spatialgeometry \
-            --pattern '*cp312*pyodide*wasm32*' --dir docs/lite/pypi --clobber
-
       - name: Sync notebooks into JupyterLite content
         # Copies *.ipynb plus any local asset directories (e.g.
         # docs/notebooks/figs/, referenced by relative path from markdown
