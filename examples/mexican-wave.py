@@ -25,7 +25,7 @@ for theta in np.linspace(0, rotation, num_robots):
     base = SE3.Rz(theta) * SE3(2, 0, 0)
 
     # Clone the robot
-    puma = rtb.ERobot(puma0)
+    puma = rtb.Robot(puma0)
     puma.base = base
     puma.q = puma0.qz
     env.add(puma)
