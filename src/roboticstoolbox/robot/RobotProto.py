@@ -41,6 +41,9 @@ class RobotProto(Protocol):
     def links(self) -> list[BaseLink]: ...
 
     @property
+    def ee_links(self) -> list[BaseLink]: ...
+
+    @property
     def n(self) -> int: ...
 
     @property
