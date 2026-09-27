@@ -413,7 +413,9 @@ class TestToDict:
     def test_mesh_filename(self, tmp_path):
         f = tmp_path / "robot.stl"
         f.touch()
-        assert gm.Mesh(str(f)).to_dict()["filename"] == str(f)
+        # spatialgeometry >= 1.4.1 normalizes to forward slashes in
+        # to_dict()["filename"] (jhavl/swift#152), for Swift's JS mesh loader.
+        assert gm.Mesh(str(f)).to_dict()["filename"] == f.as_posix()
 
     def test_mesh_scale(self, tmp_path):
         f = tmp_path / "robot.stl"
