@@ -746,6 +746,50 @@ class TestTrajectory(unittest.TestCase):
         with self.assertRaises(ValueError):
             tr.mstraj(via, dt=1, tacc=1, qdmax=[2, 1], qdf=[1, 2, 3], q0=[1, 2])
 
+    def test_mstraj_derivatives_without_blends(self):
+        via = np.array([[0.0, 0.0], [1.0, 2.0], [3.0, 0.0]])
+        out = tr.mstraj(via, dt=0.1, tacc=0, tsegment=[1.0, 2.0])
+
+        self.assertEqual(out.q.shape, (30, 2))
+        self.assertEqual(out.qd.shape, out.q.shape)
+        self.assertEqual(out.qdd.shape, out.q.shape)
+        self.assertTrue(out.istime)
+        nt.assert_allclose(out.qd[:10], np.tile([1.0, 2.0], (10, 1)))
+        nt.assert_allclose(out.qd[10:], np.tile([1.0, -1.0], (20, 1)))
+        nt.assert_array_equal(out.qdd, np.zeros_like(out.q))
+
+    def test_mstraj_derivatives_with_blends(self):
+        dt = 0.005
+        qdf = [-0.05, 0.1]
+        out = tr.mstraj(
+            np.array([[0.0, 0.0], [1.0, -2.0]]),
+            dt=dt,
+            tacc=0.4,
+            qdmax=1.0,
+            qd0=[0.1, -0.2],
+            qdf=qdf,
+        )
+
+        self.assertEqual(out.qd.shape, out.q.shape)
+        self.assertEqual(out.qdd.shape, out.q.shape)
+        self.assertTrue(np.isfinite(out.qd).all())
+        self.assertTrue(np.isfinite(out.qdd).all())
+        nt.assert_allclose(out.qd[-1], qdf, atol=1e-12)
+        nt.assert_allclose(out.qdd[-1], [0, 0], atol=1e-10)
+
+        # Sampled velocities and accelerations must describe the returned path,
+        # including the polynomial blends at either end of the segment.
+        for i in (5, 10, -11, -6):
+            with self.subTest(index=i):
+                nt.assert_allclose(
+                    out.qd[i], (out.q[i + 1] - out.q[i - 1]) / (2 * dt), atol=0.01
+                )
+                nt.assert_allclose(
+                    out.qdd[i],
+                    (out.q[i + 1] - 2 * out.q[i] + out.q[i - 1]) / dt**2,
+                    atol=0.1,
+                )
+
 
 if __name__ == "__main__":  # pragma nocover
     unittest.main()
