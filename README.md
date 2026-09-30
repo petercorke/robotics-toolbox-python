@@ -28,6 +28,7 @@
 [![Downloads](https://static.pepy.tech/badge/roboticstoolbox-python/month)](https://pepy.tech/projects/roboticstoolbox-python)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 [![codecov](https://codecov.io/gh/petercorke/robotics-toolbox-python/graph/badge.svg?token=0rqN39PDEO)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/e662475c8c774eac954f31112ee7711b)](https://app.codacy.com/gh/petercorke/robotics-toolbox-python/dashboard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ### Ecosystem & Dependencies
