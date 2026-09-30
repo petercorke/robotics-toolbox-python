@@ -33,6 +33,23 @@ new pages added — Panda model comparison, reactive control, inverse
 kinematics, and IK/RNE benchmark results with real numbers.
 
 
+## [1.4.5](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.4...v1.4.5) (2026-09-30)
+
+
+### Bug Fixes
+
+* add the payload to the end-effector link instead of overwriting it ([#699](https://github.com/petercorke/robotics-toolbox-python/issues/699)) ([79b169c](https://github.com/petercorke/robotics-toolbox-python/commit/79b169cd66f224a232165bd96755ed6e99626ecd))
+* **docs:** drop the obsolete cross-repo spatialgeometry wheel fetch ([#703](https://github.com/petercorke/robotics-toolbox-python/issues/703)) ([477b6e3](https://github.com/petercorke/robotics-toolbox-python/commit/477b6e360c8263be49b771190564335fc2607ac9))
+* **tests:** expect forward-slash filename from spatialgeometry &gt;= 1.4.1 ([#702](https://github.com/petercorke/robotics-toolbox-python/issues/702)) ([c070066](https://github.com/petercorke/robotics-toolbox-python/commit/c07006666f810c74f89865a15849afeea3b57189))
+* **trajectory:** honour non-zero time origins in scalar profiles ([#698](https://github.com/petercorke/robotics-toolbox-python/issues/698)) ([06b8716](https://github.com/petercorke/robotics-toolbox-python/commit/06b8716877b97bd28fb3ab09d5e24178315a2cba))
+* **urdf:** report stage, element and line when a URDF/xacro fails to load ([848114b](https://github.com/petercorke/robotics-toolbox-python/commit/848114b3a50518cf8d020239fc8d86a8dece82b0))
+* **urdf:** report stage, element and line when URDF/xacro loading fails ([#701](https://github.com/petercorke/robotics-toolbox-python/issues/701)) ([848114b](https://github.com/petercorke/robotics-toolbox-python/commit/848114b3a50518cf8d020239fc8d86a8dece82b0))
+
+
+### Documentation
+
+* add Codacy grade badge to README ([0372615](https://github.com/petercorke/robotics-toolbox-python/commit/03726154a0e99c389d45442645b51d4f2012ff3a))
+
 ## [1.4.4](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.3...v1.4.4) (2026-09-20)
 
 
