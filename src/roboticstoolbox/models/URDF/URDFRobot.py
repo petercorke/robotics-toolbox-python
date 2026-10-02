@@ -324,18 +324,37 @@ def _parse_urdf(urdf_str: str, source: str = "<URDF text>"):
         raise
 
 
+def _inertia_in_link_frame(inertial) -> "tuple[np.ndarray | None, np.ndarray | None]":
+    """Centre of mass and inertia tensor of a URDF link, in the link frame.
+
+    URDF gives the inertia tensor in the link's *inertial* frame, whose pose
+    relative to the link frame is ``<inertial><origin xyz rpy>``. The toolbox
+    wants the tensor about the centre of mass but with axes parallel to the
+    link frame (see :attr:`Link.I`), so rotate it: ``I_link = R I R^T``.
+    ``xyz`` is already the centre of mass in the link frame.
+
+    :param inertial: a parsed :class:`~roboticstoolbox.tools.urdf.Inertial`
+    :returns: ``(r, I)``, either of which is ``None`` when not given
+    """
+    origin = inertial.origin
+    r = None if origin is None else origin[:3, 3]
+
+    I = inertial.inertia
+    if I is not None and origin is not None:
+        R = origin[:3, :3]
+        I = R @ I @ R.T
+        I = 0.5 * (I + I.T)  # remove rounding asymmetry; Link.I checks to 1e-8
+    return r, I
+
+
 def _links_from_urdf(urdf: URDF):
     """Convert a parsed :class:`URDF` into (elinks, name)."""
     elinks = []
     elinkdict = {}
 
     for link in urdf._links:
-        elink = Link(
-            name=link.name,
-            m=link.inertial.mass,
-            r=link.inertial.origin[:3, 3] if link.inertial.origin is not None else None,
-            I=link.inertial.inertia,
-        )
+        r, I = _inertia_in_link_frame(link.inertial)
+        elink = Link(name=link.name, m=link.inertial.mass, r=r, I=I)
         elinks.append(elink)
         elinkdict[link.name] = elink
 
