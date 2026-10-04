@@ -199,6 +199,22 @@ class IKSolver(ABC):
 
         This method will attempt to solve the IK problem and obtain joint coordinates
         which result the the end-effector pose `Tep`.
+
+        If `Tep` is an :class:`SE3` containing more than one pose, or an array with
+        shape (N, 4, 4), it is treated as a trajectory of N poses.  Each pose is
+        solved independently, using the same initial coordinates `q0` (and the same
+        random restarts) for every pose, so consecutive solutions are not guaranteed
+        to lie on the same IK branch.  The returned :class:`IKSolution` has:
+
+        - ``q`` with shape (N, n), one row per pose
+        - ``success`` True only if *every* pose was solved
+        - ``iterations`` and ``searches`` summed over all poses
+        - ``residual`` the *maximum* residual over all poses, the worst case
+        - ``reason`` the reason given by the last pose that failed, if any
+
+        .. versionchanged:: 1.4.5
+            For a trajectory, ``residual`` is now the maximum over the poses,
+            previously it was the minimum, which hid poses that were solved badly.
         """
         # Get the largest jindex in the ETS. If this is greater than ETS.n
         # then we need to pad the q vector with zeros
@@ -254,7 +270,7 @@ class IKSolver(ABC):
             success = True
             interations = 0
             searches = 0
-            residual = np.inf
+            residual = 0.0
             reason = ""
 
             for i, T in enumerate(methTep):
@@ -266,7 +282,7 @@ class IKSolver(ABC):
                 interations += sol.iterations
                 searches += sol.searches
 
-                if sol.residual < residual:
+                if sol.residual > residual:
                     residual = sol.residual
 
             return IKSolution(

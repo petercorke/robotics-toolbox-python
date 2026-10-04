@@ -2005,7 +2005,8 @@ class DHRobot(Robot):
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization
 
-        :param Tep: The desired end-effector pose
+        :param Tep: The desired end-effector pose or pose trajectory, see
+            :meth:`ETS.ikine_LM` for how a trajectory is handled
         :param q0: The initial joint coordinate vector
         :param ikargs: |ikargs|
         :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
