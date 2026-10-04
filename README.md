@@ -264,16 +264,15 @@ Tep = SE3.Trans(0.6, -0.3, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
 sol = robot.ik_LM(Tep)         # solve IK
 print(sol)
 
-	(array([ 0.20592815,  0.86609481, -0.79473206, -1.68254794,  0.74872915,
-			2.21764746, -0.10255606]), 1, 114, 7, 2.890164057230228e-07)
+	IKSolution: q=[-2.709, -1.176, 1.961, -1.642, 1.173, 1.958, 2.876], success=True, iterations=6, searches=1, residual=1.06e-07
 
-q_pickup = sol[0]
+q_pickup = sol.q
 print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
 
-	 1         -8.913e-05  -0.0003334  0.5996
-	-8.929e-05 -1          -0.0004912 -0.2998
-	-0.0003334  0.0004912  -1          0.1001
-	 0          0           0          1
+	-1          0.0002931   0.0003122   0.5999
+	 0.0002931  1           7.601e-05  -0.2999
+	-0.0003121  7.611e-05  -1           0.1001
+	 0          0           0           1
 ```
 
 We can animate a path from the ready pose `qr` configuration to this pickup configuration

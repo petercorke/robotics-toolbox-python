@@ -162,7 +162,7 @@ The :py:class:`~roboticstoolbox.robot.IK.IKSolver` provides basic functionality 
 
     iksolution
 
-The :py:class:`~roboticstoolbox.robot.IK.IKSolution` is a :py:class:`dataclasses.dataclass` instance with the following members.
+The :py:class:`~roboticstoolbox.robot.IK.IKSolution` is a :py:class:`dataclasses.dataclass` instance with the following members.  It is also a sequence of the rows of ``q``, one per pose: ``len(sol)`` is the number of poses, ``for q in sol`` and ``sol[i]`` give the joint coordinates of each pose, and ``bool(sol)`` is ``success``.  Iterating over the six members was removed in 1.5.0, use the attributes or ``sol.astuple()``.
 
 ==============   =========   =====================================================================================================
 Element          Type        Description                                                                                                    

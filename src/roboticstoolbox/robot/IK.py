@@ -30,7 +30,8 @@ class IKSolution:
     ----------
     q
         The joint coordinates of the solution (ndarray). Note that these
-        will not be valid if failed to find a solution
+        will not be valid if failed to find a solution.  The shape is (n,) for a
+        single pose, or (N, n) for a trajectory of N poses
     success
         True if a valid solution was found
     iterations
@@ -52,6 +53,33 @@ class IKSolution:
         ``ik_GN`` (which now also return ``IKSolution``, see :meth:`ETS.ik_LM`)
         remain compatible with code that indexed the old bare tuple return
 
+    .. versionchanged:: 1.5.0
+        An ``IKSolution`` is now a sequence of the rows of ``q``, one per pose:
+        ``len(sol)`` is the number of poses (1 for a single pose), and
+        ``for q in sol`` and ``sol[i]`` give the joint vector of each pose.  This
+        replaces iterating over the fields, so ``q, success, ... = sol`` and
+        ``sol[1]`` no longer work, use the attributes or :meth:`astuple`.  An
+        ``IKSolution`` is true if ``success`` is true.  Printing a trajectory
+        shows the number of poses and abbreviates a long ``q``, and the
+        residual of a failed solution is no longer rounded to zero.
+
+    The solution is a sequence of the rows of ``q``, one per pose.
+
+    .. runblock:: pycon
+    >>> import numpy as np
+    >>> import roboticstoolbox as rtb
+    >>> panda = rtb.models.Panda()
+    >>> T = panda.fkine(panda.qr + np.array([[0], [0.05], [0.1]]))
+    >>> sol = panda.ikine_LM(T, q0=panda.qr, seed=0)
+    >>> len(sol)
+    >>> sol[2]
+    >>> sol[:2]
+    >>> bool(sol) == sol.success
+
+    A single pose is treated as one row, so ``len(sol)`` is 1 and ``sol[0]`` is
+    ``q``.  ``sol[i]`` is the same as ``np.atleast_2d(sol.q)[i]``, it does not
+    return an ``IKSolution`` since ``success``, ``residual`` and ``reason`` are
+    values for the whole solution, not for each pose.
     """
 
     q: np.ndarray
@@ -61,56 +89,113 @@ class IKSolution:
     residual: float = 0.0
     reason: str = ""
 
+    def _rows(self) -> NDArray:
+        # the joint coordinates as an array with one row per pose
+        if self.q is None:
+            return np.empty((0, 0))
+        return np.atleast_2d(self.q)
+
+    def __len__(self) -> int:
+        """
+        Number of poses, the number of rows of ``q``
+
+        :returns: 1 for a single pose, N for a trajectory of N poses, 0 if ``q`` is
+            ``None``
+        """
+        return 0 if self.q is None else self._rows().shape[0]
+
     def __iter__(self):
-        return iter(
-            (
-                self.q,
-                self.success,
-                self.iterations,
-                self.searches,
-                self.residual,
-                self.reason,
-            )
-        )
+        """
+        Iterate over the joint coordinates of each pose
+
+        :returns: an iterator over ``q``, one ndarray(n) per pose
+        """
+        return iter(self._rows())
 
     def __getitem__(self, i):
-        return tuple(self)[i]
+        """
+        Joint coordinates of one or more poses
+
+        :param i: an integer, slice or index array, as for a NumPy array
+        :returns: ``np.atleast_2d(self.q)[i]``, an ndarray(n) for an integer index
+        :raises IndexError: if the index is out of range
+        """
+        return self._rows()[i]
+
+    def __bool__(self) -> bool:
+        """
+        True if the IK solution was successful
+
+        :returns: the value of ``success``
+        """
+        return bool(self.success)
+
+    def astuple(self) -> tuple:
+        """
+        The fields of the solution as a tuple
+
+        :returns: ``(q, success, iterations, searches, residual, reason)``
+
+        This is what iterating over an ``IKSolution`` gave before 1.5.0.
+        """
+        return (
+            self.q,
+            self.success,
+            self.iterations,
+            self.searches,
+            self.residual,
+            self.reason,
+        )
 
     def __repr__(self):
         return str(self)
 
-    def __str__(self):
-        if self.q is not None:
-            q_str = np.array2string(
-                self.q,
-                separator=", ",
-                formatter={
-                    "float": lambda x: "{:.4g}".format(0 if abs(x) < 1e-6 else x)
-                },
-            )  # np.round(self.q, 4)
-        else:
-            q_str = None
+    def _q_str(self) -> str | None:
+        # joint coordinates as text, a trajectory of many poses is abbreviated
+        if self.q is None:
+            return None
 
-        if self.iterations == 0 and self.searches == 0:
-            # Check for analytic
-            if self.success:
-                return f"IKSolution: q={q_str}, success=True"
-            else:
-                return f"IKSolution: q={q_str}, success=False, reason={self.reason}"
+        fmt = {"float": lambda x: "{:.4g}".format(0 if abs(x) < 1e-6 else x)}
+
+        def text(a):
+            return np.array2string(a, separator=", ", formatter=fmt)
+
+        if self.q.ndim == 1 or len(self) <= 6:
+            return text(self.q)
+
+        # first three poses, an ellipsis, then the last two
+        rows = self._rows()
+        lines = [text(r) for r in rows[:3]] + ["..."] + [text(r) for r in rows[-2:]]
+        return "[" + ",\n ".join(lines) + "]"
+
+    def __str__(self):
+        analytic = self.iterations == 0 and self.searches == 0
+
+        # everything after q
+        if self.success:
+            status = "success=True"
         else:
-            # Otherwise it is a numeric solution
-            if self.success:
-                return (
-                    f"IKSolution: q={q_str}, success=True,"
+            status = f"success=False, reason={self.reason}"
+        if analytic:
+            # not iterative, show the residual if one was computed
+            if self.residual != 0:
+                status += f", residual={self.residual:.3g}"
+        else:
+            status += (
+                f", iterations={self.iterations}, searches={self.searches},"
+                f" residual={self.residual:.3g}"
+            )
+            if not self.success:
+                # reason comes before the counts for a failure
+                status = (
+                    f"success=False, reason={self.reason},"
                     f" iterations={self.iterations}, searches={self.searches},"
                     f" residual={self.residual:.3g}"
                 )
-            else:
-                return (
-                    f"IKSolution: q={q_str}, success=False, reason={self.reason},"
-                    f" iterations={self.iterations}, searches={self.searches},"
-                    f" residual={np.round(self.residual, 4):.3g}"
-                )
+
+        if self.q is not None and self.q.ndim == 2 and len(self) > 1:
+            return f"IKSolution: {len(self)} poses, {status}\nq={self._q_str()}"
+        return f"IKSolution: q={self._q_str()}, {status}"
 
 
 class IKSolver(ABC):
@@ -1437,6 +1522,6 @@ if __name__ == "__main__":  # pragma nocover
         np.array([1, 2, 3]), success=True, iterations=10, searches=100, residual=0.1
     )
 
-    a, b, c, d, e = sol
+    a, b, c, d, e, f = sol.astuple()
 
-    print(a, b, c, d, e)
+    print(a, b, c, d, e, f)
