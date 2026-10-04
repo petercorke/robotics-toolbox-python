@@ -63,11 +63,16 @@ Known limitations:
   each joint do not reach the pose.  The equations that are fully determined
   once all joints are solved could be used to prune them.
 - Solutions are expressions in terms of the pose elements, the link parameters
-  and ``Si``, ``Ci`` of other joints, and are not simplified.
+  and ``Si``, ``Ci`` of other joints, and are not simplified.  Reducing them
+  using a Groebner basis of the known relations was tried: it was slow (minutes
+  for the basis, much longer to reduce a large expression) and the result was
+  larger, because the normal form is fully expanded.  Common subexpression
+  elimination in the generated code is what keeps them manageable.
 """
 
 from __future__ import annotations
 
+import enum
 import re
 import signal
 import threading
@@ -737,6 +742,90 @@ def _ikine_sym(
 
 
 # ------------------------------------------------------------------------- #
+#                                 results                                   #
+# ------------------------------------------------------------------------- #
+
+
+class IKStatus(enum.Enum):
+    """Outcome of an inverse kinematics solution, as reported by generated code."""
+
+    OK = 0  #: solutions were found
+    SINGULAR = 1  #: one or more branches were dropped, a joint was undetermined
+    UNREACHABLE = 2  #: no solution, the pose is outside the workspace
+
+
+@dataclass
+class IKSolutions:
+    """
+    All the inverse kinematic solutions for a pose
+
+    :param q: joint configurations, one per row, shape (m, n)
+    :param status: why there are, or are not, solutions
+    :param revolute: whether each joint is revolute, shape (n,).  The difference
+        between two angles is wrapped to (-pi, pi].
+
+    ``status`` distinguishes a pose that cannot be reached from one where a
+    singularity caused solutions to be dropped, which an empty ``q`` does not.
+    """
+
+    q: np.ndarray
+    status: IKStatus
+    revolute: np.ndarray
+
+    def __post_init__(self) -> None:
+        self.revolute = np.asarray(self.revolute, dtype=bool)
+        self.q = np.asarray(self.q, dtype=float).reshape(-1, len(self.revolute))
+
+    @classmethod
+    def from_generated(cls, result, revolute: list[bool]) -> IKSolutions:
+        """
+        Wrap the result of generated Python code
+
+        :param result: what the generated function returned
+        :param revolute: whether each joint is revolute
+        """
+        return cls(
+            np.array(result.solutions), IKStatus[result.status.name], np.array(revolute)
+        )
+
+    def __len__(self) -> int:
+        return len(self.q)
+
+    def distance(self, q0, weights=None) -> np.ndarray:
+        """
+        Weighted distance of each solution from a configuration
+
+        :param q0: configuration to compare with, shape (n,)
+        :param weights: weight for each joint, default all 1.  The difference for
+            each joint is multiplied by its weight, so a weight of zero ignores
+            that joint.
+        :returns: the distances, shape (m,)
+
+        The distance is :math:`\\sqrt{\\sum_j (w_j \\Delta q_j)^2}`, where the
+        difference :math:`\\Delta q_j` of a revolute joint is wrapped to
+        :math:`(-\\pi, \\pi]`.
+        """
+        n = len(self.revolute)
+        q0 = np.asarray(q0, dtype=float).reshape(n)
+        w = np.ones(n) if weights is None else np.asarray(weights, dtype=float).reshape(n)
+        d = self.q - q0
+        d[:, self.revolute] = _wrap(d[:, self.revolute])
+        return np.sqrt(((w * d) ** 2).sum(axis=1))
+
+    def nearest(self, q0, weights=None) -> np.ndarray | None:
+        """
+        The solution nearest to a configuration
+
+        :param q0: configuration to compare with, shape (n,)
+        :param weights: weight for each joint, default all 1, see :meth:`distance`
+        :returns: the nearest solution, shape (n,), or None if there are none
+        """
+        if len(self) == 0:
+            return None
+        return self.q[np.argmin(self.distance(q0, weights))]
+
+
+# ------------------------------------------------------------------------- #
 #                            code generation                                #
 # ------------------------------------------------------------------------- #
 
@@ -932,8 +1021,13 @@ class _Emitter:
     def put(self, text: str = "") -> None:
         self.lines.append(("    " * self.depth + text) if text else "")
 
+    def qout(self, j: int) -> str:
+        """Value of joint j (1-based) for output: revolute angles are wrapped."""
+        revolute = {st.joint: st.revolute for st in self.plan.steps}[j]
+        return self.atan2(f"S{j}", f"C{j}") if revolute else f"q{j}"
+
     def qs(self) -> str:
-        return ", ".join(f"q{j}" for j in range(1, self.plan.n + 1))
+        return ", ".join(self.qout(j) for j in range(1, self.plan.n + 1))
 
     # --- the structure, common to all languages ---
 
@@ -981,6 +1075,7 @@ class _Emitter:
     def skip_if_nan(self, q: str) -> None: ...
     def sin(self, q: str) -> str: ...
     def cos(self, q: str) -> str: ...
+    def atan2(self, y: str, x: str) -> str: ...
     def error_start(self) -> None: ...
     def error_update(self, e: str, pose: str) -> None: ...
     def check(self, e: str) -> None: ...
@@ -1083,6 +1178,9 @@ def {self.name}(T, tol: float = 1e-6) -> IKResult:
 
     def cos(self, q: str) -> str:
         return f"math.cos({q})"
+
+    def atan2(self, y: str, x: str) -> str:
+        return f"math.atan2({y}, {x})"
 
     def error_start(self) -> None:
         self.put("err = 0.0")
@@ -1196,6 +1294,9 @@ ik_status {self.name}(const double T[16], double tol,
     def cos(self, q: str) -> str:
         return f"{self.math_prefix}cos({q})"
 
+    def atan2(self, y: str, x: str) -> str:
+        return f"{self.math_prefix}atan2({y}, {x})"
+
     def error_start(self) -> None:
         self.put("double err = 0.0;")
 
@@ -1213,7 +1314,7 @@ ik_status {self.name}(const double T[16], double tol,
             else "if (*count < IKINE_MAX_SOLUTIONS) {"
         )
         for j in range(1, self.plan.n + 1):
-            self.put(f"    solutions[*count][{j - 1}] = q{j};")
+            self.put(f"    solutions[*count][{j - 1}] = {self.qout(j)};")
         self.put("    ++*count;")
         self.put("}")
 
@@ -1390,6 +1491,9 @@ pub fn {self.name}(t: &[f64; 16], tol: f64) -> IkResult {{
     def cos(self, q: str) -> str:
         return f"{q}.cos()"
 
+    def atan2(self, y: str, x: str) -> str:
+        return f"{y}.atan2({x})"
+
     def error_start(self) -> None:
         self.put("let mut err: f64 = 0.0;")
 
@@ -1440,6 +1544,8 @@ def generate_code(
 
     The function takes the end-effector pose, as a 4x4 matrix, and returns all
     the joint configurations that reach it, together with a status:
+
+    The revolute joint angles are wrapped to :math:`(-\\pi, \\pi]`.
 
     - ``OK``: solutions were found
     - ``SINGULAR``: one or more branches were dropped because a joint was
@@ -1923,6 +2029,50 @@ def test_pruning():
             ), (name, "pruning left a wrong solution")
             extra += len(b) - len(a)
         print(f"{name:9s} equations checked per joint {checks}, extra solutions {extra}")
+
+
+def test_ik_solutions():
+    sols = IKSolutions(
+        [[0.1, 0.5, 0.2], [-3.1, 0.5, 0.2], [0.1, 2.0, 0.2]],
+        IKStatus.OK,
+        [True, True, False],
+    )
+    assert len(sols) == 3
+
+    # angles wrap: 3.1 is close to -3.1 (0.083 rad apart) but not to 0.1
+    np.testing.assert_allclose(sols.nearest([3.1, 0.5, 0.2]), [-3.1, 0.5, 0.2])
+    np.testing.assert_allclose(sols.distance([3.1, 0.5, 0.2])[1], 2 * np.pi - 6.2)
+
+    # a prismatic joint is not wrapped
+    sols = IKSolutions([[0.0, 0.0], [0.0, 2 * np.pi]], IKStatus.OK, [True, False])
+    np.testing.assert_allclose(sols.distance([0.0, 0.0]), [0.0, 2 * np.pi])
+
+    # a weight of zero ignores a joint, and a weight scales its difference
+    sols = IKSolutions([[0.0, 1.0], [0.5, 0.0]], IKStatus.OK, [True, True])
+    np.testing.assert_allclose(sols.nearest([0.0, 0.0]), [0.5, 0.0])
+    np.testing.assert_allclose(sols.nearest([0.0, 0.0], weights=[1, 0]), [0.0, 1.0])
+    np.testing.assert_allclose(sols.distance([0, 0], weights=[2, 1]), [1.0, 1.0])
+
+    # no solutions, and why
+    empty = IKSolutions(np.empty((0, 2)), IKStatus.UNREACHABLE, [True, True])
+    assert len(empty) == 0 and empty.nearest([0, 0]) is None
+    assert empty.status is IKStatus.UNREACHABLE
+
+
+def test_from_generated():
+    """Wrap the result of generated code."""
+    import roboticstoolbox as rtb
+
+    robot = rtb.models.DH.Puma560()
+    namespace: dict = {}
+    exec(generate_code(robot, "python"), namespace)  # noqa: S102
+
+    q0 = np.array([0.3, 0.5, -0.4, 0.2, 0.6, 0.7])
+    sols = IKSolutions.from_generated(
+        namespace["ikine"](robot.fkine(q0).A), [True] * 6
+    )
+    assert sols.status is IKStatus.OK and len(sols) == 8
+    np.testing.assert_allclose(sols.nearest(q0), q0, atol=1e-6)
 
 
 def test_generated_rust_smoke():
