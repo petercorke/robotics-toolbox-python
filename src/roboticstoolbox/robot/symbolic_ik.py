@@ -51,6 +51,12 @@ Status: of the 6-axis DH models in ``roboticstoolbox.models.DH`` seven are
 solved (IRB140, KR5, Puma560, Stanford, UR3, UR5, UR10) and checked against
 forward kinematics.  Jaco and Mico, which have no wrist centre, are not.
 
+Speed: the polynomial arithmetic is done by FLINT, via ``python-flint``, if it is
+installed, which is much faster than SymPy (for the elimination step more than
+100 times on the Jaco).  Without it SymPy is used and the results are the same.
+Irrational constants such as ``sqrt(3)/2`` are replaced by symbols while solving
+so that every equation is a polynomial with rational coefficients.
+
 Known limitations:
 
 - Only standard DH robots are handled, since link transforms come from
@@ -79,6 +85,7 @@ import threading
 import time
 from contextlib import contextmanager
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Iterator, Literal
 
 import numpy as np
@@ -89,6 +96,11 @@ from sympy.printing.pycode import PythonCodePrinter
 from sympy.printing.rust import RustCodePrinter
 
 from roboticstoolbox.robot.DHRobot import DHRobot
+
+try:  # optional, makes the elimination step much faster
+    from flint import fmpq, fmpq_mpoly_ctx
+except ImportError:  # pragma: no cover
+    fmpq = fmpq_mpoly_ctx = None
 
 # symbolic elements of the homogeneous transform
 #      nx ox ax tx
@@ -211,6 +223,41 @@ def _link_matrices(robot: DHRobot) -> list[sp.Matrix]:
     return A
 
 
+def _abstract_constants(
+    A: list[sp.Matrix],
+) -> tuple[list[sp.Matrix], dict[sp.Symbol, sp.Expr]]:
+    """
+    Replace irrational constants by symbols
+
+    :param A: link matrices
+    :returns: ``(A, constants)``, where ``constants`` maps each new symbol
+        ``k1``, ``k2``, ... to the constant it replaced
+
+    A twist angle like ``alpha = pi/3`` leaves constants such as ``sqrt(3)/2`` or
+    ``cos(pi/18)`` in the equations.  Replacing them with symbols makes every
+    equation a polynomial with rational coefficients, which can be handled by
+    fast polynomial libraries.  The symbols carry no relations between them, so
+    some simplifications are missed.  Rational numbers are left alone.
+    """
+    constants: dict[sp.Symbol, sp.Expr] = {}
+    lookup: dict[sp.Expr, sp.Symbol] = {}
+
+    def symbol_for(e: sp.Expr) -> sp.Symbol:
+        if e not in lookup:
+            lookup[e] = sp.Symbol(f"k{len(lookup) + 1}", real=True)
+            constants[lookup[e]] = e
+        return lookup[e]
+
+    def is_constant(e: sp.Expr) -> bool:
+        return (
+            (e.is_Pow or isinstance(e, (sp.sin, sp.cos)))
+            and e.is_number
+            and not e.is_Rational
+        )
+
+    return [m.replace(is_constant, symbol_for) for m in A], constants
+
+
 # ------------------------------------------------------------------------- #
 #                         equations and unknowns                            #
 # ------------------------------------------------------------------------- #
@@ -218,14 +265,15 @@ def _link_matrices(robot: DHRobot) -> list[sp.Matrix]:
 _JOINT_SYMBOL = re.compile(r"([SCq])(\d+)")
 
 
-def _joints_in(expr: sp.Expr) -> set[int]:
+@lru_cache(maxsize=None)
+def _joints_in(expr: sp.Expr) -> frozenset[int]:
     """Joints (1-based) whose symbols ``Sj``, ``Cj`` or ``qj`` appear in expr."""
     out = set()
     for s in expr.free_symbols:
         m = _JOINT_SYMBOL.fullmatch(s.name)
         if m:
             out.add(int(m.group(2)))
-    return out
+    return frozenset(out)
 
 
 def _pieper(
@@ -324,6 +372,40 @@ def _reduce(expr: sp.Expr, joints: list[int] | set[int]) -> sp.Expr:
     return sp.expand(expr)
 
 
+def _linear_form_flint(eq: sp.Expr, j: int) -> tuple | None:
+    """
+    The revolute joint case of :func:`_linear_form` using FLINT
+
+    :raises sympy.polys.polyerrors.PolynomialError: if ``eq`` is not a polynomial
+        with rational coefficients
+
+    ``Sj**2`` is replaced by ``1 - Cj**2`` by dividing by ``Sj**2 + Cj**2 - 1``
+    using lexicographic order with ``Sj`` first, so the remainder has no term
+    divisible by ``Sj**2``.
+    """
+    sj, cj = _sin_cos_symbols(j)
+    others = sorted(eq.free_symbols - {sj, cj}, key=lambda s: s.name)
+    gens = [sj, cj, *others]
+    ctx = fmpq_mpoly_ctx.get(tuple(g.name for g in gens), "lex")
+
+    poly = sp.Poly(eq, *gens, domain="QQ")
+    P = ctx.from_dict({m: fmpq(int(c.p), int(c.q)) for m, c in poly.terms()})
+    S, C = ctx.gens()[0], ctx.gens()[1]
+    _, P = divmod(P, S**2 + C**2 - 1)
+
+    # group by the powers of Sj and Cj, which must be 1, Cj, Sj or a constant
+    parts: dict[tuple[int, int], list] = {(0, 0): [], (0, 1): [], (1, 0): []}
+    for m, c in P.to_dict().items():
+        if (m[0], m[1]) not in parts:
+            return None
+        term = sp.Rational(int(c.p), int(c.q)) * sp.Mul(
+            *[g**e for g, e in zip(others, m[2:]) if e]
+        )
+        parts[(m[0], m[1])].append(term)
+    return sp.Add(*parts[(0, 1)]), sp.Add(*parts[(1, 0)]), sp.Add(*parts[(0, 0)])
+
+
+@lru_cache(maxsize=None)
 def _linear_form(eq: sp.Expr, j: int, revolute: bool) -> tuple | None:
     r"""
     Coefficients of an equation that is linear in the variable of joint j
@@ -333,6 +415,12 @@ def _linear_form(eq: sp.Expr, j: int, revolute: bool) -> tuple | None:
         that it is :math:`a q_j + k = 0`, or ``None`` if the equation has any
         other form
     """
+    if revolute and fmpq_mpoly_ctx is not None:
+        try:
+            return _linear_form_flint(eq, j)
+        except sp.polys.polyerrors.PolynomialError:
+            pass  # not a polynomial with rational coefficients, use SymPy
+
     if revolute:
         sj, cj = _sin_cos_symbols(j)
         P = sp.Poly(_reduce(eq, [j]), sj, cj)
@@ -465,6 +553,52 @@ def _solve_single(
     return [sp.atan2(C, r) - phi, sp.atan2(C, -r) - phi]
 
 
+def _eliminate_flint(f1: tuple, f2: tuple) -> list[sp.Expr] | None:
+    """
+    The revolute joint case of :func:`_eliminate` using FLINT
+
+    :param f1: ``(a, b, k)`` of the first equation, see :func:`_linear_form`
+    :param f2: ``(a, b, k)`` of the second equation
+    :raises sympy.polys.polyerrors.PolynomialError: if the coefficients are not
+        polynomials with rational coefficients
+
+    Multivariate polynomial arithmetic in FLINT is far faster than in SymPy.
+    """
+    coeffs = [sp.sympify(c) for c in (*f1, *f2)]
+    gens = sorted(set().union(*(c.free_symbols for c in coeffs)), key=lambda s: s.name)
+    ctx = fmpq_mpoly_ctx.get(tuple(g.name for g in gens), "deglex")
+
+    def to_flint(expr: sp.Expr):
+        poly = sp.Poly(expr, *gens, domain="QQ")
+        return ctx.from_dict({m: fmpq(int(c.p), int(c.q)) for m, c in poly.terms()})
+
+    a1, b1, k1, a2, b2, k2 = (to_flint(c) for c in coeffs)
+    det = a1 * b2 - a2 * b1
+    if det.is_zero():
+        return None
+    R = (-k1 * b2 + k2 * b1) ** 2 + (-a1 * k2 + a2 * k1) ** 2 - det**2
+    if R.is_zero():
+        return None
+
+    # the vanishing of the determinant is a degenerate case, so divide it out
+    # (as many times as it goes exactly)
+    if not det.is_constant():
+        while not R.is_constant():
+            quotient, remainder = divmod(R, det)
+            if not remainder.is_zero():
+                break
+            R = quotient
+
+    if R.is_constant():
+        return None
+    terms = [
+        sp.Rational(int(c.p), int(c.q))
+        * sp.Mul(*[g**e for g, e in zip(gens, monomial) if e])
+        for monomial, c in R.to_dict().items()
+    ]
+    return [sp.Add(*terms)]
+
+
 def _eliminate(
     e1: sp.Expr, e2: sp.Expr, j: int, revolute: bool
 ) -> list[sp.Expr] | None:
@@ -493,6 +627,12 @@ def _eliminate(
     f2 = _linear_form(e2, j, revolute)
     if f1 is None or f2 is None:
         return None
+
+    if revolute and fmpq_mpoly_ctx is not None:
+        try:
+            return _eliminate_flint(f1, f2)
+        except sp.polys.polyerrors.PolynomialError:
+            pass  # not a polynomial with rational coefficients, use SymPy
 
     if revolute:
         (a1, b1, k1), (a2, b2, k2) = f1, f2
@@ -647,7 +787,8 @@ def _ikine_sym(
     """Implementation of :func:`ikine_sym`, also returns the pool of equations."""
     robot, values = _symbolize(robot)
     revolute = {j: link.isrevolute for j, link in enumerate(robot.links, 1)}
-    A = _link_matrices(robot)
+    A, constants = _abstract_constants(_link_matrices(robot))
+    values = values | {k.name: float(v) for k, v in constants.items()}
     samples = _samples(A, list(revolute.values()), values)
     pool = _equation_pool(A, n, mixed)
     seen = set(pool) | {sp.expand(-e) for e in pool}
@@ -738,7 +879,11 @@ def _ikine_sym(
             pool.extend(new)
 
     done = set(Q)
-    return [[_clean(s, done) for s in Q[j]] for j in range(1, n + 1)], pool
+    # put the constants back
+    result = [
+        [_clean(s, done).xreplace(constants) for s in Q[j]] for j in range(1, n + 1)
+    ]
+    return result, [e.xreplace(constants) for e in pool]
 
 
 # ------------------------------------------------------------------------- #
@@ -2073,6 +2218,51 @@ def test_from_generated():
     )
     assert sols.status is IKStatus.OK and len(sols) == 8
     np.testing.assert_allclose(sols.nearest(q0), q0, atol=1e-6)
+
+
+def test_flint_matches_sympy():
+    """The FLINT and SymPy implementations of the polynomial steps agree."""
+    import roboticstoolbox as rtb
+
+    if fmpq_mpoly_ctx is None:
+        return
+    symrobot, values = _symbolize(rtb.models.DH.Puma560())
+    A, _ = _abstract_constants(_link_matrices(symrobot))
+    pool = _equation_pool(A, 6)
+
+    compared = 0
+    for eq in pool[:80]:
+        for j in _joints_in(eq):
+            _linear_form.cache_clear()
+            fast = _linear_form(eq, j, True)
+            _linear_form.cache_clear()
+            saved = globals()["fmpq_mpoly_ctx"]
+            globals()["fmpq_mpoly_ctx"] = None  # force the SymPy implementation
+            try:
+                slow = _linear_form(eq, j, True)
+            finally:
+                globals()["fmpq_mpoly_ctx"] = saved
+                _linear_form.cache_clear()
+            assert (fast is None) == (slow is None)
+            if fast is not None:
+                compared += 1
+                assert all(sp.expand(f - s) == 0 for f, s in zip(fast, slow))
+    assert compared > 10
+
+
+def test_without_flint():
+    """Solving works without python-flint, using SymPy."""
+    import roboticstoolbox as rtb
+
+    saved = globals()["fmpq_mpoly_ctx"]
+    globals()["fmpq_mpoly_ctx"] = None
+    _linear_form.cache_clear()
+    try:
+        Q = ikine_sym(rtb.models.DH.Planar2(symbolic=True))
+        assert Q is not None and len(Q) == 2
+    finally:
+        globals()["fmpq_mpoly_ctx"] = saved
+        _linear_form.cache_clear()
 
 
 def test_generated_rust_smoke():
