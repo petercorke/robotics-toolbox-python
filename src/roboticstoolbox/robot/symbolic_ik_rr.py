@@ -126,6 +126,7 @@ Run the tests with::
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import numpy as np
@@ -139,8 +140,9 @@ from roboticstoolbox.robot.symbolic_ik import (
     IKStatus,
     _comment,
     _dh_info,
+    _emit,
+    _make_plan,
     _provenance,
-    generate_code,
 )
 
 # ------------------------------------------------------------------------- #
@@ -1185,7 +1187,73 @@ def _derive(alpha, a, d, k: int):
 _DERIVED: dict[tuple, tuple] = {}  # in-process cache, a derivation takes seconds
 
 
-class General6R:
+class IKSolver(ABC):
+    """
+    The interface of an inverse kinematics solver for a robot
+
+    :param robot: the robot, with standard DH links and six joints
+
+    A solver gives all the joint configurations that reach a pose, as
+    :class:`IKSolutions`, and can write the same solution as source code, which
+    has no dependency on the Toolbox.  The two methods are :class:`ClosedForm`,
+    for arms with a spherical wrist or three parallel axes, and
+    :class:`General6R`, for the others, and :func:`make_solver` chooses.
+    """
+
+    #: name of the method, for messages
+    method = ""
+
+    def __init__(self, robot: DHRobot):
+        self.robot = robot
+        self.revolute = np.array([link.isrevolute for link in robot.links])
+
+    @abstractmethod
+    def solve(self, T: np.ndarray) -> IKSolutions:
+        """
+        All the joint configurations that reach a pose
+
+        :param T: end-effector pose, a 4x4 array
+        :returns: the solutions and a status, see :class:`IKSolutions`
+        """
+
+    @abstractmethod
+    def generate(self, language: str = "python", name: str = "ikine") -> str:
+        """
+        Source code for the solution for this robot
+
+        :param language: the language of the code
+        :param name: name of the generated function
+        :returns: source code, which starts with a header saying where it came from
+        :raises NotImplementedError: for a language that is not supported
+        """
+
+    def validate(self, trials: int = 100, seed: int = 1) -> float:
+        """
+        Fraction of random poses for which the original configuration is found
+
+        :param trials: number of random configurations to try
+        :param seed: seed for the random configurations
+        :returns: a value between 0 and 1.  A method that works gives 1, or very
+            nearly, and one that does not apply to this robot gives a low value.
+        """
+        rng = np.random.default_rng(seed)
+        n = self.robot.n
+        hits = 0
+        for _ in range(trials):
+            q = np.where(
+                self.revolute, rng.uniform(-np.pi, np.pi, n), rng.uniform(0.2, 0.6, n)
+            )
+            sols = self.solve(self.robot.fkine(q).A)
+            if len(sols):
+                d = sols.q - q
+                d[:, self.revolute] = np.arctan2(
+                    np.sin(d[:, self.revolute]), np.cos(d[:, self.revolute])
+                )
+                hits += bool(np.any(np.all(np.abs(d) < 1e-5, axis=1)))
+        return hits / trials
+
+
+class General6R(IKSolver):
     r"""
     Inverse kinematics of a general 6R arm
 
@@ -1207,18 +1275,19 @@ class General6R:
         wrist.  Check with :meth:`validate`, or use :func:`classify`.
     """
 
+    method = "general 6R"
+
     def __init__(self, robot: DHRobot, k: int | None = None, seed: int = 0):
         if robot.n != 6 or not all(link.isrevolute for link in robot.links):
             raise ValueError("a robot with six revolute joints is required")
         if any(link.mdh for link in robot.links):
             raise NotImplementedError("modified DH links are not supported")
-        self.robot = robot
+        super().__init__(robot)
         self.alpha = [float(link.alpha) for link in robot.links]
         self.a = [float(link.a) for link in robot.links]
         self.d = [float(link.d) for link in robot.links]
         self.offset = np.array([float(link.offset) for link in robot.links])
         self.sign = np.array([-1.0 if link.isflip else 1.0 for link in robot.links])
-        self.revolute = np.ones(6, dtype=bool)
         self.condition: dict[int, float] = {}
         self._modules: dict[int, dict] = {}
         self.k = self._choose(seed) if k is None else k
@@ -1388,38 +1457,30 @@ class General6R:
         front = _FRONT_C if language == "c" else _FRONT_CXX
         return text.replace("@@FRONT@@", front).replace("@@NAME@@", name)
 
-    def validate(self, trials: int = 100, seed: int = 1) -> float:
-        """
-        Fraction of random poses for which the original configuration is found
 
-        :param trials: number of random configurations to try
-        :param seed: seed for the random configurations
-        :returns: a value between 0 and 1.  A method that works gives 1, or
-            very nearly, and one that does not apply to this robot gives 0.
-        """
-        hits = 0
-        for q, T in self._random_poses(trials, seed):
-            hits += any(self._same(s, q) for s in self.solve(T).q)
-        return hits / trials
-
-
-class ClosedForm:
+class ClosedForm(IKSolver):
     r"""
     Inverse kinematics from the closed form solution of :mod:`symbolic_ik`
 
     :param robot: robot with standard DH links and six joints
     :param max_time: give up looking for the symbolic solution after this many
         seconds
+    :param verify: check each solution against the forward kinematics
     :raises ValueError: if no closed form solution is found
 
-    The solution is generated as Python code, which is then run.  The same code
-    can be had in other languages from :func:`symbolic_ik.generate_code`.
+    The symbolic solution is found once, when the solver is made.  The solution
+    is then generated as Python code, which is run to solve, and the same plan
+    can be written in other languages by :meth:`generate`.
     """
 
-    def __init__(self, robot: DHRobot, max_time: float | None = 120.0):
-        self.robot = robot
-        self.revolute = np.array([link.isrevolute for link in robot.links])
-        self.source = generate_code(robot, "python", "ikine", max_time=max_time)
+    method = "closed form"
+
+    def __init__(
+        self, robot: DHRobot, max_time: float | None = 120.0, verify: bool = True
+    ):
+        super().__init__(robot)
+        self._plan = _make_plan(robot, verify, max_time=max_time)
+        self.source = _emit(self._plan, "python", "ikine")
         namespace: dict = {}
         exec(self.source, namespace)  # noqa: S102
         self._ikine = namespace["ikine"]
@@ -1429,24 +1490,17 @@ class ClosedForm:
         result = self._ikine(np.asarray(T, dtype=float))
         return IKSolutions.from_generated(result, self.revolute)
 
-    def validate(self, trials: int = 100, seed: int = 1) -> float:
-        """Fraction of random poses for which the original configuration is found."""
-        rng = np.random.default_rng(seed)
-        hits = 0
-        for _ in range(trials):
-            q = np.where(
-                self.revolute,
-                rng.uniform(-np.pi, np.pi, self.robot.n),
-                rng.uniform(0.2, 0.6, self.robot.n),
-            )
-            sols = self.solve(self.robot.fkine(q).A)
-            if len(sols):
-                d = sols.q - q
-                d[:, self.revolute] = np.arctan2(
-                    np.sin(d[:, self.revolute]), np.cos(d[:, self.revolute])
-                )
-                hits += bool(np.any(np.all(np.abs(d) < 1e-5, axis=1)))
-        return hits / trials
+    def generate(self, language: str = "python", name: str = "ikine") -> str:
+        """
+        Source code for the closed form solution
+
+        :param language: ``"python"``, ``"c"``, ``"c++"`` or ``"rust"``.  The
+            Rust is not tested.
+        :param name: name of the generated function
+        :returns: source code, which needs no library
+        :raises ValueError: for any other language
+        """
+        return _emit(self._plan, language, name)
 
 
 def make_solver(
@@ -1454,7 +1508,7 @@ def make_solver(
     trials: int = 100,
     min_success: float = 0.99,
     max_time: float | None = 120.0,
-) -> ClosedForm | General6R:
+) -> IKSolver:
     """
     Choose and build the inverse kinematics method for a robot
 
@@ -1471,16 +1525,15 @@ def make_solver(
     method fails for a spherical wrist, so there is no fallback from one to the
     other.  The method is checked on random poses before it is returned.
     """
+    solver: IKSolver
     if classify(robot).general:
         solver = General6R(robot)
-        method = "general 6R"
     else:
         solver = ClosedForm(robot, max_time)
-        method = "closed form"
     rate = solver.validate(trials)
     if rate < min_success:
         raise ValueError(
-            f"the {method} method recovered the configuration for only "
+            f"the {solver.method} method recovered the configuration for only "
             f"{rate:.0%} of random poses for this robot"
         )
     return solver
@@ -1892,6 +1945,32 @@ def test_generated_c_general_6r():
                 for q in solutions:
                     assert np.abs(robot.fkine(q).A - T).max() < 1e-6
                     assert any(General6R._same(q, other) for other in want.q), (name, language)
+
+
+def test_solver_interface():
+    """Both solvers solve, generate in several languages, and validate."""
+    import pytest
+    import roboticstoolbox as rtb
+
+    closed = make_solver(rtb.models.DH.Puma560(), trials=20)
+    general = make_solver(rtb.models.DH.Jaco(), trials=20)
+    assert isinstance(closed, ClosedForm) and isinstance(general, General6R)
+    assert closed.method == "closed form" and general.method == "general 6R"
+    assert all(isinstance(s, IKSolver) for s in (closed, general))
+
+    for language in ("python", "c", "c++", "rust"):
+        code = closed.generate(language, "puma_ik")
+        assert "puma_ik" in code and "Generated by Robotics Toolbox" in code, language
+    for language in ("python", "c", "c++"):
+        code = general.generate(language, "jaco_ik")
+        assert "jaco_ik" in code and "Generated by Robotics Toolbox" in code, language
+    with pytest.raises(NotImplementedError):
+        general.generate("rust")
+    with pytest.raises(ValueError):
+        closed.generate("fortran")
+
+    # an arm with a prismatic joint is validated too
+    assert make_solver(rtb.models.DH.Stanford(), trials=20).validate(20) >= 0.95
 
 
 def test_make_solver():
