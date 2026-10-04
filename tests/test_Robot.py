@@ -7,7 +7,9 @@ import numpy as np
 import roboticstoolbox as rtb
 import unittest
 import os
+import warnings
 import spatialgeometry as sg
+from spatialmath import SE3
 from spatialmath.base import tr2jac
 from tests import skip_no_collision_checking
 
@@ -1058,22 +1060,51 @@ class TestRobot(unittest.TestCase):
         self.assertAlmostEqual(m, 0.209013, places=4)  # type: ignore
 
     def test_jtraj(self):
+        # joint coordinates in, the pure form, no warning
         r = rtb.models.Panda()
-
         q1 = r.q + 0.2
 
-        q = r.jtraj(r.fkine(q1), r.fkine(r.qr), 5)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            traj = r.jtraj(q1, r.qr, 5)
 
-        self.assertEqual(q.s.shape, (5, 7))
+        self.assertEqual(traj.s.shape, (5, 7))
+        self.assertEqual(traj.q.shape, (5, 7))
+        nt.assert_allclose(traj.q[0], q1, atol=1e-12)
+        nt.assert_allclose(traj.q[-1], r.qr, atol=1e-12)
 
-    def test_jtraj2(self):
-        r = rtb.models.DH.Puma560()
+        # the same as the function
+        nt.assert_allclose(traj.q, rtb.jtraj(q1, r.qr, 5).q)
 
-        q1 = r.q + 0.2
+    def test_jtraj_velocities(self):
+        r = rtb.models.Panda()
+        qd0 = np.full(7, 0.1)
+        qd1 = np.full(7, -0.1)
 
-        q = r.jtraj(r.fkine(q1), r.fkine(r.qr), 5)
+        traj = r.jtraj(r.qz, r.qr, 50, qd0=qd0, qd1=qd1)
 
-        self.assertEqual(q.s.shape, (5, 6))
+        nt.assert_allclose(traj.qd[0], qd0, atol=1e-9)
+        nt.assert_allclose(traj.qd[-1], qd1, atol=1e-9)
+
+    def test_jtraj_unexpected_keyword(self):
+        # these used to be forwarded to the inverse kinematics method
+        r = rtb.models.Panda()
+        with self.assertRaises(TypeError):
+            r.jtraj(r.qz, r.qr, 5, foo=1)
+
+    def test_jtraj_rejects_poses(self):
+        # deprecated in 1.5.0, the message says what to do instead
+        for r in (rtb.models.Panda(), rtb.models.DH.Puma560()):
+            T = r.fkine(r.qr)
+
+            with self.assertRaisesRegex(TypeError, "deprecated.*ikine"):
+                r.jtraj(T, r.qr, 5)
+
+            with self.assertRaisesRegex(TypeError, "deprecated.*ikine"):
+                r.jtraj(r.qr, T, 5)
+
+            with self.assertRaisesRegex(TypeError, "deprecated.*ikine"):
+                r.jtraj(T, T, 5)
 
     def test_manip(self):
         r = rtb.models.Panda()
