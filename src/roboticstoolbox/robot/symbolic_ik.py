@@ -49,7 +49,9 @@ Differences from the MATLAB original:
 
 Status: of the 6-axis DH models in ``roboticstoolbox.models.DH`` seven are
 solved (IRB140, KR5, Puma560, Stanford, UR3, UR5, UR10) and checked against
-forward kinematics.  Jaco and Mico, which have no wrist centre, are not.
+forward kinematics.  Jaco and Mico, which have no wrist centre, are not, but are
+solved by the general 6R method of :mod:`symbolic_ik_rr`, which also chooses
+between the two methods, see :func:`symbolic_ik_rr.make_solver`.
 
 Speed: the polynomial arithmetic is done by FLINT, via ``python-flint``, if it is
 installed, which is much faster than SymPy (for the elimination step more than
@@ -62,9 +64,11 @@ Known limitations:
 - Only standard DH robots are handled, since link transforms come from
   ``Link.A``.
 - Elimination needs equations that are linear in ``Sj``, ``Cj``, which is why
-  the general 6R case (Jaco, Mico) fails.  That needs a resultant based
-  elimination, and the roots of a univariate polynomial in ``tan(q/2)``, see
-  Raghavan and Roth, J. Mech. Design 115(3), 1993.
+  the general 6R case (Jaco, Mico) fails.  Greedy elimination of pairs of
+  equations saturates: the equations in the same two joints are dependent, so
+  their resultant is zero.  What is needed is the elimination of many equations at
+  once, which is the method of Raghavan and Roth, J. Mech. Design 115(3), 1993,
+  in :mod:`symbolic_ik_rr`.
 - Spurious branches are not removed: some combinations of the alternatives for
   each joint do not reach the pose.  The equations that are fully determined
   once all joints are solved could be used to prune them.
@@ -1425,6 +1429,7 @@ def half_angle_roots(ctx: _Context, coeffs: list[float]) -> list[float]:
         return angles
 
     # Aberth-Ehrlich iteration for all the roots of the monic polynomial
+    # (O. Aberth, Math. Comp. 27(122):339-344, 1973; L. W. Ehrlich, Commun. ACM 10(2):107-108, 1967)
     a = [c / coeffs[n] for c in coeffs[: n + 1]]
     radius = abs(a[0]) ** (1.0 / n) if a[0] != 0 else 1.0
     z = [radius * cmath.exp(1j * (2 * math.pi * k / n + 0.4)) for k in range(n)]
@@ -1491,7 +1496,8 @@ static int half_angle_roots(ik_ctx *ctx, const double *coeffs, int ncoeffs, doub
     if (n < ncoeffs - 1) angles[count++] = M_PI;
     if (n == 0) return count;
 
-    /* Aberth-Ehrlich iteration for all the roots of the monic polynomial */
+    /* Aberth-Ehrlich iteration for all the roots of the monic polynomial
+     * (O. Aberth, Math. Comp. 27(122):339-344, 1973; L. W. Ehrlich, Commun. ACM 10(2):107-108, 1967) */
     double a[IKINE_MAX_ANGLES];
     double complex z[IKINE_MAX_ANGLES];
     for (int i = 0; i <= n; ++i) a[i] = coeffs[i] / coeffs[n];
@@ -1566,6 +1572,7 @@ inline std::vector<double> half_angle_roots(IkContext& ctx, const std::vector<do
     if (n == 0) return angles;
 
     // Aberth-Ehrlich iteration for all the roots of the monic polynomial
+    // (O. Aberth, Math. Comp. 27(122):339-344, 1973; L. W. Ehrlich, Commun. ACM 10(2):107-108, 1967)
     using cd = std::complex<double>;
     std::vector<double> a(n + 1);
     for (int i = 0; i <= n; ++i) a[i] = coeffs[i] / coeffs[n];

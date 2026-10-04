@@ -91,14 +91,33 @@ Limits
 - **Near singularities the answer is unreliable.**  A root whose null space is
   not one dimensional is dropped, and if that leaves no solutions the status is
   ``SINGULAR``.  Solutions near a singularity may be missing.
-- **It is slower than the closed form**, about 1.7 ms per pose in NumPy on an M1,
+- **It is slower than the closed form.**  The Python class takes about 1.7 ms per
+  pose in NumPy on an M1, and the generated C about 165 microseconds for the Jaco,
   against a few microseconds for the generated closed form code in C.  Polishing
-  the candidates doubled the time.  The symbolic derivation takes a few seconds
-  for each split, and is cached only in the running process.
+  the candidates doubled the time of the Python.  The symbolic derivation takes a
+  few seconds for each split, and is cached only in the running process.
 - **Only standard DH robots with six revolute joints** are handled.
-- **Code is generated only in Python**, by :meth:`General6R.generate`, and it
-  needs NumPy.  C, C++ and Rust would need a null space and a generalized
-  eigenvalue solver in the generated code.
+- **Code is generated in Python, C and C++**, by :meth:`General6R.generate`, but
+  not Rust.  The Python needs NumPy, and uses SciPy if it is installed.  The C and
+  C++ need no library, they contain a small linear algebra kernel, see below.  It
+  has been tested against NumPy, but it is new code and has had much less use than
+  LAPACK.
+
+The kernel
+----------
+
+The C and C++ code includes a small dense linear algebra kernel in real
+arithmetic, in plain C99 that is also valid C++: LU with partial pivoting,
+Householder QR, a one-sided Jacobi SVD, and the eigenvalues of a general real
+matrix by balancing, Householder reduction to Hessenberg form and the Francis
+double shift QR iteration.  The matrices are tiny, at most 24x24, so a library
+would add a dependency and no speed.  The algorithms are the standard published
+ones, written for this project and not copied from any implementation, and
+references are in the comments of the source: Golub and Van Loan, "Matrix
+Computations"; M. R. Hestenes, J. SIAM 6(1), 1958; B. N. Parlett and C. Reinsch,
+Numer. Math. 13, 1969; J. G. F. Francis, Computer J. 4, 1961-62; and J. H.
+Wilkinson and C. Reinsch, "Handbook for Automatic Computation vol. II: Linear
+Algebra", 1971, whose EISPACK ``hqr`` is the model for the QR iteration.
 
 Run the tests with::
 
