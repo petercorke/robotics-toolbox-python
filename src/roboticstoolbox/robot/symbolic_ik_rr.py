@@ -111,6 +111,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import sympy as sp
+from sympy.printing.c import C99CodePrinter
 from sympy.printing.pycode import PythonCodePrinter
 
 from roboticstoolbox.robot.DHRobot import DHRobot
@@ -560,6 +561,319 @@ static int ikrr_eig(double *A, int n, double *wr, double *wi) {
 """
 
 
+_GENERATED_C = """\
+@@BANNER@@
+#include <math.h>
+#include <string.h>
+
+@@TYPES@@
+
+#define IKRR_MAX_SOLUTIONS 32
+
+static const double IKRR_ALPHA_COS[6] = @@COSALPHA@@;
+static const double IKRR_ALPHA_SIN[6] = @@SINALPHA@@;
+static const double IKRR_A[6] = @@A@@;      /* link lengths */
+static const double IKRR_D[6] = @@D@@;      /* link offsets */
+static const double IKRR_OFFSET[6] = @@OFFSET@@;  /* joint angle offsets, theta = sign * q + offset */
+static const double IKRR_SIGN[6] = @@SIGN@@;
+#define IKRR_K @@K@@        /* the joint whose half angle is the variable of the matrix polynomial */
+#define IKRR_LEFT0 @@LEFT0@@   /* the two joints whose monomials are on the left */
+#define IKRR_LEFT1 @@LEFT1@@
+#define IKRR_RIGHT0 @@RIGHT0@@  /* and on the right */
+#define IKRR_RIGHT1 @@RIGHT1@@
+#define IKRR_DROP @@DROP@@      /* the joint that does not appear in the equations */
+/* sin/cos monomials of the left joints to half angle monomials, 9-by-9 */
+static const double IKRR_W[81] = @@W@@;
+/* where the monomial j of the nine goes in the 12-vector after multiplying by x_u */
+static const int IKRR_SHIFT[9] = @@SHIFT@@;
+
+@@KERNEL@@
+
+/* The matrices of the fourteen equations for the pose T, 4x4 row-major. */
+static void ikrr_matrices(const double *T, double *Psin, double *Pcos, double *Pone, double *Q) {
+@@TDECL@@
+    memset(Psin, 0, 14 * 9 * sizeof(double));
+    memset(Pcos, 0, 14 * 9 * sizeof(double));
+    memset(Pone, 0, 14 * 9 * sizeof(double));
+    memset(Q, 0, 14 * 8 * sizeof(double));
+@@MATRICES@@
+}
+
+/* C = A B, with A m-by-k and B k-by-n. */
+static void ikrr_matmul(const double *A, int m, int k, const double *B, int n, double *C) {
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            double sum = 0.0;
+            for (int l = 0; l < k; ++l) sum += A[i * k + l] * B[l * n + j];
+            C[i * n + j] = sum;
+        }
+    }
+}
+
+/* The 12x12 block from six equations, and the same multiplied by x_u. */
+static void ikrr_embed(const double *E, double *M) {
+    memset(M, 0, 144 * sizeof(double));
+    for (int r = 0; r < 6; ++r) {
+        for (int c = 0; c < 9; ++c) {
+            M[r * 12 + c] = E[r * 9 + c];
+            M[(6 + r) * 12 + IKRR_SHIFT[c]] += E[r * 9 + c];
+        }
+    }
+}
+
+/* C = A B for 4x4 row-major matrices. */
+static void ikrr_mul4(const double *A, const double *B, double *C) {
+    ikrr_matmul(A, 4, 4, B, 4, C);
+}
+
+/* The link transform of joint i, and its derivative with respect to theta. */
+static void ikrr_dh(double theta, int i, double *A) {
+    double ca = IKRR_ALPHA_COS[i], sa = IKRR_ALPHA_SIN[i];
+    double s = sin(theta), c = cos(theta);
+    A[0] = c;  A[1] = -s * ca; A[2] = s * sa;   A[3] = IKRR_A[i] * c;
+    A[4] = s;  A[5] = c * ca;  A[6] = -c * sa;  A[7] = IKRR_A[i] * s;
+    A[8] = 0;  A[9] = sa;      A[10] = ca;      A[11] = IKRR_D[i];
+    A[12] = 0; A[13] = 0;      A[14] = 0;       A[15] = 1;
+}
+
+static void ikrr_dh_derivative(double theta, int i, double *A) {
+    double ca = IKRR_ALPHA_COS[i], sa = IKRR_ALPHA_SIN[i];
+    double s = sin(theta), c = cos(theta);
+    A[0] = -s; A[1] = -c * ca; A[2] = c * sa;  A[3] = -IKRR_A[i] * s;
+    A[4] = c;  A[5] = -s * ca; A[6] = s * sa;  A[7] = IKRR_A[i] * c;
+    for (int j = 8; j < 16; ++j) A[j] = 0.0;
+}
+
+static void ikrr_fkine(const double *theta, double *T) {
+    double L[16], P[16];
+    for (int j = 0; j < 16; ++j) T[j] = (j % 5 == 0) ? 1.0 : 0.0;
+    for (int i = 0; i < 6; ++i) {
+        ikrr_dh(theta[i], i, L);
+        ikrr_mul4(T, L, P);
+        memcpy(T, P, sizeof(P));
+    }
+}
+
+/* The largest difference between the top three rows of two 4x4 matrices. */
+static double ikrr_error(const double *A, const double *B) {
+    double e = 0.0;
+    for (int j = 0; j < 12; ++j) {
+        double d = fabs(A[j] - B[j]);
+        if (!(d <= e)) e = d;  /* also catches NaN */
+    }
+    return e;
+}
+
+/* Gauss-Newton steps on the joint angles, to polish a candidate. */
+static void ikrr_refine(double *theta, const double *T) {
+    for (int iteration = 0; iteration < 3; ++iteration) {
+        double links[6][16], prefix[7][16], residual[12], J[72], Qf[144], dtheta[6];
+        for (int j = 0; j < 16; ++j) prefix[0][j] = (j % 5 == 0) ? 1.0 : 0.0;
+        for (int i = 0; i < 6; ++i) {
+            ikrr_dh(theta[i], i, links[i]);
+            ikrr_mul4(prefix[i], links[i], prefix[i + 1]);
+        }
+        double biggest = 0.0;
+        for (int j = 0; j < 12; ++j) {
+            residual[j] = prefix[6][j] - T[j];
+            if (fabs(residual[j]) > biggest) biggest = fabs(residual[j]);
+        }
+        if (biggest < 1e-13) return;
+        double suffix[16], dA[16], tmp[16], dT[16], next[16];
+        for (int j = 0; j < 16; ++j) suffix[j] = (j % 5 == 0) ? 1.0 : 0.0;
+        for (int i = 5; i >= 0; --i) {
+            ikrr_dh_derivative(theta[i], i, dA);
+            ikrr_mul4(prefix[i], dA, tmp);
+            ikrr_mul4(tmp, suffix, dT);
+            for (int j = 0; j < 12; ++j) J[j * 6 + i] = dT[j];
+            ikrr_mul4(links[i], suffix, next);
+            memcpy(suffix, next, sizeof(next));
+        }
+        ikrr_qr(J, 12, 6, Qf);
+        ikrr_qr_solve(J, Qf, 12, 6, residual, dtheta);
+        for (int i = 0; i < 6; ++i) theta[i] -= dtheta[i];
+    }
+}
+
+/* The inverse of a rigid transform. */
+static void ikrr_inverse(const double *A, double *B) {
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) B[i * 4 + j] = A[j * 4 + i];
+        B[i * 4 + 3] = -(B[i * 4 + 0] * A[3] + B[i * 4 + 1] * A[7] + B[i * 4 + 2] * A[11]);
+    }
+    B[12] = 0; B[13] = 0; B[14] = 0; B[15] = 1;
+}
+
+static int ikrr_same(const double *q1, const double *q2) {
+    for (int i = 0; i < 6; ++i) {
+        double d = q1[i] - q2[i];
+        if (!(fabs(atan2(sin(d), cos(d))) < 1e-5)) return 0;
+    }
+    return 1;
+}
+
+/* All the joint configurations that reach the pose T, 4x4 row-major, written to
+ * solutions.  Returns 0 if there are any, 1 if there are none because a joint was
+ * undetermined, a singularity, and 2 if the pose cannot be reached. */
+static int ikrr_solve(const double *T, double tol, double (*solutions)[6], int *count, int max_solutions) {
+    double Psin[14 * 9], Pcos[14 * 9], Pone[14 * 9], Q[14 * 8], Qf[14 * 14];
+    double Es[6 * 9], Ec[6 * 9], Eo[6 * 9], Em[6 * 9], E[6 * 9], M0[144], M1[144], M2[144];
+    ikrr_matrices(T, Psin, Pcos, Pone, Q);
+
+    /* eliminate the monomials of the right hand joints with the null space of Q */
+    double R[14 * 8];
+    memcpy(R, Q, sizeof(R));
+    ikrr_qr(R, 14, 8, Qf);
+    for (int r = 0; r < 6; ++r) {
+        for (int c = 0; c < 9; ++c) {
+            double sn = 0.0, cs = 0.0, on = 0.0;
+            for (int i = 0; i < 14; ++i) {
+                double n = Qf[i * 14 + 8 + r];
+                sn += n * Psin[i * 9 + c];
+                cs += n * Pcos[i * 9 + c];
+                on += n * Pone[i * 9 + c];
+            }
+            Es[r * 9 + c] = sn; Ec[r * 9 + c] = cs; Eo[r * 9 + c] = on;
+        }
+    }
+    for (int j = 0; j < 54; ++j) Em[j] = Eo[j] - Ec[j];
+    ikrr_matmul(Em, 6, 9, IKRR_W, 9, E);
+    ikrr_embed(E, M2);
+    for (int j = 0; j < 54; ++j) Em[j] = 2.0 * Es[j];
+    ikrr_matmul(Em, 6, 9, IKRR_W, 9, E);
+    ikrr_embed(E, M1);
+    for (int j = 0; j < 54; ++j) Em[j] = Eo[j] + Ec[j];
+    ikrr_matmul(Em, 6, 9, IKRR_W, 9, E);
+    ikrr_embed(E, M0);
+
+    /* the eigenvalues x of (M2 x^2 + M1 x + M0) v = 0, from a companion matrix */
+    double lead[144], B[12 * 24], C[24 * 24], wr[24], wi[24];
+    memcpy(lead, M2, sizeof(lead));
+    for (int i = 0; i < 12; ++i) {
+        for (int j = 0; j < 12; ++j) { B[i * 24 + j] = M0[i * 12 + j]; B[i * 24 + 12 + j] = M1[i * 12 + j]; }
+    }
+    *count = 0;
+    if (!ikrr_lu_solve(lead, 12, B, 24)) return 1;
+    memset(C, 0, sizeof(C));
+    for (int i = 0; i < 12; ++i) {
+        C[i * 24 + 12 + i] = 1.0;
+        for (int j = 0; j < 24; ++j) C[(12 + i) * 24 + j] = -B[i * 24 + j];
+    }
+    if (!ikrr_eig(C, 24, wr, wi)) return 1;
+
+    int ambiguous = 0;
+    for (int e = 0; e < 24 && *count < max_solutions; ++e) {
+        double x = wr[e];
+        if (!(isfinite(x) && fabs(x) < 1e8 && fabs(wi[e]) < 1e-6 * (1.0 + fabs(x)))) continue;
+        double Mx[144], s[12], V[144], v[12];
+        for (int j = 0; j < 144; ++j) Mx[j] = M2[j] * x * x + M1[j] * x + M0[j];
+        ikrr_svd(Mx, 12, s, V);
+        if (s[10] < 1e-9 * s[0]) { ++ambiguous; continue; }  /* not a one dimensional null space */
+        if (fabs(V[8 * 12 + 11]) < 1e-12) continue;
+        for (int i = 0; i < 12; ++i) v[i] = V[i * 12 + 11] / V[8 * 12 + 11];
+
+        double theta[6] = {0, 0, 0, 0, 0, 0};
+        theta[IKRR_K] = 2.0 * atan(x);
+        theta[IKRR_LEFT0] = 2.0 * atan(v[5]);
+        theta[IKRR_LEFT1] = 2.0 * atan(v[7]);
+        double su = sin(theta[IKRR_LEFT0]), cu = cos(theta[IKRR_LEFT0]);
+        double sv = sin(theta[IKRR_LEFT1]), cv = cos(theta[IKRR_LEFT1]);
+        double left[9] = {su * sv, su * cv, cu * sv, cu * cv, su, cu, sv, cv, 1.0};
+        double sk = sin(theta[IKRR_K]), ck = cos(theta[IKRR_K]), rhs[14], right[8];
+        for (int r = 0; r < 14; ++r) {
+            rhs[r] = 0.0;
+            for (int c = 0; c < 9; ++c) rhs[r] += (sk * Psin[r * 9 + c] + ck * Pcos[r * 9 + c] + Pone[r * 9 + c]) * left[c];
+        }
+        ikrr_qr_solve(R, Qf, 14, 8, rhs, right);
+        theta[IKRR_RIGHT0] = atan2(right[4], right[5]);
+        theta[IKRR_RIGHT1] = atan2(right[6], right[7]);
+
+        /* the dropped joint, from  A_drop = (A_0..A_drop-1)^-1 T (A_drop+1..A_5)^-1 */
+        double pre[16], post[16], L[16], P[16], inv[16], mid[16], D[16];
+        for (int j = 0; j < 16; ++j) { pre[j] = (j % 5 == 0) ? 1.0 : 0.0; post[j] = pre[j]; }
+        for (int i = 0; i < IKRR_DROP; ++i) { ikrr_dh(theta[i], i, L); ikrr_mul4(pre, L, P); memcpy(pre, P, sizeof(P)); }
+        for (int i = IKRR_DROP + 1; i < 6; ++i) { ikrr_dh(theta[i], i, L); ikrr_mul4(post, L, P); memcpy(post, P, sizeof(P)); }
+        double T4[16];
+        memcpy(T4, T, 12 * sizeof(double));
+        T4[12] = 0; T4[13] = 0; T4[14] = 0; T4[15] = 1;
+        ikrr_inverse(pre, inv);
+        ikrr_mul4(inv, T4, mid);
+        ikrr_inverse(post, inv);
+        ikrr_mul4(mid, inv, D);
+        theta[IKRR_DROP] = atan2(D[4], D[0]);
+
+        /* a candidate that is close is polished, since the roots are only
+         * accurate to about the conditioning of the problem times round-off */
+        double fk[16];
+        ikrr_fkine(theta, fk);
+        if (ikrr_error(fk, T) < 1e-3) { ikrr_refine(theta, T); ikrr_fkine(theta, fk); }
+        if (!(ikrr_error(fk, T) < tol)) continue;
+
+        double q[6];
+        for (int i = 0; i < 6; ++i) {
+            double a = IKRR_SIGN[i] * (theta[i] - IKRR_OFFSET[i]);
+            q[i] = atan2(sin(a), cos(a));
+        }
+        int duplicate = 0;
+        for (int k = 0; k < *count; ++k) if (ikrr_same(q, solutions[k])) duplicate = 1;
+        if (!duplicate) { memcpy(solutions[*count], q, sizeof(q)); ++*count; }
+    }
+    if (*count > 0) return 0;
+    return ambiguous ? 1 : 2;
+}
+
+@@FRONT@@
+"""
+
+_FRONT_C = """\
+/* T is the 4x4 end-effector pose, row-major.  Solutions are written to
+ * solutions[0..*count-1], each IKINE_DOF joint values in (-pi, pi]. */
+ik_status @@NAME@@(const double T[16], double tol,
+                  double solutions[IKINE_MAX_SOLUTIONS][IKINE_DOF], int *count) {
+    return (ik_status)ikrr_solve(T, tol, solutions, count, IKINE_MAX_SOLUTIONS);
+}"""
+
+_TYPES_C = """\
+typedef enum {
+    IK_OK = 0,          /* solutions found */
+    IK_SINGULAR = 1,    /* a joint was undetermined, so there are none or some are missing */
+    IK_UNREACHABLE = 2  /* no solution, the pose is outside the workspace */
+} ik_status;
+
+#define IKINE_DOF 6
+#define IKINE_MAX_SOLUTIONS 32"""
+
+_FRONT_CXX = """\
+// T is the 4x4 end-effector pose, row-major.
+inline IkResult @@NAME@@(const double* T, double tol = 1e-6) {
+    double solutions[IKRR_MAX_SOLUTIONS][6];
+    int count = 0;
+    int status = ikrr_solve(T, tol, solutions, &count, IKRR_MAX_SOLUTIONS);
+    IkResult result;
+    for (int i = 0; i < count; ++i) {
+        result.solutions.push_back({solutions[i][0], solutions[i][1], solutions[i][2],
+                                    solutions[i][3], solutions[i][4], solutions[i][5]});
+    }
+    result.status = (status == 0) ? IkStatus::Ok : (status == 1) ? IkStatus::Singular : IkStatus::Unreachable;
+    return result;
+}"""
+
+_TYPES_CXX = """\
+#include <array>
+#include <vector>
+
+enum class IkStatus {
+    Ok = 0,          // solutions found
+    Singular = 1,    // a joint was undetermined, so there are none or some are missing
+    Unreachable = 2  // no solution, the pose is outside the workspace
+};
+
+struct IkResult {
+    std::vector<std::array<double, 6>> solutions;
+    IkStatus status = IkStatus::Unreachable;
+};"""
+
+
 _GENERATED = """\
 @@BANNER@@
 
@@ -987,21 +1301,73 @@ class General6R:
         """
         Source code for the solution for this robot
 
-        :param language: only ``"python"`` is supported
+        :param language: ``"python"``, ``"c"`` or ``"c++"``
         :param name: name of the generated function
         :returns: Python source code, which needs NumPy, and uses SciPy if it is
             installed
-        :raises NotImplementedError: for any other language, the generated code
-            needs a null space and a generalized eigenvalue solver
+        :raises NotImplementedError: for any other language.  The C and C++ code
+            contains its own small linear algebra kernel, and needs no library.
 
         The link parameters and the symbolic matrices of the fourteen equations
         are constants in the code.  The function ``name(T)`` takes the pose, a
         4x4 array, and returns an ``IKResult`` with the solutions, as a list of
         tuples, and the status.  The code is what :meth:`solve` runs.
         """
-        if language != "python":
-            raise NotImplementedError("only Python code can be generated")
-        return self._source(self.k, name)
+        if language == "python":
+            return self._source(self.k, name)
+        if language in ("c", "c++"):
+            return self._source_c(self.k, name, language)
+        raise NotImplementedError("Python, C and C++ code can be generated")
+
+    def _source_c(self, k: int, name: str, language: str) -> str:
+        """C or C++ source for split ``k``."""
+        _, symbolic = self._derived(k)
+        entries = [e for m in symbolic for e in m]
+        replacements, reduced = sp.cse(entries, symbols=sp.numbered_symbols("x"))
+        printer = C99CodePrinter()
+        used = set().union(*(e.free_symbols for e in [*reduced, *(r[1] for r in replacements)]))
+        lines = [
+            f"    const double T{i} = T[{i}];" for i in range(12) if sp.Symbol(f"T{i}", real=True) in used
+        ]
+        tdecl = "\n".join(lines)
+        body = [f"    const double {sym} = {printer.doprint(e)};" for sym, e in replacements]
+        pos = 0
+        for matrix_name, m in zip(("Psin", "Pcos", "Pone", "Q"), symbolic):
+            for r in range(m.rows):
+                for c in range(m.cols):
+                    e = reduced[pos]
+                    pos += 1
+                    if e != 0:
+                        body.append(f"    {matrix_name}[{r * m.cols + c}] = {printer.doprint(e)};")
+        left, right, drop = _SPLITS[k]
+        def clist(values) -> str:
+            return "{" + ", ".join(repr(float(v)) for v in values) + "}"
+        def cleaned(f) -> list[float]:
+            return [_clean(f(a)) for a in self.alpha]
+        shift = [_MON12.index((i + 1, j)) for i, j in _MON9]
+        text = _GENERATED_C
+        for key, value in {
+            "BANNER": "\n".join(
+                _comment(
+                    _provenance(
+                        _dh_info(self.robot), "general 6R, Raghavan-Roth (symbolic_ik_rr)"
+                    ),
+                    language,
+                )
+            ),
+            "TYPES": _TYPES_C if language == "c" else _TYPES_CXX,
+            "COSALPHA": clist(cleaned(np.cos)), "SINALPHA": clist(cleaned(np.sin)),
+            "A": clist(self.a), "D": clist(self.d), "OFFSET": clist(self.offset),
+            "SIGN": clist(self.sign), "K": repr(k),
+            "LEFT0": repr(left[0]), "LEFT1": repr(left[1]),
+            "RIGHT0": repr(right[0]), "RIGHT1": repr(right[1]), "DROP": repr(drop),
+            "W": clist(_W.ravel()), "SHIFT": "{" + ", ".join(map(str, shift)) + "}",
+            "TDECL": tdecl, "MATRICES": "\n".join(body),
+        }.items():  # fmt: skip
+            text = text.replace(f"@@{key}@@", value)
+        text = text.replace("@@KERNEL@@", _C_KERNEL)
+        front = _FRONT_C if language == "c" else _FRONT_CXX
+        return text.replace("@@FRONT@@", front).replace("@@NAME@@", name)
 
     def validate(self, trials: int = 100, seed: int = 1) -> float:
         """
@@ -1249,7 +1615,7 @@ def test_generate_other_languages():
     import roboticstoolbox as rtb
 
     with pytest.raises(NotImplementedError):
-        General6R(rtb.models.DH.Jaco()).generate("c++")
+        General6R(rtb.models.DH.Jaco()).generate("rust")
 
 
 def _run_kernel(cases: str, language: str = "c") -> list[str]:
@@ -1405,6 +1771,108 @@ def test_c_kernel_linear_algebra():
     assert next(out) == "0"  # singular, the right hand side is printed anyway
     next(out), next(out)
     assert next(out, None) is None
+
+
+def _run_general_6r(language: str, code: str, poses: list[np.ndarray]):
+    """
+    Compile generated C or C++ for the general 6R method, run it on poses
+
+    :returns: for each pose ``(status, solutions)``.  The compiler must give no
+        warnings.
+    """
+    import subprocess
+    import tempfile
+    from pathlib import Path
+
+    if language == "c":
+        main = r"""
+#include <stdio.h>
+#include <stdlib.h>
+int main(void) {
+    int n;
+    if (scanf("%d", &n) != 1) return 2;
+    for (int p = 0; p < n; ++p) {
+        double T[16];
+        static double sols[IKINE_MAX_SOLUTIONS][IKINE_DOF];
+        int count;
+        for (int i = 0; i < 16; ++i) if (scanf("%lf", &T[i]) != 1) return 2;
+        ik_status status = ikine(T, 1e-6, sols, &count);
+        printf("%d %d\n", (int)status, count);
+        for (int i = 0; i < count; ++i) {
+            for (int j = 0; j < IKINE_DOF; ++j) printf("%.17g ", sols[i][j]);
+            printf("\n");
+        }
+    }
+    return 0;
+}
+"""
+        source, command = "ik.c", ["cc", "-std=c99", "-O2", "-Wall", "-Wextra", "-o", "ik", "ik.c", "-lm"]
+    else:
+        main = r"""
+#include <cstdio>
+int main() {
+    int n;
+    if (std::scanf("%d", &n) != 1) return 2;
+    for (int p = 0; p < n; ++p) {
+        double T[16];
+        for (int i = 0; i < 16; ++i) if (std::scanf("%lf", &T[i]) != 1) return 2;
+        IkResult r = ikine(T);
+        std::printf("%d %d\n", (int)r.status, (int)r.solutions.size());
+        for (const auto &q : r.solutions) {
+            for (double v : q) std::printf("%.17g ", v);
+            std::printf("\n");
+        }
+    }
+    return 0;
+}
+"""
+        source, command = "ik.cpp", ["c++", "-std=c++17", "-O2", "-Wall", "-Wextra", "-o", "ik", "ik.cpp"]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        (tmp / source).write_text(code + main)
+        build = subprocess.run(command, cwd=tmp, capture_output=True, text=True)
+        assert build.returncode == 0 and build.stderr == "", build.stderr
+        stdin = f"{len(poses)}\n" + "\n".join(_numbers(T) for T in poses)
+        out = subprocess.run(
+            [str(tmp / "ik")], input=stdin, capture_output=True, text=True, check=True
+        ).stdout.splitlines()
+
+    results, line = [], 0
+    for _ in poses:
+        status, count = (int(x) for x in out[line].split())
+        solutions = [np.array([float(x) for x in out[line + 1 + i].split()]) for i in range(count)]
+        results.append((("OK", "SINGULAR", "UNREACHABLE")[status], solutions))
+        line += 1 + count
+    return results
+
+
+def test_generated_c_general_6r():
+    """The generated C and C++ agree with the Python class, and need no library."""
+    import shutil
+
+    import roboticstoolbox as rtb
+    from spatialmath import SE3
+
+    languages = [lang for lang, cc in (("c", "cc"), ("c++", "c++")) if shutil.which(cc)]
+    for name in ("Jaco", "Mico", "UR5"):
+        robot = getattr(rtb.models.DH, name)()
+        solver = General6R(robot)
+        poses = [T for _, T in solver._random_poses(60, 21)]
+        poses.append((SE3(5, 5, 5) * SE3.RPY([0.3, 0.4, 0.5])).A)  # unreachable
+        expected = [solver.solve(T) for T in poses]
+
+        for language in languages:
+            code = solver.generate(language, "ikine")
+            assert "Generated by Robotics Toolbox for Python by Peter Corke" in code
+            for (status, solutions), want, T in zip(
+                _run_general_6r(language, code, poses), expected, poses
+            ):
+                assert status == want.status.name, (name, language)
+                assert len(solutions) == len(want), (name, language)
+                for q in solutions:
+                    assert np.abs(robot.fkine(q).A - T).max() < 1e-6
+                    assert any(General6R._same(q, other) for other in want.q), (name, language)
 
 
 def test_make_solver():
