@@ -24,6 +24,8 @@ A note on the semantics of the above variable:
 
 Therefore, ``Tep`` refers to the desired end-effector pose in the base robot frame represented as an SE(3).
 
+The Python solvers (the methods starting with ``ikine_``) also accept a **trajectory** of poses: an :py:class:`~spatialmath.pose3d.SE3` object containing N poses, or an array with shape (N, 4, 4).  The C++ solvers (the methods starting with ``ik_``) accept a single pose only.
+
 .. rubric:: ilimit
 
 The ``ilimit`` specifies how many iterations are allowed within a single search. After ``ilimit`` is reached, either, a new attempt is made or the IK solution has failed depending on ``slimit``
@@ -79,7 +81,7 @@ These solvers are written in high performance C++ and wrapped in Python methods.
 
 These methods have been written purely for speed so they do not contain the niceties of the Python alternative. For example, if you give the incorrect length for the ``q0`` vector, you could end up with a ``seg-fault`` or other undetermined behaviour. Therefore, when using these methods it is very important that you understand each of the parameters and the parameters passed are of the correct type and length.
 
-The C++ solvers return a tuple with the following members:
+The C++ solvers return an :py:class:`~roboticstoolbox.robot.IK.IKSolution` with the following members (``reason`` is always empty, these solvers do not produce a failure reason string):
 
 ==============   =========   =====================================================================================================
 Element          Type        Description                                                                                                    
@@ -92,6 +94,8 @@ Element          Type        Description
 ==============   =========   =====================================================================================================
 
 The C++ solvers can be identified as methods which start with ``ik_``.
+
+These solvers handle a single pose only, ``Tep`` must not be a trajectory.  To solve for a trajectory use the Python solvers.
 
 .. rubric:: ETS C++ IK Methods
 
@@ -174,6 +178,19 @@ Element          Type        Description
 ``residual``     `float`     The final error value from the cost function                                                                   
 ``reason``       `str`       The reason the IK problem failed if applicable   
 ==============   =========   =====================================================================================================
+
+.. rubric:: Solving for a trajectory
+
+If ``Tep`` is a trajectory of N poses, each pose is solved independently, starting from the same ``q0`` (and the same random restarts) for every pose.  Consecutive solutions are therefore not guaranteed to be on the same IK branch.  The members of the returned :py:class:`~roboticstoolbox.robot.IK.IKSolution` are:
+
+* ``q`` has shape (N, n), one row per pose
+* ``success`` is True only if every pose was solved
+* ``iterations`` and ``searches`` are summed over all poses
+* ``residual`` is the maximum over all poses, the worst case
+* ``reason`` is the reason given by the last pose that failed, if any
+
+.. versionchanged:: 1.5.0
+    For a trajectory, ``residual`` is the maximum over the poses, it was the minimum.
 
 .. rubric:: The Implemented IK Solvers
 

@@ -191,7 +191,9 @@ class IKSolver(ABC):
 
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
@@ -199,6 +201,22 @@ class IKSolver(ABC):
 
         This method will attempt to solve the IK problem and obtain joint coordinates
         which result the the end-effector pose `Tep`.
+
+        If `Tep` is an :class:`SE3` containing more than one pose, or an array with
+        shape (N, 4, 4), it is treated as a trajectory of N poses.  Each pose is
+        solved independently, using the same initial coordinates `q0` (and the same
+        random restarts) for every pose, so consecutive solutions are not guaranteed
+        to lie on the same IK branch.  The returned :class:`IKSolution` has:
+
+        - ``q`` with shape (N, n), one row per pose
+        - ``success`` True only if *every* pose was solved
+        - ``iterations`` and ``searches`` summed over all poses
+        - ``residual`` the *maximum* residual over all poses, the worst case
+        - ``reason`` the reason given by the last pose that failed, if any
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is now the maximum over the poses,
+            previously it was the minimum, which hid poses that were solved badly.
         """
         # Get the largest jindex in the ETS. If this is greater than ETS.n
         # then we need to pad the q vector with zeros
@@ -245,7 +263,7 @@ class IKSolver(ABC):
             traj = True
             methTep = Tep
         elif Tep.shape != (4, 4):
-            raise ValueError("Tep must be a 4x4 SE3 matrix")
+            raise ValueError("Tep must be an SE3, a 4x4 array or an (N, 4, 4) array")
         else:
             methTep = Tep
 
@@ -254,7 +272,7 @@ class IKSolver(ABC):
             success = True
             interations = 0
             searches = 0
-            residual = np.inf
+            residual = 0.0
             reason = ""
 
             for i, T in enumerate(methTep):
@@ -266,7 +284,7 @@ class IKSolver(ABC):
                 interations += sol.iterations
                 searches += sol.searches
 
-                if sol.residual < residual:
+                if sol.residual > residual:
                     residual = sol.residual
 
             return IKSolution(

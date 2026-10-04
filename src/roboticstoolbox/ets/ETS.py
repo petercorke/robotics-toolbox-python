@@ -1169,7 +1169,7 @@ class ETS(BaseETS):
         r"""
         Fast numerical inverse kinematics using Newton-Raphson optimisation
 
-        :param Tep: the desired end-effector pose or pose trajectory
+        :param Tep: the desired end-effector pose (a single pose only, for a trajectory use :meth:`ikine_NR`)
         :param q0: initial joint configuration (random valid configuration if not supplied)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
@@ -1275,7 +1275,7 @@ class ETS(BaseETS):
         r"""
         Fast numerical inverse kinematics by Gauss-Newton optimisation
 
-        :param Tep: the desired end-effector pose or pose trajectory
+        :param Tep: the desired end-effector pose (a single pose only, for a trajectory use :meth:`ikine_GN`)
         :param q0: initial joint configuration (random valid configuration if not supplied)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
@@ -1284,8 +1284,11 @@ class ETS(BaseETS):
         :param joint_limits: reject solutions with invalid joint configurations
         :param pinv: use the pseudo-inverse instead of the normal matrix inverse
         :param pinv_damping: damping factor for the pseudo-inverse
-        :returns: tuple (q, success, iterations, searches, residual)
-        :rtype: tuple
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches`` and ``residual`` error value (``reason`` is
+            always empty -- this fast C++ solver doesn't produce a granular failure
+            reason string, unlike :meth:`ikine_GN`)
+        :rtype: IKSolution
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -1392,8 +1395,10 @@ class ETS(BaseETS):
         r"""
         Levenberg-Marquardt numerical inverse kinematics solver
 
-        :param Tep: the desired end-effector pose
-        :param q0: the initial joint coordinate vector
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1410,6 +1415,16 @@ class ETS(BaseETS):
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method.
@@ -1555,8 +1570,10 @@ class ETS(BaseETS):
         r"""
         Newton-Raphson numerical inverse kinematics solver
 
-        :param Tep: the desired end-effector pose
-        :param q0: the initial joint coordinate vector
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1572,6 +1589,16 @@ class ETS(BaseETS):
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Newton-Raphson method.
@@ -1662,8 +1689,10 @@ class ETS(BaseETS):
         r"""
         Gauss-Newton numerical inverse kinematics solver
 
-        :param Tep: the desired end-effector pose
-        :param q0: the initial joint coordinate vector
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1679,6 +1708,16 @@ class ETS(BaseETS):
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Gauss-Newton method.
@@ -1785,8 +1824,10 @@ class ETS(BaseETS):
         r"""
         Quadratic programming numerical inverse kinematics solver
 
-        :param Tep: the desired end-effector pose
-        :param q0: the initial joint coordinate vector
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1803,6 +1844,16 @@ class ETS(BaseETS):
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
         :raises ImportError: if the package ``qpsolvers`` is not installed
 
         A method that provides functionality to perform numerical inverse kinematics

@@ -709,7 +709,7 @@ class RobotKinematicsMixin:
         r"""
         Fast numerical inverse kinematics using Newton-Raphson optimization
 
-        :param Tep: The desired end-effector pose or pose trajectory
+        :param Tep: The desired end-effector pose (a single pose only, for a trajectory use :meth:`ikine_NR`)
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
         :param q0: initial joint configuration (default to random valid joint
@@ -834,7 +834,7 @@ class RobotKinematicsMixin:
         r"""
         Fast numerical inverse kinematics by Gauss-Newton optimization
 
-        :param Tep: The desired end-effector pose or pose trajectory
+        :param Tep: The desired end-effector pose (a single pose only, for a trajectory use :meth:`ikine_GN`)
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
         :param q0: initial joint configuration (default to random valid joint
@@ -980,10 +980,12 @@ class RobotKinematicsMixin:
         r"""
         Levenberg-Marquardt Numerical Inverse Kinematics Solver
 
-        :param Tep: The desired end-effector pose
+        :param Tep: The desired end-effector pose or pose trajectory
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: How many iterations are allowed within a search before a new search
             is started
         :param slimit: How many searches are allowed before being deemed unsuccessful
@@ -1011,6 +1013,16 @@ class RobotKinematicsMixin:
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method.
@@ -1167,10 +1179,12 @@ class RobotKinematicsMixin:
         r"""
         Newton-Raphson Numerical Inverse Kinematics Solver
 
-        :param Tep: The desired end-effector pose
+        :param Tep: The desired end-effector pose or pose trajectory
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: How many iterations are allowed within a search before a new search
             is started
         :param slimit: How many searches are allowed before being deemed unsuccessful
@@ -1193,6 +1207,20 @@ class RobotKinematicsMixin:
         :param tool: a static tool transformation matrix to apply to the
             end of ``end``; defaults to the robot's own ``self.tool`` if
             not given
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches``, ``residual`` error value, and ``reason``
+            string if applicable
+        :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Newton-Raphson method.
@@ -1296,10 +1324,12 @@ class RobotKinematicsMixin:
         r"""
         Gauss-Newton Numerical Inverse Kinematics Solver
 
-        :param Tep: The desired end-effector pose
+        :param Tep: The desired end-effector pose or pose trajectory
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: How many iterations are allowed within a search before a new search
             is started
         :param slimit: How many searches are allowed before being deemed unsuccessful
@@ -1322,6 +1352,20 @@ class RobotKinematicsMixin:
         :param tool: a static tool transformation matrix to apply to the
             end of ``end``; defaults to the robot's own ``self.tool`` if
             not given
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches``, ``residual`` error value, and ``reason``
+            string if applicable
+        :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Gauss-Newton method.
@@ -1441,10 +1485,12 @@ class RobotKinematicsMixin:
         r"""
         Quadratic Programming Numerical Inverse Kinematics Solver
 
-        :param Tep: The desired end-effector pose
+        :param Tep: The desired end-effector pose or pose trajectory
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: How many iterations are allowed within a search before a new search
             is started
         :param slimit: How many searches are allowed before being deemed unsuccessful
@@ -1472,6 +1518,16 @@ class RobotKinematicsMixin:
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+
+        .. versionchanged:: 1.5.0
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method that provides functionality to perform numerical inverse kinematics
         (IK) using a quadratic programming approach.
