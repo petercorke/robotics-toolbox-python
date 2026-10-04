@@ -13,8 +13,20 @@ in the form given by Manocha and Canny,
     D. Manocha and J. F. Canny, "Efficient inverse kinematics for general 6R
     manipulators," IEEE Trans. Robotics and Automation 10(5):648-657, 1994,
 
-and in Tsai, "Robot Analysis", Wiley, 1999, appendix C.  The derivation here is
-our own, following those descriptions.
+and in Tsai, "Robot Analysis", Wiley, 1999, appendix C.
+
+Provenance: the method is that of those references.  The details of the
+construction, that is the loop closure split and the fourteen equations, the
+order of the monomials, the elimination of the right hand unknowns with a null
+space, the 12x12 matrix polynomial, and the three possible splits, were taken from
+the documentation and source of the open source package ssik (Personal Robotics
+Lab, BSD-3 licence, https://github.com/personalrobotics/ssik, version 8.1.0, in
+particular ``ssik/solvers/ikgeo/_raghavan_roth.py``), which was read for guidance
+before this was written.  So was its observation that the choice of split decides
+the conditioning for the Jaco, which we reproduced.  No code was copied.  The
+recovery of the other joints, the filtering of roots, the choice of split, the
+classification of the structure and the validation are our own, and everything
+was tested against forward kinematics and numerical inverse kinematics.
 
 The loop closure :math:`T = A_1 \cdots A_6` is split so that three link matrices
 are a product on one side, and the other three are moved around :math:`T`, for
