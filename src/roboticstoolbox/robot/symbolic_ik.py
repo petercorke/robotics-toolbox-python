@@ -1264,6 +1264,17 @@ class _Emitter:
         self.step(index + 1)
         self.loop_close()
 
+    def poly_helper(self, code: str, blank_lines: int) -> None:
+        """
+        Replace the placeholder line with the root finder, but only if some joint
+        is solved by a polynomial, otherwise remove it and the blank lines after it.
+        """
+        i = self.lines.index("@@POLY@@")
+        if any(step.poly for step in self.plan.steps):
+            self.lines[i : i + 1] = code.splitlines()
+        else:
+            del self.lines[i : i + 1 + blank_lines]
+
     # --- syntax: subclasses implement these ---
 
     def header(self) -> None: ...
@@ -1559,8 +1570,7 @@ def {self.name}(T, tol: float = 1e-6) -> IKResult:
     {", ".join(p[8:12])} = T[2][0], T[2][1], T[2][2], T[2][3]
     solutions: list[tuple[float, ...]] = []'''.splitlines():
             self.lines.append(line)
-        i = self.lines.index("@@POLY@@")
-        self.lines[i : i + 1] = _PY_POLY.splitlines()
+        self.poly_helper(_PY_POLY, 2)
         self.depth = 1
 
     def footer(self) -> None:
@@ -1686,8 +1696,7 @@ ik_status {self.name}(const double T[16], double tol,
     ik_ctx ctx_ = {{0}};
     ik_ctx *ctx = &ctx_;""".splitlines():
             self.lines.append(line)
-        i = self.lines.index("@@POLY@@")
-        self.lines[i : i + 1] = _C_POLY.splitlines()
+        self.poly_helper(_C_POLY, 1)
         self.depth = 1
         for line in self.pose_lines():
             self.put(line)
@@ -1813,8 +1822,7 @@ inline IkResult {self.name}(const double* T, double tol = 1e-6) {{
     IkContext ctx;
     IkResult result;""".splitlines():
             self.lines.append(line)
-        i = self.lines.index("@@POLY@@")
-        self.lines[i : i + 1] = _CXX_POLY.splitlines()
+        self.poly_helper(_CXX_POLY, 1)
         self.depth = 1
         for line in self.pose_lines():
             self.put(line)
