@@ -2,6 +2,7 @@
 @author: Jesse Haviland
 """
 
+import numpy as np
 from roboticstoolbox.robot.RobotProto import KinematicsProtocol
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.robot.Link import Link
@@ -9,6 +10,30 @@ from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.IK import IKSolution
 from spatialmath import SE3
 from typing import Literal as L, overload
+
+
+def _as_se3(T: NDArray | SE3) -> SE3:
+    """
+    Convert a pose or pose trajectory to an SE3 object
+
+    :param T: an SE3, a 4x4 array, or an (N, 4, 4) array of N poses
+    :raises ValueError: if ``T`` is an array of any other shape
+    :returns: an SE3 object holding one or N poses
+
+    .. note:: This is a workaround for a spatialmath (SMTB) limitation.  The
+        ``SE3`` constructor does not accept an (N, 4, 4) array, and with
+        ``check=False`` it silently builds a malformed object from one.  An
+        (N, 4, 4) array is therefore converted to a list of matrices first.
+        Once SMTB accepts such arrays this can go, see
+        https://github.com/rai-opensource/spatialmath-python/issues/236
+    """
+    if isinstance(T, np.ndarray):
+        if T.shape != (4, 4) and not (T.ndim == 3 and T.shape[1:] == (4, 4)):
+            raise ValueError("T must be an SE3, a 4x4 array or an (N, 4, 4) array")
+        if T.ndim == 3:
+            # SMTB workaround, see the note above
+            return SE3(list(T), check=False)
+    return SE3(T, check=False)
 
 
 class RobotKinematicsMixin:
@@ -680,7 +705,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ik_LM(
-            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
+            Tep=_as_se3(Tep) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -805,7 +830,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ik_NR(
-            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
+            Tep=_as_se3(Tep) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -945,7 +970,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ik_GN(
-            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
+            Tep=_as_se3(Tep) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -1127,7 +1152,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ikine_LM(
-            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
+            Tep=_as_se3(Tep) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -1257,7 +1282,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ikine_NR(
-            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
+            Tep=_as_se3(Tep) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -1401,7 +1426,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ikine_GN(
-            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
+            Tep=_as_se3(Tep) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,
@@ -1584,7 +1609,7 @@ class RobotKinematicsMixin:
         """
 
         return self.ets(start, end).ikine_QP(
-            Tep=SE3(Tep, check=False) * self._resolve_tool(tool).inv(),
+            Tep=_as_se3(Tep) * self._resolve_tool(tool).inv(),
             q0=q0,
             ilimit=ilimit,
             slimit=slimit,

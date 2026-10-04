@@ -623,6 +623,32 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
+    def test_robot_ikine_accepts_pose_arrays(self):
+        # Robot.ikine_* must treat an (N, 4, 4) array like the ETS methods do
+        panda = rtb.models.Panda()
+        Ts = panda.fkine(np.array([panda.qr, panda.qr + 0.1, panda.qr - 0.1]))
+        self.assertEqual(len(Ts), 3)
+        Tarr = np.array(Ts.A)  # Ts.A is a list of matrices, make a real 3-D array
+        self.assertEqual(Tarr.shape, (3, 4, 4))
+
+        for method in ("ikine_LM", "ikine_GN", "ikine_NR"):
+            sol = getattr(panda, method)(Tarr, q0=panda.qr, seed=0, joint_limits=False)
+            self.assertEqual(sol.q.shape, (3, panda.n), method)
+            sol_se3 = getattr(panda, method)(
+                Ts, q0=panda.qr, seed=0, joint_limits=False
+            )
+            nt.assert_allclose(sol.q, sol_se3.q, err_msg=method)
+
+        # a single pose as a 4x4 array still works
+        sol = panda.ikine_LM(Ts[0].A, q0=panda.qr, seed=0)
+        self.assertEqual(sol.q.shape, (panda.n,))
+
+    def test_robot_ikine_rejects_badly_shaped_arrays(self):
+        panda = rtb.models.Panda()
+        for bad in (np.eye(3), np.zeros((2, 3, 4)), np.zeros(16)):
+            with self.assertRaises(ValueError):
+                panda.ikine_LM(bad, q0=panda.qr)
+
     def test_ik_nr(self):
 
         tol = 1e-6
