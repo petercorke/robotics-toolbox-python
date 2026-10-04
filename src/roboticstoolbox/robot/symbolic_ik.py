@@ -622,7 +622,7 @@ def ikine_sym(
 
     try:
         with _time_limit(max_time):
-            return _ikine_sym(robot, n, verbose, mixed)
+            return _ikine_sym(robot, n, verbose, mixed)[0]
     except _Timeout:
         if verbose:
             print("timed out")
@@ -638,8 +638,8 @@ _MAX_NEW = 20  # stop after finding this many new equations, and reconsider
 
 def _ikine_sym(
     robot: DHRobot, n: int, verbose: bool, mixed: bool
-) -> list[list[sp.Expr]] | None:
-    """Implementation of :func:`ikine_sym`."""
+) -> tuple[list[list[sp.Expr]] | None, list[sp.Expr]]:
+    """Implementation of :func:`ikine_sym`, also returns the pool of equations."""
     robot, values = _symbolize(robot)
     revolute = {j: link.isrevolute for j, link in enumerate(robot.links, 1)}
     A = _link_matrices(robot)
@@ -727,13 +727,13 @@ def _ikine_sym(
             if not new:
                 if verbose:
                     print(f"stuck, solved joints {sorted(Q)}")
-                return None
+                return None, pool
             if verbose:
                 print(f"eliminated, {len(new)} new equations")
             pool.extend(new)
 
     done = set(Q)
-    return [[_clean(s, done) for s in Q[j]] for j in range(1, n + 1)]
+    return [[_clean(s, done) for s in Q[j]] for j in range(1, n + 1)], pool
 
 
 # ------------------------------------------------------------------------- #
@@ -752,6 +752,7 @@ class _Step:
     revolute: bool
     assigns: list[tuple[sp.Symbol, sp.Expr]]
     alts: list[sp.Expr]
+    checks: list[sp.Expr]  # equations that are zero for a valid choice of alts
 
 
 @dataclass
@@ -764,17 +765,86 @@ class _Plan:
     fk_assigns: list[tuple[sp.Symbol, sp.Expr]]  # forward kinematics check
     fk_exprs: list[sp.Expr]
     capacity: int  # upper bound on the number of solutions
+    verify: bool  # check each solution against the forward kinematics
 
 
-def _make_plan(robot: DHRobot) -> _Plan:
+def _pruning_checks(
+    Q: list[list[sp.Expr]],
+    pool: list[sp.Expr],
+    order: list[int],
+    A: list[sp.Matrix],
+    revolute: list[bool],
+    values: dict[str, float],
+    per_step: int = 3,
+) -> dict[int, list[sp.Expr]]:
+    """
+    Choose equations that rule out wrong alternatives as soon as possible
+
+    :param Q: symbolic solution
+    :param pool: all the equations
+    :param order: joints (0-based) in the order they are solved
+    :param per_step: most equations to use at each step
+    :returns: for each joint (0-based) that has more than one alternative, the
+        equations to check once it is chosen
+
+    Once a joint is solved there are equations whose unknowns are all solved, so
+    they are zero for a valid choice of the alternatives so far.  They are of use
+    only if they distinguish: the correct alternative satisfies them and the
+    wrong one does not, since some equations are satisfied by both roots.  This
+    is tested numerically, on random configurations, and equations are chosen
+    greedily to cover as many of the wrong alternatives as possible.
+    """
+    samples = _samples(A, revolute, values, count=6, seed=1)
+    solved: set[int] = set()
+    out: dict[int, list[sp.Expr]] = {}
+
+    for j in order:
+        solved.add(j + 1)
+        if len(Q[j]) < 2 or not revolute[j]:
+            continue
+        cands = sorted(
+            (e for e in pool if j + 1 in _joints_in(e) and _joints_in(e) <= solved),
+            key=sp.count_ops,
+        )[:40]
+        alt_funcs = [_compile(e) for e in Q[j]]
+        cand_funcs = [_compile(e) for e in cands]
+
+        # which (sample, wrong alternative) pairs each candidate rules out
+        covers: list[set[tuple[int, int]]] = [set() for _ in cands]
+        for si, vals in enumerate(samples):
+            true_q = np.arctan2(vals[f"S{j + 1}"], vals[f"C{j + 1}"])
+            for ai, (args, f) in enumerate(alt_funcs):
+                qa = float(f(*[vals[a.name] for a in args]))
+                if np.isnan(qa) or abs(_wrap(np.array(qa - true_q))) < 1e-6:
+                    continue  # no solution, or the correct alternative
+                trial = {**vals, f"S{j + 1}": np.sin(qa), f"C{j + 1}": np.cos(qa)}
+                for ci, (cargs, cf) in enumerate(cand_funcs):
+                    if abs(float(cf(*[trial[a.name] for a in cargs]))) > 1e-4:
+                        covers[ci].add((si, ai))
+
+        chosen: list[sp.Expr] = []
+        remaining = set().union(*covers) if covers else set()
+        while remaining and len(chosen) < per_step:
+            best = max(range(len(cands)), key=lambda c: (len(covers[c] & remaining), -c))
+            chosen.append(cands[best])
+            remaining -= covers[best]
+        if chosen:
+            out[j] = chosen
+    return out
+
+
+def _make_plan(robot: DHRobot, verify: bool = True) -> _Plan:
     """
     Solve a robot symbolically and organize the solution for code generation
 
     :param robot: DH robot model with numeric parameters
+    :param verify: check each solution against the forward kinematics
     :raises ValueError: if no solution is found, or the model has symbolic
         parameters
     """
-    Q = ikine_sym(robot, max_time=None)
+    if robot.n not in _SPECIFIED:
+        raise ValueError("Can only solve for 2, 3, 6 DOF")
+    Q, pool = _ikine_sym(robot, robot.n, False, True)
     if Q is None:
         raise ValueError("no symbolic solution for this robot")
 
@@ -802,14 +872,21 @@ def _make_plan(robot: DHRobot) -> _Plan:
     fk = [numeric(sp.expand(T[i, j])) for i in range(3) for j in range(4)]
     fk_assigns, fk_exprs = sp.cse(fk, symbols=sp.numbered_symbols("y"))
 
+    order = _solve_order(Q)
+    checks = _pruning_checks(
+        Q, pool, order, _link_matrices(symrobot), revolute, values
+    )
+
     steps = []
-    for j in _solve_order(Q):
+    for j in order:
         alts = [numeric(e) for e in Q[j]]
         assigns, alts = sp.cse(alts, symbols=sp.numbered_symbols(f"x{j + 1}_"))
-        steps.append(_Step(j + 1, revolute[j], assigns, alts))
+        steps.append(
+            _Step(j + 1, revolute[j], assigns, alts, [numeric(e) for e in checks.get(j, [])])
+        )
 
     capacity = int(np.prod([len(s.alts) for s in steps]))
-    return _Plan(n, pose, steps, fk_assigns, fk_exprs, capacity)
+    return _Plan(n, pose, steps, fk_assigns, fk_exprs, capacity, verify)
 
 
 class _Emitter:
@@ -869,12 +946,13 @@ class _Emitter:
     def step(self, index: int) -> None:
         plan = self.plan
         if index == len(plan.steps):
-            for sym, e in plan.fk_assigns:
-                self.decl(str(sym), self.expr(e))
-            self.error_start()
-            for e, p in zip(plan.fk_exprs, plan.pose):
-                self.error_update(self.expr(e), p)
-            self.push()
+            if plan.verify:
+                for sym, e in plan.fk_assigns:
+                    self.decl(str(sym), self.expr(e))
+                self.error_start()
+                for e, p in zip(plan.fk_exprs, plan.pose):
+                    self.error_update(self.expr(e), p)
+            self.push(plan.verify)
             return
 
         st = plan.steps[index]
@@ -887,6 +965,8 @@ class _Emitter:
         if st.revolute:
             self.decl(f"S{st.joint}", self.sin(q))
             self.decl(f"C{st.joint}", self.cos(q))
+        for c in st.checks:
+            self.check(self.expr(c))
         self.step(index + 1)
         self.loop_close()
 
@@ -903,7 +983,8 @@ class _Emitter:
     def cos(self, q: str) -> str: ...
     def error_start(self) -> None: ...
     def error_update(self, e: str, pose: str) -> None: ...
-    def push(self) -> None: ...
+    def check(self, e: str) -> None: ...
+    def push(self, guarded: bool) -> None: ...
 
 
 class _PythonEmitter(_Emitter):
@@ -1009,9 +1090,16 @@ def {self.name}(T, tol: float = 1e-6) -> IKResult:
     def error_update(self, e: str, pose: str) -> None:
         self.put(f"err = max(err, abs({e} - {pose}))")
 
-    def push(self) -> None:
-        self.put("if err < tol:")
-        self.put(f"    solutions.append(({self.qs()},))")
+    def check(self, e: str) -> None:
+        self.put(f"if abs({e}) > tol:  # a wrong alternative")
+        self.put("    continue")
+
+    def push(self, guarded: bool) -> None:
+        if guarded:
+            self.put("if err < tol:")
+            self.put(f"    solutions.append(({self.qs()},))")
+        else:
+            self.put(f"solutions.append(({self.qs()},))")
 
 
 class _CEmitter(_Emitter):
@@ -1115,8 +1203,15 @@ ik_status {self.name}(const double T[16], double tol,
         m = self.math_prefix
         self.put(f"err = {m}fmax(err, {m}fabs({e} - {pose}));")
 
-    def push(self) -> None:
-        self.put("if (err < tol && *count < IKINE_MAX_SOLUTIONS) {")
+    def check(self, e: str) -> None:
+        self.put(f"if ({self.math_prefix}fabs({e}) > tol) continue;  /* a wrong alternative */")
+
+    def push(self, guarded: bool) -> None:
+        self.put(
+            "if (err < tol && *count < IKINE_MAX_SOLUTIONS) {"
+            if guarded
+            else "if (*count < IKINE_MAX_SOLUTIONS) {"
+        )
         for j in range(1, self.plan.n + 1):
             self.put(f"    solutions[*count][{j - 1}] = q{j};")
         self.put("    ++*count;")
@@ -1185,8 +1280,8 @@ inline IkResult {self.name}(const double* T, double tol = 1e-6) {{
         self.depth = 0
         self.put("}")
 
-    def push(self) -> None:
-        self.put("if (err < tol) {")
+    def push(self, guarded: bool) -> None:
+        self.put("if (err < tol) {" if guarded else "{")
         self.put(f"    result.solutions.push_back({{{self.qs()}}});")
         self.put("}")
 
@@ -1301,8 +1396,11 @@ pub fn {self.name}(t: &[f64; 16], tol: f64) -> IkResult {{
     def error_update(self, e: str, pose: str) -> None:
         self.put(f"err = err.max(({e} - {pose}).abs());")
 
-    def push(self) -> None:
-        self.put("if err < tol {")
+    def check(self, e: str) -> None:
+        self.put(f"if ({e}).abs() > tol {{ continue; }} // a wrong alternative")
+
+    def push(self, guarded: bool) -> None:
+        self.put("if err < tol {" if guarded else "{")
         self.put(f"    solutions.push([{self.qs()}]);")
         self.put("}")
 
@@ -1327,6 +1425,7 @@ def generate_code(
     robot: DHRobot,
     language: Literal["python", "c", "c++", "rust"] = "python",
     name: str = "ikine",
+    verify: bool = True,
 ) -> str:
     """
     Generate source code for the inverse kinematics of a robot
@@ -1334,6 +1433,7 @@ def generate_code(
     :param robot: DH robot model with numeric parameters
     :param language: target language
     :param name: name of the generated function
+    :param verify: check each solution against the forward kinematics
     :returns: source code
     :raises ValueError: if no solution is found, the model has symbolic
         parameters, or the language is not supported
@@ -1349,13 +1449,15 @@ def generate_code(
     The link parameters are constants in the code, which uses only the
     language's standard library.  The joints are solved in the order found by
     :func:`ikine_sym`, with a nested loop over the alternative solutions for each
-    joint.  Each configuration is checked against the forward kinematics, and
-    only those that reach the pose to within ``tol`` are returned.
+    joint.  Wrong alternatives are dropped as soon as they are chosen, using
+    equations that are zero for a correct choice.  If ``verify`` is true each
+    configuration is also checked against the forward kinematics, and only those
+    that reach the pose to within ``tol`` are returned.
 
     The Python, C and C++ code is tested.  The Rust code is generated but has
     not yet been compiled.
     """
-    return _emit(_make_plan(robot), language, name)
+    return _emit(_make_plan(robot, verify), language, name)
 
 
 def generate_python(robot: DHRobot, name: str = "ikine") -> str:
@@ -1785,6 +1887,42 @@ def test_generated_code():
             )
             assert status == "SINGULAR", (name, language, status)
             print(f"{name:10s} {language:7s} ok, singular pose gave {len(solutions)} solutions")
+
+
+def test_pruning():
+    """
+    Wrong alternatives are dropped as they are chosen, so the final check
+    against the forward kinematics should make no difference.
+    """
+    from dataclasses import replace
+
+    import roboticstoolbox as rtb
+
+    rng = np.random.default_rng(3)
+    for name in ("IRB140", "KR5", "Puma560", "Stanford", "UR3", "UR5", "UR10"):
+        robot = getattr(rtb.models.DH, name)()
+        revolute = [link.isrevolute for link in robot.links]
+        plan = _make_plan(robot, verify=True)
+        checks = {st.joint: len(st.checks) for st in plan.steps}
+
+        verified, unverified = {}, {}
+        exec(_emit(plan, "python", "ikine"), verified)  # noqa: S102
+        exec(_emit(replace(plan, verify=False), "python", "ikine"), unverified)  # noqa: S102
+
+        extra = 0
+        for _ in range(5):
+            q0 = np.where(revolute, rng.uniform(-1.5, 1.5, 6), rng.uniform(0.2, 0.6, 6))
+            T = robot.fkine(q0).A
+            a = [np.array(q) for q in verified["ikine"](T).solutions]
+            b = [np.array(q) for q in unverified["ikine"](T).solutions]
+
+            # every solution that survives the pruning must also pass the check
+            assert all(
+                any(np.allclose(_wrap_joints(x, revolute), _wrap_joints(y, revolute), atol=1e-6) for y in a)
+                for x in b
+            ), (name, "pruning left a wrong solution")
+            extra += len(b) - len(a)
+        print(f"{name:9s} equations checked per joint {checks}, extra solutions {extra}")
 
 
 def test_generated_rust_smoke():
