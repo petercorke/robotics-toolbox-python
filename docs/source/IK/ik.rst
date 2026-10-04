@@ -189,7 +189,7 @@ If ``Tep`` is a trajectory of N poses, each pose is solved independently, starti
 * ``residual`` is the maximum over all poses, the worst case
 * ``reason`` is the reason given by the last pose that failed, if any
 
-.. versionchanged:: 1.4.5
+.. versionchanged:: 1.5.0
     For a trajectory, ``residual`` is the maximum over the poses, it was the minimum.
 
 .. rubric:: The Implemented IK Solvers
