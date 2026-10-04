@@ -1012,40 +1012,57 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def jtraj(
         self,
-        T1: NDArray | SE3,
-        T2: NDArray | SE3,
-        t: NDArray | int,
-        **kwargs,
+        q0: ArrayLike,
+        qf: ArrayLike,
+        t: ArrayLike | int,
+        qd0: ArrayLike | None = None,
+        qd1: ArrayLike | None = None,
     ):
         """
-        Joint-space trajectory between SE(3) poses
+        Joint-space trajectory between two joint configurations
 
-        :param T1: initial end-effector pose
-        :param T2: final end-effector pose
+        :param q0: initial joint coordinates
+        :param qf: final joint coordinates
         :param t: time vector or number of steps
-        :param kwargs: arguments passed to the IK solver
+        :param qd0: initial joint velocity, defaults to zero
+        :param qd1: final joint velocity, defaults to zero
+        :raises TypeError: if ``q0`` or ``qf`` is an :class:`SE3`
         :returns: trajectory
 
-        The initial and final poses are mapped to joint space using inverse
-        kinematics:
+        ``traj = robot.jtraj(q0, qf, t)`` is a trajectory object whose
+        attribute ``traj.q`` is a row-wise joint-space trajectory, a quintic
+        polynomial in time from ``q0`` to ``qf``.  It is the method form of
+        :func:`~roboticstoolbox.tools.trajectory.jtraj`.
 
-        - if the object has an analytic solution ``ikine_a`` that will be used,
-        - otherwise the general numerical algorithm ``ikine_lm`` will be used.
+        .. deprecated:: 1.5.0
+            Passing :class:`SE3` poses for ``q0`` or ``qf`` is deprecated and now
+            raises ``TypeError``.  The poses were converted to joint coordinates
+            by inverse kinematics, which is never simple: which solution is chosen
+            depends on the solver and its starting point, and it can fail.  Do
+            that explicitly, so you control and can check it::
 
-        ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
-        attribute ``traj.q`` is a row-wise joint-space trajectory.
+                q0 = robot.ikine_LM(T0, q0=robot.qr).q
+                qf = robot.ikine_LM(Tf, q0=q0).q
+                traj = robot.jtraj(q0, qf, t)
 
+            For a Cartesian trajectory see
+            :func:`~roboticstoolbox.tools.trajectory.ctraj`.
+
+        .. versionchanged:: 1.5.0
+            The arguments are joint coordinates only, they were named ``T1`` and
+            ``T2`` and could be poses.  The ``**kwargs`` that were passed to the
+            inverse kinematics method are gone.
         """
 
-        if hasattr(self, "ikine_a"):
-            ik = self.ikine_a  # type: ignore
-        else:
-            ik = self.ikine_LM
+        if isinstance(q0, SE3) or isinstance(qf, SE3):
+            raise TypeError(
+                "jtraj no longer accepts SE3 poses, this was deprecated in 1.5.0. "
+                "Solve the inverse kinematics explicitly and pass joint "
+                "coordinates, e.g. robot.jtraj(robot.ikine_LM(T0).q, "
+                "robot.ikine_LM(Tf).q, t)"
+            )
 
-        q1 = ik(T1, **kwargs)
-        q2 = ik(T2, **kwargs)
-
-        return rtb.jtraj(q1.q, q2.q, t)
+        return rtb.jtraj(q0, qf, t, qd0=qd0, qd1=qd1)
 
     @overload
     def jacob0_dot(
