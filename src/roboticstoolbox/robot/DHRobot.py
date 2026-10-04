@@ -2007,7 +2007,9 @@ class DHRobot(Robot):
 
         :param Tep: The desired end-effector pose or pose trajectory, see
             :meth:`ETS.ikine_LM` for how a trajectory is handled
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ikargs: |ikargs|
         :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
         :rtype: IKSolution

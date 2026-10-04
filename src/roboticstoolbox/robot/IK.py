@@ -191,7 +191,9 @@ class IKSolver(ABC):
 
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
@@ -261,7 +263,7 @@ class IKSolver(ABC):
             traj = True
             methTep = Tep
         elif Tep.shape != (4, 4):
-            raise ValueError("Tep must be a 4x4 SE3 matrix")
+            raise ValueError("Tep must be an SE3, a 4x4 array or an (N, 4, 4) array")
         else:
             methTep = Tep
 

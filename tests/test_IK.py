@@ -799,6 +799,21 @@ class TestIK(unittest.TestCase):
         self.assertFalse(sol.success)
         self.assertGreater(sol.residual, solver.tol)
 
+    def test_q0_matrix_seeds_the_first_searches(self):
+        # row k of an (m, n) q0 is the starting point of search k
+        panda = rtb.models.Panda().ets()
+        q_true = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        Tep = panda.eval(q_true)
+        q0 = np.vstack([np.zeros(panda.n), q_true])
+
+        # one iteration per search: the first seed cannot converge, the second is exact
+        solver = rtb.IK_LM(seed=0, ilimit=1, joint_limits=False)
+        sol = solver.solve(panda, Tep, q0)
+
+        self.assertTrue(sol.success)
+        self.assertEqual(sol.searches, 2)
+        nt.assert_allclose(sol.q, q_true, atol=1e-6)
+
     def test_sol_print1(self):
 
         sol = rtb.IKSolution(

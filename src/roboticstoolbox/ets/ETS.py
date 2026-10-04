@@ -1396,7 +1396,9 @@ class ETS(BaseETS):
         Levenberg-Marquardt numerical inverse kinematics solver
 
         :param Tep: the desired end-effector pose or pose trajectory
-        :param q0: the initial joint coordinate vector
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1569,7 +1571,9 @@ class ETS(BaseETS):
         Newton-Raphson numerical inverse kinematics solver
 
         :param Tep: the desired end-effector pose or pose trajectory
-        :param q0: the initial joint coordinate vector
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1686,7 +1690,9 @@ class ETS(BaseETS):
         Gauss-Newton numerical inverse kinematics solver
 
         :param Tep: the desired end-effector pose or pose trajectory
-        :param q0: the initial joint coordinate vector
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1819,7 +1825,9 @@ class ETS(BaseETS):
         Quadratic programming numerical inverse kinematics solver
 
         :param Tep: the desired end-effector pose or pose trajectory
-        :param q0: the initial joint coordinate vector
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E

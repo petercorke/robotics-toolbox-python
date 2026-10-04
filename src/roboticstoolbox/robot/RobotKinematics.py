@@ -983,7 +983,9 @@ class RobotKinematicsMixin:
         :param Tep: The desired end-effector pose or pose trajectory
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: How many iterations are allowed within a search before a new search
             is started
         :param slimit: How many searches are allowed before being deemed unsuccessful
@@ -1180,7 +1182,9 @@ class RobotKinematicsMixin:
         :param Tep: The desired end-effector pose or pose trajectory
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: How many iterations are allowed within a search before a new search
             is started
         :param slimit: How many searches are allowed before being deemed unsuccessful
@@ -1323,7 +1327,9 @@ class RobotKinematicsMixin:
         :param Tep: The desired end-effector pose or pose trajectory
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: How many iterations are allowed within a search before a new search
             is started
         :param slimit: How many searches are allowed before being deemed unsuccessful
@@ -1482,7 +1488,9 @@ class RobotKinematicsMixin:
         :param Tep: The desired end-effector pose or pose trajectory
         :param end: the link considered as the end-effector
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: How many iterations are allowed within a search before a new search
             is started
         :param slimit: How many searches are allowed before being deemed unsuccessful
