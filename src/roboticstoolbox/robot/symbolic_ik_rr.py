@@ -248,6 +248,318 @@ def _weierstrass() -> np.ndarray:
 _W = _weierstrass()
 
 
+# A small dense linear algebra kernel, for the C and C++ code, in real arithmetic.
+# The matrices are tiny (at most 24x24) so a linear algebra library would only add
+# a dependency, and the matrices are stored row-major.  It is plain C99 that is also
+# valid C++.
+#
+# The algorithms are the standard published ones, written for this project:
+#   - LU decomposition with partial pivoting, and Householder QR, see Golub and Van
+#     Loan, "Matrix Computations".
+#   - one-sided Jacobi SVD, M. R. Hestenes, J. SIAM 6(1), 1958, see also J. Demmel
+#     and K. Veselic, SIAM J. Matrix Anal. Appl. 13(4), 1992.
+#   - eigenvalues of a general real matrix: balancing, B. N. Parlett and C.
+#     Reinsch, Numer. Math. 13, 1969, reduction to Hessenberg form by Householder
+#     reflections, and the Francis double shift QR algorithm, J. G. F. Francis,
+#     Computer J. 4, 1961-62; see Wilkinson and Reinsch, "Handbook for Automatic
+#     Computation vol. II: Linear Algebra" (1971), whose EISPACK translation of the
+#     last is the model, and Golub and Van Loan section 7.5.
+_C_KERNEL = """\
+#define IKRR_MAXN 24
+
+/* Solve A X = B, with A n-by-n and B n-by-m, by LU decomposition with partial
+ * pivoting.  A is destroyed and B is overwritten by X.  Returns 0 if A is singular. */
+static int ikrr_lu_solve(double *A, int n, double *B, int m) {
+    for (int k = 0; k < n; ++k) {
+        int p = k;
+        double big = fabs(A[k * n + k]);
+        for (int i = k + 1; i < n; ++i) {
+            if (fabs(A[i * n + k]) > big) { big = fabs(A[i * n + k]); p = i; }
+        }
+        if (big == 0.0) return 0;
+        if (p != k) {
+            for (int j = 0; j < n; ++j) { double t = A[k * n + j]; A[k * n + j] = A[p * n + j]; A[p * n + j] = t; }
+            for (int j = 0; j < m; ++j) { double t = B[k * m + j]; B[k * m + j] = B[p * m + j]; B[p * m + j] = t; }
+        }
+        for (int i = k + 1; i < n; ++i) {
+            double f = A[i * n + k] / A[k * n + k];
+            for (int j = k; j < n; ++j) A[i * n + j] -= f * A[k * n + j];
+            for (int j = 0; j < m; ++j) B[i * m + j] -= f * B[k * m + j];
+        }
+    }
+    for (int j = 0; j < m; ++j) {
+        for (int i = n - 1; i >= 0; --i) {
+            double s = B[i * m + j];
+            for (int k = i + 1; k < n; ++k) s -= A[i * n + k] * B[k * m + j];
+            B[i * m + j] = s / A[i * n + i];
+        }
+    }
+    return 1;
+}
+
+/* Householder QR of the m-by-n matrix A, m >= n.  On return the upper triangle of
+ * A is R, and Qf is the m-by-m orthogonal matrix such that A = Qf R.  The last
+ * m - n columns of Qf span the left null space of A. */
+static void ikrr_qr(double *A, int m, int n, double *Qf) {
+    double v[IKRR_MAXN];
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < m; ++j) Qf[i * m + j] = (i == j) ? 1.0 : 0.0;
+    }
+    for (int k = 0; k < n; ++k) {
+        double norm = 0.0;
+        for (int i = k; i < m; ++i) norm += A[i * n + k] * A[i * n + k];
+        norm = sqrt(norm);
+        if (norm == 0.0) continue;
+        double alpha = (A[k * n + k] > 0.0) ? -norm : norm;
+        for (int i = k; i < m; ++i) v[i] = A[i * n + k];
+        v[k] -= alpha;
+        double vv = 0.0;
+        for (int i = k; i < m; ++i) vv += v[i] * v[i];
+        if (vv == 0.0) continue;
+        double beta = 2.0 / vv;
+        for (int j = k; j < n; ++j) {
+            double dot = 0.0;
+            for (int i = k; i < m; ++i) dot += v[i] * A[i * n + j];
+            dot *= beta;
+            for (int i = k; i < m; ++i) A[i * n + j] -= dot * v[i];
+        }
+        for (int i = 0; i < m; ++i) {
+            double dot = 0.0;
+            for (int j = k; j < m; ++j) dot += Qf[i * m + j] * v[j];
+            dot *= beta;
+            for (int j = k; j < m; ++j) Qf[i * m + j] -= dot * v[j];
+        }
+        for (int i = k + 1; i < m; ++i) A[i * n + k] = 0.0;
+    }
+}
+
+/* x minimising |A x - b| for the m-by-n matrix A already factored by ikrr_qr into
+ * R (R is in the upper triangle of A) and Qf. */
+static void ikrr_qr_solve(const double *R, const double *Qf, int m, int n, const double *b, double *x) {
+    double y[IKRR_MAXN];
+    for (int j = 0; j < n; ++j) {
+        y[j] = 0.0;
+        for (int i = 0; i < m; ++i) y[j] += Qf[i * m + j] * b[i];
+    }
+    for (int i = n - 1; i >= 0; --i) {
+        double s = y[i];
+        for (int k = i + 1; k < n; ++k) s -= R[i * n + k] * x[k];
+        x[i] = s / R[i * n + i];
+    }
+}
+
+/* Singular value decomposition of the square n-by-n matrix A by one-sided Jacobi
+ * rotations.  A is not changed.  The singular values are written to s in
+ * decreasing order, and the corresponding right singular vectors are the columns
+ * of the n-by-n matrix V. */
+static void ikrr_svd(const double *A, int n, double *s, double *V) {
+    double U[IKRR_MAXN * IKRR_MAXN], norms[IKRR_MAXN];
+    int order[IKRR_MAXN];
+    for (int i = 0; i < n * n; ++i) U[i] = A[i];
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) V[i * n + j] = (i == j) ? 1.0 : 0.0;
+    }
+    for (int sweep = 0; sweep < 60; ++sweep) {
+        int rotated = 0;
+        for (int p = 0; p < n - 1; ++p) {
+            for (int q = p + 1; q < n; ++q) {
+                double alpha = 0.0, beta = 0.0, gamma = 0.0;
+                for (int i = 0; i < n; ++i) {
+                    alpha += U[i * n + p] * U[i * n + p];
+                    beta += U[i * n + q] * U[i * n + q];
+                    gamma += U[i * n + p] * U[i * n + q];
+                }
+                if (gamma == 0.0 || fabs(gamma) <= 1e-15 * sqrt(alpha * beta)) continue;
+                rotated = 1;
+                double zeta = (beta - alpha) / (2.0 * gamma);
+                double t = ((zeta >= 0.0) ? 1.0 : -1.0) / (fabs(zeta) + sqrt(1.0 + zeta * zeta));
+                double c = 1.0 / sqrt(1.0 + t * t), sn = c * t;
+                for (int i = 0; i < n; ++i) {
+                    double up = U[i * n + p], uq = U[i * n + q];
+                    U[i * n + p] = c * up - sn * uq;
+                    U[i * n + q] = sn * up + c * uq;
+                    double vp = V[i * n + p], vq = V[i * n + q];
+                    V[i * n + p] = c * vp - sn * vq;
+                    V[i * n + q] = sn * vp + c * vq;
+                }
+            }
+        }
+        if (!rotated) break;
+    }
+    for (int j = 0; j < n; ++j) {
+        double sum = 0.0;
+        for (int i = 0; i < n; ++i) sum += U[i * n + j] * U[i * n + j];
+        norms[j] = sqrt(sum);
+        order[j] = j;
+    }
+    for (int i = 1; i < n; ++i) {  /* insertion sort, decreasing */
+        int o = order[i], j = i - 1;
+        while (j >= 0 && norms[order[j]] < norms[o]) { order[j + 1] = order[j]; --j; }
+        order[j + 1] = o;
+    }
+    double Vs[IKRR_MAXN * IKRR_MAXN];
+    for (int j = 0; j < n; ++j) {
+        s[j] = norms[order[j]];
+        for (int i = 0; i < n; ++i) Vs[i * n + j] = V[i * n + order[j]];
+    }
+    for (int i = 0; i < n * n; ++i) V[i] = Vs[i];
+}
+
+/* Scale rows and columns of A by powers of two so that the norm of each row is
+ * about that of the column, which improves the accuracy of the eigenvalues.  This
+ * is a similarity transform, so they are unchanged. */
+static void ikrr_balance(double *A, int n) {
+    int changed = 1;
+    while (changed) {
+        changed = 0;
+        for (int i = 0; i < n; ++i) {
+            double c = 0.0, r = 0.0;
+            for (int j = 0; j < n; ++j) {
+                if (j != i) { c += fabs(A[j * n + i]); r += fabs(A[i * n + j]); }
+            }
+            if (c == 0.0 || r == 0.0) continue;
+            double f = 1.0;  /* power of two with c f^2 close to r */
+            while (c * f * f < 0.5 * r) f *= 2.0;
+            while (c * f * f > 2.0 * r) f *= 0.5;
+            if (c * f + r / f < 0.95 * (c + r)) {
+                for (int j = 0; j < n; ++j) { A[i * n + j] /= f; A[j * n + i] *= f; }
+                changed = 1;
+            }
+        }
+    }
+}
+
+/* Reduce A to upper Hessenberg form by Householder reflections. */
+static void ikrr_hessenberg(double *A, int n) {
+    double v[IKRR_MAXN];
+    for (int k = 0; k < n - 2; ++k) {
+        double norm = 0.0;
+        for (int i = k + 1; i < n; ++i) norm += A[i * n + k] * A[i * n + k];
+        norm = sqrt(norm);
+        if (norm == 0.0) continue;
+        double alpha = (A[(k + 1) * n + k] > 0.0) ? -norm : norm;
+        for (int i = k + 1; i < n; ++i) v[i] = A[i * n + k];
+        v[k + 1] -= alpha;
+        double vv = 0.0;
+        for (int i = k + 1; i < n; ++i) vv += v[i] * v[i];
+        if (vv == 0.0) continue;
+        double beta = 2.0 / vv;
+        for (int j = k; j < n; ++j) {
+            double dot = 0.0;
+            for (int i = k + 1; i < n; ++i) dot += v[i] * A[i * n + j];
+            dot *= beta;
+            for (int i = k + 1; i < n; ++i) A[i * n + j] -= dot * v[i];
+        }
+        for (int i = 0; i < n; ++i) {
+            double dot = 0.0;
+            for (int j = k + 1; j < n; ++j) dot += A[i * n + j] * v[j];
+            dot *= beta;
+            for (int j = k + 1; j < n; ++j) A[i * n + j] -= dot * v[j];
+        }
+        for (int i = k + 2; i < n; ++i) A[i * n + k] = 0.0;
+    }
+}
+
+/* One implicit double shift QR (Francis) step on the active block l..h of the
+ * Hessenberg matrix H, the shifts being the roots of x^2 - s x + t. */
+static void ikrr_francis(double *H, int n, int l, int h, double s, double t) {
+    double x = H[l * n + l] * H[l * n + l] + H[l * n + l + 1] * H[(l + 1) * n + l] - s * H[l * n + l] + t;
+    double y = H[(l + 1) * n + l] * (H[l * n + l] + H[(l + 1) * n + l + 1] - s);
+    double z = H[(l + 1) * n + l] * H[(l + 2) * n + l + 1];
+    for (int k = l; k <= h - 1; ++k) {
+        int three = (k < h - 1);
+        if (k > l) {
+            x = H[k * n + k - 1];
+            y = H[(k + 1) * n + k - 1];
+            z = three ? H[(k + 2) * n + k - 1] : 0.0;
+        }
+        double norm = sqrt(x * x + y * y + z * z);
+        if (norm == 0.0) continue;
+        double alpha = (x > 0.0) ? -norm : norm;
+        double v0 = x - alpha, v1 = y, v2 = z;
+        double beta = 2.0 / (v0 * v0 + v1 * v1 + v2 * v2);
+        for (int j = (k > l ? k - 1 : l); j <= h; ++j) {  /* P H */
+            double dot = v0 * H[k * n + j] + v1 * H[(k + 1) * n + j] + (three ? v2 * H[(k + 2) * n + j] : 0.0);
+            dot *= beta;
+            H[k * n + j] -= dot * v0;
+            H[(k + 1) * n + j] -= dot * v1;
+            if (three) H[(k + 2) * n + j] -= dot * v2;
+        }
+        int last = (k + 3 < h) ? k + 3 : h;
+        for (int i = l; i <= last; ++i) {  /* H P */
+            double dot = H[i * n + k] * v0 + H[i * n + k + 1] * v1 + (three ? H[i * n + k + 2] * v2 : 0.0);
+            dot *= beta;
+            H[i * n + k] -= dot * v0;
+            H[i * n + k + 1] -= dot * v1;
+            if (three) H[i * n + k + 2] -= dot * v2;
+        }
+        if (k > l) {
+            H[(k + 1) * n + k - 1] = 0.0;
+            if (three) H[(k + 2) * n + k - 1] = 0.0;
+        }
+    }
+}
+
+/* Eigenvalues of the upper Hessenberg matrix H, which is destroyed.  The real and
+ * imaginary parts are written to wr and wi.  Returns 0 if it fails to converge. */
+static int ikrr_hqr(double *H, int n, double *wr, double *wi) {
+    const double eps = 2.220446049250313e-16;
+    double anorm = 0.0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = (i > 0 ? i - 1 : 0); j < n; ++j) anorm += fabs(H[i * n + j]);
+    }
+    int h = n - 1, iterations = 0;
+    while (h >= 0) {
+        int l = h;
+        while (l > 0) {  /* the start of the unreduced block ending at h */
+            double scale = fabs(H[(l - 1) * n + l - 1]) + fabs(H[l * n + l]);
+            if (scale == 0.0) scale = anorm;
+            if (fabs(H[l * n + l - 1]) <= eps * scale) { H[l * n + l - 1] = 0.0; break; }
+            --l;
+        }
+        if (l == h) {  /* one eigenvalue */
+            wr[h] = H[h * n + h]; wi[h] = 0.0;
+            --h; iterations = 0;
+        } else if (l == h - 1) {  /* a 2-by-2 block */
+            double a = H[(h - 1) * n + h - 1], b = H[(h - 1) * n + h];
+            double c = H[h * n + h - 1], d = H[h * n + h];
+            double p = 0.5 * (a - d), q = p * p + b * c;
+            if (q >= 0.0) {
+                double z = p + ((p >= 0.0) ? sqrt(q) : -sqrt(q));
+                wr[h - 1] = d + z;
+                wr[h] = (z != 0.0) ? d - b * c / z : d + z;
+                wi[h - 1] = wi[h] = 0.0;
+            } else {
+                wr[h - 1] = wr[h] = d + p;
+                wi[h - 1] = sqrt(-q); wi[h] = -wi[h - 1];
+            }
+            h -= 2; iterations = 0;
+        } else {
+            if (iterations >= 60) return 0;
+            double a = H[(h - 1) * n + h - 1], b = H[(h - 1) * n + h];
+            double c = H[h * n + h - 1], d = H[h * n + h];
+            double s = a + d, t = a * d - b * c;
+            if (iterations == 10 || iterations == 20) {  /* break a cycle */
+                double shift = d + 0.75 * (fabs(c) + fabs(H[(h - 1) * n + h - 2]));
+                s = 2.0 * shift; t = shift * shift;
+            }
+            ikrr_francis(H, n, l, h, s, t);
+            ++iterations;
+        }
+    }
+    return 1;
+}
+
+/* Eigenvalues of the general real n-by-n matrix A, which is destroyed.  Returns 0
+ * if the iteration fails to converge. */
+static int ikrr_eig(double *A, int n, double *wr, double *wi) {
+    ikrr_balance(A, n);
+    ikrr_hessenberg(A, n);
+    return ikrr_hqr(A, n, wr, wi);
+}
+"""
+
+
 _GENERATED = """\
 @@BANNER@@
 
@@ -938,6 +1250,161 @@ def test_generate_other_languages():
 
     with pytest.raises(NotImplementedError):
         General6R(rtb.models.DH.Jaco()).generate("c++")
+
+
+def _run_kernel(cases: str, language: str = "c") -> list[str]:
+    """
+    Compile the C kernel with a small driver, and run it
+
+    :param cases: text commands for the driver, see the C code below
+    :param language: ``"c"`` or ``"c++"``, to check it is valid as both
+    :returns: lines of output.  The compiler must give no warnings.
+    """
+    import subprocess
+    import tempfile
+    from pathlib import Path
+
+    driver = r"""
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+""" + _C_KERNEL + r"""
+static void rd(double *a, int k) { for (int i = 0; i < k; ++i) if (scanf("%lf", &a[i]) != 1) exit(2); }
+int main(void) {
+    char mode;
+    while (scanf(" %c", &mode) == 1) {
+        int n, m, k;
+        double A[1024], B[1024], X[1024], Q[1024], s[32], wr[32], wi[32];
+        if (mode == 'e') {  /* eigenvalues of an n-by-n matrix */
+            if (scanf("%d", &n) != 1) return 2;
+            rd(A, n * n);
+            int ok = ikrr_eig(A, n, wr, wi);
+            printf("%d\n", ok);
+            for (int i = 0; i < n; ++i) printf("%.17g %.17g\n", wr[i], wi[i]);
+        } else if (mode == 's') {  /* singular values and vectors of an n-by-n matrix */
+            if (scanf("%d", &n) != 1) return 2;
+            rd(A, n * n);
+            ikrr_svd(A, n, s, X);
+            for (int i = 0; i < n; ++i) printf("%.17g\n", s[i]);
+            for (int i = 0; i < n * n; ++i) printf("%.17g\n", X[i]);
+        } else if (mode == 'q') {  /* QR of an m-by-n matrix, and a least squares problem */
+            if (scanf("%d %d", &m, &n) != 2) return 2;
+            rd(A, m * n); rd(B, m);
+            ikrr_qr(A, m, n, Q);
+            ikrr_qr_solve(A, Q, m, n, B, X);
+            for (int i = 0; i < n; ++i) printf("%.17g\n", X[i]);
+            for (int i = 0; i < m * m; ++i) printf("%.17g\n", Q[i]);
+            for (int i = 0; i < m * n; ++i) printf("%.17g\n", A[i]);
+        } else if (mode == 'l') {  /* A X = B, n-by-n and n-by-k */
+            if (scanf("%d %d", &n, &k) != 2) return 2;
+            rd(A, n * n); rd(B, n * k);
+            int ok = ikrr_lu_solve(A, n, B, k);
+            printf("%d\n", ok);
+            for (int i = 0; i < n * k; ++i) printf("%.17g\n", B[i]);
+        }
+    }
+    return 0;
+}
+"""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        source = tmp / ("kernel.c" if language == "c" else "kernel.cpp")
+        source.write_text(driver)
+        command = (
+            ["cc", "-std=c99", "-O2", "-Wall", "-Wextra", "-o", "kernel", source.name, "-lm"]
+            if language == "c"
+            else ["c++", "-std=c++17", "-O2", "-Wall", "-Wextra", "-o", "kernel", source.name]
+        )
+        build = subprocess.run(command, cwd=tmp, capture_output=True, text=True)
+        assert build.returncode == 0 and build.stderr == "", build.stderr
+        run = subprocess.run(
+            [str(tmp / "kernel")], input=cases, capture_output=True, text=True, check=True
+        )
+    return run.stdout.split()
+
+
+def _numbers(a: np.ndarray) -> str:
+    return " ".join(repr(float(x)) for x in np.asarray(a).ravel())
+
+
+def test_c_kernel_eigenvalues():
+    import shutil
+
+    rng = np.random.default_rng(0)
+    matrices = [rng.normal(size=(24, 24)) for _ in range(100)]
+    matrices += [rng.normal(size=(n, n)) for n in (1, 2, 3, 5, 8, 12) for _ in range(10)]
+    # the matrices the method really uses: companion matrices for the Jaco
+    import roboticstoolbox as rtb
+
+    robot = rtb.models.DH.Jaco()
+    solver = General6R(robot)
+    module = solver._module(solver.k)
+    for q, T in solver._random_poses(30, 3):
+        *_, M0, M1, M2 = module["_polynomial"](T)
+        Z, I = np.zeros((12, 12)), np.eye(12)
+        matrices.append(np.block([[Z, I], [-np.linalg.solve(M2, M0), -np.linalg.solve(M2, M1)]]))
+
+    cases = "".join(f"e {len(A)} {_numbers(A)}\n" for A in matrices)
+    for language in ["c"] + (["c++"] if shutil.which("c++") else []):
+        out = iter(_run_kernel(cases, language))
+        for A in matrices:
+            assert next(out) == "1", "failed to converge"
+            n = len(A)
+            ours = np.array([complex(float(next(out)), float(next(out))) for _ in range(n)])
+            theirs = np.linalg.eigvals(A)
+            scale = max(1.0, np.abs(theirs).max())
+            # each eigenvalue has a partner in the other set
+            for z in ours:
+                assert np.abs(theirs - z).min() < 1e-7 * scale, (n, z)
+            for z in theirs:
+                assert np.abs(ours - z).min() < 1e-7 * scale, (n, z)
+
+
+def test_c_kernel_linear_algebra():
+    rng = np.random.default_rng(1)
+    # SVD of square matrices, including a singular one
+    squares = [rng.normal(size=(12, 12)) for _ in range(30)]
+    singular = rng.normal(size=(12, 12))
+    singular[:, 5] = singular[:, 2] * 3.0
+    squares.append(singular)
+    # QR and least squares
+    tall = [(rng.normal(size=(14, 8)), rng.normal(size=14)) for _ in range(30)]
+    tall += [(rng.normal(size=(12, 6)), rng.normal(size=12)) for _ in range(30)]
+    # linear systems
+    systems = [(rng.normal(size=(12, 12)), rng.normal(size=(12, 24))) for _ in range(30)]
+
+    cases = "".join(f"s {len(A)} {_numbers(A)}\n" for A in squares)
+    cases += "".join(f"q {A.shape[0]} {A.shape[1]} {_numbers(A)} {_numbers(b)}\n" for A, b in tall)
+    cases += "".join(f"l {len(A)} {B.shape[1]} {_numbers(A)} {_numbers(B)}\n" for A, B in systems)
+    cases += "l 2 1 1 2 2 4 1 2\n"  # singular
+    out = iter(_run_kernel(cases))
+
+    for A in squares:
+        n = len(A)
+        s = np.array([float(next(out)) for _ in range(n)])
+        V = np.array([float(next(out)) for _ in range(n * n)]).reshape(n, n)
+        np.testing.assert_allclose(s, np.linalg.svd(A, compute_uv=False), atol=1e-12)
+        np.testing.assert_allclose(V.T @ V, np.eye(n), atol=1e-12)
+        np.testing.assert_allclose(np.linalg.norm(A @ V, axis=0), s, atol=1e-12)  # A v_j = s_j u_j
+
+    for A, b in tall:
+        m, n = A.shape
+        x = np.array([float(next(out)) for _ in range(n)])
+        Qf = np.array([float(next(out)) for _ in range(m * m)]).reshape(m, m)
+        R = np.array([float(next(out)) for _ in range(m * n)]).reshape(m, n)
+        np.testing.assert_allclose(x, np.linalg.lstsq(A, b, rcond=None)[0], atol=1e-10)
+        np.testing.assert_allclose(Qf @ R, A, atol=1e-12)
+        np.testing.assert_allclose(Qf.T @ Qf, np.eye(m), atol=1e-12)
+        np.testing.assert_allclose(np.tril(R, -1), 0, atol=0)
+        np.testing.assert_allclose(A.T @ Qf[:, n:], 0, atol=1e-12)  # null space of A.T
+
+    for A, B in systems:
+        assert next(out) == "1"
+        X = np.array([float(next(out)) for _ in range(B.size)]).reshape(B.shape)
+        np.testing.assert_allclose(A @ X, B, atol=1e-10)
+    assert next(out) == "0"  # singular, the right hand side is printed anyway
+    next(out), next(out)
+    assert next(out, None) is None
 
 
 def test_make_solver():
