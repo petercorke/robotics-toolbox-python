@@ -1874,6 +1874,30 @@ class DHRobot(Robot):
     # -------------------------------------------------------------------------- #
 
     def ikine_6s(self, T, config, ikfunc):
+        """
+        Analytic inverse kinematics for a robot with a spherical wrist
+
+        .. deprecated:: 1.5.0
+            This came from the MATLAB Toolbox and is not general.  It only handles
+            the wrist, the user supplied ``ikfunc`` must solve the first three
+            joints, and that is specific to one robot geometry.  It also
+            mishandles trajectories and unreachable poses.  It is no longer used by
+            :meth:`Puma560.ikine_a`, which is self-contained.  A hand-written
+            solution belongs in the class of the robot it is written for.
+
+        :param T: end-effector pose
+        :param config: arm configuration string
+        :param ikfunc: function ``ikfunc(robot, T, config)`` which returns the
+            joint angles of the first three joints
+        :returns: an IKSolution
+        """
+        warnings.warn(
+            "ikine_6s is deprecated and will be removed in a future release, "
+            "write a hand-written solution for your robot, as Puma560.ikine_a does",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         # Undo base and tool transformations, but if they are not
         # set, skip the operation.  Nicer for symbolics
         if np.array_equal(self.base.A, np.eye(4)):
