@@ -499,12 +499,41 @@ def _is_degenerate(
     return True
 
 
+@dataclass(frozen=True)
+class PolyRoots:
+    r"""
+    The solutions for a joint are given by the roots of a polynomial
+
+    :param coeffs: coefficients :math:`c_i` of the polynomial, lowest power first
+
+    The solutions are :math:`q = 2 \arctan t` for the real roots :math:`t` of
+    :math:`\sum_i c_i t^i = 0`, where :math:`t = \tan(q/2)`.  If the highest
+    coefficient is zero the polynomial has lost degree, which means that
+    :math:`t = \infty` is a root, and :math:`q = \pi` is also a solution.  If all
+    the coefficients are zero the joint is undetermined.
+
+    There is in general no closed form for the roots of a polynomial, so the
+    generated code finds them numerically.  This takes the place of the list of
+    expressions that a joint otherwise has.
+    """
+
+    coeffs: tuple[sp.Expr, ...]
+
+    @property
+    def free_symbols(self) -> set[sp.Symbol]:
+        return set().union(*(c.free_symbols for c in self.coeffs))
+
+    def xreplace(self, rule: dict) -> PolyRoots:
+        return PolyRoots(tuple(c.xreplace(rule) for c in self.coeffs))
+
+
 def _solve_single(
     eq: sp.Expr,
     j: int,
     revolute: bool,
     samples: list[dict[str, float]] | None = None,
-) -> list[sp.Expr] | None:
+    polynomial: bool = False,
+) -> list[sp.Expr | PolyRoots] | None:
     r"""
     Solve an equation in a single unknown joint
 
@@ -513,6 +542,8 @@ def _solve_single(
     :param revolute: joint is revolute
     :param samples: numeric instances, see :func:`_samples`, used to reject an
         equation whose coefficients are all zero
+    :param polynomial: give the solution as the roots of a polynomial in
+        :math:`\tan(q/2)`, see :class:`PolyRoots`, rather than in closed form
     :returns: solutions for ``qj``, or ``None`` if the equation can't be solved
 
     A revolute joint requires the form
@@ -545,6 +576,10 @@ def _solve_single(
         return None
     if samples and _is_degenerate((A, B), samples):
         return None
+    if polynomial:
+        # A cos(q) + B sin(q) + k = 0 with cos(q) = (1 - t^2) / (1 + t^2) and
+        # sin(q) = 2 t / (1 + t^2), multiplied by 1 + t^2
+        return [PolyRoots((A + k, 2 * B, k - A))]
     C = -k
     if C == 0:
         return [sp.atan2(-A, B), sp.atan2(A, -B)]
@@ -662,8 +697,10 @@ def _eliminate(
     return [R] if R.free_symbols else None
 
 
-def _clean(expr: sp.Expr, joints: set[int]) -> sp.Expr:
+def _clean(expr: sp.Expr | PolyRoots, joints: set[int]) -> sp.Expr | PolyRoots:
     """Tidy a solution: remove powers of ``Sj`` using ``Sj**2 = 1 - Cj**2``."""
+    if isinstance(expr, PolyRoots):
+        return PolyRoots(tuple(_clean(c, joints) for c in expr.coeffs))
     for _ in range(3):
         expr = _reduce(expr, joints)
     return expr
@@ -709,7 +746,8 @@ def ikine_sym(
     verbose: bool = False,
     max_time: float | None = 120.0,
     mixed: bool = True,
-) -> list[list[sp.Expr]] | None:
+    polynomial: bool = False,
+) -> list[list[sp.Expr | PolyRoots]] | None:
     r"""
     Symbolic inverse kinematics
 
@@ -720,6 +758,8 @@ def ikine_sym(
     :param max_time: give up after this many seconds (Unix, main thread only),
         ``None`` for no limit
     :param mixed: include the mixed left/right forms of Pieper's equations
+    :param polynomial: give every revolute joint as the roots of a polynomial,
+        see :class:`PolyRoots`, rather than in closed form.  For testing.
     :returns: for each joint, a list of alternative symbolic solutions, or
         ``None`` if a solution could not be found
     :raises ValueError: if ``n`` is not 2, 3 or 6, or is not the number of joints
@@ -767,7 +807,7 @@ def ikine_sym(
 
     try:
         with _time_limit(max_time):
-            return _ikine_sym(robot, n, verbose, mixed)[0]
+            return _ikine_sym(robot, n, verbose, mixed, polynomial)[0]
     except _Timeout:
         if verbose:
             print("timed out")
@@ -782,8 +822,8 @@ _MAX_NEW = 20  # stop after finding this many new equations, and reconsider
 
 
 def _ikine_sym(
-    robot: DHRobot, n: int, verbose: bool, mixed: bool
-) -> tuple[list[list[sp.Expr]] | None, list[sp.Expr]]:
+    robot: DHRobot, n: int, verbose: bool, mixed: bool, polynomial: bool = False
+) -> tuple[list[list[sp.Expr | PolyRoots]] | None, list[sp.Expr]]:
     """Implementation of :func:`ikine_sym`, also returns the pool of equations."""
     robot, values = _symbolize(robot)
     revolute = {j: link.isrevolute for j, link in enumerate(robot.links, 1)}
@@ -809,7 +849,7 @@ def _ikine_sym(
             (j,) = unknown(e)
             if (e, j) in failed:
                 continue
-            sols = _solve_single(e, j, revolute[j], samples)
+            sols = _solve_single(e, j, revolute[j], samples, polynomial)
             if sols is None:
                 failed.add((e, j))
                 continue
@@ -985,8 +1025,9 @@ class _Step:
     joint: int  # 1-based
     revolute: bool
     assigns: list[tuple[sp.Symbol, sp.Expr]]
-    alts: list[sp.Expr]
+    alts: list[sp.Expr]  # or, if poly, the coefficients of the polynomial
     checks: list[sp.Expr]  # equations that are zero for a valid choice of alts
+    poly: bool = False  # the solutions are the roots of a polynomial, see PolyRoots
 
 
 @dataclass
@@ -1067,18 +1108,19 @@ def _pruning_checks(
     return out
 
 
-def _make_plan(robot: DHRobot, verify: bool = True) -> _Plan:
+def _make_plan(robot: DHRobot, verify: bool = True, polynomial: bool = False) -> _Plan:
     """
     Solve a robot symbolically and organize the solution for code generation
 
     :param robot: DH robot model with numeric parameters
     :param verify: check each solution against the forward kinematics
+    :param polynomial: give the revolute joints as the roots of polynomials
     :raises ValueError: if no solution is found, or the model has symbolic
         parameters
     """
     if robot.n not in _SPECIFIED:
         raise ValueError("Can only solve for 2, 3, 6 DOF")
-    Q, pool = _ikine_sym(robot, robot.n, False, True)
+    Q, pool = _ikine_sym(robot, robot.n, False, True, polynomial)
     if Q is None:
         raise ValueError("no symbolic solution for this robot")
 
@@ -1113,12 +1155,22 @@ def _make_plan(robot: DHRobot, verify: bool = True) -> _Plan:
 
     steps = []
     for j in order:
-        alts = [numeric(e) for e in Q[j]]
-        assigns, alts = sp.cse(alts, symbols=sp.numbered_symbols(f"x{j + 1}_"))
+        poly = isinstance(Q[j][0], PolyRoots)
+        exprs = [numeric(e) for e in (Q[j][0].coeffs if poly else Q[j])]
+        assigns, exprs = sp.cse(exprs, symbols=sp.numbered_symbols(f"x{j + 1}_"))
         steps.append(
-            _Step(j + 1, revolute[j], assigns, alts, [numeric(e) for e in checks.get(j, [])])
+            _Step(
+                j + 1,
+                revolute[j],
+                assigns,
+                exprs,
+                [numeric(e) for e in checks.get(j, [])],
+                poly,
+            )
         )
 
+    # a polynomial of degree d has at most d roots, and q = pi is only a
+    # solution if the degree is less than expected
     capacity = int(np.prod([len(s.alts) for s in steps]))
     return _Plan(n, pose, steps, fk_assigns, fk_exprs, capacity, verify)
 
@@ -1198,9 +1250,12 @@ class _Emitter:
         for sym, e in st.assigns:
             self.decl(str(sym), self.expr(e))
         k, q = f"k{st.joint}", f"q{st.joint}"
-        self.loop_open(k, len(st.alts))
-        self.select(q, k, [self.expr(a) for a in st.alts])
-        self.skip_if_nan(q)
+        if st.poly:
+            self.poly_open(st.joint, [self.expr(a) for a in st.alts])
+        else:
+            self.loop_open(k, len(st.alts))
+            self.select(q, k, [self.expr(a) for a in st.alts])
+            self.skip_if_nan(q)
         if st.revolute:
             self.decl(f"S{st.joint}", self.sin(q))
             self.decl(f"C{st.joint}", self.cos(q))
@@ -1215,6 +1270,7 @@ class _Emitter:
     def footer(self) -> None: ...
     def decl(self, name: str, value: str) -> None: ...
     def loop_open(self, k: str, count: int) -> None: ...
+    def poly_open(self, joint: int, coeffs: list[str]) -> None: ...
     def loop_close(self) -> None: ...
     def select(self, q: str, k: str, alts: list[str]) -> None: ...
     def skip_if_nan(self, q: str) -> None: ...
@@ -1227,6 +1283,221 @@ class _Emitter:
     def push(self, guarded: bool) -> None: ...
 
 
+_PY_POLY = """\
+POLY_TOL = 1e-9
+
+
+def half_angle_roots(ctx: _Context, coeffs: list[float]) -> list[float]:
+    \"\"\"
+    Joint angles q for which sum(coeffs[i] * t**i) = 0, where t = tan(q / 2)
+
+    Only real roots are returned.  If the highest coefficients are zero the
+    polynomial has lost degree, and q = pi is also a solution.  If all the
+    coefficients are zero the joint is undetermined, which is a singularity.
+    \"\"\"
+    scale = max(abs(c) for c in coeffs)
+    if math.isnan(scale):
+        return []
+    if scale < POLY_TOL:
+        ctx.singular = True
+        return []
+    n = len(coeffs) - 1
+    while n > 0 and abs(coeffs[n]) <= 1e-12 * scale:
+        n -= 1
+    angles = [math.pi] if n < len(coeffs) - 1 else []
+    if n == 0:
+        return angles
+
+    # Aberth-Ehrlich iteration for all the roots of the monic polynomial
+    a = [c / coeffs[n] for c in coeffs[: n + 1]]
+    radius = abs(a[0]) ** (1.0 / n) if a[0] != 0 else 1.0
+    z = [radius * cmath.exp(1j * (2 * math.pi * k / n + 0.4)) for k in range(n)]
+    for _ in range(100):
+        converged = True
+        for i in range(n):
+            p = dp = 0j
+            for c in reversed(a):
+                dp = dp * z[i] + p
+                p = p * z[i] + c
+            if p == 0:
+                continue
+            ratio = p / dp if dp != 0 else p
+            s = sum(1 / (z[i] - z[j]) for j in range(n) if j != i and z[i] != z[j])
+            denominator = 1 - ratio * s
+            w = ratio / denominator if denominator != 0 else ratio
+            z[i] -= w
+            if abs(w) > 1e-14 * (1 + abs(z[i])):
+                converged = False
+        if converged:
+            break
+
+    for root in z:
+        if abs(root.imag) <= 1e-6 * (1 + abs(root.real)):
+            t = root.real
+            for _ in range(3):  # polish
+                f = df = 0.0
+                for c in reversed(a):
+                    df = df * t + f
+                    f = f * t + c
+                if df == 0:
+                    break
+                t -= f / df
+            q = 2 * math.atan(t)
+            if all(abs(q - other) > 1e-9 for other in angles):
+                angles.append(q)
+    return angles"""
+
+_C_POLY = """\
+#include <complex.h>
+
+#define IKINE_MAX_ANGLES 32
+#define IKINE_POLY_TOL 1e-9
+
+/*
+ * Joint angles q for which sum(coeffs[i] * t^i) = 0, where t = tan(q / 2), written
+ * to angles[].  Only real roots are returned.  If the highest coefficients are
+ * zero the polynomial has lost degree, and q = pi is also a solution.  If all the
+ * coefficients are zero the joint is undetermined, which is a singularity.
+ * Returns the number of angles.
+ */
+static int half_angle_roots(ik_ctx *ctx, const double *coeffs, int ncoeffs, double *angles) {
+    double scale = 0.0;
+    for (int i = 0; i < ncoeffs; ++i) {
+        if (isnan(coeffs[i])) return 0;
+        if (fabs(coeffs[i]) > scale) scale = fabs(coeffs[i]);
+    }
+    if (scale < IKINE_POLY_TOL) {
+        ctx->singular = 1;
+        return 0;
+    }
+    int n = ncoeffs - 1, count = 0;
+    while (n > 0 && fabs(coeffs[n]) <= 1e-12 * scale) --n;
+    if (n < ncoeffs - 1) angles[count++] = M_PI;
+    if (n == 0) return count;
+
+    /* Aberth-Ehrlich iteration for all the roots of the monic polynomial */
+    double a[IKINE_MAX_ANGLES];
+    double complex z[IKINE_MAX_ANGLES];
+    for (int i = 0; i <= n; ++i) a[i] = coeffs[i] / coeffs[n];
+    double radius = a[0] != 0.0 ? pow(fabs(a[0]), 1.0 / n) : 1.0;
+    for (int k = 0; k < n; ++k) z[k] = radius * cexp(I * (2.0 * M_PI * k / n + 0.4));
+    for (int iter = 0; iter < 100; ++iter) {
+        int converged = 1;
+        for (int i = 0; i < n; ++i) {
+            double complex p = 0.0, dp = 0.0, s = 0.0;
+            for (int k = n; k >= 0; --k) {
+                dp = dp * z[i] + p;
+                p = p * z[i] + a[k];
+            }
+            if (p == 0.0) continue;
+            double complex ratio = dp != 0.0 ? p / dp : p;
+            for (int j = 0; j < n; ++j) {
+                if (j != i && z[i] != z[j]) s += 1.0 / (z[i] - z[j]);
+            }
+            double complex denominator = 1.0 - ratio * s;
+            double complex w = denominator != 0.0 ? ratio / denominator : ratio;
+            z[i] -= w;
+            if (cabs(w) > 1e-14 * (1.0 + cabs(z[i]))) converged = 0;
+        }
+        if (converged) break;
+    }
+
+    for (int i = 0; i < n; ++i) {
+        if (fabs(cimag(z[i])) > 1e-6 * (1.0 + fabs(creal(z[i])))) continue;
+        double t = creal(z[i]);
+        for (int iter = 0; iter < 3; ++iter) { /* polish */
+            double f = 0.0, df = 0.0;
+            for (int k = n; k >= 0; --k) {
+                df = df * t + f;
+                f = f * t + a[k];
+            }
+            if (df == 0.0) break;
+            t -= f / df;
+        }
+        double q = 2.0 * atan(t);
+        int duplicate = 0;
+        for (int k = 0; k < count; ++k) {
+            if (fabs(q - angles[k]) <= 1e-9) duplicate = 1;
+        }
+        if (!duplicate && count < IKINE_MAX_ANGLES) angles[count++] = q;
+    }
+    return count;
+}"""
+
+_CXX_POLY = """\
+#include <complex>
+
+constexpr double IKINE_POLY_TOL = 1e-9;
+
+// Joint angles q for which sum(coeffs[i] * t^i) = 0, where t = tan(q / 2).  Only
+// real roots are returned.  If the highest coefficients are zero the polynomial
+// has lost degree, and q = pi is also a solution.  If all the coefficients are
+// zero the joint is undetermined, which is a singularity.
+inline std::vector<double> half_angle_roots(IkContext& ctx, const std::vector<double>& coeffs) {
+    std::vector<double> angles;
+    double scale = 0.0;
+    for (double c : coeffs) {
+        if (std::isnan(c)) return angles;
+        scale = std::fmax(scale, std::fabs(c));
+    }
+    if (scale < IKINE_POLY_TOL) {
+        ctx.singular = true;
+        return angles;
+    }
+    int n = static_cast<int>(coeffs.size()) - 1;
+    while (n > 0 && std::fabs(coeffs[n]) <= 1e-12 * scale) --n;
+    if (n < static_cast<int>(coeffs.size()) - 1) angles.push_back(M_PI);
+    if (n == 0) return angles;
+
+    // Aberth-Ehrlich iteration for all the roots of the monic polynomial
+    using cd = std::complex<double>;
+    std::vector<double> a(n + 1);
+    for (int i = 0; i <= n; ++i) a[i] = coeffs[i] / coeffs[n];
+    std::vector<cd> z(n);
+    const double radius = a[0] != 0.0 ? std::pow(std::fabs(a[0]), 1.0 / n) : 1.0;
+    for (int k = 0; k < n; ++k) z[k] = std::polar(radius, 2.0 * M_PI * k / n + 0.4);
+    for (int iter = 0; iter < 100; ++iter) {
+        bool converged = true;
+        for (int i = 0; i < n; ++i) {
+            cd p = 0.0, dp = 0.0, s = 0.0;
+            for (int k = n; k >= 0; --k) {
+                dp = dp * z[i] + p;
+                p = p * z[i] + a[k];
+            }
+            if (p == 0.0) continue;
+            const cd ratio = dp != 0.0 ? p / dp : p;
+            for (int j = 0; j < n; ++j) {
+                if (j != i && z[i] != z[j]) s += 1.0 / (z[i] - z[j]);
+            }
+            const cd denominator = 1.0 - ratio * s;
+            const cd w = denominator != 0.0 ? ratio / denominator : ratio;
+            z[i] -= w;
+            if (std::abs(w) > 1e-14 * (1.0 + std::abs(z[i]))) converged = false;
+        }
+        if (converged) break;
+    }
+
+    for (int i = 0; i < n; ++i) {
+        if (std::fabs(z[i].imag()) > 1e-6 * (1.0 + std::fabs(z[i].real()))) continue;
+        double t = z[i].real();
+        for (int iter = 0; iter < 3; ++iter) {  // polish
+            double f = 0.0, df = 0.0;
+            for (int k = n; k >= 0; --k) {
+                df = df * t + f;
+                f = f * t + a[k];
+            }
+            if (df == 0.0) break;
+            t -= f / df;
+        }
+        const double q = 2.0 * std::atan(t);
+        bool duplicate = false;
+        for (double other : angles) duplicate = duplicate || std::fabs(q - other) <= 1e-9;
+        if (!duplicate) angles.push_back(q);
+    }
+    return angles;
+}"""
+
+
 class _PythonEmitter(_Emitter):
     printer_class = PythonCodePrinter
 
@@ -1235,6 +1506,7 @@ class _PythonEmitter(_Emitter):
         p = self.plan.pose
         for line in f'''"""Inverse kinematics generated by roboticstoolbox symbolic_ik."""
 
+import cmath
 import enum
 import math
 from typing import NamedTuple
@@ -1271,6 +1543,9 @@ def atan2c(ctx: _Context, y: float, x: float) -> float:
     return math.atan2(y, x)
 
 
+@@POLY@@
+
+
 def {self.name}(T, tol: float = 1e-6) -> IKResult:
     """
     Joint configurations (q1..q{n}) for which the end-effector pose is T
@@ -1284,6 +1559,8 @@ def {self.name}(T, tol: float = 1e-6) -> IKResult:
     {", ".join(p[8:12])} = T[2][0], T[2][1], T[2][2], T[2][3]
     solutions: list[tuple[float, ...]] = []'''.splitlines():
             self.lines.append(line)
+        i = self.lines.index("@@POLY@@")
+        self.lines[i : i + 1] = _PY_POLY.splitlines()
         self.depth = 1
 
     def footer(self) -> None:
@@ -1303,6 +1580,10 @@ def {self.name}(T, tol: float = 1e-6) -> IKResult:
 
     def loop_open(self, k: str, count: int) -> None:
         self.put(f"for {k} in range({count}):")
+        self.depth += 1
+
+    def poly_open(self, joint: int, coeffs: list[str]) -> None:
+        self.put(f"for q{joint} in half_angle_roots(ctx, [{', '.join(coeffs)}]):")
         self.depth += 1
 
     def loop_close(self) -> None:
@@ -1394,6 +1675,8 @@ static double atan2c(ik_ctx *ctx, double y, double x) {{
     return atan2(y, x);
 }}
 
+@@POLY@@
+
 /*
  * T is the 4x4 end-effector pose, row-major.  Solutions are written to
  * solutions[0..*count-1], each IKINE_DOF joint values.
@@ -1403,6 +1686,8 @@ ik_status {self.name}(const double T[16], double tol,
     ik_ctx ctx_ = {{0}};
     ik_ctx *ctx = &ctx_;""".splitlines():
             self.lines.append(line)
+        i = self.lines.index("@@POLY@@")
+        self.lines[i : i + 1] = _C_POLY.splitlines()
         self.depth = 1
         for line in self.pose_lines():
             self.put(line)
@@ -1419,6 +1704,17 @@ ik_status {self.name}(const double T[16], double tol,
     def loop_open(self, k: str, count: int) -> None:
         self.put(f"for (int {k} = 0; {k} < {count}; ++{k}) {{")
         self.depth += 1
+
+    def poly_open(self, joint: int, coeffs: list[str]) -> None:
+        n = len(coeffs)
+        self.put(f"const double coeffs{joint}[{n}] = {{{', '.join(coeffs)}}};")
+        self.put(f"double angles{joint}[IKINE_MAX_ANGLES];")
+        self.put(
+            f"const int n{joint} = half_angle_roots(ctx, coeffs{joint}, {n}, angles{joint});"
+        )
+        self.put(f"for (int k{joint} = 0; k{joint} < n{joint}; ++k{joint}) {{")
+        self.depth += 1
+        self.put(f"const double q{joint} = angles{joint}[k{joint}];")
 
     def loop_close(self) -> None:
         self.depth -= 1
@@ -1510,14 +1806,26 @@ inline double atan2c(IkContext& ctx, double y, double x) {{
     return std::atan2(y, x);
 }}
 
+@@POLY@@
+
 // T is the 4x4 end-effector pose, row-major.
 inline IkResult {self.name}(const double* T, double tol = 1e-6) {{
     IkContext ctx;
     IkResult result;""".splitlines():
             self.lines.append(line)
+        i = self.lines.index("@@POLY@@")
+        self.lines[i : i + 1] = _CXX_POLY.splitlines()
         self.depth = 1
         for line in self.pose_lines():
             self.put(line)
+
+    def poly_open(self, joint: int, coeffs: list[str]) -> None:
+        self.put(
+            f"const std::vector<double> angles{joint} = "
+            f"half_angle_roots(ctx, {{{', '.join(coeffs)}}});"
+        )
+        self.put(f"for (const double q{joint} : angles{joint}) {{")
+        self.depth += 1
 
     def footer(self) -> None:
         self.put("if (ctx.singular) result.status = IkStatus::Singular;")
@@ -1617,6 +1925,9 @@ pub fn {self.name}(t: &[f64; 16], tol: f64) -> IkResult {{
         self.put(f"for {k} in 0..{count} {{")
         self.depth += 1
 
+    def poly_open(self, joint: int, coeffs: list[str]) -> None:
+        raise NotImplementedError("polynomial solutions are not yet supported for Rust")
+
     def loop_close(self) -> None:
         self.depth -= 1
         self.put("}")
@@ -1675,6 +1986,7 @@ def generate_code(
     language: Literal["python", "c", "c++", "rust"] = "python",
     name: str = "ikine",
     verify: bool = True,
+    polynomial: bool = False,
 ) -> str:
     """
     Generate source code for the inverse kinematics of a robot
@@ -1683,6 +1995,8 @@ def generate_code(
     :param language: target language
     :param name: name of the generated function
     :param verify: check each solution against the forward kinematics
+    :param polynomial: give every revolute joint as the roots of a polynomial in
+        tan(q/2) found numerically, rather than in closed form.  For testing.
     :returns: source code
     :raises ValueError: if no solution is found, the model has symbolic
         parameters, or the language is not supported
@@ -1708,7 +2022,7 @@ def generate_code(
     The Python, C and C++ code is tested.  The Rust code is generated but has
     not yet been compiled.
     """
-    return _emit(_make_plan(robot, verify), language, name)
+    return _emit(_make_plan(robot, verify, polynomial), language, name)
 
 
 def generate_python(robot: DHRobot, name: str = "ikine") -> str:
@@ -1739,6 +2053,30 @@ def _safe_sqrt(x):
     negative values (an unreachable branch) give NaN."""
     x = np.asarray(x, dtype=float)
     return np.where(x < -1e-9, np.nan, np.sqrt(np.maximum(x, 0.0)))
+
+
+def _poly_angles(coeffs) -> np.ndarray:
+    """Joint angles for the real roots of a polynomial in tan(q/2), see PolyRoots."""
+    c = np.array(coeffs, dtype=float)
+    scale = np.abs(c).max()
+    if not scale > 1e-9:
+        return np.array([])
+    keep = len(c)
+    while keep > 1 and abs(c[keep - 1]) <= 1e-12 * scale:
+        keep -= 1
+    angles = [np.pi] if keep < len(c) else []
+    if keep > 1:
+        for r in np.roots(c[:keep][::-1]):
+            if abs(r.imag) <= 1e-6 * (1 + abs(r.real)):
+                angles.append(2 * np.arctan(r.real))
+    return np.array(angles)
+
+
+def _compile_roots(sol: PolyRoots):
+    """Compile a PolyRoots solution to ``(symbols, function)``, giving the angles."""
+    args = sorted(sol.free_symbols, key=lambda s: s.name)
+    func = sp.lambdify(args, list(sol.coeffs), modules="numpy", cse=True)
+    return args, lambda *v: _poly_angles(func(*v))
 
 
 def _compile(expr: sp.Expr):
@@ -1772,7 +2110,10 @@ def _numeric_solutions(
     n = len(Q)
     revolute = revolute or [True] * n
     order = _solve_order(Q)
-    compiled = [[_compile(e) for e in sols] for sols in Q]
+    compiled = [
+        [_compile_roots(e) if isinstance(e, PolyRoots) else _compile(e) for e in sols]
+        for sols in Q
+    ]
 
     def recurse(step: int, vals: dict[str, float], qs: dict[int, float]) -> list[dict]:
         if step == n:
@@ -1780,14 +2121,15 @@ def _numeric_solutions(
         j = order[step]
         out = []
         for args, func in compiled[j]:
-            qj = float(func(*[vals[a.name] for a in args]))
-            if np.isnan(qj):
-                continue
-            if revolute[j]:
-                new = {f"S{j + 1}": np.sin(qj), f"C{j + 1}": np.cos(qj)}
-            else:
-                new = {f"q{j + 1}": qj}
-            out += recurse(step + 1, {**vals, **new}, {**qs, j: qj})
+            for qj in np.atleast_1d(func(*[vals[a.name] for a in args])):
+                qj = float(qj)
+                if np.isnan(qj):
+                    continue
+                if revolute[j]:
+                    new = {f"S{j + 1}": np.sin(qj), f"C{j + 1}": np.cos(qj)}
+                else:
+                    new = {f"q{j + 1}": qj}
+                out += recurse(step + 1, {**vals, **new}, {**qs, j: qj})
         return out
 
     return [np.array([x[j] for j in range(n)]) for x in recurse(0, dict(values), {})]
@@ -2263,6 +2605,62 @@ def test_without_flint():
     finally:
         globals()["fmpq_mpoly_ctx"] = saved
         _linear_form.cache_clear()
+
+
+def test_polynomial_mode():
+    """
+    Solving every revolute joint as the roots of a polynomial in tan(q/2) gives
+    the same solutions as the closed forms.
+    """
+    import roboticstoolbox as rtb
+
+    for name in ("Puma560", "IRB140", "Stanford", "UR5"):
+        robot = getattr(rtb.models.DH, name)()
+        closed = _numeric_check(robot, ikine_sym(robot), trials=3)
+        Q = ikine_sym(robot, polynomial=True)
+        assert any(isinstance(s[0], PolyRoots) for s in Q)
+        assert _numeric_check(robot, Q, trials=3) == closed, name
+
+
+def test_polynomial_generated_code():
+    """The generated root finder works in each language, and finds all solutions."""
+    import shutil
+
+    import roboticstoolbox as rtb
+
+    languages = ["python"]
+    languages += [lang for lang, cc in (("c", "cc"), ("c++", "c++")) if shutil.which(cc)]
+
+    rng = np.random.default_rng(7)
+    for name in ("Puma560", "UR5"):
+        robot = getattr(rtb.models.DH, name)()
+        revolute = [link.isrevolute for link in robot.links]
+        closed = _make_plan(robot)
+        poly = _make_plan(robot, polynomial=True)
+        assert any(step.poly for step in poly.steps)
+
+        q0 = np.where(revolute, rng.uniform(-1.5, 1.5, 6), rng.uniform(0.2, 0.6, 6))
+        T = robot.fkine(q0).A
+        for language in languages:
+            _, expected = _run_generated(language, _emit(closed, language, "ikine"), T)
+            status, solutions = _run_generated(language, _emit(poly, language, "ikine"), T)
+            assert status == "OK", (name, language, status)
+            assert len(solutions) == len(expected), (name, language)
+            for q in solutions:
+                assert np.abs(robot.fkine(q).A - T).max() < 1e-6
+            target = _wrap_joints(q0, revolute)
+            assert any(
+                np.allclose(_wrap_joints(q, revolute), target, atol=1e-5)
+                for q in solutions
+            ), (name, language)
+
+
+def test_polynomial_rust_not_supported():
+    import pytest
+    import roboticstoolbox as rtb
+
+    with pytest.raises(NotImplementedError):
+        generate_code(rtb.models.DH.Puma560(), "rust", polynomial=True)
 
 
 def test_generated_rust_smoke():
