@@ -41,9 +41,48 @@ for :math:`x`, and the other joints follow by back substitution.
 
 Which joint is :math:`k` makes a great difference to the conditioning, and for
 some arms the wrong choice gives no solutions at all, so it is chosen
-numerically.  The method degenerates for some special geometries, such as a
-spherical wrist, so the result is always checked against the forward kinematics,
-and :meth:`General6R.validate` should be used before relying on it for a robot.
+numerically.  Every solution is checked against the forward kinematics.
+
+:func:`classify` finds the structure of an arm, and :func:`make_solver` uses it to
+choose between this method and the closed form solutions of :mod:`symbolic_ik`.
+Each is only good for its own kind of arm, so there is no fallback from one to the
+other: a spherical wrist or three parallel axes goes to the closed form, anything
+else to this method, and the choice is then checked on random poses.
+
+Limits
+------
+
+- **The method degenerates for some geometries.**  A spherical wrist is the
+  example found: the conditioning is fine but the solutions are not valid, and
+  :meth:`General6R.validate` recovers the original configuration for under half of
+  random poses of a Puma 560.  That is why such arms are not given to this method.
+- **Completeness is not proven.**  Each solution is checked, but nothing checks
+  that all of them are found.  A general 6R arm has up to 16 solutions.  On 300
+  random poses each, the Jaco, Mico and UR5 always recovered the original
+  configuration, but a few poses (2 for the Jaco, 5 for the Mico) gave an odd
+  number of solutions (3, 7 or 9) when they normally come in pairs.  A root may
+  have been lost, or two merged by the test for duplicates.  Comparison with
+  numerical inverse kinematics from random starts is only a lower bound.
+- **The eigenvalue solver matters.**  SciPy's QZ algorithm is used if it is
+  installed.  NumPy alone, with a companion matrix, needs the leading matrix to be
+  invertible.  In a trial before this class was written it recovered the original
+  configuration for 298 of 300 poses of the Jaco and of the Mico, against 300 of
+  300 with SciPy, and 300 of 300 for the UR5.  The NumPy-only path has not been
+  tested in this class.
+- **Conditioning depends on the pose.**  The split is chosen from 20 random
+  poses, which does not guarantee it is the best for every pose.  The condition
+  number of the leading matrix for the chosen split was between 40 and 2.4e4 on
+  the poses tried for the Jaco and Mico, and accuracy falls as it rises.
+- **Near singularities the answer is unreliable.**  A root whose null space is
+  not one dimensional is dropped, and if that leaves no solutions the status is
+  ``SINGULAR``.  Solutions near a singularity may be missing.
+- **It is slower than the closed form**, about 1 ms per pose in NumPy on an M1,
+  against a few microseconds for the generated closed form code in C.  The
+  symbolic derivation takes a few seconds for each split, and is cached only in
+  the running process.
+- **Only standard DH robots with six revolute joints** are handled.
+- **There is no code generation for this method yet.**  It is a Python class, and
+  needs NumPy.
 
 Run the tests with::
 
@@ -58,7 +97,7 @@ import numpy as np
 import sympy as sp
 
 from roboticstoolbox.robot.DHRobot import DHRobot
-from roboticstoolbox.robot.symbolic_ik import IKSolutions, IKStatus
+from roboticstoolbox.robot.symbolic_ik import IKSolutions, IKStatus, generate_code
 
 try:  # preferred for the eigenvalues, but NumPy alone is almost always enough
     import scipy.linalg
@@ -483,6 +522,94 @@ class General6R:
 
 
 # ------------------------------------------------------------------------- #
+#                          choosing a method                                #
+# ------------------------------------------------------------------------- #
+
+
+class ClosedForm:
+    r"""
+    Inverse kinematics from the closed form solution of :mod:`symbolic_ik`
+
+    :param robot: robot with standard DH links and six joints
+    :param max_time: give up looking for the symbolic solution after this many
+        seconds
+    :raises ValueError: if no closed form solution is found
+
+    The solution is generated as Python code, which is then run.  The same code
+    can be had in other languages from :func:`symbolic_ik.generate_code`.
+    """
+
+    def __init__(self, robot: DHRobot, max_time: float | None = 120.0):
+        self.robot = robot
+        self.revolute = np.array([link.isrevolute for link in robot.links])
+        self.source = generate_code(robot, "python", "ikine", max_time=max_time)
+        namespace: dict = {}
+        exec(self.source, namespace)  # noqa: S102
+        self._ikine = namespace["ikine"]
+
+    def solve(self, T: np.ndarray) -> IKSolutions:
+        """All the joint configurations that reach a pose, see :class:`IKSolutions`."""
+        result = self._ikine(np.asarray(T, dtype=float))
+        return IKSolutions.from_generated(result, self.revolute)
+
+    def validate(self, trials: int = 100, seed: int = 1) -> float:
+        """Fraction of random poses for which the original configuration is found."""
+        rng = np.random.default_rng(seed)
+        hits = 0
+        for _ in range(trials):
+            q = np.where(
+                self.revolute,
+                rng.uniform(-np.pi, np.pi, self.robot.n),
+                rng.uniform(0.2, 0.6, self.robot.n),
+            )
+            sols = self.solve(self.robot.fkine(q).A)
+            if len(sols):
+                d = sols.q - q
+                d[:, self.revolute] = np.arctan2(
+                    np.sin(d[:, self.revolute]), np.cos(d[:, self.revolute])
+                )
+                hits += bool(np.any(np.all(np.abs(d) < 1e-5, axis=1)))
+        return hits / trials
+
+
+def make_solver(
+    robot: DHRobot,
+    trials: int = 100,
+    min_success: float = 0.99,
+    max_time: float | None = 120.0,
+) -> ClosedForm | General6R:
+    """
+    Choose and build the inverse kinematics method for a robot
+
+    :param robot: robot with standard DH links and six joints
+    :param trials: number of random poses used to check the method
+    :param min_success: smallest acceptable fraction of those poses for which the
+        original configuration is recovered
+    :param max_time: give up looking for a closed form solution after this long
+    :returns: a :class:`ClosedForm` solver for an arm with a spherical wrist or
+        three parallel axes, otherwise a :class:`General6R` solver
+    :raises ValueError: if the method does not recover enough of the poses
+
+    Each method is only good for its own kind of arm, for example the general
+    method fails for a spherical wrist, so there is no fallback from one to the
+    other.  The method is checked on random poses before it is returned.
+    """
+    if classify(robot).general:
+        solver = General6R(robot)
+        method = "general 6R"
+    else:
+        solver = ClosedForm(robot, max_time)
+        method = "closed form"
+    rate = solver.validate(trials)
+    if rate < min_success:
+        raise ValueError(
+            f"the {method} method recovered the configuration for only "
+            f"{rate:.0%} of random poses for this robot"
+        )
+    return solver
+
+
+# ------------------------------------------------------------------------- #
 #                                  tests                                    #
 # ------------------------------------------------------------------------- #
 
@@ -579,6 +706,34 @@ def test_bad_robot():
         General6R(rtb.models.DH.Planar2())
     with pytest.raises(ValueError):
         General6R(rtb.models.DH.Stanford())  # a prismatic joint
+
+
+def test_make_solver():
+    import pytest
+    import roboticstoolbox as rtb
+
+    models = rtb.models.DH
+    for name, kind in (
+        ("Puma560", ClosedForm),
+        ("Stanford", ClosedForm),
+        ("UR5", ClosedForm),
+        ("Jaco", General6R),
+    ):
+        robot = getattr(models, name)()
+        solver = make_solver(robot, trials=30)
+        assert isinstance(solver, kind), name
+
+        q0 = np.where(
+            [link.isrevolute for link in robot.links],
+            [0.3, -0.8, 1.1, 0.4, -0.6, 0.9],
+            [0.3, 0.5, 0.4, 0.2, 0.6, 0.5],
+        )
+        sols = solver.solve(robot.fkine(q0).A)
+        assert sols.status is IKStatus.OK
+        np.testing.assert_allclose(sols.nearest(q0), q0, atol=1e-5)
+
+    with pytest.raises(ValueError, match="recovered"):
+        make_solver(models.Jaco(), trials=10, min_success=1.01)
 
 
 if __name__ == "__main__":  # pragma nocover

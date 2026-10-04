@@ -1108,19 +1108,30 @@ def _pruning_checks(
     return out
 
 
-def _make_plan(robot: DHRobot, verify: bool = True, polynomial: bool = False) -> _Plan:
+def _make_plan(
+    robot: DHRobot,
+    verify: bool = True,
+    polynomial: bool = False,
+    max_time: float | None = None,
+) -> _Plan:
     """
     Solve a robot symbolically and organize the solution for code generation
 
     :param robot: DH robot model with numeric parameters
     :param verify: check each solution against the forward kinematics
     :param polynomial: give the revolute joints as the roots of polynomials
+    :param max_time: give up searching for a symbolic solution after this many
+        seconds (Unix, main thread only)
     :raises ValueError: if no solution is found, or the model has symbolic
         parameters
     """
     if robot.n not in _SPECIFIED:
         raise ValueError("Can only solve for 2, 3, 6 DOF")
-    Q, pool = _ikine_sym(robot, robot.n, False, True, polynomial)
+    try:
+        with _time_limit(max_time):
+            Q, pool = _ikine_sym(robot, robot.n, False, True, polynomial)
+    except _Timeout:
+        Q = None
     if Q is None:
         raise ValueError("no symbolic solution for this robot")
 
@@ -1995,6 +2006,7 @@ def generate_code(
     name: str = "ikine",
     verify: bool = True,
     polynomial: bool = False,
+    max_time: float | None = None,
 ) -> str:
     """
     Generate source code for the inverse kinematics of a robot
@@ -2005,6 +2017,8 @@ def generate_code(
     :param verify: check each solution against the forward kinematics
     :param polynomial: give every revolute joint as the roots of a polynomial in
         tan(q/2) found numerically, rather than in closed form.  For testing.
+    :param max_time: give up searching for a symbolic solution after this many
+        seconds (Unix, main thread only)
     :returns: source code
     :raises ValueError: if no solution is found, the model has symbolic
         parameters, or the language is not supported
@@ -2030,7 +2044,7 @@ def generate_code(
     The Python, C and C++ code is tested.  The Rust code is generated but has
     not yet been compiled.
     """
-    return _emit(_make_plan(robot, verify, polynomial), language, name)
+    return _emit(_make_plan(robot, verify, polynomial, max_time), language, name)
 
 
 def generate_python(robot: DHRobot, name: str = "ikine") -> str:
