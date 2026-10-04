@@ -1088,6 +1088,111 @@ class TestDHRobot(unittest.TestCase):
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
+    def _puma_poses(self, puma):
+        qs = np.array(
+            [puma.qn, puma.qn + 0.1, [0.3, 0.5, -0.4, 0.2, 0.6, 0.7]], dtype=float
+        )
+        return qs, puma.fkine(qs)
+
+    def test_ikine_a_trajectory(self):
+        # a trajectory gives one IKSolution like the numerical solvers
+        puma = rp.models.DH.Puma560()
+        qs, Ts = self._puma_poses(puma)
+
+        sol = puma.ikine_a(Ts)
+
+        self.assertIsInstance(sol, rp.IKSolution)
+        self.assertEqual(sol.q.shape, (3, 6))
+        self.assertIs(type(sol.success), bool)
+        self.assertTrue(sol.success)
+        self.assertEqual(sol.reason, "")
+        self.assertEqual((sol.iterations, sol.searches), (0, 0))
+        self.assertLess(sol.residual, 1e-12)
+        for k in range(3):
+            nt.assert_allclose(puma.fkine(sol.q[k]).A, Ts[k].A, atol=1e-9)
+
+    def test_ikine_a_accepts_arrays(self):
+        puma = rp.models.DH.Puma560()
+        qs, Ts = self._puma_poses(puma)
+
+        sol_se3 = puma.ikine_a(Ts)
+        sol_arr = puma.ikine_a(np.array(Ts.A))  # (3, 4, 4)
+        nt.assert_allclose(sol_arr.q, sol_se3.q)
+
+        sol_one = puma.ikine_a(Ts[0].A)  # (4, 4)
+        self.assertEqual(sol_one.q.shape, (6,))
+        nt.assert_allclose(sol_one.q, sol_se3.q[0])
+
+        for bad in (np.eye(3), np.zeros((2, 3, 4)), np.zeros(16)):
+            with self.assertRaises(ValueError):
+                puma.ikine_a(bad)
+
+    def test_ikine_a_unreachable(self):
+        puma = rp.models.DH.Puma560()
+
+        # far outside the workspace
+        sol = puma.ikine_a(sm.SE3(5, 5, 5))
+        self.assertFalse(sol.success)
+        self.assertEqual(sol.reason, "Out of reach")
+        self.assertEqual(sol.q.shape, (6,))
+        self.assertTrue(np.all(np.isnan(sol.q)))
+        self.assertEqual(sol.residual, np.inf)
+
+        # closer to the waist axis than the shoulder offset, this used to
+        # return success=True with q all NaN
+        sol = puma.ikine_a(sm.SE3(0.05, 0.0, 0.5) * sm.SE3.Rx(np.pi))
+        self.assertFalse(sol.success)
+        self.assertEqual(sol.reason, "Out of reach")
+        self.assertTrue(np.all(np.isnan(sol.q)))
+
+        # on the waist axis
+        sol = puma.ikine_a(sm.SE3(0.0, 0.0, 0.5))
+        self.assertFalse(sol.success)
+
+    def test_ikine_a_trajectory_with_unreachable_pose(self):
+        # this used to raise ValueError
+        puma = rp.models.DH.Puma560()
+        qs, Ts = self._puma_poses(puma)
+        Tmixed = sm.SE3([Ts[0], sm.SE3(5, 5, 5), Ts[2]])
+
+        sol = puma.ikine_a(Tmixed)
+
+        self.assertEqual(sol.q.shape, (3, 6))
+        self.assertIs(type(sol.success), bool)
+        self.assertFalse(sol.success)
+        self.assertEqual(sol.reason, "Out of reach")
+        self.assertEqual(sol.residual, np.inf)
+        self.assertTrue(np.all(np.isfinite(sol.q[0])))
+        self.assertTrue(np.all(np.isnan(sol.q[1])))
+        self.assertTrue(np.all(np.isfinite(sol.q[2])))
+        nt.assert_allclose(puma.fkine(sol.q[0]).A, Ts[0].A, atol=1e-9)
+        nt.assert_allclose(puma.fkine(sol.q[2]).A, Ts[2].A, atol=1e-9)
+
+    def test_ikine_a_wrist_singularity(self):
+        # q5 = 0 aligns the axes of joints 4 and 6
+        puma = rp.models.DH.Puma560()
+        T = puma.fkine([0.3, 0.5, -0.4, 0.2, 0.0, 0.7])
+
+        sol = puma.ikine_a(T)
+
+        self.assertTrue(sol.success)
+        nt.assert_allclose(puma.fkine(sol.q).A, T.A, atol=1e-9)
+
+    def test_ikine_a_with_base(self):
+        puma = rp.models.DH.Puma560()
+        puma.base = sm.SE3(0.2, -0.1, 0.3) * sm.SE3.Rz(0.4)
+        T = puma.fkine(puma.qn)
+
+        sol = puma.ikine_a(T)
+
+        self.assertTrue(sol.success)
+        nt.assert_allclose(puma.fkine(sol.q).A, T.A, atol=1e-9)
+
+    def test_ikine_6s_is_deprecated(self):
+        puma = rp.models.DH.Puma560()
+        with self.assertWarns(DeprecationWarning):
+            puma.ikine_6s(puma.fkine(puma.qn), "lun", lambda robot, T, config: None)
+
     def test_ikine_LM(self):
         puma = rp.models.DH.Puma560()
 
