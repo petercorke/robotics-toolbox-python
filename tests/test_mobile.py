@@ -17,6 +17,7 @@ from roboticstoolbox.mobile.landmarkmap import *
 from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.sensors import *
 from roboticstoolbox.mobile.Vehicle import *
+from roboticstoolbox.mobile.Vehicle import DiffSteer, Unicycle
 from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
 
 # from roboticstoolbox.mobile import Planner
