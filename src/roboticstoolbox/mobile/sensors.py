@@ -558,9 +558,14 @@ class RangeBearingSensor(SensorBase):
 
         Return the range and bearing to a landmark:
 
-        - ``.h(x)`` is range and bearing to all landmarks, one row per landmark
+        - ``.h(x)`` is range and bearing to all landmarks, one row per landmark,
+          including maps with just one landmark
         - ``.h(x, id)`` is range and bearing to landmark ``id``
         - ``.h(x, p)`` is range and bearing to landmark with coordinates ``p``
+
+        For an explicit landmark, a single vehicle pose returns a vector of two
+        elements. An ndarray of vehicle poses returns one row per pose, including
+        a batch containing just one pose.
 
         .. runblock:: pycon
 
@@ -582,7 +587,8 @@ class RangeBearingSensor(SensorBase):
         """
         # get the landmarks, one per row
 
-        if isinstance(x, np.ndarray) and x.ndim == 2:
+        vectorized = isinstance(x, np.ndarray) and x.ndim == 2
+        if vectorized:
             # x is Nx3 set of vehicle states, do vectorized form
             # used by particle filter
             xp, y, t = x.T
@@ -612,7 +618,7 @@ class RangeBearingSensor(SensorBase):
             np.sqrt(dx**2 + dy**2), base.angdiff(np.arctan2(dy, dx), t)
         ]  # range & bearing as columns
 
-        if z.shape[0] == 1:
+        if z.shape[0] == 1 and landmark is not None and not vectorized:
             return z[0]
         else:
             return z
