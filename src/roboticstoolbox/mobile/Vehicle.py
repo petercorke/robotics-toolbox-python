@@ -5,6 +5,7 @@ Python Vehicle
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 import warnings
 import sys
 from math import pi, sin, cos, tan
@@ -743,7 +744,7 @@ class VehicleBase(ABC):
         #. Returns the odometry
 
         - ``veh.step((vel, steer))`` for a Bicycle vehicle model
-        - ``veh.step((vel, vel_diff))`` for a Unicycle vehicle model
+        - ``veh.step((vel, turn_rate))`` for a Unicycle vehicle model
         - ``veh.step()`` as above but control is taken from the ``control``
           attribute which might be a function or driver agent.
 
@@ -1232,7 +1233,12 @@ class Unicycle(VehicleBase):
         )
         return s
 
-    def deriv(self, x, u, limits=True):
+    def deriv(
+        self,
+        x: Sequence[float] | np.ndarray,
+        u: Sequence[float] | np.ndarray,
+        limits: bool = True,
+    ) -> np.ndarray:
         r"""
         Time derivative of state
 
@@ -1253,8 +1259,9 @@ class Unicycle(VehicleBase):
                     \dot{y} &= v \sin \theta \\
                     \dot{\theta} &= \omega
 
-        If ``limits`` is True then speed, acceleration and steer-angle limits are
-        applied to ``u``.
+        The turn rate is an angular velocity in radians per second, independent
+        of the vehicle width ``W``. If ``limits`` is True then speed, acceleration
+        and turn-rate limits are applied to ``u``.
 
         :seealso: :meth:`f`
         """
@@ -1263,9 +1270,9 @@ class Unicycle(VehicleBase):
         # unpack some variables
         theta = x[2]
         v = u[0]
-        vdiff = u[1]
+        omega = u[1]
 
-        return np.r_[v * cos(theta), v * sin(theta), vdiff / self._W]
+        return np.r_[v * cos(theta), v * sin(theta), omega]
 
     def u_limited(self, u):
         r"""
