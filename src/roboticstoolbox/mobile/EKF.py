@@ -1240,27 +1240,23 @@ class EKF:
         # xlabel('Time step')
         # ylabel('\theta error')
 
-    def get_map(self):
+    def get_map(self) -> np.ndarray:
         """
         Get estimated map
 
         :return: landmark coordinates :math:`(x, y)`
         :rtype: ndarray(n,2)
 
-        Landmarks are returned in the order they were first observed.
+        Landmarks are returned in the order they were first observed. Each row
+        contains the two coordinates of one landmark, excluding the vehicle pose
+        when it is estimated as part of SLAM.
 
         :seealso: :meth:`landmarks`  :meth:`run` :meth:`history`
 
         """
         xy = []
-        for lm_id, (jx, n) in self._landmarks.items():
-            #  jx is an index into the *landmark* part of the state
-            #  vector, we need to offset it to account for the vehicle
-            #  state if we are estimating vehicle as well
-            if self._est_vehicle:
-                jx += 3
-            xf = self._x_est[jx : jx + 2]
-            xy.append(xf)
+        for lm_id in self._landmarks:
+            xy.append(self.landmark_x(lm_id))
         return np.array(xy)
 
     def plot_map(self, marker=None, ellipse=None, confidence=0.95, block=None):
