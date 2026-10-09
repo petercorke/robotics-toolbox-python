@@ -242,7 +242,7 @@ class DHRobot(Robot):
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
-                        ql = [qlim[0, j], qlim[1, j]]
+                        ql = [format_attr(qlim[k, j]) for k in [0, 1]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
@@ -265,7 +265,7 @@ class DHRobot(Robot):
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
-                        ql = [qlim[0, j], qlim[1, j]]
+                        ql = [format_attr(qlim[k, j]) for k in [0, 1]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
