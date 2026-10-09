@@ -37,10 +37,10 @@ def test_get_map_landmark_coordinates(
     observed = list(
         dict.fromkeys(item.lm for item in estimator.history if item.lm >= 0)
     )
-    assert len(observed) == nobserved
+    nt.assert_equal(len(observed), nobserved)
     exported = estimator.get_map()
     if not nobserved:
-        assert exported.size == 0
+        nt.assert_equal(exported.size, 0)
         return
 
     expected = points[:, observed].T
