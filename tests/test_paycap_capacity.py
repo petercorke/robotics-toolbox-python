@@ -71,3 +71,17 @@ def test_paycap_rejects_zero_wrench_direction():
     robot = _DummyRobot(7)
     with pytest.raises(ValueError, match="nonzero wrench"):
         robot.paycap(np.zeros(6), _limits(7))
+
+
+def test_paycap_joint_unaffected_by_wrench_is_unbounded():
+    robot = _DummyRobot(3)
+    robot.pay = lambda w, q, frame: np.array([1.0, 0.0, 2.0])
+    limits = _limits(3)
+    limits[1, 1] = 0.0
+
+    with np.errstate(divide="raise", invalid="raise"):
+        capacities, joint = robot.paycap([1.0, 0, 0, 0, 0, 0], limits)
+
+    npt.assert_allclose(capacities[[0, 2]], [20.0, 10.0])
+    assert np.isinf(capacities[1])
+    assert joint == 2

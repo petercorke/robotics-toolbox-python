@@ -1478,10 +1478,10 @@ class DynamicsMixin:
             tauP = self.pay(w[i, :] / w_norm[i], q=q[i, :], frame=frame)
 
             positive = tauP > 0
-            nonpositive = tauP <= 0
-            WM = np.zeros(self.n)
+            negative = tauP < 0
+            WM = np.full(self.n, np.inf)
             WM[positive] = (tauR[positive, 0] - tauB[positive]) / tauP[positive]
-            WM[nonpositive] = (tauR[nonpositive, 1] - tauB[nonpositive]) / tauP[nonpositive]
+            WM[negative] = (tauR[negative, 1] - tauB[negative]) / tauP[negative]
             WM[WM == -np.inf] = np.inf
 
             wmax[i, :] = WM
