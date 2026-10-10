@@ -179,8 +179,13 @@ class DynamicsMixin:
         nf = self.copy()
         nf.name = "NF/" + self.name
 
-        # add the modified links (copies)
-        nf._links = [link.nofriction(coulomb, viscous) for link in self.links]
+        # Modify the already-copied links in place. Replacing _links with
+        # independent copies would break their parent/child relationships.
+        for link in nf.links:
+            if viscous:
+                link.B = 0.0
+            if coulomb:
+                link.Tc = [0.0, 0.0]
 
         return nf
 
