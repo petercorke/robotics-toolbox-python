@@ -618,6 +618,11 @@ class TestBaseRobot(unittest.TestCase):
         self.assertEqual(robot.links[0]._children, [robot.links[1]])
         self.assertEqual(robot.links[1]._children, [robot.links[2]])
         nt.assert_allclose(clone.rne(q, qd, qdd), expected_tau)
+
+        frictionless = robot.nofriction(coulomb=True, viscous=True)
+        self.assertIs(frictionless.links[1].parent, frictionless.links[0])
+        self.assertIs(frictionless.links[2].parent, frictionless.links[1])
+        nt.assert_allclose(frictionless.rne(q, qd, qdd), expected_tau)
         nt.assert_allclose(clone.coriolis(q, qd), robot.coriolis(q, qd))
 
     def test_toradians(self):
