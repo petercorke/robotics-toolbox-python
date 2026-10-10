@@ -34,10 +34,10 @@ def test_paycap_joint_count(n):
         [2.0, 0, 0, 0, 0, 0], _limits(n), frame=0
     )
     npt.assert_allclose(capacity, 20.0 / np.arange(1, n + 1))
-    assert capacity.shape == (n,)
-    assert limiting_joint == n - 1
+    npt.assert_equal(capacity.shape, (n,))
+    npt.assert_equal(limiting_joint, n - 1)
     npt.assert_allclose(robot.calls[0][0], [1, 0, 0, 0, 0, 0])
-    assert robot.calls[0][2] == 0
+    npt.assert_equal(robot.calls[0][2], 0)
 
 
 def test_paycap_negative_wrench_uses_minimum_torque_limit():
@@ -46,7 +46,7 @@ def test_paycap_negative_wrench_uses_minimum_torque_limit():
         [-10.0, 0, 0, 0, 0, 0], _limits(7)
     )
     npt.assert_allclose(capacity, 10.0 / np.arange(1, 8))
-    assert limiting_joint == 6
+    npt.assert_equal(limiting_joint, 6)
 
 
 def test_paycap_trajectory_uses_each_wrench_direction():
@@ -54,7 +54,7 @@ def test_paycap_trajectory_uses_each_wrench_direction():
     q = np.stack([np.zeros(7), np.ones(7)])
     wrench = np.array([[2.0, 0, 0, 0, 0, 0], [-10.0, 0, 0, 0, 0, 0]])
     capacities, joints = robot.paycap(wrench, _limits(7), q=q)
-    assert capacities.shape == (2, 7)
+    npt.assert_equal(capacities.shape, (2, 7))
     npt.assert_allclose(capacities[0], 20.0 / np.arange(1, 8))
     npt.assert_allclose(capacities[1], 10.0 / np.arange(1, 8))
     npt.assert_array_equal(joints, [6, 6])
@@ -83,5 +83,5 @@ def test_paycap_joint_unaffected_by_wrench_is_unbounded():
         capacities, joint = robot.paycap([1.0, 0, 0, 0, 0, 0], limits)
 
     npt.assert_allclose(capacities[[0, 2]], [20.0, 10.0])
-    assert np.isinf(capacities[1])
-    assert joint == 2
+    npt.assert_equal(np.isinf(capacities[1]), True)
+    npt.assert_equal(joint, 2)
