@@ -1528,7 +1528,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             cls = rtb.Robot
 
         for link in self.links:
-            links.append(deepcopy(link))
+            cloned = deepcopy(link)
+            # Rebuild parent/child references within the copied robot, rather
+            # than retaining links from the source robot.
+            cloned._children = []
+            if cloned.parent is not None:
+                cloned._parent_name = cloned.parent.name
+                cloned._parent = None
+            links.append(cloned)
 
         name = deepcopy(self.name)
         manufacturer = deepcopy(self.manufacturer)

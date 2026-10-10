@@ -589,6 +589,37 @@ class TestBaseRobot(unittest.TestCase):
 
         self.assertTrue(r2.links[0] != r.links[0])
 
+    def test_copy_preserves_parent_graph_and_dynamics(self):
+        # A fixed link between two joints exercises the parent references
+        # used by both the forward and backward RNE recursions.
+        base = Link(ET.Rz(), name="joint0", m=1.0, r=[0.1, 0, 0], I=[0.02] * 3)
+        fixed = Link(
+            ET.tx(0.25), name="fixed", parent=base,
+            m=0.3, r=[0.05, 0, 0], I=[0.01] * 3,
+        )
+        tip = Link(
+            ET.Ry(), name="joint1", parent=fixed,
+            m=0.6, r=[0.1, 0, 0], I=[0.02] * 3,
+        )
+        robot = Robot([base, fixed, tip])
+        q = np.array([0.2, -0.3])
+        qd = np.array([0.1, 0.2])
+        qdd = np.array([0.3, -0.1])
+
+        expected_tau = robot.rne(q, qd, qdd)
+        clone = robot.copy()
+
+        self.assertIsNot(clone.links[0], robot.links[0])
+        self.assertIsNone(clone.links[0].parent)
+        self.assertIs(clone.links[1].parent, clone.links[0])
+        self.assertIs(clone.links[2].parent, clone.links[1])
+        self.assertEqual(clone.links[0]._children, [clone.links[1]])
+        self.assertEqual(clone.links[1]._children, [clone.links[2]])
+        self.assertEqual(robot.links[0]._children, [robot.links[1]])
+        self.assertEqual(robot.links[1]._children, [robot.links[2]])
+        nt.assert_allclose(clone.rne(q, qd, qdd), expected_tau)
+        nt.assert_allclose(clone.coriolis(q, qd), robot.coriolis(q, qd))
+
     def test_toradians(self):
         r = rtb.models.Panda()
 
