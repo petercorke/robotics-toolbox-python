@@ -44,7 +44,40 @@ from ansitable import ANSITable, Column
 import warnings
 
 
+def _is_zero(x) -> bool:
+    try:
+        return bool(np.all(np.asarray(x) == 0))
+    except Exception:
+        return False
+
+
 class DynamicsMixin:
+    # --------------------------------------------------------------------- #
+    @property
+    def has_dynamics(self: RobotProto) -> bool:
+        """
+        Robot has dynamic parameters (Robot superclass)
+
+        :returns: ``True`` if any link has a non-zero mass or motor inertia
+        :rtype: bool
+
+        Kinematics-only models, such as the default ``rtb.models.Panda``, have
+        no inertial data. The dynamics methods raise ``ValueError`` for such a
+        model rather than return an all-zero result.
+
+        .. note:: This is ``any`` and not ``all`` since the first link of the
+            DH Puma560 legitimately has a mass of zero.
+        """
+        return any(not (_is_zero(link.m) and _is_zero(link.Jm)) for link in self.links)
+
+    def _require_dynamics(self: RobotProto) -> None:
+        if not self.has_dynamics:
+            raise ValueError(
+                f"model '{self.name}' has no dynamic parameters (all link masses "
+                "are zero); use a model that defines them, for example "
+                "rtb.models.DH.Panda(), or set m, r and I on its links"
+            )
+
     # --------------------------------------------------------------------- #
     def dynamics(self: RobotProto):
         """
@@ -291,6 +324,7 @@ class DynamicsMixin:
         :func:`DHRobot.rne`.
 
         """
+        self._require_dynamics()
 
         n = self.n
 
@@ -462,6 +496,7 @@ class DynamicsMixin:
             104, no. 3, pp. 205-211, 1982.
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -752,6 +787,7 @@ class DynamicsMixin:
         :func:`cinertia`
 
         """
+        self._require_dynamics()
         q = getmatrix(q, (None, self.n))
 
         In = np.zeros((q.shape[0], self.n, self.n))
@@ -813,6 +849,7 @@ class DynamicsMixin:
         - Computationally slow, involves :math:`n^2/2` invocations of RNE.
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -905,6 +942,7 @@ class DynamicsMixin:
             >>> puma.gravload(puma.qz)
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
 
@@ -1415,6 +1453,7 @@ class DynamicsMixin:
         :func:`inertia`
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qdd = getmatrix(qdd, (None, self.n))
