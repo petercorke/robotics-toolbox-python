@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+from spatialmath import SE3
 from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
@@ -33,11 +34,15 @@ class rx200(URDFRobot):
     def __init__(self):
 
         super().__init__(
-            "trossen_descriptions/urdf/rx200.urdf.xacro", manufacturer="Interbotix"
+            "trossen_descriptions/urdf/rx200.urdf.xacro",
+            manufacturer="Interbotix",
+            gripper_link_name="/ee_arm_link",
         )
 
-        self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4, 0])
-        self.qz = np.zeros(8)
+        self.grippers[0].tool = SE3(0.05057, 0, 0)
+
+        self.qr = np.array([0, -0.3, 0.8, -0.5, 0])
+        self.qz = np.zeros(5)
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)

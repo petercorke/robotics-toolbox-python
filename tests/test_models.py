@@ -75,48 +75,84 @@ class TestModels(unittest.TestCase):
 
     def test_px100(self):
         r = rp.models.px100()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 4)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_px150(self):
         r = rp.models.px150()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 5)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_rx150(self):
         r = rp.models.rx150()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 5)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_rx200(self):
         r = rp.models.rx200()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 5)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_vx300(self):
         r = rp.models.vx300()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 5)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_vx300s(self):
         r = rp.models.vx300s()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 6)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_wx200(self):
         r = rp.models.wx200()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 5)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_wx250(self):
         r = rp.models.wx250()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 5)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_wx250s(self):
         r = rp.models.wx250s()
-        r.qr
-        r.qz
+        self.assertEqual(r.n, 6)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
+        self.assertEqual(len(r.grippers), 1)
+        self.assertTrue(((r.qr >= r.qlim[0]) & (r.qr <= r.qlim[1])).all())
+        self.assertTrue(((r.qz >= r.qlim[0]) & (r.qz <= r.qlim[1])).all())
 
     def test_Jaco(self):
         r = rp.models.Jaco()
