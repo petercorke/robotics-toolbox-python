@@ -56,7 +56,7 @@ def test_heading_moments_survive_wrap_and_particle_replication(
     assert_allclose(step.xest[:2], [3.0, 1.5])
     assert_allclose(step.std[:2], [np.sqrt(5.0), np.sqrt(1.25)])
     assert_allclose(particle_filter.get_std()[-1], step.std)
-    assert np.all(np.abs(particle_filter.x[:, 2]) <= np.pi)
+    np.testing.assert_equal(np.all(np.abs(particle_filter.x[:, 2]) <= np.pi), True)
 
 
 def test_single_particle_has_zero_heading_spread() -> None:
@@ -92,7 +92,7 @@ def test_heading_moments_use_the_current_resampled_cloud(
     assert_allclose(step.xest[:2], cloud[:, :2].mean(axis=0))
     assert_allclose(step.std[:2], cloud[:, :2].std(axis=0))
     if observations:
-        assert np.any(step.weights != step.weights[0])
+        np.testing.assert_equal(np.any(step.weights != step.weights[0]), True)
 
 
 def test_symmetric_resultant_has_finite_dispersion() -> None:
@@ -102,6 +102,6 @@ def test_symmetric_resultant_has_finite_dispersion() -> None:
     particle_filter._step()
 
     step = particle_filter.history[-1]
-    assert np.isfinite(step.xest).all()
-    assert np.isfinite(step.std).all()
-    assert 0 <= step.std[2] <= np.pi
+    np.testing.assert_equal(np.isfinite(step.xest).all(), True)
+    np.testing.assert_equal(np.isfinite(step.std).all(), True)
+    np.testing.assert_equal(0 <= step.std[2] <= np.pi, True)
