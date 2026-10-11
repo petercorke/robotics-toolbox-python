@@ -79,8 +79,11 @@ def test_quintic_integer_samples(steps: int) -> None:
     polynomial = Polynomial([1, 0, 0, 10, -15, 6])
 
     nt.assert_array_equal(trajectory.t, np.arange(steps))
-    assert not trajectory.istime
-    assert trajectory.q.shape == trajectory.qd.shape == trajectory.qdd.shape == (steps,)
+    nt.assert_equal(not trajectory.istime, True)
+    nt.assert_equal(
+        trajectory.q.shape == trajectory.qd.shape == trajectory.qdd.shape == (steps,),
+        True,
+    )
     nt.assert_allclose(trajectory.q, polynomial(samples), rtol=1e-12, atol=1e-12)
     nt.assert_allclose(
         trajectory.qd * (steps - 1), polynomial.deriv()(samples), atol=1e-12
@@ -103,7 +106,7 @@ def test_quintic_sampled_time_origin(duration: float, origin: float) -> None:
     trajectory = quintic(1, 2, times, qd0=1 / actual_duration, qdf=2 / actual_duration)
 
     nt.assert_array_equal(trajectory.t, times)
-    assert trajectory.istime
+    nt.assert_equal(trajectory.istime, True)
     for values, derivative, scale in (
         (trajectory.q, polynomial, 1),
         (trajectory.qd, polynomial.deriv(), actual_duration),
@@ -120,15 +123,17 @@ def test_quintic_multi_axis_native_control(duration: float) -> None:
     actual = mtraj(quintic, initial, final, times)
     expected = jtraj(initial, final, times)
 
-    assert actual.q.shape == actual.qd.shape == actual.qdd.shape == (11, 3)
+    nt.assert_equal(
+        actual.q.shape == actual.qd.shape == actual.qdd.shape == (11, 3), True
+    )
     nt.assert_array_equal(actual.t, times)
-    assert actual.istime
+    nt.assert_equal(actual.istime, True)
     for values, reference, scale in (
         (actual.q, expected.q, 1),
         (actual.qd, expected.qd, duration),
         (actual.qdd, expected.qdd, duration**2),
     ):
-        assert np.issubdtype(values.dtype, np.floating)
+        nt.assert_equal(np.issubdtype(values.dtype, np.floating), True)
         nt.assert_allclose(values * scale, reference * scale, rtol=1e-12, atol=1e-12)
     nt.assert_allclose(actual.q[[0, -1]], [initial, final], atol=1e-12)
 
@@ -146,8 +151,8 @@ def test_quintic_func_sample_shapes(samples: ArrayLike) -> None:
             polynomial.deriv(2)(samples),
         ),
     ):
-        assert np.shape(actual) == np.shape(samples)
-        assert np.issubdtype(np.asarray(actual).dtype, np.floating)
+        nt.assert_equal(np.shape(actual) == np.shape(samples), True)
+        nt.assert_equal(np.issubdtype(np.asarray(actual).dtype, np.floating), True)
         nt.assert_allclose(actual, expected, rtol=1e-12, atol=1e-12)
 
 
@@ -180,8 +185,8 @@ def test_quintic_func_float32_sample_precision(
             )
     reference = np.asarray(expected, dtype=float).T.reshape((3, *np.shape(times)))
     for order, actual in enumerate(quintic_func(1, 2, duration)(times)):
-        assert np.shape(actual) == np.shape(times)
-        assert np.asarray(actual).dtype == np.dtype(np.float64)
+        nt.assert_equal(np.shape(actual) == np.shape(times), True)
+        nt.assert_equal(np.asarray(actual).dtype == np.dtype(np.float64), True)
         nt.assert_allclose(
             actual * duration**order, reference[order], rtol=1e-12, atol=1e-12
         )
@@ -210,9 +215,9 @@ def test_quintic_func_sample_dtype_compatibility(dtype: type) -> None:
     result_dtype = np.result_type(samples.dtype, np.float64)
     polynomial = Polynomial([1, 0, 0, 10, -15, 6])
     for order, actual in enumerate(quintic_func(1, 2, 1)(samples)):
-        assert isinstance(actual, np.ndarray)
-        assert actual.shape == samples.shape
-        assert actual.dtype == result_dtype
+        nt.assert_equal(isinstance(actual, np.ndarray), True)
+        nt.assert_equal(actual.shape == samples.shape, True)
+        nt.assert_equal(actual.dtype == result_dtype, True)
         nt.assert_allclose(
             actual,
             polynomial.deriv(order)(samples.astype(result_dtype)),
