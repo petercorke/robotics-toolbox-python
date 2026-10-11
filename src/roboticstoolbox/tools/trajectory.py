@@ -1,7 +1,7 @@
 import math
 import warnings
 from collections import namedtuple
-
+from collections.abc import Callable
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
@@ -364,25 +364,24 @@ def quintic(
     return Trajectory("quintic", t, p, pd, pdd, istime)
 
 
-def quintic_func(q0, qf, T, qd0=0, qdf=0):
+def quintic_func(
+    q0: float, qf: float, T: float, qd0: float = 0, qdf: float = 0
+) -> Callable[[ArrayLike], tuple[ArrayLike, ArrayLike, ArrayLike]]:
     r"""
     Quintic scalar polynomial as a function
 
     :param q0: initial value
-    :type q0: float
     :param qf: final value
-    :type qf: float
-    :param T: trajectory time
-    :type T: float
+    :param T: trajectory duration
     :param qd0: initial velocity, defaults to 0
-    :type q0: float, optional
     :param qdf: final velocity, defaults to 0
-    :type q0: float, optional
-    :return: polynomial function :math:`f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))`
-    :rtype: callable
+    :returns: polynomial function :math:`f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))`
 
     Returns a function which computes the specific quintic polynomial, and its
-    derivatives, as described by the parameters.
+    derivatives, as described by the parameters. The polynomial is solved and
+    evaluated in normalized time to avoid ill-conditioning for short or long
+    durations. Returned derivatives are with respect to the supplied time, with
+    zero acceleration at both endpoints.
 
     Example:
 
@@ -397,30 +396,51 @@ def quintic_func(q0, qf, T, qd0=0, qdf=0):
     :seealso: :func:`quintic` :func:`trapezoidal_func`
     """
 
-    # solve for the polynomial coefficients using least squares
-    # fmt: off
-    X = [
-        [ 0.0,          0.0,         0.0,        0.0,     0.0,  1.0],
-        [ T**5,         T**4,        T**3,       T**2,    T,    1.0],
-        [ 0.0,          0.0,         0.0,        0.0,     1.0,  0.0],
-        [ 5.0 * T**4,   4.0 * T**3,  3.0 * T**2, 2.0 * T, 1.0,  0.0],
-        [ 0.0,          0.0,         0.0,        2.0,     0.0,  0.0],
-        [20.0 * T**3,  12.0 * T**2,  6.0 * T,    2.0,     0.0,  0.0],
-    ]
-    # fmt: on
-    coeffs, resid, rank, s = np.linalg.lstsq(
-        X, np.r_[q0, qf, qd0, qdf, 0, 0], rcond=None
-    )
+    # Hermite basis functions use normalized time. Factor the derivatives so
+    # zero endpoint acceleration is not lost through polynomial cancellation.
+    tscal = T if T != 0 else 1.0
+    boundary = np.r_[q0, qf, qd0, qdf, 0, 0]
+    if boundary.shape != (6,):
+        raise np.linalg.LinAlgError("Incompatible dimensions")
+    coefficient_dtype = np.result_type(boundary.dtype, np.asarray(T).dtype, np.float64)
+    if coefficient_dtype not in (np.float64, np.complex128):
+        raise TypeError(f"array type {coefficient_dtype} is unsupported in linalg")
+    q0, qf, v0, vf, _, _ = boundary * np.r_[1.0, 1.0, tscal, tscal, 1.0, 1.0]
+    delta = qf - q0
 
-    # coefficients of derivatives
-    coeffs_d = coeffs[0:5] * np.arange(5, 0, -1)
-    coeffs_dd = coeffs_d[0:4] * np.arange(4, 0, -1)
+    def polynomial(x: ArrayLike) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+        samples = np.asarray(x)
+        sample_dtype = np.result_type(samples.dtype, coefficient_dtype)
+        tau = np.asarray(samples, dtype=sample_dtype) / tscal
+        if T == 0:
+            # Preserve the existing degenerate least-squares linear result.
+            coeffs = np.r_[0, 0, 0, 0, (v0 + vf) / 2, (q0 + qf) / 2]
+            return (
+                np.polyval(coeffs, tau),
+                np.polyval(np.r_[0, 0, 0, 0, (v0 + vf) / 2], tau),
+                np.polyval(np.zeros(4), tau),
+            )
+        remaining = 1 - tau
+        blend = tau**3 * (10 + tau * (-15 + 6 * tau))
+        return (
+            q0 * (1 - blend)
+            + qf * blend
+            + v0 * tau * remaining**3 * (1 + 3 * tau)
+            - vf * tau**3 * remaining * (4 - 3 * tau),
+            (
+                30 * delta * tau**2 * remaining**2
+                + v0 * remaining**2 * (1 + 2 * tau - 15 * tau**2)
+                + vf * tau**2 * (1 + 2 * remaining - 15 * remaining**2)
+            )
+            / tscal,
+            12
+            * tau
+            * remaining
+            * (5 * delta * (1 - 2 * tau) - v0 * (3 - 5 * tau) - vf * (2 - 5 * tau))
+            / tscal**2,
+        )
 
-    return lambda x: (
-        np.polyval(coeffs, x),
-        np.polyval(coeffs_d, x),
-        np.polyval(coeffs_dd, x),
-    )
+    return polynomial
 
 
 # -------------------------------------------------------------------------- #
