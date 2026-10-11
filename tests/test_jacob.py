@@ -80,21 +80,32 @@ class Tests:
 
         nt.assert_array_almost_equal(j0, Jd, decimal=4)
 
-    def test_jacob_dot_analytical_eul(self):
-        rep = "eul"
-        j0 = self.robot.jacob0_dot(self.q, self.qd, representation=rep)
+    def test_jacob_dot_precomputed_j0(self):
+        J0 = self.robot.jacob0(self.q)
+        j0_direct = self.robot.jacob0_dot(self.q, self.qd)
+        j0_precomputed = self.robot.jacob0_dot(None, self.qd, J0=J0)
+        nt.assert_array_almost_equal(j0_direct, j0_precomputed)
 
-        H = numhess(
-            lambda q: self.robot.jacob0_analytical(q, representation=rep), self.q
-        )
-        Jd = np.zeros((6, self.robot.n))
-        for i in range(self.robot.n):
-            Jd += H[i, :, :] * self.qd[i]
+    def test_jacob_dot_analytical_all_representations(self):
+        for rep in ["rpy/xyz", "rpy/zyx", "eul", "exp"]:
+            j0 = self.robot.jacob0_dot(self.q, self.qd, representation=rep)
 
-        print(np.round(j0, 2))
-        print()
-        print(np.round(Jd, 2))
-        nt.assert_array_almost_equal(j0, Jd, decimal=4)
+            H = numhess(
+                lambda q, rep=rep: self.robot.jacob0_analytical(q, representation=rep),
+                self.q,
+            )
+            Jd = np.zeros((6, self.robot.n))
+            for i in range(self.robot.n):
+                Jd += H[i, :, :] * self.qd[i]
+
+            nt.assert_array_almost_equal(j0, Jd, decimal=4)
+
+    def test_jacob_dot_representation_q_none_raises(self):
+        J0 = self.robot.jacob0(self.q)
+        with pytest.raises(
+            ValueError, match="q must be provided when representation is specified"
+        ):
+            self.robot.jacob0_dot(None, self.qd, J0=J0, representation="eul")
 
     # ------ This section tests various ets' with flipped joints ------ #
 
