@@ -490,7 +490,15 @@ class ParticleFilter:
         #     # anim.add()
         # # anim.close()
 
-    def _step(self):
+    def _step(self) -> None:
+        """Advance the simulation and estimate the current particle cloud.
+
+        Heading uses the circular mean, with dispersion given by the root
+        mean square of wrapped angular residuals.  The moments describe the
+        equally weighted cloud after resampling, when an observation is
+        available.  A zero mean resultant does not define a unique heading;
+        in that case SciPy's circular mean selects a representative.
+        """
 
         # fprintf('---- step\n')
         odo = self.robot.step(animate=self._animate)  # move the robot
@@ -509,12 +517,11 @@ class ParticleFilter:
 
         # our estimate is simply the mean of the particles
         x_est = self.x.mean(axis=0)
+        x_est[2] = sp.stats.circmean(self.x[:, 2], low=-np.pi, high=np.pi)
         std_est = self.x.std(axis=0)
 
         # std is more complex for angles, need to account for 2pi wrap
-        std_est[2] = np.sqrt(np.sum(smb.angdiff(self.x[:, 2], x_est[2]) ** 2)) / (
-            self.nparticles - 1
-        )
+        std_est[2] = np.sqrt(np.mean(smb.angdiff(self.x[:, 2], x_est[2]) ** 2))
 
         # display the updated particles
         # set(self.h, 'Xdata', self.x(:,1), 'Ydata', self.x(:,2), 'Zdata', self.x(:,3))
@@ -658,15 +665,18 @@ class ParticleFilter:
         """
         return np.array([h.xest[:2] for h in self._history])
 
-    def get_std(self):
+    def get_std(self) -> np.ndarray:
         r"""
         Get standard deviation of particles
 
-        :return: standard deviation of vehicle position estimate
-        :rtype: ndarray(n,2)
+        :return: dispersion of position and heading estimates, shape (n, 3)
+        :rtype: ndarray(n,3)
 
-        Return the standard deviation :math:`(\sigma_x, \sigma_y)` of the
-        particle cloud at each time step.
+        Return the population standard deviation of position and the root
+        mean square wrapped heading residual
+        :math:`(\sigma_x, \sigma_y, \sigma_\theta)` of the equally weighted
+        particle cloud at each time step.  Heading residuals are measured
+        from the circular mean in radians.
 
         :seealso: :meth:`get_xyt`
         """
