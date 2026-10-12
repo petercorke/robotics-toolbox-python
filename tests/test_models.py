@@ -5,6 +5,7 @@
 
 import roboticstoolbox as rp
 import unittest
+import numpy as np
 import numpy.testing as nt
 
 
@@ -105,8 +106,18 @@ class TestModels(unittest.TestCase):
 
     def test_wx200(self):
         r = rp.models.wx200()
-        r.qr
-        r.qz
+        # The three gripper joints must not inflate the five-DOF arm Jacobian.
+        self.assertEqual(r.n, 5)
+        self.assertEqual(len(r.grippers), 1)
+        self.assertEqual(r.grippers[0].n, 3)
+        self.assertEqual(len(r.ee_links), 1)
+        self.assertEqual(r.ee_links[0].name, "/ee_arm_link")
+        nt.assert_allclose(r.grippers[0].tool.t, [0.050575, 0, 0])
+
+        for q in (r.qr, r.qz):
+            self.assertEqual(q.shape, (r.n,))
+            self.assertTrue(np.all(q >= r.qlim[0]))
+            self.assertTrue(np.all(q <= r.qlim[1]))
 
     def test_wx250(self):
         r = rp.models.wx250()

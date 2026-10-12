@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+from spatialmath import SE3
 from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
@@ -33,11 +34,19 @@ class wx200(URDFRobot):
     def __init__(self):
 
         super().__init__(
-            "trossen_descriptions/urdf/wx200.urdf.xacro", manufacturer="Interbotix"
+            "trossen_descriptions/urdf/wx200.urdf.xacro",
+            manufacturer="Interbotix",
+            gripper_link_name="/ee_arm_link",
         )
 
-        self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4, 0])
-        self.qz = np.zeros(8)
+        # ee_gripper_link is reached from ee_arm_link by two fixed x-translations
+        # (0.023 m to fingers_link and 0.027575 m to ee_gripper_link).
+        self.grippers[0].tool = SE3.Tx(0.050575)
+
+        # Only the five arm joints belong to Robot.q; the three gripper joints
+        # are managed by the Gripper object. Keep named arm poses within limits.
+        self.qr = np.array([0, -0.3, 0, -2.0, 0])
+        self.qz = np.zeros(5)
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
