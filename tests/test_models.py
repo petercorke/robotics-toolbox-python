@@ -111,8 +111,13 @@ class TestModels(unittest.TestCase):
         self.assertEqual(len(r.grippers), 1)
         self.assertEqual(r.grippers[0].n, 3)
         self.assertEqual(len(r.ee_links), 1)
-        self.assertEqual(r.ee_links[0].name, "/ee_arm_link")
+        # Robot.ee_links names the parent of the gripper root, not the root.
+        self.assertEqual(r.ee_links[0].name, "/gripper_link")
         nt.assert_allclose(r.grippers[0].tool.t, [0.050575, 0, 0])
+        # The default tool pose must match the URDF's actual fixed tool link.
+        nt.assert_allclose(
+            r.fkine(r.qz).A, r.fkine(r.qz, end="/ee_gripper_link").A, atol=1e-10
+        )
 
         for q in (r.qr, r.qz):
             self.assertEqual(q.shape, (r.n,))
