@@ -157,6 +157,62 @@ class TestETS(unittest.TestCase):
         self.assertEqual(ets1.structure, "")
         self.assertEqual(ets2.structure, "RR")
 
+    def test_fixjoint_preserves_kinematics_and_limits(self):
+        ets = (
+            tx(0.2)
+            * Rz(qlim=[-1, 1])
+            * ty(0.3)
+            * Rx(flip=True, qlim=[-2, 2])
+            * tz(0.1)
+            * tx(qlim=[-0.5, 0.5])
+        )
+        q = np.array([0.3, -0.25, 0.12])
+        original = ets.eval(q)
+
+        for j in range(ets.n):
+            reduced = ets.fixjoint(j, q[j])
+            self.assertEqual(reduced.n, ets.n - 1)
+            self.assertEqual([e.jindex for e in reduced.joints()], [0, 1])
+            nt.assert_allclose(reduced.eval(np.delete(q, j)), original)
+
+            surviving = [e for k, e in enumerate(ets.joints()) if k != j]
+            for actual, expected in zip(reduced.joints(), surviving):
+                self.assertEqual(actual.axis, expected.axis)
+                self.assertEqual(actual.isflip, expected.isflip)
+                nt.assert_array_equal(actual.qlim, expected.qlim)
+
+        nt.assert_allclose(ets.eval(q), original)
+        self.assertEqual([e.jindex for e in ets.joints()], [0, 1, 2])
+
+    def test_fixjoint_noncontiguous_jindices(self):
+        ets = Rz(jindex=3, qlim=[-1, 1]) * tx(0.2) * Rx(
+            jindex=7, flip=True, qlim=[-2, 2]
+        )
+        q = np.zeros(8)
+        q[3] = 0.2
+        q[7] = -0.4
+        original = ets.eval(q)
+
+        reduced = ets.fixjoint(0, q[3])
+        self.assertEqual(reduced.n, 1)
+        self.assertEqual(reduced.joints()[0].jindex, 0)
+        self.assertTrue(reduced.joints()[0].isflip)
+        nt.assert_allclose(reduced.eval([q[7]]), original)
+        self.assertEqual([e.jindex for e in ets.joints()], [3, 7])
+
+    def test_fixjoint_single_joint_and_bad_indices(self):
+        ets = rtb.ETS(Rz())
+        fixed = ets.fixjoint(0, 0.3)
+        self.assertEqual(fixed.n, 0)
+        nt.assert_allclose(fixed[0].A(), Rz(0.3).A())
+        self.assertEqual(ets.n, 1)
+
+        for index in (-1, 1, 0.5, "0"):
+            with self.subTest(index=index), self.assertRaises(ValueError):
+                ets.fixjoint(index, 0.3)
+        with self.assertRaises(ValueError):
+            rtb.ETS().fixjoint(0, 0.3)
+
     def test_fkine(self):
         q = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         rx = Rx(1.543)

@@ -168,6 +168,37 @@ class ETS(BaseETS):
     def __add__(self, rest) -> "ETS":
         return self.__mul__(rest)  # pragma: nocover
 
+    def fixjoint(self, j: int, value: float) -> "ETS":
+        """Return an independent ETS with the specified joint held constant.
+
+        j is the zero-based position among joint ETs, not a potentially
+        non-contiguous jindex. Remaining joints are renumbered consecutively
+        while retaining flip and joint limits. The original is not modified.
+
+        :param j: index of the joint to fix
+        :param value: fixed joint coordinate, in radians or metres
+        :returns: ETS with one fewer joint
+        :raises ValueError: if j does not identify a joint
+        """
+        if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
+            raise ValueError(f"joint index {j} out of range for {self.n} joints")
+
+        parts = []
+        joint_index = 0
+        for et in self:
+            if not et.isjoint:
+                parts.append(et)
+                continue
+
+            constructor = getattr(ET, et.axis)
+            if joint_index == j:
+                parts.append(constructor(-value if et.isflip else value))
+            else:
+                parts.append(constructor(flip=et.isflip, qlim=et.qlim))
+            joint_index += 1
+
+        return ETS(parts)
+
     def compile(self) -> "ETS":
         """
         Compile an ETS
