@@ -309,7 +309,7 @@ class PRMPlanner(PlannerBase):
         edge = {**dict(linewidth=0.5), **edge}
 
         # add the roadmap graph
-        self.graph.plot(text=False, vopt=vertex, eopt=edge, ax=ax)
+        self.graph.plot(labels=False, vertex_opt=vertex, edge_opt=edge, ax=ax)
         print("plotted roadmap")
 
 

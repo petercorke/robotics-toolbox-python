@@ -2,9 +2,11 @@
 
 import roboticstoolbox as rtb
 import types
+
 try:
     import pgraph
 except ImportError:
+
     class _PGraphMissing:  # pragma: no cover
         def __init__(self, *args, **kwargs):
             raise ImportError(
@@ -12,7 +14,9 @@ except ImportError:
                 "Install it with: pip install pgraph-python"
             )
 
-    pgraph = types.SimpleNamespace(UVertex=_PGraphMissing, Edge=_PGraphMissing, UGraph=_PGraphMissing)
+    pgraph = types.SimpleNamespace(
+        Vertex=_PGraphMissing, Edge=_PGraphMissing, UGraph=_PGraphMissing
+    )
 from spatialmath import SE2
 import spatialmath.base as smb
 import matplotlib.pyplot as plt
@@ -25,7 +29,7 @@ from pathlib import Path
 from progress.bar import FillingCirclesBar
 
 
-class PGVertex(pgraph.UVertex):
+class PGVertex(pgraph.Vertex):
     nvertices = 0  # reset this before each PGGraph build
 
     def __init__(self, type, **kwargs):
@@ -331,13 +335,25 @@ class PoseGraph:
         return self.vindex[i].time
 
     def plot(self, **kwargs):
-        if not "vopt" in kwargs:
-            kwargs["vopt"] = dict(
-                markersize=8, markerfacecolor="blue", markeredgecolor="None"
-            )
-        if not "eopt" in kwargs:
-            kwargs["eopt"] = dict(linewidth=1)
-        self.graph.plot(colorcomponents=False, force2d=True, **kwargs)
+        if "vopt" in kwargs:
+            vertex_opt = kwargs.pop("vopt")
+        else:
+            vertex_opt = {
+                "markersize": 8,
+                "markerfacecolor": "blue",
+                "markeredgecolor": "None",
+            }
+        if "eopt" in kwargs:
+            edge_opt = kwargs.pop("eopt")
+        else:
+            edge_opt = {"linewidth": 1}
+        self.graph.plot(
+            vertex_opt=vertex_opt,
+            edge_opt=edge_opt,
+            color_components=False,
+            force_2d=True,
+            **kwargs,
+        )
         plt.xlabel("x")
         plt.ylabel("y")
         plt.grid(True)
@@ -445,7 +461,11 @@ class PoseGraph:
                 else:
                     eopt = {**eo, **dict(color=tuple(colors[i, :]), label=i)}
                 self.graph.plot(
-                    eopt=eopt, force2d=True, colorcomponents=False, ax=ax, **kwargs
+                    edge_opt=eopt,
+                    force_2d=True,
+                    color_components=False,
+                    ax=ax,
+                    **kwargs,
                 )
                 plt.pause(0.5)
 

@@ -1,6 +1,7 @@
 try:
-    from pgraph import DGraph, DVertex, Edge
+    from pgraph import DGraph, Edge, Vertex
 except ImportError:
+
     class _PGraphMissing:  # pragma: no cover
         def __init__(self, *args, **kwargs):
             raise ImportError(
@@ -9,8 +10,8 @@ except ImportError:
             )
 
     DGraph = _PGraphMissing
-    DVertex = _PGraphMissing
     Edge = _PGraphMissing
+    Vertex = _PGraphMissing
 import numpy as np
 from spatialmath import SE2
 import matplotlib.pyplot as plt
@@ -45,7 +46,7 @@ def make_arc(dir, radius=1, npoints=20):
 arcs = {}
 
 
-class LatticeVertex(DVertex):
+class LatticeVertex(Vertex):
     def __init__(self, move=None, pose=None, name=None):
         super().__init__(name=name)
         self.move = move
