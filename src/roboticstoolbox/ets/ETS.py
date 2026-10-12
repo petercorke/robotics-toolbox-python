@@ -190,7 +190,7 @@ class ETS(BaseETS):
                 parts.append(et)
                 continue
 
-            constructor = getattr(ET, et.axis)
+            constructor = getattr(ET, et.kind)
             if joint_index == j:
                 parts.append(constructor(-value if et.isflip else value))
             else:

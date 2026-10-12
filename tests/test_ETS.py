@@ -177,7 +177,7 @@ class TestETS(unittest.TestCase):
 
             surviving = [e for k, e in enumerate(ets.joints()) if k != j]
             for actual, expected in zip(reduced.joints(), surviving):
-                self.assertEqual(actual.axis, expected.axis)
+                self.assertEqual(actual.kind, expected.kind)
                 self.assertEqual(actual.isflip, expected.isflip)
                 nt.assert_array_equal(actual.qlim, expected.qlim)
 
