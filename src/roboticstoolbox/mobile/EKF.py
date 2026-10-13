@@ -73,7 +73,7 @@ class EKF:
         where:
 
         - ``veh`` models the robotic vehicle kinematics and odometry and is a :class:`VehicleBase` subclass
-        - ``V`` is the estimated odometry (process) noise covariance as an ndarray(3,3)
+        - ``V`` is the estimated odometry (process) noise covariance as an ndarray(2,2)
         - ``smodel`` models the robot mounted sensor and is a :class:`SensorBase` subclass
         - ``W`` is the estimated sensor (measurement) noise covariance as an ndarray(2,2)
 
@@ -147,10 +147,10 @@ class EKF:
             robot = Bicycle(covar=V)
             robot.control = RandomPath(workspace=10)
 
-            map = LandmarkMap(nlandmarks=20, workspace=10)
+            map = LandmarkMap(20, workspace=10)
 
             W = np.diag([0.1, np.radians(1)]) ** 2
-            sensor = RangeBearingSensor(robot=robot, map=map, covar=W, angle=[-np.pi/2, np.pi/2], range=4, animate=True)
+            sensor = RangeBearingSensor(robot=robot, map=map, covar=W, angle=[-np.pi/2, np.pi/2], range=4, plot=True)
 
             x_sdev = [0.05, 0.05, np.radians(0.5)]
             P0 = np.diag(x_sdev) ** 2
@@ -181,12 +181,12 @@ class EKF:
         covariance ``W``, then run the filter for N time steps::
 
             robot = Bicycle()
-            robot.add_driver(RandomPath(20, 2))
+            robot.add_driver(RandomPath(workspace=10))
 
-            map = LandmarkMap(nlandmarks=20, workspace=10, seed=0)
+            map = LandmarkMap(20, workspace=10, seed=0)
 
             W = np.diag([0.1, np.radians(1)]) ** 2
-            sensor = RangeBearingSensor(robot, map, W)
+            sensor = RangeBearingSensor(robot, map, covar=W)
 
             ekf = EKF(robot=(robot, None), sensor=(sensor, W))
 
@@ -214,11 +214,13 @@ class EKF:
             robot = Bicycle(covar=V)
             robot.control = RandomPath(workspace=10)
 
-            map = LandmarkMap(nlandmarks=20, workspace=10)
+            map = LandmarkMap(20, workspace=10)
 
             W = np.diag([0.1, np.radians(1)]) ** 2
-            sensor = RangeBearingSensor(robot=robot, map=map, covar=W, angle=[-np.pi/2, np.pi/2], range=4, animate=True)
+            sensor = RangeBearingSensor(robot=robot, map=map, covar=W, angle=[-np.pi/2, np.pi/2], range=4, plot=True)
 
+            x_sdev = [0.05, 0.05, np.radians(0.5)]
+            P0 = np.diag(x_sdev) ** 2
             ekf = EKF(robot=(robot, V), P0=P0, sensor=(sensor, W))
 
             ekf.run(T=20)  # run the simulation for 20 seconds
