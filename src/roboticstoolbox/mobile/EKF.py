@@ -1172,7 +1172,7 @@ class EKF:
 
         .. note:: Observations will decrease the uncertainty while periods of dead-reckoning increase it.
 
-        .. versionchanged:: 1.5.0
+        .. versionchanged:: 1.4.5
             - The ``confidence`` bounds are the interval that contains that
               fraction of a one-dimensional Gaussian, :math:`\pm 1.96\sigma`
               for 0.95.  Earlier versions used the radius of a
