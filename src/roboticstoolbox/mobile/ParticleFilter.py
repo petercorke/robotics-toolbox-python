@@ -654,9 +654,14 @@ class ParticleFilter:
         :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`
         :rtype: ndarray(n,3)
 
+        .. versionchanged:: 1.5.0
+            Returns the heading as well as the position, as documented and as
+            :meth:`EKF.get_xyt` does.  Previously the result had only the
+            :math:`(x, y)` columns, ``xyt[:, :2]`` is that.
+
         :seealso: :meth:`plot_xy` :meth:`run` :meth:`history`
         """
-        return np.array([h.xest[:2] for h in self._history])
+        return np.array([h.xest[:3] for h in self._history])
 
     def get_std(self):
         r"""
