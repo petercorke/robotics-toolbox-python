@@ -356,9 +356,7 @@ class TestPoseGraph(unittest.TestCase):
         with self.assertRaises(ValueError):
             quiet(PoseGraph, path)
 
-    @unittest.expectedFailure
     def test_blank_line_ignored(self) -> None:
-        # a blank line (or a trailing one) raises IndexError on tokens[0]
         path = write_graph_file("VERTEX_SE2 1 0 0 0\n\nVERTEX_SE2 2 1 0 0\n")
         pg = quiet(PoseGraph, path)
         self.assertEqual(pg.graph.n, 2)

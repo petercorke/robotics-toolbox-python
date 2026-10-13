@@ -180,6 +180,10 @@ class PoseGraph:
 
                 tokens = line.split()
 
+                # is it a blank line?
+                if not tokens:
+                    continue
+
                 # g2o format records
                 if tokens[0] == "VERTEX_SE2":
                     coord = np.array([float(x) for x in tokens[2:5]])
