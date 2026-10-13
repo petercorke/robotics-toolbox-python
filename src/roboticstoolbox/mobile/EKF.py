@@ -1172,6 +1172,20 @@ class EKF:
 
         .. note:: Observations will decrease the uncertainty while periods of dead-reckoning increase it.
 
+        .. versionchanged:: 1.5.0
+            - The ``confidence`` bounds are the interval that contains that
+              fraction of a one-dimensional Gaussian, :math:`\pm 1.96\sigma`
+              for 0.95.  Earlier versions used the radius of a
+              two-dimensional confidence region, :math:`\pm 2.45\sigma` for
+              0.95, which made the shaded region about 25% wider than its
+              label.  Plots produced with earlier versions show wider bounds.
+            - The error is plotted against time.  Earlier versions plotted it
+              against sample number on axes limited to the time range, so only
+              the start of a run was visible.
+            - ``bgcolor`` is used, it was previously ignored.
+            - Works for SLAM, where the state also holds the landmarks, and
+              raises ``ValueError`` if the vehicle pose is not estimated.
+
         :seealso: :meth:`get_P` :meth:`run` :meth:`history`
         """
         if not self._est_vehicle:
