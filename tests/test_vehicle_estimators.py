@@ -390,10 +390,14 @@ class TestParticleFilter(unittest.TestCase):
         pf = ParticleFilter(
             robot, sensor, self.R, self.L, nparticles=nparticles, seed=seed, animate=False
         )
-        # run() currently pauses for 0.2 s every step even when not animating
-        with mock.patch.object(plt, "pause"):
-            quiet(pf.run, T=T)
+        quiet(pf.run, T=T)
         return pf, robot
+
+    def test_no_pause_unless_animating(self) -> None:
+        # a non-animated run must not sleep, it used to pause 0.2 s per step
+        with mock.patch.object(plt, "pause") as pause:
+            self.run_filter(nparticles=50, T=1)
+        pause.assert_not_called()
 
     def test_converges_to_the_truth(self) -> None:
         pf, robot = self.run_filter()
