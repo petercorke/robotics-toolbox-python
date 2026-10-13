@@ -80,7 +80,8 @@ class PRMPlanner(PlannerBase):
         super().__init__(occgrid, ndims=2, **kwargs)
 
         if dist_thresh is None:
-            self._dist_thresh = 0.3 * self.occgrid.maxdim
+            dist_thresh = 0.3 * self.occgrid.maxdim
+        self._dist_thresh = dist_thresh
 
         self._npoints = npoints
         # self._npoints0 = npoints
