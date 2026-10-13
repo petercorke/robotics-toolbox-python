@@ -214,7 +214,7 @@ class IKSolver(ABC):
         - ``residual`` the *maximum* residual over all poses, the worst case
         - ``reason`` the reason given by the last pose that failed, if any
 
-        .. versionchanged:: 1.5.0
+        .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is now the maximum over the poses,
             previously it was the minimum, which hid poses that were solved badly.
         """

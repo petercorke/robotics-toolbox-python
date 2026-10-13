@@ -1422,7 +1422,7 @@ class ETS(BaseETS):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
 
-        .. versionchanged:: 1.5.0
+        .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1596,7 +1596,7 @@ class ETS(BaseETS):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
 
-        .. versionchanged:: 1.5.0
+        .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1715,7 +1715,7 @@ class ETS(BaseETS):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
 
-        .. versionchanged:: 1.5.0
+        .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1851,7 +1851,7 @@ class ETS(BaseETS):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
 
-        .. versionchanged:: 1.5.0
+        .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
         :raises ImportError: if the package ``qpsolvers`` is not installed
