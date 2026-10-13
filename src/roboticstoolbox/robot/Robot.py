@@ -1034,7 +1034,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         polynomial in time from ``q0`` to ``qf``.  It is the method form of
         :func:`~roboticstoolbox.tools.trajectory.jtraj`.
 
-        .. deprecated:: 1.5.0
+        .. deprecated:: 1.4.5
             Passing :class:`SE3` poses for ``q0`` or ``qf`` is deprecated and now
             raises ``TypeError``.  The poses were converted to joint coordinates
             by inverse kinematics, which is never simple: which solution is chosen
@@ -1048,7 +1048,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             For a Cartesian trajectory see
             :func:`~roboticstoolbox.tools.trajectory.ctraj`.
 
-        .. versionchanged:: 1.5.0
+        .. versionchanged:: 1.4.5
             The arguments are joint coordinates only, they were named ``T1`` and
             ``T2`` and could be poses.  The ``**kwargs`` that were passed to the
             inverse kinematics method are gone.
@@ -1056,7 +1056,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         if isinstance(q0, SE3) or isinstance(qf, SE3):
             raise TypeError(
-                "jtraj no longer accepts SE3 poses, this was deprecated in 1.5.0. "
+                "jtraj no longer accepts SE3 poses, this was deprecated in 1.4.5. "
                 "Solve the inverse kinematics explicitly and pass joint "
                 "coordinates, e.g. robot.jtraj(robot.ikine_LM(T0).q, "
                 "robot.ikine_LM(Tf).q, t)"
