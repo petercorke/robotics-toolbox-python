@@ -211,7 +211,9 @@ class RandomPath(VehicleDriverBase):
 
         super().__init__(**kwargs)
 
-        self._dthresh = dthresh * np.diff(self._workspace[0:2])
+        if self._workspace is None:
+            raise ValueError("RandomPath requires a workspace")
+
         self._goal_marker = None
 
         self._d_prev = np.inf
