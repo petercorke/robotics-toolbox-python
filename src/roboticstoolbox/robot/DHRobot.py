@@ -1877,7 +1877,7 @@ class DHRobot(Robot):
         """
         Analytic inverse kinematics for a robot with a spherical wrist
 
-        .. deprecated:: 1.5.0
+        .. deprecated:: 1.4.5
             This came from the MATLAB Toolbox and is not general.  It only handles
             the wrist, the user supplied ``ikfunc`` must solve the first three
             joints, and that is specific to one robot geometry.  It also
