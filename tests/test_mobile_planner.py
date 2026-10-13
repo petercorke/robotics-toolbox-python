@@ -183,7 +183,6 @@ class TestPlanners(unittest.TestCase):
     #     dx.plot(path=path)
 
 
-
 def test_rrt_query_returns_path_without_printing(capsys):
     """Query must preserve its path and status without printing graph vertices."""
     from roboticstoolbox.mobile.RRTPlanner import RRTPlanner
