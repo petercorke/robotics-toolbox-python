@@ -125,10 +125,7 @@ class TestPRMPlanner(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             prm.query(self.START, self.GOAL)
 
-    @unittest.expectedFailure
     def test_query_before_plan_is_a_clear_error(self) -> None:
-        # intended: RuntimeError("no plan computed"), actual: AttributeError on
-        # ``None.n`` because the graph does not exist until plan() is called
         prm = PRMPlanner(self.grid(), seed=0)
         with self.assertRaises(RuntimeError):
             prm.query(self.START, self.GOAL)
