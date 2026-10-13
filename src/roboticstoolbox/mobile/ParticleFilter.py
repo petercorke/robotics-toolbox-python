@@ -652,10 +652,8 @@ class ParticleFilter:
         r"""
         Get estimated vehicle trajectory
 
-        :return: vehicle trajectory where each row is position :math:`(x, y)`
-        :rtype: ndarray(n,2)
-
-        .. note:: Unlike :meth:`EKF.get_xyt` the heading is not included.
+        :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`
+        :rtype: ndarray(n,3)
 
         :seealso: :meth:`plot_xy` :meth:`run` :meth:`history`
         """
