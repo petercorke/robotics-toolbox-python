@@ -1063,7 +1063,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: None,
         qd: ArrayLike,
         J0: NDArray = ...,
-        representation: None = None,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1077,18 +1077,19 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         r"""
         Time derivative of manipulator Jacobian in frame {0}
 
-        :param q: The joint configuration of the robot (must be provided if
-            ``representation`` is specified; may be ``None`` if ``J0`` is
-            provided and ``representation`` is ``None``)
-        :type q: ndarray(n) | None
+        :param q: The joint configuration of the robot. Must be provided if
+            ``representation`` is specified; may be omitted if ``J0`` is
+            provided and ``representation`` is not.
+        :type q: ArrayLike(n), optional
         :param qd: The joint velocity of the robot
-        :type qd: ndarray(n)
+        :type qd: ArrayLike(n)
         :param J0: Jacobian in {0} frame. Ignored if ``representation`` is
-            specified.
-        :type J0: ndarray(6,n) | None
+            specified; may be provided to save computation if
+            ``representation`` is not specified.
+        :type J0: ndarray(6,n), optional
         :param representation: Angular representation for analytical Jacobian
             ('rpy/xyz', 'rpy/zyx', 'eul', or 'exp')
-        :type representation: str | None
+        :type representation: str, optional
         :returns: The time derivative of the manipulator Jacobian
         :rtype: ndarray(6,n)
 
@@ -1135,6 +1136,30 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         an approximate, numerical calculation and is slower than the closed-form
         geometric Jacobian derivative.
 
+        .. list-table:: Parameter interaction between ``representation``, ``q``, and ``J0``
+           :header-rows: 1
+
+           * - ``representation``
+             - ``q``
+             - ``J0``
+             - Behavior
+           * - Omitted / ``None``
+             - Provided
+             - Omitted / ``None``
+             - Geometric Jacobian: computes :math:`\mat{J}_0` and Hessian :math:`\mathcal{H}_0` from ``q``, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
+           * - Omitted / ``None``
+             - Omitted (or ``None``)
+             - Provided
+             - Geometric Jacobian: reuses precomputed ``J0`` to compute Hessian :math:`\mathcal{H}_0`, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
+           * - Specified (e.g. ``'rpy/xyz'``)
+             - Provided
+             - Ignored
+             - Analytical Jacobian: evaluates numerical Hessian via :func:`spatialmath.base.numhess` at ``q`` and contracts with ``qd``.
+           * - Specified (e.g. ``'rpy/xyz'``)
+             - Omitted (or ``None``)
+             - Any
+             - Raises :class:`ValueError` (``q`` is required to evaluate the analytical Jacobian).
+
         .. rubric:: References
 
         - Kinematic Derivatives using the Elementary Transform
@@ -1153,6 +1178,12 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             >>> j0_dot = robot.jacob0_dot(q, qd)
             >>> j0_dot.shape
             (6, 6)
+            >>> # If J0 is already computed, it can be passed in directly:
+            >>> J0 = robot.jacob0(q)
+            >>> j0_dot_fast = robot.jacob0_dot(None, qd, J0=J0)
+            >>> import numpy as np
+            >>> np.allclose(j0_dot, j0_dot_fast)
+            True
 
         """
 
