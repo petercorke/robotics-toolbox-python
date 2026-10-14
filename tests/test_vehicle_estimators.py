@@ -456,7 +456,7 @@ class TestParticleFilter(unittest.TestCase):
 
     def test_converges_to_the_truth(self) -> None:
         pf, robot = self.run_filter()
-        error = np.linalg.norm(pf.get_xyt()[-1] - robot.x[:2])
+        error = np.linalg.norm(pf.get_xyt()[-1, :2] - robot.x[:2])
         self.assertLess(error, 1.0)
 
     def test_uncertainty_shrinks(self) -> None:
@@ -468,9 +468,16 @@ class TestParticleFilter(unittest.TestCase):
         pf, robot = self.run_filter(nparticles=100, T=2)
         steps = round(2 / robot.dt)
         self.assertEqual(pf.get_t().shape, (steps,))
-        self.assertEqual(pf.get_xyt().shape, (steps, 2))
+        self.assertEqual(pf.get_xyt().shape, (steps, 3))
         self.assertEqual(pf.get_std().shape, (steps, 3))
         self.assertEqual(pf.x.shape, (100, 3))
+
+    def test_xyt_includes_heading(self) -> None:
+        pf, _ = self.run_filter(nparticles=100, T=2)
+        xyt = pf.get_xyt()
+        # heading is the estimate in the history, within the wrapped range
+        nt.assert_array_equal(xyt[:, 2], [h.xest[2] for h in pf.history])
+        self.assertTrue(np.all(np.abs(xyt[:, 2]) <= np.pi + 1e-9))
 
     def test_same_seed_same_estimate(self) -> None:
         a, _ = self.run_filter(nparticles=100, T=2, seed=5)
