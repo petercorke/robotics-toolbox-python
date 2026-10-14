@@ -10,6 +10,10 @@ each other (BaseET is depended on by both, so it can't depend on either
 without a cycle).
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import re
 import warnings
 from copy import deepcopy
@@ -24,9 +28,7 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 _AXIS_TO_INT: dict[str, int] = {"Rx": 0, "Ry": 1, "Rz": 2, "tx": 3, "ty": 4, "tz": 5}
 
 if TYPE_CHECKING:  # pragma: nocover
-    import sympy
-
-    Sym = sympy.core.symbol.Symbol  # type: ignore
+    from sympy import Symbol as Sym
 else:  # pragma: nocover
     Sym = None
 
@@ -86,7 +88,7 @@ class BaseET:
         qlim: ArrayLike | None = None,
         *,
         eta: float | None = None,
-    ):
+    ) -> None:
         param = _resolve_param(param, eta)
 
         self._kind = axis
@@ -94,7 +96,7 @@ class BaseET:
         # A custom joint display name, e.g. "theta2" from a string `param`
         # descriptor below - printed by __str__ in place of the generic
         # "q2" when set.
-        self._joint_name = None
+        self._joint_name: str | None = None
 
         # A string `param` that doesn't parse as a plain number is a joint
         # descriptor (e.g. "theta2", "-q(3)", "θ_3"): regex-parsed for
@@ -103,16 +105,17 @@ class BaseET:
         # not also be given explicitly in this case - one form or the
         # other, not a silent merge of both.
         if isinstance(param, str):
+            descriptor: str = param
             try:
-                param = float(param)
+                param = float(descriptor)
             except ValueError:
                 if jindex is not None or flip is not None:
                     raise ValueError(
                         "cannot specify `jindex` or `flip` alongside a string "
                         "joint descriptor for `param`"
                     )
-                jindex, flip = _parse_joint_descriptor(param)
-                self._joint_name = param
+                jindex, flip = _parse_joint_descriptor(descriptor)
+                self._joint_name = descriptor
                 param = None
 
         flip = bool(flip)  # None (not given, and not set above) -> False
@@ -130,11 +133,13 @@ class BaseET:
         self._flip = flip
         self._jindex = jindex
 
+        self._qlim: NDArray | None
         if qlim is not None:
-            self._qlim: NDArray | None = getvector(qlim, 2, out="array")
+            self._qlim = getvector(qlim, 2, out="array")
         else:
-            self._qlim: NDArray | None = None
+            self._qlim = None
 
+        self._param: float | Sym | None
         if param is None:
             self._param = None
             if T is None:
@@ -149,12 +154,14 @@ class BaseET:
             if axis[0] == "R" and unit.lower().startswith("deg"):
                 if not issymbol(param):
                     param = deg2rad(float(param))
+            # a string `param` has been converted to a float, or to None above
+            assert not isinstance(param, str)
             # This is a static joint. The `param` setter validates axis_func,
             # computes `_T`, sets `_isstaticsym`/`_joint`, and (for ET)
             # syncs the compiled acceleration struct.
             self.param = param
 
-    def __str__(self):
+    def __str__(self) -> str:
         param_str = ""
 
         if self.isjoint:
@@ -197,7 +204,7 @@ class BaseET:
 
         return f"{self.kind}({param_str})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         s_param = "" if self.param is None else f"param={self.param}"
         s_T = (
             f"T={repr(self._T)}"
@@ -219,7 +226,7 @@ class BaseET:
 
         return f"{start}.{self.kind}({s_kwargs})"
 
-    def _repr_pretty_(self, p, cycle):
+    def _repr_pretty_(self, p: Any, cycle: Any) -> None:
         """
         Pretty string for IPython
 
@@ -242,7 +249,7 @@ class BaseET:
     # Python ET2; overridden by ET.
     _deepcopy_skip: tuple[str, ...] = ()
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> Any:
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
@@ -254,10 +261,10 @@ class BaseET:
         result._accel_init()
         return result
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> Any:
         return repr(self) == repr(other)
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> Any:
         # lets sum() work without an explicit start value, since its
         # default start is the int 0, which has no idea how to compose
         # with an ET/ET2
@@ -540,9 +547,9 @@ class BaseET:
 
     @qlim.setter
     def qlim(self, qlim_new: ArrayLike | None) -> None:
-        if qlim_new is not None:
-            qlim_new = getvector(qlim_new, 2, out="array")
-        self._qlim = qlim_new
+        self._qlim = (
+            None if qlim_new is None else getvector(qlim_new, 2, out="array")
+        )
         self._accel_update()
 
     @property
@@ -572,7 +579,7 @@ class BaseET:
         return self._jindex
 
     @jindex.setter
-    def jindex(self, j):
+    def jindex(self, j: Any) -> None:
         if not isinstance(j, int) or j < 0:
             raise ValueError(f"jindex is {j}, must be an int >= 0")
         self._jindex = j
@@ -599,7 +606,7 @@ class BaseET:
 
         return self.kind[0] != "S"
 
-    def inv(self):
+    def inv(self) -> Any:
         r"""
         Inverse of ET
 
@@ -658,7 +665,7 @@ class BaseET:
         """
         if self.isjoint:
             if self.isflip:
-                q = -q  # type: ignore
+                q = -q
 
             if self.axis_func is not None:
                 return self.axis_func(q)

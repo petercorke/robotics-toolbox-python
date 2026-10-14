@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 from roboticstoolbox.robot.Link import Link
@@ -36,7 +40,7 @@ class YuMi(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         links, name, urdf_filepath = URDF_read("yumi")
 

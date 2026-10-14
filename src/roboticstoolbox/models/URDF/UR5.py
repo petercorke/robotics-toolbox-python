@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -31,7 +35,7 @@ class UR5(URDFRobot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # Name-based lookup, not a raw positional index: robot_descriptions
         # 3.0.0 changed which upstream repo "ur5" resolves to, reordering

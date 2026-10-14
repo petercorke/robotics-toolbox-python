@@ -16,6 +16,10 @@ class Connector(ABC):
     #: True if the backend can render EllipsePlot objects.
     supports_ellipse: bool = False
 
+    #: velocity and force ellipsoids shown by the teach pendant, set by it
+    _teach_vellipse: Any
+    _teach_fellipse: Any
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -103,6 +107,19 @@ class Connector(ABC):
         """
 
         pass
+
+    def _add_teach_panel(
+        self, robot: Any, q: Any, handle: Any = None, block: bool = True
+    ) -> Any:
+        """
+        Add the teach pendant controls for ``robot``, if the backend supports
+        them (see ``supports_teach``).
+
+        :return: True if the backend has already blocked until dismissed
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not have a teach pendant"
+        )
 
     @abstractmethod
     def hold(self, *args: Any, **kwargs: Any) -> Any:  # pragma nocover

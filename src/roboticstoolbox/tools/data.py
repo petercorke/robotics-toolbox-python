@@ -1,9 +1,12 @@
+from __future__ import annotations
+
+from typing import Any
 from pathlib import Path
 import sys
 import importlib
 
 
-def _candidate_rtbdata_roots():
+def _candidate_rtbdata_roots() -> Any:
     """
     Yield candidate roots where the ``rtbdata`` tree may exist.
     """
@@ -28,7 +31,7 @@ def _candidate_rtbdata_roots():
             yield root
 
 
-def rtb_load_matfile(filename):
+def rtb_load_matfile(filename: Any) -> Any:
     """
     Load toolbox mat format data file
 
@@ -64,7 +67,7 @@ def rtb_load_matfile(filename):
         if isinstance(value, mat_struct):
             # extend dict with a dot access method
             class dictx(dict):
-                def __getattr__(self, key):
+                def __getattr__(self, key: Any) -> Any:
                     try:
                         return self[key]
                     except KeyError as k:
@@ -78,7 +81,7 @@ def rtb_load_matfile(filename):
     return data
 
 
-def rtb_load_jsonfile(filename):
+def rtb_load_jsonfile(filename: Any) -> Any:
     """
     Load toolbox JSON format data file
 
@@ -103,7 +106,7 @@ def rtb_load_jsonfile(filename):
     return rtb_load_data(filename, lambda f: json.load(open(f, "r")))
 
 
-def rtb_load_data(filename, handler, **kwargs):
+def rtb_load_data(filename: Any, handler: Any, **kwargs: Any) -> Any:
     """
     Load toolbox data file
 
@@ -133,7 +136,7 @@ def rtb_load_data(filename, handler, **kwargs):
     return handler(path, **kwargs)
 
 
-def rtb_path_to_datafile(*filename, local=True):
+def rtb_path_to_datafile(*filename: Any, local: bool = True) -> Any:
     """
     Get absolute path to datafile
 
@@ -160,19 +163,19 @@ def rtb_path_to_datafile(*filename, local=True):
         loadmat('~/foo.dat')       # read $HOME/foo.dat
     """
 
-    filename = Path(*filename)
+    fname = Path(*filename)
 
     if local:
         # check if file is in user's local filesystem
 
-        p = filename.expanduser()
+        p = fname.expanduser()
         p = p.resolve()
         if p.exists():
             return p
 
     # otherwise, look for it in rtbdata locations
     for root in _candidate_rtbdata_roots():
-        path = root / filename
+        path = root / fname
         if path.exists():
             return path.resolve()
 
@@ -181,7 +184,7 @@ def rtb_path_to_datafile(*filename, local=True):
 
 if __name__ == "__main__":
     house = rtb_load_matfile("data/house.mat")
-    a = rtb_loadmat("map1.mat")
+    a = rtb_loadmat("map1.mat")  # type: ignore[name-defined]
     print(a)
-    a = rtb_loadmat("data/map1.mat")
+    a = rtb_loadmat("data/map1.mat")  # type: ignore[name-defined]
     print(a)

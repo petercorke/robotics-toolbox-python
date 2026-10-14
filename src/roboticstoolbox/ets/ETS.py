@@ -39,13 +39,13 @@ from roboticstoolbox.ets.fknm import (
 from copy import deepcopy
 from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets._ET import BaseET
-from roboticstoolbox.ets._ETS import BaseETS, T, _dirties_fknm
-from typing import overload, TypeVar
+from roboticstoolbox.ets._ETS import BaseETS, _dirties_fknm
+from typing import Any, Sequence, overload, TypeVar
 from typing import Literal as L
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
-class ETS(BaseETS):
+class ETS(BaseETS[ET]):
     """
     This class implements an elementary transform sequence (ETS) for 3D
 
@@ -93,9 +93,8 @@ class ETS(BaseETS):
     """
 
     def __init__(
-        self,
-        arg: list[ETS | ET] | list[ET] | list[ETS] | ET | ETS | None = None,
-    ):
+        self, arg: list[ETS | ET] | list[ET] | list[ETS] | ET | ETS | None = None
+    ) -> None:
         super().__init__()
         if isinstance(arg, list):
             for item in arg:
@@ -162,10 +161,10 @@ class ETS(BaseETS):
     def __rmul__(self, other: ET | ETS) -> "ETS":
         return ETS([other, *self._data])  # pragma: nocover
 
-    def __imul__(self, rest: "ETS"):
+    def __imul__(self, rest: ET | ETS) -> "ETS":
         return self + rest  # pragma: nocover
 
-    def __add__(self, rest) -> "ETS":
+    def __add__(self, rest: ET | ETS) -> "ETS":
         return self.__mul__(rest)  # pragma: nocover
 
     def compile(self) -> "ETS":
@@ -219,7 +218,7 @@ class ETS(BaseETS):
                 ets *= ET.SE3(const)
         return ets
 
-    def insert(  # type: ignore[override]
+    def insert(
         self,
         index: int,
         value: ET | ETS,
@@ -309,7 +308,7 @@ class ETS(BaseETS):
 
         if fk.ndim == 3:
             for T in fk:
-                ret.append(SE3(T, check=False))  # type: ignore
+                ret.append(SE3(T, check=False))
         else:
             ret = SE3(fk, check=False)
 
@@ -613,7 +612,7 @@ class ETS(BaseETS):
         q: ArrayLike,
         representation: str = "rpy/xyz",
         tool: NDArray | SE3 | None = None,
-    ):
+    ) -> Any:
         r"""
         Manipulator analytical Jacobian in the base frame
 
@@ -704,10 +703,10 @@ class ETS(BaseETS):
 
     def manipulability(
         self,
-        q,
+        q: Any,
         method: L["yoshikawa", "minsingular", "invcondition"] = "yoshikawa",
         axes: L["all", "trans", "rot"] | list[bool] = "all",
-    ):
+    ) -> Any:
         """
         Manipulability measure
 
@@ -782,7 +781,7 @@ class ETS(BaseETS):
         else:
             raise ValueError("axes must be all, trans, rot or both")
 
-        def yoshikawa(robot, J, q, axes, **kwargs):
+        def yoshikawa(robot: Any, J: Any, q: Any, axes: Any, **kwargs: Any) -> Any:
             J = J[axes, :]
             if J.shape[0] == J.shape[1]:
                 # simplified case for square matrix
@@ -791,11 +790,11 @@ class ETS(BaseETS):
                 m2 = det(J @ J.T)
                 return np.sqrt(abs(m2))
 
-        def condition(robot, J, q, axes, **kwargs):
+        def condition(robot: Any, J: Any, q: Any, axes: Any, **kwargs: Any) -> Any:
             J = J[axes, :]
             return 1 / cond(J)
 
-        def minsingular(robot, J, q, axes, **kwargs):
+        def minsingular(robot: Any, J: Any, q: Any, axes: Any, **kwargs: Any) -> Any:
             J = J[axes, :]
             s = svd(J, compute_uv=False)
             return s[-1]  # return last/smallest singular value of J
@@ -878,9 +877,9 @@ class ETS(BaseETS):
         # The Hessian is the 2nd-order so we start with c = 2
         c = 2
 
-        def add_indices(indices, c):
+        def add_indices(indices: Any, c: Any) -> Any:
             total = len(indices * 2)
-            new_indices = []
+            new_indices: list[Any] = []
 
             for i in range(total):
                 j = i // 2
@@ -897,9 +896,9 @@ class ETS(BaseETS):
 
             return new_indices
 
-        def add_pdi(pdi):
+        def add_pdi(pdi: Any) -> Any:
             total = len(pdi * 2)
-            new_pdi = []
+            new_pdi: list[Any] = []
 
             for i in range(total):
                 j = i // 2
@@ -979,18 +978,18 @@ class ETS(BaseETS):
                     idx1_n = idx1[0]
 
                     # Use our indices to select the rotational column from pdr0 and pdr1
-                    col0_rot = pdr0[(*idx0_slices, slice(3, 6), idx0_n)]
-                    col1_rot = pdr1[(*idx1_slices, slice(3, 6), idx1_n)]
+                    col0_rot = pdr0[tuple(idx0_slices) + (slice(3, 6), idx0_n)]
+                    col1_rot = pdr1[tuple(idx1_slices) + (slice(3, 6), idx1_n)]
 
                     # Use our indices to select the translational column from pdr1
-                    col1_trn = pdr1[(*idx1_slices, slice(0, 3), idx1_n)]
+                    col1_trn = pdr1[tuple(idx1_slices) + (slice(0, 3), idx1_n)]
 
                     # Perform the cross product as described in the maths above
                     rot += np.cross(col0_rot, col1_rot)
                     trn += np.cross(col0_rot, col1_trn)
 
-                pd[(*np.flip(count[1:]), slice(0, 3), count[0])] = trn
-                pd[(*np.flip(count[1:]), slice(3, 6), count[0])] = rot
+                pd[tuple(np.flip(count[1:])) + (slice(0, 3), count[0])] = trn
+                pd[tuple(np.flip(count[1:])) + (slice(3, 6), count[0])] = rot
 
                 count[0] += 1
                 for j in range(len(count)):
@@ -1390,8 +1389,8 @@ class ETS(BaseETS):
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Levenberg-Marquardt numerical inverse kinematics solver
 
@@ -1565,8 +1564,8 @@ class ETS(BaseETS):
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Newton-Raphson numerical inverse kinematics solver
 
@@ -1684,8 +1683,8 @@ class ETS(BaseETS):
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Gauss-Newton numerical inverse kinematics solver
 
@@ -1813,14 +1812,14 @@ class ETS(BaseETS):
         mask: ArrayLike | None = None,
         joint_limits: bool = True,
         seed: int | None = None,
-        kj=1.0,
-        ks=1.0,
+        kj: float = 1.0,
+        ks: float = 1.0,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Quadratic programming numerical inverse kinematics solver
 
@@ -1979,7 +1978,7 @@ class ETS(BaseETS):
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
     @staticmethod
-    def _template_consume(elements: list["BaseET"], template: list[str]) -> int:
+    def _template_consume(elements: Sequence["BaseET"], template: list[str]) -> int:
         """
         Greedily match a run of ETs against an ordered template of ``kind``
         strings, where each template slot is optional but present slots must
@@ -2000,7 +1999,9 @@ class ETS(BaseETS):
                 break
         return consumed
 
-    def _split_convention(self, template: list[str], joint_slots: set[int], exposed: str):
+    def _split_convention(
+        self, template: list[str], joint_slots: set[int], exposed: str
+    ) -> Any:
         """
         Split according to a DH-like convention.
 
@@ -2045,11 +2046,11 @@ class ETS(BaseETS):
             end[i] = k + 1 + consumed
 
             if i + 1 < len(idx):
-                gap = self[end[i] : idx[i + 1]]
+                gap_ets = self[end[i] : idx[i + 1]]
                 gap_consumed = self._template_consume(
-                    list(gap), template[0 : slots[i + 1]]
+                    list(gap_ets), template[0 : slots[i + 1]]
                 )
-                if gap_consumed != len(gap):
+                if gap_consumed != len(gap_ets):
                     raise ValueError(
                         "ETS is not a valid DH/MDH parameterisation: "
                         f"unexpected term at index {end[i] + gap_consumed}"
@@ -2125,7 +2126,7 @@ class ETS(BaseETS):
                     ["tx", "Rx", "Rz", "tz"], {2, 3}, exposed="tail"
                 )
             case _:
-                return super().split(method)  # type: ignore
+                return super().split(method)
 
-        return [head] + segments + [tail]  # type: ignore
+        return [head] + segments + [tail]
 
