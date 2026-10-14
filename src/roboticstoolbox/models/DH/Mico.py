@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 from math import pi, sin, cos
@@ -39,7 +43,7 @@ class Mico(DHRobot):
     :seealso: :func:`Mico`
     """
 
-    def __init__(self, symbolic=False):
+    def __init__(self, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym

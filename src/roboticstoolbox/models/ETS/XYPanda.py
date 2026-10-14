@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -24,7 +28,7 @@ class XYPanda(Robot):
 
     """
 
-    def __init__(self, workspace=5):
+    def __init__(self, workspace: float = 5) -> None:
         """
         Create model of Franka-Emika Panda manipulator on an XY platform.
 

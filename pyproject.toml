@@ -270,6 +270,65 @@ module = [
     "roboticstoolbox.tools.trchain",
     "roboticstoolbox.tools.urdf.urdf",
     "roboticstoolbox.tools.urdf.utils",
+    "roboticstoolbox.demo.eigdemo",
+    "roboticstoolbox.demo.tripleangledemo",
+    "roboticstoolbox.demo.twistdemo",
+    "roboticstoolbox.bin._bintools",
+    "roboticstoolbox.bin.rtbtool",
+    "roboticstoolbox.models.DH.AL5D",
+    "roboticstoolbox.models.DH.Ball",
+    "roboticstoolbox.models.DH.Baxter",
+    "roboticstoolbox.models.DH.Cobra600",
+    "roboticstoolbox.models.DH.Coil",
+    "roboticstoolbox.models.DH.Hyper",
+    "roboticstoolbox.models.DH.Hyper3d",
+    "roboticstoolbox.models.DH.IRB140",
+    "roboticstoolbox.models.DH.Jaco",
+    "roboticstoolbox.models.DH.KR5",
+    "roboticstoolbox.models.DH.LWR4",
+    "roboticstoolbox.models.DH.Mico",
+    "roboticstoolbox.models.DH.Orion5",
+    "roboticstoolbox.models.DH.P8",
+    "roboticstoolbox.models.DH.Panda",
+    "roboticstoolbox.models.DH.Planar2",
+    "roboticstoolbox.models.DH.Planar3",
+    "roboticstoolbox.models.DH.Puma560",
+    "roboticstoolbox.models.DH.Sawyer",
+    "roboticstoolbox.models.DH.Stanford",
+    "roboticstoolbox.models.DH.TwoLink",
+    "roboticstoolbox.models.DH.UR10",
+    "roboticstoolbox.models.DH.UR3",
+    "roboticstoolbox.models.DH.UR5",
+    "roboticstoolbox.models.DH.Uprighttl",
+    "roboticstoolbox.models.ETS.GenericSeven",
+    "roboticstoolbox.models.ETS.Planar2",
+    "roboticstoolbox.models.ETS.Planar_Y",
+    "roboticstoolbox.models.URDF.AL5D",
+    "roboticstoolbox.models.URDF.Fetch",
+    "roboticstoolbox.models.URDF.Frankie",
+    "roboticstoolbox.models.URDF.FrankieOmni",
+    "roboticstoolbox.models.URDF.Jaco",
+    "roboticstoolbox.models.URDF.KinovaGen3",
+    "roboticstoolbox.models.URDF.LBR",
+    "roboticstoolbox.models.URDF.PR2",
+    "roboticstoolbox.models.URDF.Panda",
+    "roboticstoolbox.models.URDF.Puma560",
+    "roboticstoolbox.models.URDF.UR10",
+    "roboticstoolbox.models.URDF.UR3",
+    "roboticstoolbox.models.URDF.UR5",
+    "roboticstoolbox.models.URDF.URDFRobot",
+    "roboticstoolbox.models.URDF.Valkyrie",
+    "roboticstoolbox.models.URDF.YuMi",
+    "roboticstoolbox.models.URDF.px100",
+    "roboticstoolbox.models.URDF.px150",
+    "roboticstoolbox.models.URDF.rx150",
+    "roboticstoolbox.models.URDF.rx200",
+    "roboticstoolbox.models.URDF.vx300",
+    "roboticstoolbox.models.URDF.vx300s",
+    "roboticstoolbox.models.URDF.wx200",
+    "roboticstoolbox.models.URDF.wx250",
+    "roboticstoolbox.models.URDF.wx250s",
+    "roboticstoolbox.models.catalog",
 ]
 disallow_untyped_defs = true
 
@@ -277,18 +336,6 @@ disallow_untyped_defs = true
 # has type errors; fix a module, delete its line, and mypy then holds it to
 # zero.  The list should only ever get shorter.  A module that is not listed
 # is checked, and must stay clean.
-[[tool.mypy.overrides]]
-module = [
-    "roboticstoolbox.bin.rtbtool",
-]
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = [
-    "roboticstoolbox.demo.eigdemo",
-]
-ignore_errors = true
-
 [[tool.mypy.overrides]]
 module = [
     "roboticstoolbox.ets.ET",
@@ -304,19 +351,6 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = [
     "roboticstoolbox.mobile.ParticleFilter",
-]
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = [
-    "roboticstoolbox.models.DH.Planar2",
-    "roboticstoolbox.models.ETS.Frankie",
-    "roboticstoolbox.models.ETS.Omni",
-    "roboticstoolbox.models.ETS.Panda",
-    "roboticstoolbox.models.ETS.Puma560",
-    "roboticstoolbox.models.ETS.XYPanda",
-    "roboticstoolbox.models.URDF.URDFRobot",
-    "roboticstoolbox.models.catalog",
 ]
 ignore_errors = true
 
@@ -342,6 +376,16 @@ module = [
     "roboticstoolbox.tools.trajectory",
     "roboticstoolbox.tools.urdf.tests.test_urdf",
     "roboticstoolbox.tools.DHFactor",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.models.ETS.Frankie",
+    "roboticstoolbox.models.ETS.Omni",
+    "roboticstoolbox.models.ETS.Panda",
+    "roboticstoolbox.models.ETS.Puma560",
+    "roboticstoolbox.models.ETS.XYPanda",
 ]
 ignore_errors = true
 

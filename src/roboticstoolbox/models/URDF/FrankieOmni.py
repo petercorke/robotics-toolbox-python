@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -42,7 +46,7 @@ class FrankieOmni(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         links_base, _, urdf_filepath = URDF_read(
             "clearpath_ridgeback_description/urdf/ridgeback.urdf.xacro"

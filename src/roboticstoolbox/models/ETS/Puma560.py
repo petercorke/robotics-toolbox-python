@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 from roboticstoolbox import ET as ET
 from roboticstoolbox import Robot
 import numpy as np
@@ -29,7 +33,7 @@ class Puma560(Robot):
 
     """  # noqa
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Puma dimensions (m)
         l1 = 0.672
         l2 = -0.2337

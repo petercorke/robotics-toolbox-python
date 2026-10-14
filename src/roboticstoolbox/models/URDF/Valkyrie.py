@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import re
@@ -61,7 +65,7 @@ class Valkyrie(Robot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self, variant="A"):
+    def __init__(self, variant: str = "A") -> None:
 
         if not variant in "ABCD":
             raise ValueError("variant must be in the range A-D")

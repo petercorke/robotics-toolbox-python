@@ -4,6 +4,10 @@
 @author: Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 # 2/8/95  changed D3 to 150.05mm which is closer to data from Lee, AKB86 and
 # Tarn fixed errors in COG for links 2 and 3
 # 29/1/91 to agree with data from Armstrong etal.  Due to their use
@@ -73,7 +77,7 @@ class Puma560(DHRobot):
     .. codeauthor:: Peter Corke
     """  # noqa
 
-    def __init__(self, symbolic=False):
+    def __init__(self, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym
@@ -271,7 +275,7 @@ class Puma560(DHRobot):
 
         config = self.config_validate(config, ("lr", "ud", "nf"))
 
-        def ik3(robot, T, config="lun"):
+        def ik3(robot: Any, T: Any, config: str = "lun") -> Any:
 
             # solve for the first three joints
 

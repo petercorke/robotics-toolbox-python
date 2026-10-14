@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -24,7 +28,7 @@ class Planar2(Robot2):
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         a1 = 1
         a2 = 1

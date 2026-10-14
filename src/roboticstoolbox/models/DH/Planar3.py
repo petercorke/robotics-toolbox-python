@@ -4,6 +4,10 @@
 @author: Samuel Drew
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 from roboticstoolbox import DHRobot, RevoluteDH
 import numpy as np
 
@@ -33,7 +37,7 @@ class Planar3(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         L = [RevoluteDH(a=1), RevoluteDH(a=1), RevoluteDH(a=1)]
 
