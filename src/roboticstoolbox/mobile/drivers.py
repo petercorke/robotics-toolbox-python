@@ -14,9 +14,9 @@ from typing import TYPE_CHECKING, Any
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
+from spatialmath.base.types import R2, ArrayLike2, Points2
 
 import roboticstoolbox as rtb
-from spatialmath.base.types import ArrayLike2, Points2, R2
 from roboticstoolbox.tools.types import NDArray
 
 if TYPE_CHECKING:
@@ -113,7 +113,6 @@ class VehicleDriverBase(ABC):
         Has access to the vehicle and its state through the :meth:`vehicle`
         property.
         """
-        pass
 
     @abstractmethod
     def init(self, ax: Axes | None = None) -> None:
@@ -125,7 +124,6 @@ class VehicleDriverBase(ABC):
         Called at the start of a simulation run.  Used to initialize state
         including random number generator state.
         """
-        pass
 
     @property
     def vehicle(self) -> VehicleBase | None:
