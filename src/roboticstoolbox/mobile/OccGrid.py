@@ -10,13 +10,14 @@ import spatialmath.base as smb
 from spatialmath.geom2d import Polygon2
 from typing_extensions import Self
 
+from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class BaseMap(ABC):
     def __init__(
         self,
-        workspace: Any = None,
+        workspace: WorkspaceLike | None = None,
         name: str | None = None,
         **unused: Any,
     ) -> None:
@@ -39,12 +40,11 @@ class BaseMap(ABC):
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
         """
-        self._workspace: NDArray | None = None
-        if workspace is not None:
-            workspace = smb.expand_dims(workspace)
-            self._workspace = workspace
-            self.dx = workspace[1] - workspace[0]
-            self.dy = workspace[3] - workspace[2]
+        # a scalar, 2-vector, 4-vector or an object with a workspace attribute
+        self._workspace: NDArray | None = resolve_workspace(workspace)
+        if self._workspace is not None:
+            self.dx = self._workspace[1] - self._workspace[0]
+            self.dy = self._workspace[3] - self._workspace[2]
         self._name = name
 
 
@@ -89,8 +89,9 @@ class BaseOccupancyGrid(BaseMap):
             self._origin = smb.getvector(origin, 2)
 
         elif self._workspace is not None:
+            # the array is indexed [row, column] = [y, x]
             self._grid = np.full(
-                np.floor(np.r_[self.dx, self.dy] / cellsize).astype(int) + 1, value
+                np.floor(np.r_[self.dy, self.dx] / cellsize).astype(int) + 1, value
             )
             self._origin = np.r_[self._workspace[0], self._workspace[2]]
 
@@ -492,8 +493,8 @@ class OccupancyGrid(BaseOccupancyGrid):
 class PolygonMap(BaseMap):
     def __init__(
         self,
-        workspace: Any = None,
-        polygons: list[Polygon2] = [],
+        workspace: WorkspaceLike | None = None,
+        polygons: list[Polygon2] | None = None,
     ) -> None:
         """
         Polygonal obstacle map
@@ -501,7 +502,7 @@ class PolygonMap(BaseMap):
         :param workspace: dimensions of 2D plot area, defaults to (-10:10) x (-10:10),
             see :func:`~spatialmath.base.graphics.plotvol2`
         :type workspace: float, array_like(2), array_like(4)
-        :param polygons: obstacle polygons, defaults to []
+        :param polygons: obstacle polygons, defaults to None (no polygons)
         :type polygons: list, optional
 
         The obstacle polygons are specified as instances of :class:`~spatialmath.geom2d.Polygon2`
@@ -521,7 +522,8 @@ class PolygonMap(BaseMap):
         """
         super().__init__(workspace=workspace)
 
-        self.polygons = polygons
+        # a copy, not the caller's list or a list shared between maps
+        self.polygons: list[Polygon2] = list(polygons) if polygons is not None else []
 
     def add(self, polygon: Polygon2 | NDArray) -> None:
         """

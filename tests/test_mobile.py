@@ -830,10 +830,15 @@ class TestUnicycle(unittest.TestCase):
 
 class TestRandomPathWorkspace(unittest.TestCase):
     def test_workspace_is_required(self):
-        # the driver chooses waypoints inside the workspace, so it needs one;
-        # this used to fail with an obscure TypeError on None
+        # the driver chooses waypoints inside the workspace, so it needs one,
+        # its own or that of the vehicle it is attached to.  It is checked when
+        # the simulation is initialized; this used to fail with an obscure
+        # TypeError on None
+        driver = rtb.RandomPath()
+        veh = rtb.Bicycle()
+        veh.control = driver
         with self.assertRaises(ValueError):
-            rtb.RandomPath()
+            veh.init(animate=False)
 
     def test_workspace_given(self):
         driver = rtb.RandomPath(workspace=10)

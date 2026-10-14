@@ -18,6 +18,7 @@ from spatialmath import base
 from spatialmath.base.types import R2, ArrayLike2, Points2
 
 import roboticstoolbox as rtb
+from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
 from roboticstoolbox.tools.types import NDArray
 
 if TYPE_CHECKING:
@@ -46,7 +47,7 @@ class VehicleDriverBase(ABC):
 
     def __init__(
         self,
-        workspace: Any = None,
+        workspace: WorkspaceLike | None = None,
         speed: float = 1,
         headinggain: float = 0.3,
         goal_style: dict[str, Any] | None = None,
@@ -82,17 +83,8 @@ class VehicleDriverBase(ABC):
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
         """
-        if workspace is None:
-            # spatialmath.base.expand_dims(None) raises TypeError despite
-            # None being its own advertised default (see tech-debt.md in
-            # the spatialmath-python repo) — treat "no workspace" as None
-            # rather than relying on that default.
-            self._workspace: NDArray | None = None
-        elif hasattr(workspace, "workspace"):
-            # workspace can be defined by an object with a workspace attribute
-            self._workspace = base.expand_dims(workspace.workspace)
-        else:
-            self._workspace = base.expand_dims(workspace)
+        # a scalar, 2-vector, 4-vector or an object with a workspace attribute
+        self._workspace: NDArray | None = resolve_workspace(workspace)
 
         # the vehicle under control, set by the vehicle's control setter
         self._veh: VehicleBase | None = None
@@ -193,9 +185,15 @@ class VehicleDriverBase(ABC):
         :rtype: ndarray(4) or None
 
         Returns the bounds of the workspace as specified by constructor
-        option ``workspace``
+        option ``workspace`` or, if that was not given, the workspace of the
+        vehicle that the driver is attached to.  None if neither has one.
         """
-        return self._workspace
+        if self._workspace is not None:
+            return self._workspace
+        if self._veh is not None:
+            # the vehicle's own attribute, its property falls back to this driver
+            return self._veh._workspace
+        return None
 
     def driveto(self, goal: ArrayLike2) -> R2:
         """
@@ -275,17 +273,34 @@ class RandomPath(VehicleDriverBase):
         # TODO options to specify region, maybe accept a Map object?
         super().__init__(**kwargs)
 
-        if self._workspace is None:
-            raise ValueError("RandomPath requires a workspace")
 
         self._d_prev = np.inf
         self._random = np.random.default_rng(seed)
         self._seed = seed
         self._goal: NDArray | None = None
-        self._dthresh = dthresh * max(
-            self._workspace[1] - self._workspace[0],
-            self._workspace[3] - self._workspace[2],
+
+        # the workspace is the driver's own or, once attached, the vehicle's
+        self._dthresh_fraction = dthresh
+        self._dthresh = 0.0
+        if self.workspace is not None:
+            self._set_threshold()
+
+    def _set_threshold(self) -> NDArray:
+        """
+        Compute the waypoint distance threshold from the workspace
+
+        :raises ValueError: neither the driver nor its vehicle has a workspace
+        :return: workspace bounds
+        """
+        workspace = self.workspace
+        if workspace is None:
+            raise ValueError(
+                "RandomPath requires a workspace, given to the driver or its vehicle"
+            )
+        self._dthresh = self._dthresh_fraction * max(
+            workspace[1] - workspace[0], workspace[3] - workspace[2]
         )
+        return workspace
 
     def __str__(self) -> str:
         """
@@ -294,14 +309,12 @@ class RandomPath(VehicleDriverBase):
         :return: driver parameters and state in a compact human readable format
         """
 
-        # the constructor guarantees a workspace
-        assert self._workspace is not None
         s = "RandomPath driver object\n"
-        s += (
-            f"  X {self._workspace[0]} : {self._workspace[1]}; "
-            f"Y {self._workspace[2]} : {self._workspace[3]}, "
-            f"dthresh={self._dthresh}\n"
-        )
+        ws = self.workspace
+        if ws is not None:
+            s += (
+                f"  X {ws[0]} : {ws[1]}; Y {ws[2]} : {ws[3]}, dthresh={self._dthresh}\n"
+            )
         s += f"  current goal={self._goal}"
         return s
 
@@ -315,6 +328,9 @@ class RandomPath(VehicleDriverBase):
         random number generator is reseeded so that the sequence of random
         waypoints is repeatable.
         """
+
+        # the workspace may have come from the vehicle, which is now attached
+        self._set_threshold()
 
         if self._seed is not None:
             self._random = np.random.default_rng(self._seed)
@@ -353,17 +369,16 @@ class RandomPath(VehicleDriverBase):
     def _new_goal(self) -> None:
         """Choose a new random goal, invoked from :meth:`demand`"""
 
-        # the constructor guarantees a workspace
-        assert self._workspace is not None
+        workspace = self._set_threshold()
         veh = self._attached_vehicle()
 
         # choose a uniform random goal within inner 80% of driving area
         while True:
             r = self._random.uniform(0.1, 0.9)
-            gx = self._workspace[0:2] @ np.r_[r, 1 - r]
+            gx = workspace[0:2] @ np.r_[r, 1 - r]
 
             r = self._random.uniform(0.1, 0.9)
-            gy = self._workspace[2:4] @ np.r_[r, 1 - r]
+            gy = workspace[2:4] @ np.r_[r, 1 - r]
 
             self._goal = np.r_[gx, gy]
 
