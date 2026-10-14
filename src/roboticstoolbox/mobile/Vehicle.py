@@ -54,7 +54,9 @@ def _isnotebook() -> bool:
         return False
 
 
-def _refresh_animation_frame(fig: Figure | SubFigure | None, dt: float, pause: bool) -> None:
+def _refresh_animation_frame(
+    fig: Figure | SubFigure | None, dt: float, pause: bool | None
+) -> None:
     """
     Refresh animation for desktop and notebook backends.
 
@@ -795,7 +797,7 @@ class VehicleBase(ABC):
         self,
         u: ControlLike | None = None,
         animate: bool = True,
-        pause: bool = True,
+        pause: bool | None = True,
     ) -> NDArray:
         r"""
         Step simulator by one time step (superclass)
@@ -1776,7 +1778,7 @@ class VehicleTrailer(VehicleBase):
         self,
         u: ControlLike | None = None,
         animate: bool = True,
-        pause: bool = True,
+        pause: bool | None = True,
     ) -> None:
         r"""
         Step simulator by one time step
