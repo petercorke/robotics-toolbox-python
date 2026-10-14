@@ -136,12 +136,12 @@ class VehicleMarker(VehicleAnimationBase):
         For example, to animate a simulation with a blue square marker::
 
             a = VehicleMarker(marker="s", markerfacecolor="b")
-            veh = Bicycle(driver=RandomPath(10), animation=a)
+            veh = Bicycle(control=RandomPath(workspace=10), animation=a)
             veh.run()
 
         .. note:: A marker can only indicate vehicle position, not orientation.
 
-        :seealso: :func:`~Vehicle`
+        :seealso: :class:`VehicleBase`
         """
         super().__init__()
         if len(kwargs) == 0:
@@ -189,7 +189,7 @@ class VehiclePolygon(VehicleAnimationBase):
         For example, to animate a simulation with a red filled car-shaped polygon::
 
             a = VehiclePolygon("car", color="r")
-            veh = Bicycle(driver=RandomPath(10), animation=a)
+            veh = Bicycle(control=RandomPath(workspace=10), animation=a)
             veh.run()
 
         ``shape`` can be:
@@ -202,7 +202,7 @@ class VehiclePolygon(VehicleAnimationBase):
         The polygon is scaled to an image with a length of ``scale`` in the
         vehicle x-direction, in the units of the plot.
 
-        :seealso: :func:`~Vehicle` :class:`matplotlib.patches.Polygon`
+        :seealso: :class:`VehicleBase` :class:`matplotlib.patches.Polygon`
         """
         super().__init__()
         if isinstance(shape, str):
@@ -329,7 +329,7 @@ class VehicleIcon(VehicleAnimationBase):
         For example, to animate a simulation with the red car icon::
 
             a = VehicleIcon("redcar", scale=2)
-            veh = Bicycle(driver=RandomPath(10), animation=a)
+            veh = Bicycle(control=RandomPath(workspace=10), animation=a)
             veh.run(animation=a)
 
         .. note:: The standard icons are provided in the package ``rtb-data``
@@ -436,7 +436,7 @@ if __name__ == "__main__":
     v = VehiclePolygon(facecolor="None", edgecolor="k")
     # v = VehicleIcon('greycar2', scale=2, rotation=90)
 
-    veh = Bicycle(covar=V, animation=v, control=RandomPath(10), verbose=False)
+    veh = Bicycle(covar=V, animation=v, control=RandomPath(workspace=10), verbose=False)
     print(veh)
 
     odo = veh.step([1, 0.3])
@@ -454,7 +454,7 @@ if __name__ == "__main__":
 
         return (1, d_heading)
 
-    veh.control = RandomPath(10)
+    veh.control = RandomPath(workspace=10)
     p = veh.run(20, animate=True)
     # plt.show()
     print(p)
