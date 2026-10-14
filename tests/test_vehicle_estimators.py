@@ -366,16 +366,71 @@ class TestEKF(unittest.TestCase):
         ekf.plot_error()
         plt.close("all")
 
-    @unittest.expectedFailure
-    def test_plot_error_slam(self) -> None:
-        # the error is computed against the whole state vector, which includes
-        # the landmarks in SLAM, so the shapes (3,) and (3+2N,) do not match
+    def slam(self, T: float = 5) -> tuple[EKF, Bicycle]:
         robot = self.robot()
         map = self.map()
-        ekf = EKF(robot=(robot, V), P0=P0, sensor=(self.sensor(robot, map), W), animate=False)
-        quiet(ekf.run, T=5)
+        ekf = EKF(
+            robot=(robot, V), P0=P0, sensor=(self.sensor(robot, map), W), animate=False
+        )
+        quiet(ekf.run, T=T)
+        return ekf, robot
+
+    def test_plot_error_slam(self) -> None:
+        # the state vector includes the landmarks, only the pose is compared
+        ekf, _ = self.slam()
         ekf.plot_error()
         plt.close("all")
+
+    def test_plot_error_is_against_time(self) -> None:
+        ekf, _ = self.dead_reckoning(T=5)
+        ekf.plot_error()
+        axes = plt.gcf().axes
+        self.assertEqual(len(axes), 3)
+        for ax in axes:
+            line = ax.get_lines()[0]
+            nt.assert_allclose(line.get_xdata(), ekf.get_t())
+            self.assertEqual(len(line.get_ydata()), len(ekf.history))
+        plt.close("all")
+
+    def test_plot_error_error_and_bounds(self) -> None:
+        from scipy.stats import norm
+
+        ekf, robot = self.slam()
+        ekf.plot_error(confidence=0.95)
+        ax = plt.gcf().axes[0]
+        # error is truth - estimate, for the x coordinate
+        expected = np.array([robot.x_hist[k, 0] - h.xest[0] for k, h in enumerate(ekf.history)])
+        nt.assert_allclose(ax.get_lines()[0].get_ydata(), expected)
+        # a 95% interval on a scalar quantity is 1.96 sigma
+        sigma = np.array([np.sqrt(h.P[0, 0]) for h in ekf.history])
+        vertices = ax.patches[0].get_xy()
+        upper = vertices[: len(ekf.history), 1]
+        nt.assert_allclose(upper, norm.ppf(0.975) * sigma, rtol=1e-9)
+        plt.close("all")
+
+    def test_plot_error_bgcolor(self) -> None:
+        from matplotlib.colors import to_rgb
+
+        ekf, _ = self.dead_reckoning(T=2)
+        ekf.plot_error(bgcolor="g")
+        for ax in plt.gcf().axes:
+            nt.assert_allclose(ax.patches[0].get_facecolor()[:3], to_rgb("g"))
+        plt.close("all")
+
+    def test_plot_error_without_bounds(self) -> None:
+        ekf, _ = self.dead_reckoning(T=2)
+        ekf.plot_error(confidence=None)
+        for ax in plt.gcf().axes:
+            self.assertEqual(len(ax.patches), 0)
+        plt.close("all")
+
+    def test_plot_error_needs_a_vehicle_estimate(self) -> None:
+        robot = self.robot(covar=None)
+        map = self.map()
+        ekf = EKF(robot=(robot, None), sensor=(self.sensor(robot, map), W), animate=False)
+        quiet(ekf.run, T=2)
+        with self.assertRaises(ValueError):
+            ekf.plot_error()
 
 
 class TestParticleFilter(unittest.TestCase):
@@ -390,14 +445,18 @@ class TestParticleFilter(unittest.TestCase):
         pf = ParticleFilter(
             robot, sensor, self.R, self.L, nparticles=nparticles, seed=seed, animate=False
         )
-        # run() currently pauses for 0.2 s every step even when not animating
-        with mock.patch.object(plt, "pause"):
-            quiet(pf.run, T=T)
+        quiet(pf.run, T=T)
         return pf, robot
+
+    def test_no_pause_unless_animating(self) -> None:
+        # a non-animated run must not sleep, it used to pause 0.2 s per step
+        with mock.patch.object(plt, "pause") as pause:
+            self.run_filter(nparticles=50, T=1)
+        pause.assert_not_called()
 
     def test_converges_to_the_truth(self) -> None:
         pf, robot = self.run_filter()
-        error = np.linalg.norm(pf.get_xyt()[-1] - robot.x[:2])
+        error = np.linalg.norm(pf.get_xyt()[-1, :2] - robot.x[:2])
         self.assertLess(error, 1.0)
 
     def test_uncertainty_shrinks(self) -> None:
@@ -409,9 +468,16 @@ class TestParticleFilter(unittest.TestCase):
         pf, robot = self.run_filter(nparticles=100, T=2)
         steps = round(2 / robot.dt)
         self.assertEqual(pf.get_t().shape, (steps,))
-        self.assertEqual(pf.get_xyt().shape, (steps, 2))
+        self.assertEqual(pf.get_xyt().shape, (steps, 3))
         self.assertEqual(pf.get_std().shape, (steps, 3))
         self.assertEqual(pf.x.shape, (100, 3))
+
+    def test_xyt_includes_heading(self) -> None:
+        pf, _ = self.run_filter(nparticles=100, T=2)
+        xyt = pf.get_xyt()
+        # heading is the estimate in the history, within the wrapped range
+        nt.assert_array_equal(xyt[:, 2], [h.xest[2] for h in pf.history])
+        self.assertTrue(np.all(np.abs(xyt[:, 2]) <= np.pi + 1e-9))
 
     def test_same_seed_same_estimate(self) -> None:
         a, _ = self.run_filter(nparticles=100, T=2, seed=5)
