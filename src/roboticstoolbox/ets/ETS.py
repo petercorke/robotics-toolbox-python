@@ -171,9 +171,10 @@ class ETS(BaseETS):
     def fixjoint(self, j: int, value: float) -> "ETS":
         """Return an independent ETS with the specified joint held constant.
 
-        j is the zero-based position among joint ETs, not a potentially
-        non-contiguous jindex. Remaining joints are renumbered consecutively
-        while retaining flip and joint limits. The original is not modified.
+        j is the zero-based position among joint ETs, independent of their
+        jindex values. Remaining joints retain explicit global jindices;
+        automatically indexed joints are renumbered to fill the gap. Joint
+        limits and flip flags are preserved. The original is not modified.
 
         :param j: index of the joint to fix
         :param value: fixed joint coordinate, in radians or metres
@@ -194,7 +195,10 @@ class ETS(BaseETS):
             if joint_index == j:
                 parts.append(constructor(-value if et.isflip else value))
             else:
-                parts.append(constructor(flip=et.isflip, qlim=et.qlim))
+                kwargs = {"flip": et.isflip, "qlim": et.qlim}
+                if not self._auto_jindex:
+                    kwargs["jindex"] = et.jindex
+                parts.append(constructor(**kwargs))
             joint_index += 1
 
         return ETS(parts)
