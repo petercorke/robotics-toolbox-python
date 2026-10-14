@@ -26,7 +26,7 @@ def test_outside_grid_is_occupied(origin: tuple[int, int], cellsize: float) -> N
         (-6, 1),
         (2, -4),
     ]:
-        assert grid.isoccupied(grid.g2w((column, row)))
+        nt.assert_equal(grid.isoccupied(grid.g2w((column, row))), True)
 
 
 @pytest.mark.parametrize("origin", [(0, 0), (10, -7)])
@@ -40,11 +40,13 @@ def test_grid_bounds_preserve_rounding_and_cell_values(
     grid = BinaryOccupancyGrid(cells, origin=origin, cellsize=cellsize)
     for row in range(3):
         for column in range(5):
-            assert grid.isoccupied(grid.g2w((column, row))) == bool(cells[row, column])
+            nt.assert_equal(
+                grid.isoccupied(grid.g2w((column, row))), bool(cells[row, column])
+            )
     for column, row in [(-0.49, 1), (4.49, 1), (1, -0.49), (1, 2.49)]:
-        assert not grid.isoccupied(grid.g2w((column, row)))
+        nt.assert_equal(grid.isoccupied(grid.g2w((column, row))), False)
     for column, row in [(-0.51, 1), (4.51, 1), (1, -0.51), (1, 2.51)]:
-        assert grid.isoccupied(grid.g2w((column, row)))
+        nt.assert_equal(grid.isoccupied(grid.g2w((column, row))), True)
 
 
 @pytest.mark.parametrize("outside", [(-5, 2), (20, 2), (2, -5), (2, 20)])
