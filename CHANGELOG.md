@@ -32,6 +32,15 @@ all 26 pages, stale/incorrect content fixed, ROS references removed, and
 new pages added — Panda model comparison, reactive control, inverse
 kinematics, and IK/RNE benchmark results with real numbers.
 
+**Changed behavior: `EKF.plot_error()`.** The confidence bounds are now the
+interval containing the requested fraction of a one-dimensional Gaussian
+(±1.96σ for `confidence=0.95`); earlier versions drew ±2.45σ, which is the
+95% radius of a two-dimensional region and was too wide for a scalar error.
+The error is now plotted against time (it was plotted against sample number on
+axes limited to time), `bgcolor` is honored, and SLAM no longer raises.
+Figures regenerated with this version, for example Figure 6.10 in *Robotics,
+Vision & Control* (3rd ed.), have narrower shaded bounds than the printed ones.
+
 
 ## [1.4.4](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.3...v1.4.4) (2026-09-20)
 
