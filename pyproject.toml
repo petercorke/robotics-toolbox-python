@@ -244,6 +244,8 @@ module = [
     "roboticstoolbox.mobile.ReedsSheppPlanner",
     "roboticstoolbox.mobile.DstarPlanner",
     "roboticstoolbox.mobile.PoseGraph",
+    "roboticstoolbox.mobile.EKF",
+    "roboticstoolbox.mobile.sensors",
 ]
 disallow_untyped_defs = true
 
@@ -295,9 +297,7 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.mobile.EKF",
     "roboticstoolbox.mobile.ParticleFilter",
-    "roboticstoolbox.mobile.sensors",
 ]
 ignore_errors = true
 
