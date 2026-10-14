@@ -235,6 +235,7 @@ module = [
     "roboticstoolbox.mobile.PlannerBase",
     "roboticstoolbox.mobile.Bug2",
     "roboticstoolbox.mobile.DistanceTransformPlanner",
+    "roboticstoolbox.mobile.PRMPlanner",
 ]
 disallow_untyped_defs = true
 
@@ -291,7 +292,6 @@ module = [
     "roboticstoolbox.mobile.DubinsPlanner",
     "roboticstoolbox.mobile.EKF",
     "roboticstoolbox.mobile.LatticePlanner",
-    "roboticstoolbox.mobile.PRMPlanner",
     "roboticstoolbox.mobile.ParticleFilter",
     "roboticstoolbox.mobile.PoseGraph",
     "roboticstoolbox.mobile.QuinticPolyPlanner",
