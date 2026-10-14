@@ -294,7 +294,6 @@ class DiffSteer(ContinuousBlock):
         speed_max: float = np.inf,
         accel_max: float = np.inf,
         steer_max: float | None = None,
-        a: float = 0,
         x0: ArrayLike3 | None = None,
         **blockargs: Any,
     ) -> None:
