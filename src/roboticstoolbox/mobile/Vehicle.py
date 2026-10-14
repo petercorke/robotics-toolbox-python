@@ -148,10 +148,8 @@ class VehicleBase(ABC):
         seed: int | None = 0,
         animation: VehicleAnimationBase | str | None = None,
         verbose: bool = False,
-        plot: bool = False,
         workspace: Any = None,
         polygon: Polygon2 | None = None,
-        trailers: Any = None,
     ) -> None:
         r"""
         Superclass for vehicle kinematic models
@@ -229,7 +227,6 @@ class VehicleBase(ABC):
         self._stopsim = False
 
         self._verbose = verbose
-        self._plot = False
 
         # the setter connects a driver agent to this vehicle
         self._control: ControlLike | None = None
