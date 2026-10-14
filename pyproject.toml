@@ -274,9 +274,6 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.blocks.arm",
-    "roboticstoolbox.blocks.mobile",
-    "roboticstoolbox.blocks.quad_model",
 ]
 ignore_errors = true
 

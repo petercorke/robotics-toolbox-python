@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import Any
 import numpy as np
 from math import sin, cos, pi
 
@@ -51,7 +54,7 @@ class Tr2Delta(FunctionBlock):
     inlabels = ("T1", "T2")
     outlabels = ("Δ",)
 
-    def __init__(self, **blockargs):
+    def __init__(self, **blockargs: Any) -> None:
         """
         :param blockargs: |BlockOptions|
         :type blockargs: dict
@@ -61,7 +64,7 @@ class Tr2Delta(FunctionBlock):
         self.inport_names(("T1", "T2"))
         self.outport_names((r"$\delta$",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         return [smb.tr2delta(inports[0].A, inports[1].A)]
 
 
@@ -104,7 +107,7 @@ class Delta2Tr(FunctionBlock):
     outlabels = ("T",)
     inlabels = ("Δ",)
 
-    def __init__(self, **blockargs):
+    def __init__(self, **blockargs: Any) -> None:
         """
         :param blockargs: |BlockOptions|
         :type blockargs: dict
@@ -114,7 +117,7 @@ class Delta2Tr(FunctionBlock):
         self.inport_names((r"$\delta$",))
         self.outport_names(("T",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         return [SE3.Delta(inports[0])]
 
 
@@ -153,7 +156,7 @@ class Point2Tr(FunctionBlock):
     nin = 1
     nout = 1
 
-    def __init__(self, T=None, **blockargs):
+    def __init__(self, T: Any = None, **blockargs: Any) -> None:
         """
         :param T: the transform
         :type T: SE3
@@ -170,7 +173,7 @@ class Point2Tr(FunctionBlock):
             T = SE3()
         self.pose = T
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         T = SE3.Rt(self.pose.R, t=inports[0])
         return [T]
 
@@ -220,7 +223,7 @@ class TR2T(FunctionBlock):
     inlabels = ("T",)
     outlabels = ("x", "y", "z")
 
-    def __init__(self, **blockargs):
+    def __init__(self, **blockargs: Any) -> None:
         """
         :param blockargs: |BlockOptions|
         :type blockargs: dict
@@ -230,7 +233,7 @@ class TR2T(FunctionBlock):
         self.inport_names(("T",))
         self.outport_names(("x", "y", "z"))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         t = inports[0].t
         return list(t)
 
