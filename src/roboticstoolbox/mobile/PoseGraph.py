@@ -120,6 +120,7 @@ class PoseGraph:
         :param verbose: show details of processing, defaults to False
         :type verbose: bool, optional
         :raises RuntimeError: file syntax error
+        :raises ValueError: an edge references an unknown vertex
 
         :references:
 
@@ -169,7 +170,7 @@ class PoseGraph:
             self.vindex = {}
             firstlidar = True
             PGVertex.nvertices = 0  # reset vertex counter in PGVertex class
-            for line in f:
+            for line_number, line in enumerate(f, start=1):
                 # for zip file, we get data as bytes not str
                 if isinstance(line, bytes):
                     line = line.decode()
@@ -214,8 +215,13 @@ class PoseGraph:
                     info = d[g2o].reshape((3, 3))
 
                     # create the edge
-                    v1 = self.graph[v1]
-                    v2 = self.graph[v2]
+                    try:
+                        v1 = self.graph[v1]
+                        v2 = self.graph[v2]
+                    except KeyError as exc:
+                        raise ValueError(
+                            f"Edge references unknown vertex {exc.args[0]!r} in {filename} at line {line_number}"
+                        ) from exc
                     e = PGEdge(v1, v2, mean, info)
                     v1.connect(v2, edge=e)
 
@@ -247,8 +253,13 @@ class PoseGraph:
                     info = d[toro].reshape((3, 3))
 
                     # create the edge
-                    v1 = self.graph[v1]
-                    v2 = self.graph[v2]
+                    try:
+                        v1 = self.graph[v1]
+                        v2 = self.graph[v2]
+                    except KeyError as exc:
+                        raise ValueError(
+                            f"Edge references unknown vertex {exc.args[0]!r} in {filename} at line {line_number}"
+                        ) from exc
                     e = PGEdge(v1, v2, mean, info)
                     v1.connect(v2, edge=e)
 

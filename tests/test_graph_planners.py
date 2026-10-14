@@ -339,11 +339,23 @@ class TestPoseGraph(unittest.TestCase):
             quiet(PoseGraph, "no-such-file.g2o")
 
     def test_edge_to_unknown_vertex(self) -> None:
-        path = write_graph_file(
-            "VERTEX_SE2 1 0 0 0\nEDGE_SE2 1 9 1 0 0 500 0 0 500 0 500\n"
-        )
-        with self.assertRaises((KeyError, ValueError, RuntimeError)):
-            quiet(PoseGraph, path)
+        for suffix, vertex_record, edge_record in (
+            (".g2o", "VERTEX_SE2", "EDGE_SE2"),
+            (".toro", "VERTEX2", "EDGE2"),
+        ):
+            for start_id, end_id in (("1", "9"), ("9", "1")):
+                with self.subTest(suffix=suffix, start=start_id, end=end_id):
+                    path = write_graph_file(
+                        f"# graph header\n{vertex_record} 1 0 0 0\n"
+                        f"{edge_record} {start_id} {end_id} 1 0 0 500 0 0 500 0 500\n",
+                        suffix=suffix,
+                    )
+                    with self.assertRaises(ValueError) as raised:
+                        quiet(PoseGraph, path)
+                    self.assertIn(path, str(raised.exception))
+                    self.assertIn("line 3", str(raised.exception))
+                    self.assertIn("'9'", str(raised.exception))
+                    self.assertIsInstance(raised.exception.__cause__, KeyError)
 
     @unittest.skipUnless(
         PGRAPH_REJECTS_DUPLICATES, "pgraph < 1.0 silently replaces the vertex"
