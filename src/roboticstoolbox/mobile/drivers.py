@@ -7,6 +7,7 @@ Driving agents (drivers) for mobile robot vehicles
 
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
 from math import atan2, pi
 from typing import TYPE_CHECKING, Any
@@ -24,6 +25,15 @@ if TYPE_CHECKING:
 
     from roboticstoolbox.mobile.Vehicle import VehicleBase
 
+# default Matplotlib styles, a user supplied dict is merged over these
+GOAL_STYLE: dict[str, Any] = {
+    "marker": "D",
+    "markersize": 6,
+    "color": "r",
+    "linestyle": "None",
+}
+PATH_STYLE: dict[str, Any] = {"color": "r", "linewidth": 3, "alpha": 0.7, "zorder": 0}
+
 
 class VehicleDriverBase(ABC):
     """
@@ -39,8 +49,9 @@ class VehicleDriverBase(ABC):
         workspace: Any = None,
         speed: float = 1,
         headinggain: float = 0.3,
-        goalmarkerstyle: dict[str, Any] | None = None,
+        goal_style: dict[str, Any] | None = None,
         verbose: bool = False,
+        goalmarkerstyle: dict[str, Any] | None = None,
     ) -> None:
         """
         Abstract vehicle driver
@@ -51,9 +62,14 @@ class VehicleDriverBase(ABC):
         :param speed: forward speed, defaults to 1
         :param headinggain: gain of the proportional controller that steers the
             vehicle towards the current goal, defaults to 0.3
-        :param goalmarkerstyle: Matplotlib style of the marker used to display
-            the current goal, defaults to a red diamond
+        :param goal_style: Matplotlib line style of the marker used to display
+            the current goal, merged over the default :data:`GOAL_STYLE` (a red
+            diamond)
         :param verbose: display debug information, defaults to False
+        :param goalmarkerstyle: deprecated, use ``goal_style``
+
+        .. deprecated:: 1.4.5
+            ``goalmarkerstyle`` is deprecated, use ``goal_style`` instead.
 
         The workspace of the robot is a rectangular region defined by ``workspace``
         that is specified by (see :func:`~spatialmath.base.graphics.plotvol2`):
@@ -88,16 +104,16 @@ class VehicleDriverBase(ABC):
         self._headinggain = headinggain
         self._verbose = verbose
 
-        self._goal_marker_style: dict[str, Any]
-        if goalmarkerstyle is None:
-            self._goal_marker_style = {
-                "marker": "D",
-                "markersize": 6,
-                "color": "r",
-                "linestyle": "None",
-            }
-        else:
-            self._goal_marker_style = goalmarkerstyle
+        if goalmarkerstyle is not None:
+            warnings.warn(
+                "goalmarkerstyle is deprecated, use goal_style instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if goal_style is None:
+                goal_style = goalmarkerstyle
+
+        self._goal_style: dict[str, Any] = GOAL_STYLE | (goal_style or {})
 
     @abstractmethod
     def demand(self) -> R2:
@@ -151,7 +167,7 @@ class VehicleDriverBase(ABC):
         self._goal_marker = None
         if ax is not None:
             self._goal_marker = plt.plot(
-                np.nan, np.nan, **self._goal_marker_style, label=label
+                np.nan, np.nan, **self._goal_style, label=label
             )[0]
 
     def _attached_vehicle(self) -> VehicleBase:
@@ -367,7 +383,7 @@ class PurePursuit(VehicleDriverBase):
         self,
         path: Points2,
         lookahead: float = 1,
-        pathstyle: dict[str, Any] | None = None,
+        path_style: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -376,8 +392,9 @@ class PurePursuit(VehicleDriverBase):
         :param path: path as a set of waypoints, one column per point
         :type path: ndarray(2,n)
         :param lookahead: lookahead distance, defaults to 1
-        :param pathstyle: Matplotlib line style used to display the path,
-            defaults to a wide, translucent red line
+        :param path_style: Matplotlib line style used to display the path,
+            merged over the default :data:`PATH_STYLE` (a wide, translucent red
+            line)
         :param kwargs: arguments passed to :class:`VehicleDriverBase`
         :raises ValueError: ``path`` is not a 2xN array
 
@@ -395,9 +412,9 @@ class PurePursuit(VehicleDriverBase):
             veh = Bicycle()
             veh.control = driver
 
-        If the simulation is animated, the path is plotted using ``pathstyle``
+        If the simulation is animated, the path is plotted using ``path_style``
         and the current goal point, which changes at every time step, is shown
-        using ``goalmarkerstyle``.
+        using ``goal_style``.
 
         :seealso: :class:`RandomPath` :class:`VehicleBase`
         """
@@ -412,11 +429,7 @@ class PurePursuit(VehicleDriverBase):
         self._path = path
         self._lookahead = lookahead
 
-        self._pathstyle: dict[str, Any] = (
-            {"color": "r", "linewidth": 3, "alpha": 0.7, "zorder": 0}
-            if pathstyle is None
-            else pathstyle
-        )
+        self._path_style: dict[str, Any] = PATH_STYLE | (path_style or {})
 
     def __str__(self) -> str:
         """
@@ -446,7 +459,7 @@ class PurePursuit(VehicleDriverBase):
         """
         if ax is not None:
             plt.plot(
-                self._path[0, :], self._path[1, :], **self._pathstyle, label="path"
+                self._path[0, :], self._path[1, :], **self._path_style, label="path"
             )
         self._init_goal_marker(ax, label="pursuit goal")
 
