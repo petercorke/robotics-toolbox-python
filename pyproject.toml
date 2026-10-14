@@ -232,6 +232,7 @@ module = [
     "roboticstoolbox.mobile.Vehicle",
     "roboticstoolbox.mobile.OccGrid",
     "roboticstoolbox.mobile.landmarkmap",
+    "roboticstoolbox.mobile.PlannerBase",
 ]
 disallow_untyped_defs = true
 
@@ -292,7 +293,6 @@ module = [
     "roboticstoolbox.mobile.LatticePlanner",
     "roboticstoolbox.mobile.PRMPlanner",
     "roboticstoolbox.mobile.ParticleFilter",
-    "roboticstoolbox.mobile.PlannerBase",
     "roboticstoolbox.mobile.PoseGraph",
     "roboticstoolbox.mobile.QuinticPolyPlanner",
     "roboticstoolbox.mobile.RRTPlanner",
