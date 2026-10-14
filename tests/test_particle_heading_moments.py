@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-from scipy.stats import circmean
+from scipy.stats import circmean, circstd
 from spatialmath import base
 
 import roboticstoolbox as rtb
@@ -52,7 +52,8 @@ def test_heading_moments_survive_wrap_and_particle_replication(
 
     step = particle_filter.history[-1]
     assert_allclose(base.angdiff(step.xest[2], centre), 0.0, atol=1e-14)
-    assert_allclose(step.std[2], np.sqrt(0.05), atol=1e-14)
+    expected_spread = np.sqrt(-2 * np.log((np.cos(0.1) + np.cos(0.3)) / 2))
+    assert_allclose(step.std[2], expected_spread, atol=1e-14)
     assert_allclose(step.xest[:2], [3.0, 1.5])
     assert_allclose(step.std[:2], [np.sqrt(5.0), np.sqrt(1.25)])
     assert_allclose(particle_filter.get_std()[-1], step.std)
@@ -66,7 +67,28 @@ def test_single_particle_has_zero_heading_spread() -> None:
     particle_filter._step()
 
     assert_allclose(particle_filter.history[-1].xest, [2.0, -1.0, 3.0])
-    assert_allclose(particle_filter.history[-1].std, np.zeros(3))
+    # Roundoff in the unit resultant is amplified by the square root.
+    assert_allclose(
+        particle_filter.history[-1].std,
+        np.zeros(3),
+        atol=2 * np.sqrt(np.finfo(float).eps),
+    )
+
+
+@pytest.mark.parametrize(
+    "heading", [-1.715309588860027, 0.9613273519984773, 1.1812388377497625]
+)
+@pytest.mark.parametrize("copies", [3, 50, 1000])
+def test_identical_headings_have_zero_spread(heading: float, copies: int) -> None:
+    """Replicated point masses have zero spread despite resultant roundoff."""
+    particles = np.tile([2.0, -1.0, heading], (copies, 1))
+    particle_filter = _particle_filter(particles)
+
+    particle_filter._step()
+
+    step = particle_filter.history[-1]
+    assert_allclose(base.angdiff(step.xest[2], heading), 0.0, atol=1e-14)
+    assert_allclose(step.std, np.zeros(3))
 
 
 @pytest.mark.parametrize("observations", [False, True])
@@ -85,23 +107,23 @@ def test_heading_moments_use_the_current_resampled_cloud(
 
     cloud = particle_filter.x
     expected_heading = circmean(cloud[:, 2], low=-np.pi, high=np.pi)
-    residuals = np.angle(np.exp(1j * (cloud[:, 2] - expected_heading)))
+    expected_spread = circstd(cloud[:, 2], low=-np.pi, high=np.pi)
     step = particle_filter.history[-1]
     assert_allclose(base.angdiff(step.xest[2], expected_heading), 0.0, atol=1e-14)
-    assert_allclose(step.std[2], np.sqrt(np.mean(residuals**2)))
+    assert_allclose(step.std[2], expected_spread)
     assert_allclose(step.xest[:2], cloud[:, :2].mean(axis=0))
     assert_allclose(step.std[:2], cloud[:, :2].std(axis=0))
     if observations:
         np.testing.assert_equal(np.any(step.weights != step.weights[0]), True)
 
 
-def test_symmetric_resultant_has_finite_dispersion() -> None:
-    """An undefined circular centre still uses the library's representative."""
+def test_opposing_headings_have_large_circular_dispersion() -> None:
+    """Nearly zero resultants have an undefined centre and unbounded spread."""
     particle_filter = _particle_filter(np.array([[0.0, 0.0, 0.0], [0.0, 0.0, np.pi]]))
 
     particle_filter._step()
 
     step = particle_filter.history[-1]
     np.testing.assert_equal(np.isfinite(step.xest).all(), True)
-    np.testing.assert_equal(np.isfinite(step.std).all(), True)
-    np.testing.assert_equal(0 <= step.std[2] <= np.pi, True)
+    assert_allclose(step.std[:2], np.zeros(2))
+    np.testing.assert_equal(step.std[2] > np.pi, True)
