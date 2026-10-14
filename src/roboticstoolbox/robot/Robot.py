@@ -1092,16 +1092,26 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
     ):
         r"""
-        Derivative of Jacobian
+        Time derivative of manipulator Jacobian in frame {0}
 
-        :param q: The joint configuration of the robot
+        :param q: The joint configuration of the robot. Must be provided if
+            ``representation`` is specified; may be omitted if ``J0`` is
+            provided and ``representation`` is not.
+        :type q: ArrayLike(n), optional
         :param qd: The joint velocity of the robot
-        :param J0: Jacobian in {0} frame
-        :param representation: angular representation
-        :returns: The derivative of the manipulator Jacobian
+        :type qd: ArrayLike(n)
+        :param J0: Jacobian in {0} frame. Ignored if ``representation`` is
+            specified; may be provided to save computation if
+            ``representation`` is not specified.
+        :type J0: ndarray(6,n), optional
+        :param representation: Angular representation for analytical Jacobian
+            ('rpy/xyz', 'rpy/zyx', 'eul', or 'exp')
+        :type representation: str, optional
+        :returns: The time derivative of the manipulator Jacobian
+        :rtype: ndarray(6,n)
 
-        ``robot.jacob_dot(q, qd)`` computes the rate of change of the
-        Jacobian elements
+        ``robot.jacob0_dot(q, qd)`` computes the rate of change of the
+        manipulator Jacobian elements
 
         .. math::
 
@@ -1110,10 +1120,15 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         where the first term is the rank-3 Hessian.
 
         If ``J0`` is already calculated for the joint
-        coordinates ``q`` it can be passed in to to save computation time.
+        coordinates ``q`` it can be passed in to save computation time.
 
-        It is computed as the mode-3 product of the Hessian tensor and the
-        velocity vector.
+        For the geometric Jacobian (``representation=None``), it is computed
+        analytically as the mode-3 product of the Hessian tensor and the joint
+        velocity vector:
+
+        .. math::
+
+            \dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}
 
         The derivative of an analytical Jacobian can be obtained by setting
         ``representation`` as
@@ -1132,15 +1147,60 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
            * - ``'exp'``
              - exponential coordinate rates
 
+        When ``representation`` is specified, the Hessian of the analytical
+        Jacobian is evaluated numerically using finite differences via
+        :func:`spatialmath.base.numhess` and contracted with ``qd``. This is
+        an approximate, numerical calculation and is slower than the closed-form
+        geometric Jacobian derivative.
+
+        .. list-table:: Parameter interaction between ``representation``, ``q``, and ``J0``
+           :header-rows: 1
+
+           * - ``representation``
+             - ``q``
+             - ``J0``
+             - Behavior
+           * - Omitted / ``None``
+             - Provided
+             - Omitted / ``None``
+             - Geometric Jacobian: computes :math:`\mat{J}_0` and Hessian :math:`\mathcal{H}_0` from ``q``, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
+           * - Omitted / ``None``
+             - Omitted (or ``None``)
+             - Provided
+             - Geometric Jacobian: reuses precomputed ``J0`` to compute Hessian :math:`\mathcal{H}_0`, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
+           * - Specified (e.g. ``'rpy/xyz'``)
+             - Provided
+             - Ignored
+             - Analytical Jacobian: evaluates numerical Hessian via :func:`spatialmath.base.numhess` at ``q`` and contracts with ``qd``.
+           * - Specified (e.g. ``'rpy/xyz'``)
+             - Omitted (or ``None``)
+             - Any
+             - Raises :class:`ValueError` (``q`` is required to evaluate the analytical Jacobian).
+
         .. rubric:: References
 
         - Kinematic Derivatives using the Elementary Transform
-            Sequence, J. Haviland and P. Corke
+          Sequence, J. Haviland and P. Corke
 
-        See Also
-        --------
-        :func:`jacob0`
-        :func:`hessian0`
+        .. seealso:: :func:`jacob0`, :func:`hessian0`
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> q = robot.qn
+            >>> qd = [0.1, -0.2, 0.3, -0.1, 0.2, -0.3]
+            >>> j0_dot = robot.jacob0_dot(q, qd)
+            >>> j0_dot.shape
+            (6, 6)
+            >>> # If J0 is already computed, it can be passed in directly:
+            >>> J0 = robot.jacob0(q)
+            >>> j0_dot_fast = robot.jacob0_dot(None, qd, J0=J0)
+            >>> import numpy as np
+            >>> np.allclose(j0_dot, j0_dot_fast)
+            True
 
         """
 
@@ -1152,32 +1212,13 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             H = self.hessian0(q, J0=J0)
 
         else:
-            # # determine analytic rotation
-            # T = self.fkine(q).A
-            # gamma = smb.r2x(smb.t2r(T), representation=representation)
+            if q is None:
+                raise ValueError("q must be provided when representation is specified")
 
-            # # get transformation angular velocity to analytic velocity
-            # Ai = smb.rotvelxform(
-            #     gamma, representation=representation, inverse=True, full=True
-            # )
-
-            # # get analytic rate from joint rates
-            # omega = J0[3:, :] @ qd
-            # gamma_dot = Ai[3:, 3:] @ omega
-            # Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
-            # Ai_dot = sp.linalg.block_diag(np.zeros((3, 3)), Ai_dot)
-
-            # Jd = Ai_dot @ J0 + Ai @ Jd
-
-            # not actually sure this can be written in closed form
-
+            # Numerical Hessian of the analytical Jacobian
             H = smb.numhess(
                 lambda q: self.jacob0_analytical(q, representation=representation), q
             )
-
-            # Jd = Ai @ Jd
-
-            # return Jd
 
         return np.tensordot(H, qd, (0, 0))
 
