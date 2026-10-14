@@ -206,5 +206,135 @@ filterwarnings = [
     "ignore:FigureCanvasAgg is non-interactive:UserWarning",
 ]
 
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "src"
+files = ["src/roboticstoolbox"]
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+# Not annotated, and not going to be: unmaintained sketches that need hardware
+# and have no tests.  Annotating them would hide, not fix, their problems.
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.backends.Dynamixel.*",
+    "roboticstoolbox.backends.ROS.*",
+]
+ignore_errors = true
+
+# The to-do list for the typing pass.  A module is listed here because it still
+# has type errors; fix a module, delete its line, and mypy then holds it to
+# zero.  The list should only ever get shorter.  A module that is not listed
+# is checked, and must stay clean.
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.backends.PyPlot.EllipsePlot",
+    "roboticstoolbox.backends.PyPlot.PyPlot",
+    "roboticstoolbox.backends.PyPlot.PyPlot2",
+    "roboticstoolbox.backends.PyPlot.RobotPlot",
+    "roboticstoolbox.backends.PyPlot.RobotPlot2",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.bin.rtbtool",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.blocks.arm",
+    "roboticstoolbox.blocks.mobile",
+    "roboticstoolbox.blocks.quad_model",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.demo.eigdemo",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.ets.ET",
+    "roboticstoolbox.ets.ET2",
+    "roboticstoolbox.ets.ETS",
+    "roboticstoolbox.ets.ETS2",
+    "roboticstoolbox.ets._ET",
+    "roboticstoolbox.ets._ETS",
+    "roboticstoolbox.ets.fknm",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.mobile.Animations",
+    "roboticstoolbox.mobile.Bug2",
+    "roboticstoolbox.mobile.CurvaturePolyPlanner",
+    "roboticstoolbox.mobile.DistanceTransformPlanner",
+    "roboticstoolbox.mobile.DstarPlanner",
+    "roboticstoolbox.mobile.DubinsPlanner",
+    "roboticstoolbox.mobile.EKF",
+    "roboticstoolbox.mobile.LatticePlanner",
+    "roboticstoolbox.mobile.PRMPlanner",
+    "roboticstoolbox.mobile.ParticleFilter",
+    "roboticstoolbox.mobile.PlannerBase",
+    "roboticstoolbox.mobile.PoseGraph",
+    "roboticstoolbox.mobile.QuinticPolyPlanner",
+    "roboticstoolbox.mobile.RRTPlanner",
+    "roboticstoolbox.mobile.ReedsSheppPlanner",
+    "roboticstoolbox.mobile.Vehicle",
+    "roboticstoolbox.mobile.drivers",
+    "roboticstoolbox.mobile.sensors",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.models.DH.Planar2",
+    "roboticstoolbox.models.ETS.Frankie",
+    "roboticstoolbox.models.ETS.Omni",
+    "roboticstoolbox.models.ETS.Panda",
+    "roboticstoolbox.models.ETS.Puma560",
+    "roboticstoolbox.models.ETS.XYPanda",
+    "roboticstoolbox.models.URDF.URDFRobot",
+    "roboticstoolbox.models.catalog",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.robot.BaseRobot",
+    "roboticstoolbox.robot.DHFactor",
+    "roboticstoolbox.robot.DHLink",
+    "roboticstoolbox.robot.DHRobot",
+    "roboticstoolbox.robot.Dynamics",
+    "roboticstoolbox.robot.IK",
+    "roboticstoolbox.robot.Link",
+    "roboticstoolbox.robot.PoERobot",
+    "roboticstoolbox.robot.Robot",
+    "roboticstoolbox.robot.RobotKinematics",
+    "roboticstoolbox.robot.RobotPlottingMPL",
+    "roboticstoolbox.robot.frne",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.tools.DHFactor",
+    "roboticstoolbox.tools.Ticker",
+    "roboticstoolbox.tools.data",
+    "roboticstoolbox.tools.jsingu",
+    "roboticstoolbox.tools.numerical",
+    "roboticstoolbox.tools.trajectory",
+    "roboticstoolbox.tools.trchain",
+    "roboticstoolbox.tools.urdf.tests.test_urdf",
+    "roboticstoolbox.tools.urdf.urdf",
+]
+ignore_errors = true
+
 [tool.coverage.run]
 omit = ["src/roboticstoolbox/demo/*", "test_*.py"]
