@@ -80,7 +80,8 @@ class PRMPlanner(PlannerBase):
         super().__init__(occgrid, ndims=2, **kwargs)
 
         if dist_thresh is None:
-            self._dist_thresh = 0.3 * self.occgrid.maxdim
+            dist_thresh = 0.3 * self.occgrid.maxdim
+        self._dist_thresh = dist_thresh
 
         self._npoints = npoints
         # self._npoints0 = npoints
@@ -256,6 +257,8 @@ class PRMPlanner(PlannerBase):
         :param kwargs: options passed to :meth:`PlannerBase.query`
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
+        :raises RuntimeError: if :meth:`plan` has not been called, or no path
+            exists through the roadmap
 
         The path is a sparse sequence of waypoints, with variable distance
         between them.
@@ -265,7 +268,7 @@ class PRMPlanner(PlannerBase):
             motion segment is not guaranteed to be obstacle free.
 
         """
-        if self.graph.n == 0:
+        if self.graph is None or self.graph.n == 0:
             raise RuntimeError("no plan computed")
 
         super().query(start=start, goal=goal, next=False, **kwargs)
