@@ -236,6 +236,8 @@ module = [
     "roboticstoolbox.mobile.Bug2",
     "roboticstoolbox.mobile.DistanceTransformPlanner",
     "roboticstoolbox.mobile.PRMPlanner",
+    "roboticstoolbox.mobile.QuinticPolyPlanner",
+    "roboticstoolbox.mobile.CurvaturePolyPlanner",
 ]
 disallow_untyped_defs = true
 
@@ -287,14 +289,12 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.mobile.CurvaturePolyPlanner",
     "roboticstoolbox.mobile.DstarPlanner",
     "roboticstoolbox.mobile.DubinsPlanner",
     "roboticstoolbox.mobile.EKF",
     "roboticstoolbox.mobile.LatticePlanner",
     "roboticstoolbox.mobile.ParticleFilter",
     "roboticstoolbox.mobile.PoseGraph",
-    "roboticstoolbox.mobile.QuinticPolyPlanner",
     "roboticstoolbox.mobile.RRTPlanner",
     "roboticstoolbox.mobile.ReedsSheppPlanner",
     "roboticstoolbox.mobile.sensors",
