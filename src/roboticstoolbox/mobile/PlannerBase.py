@@ -4,23 +4,27 @@ Python Navigation Abstract Class
 @Author: Kristian Gibson
 """
 
+from __future__ import annotations
+
 from abc import ABC
+import os
+from typing import Any
+
+import numpy as np
 
 # from scipy import integrate
 # from scipy.ndimage import interpolation
-from spatialmath.base.transforms2d import *
-from spatialmath.base.vectors import *
 from spatialmath.base.argcheck import getvector
 from spatialmath.base.graphics import axes_logic, plotvol2, axes_get_scale
 
 # from spatialmath import SE2, SE3
-from matplotlib import cm
-from abc import ABC
+from matplotlib import animation, cm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import copy
 from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid, BinaryOccupancyGrid
 from roboticstoolbox.mobile.Animations import VehiclePolygon
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 from colored import fg, attr
 
 from spatialmath.base.graphics import axes_logic
@@ -76,20 +80,21 @@ class PlannerBase(ABC):
 
     def __init__(
         self,
-        occgrid=None,
-        inflate=0,
-        ndims=None,
-        start=None,
-        goal=None,
-        verbose=False,
-        msgcolor="yellow",
-        progress=True,
-        marker=None,
-        seed=None,
-        **unused,
-    ):
+        occgrid: BinaryOccupancyGrid | NDArray | None = None,
+        inflate: float = 0,
+        ndims: int | None = None,
+        start: ArrayLike | None = None,
+        goal: ArrayLike | None = None,
+        verbose: bool = False,
+        msgcolor: str = "yellow",
+        progress: bool = True,
+        marker: Any = None,
+        seed: int | None = None,
+        **unused: Any,
+    ) -> None:
 
-        self._occgrid = None
+        self._occgrid: BinaryOccupancyGrid | None = None
+        self._occgrid0: BinaryOccupancyGrid | None = None
         if ndims is None:
             raise ValueError("ndims must be specified")
         self._ndims = ndims
@@ -110,16 +115,16 @@ class PlannerBase(ABC):
             elif isinstance(occgrid, BinaryOccupancyGrid):
                 self._occgrid = occgrid  # original occgrid for reference
 
-            if inflate > 0:
+            if inflate > 0 and self._occgrid is not None:
                 self._occgrid0 = self._occgrid.copy()
                 self._occgrid.inflate(inflate)
             else:
                 self._occgrid0 = self._occgrid
 
-        self._start = self.validate_endpoint(start)
-        self._goal = self.validate_endpoint(goal)
+        self._start: NDArray | None = self.validate_endpoint(start)
+        self._goal: NDArray | None = self.validate_endpoint(goal)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Compact representation of the planner
 
@@ -135,11 +140,11 @@ class PlannerBase(ABC):
             s += f"\n  Goal: {self.goal}"
         return s
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     @property
-    def start(self):
+    def start(self) -> NDArray | None:
         r"""
         Set/get start point or configuration (superclass)
 
@@ -155,14 +160,14 @@ class PlannerBase(ABC):
         return self._start
 
     @start.setter
-    def start(self, start):
+    def start(self, start: ArrayLike | None) -> None:
         if start is not None:
             if self.isoccupied(start):
                 raise ValueError("Start location inside obstacle")
             self._start = getvector(start)
 
     @property
-    def goal(self):
+    def goal(self) -> NDArray | None:
         r"""
         Set/get goal point or configuration (superclass)
 
@@ -178,7 +183,7 @@ class PlannerBase(ABC):
         return self._goal
 
     @goal.setter
-    def goal(self, goal):
+    def goal(self, goal: ArrayLike | None) -> None:
         r"""
         Set goal point or configuration for planning
 
@@ -192,7 +197,7 @@ class PlannerBase(ABC):
             self._goal = getvector(goal)
 
     @property
-    def verbose(self):
+    def verbose(self) -> bool:
         """
         Get verbosity
 
@@ -205,7 +210,7 @@ class PlannerBase(ABC):
         return self._verbose
 
     @verbose.setter
-    def verbose(self, v):
+    def verbose(self, v: bool) -> None:
         """
         Set verbosity
 
@@ -218,7 +223,7 @@ class PlannerBase(ABC):
         self._verbose = v
 
     @property
-    def random(self):
+    def random(self) -> np.random.Generator:
         """
         Get private random number generator
 
@@ -240,7 +245,7 @@ class PlannerBase(ABC):
         """
         return self._private_random
 
-    def random_init(self, seed=None):
+    def random_init(self, seed: int | None = None) -> None:
         """
         Initialize private random number generator
 
@@ -260,7 +265,11 @@ class PlannerBase(ABC):
     #     if self._seed is not None:
     #         self._private_random = np.random.default_rng(seed=self._seed)
 
-    def plan(self):
+    def next(self, *args: Any, **kwargs: Any) -> Any:
+        """Next point on the path, provided by the planner subclass"""
+        raise NotImplementedError
+
+    def plan(self, *args: Any, **kwargs: Any) -> Any:
         r"""
         Plan path (superclass)
 
@@ -275,7 +284,7 @@ class PlannerBase(ABC):
         pass
 
     @property
-    def occgrid(self):
+    def occgrid(self) -> BinaryOccupancyGrid | None:
         """
         Occupancy grid
 
@@ -288,7 +297,7 @@ class PlannerBase(ABC):
         """
         return self._occgrid
 
-    def isoccupied(self, p):
+    def isoccupied(self, p: ArrayLike) -> bool:
         """
         Test if point is occupied (superclass)
 
@@ -310,7 +319,9 @@ class PlannerBase(ABC):
         else:
             return self.occgrid.isoccupied(p)
 
-    def validate_endpoint(self, p, dtype=None):
+    def validate_endpoint(
+        self, p: ArrayLike | None, dtype: Any = None
+    ) -> NDArray | None:
         """
         Validate start or goal point
 
@@ -327,12 +338,13 @@ class PlannerBase(ABC):
         :seealso: :meth:`isoccupied` :meth:`occgrid`
         """
         if p is not None:
-            p = getvector(p, self._ndims, dtype=dtype)
-            if self.isoccupied(p):
+            pv = getvector(p, self._ndims, dtype=dtype)
+            if self.isoccupied(pv):
                 raise ValueError("Point is inside obstacle")
-        return p
+            return pv
+        return None
 
-    def progress_start(self, n):
+    def progress_start(self, n: int) -> None:
         """
         Initialize a progress bar (superclass)
 
@@ -357,7 +369,7 @@ class PlannerBase(ABC):
                 self.__class__.__name__, max=n, suffix="%(percent).1f%% - %(eta)ds"
             )
 
-    def progress_next(self):
+    def progress_next(self) -> None:
         """
         Increment a progress bar (superclass)
 
@@ -377,7 +389,7 @@ class PlannerBase(ABC):
         if _progress:
             self._bar.next()
 
-    def progress_end(self):
+    def progress_end(self) -> None:
         """
         Finalize a progress bar  (superclass)
 
@@ -398,8 +410,14 @@ class PlannerBase(ABC):
             self._bar.finish()
 
     def query(
-        self, start=None, goal=None, dtype=None, next=True, animate=False, movie=None
-    ):
+        self,
+        start: ArrayLike | None = None,
+        goal: ArrayLike | None = None,
+        dtype: Any = None,
+        next: bool = True,
+        animate: bool = False,
+        movie: Any = None,
+    ) -> NDArray | None:
         r"""
         Find a path from start to goal using planner (superclass)
 
@@ -443,7 +461,9 @@ class PlannerBase(ABC):
         # movie = MovieWriter(movie)
 
         robot = self._start
-        path = [robot]
+        if robot is None:
+            raise ValueError("no start point")
+        path: list[NDArray | None] = [robot]
 
         while next:
             if animate:
@@ -459,29 +479,30 @@ class PlannerBase(ABC):
                 return np.array(path).astype(int)
 
             path.append(robot)
+        return None
 
     def plot(
         self,
-        path=None,
-        line=None,
-        line_r=None,
-        configspace=False,
-        unwrap=True,
-        direction=None,
-        background=True,
-        path_marker=None,
-        path_marker_reverse=None,
-        start_marker=None,
-        goal_marker=None,
-        start_vehicle=None,
-        goal_vehicle=None,
-        start=None,
-        goal=None,
-        ax=None,
-        block=None,
-        bgargs={},
-        **unused,
-    ):
+        path: NDArray | None = None,
+        line: tuple[dict[str, Any], ...] | None = None,
+        line_r: tuple[dict[str, Any], ...] | None = None,
+        configspace: bool = False,
+        unwrap: bool = True,
+        direction: ArrayLike | None = None,
+        background: bool = True,
+        path_marker: dict[str, Any] | None = None,
+        path_marker_reverse: dict[str, Any] | None = None,
+        start_marker: dict[str, Any] | None = None,
+        goal_marker: dict[str, Any] | None = None,
+        start_vehicle: dict[str, Any] | None = None,
+        goal_vehicle: dict[str, Any] | None = None,
+        start: ArrayLike | None = None,
+        goal: ArrayLike | None = None,
+        ax: Any = None,
+        block: bool | None = None,
+        bgargs: dict[str, Any] = {},
+        **unused: Any,
+    ) -> Any:
         r"""
         Plot vehicle path (superclass)
 
@@ -754,10 +775,10 @@ class PlannerBase(ABC):
                 ax.plot(start[0], start[1], start[2], label="start", **start_marker)
             if goal is not None:
                 if path is not None and unwrap:
-                    theta = theta[-1]
+                    theta_goal = theta[-1]
                 else:
-                    theta = goal[2]
-                plt.plot(goal[0], goal[1], theta, label="goal", **goal_marker)
+                    theta_goal = goal[2]
+                plt.plot(goal[0], goal[1], theta_goal, label="goal", **goal_marker)
 
         ax.set_xlabel("x")
         ax.set_ylabel("y")
@@ -771,7 +792,7 @@ class PlannerBase(ABC):
 
         return ax
 
-    def _qmarker(self, shape):
+    def _qmarker(self, shape: str) -> NDArray | None:
         h = 0.3
         t = 0.8  # start of head taper
         c = 0.5  # centre x coordinate
@@ -795,17 +816,18 @@ class PlannerBase(ABC):
                     [-c, h],
                 ]
             ).T
+        return None
 
     def plot_bg(
         self,
-        distance=None,
-        cmap="gray",
-        ax=None,
-        inflated=True,
-        colorbar=True,
-        block=None,
-        **unused,
-    ):
+        distance: NDArray | None = None,
+        cmap: str = "gray",
+        ax: Any = None,
+        inflated: bool = True,
+        colorbar: bool | dict[str, Any] = True,
+        block: bool | None = None,
+        **unused: Any,
+    ) -> None:
         """
         Plot background (superclass)
 
@@ -827,7 +849,8 @@ class PlannerBase(ABC):
         the distance field will be used as the background and obstacle cells
         (actual or inflated) will be shown in red. A colorbar is added.
         """
-        if self._occgrid is None:
+        occgrid = self._occgrid
+        if occgrid is None:
             return
 
         if isinstance(self._occgrid, BaseOccupancyGrid):
@@ -844,12 +867,13 @@ class PlannerBase(ABC):
             # 1 inflated obstacle (pink)
             # 2 original obstacle (red)
             colors = [(1, 1, 1, 0), (1, 0.75, 0.8, 1), (1, 0, 0, 1)]
-            image = self.occgrid.grid.astype(int) + self._occgrid0.grid.astype(int)
+            assert self._occgrid0 is not None
+            image = occgrid.grid.astype(int) + self._occgrid0.grid.astype(int)
         else:
             # 0 background
             # 1 obstacle
             colors = [(1, 1, 1, 0), (1, 0, 0, 1)]
-            image = self.occgrid.grid
+            image = occgrid.grid
 
         if distance is None and hasattr(self, "distancemap"):
             distance = self.distancemap
@@ -900,7 +924,7 @@ class PlannerBase(ABC):
                 ax.figure.colorbar(scalar_mappable_c_map, **cb_kwargs)
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
-            self.occgrid.plot(image, cmap=c_map, zorder=1)
+            occgrid.plot(image, cmap=c_map, zorder=1)
 
         else:
             # occupancy grid only
@@ -908,7 +932,7 @@ class PlannerBase(ABC):
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
             # self.occgrid.plot(image, cmap=c_map, zorder=1)
-            self.occgrid.plot(cmap=c_map, zorder=1, ax=ax)
+            occgrid.plot(cmap=c_map, zorder=1, ax=ax)
 
         ax.set_facecolor((1, 1, 1))  # create white background
         ax.set_xlabel("x (cells)")
@@ -923,7 +947,7 @@ class PlannerBase(ABC):
         if block is not None:
             plt.show(block=block)
 
-    def message(self, s, color=None):
+    def message(self, s: str, color: str | None = None) -> None:
         """
         Print message to message channel
 
@@ -952,7 +976,12 @@ class PlannerBase(ABC):
 
 
 class MovieWriter:
-    def __init__(self, filename=None, interval=0.1, fig=None):
+    def __init__(
+        self,
+        filename: str | tuple[str, float] | list[Any] | None = None,
+        interval: float = 0.1,
+        fig: Any = None,
+    ) -> None:
         """
         Save animation as a movie file
 
@@ -996,14 +1025,14 @@ class MovieWriter:
         self.writer.setup(fig, filename)
         self.filename = filename
 
-    def add(self):
+    def add(self) -> None:
         """
         Add frame to the movie
         """
         if self.writer is not None:
             self.writer.grab_frame()
 
-    def done(self):
+    def done(self) -> None:
         if self.writer is not None:
             self.writer.finish()
             self.writer = None

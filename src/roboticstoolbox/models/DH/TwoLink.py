@@ -2,6 +2,10 @@
 @author: Peter Corke
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 from roboticstoolbox import DHRobot, RevoluteDH, RevoluteMDH
 
 # from math import pi
@@ -59,7 +63,9 @@ class TwoLink(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self, symbolic:bool=False, mdh:bool=False, inertia:bool=False):
+    def __init__(
+        self, symbolic: bool = False, mdh: bool = False, inertia: bool = False
+    ) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym
@@ -142,7 +148,7 @@ class TwoLink(DHRobot):
         self.gravity = [0, 0, g]
 
 
-def _cylinder_inertia_x(m, r, L):
+def _cylinder_inertia_x(m: Any, r: Any, L: Any) -> Any:
     ixx = 0.5 * m * r**2
     iyy = (1.0 / 12.0) * m * (3 * r**2 + L**2)
     izz = iyy

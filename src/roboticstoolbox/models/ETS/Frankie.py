@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -35,7 +39,7 @@ class Frankie(Robot):
         Sequence, J. Haviland and P. Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         deg = np.pi / 180
         mm = 1e-3

@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -27,7 +31,7 @@ class AL5D(URDFRobot):
     .. codeauthor:: Tassos Natsakis
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "lynxmotion_al5d_description/urdf/al5d_robot.urdf",
             manufacturer="Lynxmotion",

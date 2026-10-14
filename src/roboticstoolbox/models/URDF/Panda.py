@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -43,7 +47,7 @@ class Panda(URDFRobot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self, use_robot_descriptions: bool = False):
+    def __init__(self, use_robot_descriptions: bool = False) -> None:
 
         if use_robot_descriptions:
             super().__init__(

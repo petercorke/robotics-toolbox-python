@@ -1,18 +1,25 @@
 # PoseGraph Pose graph
 
+from __future__ import annotations
+
+from typing import Any, Callable, cast
+
 import roboticstoolbox as rtb
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 import types
 try:
     import pgraph
 except ImportError:
     class _PGraphMissing:  # pragma: no cover
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             raise ImportError(
                 "PoseGraph requires optional dependency 'pgraph'. "
                 "Install it with: pip install pgraph-python"
             )
 
-    pgraph = types.SimpleNamespace(UVertex=_PGraphMissing, Edge=_PGraphMissing, UGraph=_PGraphMissing)
+    pgraph = types.SimpleNamespace(
+        UVertex=_PGraphMissing, Edge=_PGraphMissing, UGraph=_PGraphMissing
+    )
 from spatialmath import SE2
 import spatialmath.base as smb
 import matplotlib.pyplot as plt
@@ -28,7 +35,7 @@ from progress.bar import FillingCirclesBar
 class PGVertex(pgraph.UVertex):
     nvertices = 0  # reset this before each PGGraph build
 
-    def __init__(self, type, **kwargs):
+    def __init__(self, type: str, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.type = type
         self.index = PGVertex.nvertices
@@ -36,7 +43,7 @@ class PGVertex(pgraph.UVertex):
 
 
 class PGEdge(pgraph.Edge):
-    def __init__(self, v1, v2, mean, info):
+    def __init__(self, v1: Any, v2: Any, mean: NDArray, info: NDArray) -> None:
         super().__init__(v1, v2)
         self.mean = mean
         self.info = info
@@ -49,7 +56,7 @@ class PGEdge(pgraph.Edge):
     #  "A Tutorial on Graph-Based SLAM,” in IEEE Intelligent Transportation Systems Magazine,
     #  vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
 
-    def linear_factors(self):
+    def linear_factors(self) -> tuple[NDArray, NDArray, NDArray]:
         # computes the Taylor expansion of the error function of the k_th edge
         # v: vertices positions
         # z: edge means
@@ -109,7 +116,9 @@ class PoseGraph:
     #     center
     #     cellsize
 
-    def __init__(self, filename, lidar=False, verbose=False):
+    def __init__(
+        self, filename: str, lidar: bool = False, verbose: bool = False
+    ) -> None:
         """
         Pose graph optimization for SLAM
 
@@ -120,6 +129,7 @@ class PoseGraph:
         :param verbose: show details of processing, defaults to False
         :type verbose: bool, optional
         :raises RuntimeError: file syntax error
+        :raises ValueError: an edge references an unknown vertex
 
         :references:
 
@@ -142,14 +152,17 @@ class PoseGraph:
 
         path = Path(rtb.rtb_path_to_datafile(filename))
 
+        opener: Callable[..., Any]
+        fname: Path | str
         if path.suffix == ".zip":
             zf = zipfile.ZipFile(path, "r")
-            opener = zf.open
-            path = path.stem
+            opener = cast("Callable[..., Any]", zf.open)
+            fname = path.stem
         else:
             opener = open
+            fname = path
 
-        with opener(path, "r") as f:
+        with opener(fname, "r") as f:
             toroformat = False
             nlidar = 0
 
@@ -169,7 +182,7 @@ class PoseGraph:
             self.vindex = {}
             firstlidar = True
             PGVertex.nvertices = 0  # reset vertex counter in PGVertex class
-            for line in f:
+            for line_number, line in enumerate(f, start=1):
                 # for zip file, we get data as bytes not str
                 if isinstance(line, bytes):
                     line = line.decode()
@@ -179,6 +192,10 @@ class PoseGraph:
                     continue
 
                 tokens = line.split()
+
+                # is it a blank line?
+                if not tokens:
+                    continue
 
                 # g2o format records
                 if tokens[0] == "VERTEX_SE2":
@@ -210,8 +227,13 @@ class PoseGraph:
                     info = d[g2o].reshape((3, 3))
 
                     # create the edge
-                    v1 = self.graph[v1]
-                    v2 = self.graph[v2]
+                    try:
+                        v1 = self.graph[v1]
+                        v2 = self.graph[v2]
+                    except KeyError as exc:
+                        raise ValueError(
+                            f"Edge references unknown vertex {exc.args[0]!r} in {filename} at line {line_number}"
+                        ) from exc
                     e = PGEdge(v1, v2, mean, info)
                     v1.connect(v2, edge=e)
 
@@ -243,8 +265,13 @@ class PoseGraph:
                     info = d[toro].reshape((3, 3))
 
                     # create the edge
-                    v1 = self.graph[v1]
-                    v2 = self.graph[v2]
+                    try:
+                        v1 = self.graph[v1]
+                        v2 = self.graph[v2]
+                    except KeyError as exc:
+                        raise ValueError(
+                            f"Edge references unknown vertex {exc.args[0]!r} in {filename} at line {line_number}"
+                        ) from exc
                     e = PGEdge(v1, v2, mean, info)
                     v1.connect(v2, edge=e)
 
@@ -292,11 +319,11 @@ class PoseGraph:
             )
 
             if nlidar > 0:
-                lidarmeta = [float(x) for x in lidarmeta]
+                lidar_f = [float(x) for x in lidarmeta]
 
-                self._angmin = lidarmeta[0]
-                self._angmax = sum(lidarmeta[0:2])
-                self._maxrange = lidarmeta[3]
+                self._angmin = lidar_f[0]
+                self._angmax = sum(lidar_f[0:2])
+                self._maxrange = lidar_f[3]
 
                 fov = np.degrees([self._angmin, self._angmax])
                 print(
@@ -304,11 +331,11 @@ class PoseGraph:
                     f" {fov[1]:.1f}°, max range {self._maxrange}"
                 )
 
-    def scan(self, i):
+    def scan(self, i: int) -> tuple[NDArray, NDArray]:
         v = self.vindex[i]
         return v.range, v.theta
 
-    def scanxy(self, i):
+    def scanxy(self, i: int) -> NDArray:
 
         range, theta = self.scan(i)
         range = np.where(range < self._maxrange, range, np.nan)
@@ -317,20 +344,20 @@ class PoseGraph:
 
         return np.c_[x, y].T
 
-    def plot_scan(self, n):
+    def plot_scan(self, n: ArrayLike) -> None:
         n = smb.getvector(n)
         for i in n:
-            x, y = self.scanxy(i)
+            x, y = self.scanxy(int(i))
             plt.plot(x, y, ".", "MarkerSize", 10)
             plt.pause(1)
 
-    def pose(self, i):
+    def pose(self, i: int) -> NDArray:
         return self.vindex[i].coord
 
-    def time(self, i):
+    def time(self, i: int) -> float:
         return self.vindex[i].time
 
-    def plot(self, **kwargs):
+    def plot(self, **kwargs: Any) -> None:
         if not "vopt" in kwargs:
             kwargs["vopt"] = dict(
                 markersize=8, markerfacecolor="blue", markeredgecolor="None"
@@ -342,13 +369,13 @@ class PoseGraph:
         plt.ylabel("y")
         plt.grid(True)
 
-    def scanmatch(self, s1, s2):
+    def scanmatch(self, s1: int, s2: int) -> SE2:
         p1 = self.scanxy(s1)
         p2 = self.scanxy(s2)
         T = smb.ICP2d(p1, p2)
         return SE2(T)
 
-    def scanmap(self, occgrid, maxrange=None):
+    def scanmap(self, occgrid: Any, maxrange: float | None = None) -> None:
         # note about maxrange timing
 
         bar = FillingCirclesBar(
@@ -388,13 +415,17 @@ class PoseGraph:
         grid1d[grid1d > 0] = 1
         bar.finish()
 
-    def w2g(self, w):
-        return np.round((w - self._centre) / self._cellsize) + self._ngrid / 2
+    def w2g(self, w: ArrayLike) -> NDArray:
+        # _centre, _cellsize and _ngrid are never set, this is unfinished
+        # _centre, _cellsize and _ngrid are never set: this is unfinished
+        c, h, n = self._centre, self._cellsize, self._ngrid  # type: ignore[attr-defined]
+        return np.round((w - c) / h) + n / 2
 
-    def g2w(self, g):
-        return (np.r_[g] - self._ngrid / 2) * self._cellsize + self._centre
+    def g2w(self, g: ArrayLike) -> NDArray:
+        c, h, n = self._centre, self._cellsize, self._ngrid  # type: ignore[attr-defined]
+        return (np.r_[g] - n / 2) * h + c
 
-    def plot_occgrid(self, w, block=None):
+    def plot_occgrid(self, w: NDArray, block: bool | None = None) -> None:
 
         bl = self.g2w([0, 0])
         tr = self.g2w([w.shape[1], w.shape[0]])
@@ -404,7 +435,7 @@ class PoseGraph:
         w = -w
 
         # plot it
-        plt.imshow(w, cmap="gray", extent=[bl[0], tr[0], bl[1], tr[1]])
+        plt.imshow(w, cmap="gray", extent=(bl[0], tr[0], bl[1], tr[1]))
         plt.xlabel("x")
         plt.ylabel("y")
 
@@ -419,7 +450,13 @@ class PoseGraph:
     #  "A Tutorial on Graph-Based SLAM,” in IEEE Intelligent Transportation Systems Magazine,
     #  vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
 
-    def optimize(self, iterations=10, animate=False, retain=True, **kwargs):
+    def optimize(
+        self,
+        iterations: int = 10,
+        animate: bool = False,
+        retain: bool = True,
+        **kwargs: Any,
+    ) -> None:
 
         eprev = math.inf
         eo = {}
@@ -455,7 +492,7 @@ class PoseGraph:
                 break
             eprev = energy
 
-    def linearize_and_solve(self):
+    def linearize_and_solve(self) -> float:
         t0 = time.time()
 
         g = self.graph

@@ -3,6 +3,10 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 # import numpy as np
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 import numpy as np
@@ -11,8 +15,15 @@ from spatialmath import SE2
 
 class RobotPlot2(RobotPlot):
     def __init__(
-        self, robot, env, readonly, display=True, eeframe=True, name=True, options=None
-    ):
+        self,
+        robot: Any,
+        env: Any,
+        readonly: Any,
+        display: bool = True,
+        eeframe: bool = True,
+        name: bool = True,
+        options: Any = None,
+    ) -> None:
 
         super().__init__(
             robot,
@@ -25,7 +36,7 @@ class RobotPlot2(RobotPlot):
             name=name,
         )
 
-        defaults = {
+        defaults: dict[str, Any] = {
             "robot": {"color": "#E16F6D", "linewidth": 5},
             "jointlabels": {},
             "eex": {"color": "#F84752", "linewidth": 2},  # '#EE9494'
@@ -43,7 +54,7 @@ class RobotPlot2(RobotPlot):
                     defaults[key] = value
         self.options = defaults
 
-    def draw(self):
+    def draw(self) -> None:
         if not self.display:
             return
 
@@ -76,7 +87,7 @@ class RobotPlot2(RobotPlot):
             for quiver in self.eeframes:
                 quiver.remove()
 
-            self.eeframes = []
+            self.eeframes: list[Any] = []
 
         if self.eeframe:
             len = self.options["eelength"]
@@ -96,7 +107,7 @@ class RobotPlot2(RobotPlot):
 
                 self.eeframes.extend([xaxis, yaxis])
 
-    def init(self):
+    def init(self) -> None:
 
         self.drawn = True
 
@@ -115,14 +126,14 @@ class RobotPlot2(RobotPlot):
             self.name = self.ax.text(Tb.t[0] + 0.05, Tb.t[1], self.robot.name)
 
         # Initialize the robot links
-        self.links = []
+        self.links: list[Any] = []
         for i in range(len(self.segments)):
             (line,) = self.ax.plot(0, 0, **self.options["robot"])
             self.links.append(line)
 
         self.eeframes = []
 
-    def _plot_quiver(self, p0, p1, options):
+    def _plot_quiver(self, p0: Any, p1: Any, options: Any) -> Any:
         # draw arrow from p0 (tail) to p1 (head)
         qv = self.ax.quiver(p0[0], p0[1], p1[0] - p0[0], p1[1] - p0[1], **options)
         return qv

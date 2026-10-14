@@ -4,6 +4,10 @@
 @author: Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import roboticstoolbox as rtb
 from numpy import array, ndarray
 from spatialmath.base import trot2, transl2
@@ -12,17 +16,22 @@ from spatialmath.base import trot2, transl2
 # needs its own name here.
 from spatialmath import SE2 as SE2T
 
+from typing import TYPE_CHECKING
+
 from roboticstoolbox.ets._ET import BaseET, Sym, _resolve_param
+
+if TYPE_CHECKING:  # pragma: nocover
+    from roboticstoolbox.ets.ETS2 import ETS2
 
 
 class ET2(BaseET):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    def __mul__(self, other: "ET2") -> "rtb.ETS2":
-        return rtb.ETS2([self, other])
+    def __mul__(self, other: "ET2") -> "ETS2":
+        return rtb.ETS2([self, other])  # type: ignore[operator]
 
-    def __add__(self, other: "ET2") -> "rtb.ETS2":
+    def __add__(self, other: "ET2") -> "ETS2":
         return self.__mul__(other)
 
     @property
@@ -43,7 +52,7 @@ class ET2(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> "ET2":
         """
         Pure rotation
@@ -82,7 +91,7 @@ class ET2(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> "ET2":
         """
         Pure translation along the x-axis
@@ -115,7 +124,7 @@ class ET2(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> "ET2":
         """
         Pure translation along the y-axis
@@ -141,7 +150,7 @@ class ET2(BaseET):
         return cls(axis="ty", param=param, axis_func=lambda y: transl2(0, y), **kwargs)
 
     @classmethod
-    def SE2(cls, T: ndarray | SE2T, **kwargs) -> "ET2":
+    def SE2(cls, T: ndarray | SE2T, **kwargs: Any) -> "ET2":
         """
         A static SE2
 

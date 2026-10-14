@@ -5,6 +5,10 @@
 @author: Samuel Drew
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 from roboticstoolbox import DHRobot, RevoluteDH
 from math import pi
 import numpy as np
@@ -42,7 +46,7 @@ class KR5(DHRobot):
     .. codeauthor:: Peter Corke
     """  # noqa
 
-    def __init__(self):
+    def __init__(self) -> None:
         deg = pi / 180
 
         # Updated values form ARTE git. Old values left as comments
