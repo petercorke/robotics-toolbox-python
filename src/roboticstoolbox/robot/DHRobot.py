@@ -242,7 +242,7 @@ class DHRobot(Robot):
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
-                        ql = [qlim[0, j], qlim[1, j]]
+                        ql = [format_attr(qlim[k, j]) for k in [0, 1]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
@@ -265,7 +265,7 @@ class DHRobot(Robot):
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
-                        ql = [qlim[0, j], qlim[1, j]]
+                        ql = [format_attr(qlim[k, j]) for k in [0, 1]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
@@ -1874,6 +1874,30 @@ class DHRobot(Robot):
     # -------------------------------------------------------------------------- #
 
     def ikine_6s(self, T, config, ikfunc):
+        """
+        Analytic inverse kinematics for a robot with a spherical wrist
+
+        .. deprecated:: 1.4.5
+            This came from the MATLAB Toolbox and is not general.  It only handles
+            the wrist, the user supplied ``ikfunc`` must solve the first three
+            joints, and that is specific to one robot geometry.  It also
+            mishandles trajectories and unreachable poses.  It is no longer used by
+            :meth:`Puma560.ikine_a`, which is self-contained.  A hand-written
+            solution belongs in the class of the robot it is written for.
+
+        :param T: end-effector pose
+        :param config: arm configuration string
+        :param ikfunc: function ``ikfunc(robot, T, config)`` which returns the
+            joint angles of the first three joints
+        :returns: an IKSolution
+        """
+        warnings.warn(
+            "ikine_6s is deprecated and will be removed in a future release, "
+            "write a hand-written solution for your robot, as Puma560.ikine_a does",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         # Undo base and tool transformations, but if they are not
         # set, skip the operation.  Nicer for symbolics
         if np.array_equal(self.base.A, np.eye(4)):
@@ -2005,8 +2029,11 @@ class DHRobot(Robot):
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization
 
-        :param Tep: The desired end-effector pose
-        :param q0: The initial joint coordinate vector
+        :param Tep: The desired end-effector pose or pose trajectory, see
+            :meth:`ETS.ikine_LM` for how a trajectory is handled
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ikargs: |ikargs|
         :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
         :rtype: IKSolution

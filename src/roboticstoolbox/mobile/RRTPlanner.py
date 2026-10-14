@@ -251,7 +251,6 @@ class RRTPlanner(PlannerBase):
 
         vpath, cost, _ = self.g.path_UCS(vstart, self.g[0])
 
-        print(vpath)
         # stack the Dubins path segments
         path = np.empty((0, 3))
         for vertex in vpath:
