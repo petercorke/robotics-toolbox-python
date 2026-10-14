@@ -168,7 +168,7 @@ class ETS(BaseETS):
     def __add__(self, rest) -> "ETS":
         return self.__mul__(rest)  # pragma: nocover
 
-    def fixjoint(self, j: int, value: float) -> "ETS":
+    def fixjoint(self, j: int, value: float, unit: str = "rad") -> "ETS":
         """Return an independent ETS with the specified joint held constant.
 
         j is the zero-based position among joint ETs, independent of their
@@ -177,12 +177,15 @@ class ETS(BaseETS):
         limits and flip flags are preserved. The original is not modified.
 
         :param j: index of the joint to fix
-        :param value: fixed joint coordinate, in radians or metres
+        :param value: fixed joint coordinate, in radians/degrees or metres
+        :param unit: angular unit for rotational joints, "rad" [default] or "deg"
         :returns: ETS with one fewer joint
-        :raises ValueError: if j does not identify a joint
+        :raises ValueError: for an invalid joint position or angular unit
         """
         if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
             raise ValueError(f"joint index {j} out of range for {self.n} joints")
+        if unit not in ("rad", "deg"):
+            raise ValueError("unit must be 'rad' or 'deg'")
 
         parts = []
         joint_index = 0
@@ -193,7 +196,13 @@ class ETS(BaseETS):
 
             constructor = getattr(ET, et.kind)
             if joint_index == j:
-                parts.append(constructor(-value if et.isflip else value))
+                fixed = -value if et.isflip else value
+                if et.isrotation:
+                    parts.append(constructor(fixed, unit=unit))
+                else:
+                    if unit != "rad":
+                        raise ValueError("unit='deg' is only valid for rotational joints")
+                    parts.append(constructor(fixed))
             else:
                 kwargs = {"flip": et.isflip, "qlim": et.qlim}
                 if not self._auto_jindex:
