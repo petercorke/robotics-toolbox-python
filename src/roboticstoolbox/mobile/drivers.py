@@ -36,15 +36,19 @@ class VehicleDriverBase(ABC):
         verbose=False,
     ):
         """
-        _summary_
+        Abstract vehicle driver
 
-        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`
+        :param workspace: dimension of workspace, see :func:`spatialmath.base.graphics.expand_dims`
         :type workspace: scalar, array_like(2), array_like(4)
         :param speed: forward speed, defaults to 1
         :type speed: float, optional
-        :param headinggain: _description_, defaults to 0.3
+        :param headinggain: gain of the proportional controller that steers the
+            vehicle towards the current goal, defaults to 0.3
         :type headinggain: float, optional
-        :param verbose: _description_, defaults to False
+        :param goalmarkerstyle: Matplotlib style of the marker used to display
+            the current goal, defaults to None
+        :type goalmarkerstyle: dict, optional
+        :param verbose: display debug information, defaults to False
         :type verbose: bool, optional
 
         The workspace of the robot is a rectangular region defined by `workspace`
@@ -164,33 +168,38 @@ class RandomPath(VehicleDriverBase):
         """
         Driving agent for random path
 
-
-        :param dthresh: distance threshold, defaults to 0.05
+        :param dthresh: distance threshold as a fraction of the larger workspace
+            dimension, defaults to 0.05
         :type dthresh: float, optional
-
-        :raises ValueError: bad workspace specified
+        :param seed: random number seed, defaults to 0, None for a random seed
+        :type seed: int, optional
+        :param kwargs: arguments passed to :class:`VehicleDriverBase`, in
+            particular ``workspace`` which is required
+        :raises ValueError: no workspace specified
 
         Returns a *driver* object that drives the attached vehicle to a
         sequence of random waypoints.
 
         The driver is connected to the vehicle by::
 
-            Vehicle(control=driver)
+            veh = Bicycle(control=driver)
 
         or::
 
-            veh = Vehicle()
+            veh = Bicycle()
             veh.control = driver
 
         The waypoints are positioned inside a rectangular region defined by
-        the `workspace`
+        the ``workspace``, which must be given::
+
+            driver = RandomPath(workspace=10)
 
         .. note::
             - It is possible in some cases for the vehicle to move outside the desired
               region, for instance if moving to a waypoint near the edge, the limited
               turning circle may cause the vehicle to temporarily move outside.
             - The vehicle chooses a new waypoint when it is closer than ``dthresh``
-              to the current waypoint.
+              times the larger workspace dimension to the current waypoint.
             - Uses its own random number generator so as to not influence the performance
               of other randomized algorithms such as path planning. Set ``seed=None`` to have it randomly initialized from the
               operating system.
@@ -202,7 +211,9 @@ class RandomPath(VehicleDriverBase):
 
         super().__init__(**kwargs)
 
-        self._dthresh = dthresh * np.diff(self._workspace[0:2])
+        if self._workspace is None:
+            raise ValueError("RandomPath requires a workspace")
+
         self._goal_marker = None
 
         self._d_prev = np.inf

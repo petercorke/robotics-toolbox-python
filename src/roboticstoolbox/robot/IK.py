@@ -276,7 +276,9 @@ class IKSolver(ABC):
 
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
-        :param q0: The initial joint coordinate vector
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
@@ -284,6 +286,22 @@ class IKSolver(ABC):
 
         This method will attempt to solve the IK problem and obtain joint coordinates
         which result the the end-effector pose `Tep`.
+
+        If `Tep` is an :class:`SE3` containing more than one pose, or an array with
+        shape (N, 4, 4), it is treated as a trajectory of N poses.  Each pose is
+        solved independently, using the same initial coordinates `q0` (and the same
+        random restarts) for every pose, so consecutive solutions are not guaranteed
+        to lie on the same IK branch.  The returned :class:`IKSolution` has:
+
+        - ``q`` with shape (N, n), one row per pose
+        - ``success`` True only if *every* pose was solved
+        - ``iterations`` and ``searches`` summed over all poses
+        - ``residual`` the *maximum* residual over all poses, the worst case
+        - ``reason`` the reason given by the last pose that failed, if any
+
+        .. versionchanged:: 1.4.5
+            For a trajectory, ``residual`` is now the maximum over the poses,
+            previously it was the minimum, which hid poses that were solved badly.
         """
         # Get the largest jindex in the ETS. If this is greater than ETS.n
         # then we need to pad the q vector with zeros
@@ -330,7 +348,7 @@ class IKSolver(ABC):
             traj = True
             methTep = Tep
         elif Tep.shape != (4, 4):
-            raise ValueError("Tep must be a 4x4 SE3 matrix")
+            raise ValueError("Tep must be an SE3, a 4x4 array or an (N, 4, 4) array")
         else:
             methTep = Tep
 
@@ -339,7 +357,7 @@ class IKSolver(ABC):
             success = True
             interations = 0
             searches = 0
-            residual = np.inf
+            residual = 0.0
             reason = ""
 
             for i, T in enumerate(methTep):
@@ -351,7 +369,7 @@ class IKSolver(ABC):
                 interations += sol.iterations
                 searches += sol.searches
 
-                if sol.residual < residual:
+                if sol.residual > residual:
                     residual = sol.residual
 
             return IKSolution(
@@ -540,37 +558,13 @@ class IKSolver(ABC):
         :param q: Joint coordinates, indexed by joint jindex, modified in place
         :returns: None
 
-        Preserve coordinates already within their limits, including revolute joints
-        outside the principal interval. Otherwise prefer the principal angle, shifted
-        by whole turns towards the limits if necessary. If no equivalent angle lies
-        within the limits, the subsequent joint-limit check will reject the solution.
+        A thin wrapper which maps the jindex-indexed ``q`` onto the joints of the
+        ETS and applies :func:`normalise_q`.
         """
-        qlim = ets.qlim
-        for i, joint in enumerate(ets.joints()):
-            j = joint.jindex
-            lower, upper = qlim[:, i]
-            if not joint.isrotation or lower <= q[j] <= upper:
-                continue
-
-            # Avoid rounding a principal angle across a nearby joint limit.
-            angle = q[j]
-            if not -np.pi <= angle < np.pi:
-                angle = (angle + np.pi) % (2 * np.pi) - np.pi
-            if angle < lower:
-                angle += 2 * np.pi * np.ceil((lower - angle) / (2 * np.pi))
-            elif angle > upper:
-                angle -= 2 * np.pi * np.ceil((angle - upper) / (2 * np.pi))
-            if not lower <= angle <= upper:
-                # Argument reduction can round a limit plus whole turns just
-                # outside the closed interval. Accept that endpoint only when
-                # it reconstructs the original coordinate exactly, without an
-                # epsilon that could admit an unrelated out-of-limit angle.
-                for bound in (lower, upper):
-                    turns = np.rint((q[j] - bound) / (2 * np.pi))
-                    if turns != 0 and bound + turns * (2 * np.pi) == q[j]:
-                        angle = bound
-                        break
-            q[j] = angle
+        joints = ets.joints()
+        jindex = [joint.jindex for joint in joints]
+        revolute = np.array([joint.isrotation for joint in joints])
+        q[jindex] = normalise_q(q[jindex], ets.qlim, revolute)
 
     def _check_jl(self, ets: "rtb.ETS", q: np.ndarray) -> bool:
         """
@@ -581,21 +575,73 @@ class IKSolver(ABC):
         :returns: True if joints within feasible limits otherwise False
         :rtype: bool
 
+        A thin wrapper around :func:`within_limits`.
         """
+        return within_limits(q[: ets.n], ets.qlim)
 
-        # Loop through the joints in the ETS
-        for i in range(ets.n):
-            # Get the corresponding joint limits
-            ql0 = ets.qlim[0, i]
-            ql1 = ets.qlim[1, i]
 
-            # Check if q exceeds the limits
-            if q[i] < ql0 or q[i] > ql1:
-                return False
+def normalise_q(q: ArrayLike, qlim: ArrayLike, revolute: ArrayLike) -> NDArray:
+    """
+    Choose equivalent revolute joint coordinates, without changing prismatic joints
 
-        # If we make it here, all the joints are fine
-        return True
+    :param q: joint coordinates, shape (n,)
+    :param qlim: joint limits, shape (2, n), lower limits in the first row
+    :param revolute: True for each revolute joint, shape (n,)
+    :returns: the normalised joint coordinates, ``q`` is not modified
+    :rtype: ndarray(n)
 
+    Coordinates already within their limits are preserved, including revolute
+    joints outside the principal interval :math:`[-\\pi, \\pi)`. Otherwise the
+    principal angle is preferred, shifted by whole turns towards the limits if
+    necessary. If no equivalent angle lies within the limits the coordinate is
+    left as the nearest candidate, and a subsequent :func:`within_limits` check
+    will reject it.
+
+    This is the joint coordinate convention used by the numerical IK solvers.
+    """
+    q = np.array(q, dtype=float)
+    qlim = np.asarray(qlim, dtype=float)
+    revolute = np.asarray(revolute, dtype=bool)
+
+    for i in range(len(q)):
+        lower, upper = qlim[:, i]
+        if not revolute[i] or lower <= q[i] <= upper:
+            continue
+
+        # Avoid rounding a principal angle across a nearby joint limit.
+        angle = q[i]
+        if not -np.pi <= angle < np.pi:
+            angle = (angle + np.pi) % (2 * np.pi) - np.pi
+        if angle < lower:
+            angle += 2 * np.pi * np.ceil((lower - angle) / (2 * np.pi))
+        elif angle > upper:
+            angle -= 2 * np.pi * np.ceil((angle - upper) / (2 * np.pi))
+        if not lower <= angle <= upper:
+            # Argument reduction can round a limit plus whole turns just
+            # outside the closed interval. Accept that endpoint only when
+            # it reconstructs the original coordinate exactly, without an
+            # epsilon that could admit an unrelated out-of-limit angle.
+            for bound in (lower, upper):
+                turns = np.rint((q[i] - bound) / (2 * np.pi))
+                if turns != 0 and bound + turns * (2 * np.pi) == q[i]:
+                    angle = bound
+                    break
+        q[i] = angle
+
+    return q
+
+
+def within_limits(q: ArrayLike, qlim: ArrayLike) -> bool:
+    """
+    Test whether joint coordinates are within their limits
+
+    :param q: joint coordinates, shape (n,)
+    :param qlim: joint limits, shape (2, n), lower limits in the first row
+    :returns: True if every joint is within its limits (inclusive)
+    """
+    q = np.asarray(q, dtype=float)
+    qlim = np.asarray(qlim, dtype=float)
+    return not bool(np.any((q < qlim[0]) | (q > qlim[1])))
 
 def _null_Σ(ets: "rtb.ETS", q: NDArray, ps: float, pi: NDArray | float):
     """
