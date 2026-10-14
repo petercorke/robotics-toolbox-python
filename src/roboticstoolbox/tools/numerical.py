@@ -5,7 +5,7 @@ import numpy as np
 from spatialmath import base
 
 
-def jacobian_numerical(f: Any, x: Any, dx: float = 1e-08, N: int = 0) -> Any:
+def jacobian_numerical(f: Any, x: Any, dx: float = 1e-8, N: int = 0) -> Any:
     r"""
     Numerically compute Jacobian of function
 
@@ -48,7 +48,7 @@ def jacobian_numerical(f: Any, x: Any, dx: float = 1e-08, N: int = 0) -> Any:
     return np.c_[Jcol].T
 
 
-def hessian_numerical(J: Any, x: Any, dx: float = 1e-08) -> Any:
+def hessian_numerical(J: Any, x: Any, dx: float = 1e-8) -> Any:
     r"""
     Numerically compute Hessian of Jacobian function
 

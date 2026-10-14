@@ -329,15 +329,6 @@ module = [
     "roboticstoolbox.models.URDF.wx250",
     "roboticstoolbox.models.URDF.wx250s",
     "roboticstoolbox.models.catalog",
-]
-disallow_untyped_defs = true
-
-# The to-do list for the typing pass.  A module is listed here because it still
-# has type errors; fix a module, delete its line, and mypy then holds it to
-# zero.  The list should only ever get shorter.  A module that is not listed
-# is checked, and must stay clean.
-[[tool.mypy.overrides]]
-module = [
     "roboticstoolbox.ets.ET",
     "roboticstoolbox.ets.ET2",
     "roboticstoolbox.ets.ETS",
@@ -345,9 +336,18 @@ module = [
     "roboticstoolbox.ets._ET",
     "roboticstoolbox.ets._ETS",
     "roboticstoolbox.ets.fknm",
+    "roboticstoolbox.models.ETS.Frankie",
+    "roboticstoolbox.models.ETS.Omni",
+    "roboticstoolbox.models.ETS.Panda",
+    "roboticstoolbox.models.ETS.Puma560",
+    "roboticstoolbox.models.ETS.XYPanda",
 ]
-ignore_errors = true
+disallow_untyped_defs = true
 
+# The to-do list for the typing pass.  A module is listed here because it still
+# has type errors; fix a module, delete its line, and mypy then holds it to
+# zero.  The list should only ever get shorter.  A module that is not listed
+# is checked, and must stay clean.
 [[tool.mypy.overrides]]
 module = [
     "roboticstoolbox.mobile.ParticleFilter",
@@ -376,16 +376,6 @@ module = [
     "roboticstoolbox.tools.trajectory",
     "roboticstoolbox.tools.urdf.tests.test_urdf",
     "roboticstoolbox.tools.DHFactor",
-]
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = [
-    "roboticstoolbox.models.ETS.Frankie",
-    "roboticstoolbox.models.ETS.Omni",
-    "roboticstoolbox.models.ETS.Panda",
-    "roboticstoolbox.models.ETS.Puma560",
-    "roboticstoolbox.models.ETS.XYPanda",
 ]
 ignore_errors = true
 
