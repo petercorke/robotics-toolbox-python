@@ -368,7 +368,7 @@ def _links_from_urdf(urdf: URDF) -> Any:
 
         try:
             # geometry has no setter, so this raises AttributeError and is ignored
-            elink.geometry = [v.geometry.ob for v in link.visuals]  # type: ignore[misc]
+            elink.geometry = [v.geometry.ob for v in link.visuals]
         except AttributeError:
             pass
 
@@ -400,7 +400,7 @@ def _links_from_urdf(urdf: URDF) -> Any:
         childlink = elinkdict[joint.child]
         parentlink = elinkdict[joint.parent]
 
-        childlink._parent = parentlink  # type: ignore[assignment]
+        childlink._parent = parentlink
         childlink._joint_name = joint.name
 
         trans = SE3(joint.origin).t

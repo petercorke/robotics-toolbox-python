@@ -3,6 +3,10 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 from spatialmath import SE3
 import spatialmath as sm
@@ -20,11 +24,8 @@ LinkType = TypeVar("LinkType", bound=BaseLink)
 
 class Gripper(Generic[LinkType]):
     def __init__(
-        self,
-        links: list[LinkType],
-        name: str = "",
-        tool: NDArray | SE3 | None = None,
-    ):
+        self, links: list[LinkType], name: str = "", tool: NDArray | SE3 | None = None
+    ) -> None:
 
         self._n = 0
 
@@ -52,7 +53,7 @@ class Gripper(Generic[LinkType]):
         ):
             jindex = [0]  # "mutable integer" hack
 
-            def visit_link(link, jindex):
+            def visit_link(link: Any, jindex: Any) -> None:
                 # if it's a joint, assign it a jindex and increment it
                 if link.isjoint:
                     link.jindex = jindex[0]
@@ -80,7 +81,7 @@ class Gripper(Generic[LinkType]):
                 "all gripper links must have a jindex, or none have a jindex"
             )
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = "Gripper("
         if self.name is not None:
             s += f'"{self.name}"'
@@ -91,7 +92,7 @@ class Gripper(Generic[LinkType]):
         s += ")"
         return s
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         links = [link.__repr__() for link in self.links]
 
         tool = None if np.all(self.tool.A == np.eye(4)) else self.tool.A.__repr__()
@@ -99,9 +100,7 @@ class Gripper(Generic[LinkType]):
 
         return s
 
-    def dfs_links(
-        self, start: LinkType, func: Callable[[Link], None] | None = None
-    ):
+    def dfs_links(self, start: LinkType, func: Callable[[Link], None] | None = None) -> Any:
         """
         Search links using depth first search.
 
@@ -115,7 +114,7 @@ class Gripper(Generic[LinkType]):
         """
         visited = []
 
-        def vis_children(link):
+        def vis_children(link: Any) -> None:
             visited.append(link)
             if func is not None:
                 func(link)
@@ -145,7 +144,7 @@ class Gripper(Generic[LinkType]):
         return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T: SE3 | NDArray):
+    def tool(self, T: SE3 | NDArray) -> None:
         if isinstance(T, SE3):
             self._tool = T.A
         else:
@@ -186,7 +185,7 @@ class Gripper(Generic[LinkType]):
         return self._q
 
     @q.setter
-    def q(self, q_new: ArrayLike):
+    def q(self, q_new: ArrayLike) -> None:
         self._q = np.array(getvector(q_new, self.n))
 
     # --------------------------------------------------------------------- #
@@ -218,25 +217,25 @@ class Gripper(Generic[LinkType]):
         return self._name
 
     @name.setter
-    def name(self, new_name: str):
+    def name(self, new_name: str) -> None:
         self._name = new_name
 
     # --------------------------------------------------------------------- #
     # Scene Graph section
     # --------------------------------------------------------------------- #
 
-    def _update_link_tf(self, q: ArrayLike | None = None):
+    def _update_link_tf(self, q: ArrayLike | None = None) -> None:
         """
         This private method updates the local transform of each link within
         this robot according to q (or self.q if q is none)
         """
 
         @lru_cache(maxsize=2)
-        def get_link_ets():
+        def get_link_ets() -> Any:
             return [link.ets._fknm for link in self.links]
 
         @lru_cache(maxsize=2)
-        def get_link_scene_node():
+        def get_link_scene_node() -> Any:
             return [link._T_reference for link in self.links]
 
         Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)

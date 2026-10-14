@@ -4,13 +4,20 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import Tuple, cast
+from typing import TYPE_CHECKING, Tuple, cast
 import roboticstoolbox as rtb
 from dataclasses import dataclass
 from spatialmath import SE3
 from roboticstoolbox.tools.types import ArrayLike, NDArray
+
+if TYPE_CHECKING:  # pragma: nocover
+    from roboticstoolbox.ets.ETS import ETS
 
 
 try:
@@ -82,7 +89,7 @@ class IKSolution:
     values for the whole solution, not for each pose.
     """
 
-    q: np.ndarray
+    q: NDArray
     success: bool
     iterations: int = 0
     searches: int = 0
@@ -104,7 +111,7 @@ class IKSolution:
         """
         return 0 if self.q is None else self._rows().shape[0]
 
-    def __iter__(self):
+    def __iter__(self) -> Any:
         """
         Iterate over the joint coordinates of each pose
 
@@ -112,7 +119,7 @@ class IKSolution:
         """
         return iter(self._rows())
 
-    def __getitem__(self, i):
+    def __getitem__(self, i: Any) -> Any:
         """
         Joint coordinates of one or more poses
 
@@ -147,7 +154,7 @@ class IKSolution:
             self.reason,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     def _q_str(self) -> str | None:
@@ -157,8 +164,10 @@ class IKSolution:
 
         fmt = {"float": lambda x: "{:.4g}".format(0 if abs(x) < 1e-6 else x)}
 
-        def text(a):
-            return np.array2string(a, separator=", ", formatter=fmt)
+        def text(a: NDArray) -> str:
+            return np.array2string(
+                a, separator=", ", formatter=fmt  # type: ignore[arg-type]
+            )
 
         if self.q.ndim == 1 or len(self) <= 6:
             return text(self.q)
@@ -168,7 +177,7 @@ class IKSolution:
         lines = [text(r) for r in rows[:3]] + ["..."] + [text(r) for r in rows[-2:]]
         return "[" + ",\n ".join(lines) + "]"
 
-    def __str__(self):
+    def __str__(self) -> str:
         analytic = self.iterations == 0 and self.searches == 0
 
         # everything after q
@@ -249,7 +258,7 @@ class IKSolver(ABC):
         mask: ArrayLike | None = None,
         joint_limits: bool = True,
         seed: int | None = None,
-    ):
+    ) -> None:
         # Solver parameters
         self.name = name
         self.slimit = slimit
@@ -262,13 +271,13 @@ class IKSolver(ABC):
         if mask is None:
             mask = np.ones(6)
 
-        self.We = np.diag(mask)  # type: ignore
+        self.We = np.diag(mask)
         self.joint_limits = joint_limits
 
     def solve(
         self,
-        ets: "rtb.ETS",
-        Tep: SE3 | np.ndarray,
+        ets: "ETS",
+        Tep: SE3 | ArrayLike,
         q0: ArrayLike | None = None,
     ) -> IKSolution:
         """
@@ -308,32 +317,31 @@ class IKSolver(ABC):
         max_jindex: int = 0
 
         for j in ets.joints():
-            if j.jindex > max_jindex:  # type: ignore
-                max_jindex = j.jindex  # type: ignore
+            if j.jindex is not None and j.jindex > max_jindex:
+                max_jindex = j.jindex
 
         q0_method = np.zeros((self.slimit, max_jindex + 1))
 
         if q0 is None:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
 
-        elif not isinstance(q0, np.ndarray):
-            q0 = np.array(q0)
+        q0a: NDArray | None = None if q0 is None else np.asarray(q0)
 
-        if q0 is not None and q0.ndim == 1:
+        if q0a is not None and q0a.ndim == 1:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
 
-            q0_method[0, ets.jindices] = q0
+            q0_method[0, ets.jindices] = q0a
 
-        if q0 is not None and q0.ndim == 2:
+        if q0a is not None and q0a.ndim == 2:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
 
-            q0_method[: q0.shape[0], ets.jindices] = q0
+            q0_method[: q0a.shape[0], ets.jindices] = q0a
 
         q0 = q0_method
 
         traj = False
 
-        methTep: np.ndarray
+        methTep: NDArray
 
         if isinstance(Tep, SE3):
             if len(Tep) > 1:
@@ -344,13 +352,13 @@ class IKSolver(ABC):
                     methTep[i] = T.A
             else:
                 methTep = cast(NDArray, Tep.A)
-        elif Tep.ndim == 3:
+        elif np.ndim(Tep) == 3:
             traj = True
-            methTep = Tep
-        elif Tep.shape != (4, 4):
+            methTep = np.asarray(Tep)
+        elif np.shape(Tep) != (4, 4):
             raise ValueError("Tep must be an SE3, a 4x4 array or an (N, 4, 4) array")
         else:
-            methTep = Tep
+            methTep = np.asarray(Tep)
 
         if traj:
             q = np.empty((methTep.shape[0], ets.n))
@@ -386,7 +394,7 @@ class IKSolver(ABC):
 
         return sol
 
-    def _solve(self, ets: "rtb.ETS", Tep: np.ndarray, q0: np.ndarray) -> IKSolution:
+    def _solve(self, ets: "ETS", Tep: NDArray, q0: NDArray) -> IKSolution:
         # Iteration count
         i = 0
         total_i = 0
@@ -464,7 +472,7 @@ class IKSolver(ABC):
             reason=reason,
         )
 
-    def error(self, Te: np.ndarray, Tep: np.ndarray) -> Tuple[np.ndarray, float]:
+    def error(self, Te: NDArray, Tep: NDArray) -> Tuple[NDArray, float]:
         r"""
         Calculates the error between Te and Tep
 
@@ -491,8 +499,8 @@ class IKSolver(ABC):
 
     @abstractmethod
     def step(
-        self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray
-    ) -> Tuple[float, np.ndarray]:
+        self, ets: "ETS", Tep: NDArray, q: NDArray
+    ) -> Tuple[float, NDArray]:
         """
         Abstract step method
 
@@ -509,7 +517,7 @@ class IKSolver(ABC):
         """
         pass  # pragma: nocover
 
-    def _random_q(self, ets: "rtb.ETS", i: int = 1) -> np.ndarray:
+    def _random_q(self, ets: "ETS", i: int = 1) -> NDArray:
         """
         Generate a random valid joint configuration using a private RNG
 
@@ -550,7 +558,7 @@ class IKSolver(ABC):
 
         return q
 
-    def _normalise_q(self, ets: "rtb.ETS", q: np.ndarray) -> None:
+    def _normalise_q(self, ets: "ETS", q: NDArray) -> None:
         """
         Choose equivalent revolute coordinates without changing prismatic joints.
 
@@ -562,11 +570,11 @@ class IKSolver(ABC):
         ETS and applies :func:`normalise_q`.
         """
         joints = ets.joints()
-        jindex = [joint.jindex for joint in joints]
+        jindex = cast(list[int], [joint.jindex for joint in joints])
         revolute = np.array([joint.isrotation for joint in joints])
         q[jindex] = normalise_q(q[jindex], ets.qlim, revolute)
 
-    def _check_jl(self, ets: "rtb.ETS", q: np.ndarray) -> bool:
+    def _check_jl(self, ets: "ETS", q: NDArray) -> bool:
         """
         Checks if the joints are within their respective limits
 
@@ -643,7 +651,7 @@ def within_limits(q: ArrayLike, qlim: ArrayLike) -> bool:
     qlim = np.asarray(qlim, dtype=float)
     return not bool(np.any((q < qlim[0]) | (q > qlim[1])))
 
-def _null_Σ(ets: "rtb.ETS", q: NDArray, ps: float, pi: NDArray | float):
+def _null_Σ(ets: "ETS", q: NDArray, ps: float, pi: ArrayLike | float) -> Any:
     """
     Formulates a relationship between joint limits and the joint velocity.
     When this is projected into the null-space of the differential kinematics
@@ -679,14 +687,14 @@ def _null_Σ(ets: "rtb.ETS", q: NDArray, ps: float, pi: NDArray | float):
 
 
 def _calc_qnull(
-    ets: "rtb.ETS",
-    q: np.ndarray,
-    J: np.ndarray,
+    ets: "ETS",
+    q: NDArray,
+    J: NDArray,
     λΣ: float,
     λm: float,
     ps: float,
-    pi: np.ndarray | float,
-):
+    pi: ArrayLike | float,
+) -> Any:
     """
     Calculates the desired null-space motion according to the gains λΣ and λm.
     This is a helper method that is used within the `step` method of an IK solver
@@ -814,9 +822,9 @@ class IK_NR(IKSolver):
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: np.ndarray | float = 0.3,
-        **kwargs,
-    ):
+        pi: ArrayLike | float = 0.3,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(
             name=name,
             ilimit=ilimit,
@@ -843,8 +851,8 @@ class IK_NR(IKSolver):
             self.name += " Jm"
 
     def step(
-        self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray
-    ) -> Tuple[float, np.ndarray]:
+        self, ets: "ETS", Tep: NDArray, q: NDArray
+    ) -> Tuple[float, NDArray]:
         r"""
         Performs a single iteration of the Newton-Raphson optimisation method
 
@@ -977,13 +985,13 @@ class IK_LM(IKSolver):
         joint_limits: bool = True,
         seed: int | None = None,
         k: float = 1.0,
-        method="chan",
+        method: str = "chan",
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: np.ndarray | float = 0.3,
-        **kwargs,
-    ):
+        pi: ArrayLike | float = 0.3,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(
             name=name,
             ilimit=ilimit,
@@ -1019,7 +1027,7 @@ class IK_LM(IKSolver):
         if self.km > 0.0:
             self.name += " Jm"
 
-    def step(self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray):
+    def step(self, ets: "ETS", Tep: NDArray, q: NDArray) -> Any:
         r"""
         Performs a single iteration of the Levenberg-Marquardt optimisation
 
@@ -1212,9 +1220,9 @@ class IK_GN(IKSolver):
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: np.ndarray | float = 0.3,
-        **kwargs,
-    ):
+        pi: ArrayLike | float = 0.3,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(
             name=name,
             ilimit=ilimit,
@@ -1241,8 +1249,8 @@ class IK_GN(IKSolver):
             self.name += " Jm"
 
     def step(
-        self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray
-    ) -> Tuple[float, np.ndarray]:
+        self, ets: "ETS", Tep: NDArray, q: NDArray
+    ) -> Tuple[float, NDArray]:
         r"""
         Performs a single iteration of the Gauss-Newton optimisation method
 
@@ -1382,14 +1390,14 @@ class IK_QP(IKSolver):
         mask: ArrayLike | None = None,
         joint_limits: bool = True,
         seed: int | None = None,
-        kj=0.01,
-        ks=1.0,
+        kj: float = 0.01,
+        ks: float = 1.0,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: np.ndarray | float = 0.3,
-        **kwargs,
-    ):
+        pi: ArrayLike | float = 0.3,
+        **kwargs: Any,
+    ) -> None:
         if not _qp:  # pragma: nocover
             raise ImportError(
                 "the package qpsolvers is required for this class. \nInstall using 'pip"
@@ -1423,8 +1431,8 @@ class IK_QP(IKSolver):
             self.name += " Jm"
 
     def step(
-        self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray
-    ) -> Tuple[float, np.ndarray]:
+        self, ets: "ETS", Tep: NDArray, q: NDArray
+    ) -> Tuple[float, NDArray]:
         r"""
         Performs a single iteration of the QP optimisation method
 

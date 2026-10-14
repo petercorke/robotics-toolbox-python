@@ -52,8 +52,7 @@ class Omni(Robot):
 
         g0 = Link(name="gripper", parent=b2)
 
-        # mypy sees the property as read-only, see robot/Link.py geometry
-        b2.geometry = sg.Cuboid(  # type: ignore[misc]
+        b2.geometry = sg.Cuboid(
             [l, w, h], base=sm.SE3(0, 0, h / 2), color=(163, 157, 134)
         )
 

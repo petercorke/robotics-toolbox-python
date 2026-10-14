@@ -18,6 +18,11 @@ class KinematicsProtocol(Protocol):
     @property
     def _T(self) -> NDArray: ...
 
+    @property
+    def tool(self) -> SE3: ...
+
+    def _resolve_tool(self, tool: NDArray | SE3 | None) -> SE3: ...
+
     def ets(
         self,
         start: Link | Gripper | str | None = None,
@@ -40,6 +45,8 @@ class RobotProto(Protocol):
     @property
     def links(self) -> list[BaseLink]: ...
 
+    _links: list[BaseLink]
+
     @property
     def ee_links(self) -> list[BaseLink]: ...
 
@@ -53,7 +60,7 @@ class RobotProto(Protocol):
     def name(self) -> str: ...
 
     @name.setter
-    def name(self, new_name: str): ...
+    def name(self, new_name: str) -> None: ...
 
     @property
     def gravity(self) -> NDArray: ...
@@ -152,7 +159,7 @@ class RobotProto(Protocol):
         self,
         t: float,
         x: NDArray,
-        torqfun: Callable[[Any], NDArray],
+        torqfun: Callable[..., NDArray] | None,
         targs: dict,
     ) -> NDArray: ...
 

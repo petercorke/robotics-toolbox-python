@@ -2,6 +2,10 @@
 @author: Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 from roboticstoolbox.robot.RobotProto import KinematicsProtocol
 from roboticstoolbox.tools.types import ArrayLike, NDArray
@@ -272,10 +276,10 @@ class RobotKinematicsMixin:
 
     def hessian0(
         self: KinematicsProtocol,
-        q=None,
+        q: Any = None,
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
-        J0=None,
+        J0: Any = None,
         tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
@@ -372,10 +376,10 @@ class RobotKinematicsMixin:
 
     def hessiane(
         self: KinematicsProtocol,
-        q=None,
+        q: Any = None,
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
-        Je=None,
+        Je: Any = None,
         tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
@@ -454,7 +458,7 @@ class RobotKinematicsMixin:
         n: int = 3,
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
-    ):
+    ) -> Any:
         r"""
         Manipulator Forward Kinematics nth Partial Derivative
 
@@ -499,7 +503,7 @@ class RobotKinematicsMixin:
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
         tool: NDArray | SE3 | None = None,
-    ):
+    ) -> Any:
         r"""
         Manipulator analytical Jacobian in the ``start`` frame
 
@@ -1000,8 +1004,8 @@ class RobotKinematicsMixin:
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
         tool: NDArray | SE3 | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Levenberg-Marquardt Numerical Inverse Kinematics Solver
 
@@ -1199,8 +1203,8 @@ class RobotKinematicsMixin:
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
         tool: NDArray | SE3 | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Newton-Raphson Numerical Inverse Kinematics Solver
 
@@ -1344,8 +1348,8 @@ class RobotKinematicsMixin:
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
         tool: NDArray | SE3 | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Gauss-Newton Numerical Inverse Kinematics Solver
 
@@ -1498,15 +1502,15 @@ class RobotKinematicsMixin:
         mask: ArrayLike | None = None,
         joint_limits: bool = True,
         seed: int | None = None,
-        kj=1.0,
-        ks=1.0,
+        kj: float = 1.0,
+        ks: float = 1.0,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
         tool: NDArray | SE3 | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Quadratic Programming Numerical Inverse Kinematics Solver
 

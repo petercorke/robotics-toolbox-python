@@ -341,6 +341,22 @@ module = [
     "roboticstoolbox.models.ETS.Panda",
     "roboticstoolbox.models.ETS.Puma560",
     "roboticstoolbox.models.ETS.XYPanda",
+    "roboticstoolbox.robot.BaseRobot",
+    "roboticstoolbox.robot.DHLink",
+    "roboticstoolbox.robot.DHRobot",
+    "roboticstoolbox.robot.Dynamics",
+    "roboticstoolbox.robot.ELink",
+    "roboticstoolbox.robot.ERobot",
+    "roboticstoolbox.robot.Gripper",
+    "roboticstoolbox.robot.IK",
+    "roboticstoolbox.robot.Link",
+    "roboticstoolbox.robot.PoERobot",
+    "roboticstoolbox.robot.Robot",
+    "roboticstoolbox.robot.RobotKinematics",
+    "roboticstoolbox.robot.RobotPlottingMPL",
+    "roboticstoolbox.robot.RobotProto",
+    "roboticstoolbox.robot.frne",
+    "roboticstoolbox.robot",
 ]
 disallow_untyped_defs = true
 
@@ -356,26 +372,10 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.robot.BaseRobot",
-    "roboticstoolbox.robot.DHFactor",
-    "roboticstoolbox.robot.DHLink",
-    "roboticstoolbox.robot.DHRobot",
-    "roboticstoolbox.robot.Dynamics",
-    "roboticstoolbox.robot.IK",
-    "roboticstoolbox.robot.Link",
-    "roboticstoolbox.robot.PoERobot",
-    "roboticstoolbox.robot.Robot",
-    "roboticstoolbox.robot.RobotKinematics",
-    "roboticstoolbox.robot.RobotPlottingMPL",
-    "roboticstoolbox.robot.frne",
-]
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = [
     "roboticstoolbox.tools.trajectory",
     "roboticstoolbox.tools.urdf.tests.test_urdf",
     "roboticstoolbox.tools.DHFactor",
+    "roboticstoolbox.robot.DHFactor",
 ]
 ignore_errors = true
 
