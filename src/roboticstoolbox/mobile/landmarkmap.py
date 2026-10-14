@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 from abc import ABC
+from typing import Any
 import numpy as np
 import scipy as sp
 from math import pi, sin, cos
 import matplotlib.pyplot as plt
 from spatialmath import base
 import roboticstoolbox as rtb
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class LandmarkMap:
@@ -58,14 +62,21 @@ class LandmarkMap:
     See also :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF`
     """
 
-    def __init__(self, map, workspace=10, verbose=True, seed=0):
+    def __init__(
+        self,
+        map: NDArray | int,
+        workspace: Any = 10,
+        verbose: bool = True,
+        seed: int | None = 0,
+    ) -> None:
 
         try:
             self._workspace = workspace.workspace
-        except:
+        except AttributeError:
             self._workspace = base.expand_dims(workspace)
 
-        if base.ismatrix(map, (2, None)):
+        self._map: NDArray
+        if isinstance(map, np.ndarray) and base.ismatrix(map, (2, None)):
             self._map = map
             self._nlandmarks = map.shape[1]
         elif isinstance(map, int):
@@ -81,7 +92,7 @@ class LandmarkMap:
 
         self._verbose = verbose
 
-    def __str__(self):
+    def __str__(self) -> str:
         # s = M.char() is a string showing map parameters in
         # a compact human readable format.
         ws = self._workspace
@@ -89,10 +100,10 @@ class LandmarkMap:
         s += f"({ws[0]}: {ws[1]}, {ws[2]}: {ws[3]})"
         return s
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Number of landmarks in map
 
@@ -102,7 +113,7 @@ class LandmarkMap:
         return self._nlandmarks
 
     @property
-    def landmarks(self):
+    def landmarks(self) -> NDArray:
         """
         xy-coordinates of all landmarks
 
@@ -112,7 +123,7 @@ class LandmarkMap:
         return self._map
 
     @property
-    def workspace(self):
+    def workspace(self) -> NDArray:
         """
         Size of map workspace
 
@@ -124,7 +135,7 @@ class LandmarkMap:
         """
         return self._workspace
 
-    def __getitem__(self, k):
+    def __getitem__(self, k: int) -> NDArray:
         """
         Get landmark coordinates from map
 
@@ -135,7 +146,9 @@ class LandmarkMap:
         """
         return self._map[:, k]
 
-    def plot(self, labels=False, block=None, **kwargs):
+    def plot(
+        self, labels: bool = False, block: bool | None = None, **kwargs: Any
+    ) -> None:
         """
         Plot landmark map
 
@@ -167,11 +180,8 @@ class LandmarkMap:
             kwargs["label"] = "landmark"
 
         # plt.plot(self._map[0,:], self._map[1,:], , **kwargs)
-        if labels:
-            labels = "#{}"
-        else:
-            labels = None
-        base.plot_point(self._map, text=labels, **kwargs)
+        text = "#{}" if labels else None
+        base.plot_point(self._map, text=text, **kwargs)
         plt.grid(True)
         if block is not None:
             plt.show(block=block)

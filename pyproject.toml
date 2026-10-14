@@ -230,6 +230,8 @@ module = [
     "roboticstoolbox.mobile.Animations",
     "roboticstoolbox.mobile.drivers",
     "roboticstoolbox.mobile.Vehicle",
+    "roboticstoolbox.mobile.OccGrid",
+    "roboticstoolbox.mobile.landmarkmap",
 ]
 disallow_untyped_defs = true
 
