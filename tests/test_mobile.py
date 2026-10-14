@@ -296,6 +296,59 @@ class DriversTest(unittest.TestCase):
         self.assertIsInstance(u, np.ndarray)
         self.assertTrue(u.shape, (2,))
 
+    def test_purepursuit_path(self):
+        # a list of lists is converted to a 2xN float array
+        pp = rtb.PurePursuit([[0, 10, 10], [0, 0, 10]], lookahead=2)
+        self.assertIsInstance(pp._path, np.ndarray)
+        self.assertEqual(pp._path.shape, (2, 3))
+
+        # one column per point, so the wrong orientation is an error
+        with self.assertRaises(ValueError):
+            rtb.PurePursuit([[0, 0], [10, 0], [10, 10]])
+
+        with self.assertRaises(ValueError):
+            rtb.PurePursuit([0, 1, 2])
+
+    def test_purepursuit_str(self):
+        pp = rtb.PurePursuit([[0, 10], [0, 10]], workspace=[0, 10, -5, 5])
+        s = str(pp)
+        self.assertIn("X 0.0 : 10.0", s)
+        self.assertIn("Y -5.0 : 5.0", s)
+
+        # no workspace
+        self.assertIsInstance(str(rtb.PurePursuit([[0, 10], [0, 10]])), str)
+
+    def test_purepursuit_run(self):
+        # without animation, there are no markers
+        path = np.array([[0.0, 10, 10], [0, 0, 10]])
+        veh = rtb.Bicycle(control=rtb.PurePursuit(path, lookahead=2, speed=2))
+        veh.run(5, animate=False)
+        self.assertIsNone(veh.control._waypoint_markers)
+
+        u = veh.control.demand()
+        self.assertEqual(u.shape, (2,))
+
+    def test_purepursuit_markers(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        path = np.array([[0.0, 10, 10], [0, 0, 10]])
+        pp = rtb.PurePursuit(path, lookahead=2, speed=2)
+        veh = rtb.Bicycle(control=pp)
+        veh.init(animate=False)
+
+        fig, ax = plt.subplots()
+        pp.init(ax=ax)
+        self.assertEqual(len(pp._waypoint_markers), 3)
+
+        # demand highlights exactly one waypoint, the current goal
+        pp.demand()
+        colors = [m.get_color() for m in pp._waypoint_markers]
+        self.assertEqual(colors.count("red"), 1)
+        plt.close(fig)
+
 
 class TestBicycle(unittest.TestCase):
     # def test_deriv(self):
