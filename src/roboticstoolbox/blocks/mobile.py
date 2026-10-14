@@ -322,8 +322,7 @@ class DiffSteer(ContinuousBlock):
         self.R = R
 
         if x0 is None:
-            # `slef` is a typo for `self`, so this raises NameError: see findings
-            self._x0 = np.zeros((slef.nstates,))  # type: ignore[name-defined,has-type]
+            self._x0 = np.zeros((self.nstates,))
         else:
             assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
             self._x0 = x0

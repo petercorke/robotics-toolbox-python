@@ -316,6 +316,13 @@ class MobileBlockTest(unittest.TestCase):
         nt.assert_array_almost_equal(block.test_output(5, -5, x=x)[0], x)
         nt.assert_array_almost_equal(block.test_deriv(5, -5, x=x), [0, 0, -10/2])
 
+    def test_default_x0(self):
+        # without x0 the initial state is zero, for each of the vehicle blocks
+        for cls in (Bicycle, Unicycle, DiffSteer):
+            with self.subTest(block=cls.__name__):
+                block = cls()
+                nt.assert_array_equal(block._x0, [0, 0, 0])
+
     @unittest.skip("cant test bdsim plot blocks")
     def test_vehicleplot(self):
 
