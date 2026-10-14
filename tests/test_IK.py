@@ -10,6 +10,7 @@ import numpy.testing as nt
 
 # import sympy
 import pytest
+from spatialmath import SE3
 from tests import skip_no_qp
 
 test_tol = 1e-5
@@ -623,6 +624,32 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
+    def test_robot_ikine_accepts_pose_arrays(self):
+        # Robot.ikine_* must treat an (N, 4, 4) array like the ETS methods do
+        panda = rtb.models.Panda()
+        Ts = panda.fkine(np.array([panda.qr, panda.qr + 0.1, panda.qr - 0.1]))
+        self.assertEqual(len(Ts), 3)
+        Tarr = np.array(Ts.A)  # Ts.A is a list of matrices, make a real 3-D array
+        self.assertEqual(Tarr.shape, (3, 4, 4))
+
+        for method in ("ikine_LM", "ikine_GN", "ikine_NR"):
+            sol = getattr(panda, method)(Tarr, q0=panda.qr, seed=0, joint_limits=False)
+            self.assertEqual(sol.q.shape, (3, panda.n), method)
+            sol_se3 = getattr(panda, method)(
+                Ts, q0=panda.qr, seed=0, joint_limits=False
+            )
+            nt.assert_allclose(sol.q, sol_se3.q, err_msg=method)
+
+        # a single pose as a 4x4 array still works
+        sol = panda.ikine_LM(Ts[0].A, q0=panda.qr, seed=0)
+        self.assertEqual(sol.q.shape, (panda.n,))
+
+    def test_robot_ikine_rejects_badly_shaped_arrays(self):
+        panda = rtb.models.Panda()
+        for bad in (np.eye(3), np.zeros((2, 3, 4)), np.zeros(16)):
+            with self.assertRaises(ValueError):
+                panda.ikine_LM(bad, q0=panda.qr)
+
     def test_ik_nr(self):
 
         tol = 1e-6
@@ -637,11 +664,11 @@ class TestIK(unittest.TestCase):
         sol = r.ik_NR(Tep, tol=tol)
         sol2 = r2.ik_NR(Tep, tol=tol)
 
-        self.assertEqual(sol[1], True)
-        self.assertEqual(sol2[1], True)
+        self.assertTrue(sol.success)
+        self.assertTrue(sol2.success)
 
-        Tq = r.eval(sol[0])
-        Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol.q)
+        Tq2 = r.eval(sol2.q)
 
         _, E = solver.error(Tep, Tq)
         _, E2 = solver.error(Tep, Tq2)
@@ -663,11 +690,11 @@ class TestIK(unittest.TestCase):
         sol = r.ik_LM(Tep, tol=tol, method="chan")
         sol2 = r2.ik_LM(Tep, tol=tol, method="chan")
 
-        self.assertEqual(sol[1], True)
-        self.assertEqual(sol2[1], True)
+        self.assertTrue(sol.success)
+        self.assertTrue(sol2.success)
 
-        Tq = r.eval(sol[0])
-        Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol.q)
+        Tq2 = r.eval(sol2.q)
 
         _, E = solver.error(Tep, Tq)
         _, E2 = solver.error(Tep, Tq2)
@@ -689,11 +716,11 @@ class TestIK(unittest.TestCase):
         sol = r.ik_LM(Tep, tol=tol, method="wampler", k=0.01)
         sol2 = r2.ik_LM(Tep, tol=tol, method="wampler", k=0.01)
 
-        self.assertEqual(sol[1], True)
-        self.assertEqual(sol2[1], True)
+        self.assertTrue(sol.success)
+        self.assertTrue(sol2.success)
 
-        Tq = r.eval(sol[0])
-        Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol.q)
+        Tq2 = r.eval(sol2.q)
 
         _, E = solver.error(Tep, Tq)
         _, E2 = solver.error(Tep, Tq2)
@@ -715,11 +742,11 @@ class TestIK(unittest.TestCase):
         sol = r.ik_LM(Tep, tol=tol, k=0.01, method="sugihara")
         sol2 = r2.ik_LM(Tep, tol=tol, k=0.01, method="sugihara")
 
-        self.assertEqual(sol[1], True)
-        self.assertEqual(sol2[1], True)
+        self.assertTrue(sol.success)
+        self.assertTrue(sol2.success)
 
-        Tq = r.eval(sol[0])
-        Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol.q)
+        Tq2 = r.eval(sol2.q)
 
         _, E = solver.error(Tep, Tq)
         _, E2 = solver.error(Tep, Tq2)
@@ -741,13 +768,13 @@ class TestIK(unittest.TestCase):
         sol = r.ik_GN(Tep, tol=tol)
         sol2 = r2.ik_GN(Tep, tol=tol)
 
-        self.assertEqual(sol[1], True)
-        self.assertEqual(sol2[1], True)
+        self.assertTrue(sol.success)
+        self.assertTrue(sol2.success)
 
-        Tq = r.eval(sol[0])
-        Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol.q)
+        Tq2 = r.eval(sol2.q)
 
-        print(sol[4])
+        print(sol.residual)
         print(Tep)
         print(Tq)
 
@@ -756,6 +783,62 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
+
+    def test_trajectory_residual_is_maximum(self):
+        # for a trajectory, residual is the worst case over the poses, not the best
+        residuals = iter([0.5, 3.0, 0.25])
+
+        class Stub(rtb.IKSolver):
+            def step(self, ets, Tep, q):
+                raise NotImplementedError
+
+            def _solve(self, ets, Tep, q0):
+                return rtb.IKSolution(
+                    q=np.zeros(ets.n),
+                    success=True,
+                    iterations=1,
+                    searches=1,
+                    residual=next(residuals),
+                )
+
+        panda = rtb.models.Panda().ets()
+        Teps = np.array([np.eye(4)] * 3)
+
+        sol = Stub().solve(panda, Teps)
+
+        self.assertEqual(sol.q.shape, (3, panda.n))
+        self.assertEqual(sol.residual, 3.0)
+        self.assertEqual(sol.iterations, 3)
+        self.assertEqual(sol.searches, 3)
+
+    def test_trajectory_failure_is_reported(self):
+        # one reachable and one unreachable pose: the failure must not be hidden
+        # by the small residual of the pose that was solved
+        panda = rtb.models.Panda().ets()
+        good = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        bad = SE3(5, 5, 5).A
+
+        solver = rtb.IK_LM(seed=0, slimit=5)
+        sol = solver.solve(panda, SE3([SE3(good), SE3(bad)]))
+
+        self.assertEqual(sol.q.shape, (2, panda.n))
+        self.assertFalse(sol.success)
+        self.assertGreater(sol.residual, solver.tol)
+
+    def test_q0_matrix_seeds_the_first_searches(self):
+        # row k of an (m, n) q0 is the starting point of search k
+        panda = rtb.models.Panda().ets()
+        q_true = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        Tep = panda.eval(q_true)
+        q0 = np.vstack([np.zeros(panda.n), q_true])
+
+        # one iteration per search: the first seed cannot converge, the second is exact
+        solver = rtb.IK_LM(seed=0, ilimit=1, joint_limits=False)
+        sol = solver.solve(panda, Tep, q0)
+
+        self.assertTrue(sol.success)
+        self.assertEqual(sol.searches, 2)
+        nt.assert_allclose(sol.q, q_true, atol=1e-6)
 
     def test_sol_print1(self):
 
@@ -807,7 +890,7 @@ class TestIK(unittest.TestCase):
 
         s = sol.__str__()
 
-        ans = "IKSolution: q=[0, 0, 0], success=False, reason=no"
+        ans = "IKSolution: q=[0, 0, 0], success=False, reason=no, residual=3"
 
         self.assertEqual(s, ans)
 
@@ -824,7 +907,7 @@ class TestIK(unittest.TestCase):
 
         s = sol.__str__()
 
-        ans = "IKSolution: q=[0, 0, 0], success=True"
+        ans = "IKSolution: q=[0, 0, 0], success=True, residual=3"
 
         self.assertEqual(s, ans)
 
@@ -848,7 +931,56 @@ class TestIK(unittest.TestCase):
 
         self.assertEqual(s, ans)
 
-    def test_getitem_iksol(self):
+    def test_iksol_single_pose_is_one_row(self):
+        q = np.array([1.0, 2.0, 3.0])
+        sol = rtb.IKSolution(q, success=True)
+
+        self.assertEqual(len(sol), 1)
+        nt.assert_array_equal(sol[0], q)
+        nt.assert_array_equal(sol[-1], q)
+        rows = list(sol)
+        self.assertEqual(len(rows), 1)
+        nt.assert_array_equal(rows[0], q)
+        with self.assertRaises(IndexError):
+            sol[1]
+
+    def test_iksol_trajectory_is_a_sequence_of_rows(self):
+        q = np.arange(12.0).reshape(4, 3)
+        sol = rtb.IKSolution(q, success=True)
+
+        self.assertEqual(len(sol), 4)
+        nt.assert_array_equal(sol[0], q[0])
+        nt.assert_array_equal(sol[2], q[2])
+        nt.assert_array_equal(sol[-1], q[-1])
+        nt.assert_array_equal(sol[1:3], q[1:3])
+        nt.assert_array_equal(sol[[0, 3]], q[[0, 3]])
+        for k, row in enumerate(sol):
+            nt.assert_array_equal(row, q[k])
+        with self.assertRaises(IndexError):
+            sol[4]
+
+        # the sequence protocol means NumPy sees the rows
+        nt.assert_array_equal(np.array(sol), q)
+        nt.assert_array_equal(np.array(rtb.IKSolution(q[0], success=True)), q[:1])
+
+    def test_iksol_without_q_is_empty(self):
+        sol = rtb.IKSolution(None, success=False)  # type: ignore
+
+        self.assertEqual(len(sol), 0)
+        self.assertEqual(list(sol), [])
+        with self.assertRaises(IndexError):
+            sol[0]
+
+    def test_iksol_bool_is_success(self):
+        q = np.zeros((2, 3))
+
+        self.assertTrue(rtb.IKSolution(q, success=True))
+        # not the same as having rows
+        self.assertFalse(rtb.IKSolution(q, success=False))
+        self.assertFalse(rtb.IKSolution(None, success=False))  # type: ignore
+        self.assertFalse(rtb.IKSolution(np.zeros(3), success=False))
+
+    def test_iksol_astuple(self):
         sol = rtb.IKSolution(
             np.array([1.0, 2.0, 3.0]),
             success=True,
@@ -858,12 +990,75 @@ class TestIK(unittest.TestCase):
             reason="ok",
         )
 
-        nt.assert_almost_equal(sol[0], np.array([1.0, 2.0, 3.0]))  # type: ignore
-        self.assertEqual(sol[1], True)
-        self.assertEqual(sol[2], 10)
-        self.assertEqual(sol[3], 100)
-        self.assertEqual(sol[4], 0.1)
-        self.assertEqual(sol[5], "ok")
+        q, success, iterations, searches, residual, reason = sol.astuple()
+
+        nt.assert_almost_equal(q, np.array([1.0, 2.0, 3.0]))  # type: ignore
+        self.assertEqual(success, True)
+        self.assertEqual(iterations, 10)
+        self.assertEqual(searches, 100)
+        self.assertEqual(residual, 0.1)
+        self.assertEqual(reason, "ok")
+
+    def test_iksol_from_a_solver_trajectory(self):
+        panda = rtb.models.Panda().ets()
+        Tep = panda.eval(np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))
+        Teps = SE3([SE3(Tep), SE3(Tep)])
+
+        sol = rtb.IK_LM(seed=0).solve(panda, Teps)
+
+        self.assertEqual(len(sol), 2)
+        self.assertEqual(sol[0].shape, (panda.n,))
+        self.assertEqual(bool(sol), sol.success)
+
+    def test_sol_print_trajectory(self):
+        q = np.arange(9.0).reshape(3, 3)
+        sol = rtb.IKSolution(q, success=True, iterations=4, searches=3, residual=1e-8)
+
+        lines = str(sol).split("\n")
+
+        self.assertEqual(
+            lines[0],
+            "IKSolution: 3 poses, success=True, iterations=4, searches=3,"
+            " residual=1e-08",
+        )
+        self.assertEqual(lines[1], "q=[[0, 1, 2],")
+        self.assertEqual(lines[-1], " [6, 7, 8]]")
+        self.assertEqual(repr(sol), str(sol))
+
+    def test_sol_print_long_trajectory_is_abbreviated(self):
+        q = np.arange(300.0).reshape(100, 3)
+        sol = rtb.IKSolution(q, success=False, iterations=9, searches=2, reason="no")
+
+        lines = str(sol).split("\n")
+
+        self.assertTrue(lines[0].startswith("IKSolution: 100 poses, success=False,"))
+        self.assertIn("reason=no", lines[0])
+        self.assertLessEqual(len(lines), 8)
+        self.assertIn("[0, 1, 2]", lines[1])  # first pose
+        self.assertIn("...", str(sol))
+        self.assertIn("[297, 298, 299]", lines[-1])  # last pose
+
+    def test_sol_print_failed_residual_is_not_rounded_to_zero(self):
+        sol = rtb.IKSolution(
+            np.zeros(3),
+            success=False,
+            iterations=3,
+            searches=2,
+            residual=1.5e-5,
+            reason="no",
+        )
+
+        self.assertIn("residual=1.5e-05", str(sol))
+
+    def test_sol_print_analytic_without_residual(self):
+        # an analytic solution that did not compute a residual has none to show
+        sol = rtb.IKSolution(np.zeros(3), success=True)
+        self.assertEqual(str(sol), "IKSolution: q=[0, 0, 0], success=True")
+
+        sol = rtb.IKSolution(np.zeros(3), success=False, reason="Out of reach")
+        self.assertEqual(
+            str(sol), "IKSolution: q=[0, 0, 0], success=False, reason=Out of reach"
+        )
 
     def test_repr_iksol(self):
         sol = rtb.IKSolution(np.array([1.0, 2.0, 3.0]), success=True)
@@ -911,24 +1106,6 @@ class TestIK(unittest.TestCase):
 
         self.assertFalse(sol.success)
         self.assertEqual(sol.q.shape[0], ets.n)
-
-    def test_iter_iksol(self):
-        sol = rtb.IKSolution(
-            np.array([1.0, 2.0, 3.0]),
-            success=True,
-            iterations=10,
-            searches=100,
-            residual=0.1,
-        )
-
-        a, b, c, d, e, f = sol
-
-        nt.assert_almost_equal(a, np.array([1.0, 2.0, 3.0]))  # type: ignore
-        self.assertEqual(b, True)
-        self.assertEqual(c, 10)
-        self.assertEqual(d, 100)
-        self.assertEqual(e, 0.1)
-        self.assertEqual(f, "")
 
     def test_random_q_rejects_non_finite_qlim(self):
         # _random_q() used to sample straight from ets.qlim with no check --

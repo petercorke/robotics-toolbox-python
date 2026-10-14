@@ -185,13 +185,13 @@ class QuinticPolyPlanner(PlannerBase):
     :param goal_acc: goal acceleration, defaults to 0
     :type goal_acc: float, optional
     :param max_acc: maximum acceleration, defaults to 1
-    :type max_acc: int, optional
+    :type max_acc: float, optional
     :param max_jerk: maximum jerk, defaults to 0.5
-    :type min_t: float, optional
-    :param min_t: minimum path time, defaults to 5
-    :type max_t: float, optional
-    :param max_t: maximum path time, defaults to 100
     :type max_jerk: float, optional
+    :param min_t: minimum path time, defaults to 5
+    :type min_t: float, optional
+    :param max_t: maximum path time, defaults to 100
+    :type max_t: float, optional
     :return: Quintic polynomial path planner
     :rtype: QuinticPolyPlanner instance
 

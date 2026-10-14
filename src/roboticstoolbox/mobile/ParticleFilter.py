@@ -56,7 +56,8 @@ class ParticleFilter:
         :type nparticles: int, optional
         :param seed: random number seed, defaults to 0
         :type seed: int, optional
-        :param x0: initial state, defaults to [0, 0, 0]
+        :param x0: initial particle state, defaults to None which means the
+            particles are distributed uniformly randomly over the workspace
         :type x0: array_like(3), optional
         :param verbose: display extra debug information, defaults to False
         :type verbose: bool, optional
@@ -91,7 +92,7 @@ class ParticleFilter:
             robot = Bicycle(covar=V, animation="car", workspace=10)
             robot.control = RandomPath(workspace=robot)
 
-            map = LandmarkMap(nlandmarks=20, workspace=robot.workspace)
+            map = LandmarkMap(20, workspace=robot.workspace)
 
             W = np.diag([0.1, np.radians(1)]) ** 2
             sensor = RangeBearingSensor(robot, map, covar=W, plot=True)
@@ -108,7 +109,7 @@ class ParticleFilter:
 
             plt.plot(pf.get_std()[:100,:])
 
-        .. note:: Set ``seed=0`` to get different behaviour from run to run.
+        .. note:: Set ``seed=None`` to get different behaviour from run to run.
 
         :seealso: :meth:`run`
         """
@@ -215,7 +216,7 @@ class ParticleFilter:
         list.  It contains, for that time step, estimated state and covariance,
         and sensor observation.
 
-        :seealso: :meth:`get_t` :meth:`get_xy` :meth:`get_std`
+        :seealso: :meth:`get_t` :meth:`get_xyt` :meth:`get_std`
             :meth:`get_Pnorm`
         """
         return self._history
@@ -314,7 +315,8 @@ class ParticleFilter:
 
         :param T: maximum simulation time in seconds
         :type T: float
-        :param x0: Initial state, defaults to value given to Vehicle constructor
+        :param x0: Initial particle state, defaults to the value given to the
+            constructor
         :type x0: array_like(3) or array_like(2)
 
         Simulates the motion of a vehicle (under the control of a driving agent)
@@ -325,11 +327,10 @@ class ParticleFilter:
 
             - step the vehicle and its driver agent, obtain odometry
             - take a sensor reading
-            - execute the EKF
+            - execute the particle filter
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`
-            :meth:`get_xy` :meth:`get_t` :meth:`get_std`
+        :seealso: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
             :meth:`plot_xy`
         """
 
@@ -355,12 +356,10 @@ class ParticleFilter:
         # self.robot.plot()
 
         # iterate over time
-        import time
-
         for i in range(round(T / self.robot.dt)):
             self._step()
-            # time.sleep(0.2)
-            plt.pause(0.2)
+            if self._animate:
+                plt.pause(0.2)
             # plt.draw()
             # anim.add()
         # anim.close()
@@ -371,7 +370,8 @@ class ParticleFilter:
 
         :param T: maximum simulation time in seconds
         :type T: float
-        :param x0: Initial state, defaults to value given to Vehicle constructor
+        :param x0: Initial particle state, defaults to the value given to the
+            constructor
         :type x0: array_like(3) or array_like(2)
         :param format: Output format
         :type format: str, optional
@@ -407,11 +407,10 @@ class ParticleFilter:
 
             - step the vehicle and its driver agent, obtain odometry
             - take a sensor reading
-            - execute the EKF
+            - execute the particle filter
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`
-            :meth:`get_xy` :meth:`get_t` :meth:`get_std`
+        :seealso: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
             :meth:`plot_xy`
         """
 
@@ -654,9 +653,14 @@ class ParticleFilter:
         :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`
         :rtype: ndarray(n,3)
 
+        .. versionchanged:: 1.4.5
+            Returns the heading as well as the position, as documented and as
+            :meth:`EKF.get_xyt` does.  Previously the result had only the
+            :math:`(x, y)` columns, ``xyt[:, :2]`` is that.
+
         :seealso: :meth:`plot_xy` :meth:`run` :meth:`history`
         """
-        return np.array([h.xest[:2] for h in self._history])
+        return np.array([h.xest[:3] for h in self._history])
 
     def get_std(self):
         r"""
@@ -683,7 +687,7 @@ class ParticleFilter:
 
         Plot the estimated vehicle path in the xy-plane.
 
-        :seealso: :meth:`get_xy`
+        :seealso: :meth:`get_xyt`
         """
         xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
