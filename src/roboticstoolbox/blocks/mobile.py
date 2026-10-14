@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import warnings
+from collections.abc import Callable
 from math import pi
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 from bdsim.block_types import ContinuousBlock, GraphicsBlock
+from spatialmath import base
+from spatialmath.base.types import R3, ArrayLike3
 
 from roboticstoolbox import mobile
+from roboticstoolbox.tools.types import ArrayLike, NDArray
+
+if TYPE_CHECKING:
+    from bdsim.components import SimulationState
+    from matplotlib.axes import Axes
 
 
 # ------------------------------------------------------------------------ #
@@ -62,27 +70,22 @@ class Bicycle(ContinuousBlock):
     def __init__(
         self,
         L: float = 1,
-        speed_max: Any = np.inf,
-        accel_max: Any = np.inf,
-        steer_max: Any = 0.45 * pi,
-        x0: Any = None,
+        speed_max: float = np.inf,
+        accel_max: float = np.inf,
+        steer_max: float = 0.45 * pi,
+        x0: ArrayLike3 | None = None,
         **blockargs: Any,
     ) -> None:
         r"""
         :param L: Wheelbase, defaults to 1
-        :type L: float, optional
         :param speed_max: Velocity limit, defaults to math.inf
-        :type speed_max: float, optional
         :param accel_max: maximum acceleration, defaults to math.inf
-        :type accel_max: float, optional
         :param steer_max: maximum steered wheel angle, defaults to math.pi*0.45
-        :type steer_max: float, optional
         :param x0: Initial state, defaults to [0,0,0]
-        :type x0: array_like(3), optional
         :param blockargs: |BlockOptions|
-        :type blockargs: dict
 
-        .. deprecated:: the ``vlim`` and ``slim`` keywords are deprecated,
+        .. deprecated:: 1.4.0
+            the ``vlim`` and ``slim`` keywords are deprecated,
             use ``speed_max`` and ``steer_max`` instead.
         """
         # TODO: add option to model the effect of steering arms, responds to
@@ -113,20 +116,20 @@ class Bicycle(ContinuousBlock):
             L=L, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
         )
 
-        if x0 is None:
-            self._x0 = np.zeros((self.nstates,))
-        else:
-            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
-            self._x0 = x0
+        self._x0: NDArray = (
+            np.zeros((self.nstates,))
+            if x0 is None
+            else base.getvector(x0, self.nstates)
+        )
 
         self.inport_names(("v", r"$\gamma$"))
         self.outport_names(("q",))
         self.state_names(("x", "y", r"$\theta$"))
 
-    def output(self, t: Any, inports: Any, x: Any) -> Any:
+    def output(self, t: float, inports: list[Any], x: NDArray) -> list[R3]:
         return [x]  # one output which is ndarray(3)
 
-    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
+    def deriv(self, t: float, inports: list[Any], x: NDArray) -> NDArray:
         return self.vehicle.deriv(x, inports)
 
 
@@ -182,36 +185,30 @@ class Unicycle(ContinuousBlock):
     def __init__(
         self,
         w: float = 1,
-        speed_max: Any = np.inf,
-        accel_max: Any = np.inf,
-        steer_max: Any = np.inf,
+        speed_max: float = np.inf,
+        accel_max: float = np.inf,
+        steer_max: float = np.inf,
         # a=0,  implement this, RVC2 p111, change output and deriv
-        x0: Any = None,
+        x0: ArrayLike3 | None = None,
         **blockargs: Any,
     ) -> None:
         r"""
 
         :param w: vehicle width, defaults to 1
-        :type w: float, optional
         :param speed_max: Velocity limit, defaults to math.inf
-        :type speed_max: float, optional
         :param accel_max: maximum acceleration, defaults to math.inf
-        :type accel_max: float, optional
         :param steer_max: maximum turn rate :math:`\omega`, defaults to math.inf
-        :type steer_max: float, optional
-        :param x0: Inital state, defaults to [0,0,0]
-        :type x0: array_like(3), optional
+        :param x0: Initial state, defaults to [0,0,0]
         :param blockargs: |BlockOptions|
-        :type blockargs: dict
         """
         super().__init__(nstates=3, **blockargs)
         self.type = "unicycle"
 
-        if x0 is None:
-            self._x0 = np.zeros((self.nstates,))
-        else:
-            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
-            self._x0 = x0
+        self._x0: NDArray = (
+            np.zeros((self.nstates,))
+            if x0 is None
+            else base.getvector(x0, self.nstates)
+        )
 
         self.vehicle = mobile.Unicycle(
             W=w, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
@@ -231,10 +228,10 @@ class Unicycle(ContinuousBlock):
         #         \dot{x} \\ \dot{y}
         #     \end{pmatrix}
 
-    def output(self, t: Any, inports: Any, x: Any) -> Any:
+    def output(self, t: float, inports: list[Any], x: NDArray) -> list[R3]:
         return [x]
 
-    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
+    def deriv(self, t: float, inports: list[Any], x: NDArray) -> NDArray:
         return self.vehicle.deriv(x, inports)
 
 
@@ -281,7 +278,7 @@ class DiffSteer(ContinuousBlock):
     .. note:: Wheel velocity is defined such that if both are positive the vehicle
             moves forward.
 
-    :seealso: :class:`~roboticstoolbox.mobile.Vehicle.Diffsteer` :class:`Bicycle` :class:`Unicycle`
+    :seealso: :class:`~roboticstoolbox.mobile.Vehicle.DiffSteer` :class:`Bicycle` :class:`Unicycle`
     """
 
     nin = 2
@@ -294,47 +291,40 @@ class DiffSteer(ContinuousBlock):
         self,
         w: float = 1,
         R: float = 1,
-        speed_max: Any = np.inf,
-        accel_max: Any = np.inf,
-        steer_max: Any = None,
+        speed_max: float = np.inf,
+        accel_max: float = np.inf,
+        steer_max: float | None = None,
         a: float = 0,
-        x0: Any = None,
+        x0: ArrayLike3 | None = None,
         **blockargs: Any,
     ) -> None:
         r"""
         :param w: vehicle width, defaults to 1
-        :type w: float, optional
         :param R: Wheel radius, defaults to 1
-        :type R: float, optional
-        :param speed_max: Velocity limit, defaults to 1
-        :type speed_max: float, optional
+        :param speed_max: Velocity limit, defaults to math.inf
         :param accel_max: maximum acceleration, defaults to math.inf
-        :type accel_max: float, optional
-        :param steer_max: maximum steering rate, defaults to 1
-        :type steer_max: float, optional
-        :param x0: Inital state, defaults to None
-        :type x0: array_like, optional
+        :param steer_max: maximum steering rate, defaults to None (no limit)
+        :param x0: Initial state, defaults to [0,0,0]
         :param blockargs: |BlockOptions|
-        :type blockargs: dict
         """
         super().__init__(nstates=3, **blockargs)
         self.type = "diffsteer"
         self.R = R
 
-        if x0 is None:
-            self._x0 = np.zeros((self.nstates,))
-        else:
-            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
-            self._x0 = x0
+        self._x0: NDArray = (
+            np.zeros((self.nstates,))
+            if x0 is None
+            else base.getvector(x0, self.nstates)
+        )
 
         self.vehicle = mobile.DiffSteer(
             W=w, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
         )
 
-    def output(self, t: Any, inports: Any, x: Any) -> Any:
+    def output(self, t: float, inports: list[Any], x: NDArray) -> list[R3]:
         return [x]
 
-    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
+    def deriv(self, t: float, inports: list[Any], x: NDArray) -> NDArray:
         return self.vehicle.deriv(x, inports)
 
 
@@ -384,38 +374,38 @@ class VehiclePlot(GraphicsBlock):
 
     def __init__(
         self,
-        animation: Any = None,
-        path: Any = None,
-        labels: Any = ["X", "Y"],
+        animation: mobile.VehicleAnimationBase | None = None,
+        path: str | dict[str, Any] | None = None,
+        labels: tuple[str, str] = ("X", "Y"),
         square: bool = True,
-        init: Any = None,
-        scale: str = "auto",
+        init: Callable[[Axes], None] | None = None,
+        scale: str | ArrayLike = "auto",
         shape: str = "car",
-        size: Any = None,
-        polyargs: Any = {},
+        size: float | ArrayLike | None = None,
+        polyargs: dict[str, Any] | None = None,
         **blockargs: Any,
     ) -> None:
         """
-        :param animation: Graphical animation of vehicle, defaults to None
-        :type animation: VehicleAnimation subclass, optional
-        :param path: linestyle to plot path taken by vehicle, defaults to None
-        :type path: str or dict, optional
-        :param labels: axis labels (xlabel, ylabel), defaults to ["X","Y"]
-        :type labels: array_like(2) or list
+        :param animation: Graphical animation of vehicle, a
+            :class:`~roboticstoolbox.mobile.Animations.VehicleAnimationBase`
+            subclass, defaults to a :class:`~roboticstoolbox.mobile.Animations.VehiclePolygon`
+        :param path: Matplotlib linestyle string or dict of arguments used to plot
+            the path taken by vehicle, defaults to None (no path)
+        :param labels: axis labels (xlabel, ylabel), defaults to ("X", "Y")
         :param square: Set aspect ratio to 1, defaults to True
-        :type square: bool, optional
-        :param init: function to initialize graphics, defaults to None
-        :type init: callable, optional
-        :param scale: scale of plot, defaults to "auto"
-        :type scale: list or str, optional
-        :param shape: shape of vehicle, passed to animation, defaults to None
-        :type shape: array_like, optional
-        :param size: size of vehicle, passed to animation, defaults to None
-        :type size: float or array_like, optional
-        :param polyargs: arguments passed to :meth:`Animation.Polygon`
-        :type polyargs: dict
+        :param init: function called with the axes to initialize graphics,
+            defaults to None
+        :param scale: axis limits: ``"auto"``, ``[min, max]`` used for both axes, or
+            ``[xmin, xmax, ymin, ymax]``, defaults to ``"auto"``
+        :param shape: shape of vehicle, passed to the default animation, defaults
+            to ``"car"``
+        :param size: size of vehicle, passed to the default animation, defaults to
+            None (the animation's default)
+        :param polyargs: arguments passed to the default animation
+            :class:`~roboticstoolbox.mobile.Animations.VehiclePolygon`, defaults
+            to None.  The dict is not modified.
+        :raises TypeError: ``animation`` is not a ``VehicleAnimationBase``
         :param blockargs: |GraphicsBlockOptions|
-        :type blockargs: dict
 
         .. note::
 
@@ -439,15 +429,22 @@ class VehiclePlot(GraphicsBlock):
 
         self.pathstyle = path
 
-        if scale != "auto":
-            if len(scale) == 2:
-                scale = scale * 2
-        self.scale = scale
+        self.scale: str | list[float]
+        if isinstance(scale, str):
+            self.scale = scale
+        else:
+            scale = list(scale)
+            # [min, max] applies to both axes
+            self.scale = scale * 2 if len(scale) == 2 else scale
         self.labels = labels
 
+        # a copy, so as not to modify the caller's dict
+        polyargs = dict(polyargs or {})
         polyargs.update(
             {k: v for k, v in [("shape", shape), ("scale", size)] if v is not None}
         )
+
+        self.line: Any = None  # Matplotlib Line2D, if the path is plotted
 
         if animation is None:
             animation = mobile.VehiclePolygon(**polyargs)
@@ -456,7 +453,7 @@ class VehiclePlot(GraphicsBlock):
 
         self.animation = animation
 
-    def start(self, simstate: Any) -> None:
+    def start(self, simstate: SimulationState) -> None:
         super().start(simstate)
 
         if not self._enabled:
@@ -469,14 +466,13 @@ class VehiclePlot(GraphicsBlock):
 
         if self.square:
             self.ax.set_aspect("equal")
-        print("done")
 
         self.ax.set_axisbelow(True)  # keeps grid beneath artists
         self.ax.grid(True)
         self.ax.set_xlabel(self.labels[0])
         self.ax.set_ylabel(self.labels[1])
         self.ax.set_title(self.name)
-        if self.scale != "auto":
+        if not isinstance(self.scale, str):
             self.ax.set_xlim(*self.scale[0:2])
             self.ax.set_ylim(*self.scale[2:4])
         if self.init is not None:
@@ -492,7 +488,7 @@ class VehiclePlot(GraphicsBlock):
         # plt.draw()
         # plt.show(block=False)
 
-    def step(self, t: Any, inports: Any) -> None:
+    def step(self, t: float, inports: list[Any]) -> None:
         if not self._enabled:
             return
 
@@ -503,13 +499,13 @@ class VehiclePlot(GraphicsBlock):
         self.xdata.append(xyt[0])
         self.ydata.append(xyt[1])
         # plt.figure(self.fig.number)
-        if self.pathstyle is not None:
+        if self.line is not None:
             self.line.set_data(self.xdata, self.ydata)
 
         # update the vehicle pose
         self.animation.update(xyt)
 
-        if isinstance(self.scale, str) and self.scale == "auto":
+        if isinstance(self.scale, str):
             self.ax.relim()
             self.ax.autoscale_view()
         super().step(t, inports)
