@@ -159,6 +159,41 @@ class ETS2(BaseETS):
     def __add__(self, rest) -> "ETS2":
         return self.__mul__(rest)  # pragma: nocover
 
+    def fixjoint(self, j: int, value: float) -> "ETS2":
+        """Return an independent ETS2 with the specified joint held constant.
+
+        j is the zero-based position among joint ETs, independent of their
+        jindex values. Remaining joints retain explicit global jindices;
+        automatically indexed joints are renumbered to fill the gap. Joint
+        limits and flip flags are preserved. The original is not modified.
+
+        :param j: index of the joint to fix
+        :param value: fixed joint coordinate, in radians or metres
+        :returns: ETS2 with one fewer joint
+        :raises ValueError: if j does not identify a joint
+        """
+        if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
+            raise ValueError(f"joint index {j} out of range for {self.n} joints")
+
+        parts = []
+        joint_index = 0
+        for et in self:
+            if not et.isjoint:
+                parts.append(et)
+                continue
+
+            constructor = getattr(ET2, et.kind)
+            if joint_index == j:
+                parts.append(constructor(-value if et.isflip else value))
+            else:
+                kwargs = {"flip": et.isflip, "qlim": et.qlim}
+                if not self._auto_jindex:
+                    kwargs["jindex"] = et.jindex
+                parts.append(constructor(**kwargs))
+            joint_index += 1
+
+        return ETS2(parts)
+
     def compile(self) -> "ETS2":
         """
         Compile an ETS2
