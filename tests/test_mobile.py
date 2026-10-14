@@ -319,34 +319,59 @@ class DriversTest(unittest.TestCase):
         self.assertIsInstance(str(rtb.PurePursuit([[0, 10], [0, 10]])), str)
 
     def test_purepursuit_run(self):
-        # without animation, there are no markers
+        # without animation, there is no goal marker
         path = np.array([[0.0, 10, 10], [0, 0, 10]])
         veh = rtb.Bicycle(control=rtb.PurePursuit(path, lookahead=2, speed=2))
         veh.run(5, animate=False)
-        self.assertIsNone(veh.control._waypoint_markers)
+        self.assertIsNone(veh.control._goal_marker)
 
         u = veh.control.demand()
         self.assertEqual(u.shape, (2,))
 
-    def test_purepursuit_markers(self):
+    def test_goal_marker(self):
         import matplotlib
 
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
 
-        path = np.array([[0.0, 10, 10], [0, 0, 10]])
-        pp = rtb.PurePursuit(path, lookahead=2, speed=2)
+        # a dense path, as produced by a trajectory generator
+        xs = np.arange(0, 50, 0.5)
+        path = np.vstack((xs, np.zeros_like(xs)))
+        pp = rtb.PurePursuit(path, lookahead=3, speed=2)
         veh = rtb.Bicycle(control=pp)
         veh.init(animate=False)
 
         fig, ax = plt.subplots()
+        nlines = len(ax.lines)
         pp.init(ax=ax)
-        self.assertEqual(len(pp._waypoint_markers), 3)
+        # the path and a single goal marker
+        self.assertEqual(len(ax.lines), nlines + 2)
 
-        # demand highlights exactly one waypoint, the current goal
-        pp.demand()
-        colors = [m.get_color() for m in pp._waypoint_markers]
-        self.assertEqual(colors.count("red"), 1)
+        # the goal marker moves, rather than leaving a trail
+        goals = []
+        for _ in range(50):
+            pp.demand()
+            goals.append(pp._goal_marker.get_xydata().copy())
+            veh.step()
+        self.assertEqual(len(ax.lines), nlines + 2)
+        self.assertFalse(np.allclose(goals[0], goals[-1]))
+        plt.close(fig)
+
+    def test_randompath_goal_marker(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        rp = rtb.RandomPath(workspace=10)
+        veh = rtb.Bicycle(control=rp)
+        veh.init(animate=False)
+
+        fig, ax = plt.subplots()
+        rp.init(ax=ax)
+        rp.demand()
+        self.assertEqual(len(ax.lines), 1)
+        np.testing.assert_allclose(rp._goal_marker.get_xydata()[0], rp._goal)
         plt.close(fig)
 
 

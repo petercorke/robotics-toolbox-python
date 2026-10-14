@@ -81,6 +81,9 @@ class VehicleDriverBase(ABC):
         # the vehicle under control, set by the vehicle's control setter
         self._veh: VehicleBase | None = None
 
+        # Matplotlib Line2D showing the current goal, once displayed
+        self._goal_marker: Any = None
+
         self._speed = speed
         self._headinggain = headinggain
         self._verbose = verbose
@@ -140,6 +143,19 @@ class VehicleDriverBase(ABC):
     def vehicle(self, v: VehicleBase) -> None:
         self._veh = v
 
+    def _init_goal_marker(self, ax: Axes | None, label: str = "goal") -> None:
+        """
+        Create the goal marker, to be moved by :meth:`driveto`
+
+        :param ax: axes in which to draw the goal, None for no graphics
+        :param label: legend label for the marker
+        """
+        self._goal_marker = None
+        if ax is not None:
+            self._goal_marker = plt.plot(
+                np.nan, np.nan, **self._goal_marker_style, label=label
+            )[0]
+
     def _attached_vehicle(self) -> VehicleBase:
         """The vehicle under control, which must have been attached"""
         if self._veh is None:
@@ -177,8 +193,12 @@ class VehicleDriverBase(ABC):
         The speed demand is the constant ``speed``.  The steering angle demand
         is the heading error to the goal, :math:`\\Delta\\theta`, scaled by
         ``headinggain``.
+
+        If the goal marker is displayed, it is moved to the goal.
         """
         veh = self._attached_vehicle()
+        if self._goal_marker is not None:
+            self._goal_marker.set_data([goal[0]], [goal[1]])
         goal_heading = atan2(goal[1] - veh._x[1], goal[0] - veh._x[0])
         delta_heading = base.angdiff(goal_heading, veh._x[2])
         if veh.verbose or self._verbose:
@@ -244,8 +264,6 @@ class RandomPath(VehicleDriverBase):
         if self._workspace is None:
             raise ValueError("RandomPath requires a workspace")
 
-        self._goal_marker: Any = None  # Matplotlib Line2D, once displayed
-
         self._d_prev = np.inf
         self._random = np.random.default_rng(seed)
         self._seed = seed
@@ -288,10 +306,7 @@ class RandomPath(VehicleDriverBase):
             self._random = np.random.default_rng(self._seed)
 
         self._goal = None
-        if ax is not None:
-            self._goal_marker = plt.plot(
-                np.nan, np.nan, **self._goal_marker_style, label="random waypoint"
-            )[0]
+        self._init_goal_marker(ax, label="random waypoint")
 
     def demand(self) -> R2:
         """
@@ -345,11 +360,6 @@ class RandomPath(VehicleDriverBase):
         if veh.verbose or self._verbose:
             print(f"set goal: {self._goal}")
 
-        # update the goal marker
-        if self._goal_marker is not None:
-            self._goal_marker.set_xdata([self._goal[0]])
-            self._goal_marker.set_ydata([self._goal[1]])
-
 
 # ========================================================================= #
 
@@ -359,8 +369,7 @@ class PurePursuit(VehicleDriverBase):
         self,
         path: Points2,
         lookahead: float = 1,
-        linemarkerstyle: dict[str, Any] | None = None,
-        waypointmarkerstyle: dict[str, Any] | None = None,
+        pathstyle: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -369,10 +378,8 @@ class PurePursuit(VehicleDriverBase):
         :param path: path as a set of waypoints, one column per point
         :type path: ndarray(2,n)
         :param lookahead: lookahead distance, defaults to 1
-        :param linemarkerstyle: Matplotlib style of the line that joins the
-            waypoints, defaults to a thin dashed blue line
-        :param waypointmarkerstyle: Matplotlib style of the marker drawn at each
-            waypoint, defaults to a blue circle
+        :param pathstyle: Matplotlib line style used to display the path,
+            defaults to a wide, translucent red line
         :param kwargs: arguments passed to :class:`VehicleDriverBase`
         :raises ValueError: ``path`` is not a 2xN array
 
@@ -390,8 +397,9 @@ class PurePursuit(VehicleDriverBase):
             veh = Bicycle()
             veh.control = driver
 
-        If the simulation is animated, the path and its waypoints are plotted,
-        and the waypoint that is currently the goal is shown in red.
+        If the simulation is animated, the path is plotted using ``pathstyle``
+        and the current goal point, which changes at every time step, is shown
+        using ``goalmarkerstyle``.
 
         :seealso: :class:`RandomPath` :class:`VehicleBase`
         """
@@ -406,19 +414,11 @@ class PurePursuit(VehicleDriverBase):
         self._path = path
         self._lookahead = lookahead
 
-        self._linemarkerstyle: dict[str, Any] = (
-            {"color": "b", "linestyle": "--", "linewidth": 0.5}
-            if linemarkerstyle is None
-            else linemarkerstyle
+        self._pathstyle: dict[str, Any] = (
+            {"color": "r", "linewidth": 3, "alpha": 0.7, "zorder": 0}
+            if pathstyle is None
+            else pathstyle
         )
-        self._waypoint_marker_style: dict[str, Any] = (
-            {"marker": "o", "markersize": 5, "color": "b", "linestyle": "None"}
-            if waypointmarkerstyle is None
-            else waypointmarkerstyle
-        )
-
-        # one Matplotlib Line2D per waypoint, once displayed
-        self._waypoint_markers: list[Any] | None = None
 
     def __str__(self) -> str:
         """
@@ -444,20 +444,13 @@ class PurePursuit(VehicleDriverBase):
         :param ax: axes in which to draw the path and waypoints, defaults to None
 
         Called at the start of a simulation run.  If ``ax`` is given, plot the
-        path as a line with a marker at each waypoint.
+        path and create the goal marker.
         """
-        self._waypoint_markers = None
         if ax is not None:
             plt.plot(
-                self._path[0, :],
-                self._path[1, :],
-                **self._linemarkerstyle,
-                label="path",
+                self._path[0, :], self._path[1, :], **self._pathstyle, label="path"
             )
-            self._waypoint_markers = [
-                plt.plot(x, y, **self._waypoint_marker_style)[0]
-                for x, y in self._path.T
-            ]
+        self._init_goal_marker(ax, label="pursuit goal")
 
     def demand(self) -> R2:
         """
@@ -481,18 +474,9 @@ class PurePursuit(VehicleDriverBase):
         if len(k) == 0:
             # no such points, we must be near the end, goal is the end
             goal = self._path[:, -1]
-            k = -1
         else:
-            # many such points, take the first one
-            k = k[0] + 1  # first point beyond look ahead distance
-            goal = self._path[:, k + i]
-            k += i
-
-        # highlight the current goal
-        if self._waypoint_markers is not None:
-            for marker in self._waypoint_markers:
-                marker.set_color("blue")
-            self._waypoint_markers[k].set_color("red")
+            # many such points, take the first one beyond look ahead distance
+            goal = self._path[:, i + 1 + k[0]]
 
         return self.driveto(goal)
 
