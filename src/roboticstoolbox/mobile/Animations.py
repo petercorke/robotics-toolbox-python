@@ -3,8 +3,11 @@
 @Author: Kristian Gibson, initial MATLAB port
 """
 
-from abc import ABC
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
 from math import pi, atan2
+from typing import Any, Literal, Sequence
 import numpy as np
 
 # from scipy import integrate, linalg, interpolate
@@ -12,9 +15,11 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib import patches, colors
 import matplotlib.transforms as mtransforms
+from matplotlib.axes import Axes
 
 from spatialmath import SE2, base, Polygon2
 from roboticstoolbox import rtb_load_data
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class VehicleAnimationBase(ABC):
@@ -56,11 +61,19 @@ class VehicleAnimationBase(ABC):
 
     """
 
-    def __init__(self):
-        self._object = None
-        self._ax = None
+    def __init__(self) -> None:
+        self._object: Any = None  # the Matplotlib artist, once added
+        self._ax: Axes | None = None
 
-    def add(self, ax=None, **kwargs):
+    @abstractmethod
+    def _add(self, **kwargs: Any) -> None:
+        """Create the Matplotlib artist and add it to the plot"""
+
+    @abstractmethod
+    def _update(self, x: ArrayLike) -> None:
+        """Move the Matplotlib artist to configuration ``x``"""
+
+    def add(self, ax: Axes | None = None, **kwargs: Any) -> None:
         """
         Add vehicle animation to the current plot
 
@@ -83,7 +96,7 @@ class VehicleAnimationBase(ABC):
 
         self._add(**kwargs)
 
-    def update(self, q):
+    def update(self, q: ArrayLike) -> None:
         """
         Update the vehicle animation (superclass)
 
@@ -96,7 +109,7 @@ class VehicleAnimationBase(ABC):
         """
         self._update(q)
 
-    def plot(self, q, **kwargs):
+    def plot(self, q: ArrayLike, **kwargs: Any) -> Any:
         """
         Add vehicle to the current plot (superclass)
 
@@ -112,7 +125,7 @@ class VehicleAnimationBase(ABC):
         self.update(q)
         return self._object
 
-    def __del__(self):
+    def __del__(self) -> None:
 
         if self._object is not None:
             self._object.remove()
@@ -120,7 +133,7 @@ class VehicleAnimationBase(ABC):
 
 # ========================================================================= #
 class VehicleMarker(VehicleAnimationBase):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """
         Create graphical animation of vehicle as a Matplotlib marker
 
@@ -153,11 +166,11 @@ class VehicleMarker(VehicleAnimationBase):
             }
         self._args = kwargs
 
-    def _update(self, x):
+    def _update(self, x: ArrayLike) -> None:
         self._object.set_xdata(x[0])
         self._object.set_ydata(x[1])
 
-    def _add(self, x=None, **kwargs):
+    def _add(self, x: ArrayLike | None = None, **kwargs: Any) -> None:
         if x is None:
             x = (0, 0)
         self._object = plt.plot(x[0], x[1], **{**self._args, **kwargs})[0]
@@ -167,7 +180,12 @@ class VehicleMarker(VehicleAnimationBase):
 
 
 class VehiclePolygon(VehicleAnimationBase):
-    def __init__(self, shape="car", scale=1, **kwargs):
+    def __init__(
+        self,
+        shape: str | NDArray | Polygon2 = "car",
+        scale: float = 1,
+        **kwargs: Any,
+    ) -> None:
         """
         Create graphical animation of vehicle as a polygon
 
@@ -252,14 +270,14 @@ class VehiclePolygon(VehicleAnimationBase):
         self._coords *= scale
         self._args = kwargs
 
-    def _add(self, **kwargs):
+    def _add(self, **kwargs: Any) -> None:
         # color is fillcolor + edgecolor
         # facecolor if None is default
         self._ax = plt.gca()
         self._object = patches.Polygon(self._coords.T, **{**self._args, **kwargs})
         self._ax.add_patch(self._object)
 
-    def _update(self, x):
+    def _update(self, x: ArrayLike) -> None:
 
         if self._object is not None:
             # if animation is initialized
@@ -271,7 +289,13 @@ class VehiclePolygon(VehicleAnimationBase):
 
 
 class VehicleIcon(VehicleAnimationBase):
-    def __init__(self, filename, origin=None, scale=1, rotation=0):
+    def __init__(
+        self,
+        filename: str,
+        origin: ArrayLike | None = None,
+        scale: float = 1,
+        rotation: float = 0,
+    ) -> None:
         """
         Create graphical animation of vehicle as an image icon
 
@@ -368,8 +392,8 @@ class VehicleIcon(VehicleAnimationBase):
             self._height = scale
             self._width = scale * image.shape[0] / image.shape[1]
 
-    def _add(self, ax=None, **kwargs):
-        def imshow_affine(ax, z, *args, **kwargs):
+    def _add(self, ax: Axes | None = None, **kwargs: Any) -> None:
+        def imshow_affine(ax: Axes, z: NDArray, *args: Any, **kwargs: Any) -> Any:
             im = ax.imshow(z, *args, **kwargs)
             x1, x2, y1, y2 = im.get_extent()
             # im._image_skew_coordinate = (x2, y1)
@@ -384,12 +408,15 @@ class VehicleIcon(VehicleAnimationBase):
         ]
         self._ax = plt.gca()
 
-        args = {}
+        args: dict[str, Any] = {}
         if "color" in kwargs and self._image.ndim == 2:
             color = kwargs["color"]
             del kwargs["color"]
             rgb = colors.to_rgb(color)
-            cmapdata = {
+            cmapdata: dict[
+                Literal["red", "green", "blue", "alpha"],
+                Sequence[tuple[float, ...]],
+            ] = {
                 "red": [(0.0, 0.0, 0.0), (1.0, rgb[0], 0.0)],
                 "green": [(0.0, 0.0, 0.0), (1.0, rgb[1], 0.0)],
                 "blue": [(0.0, 0.0, 0.0), (1.0, rgb[2], 0.0)],
@@ -410,7 +437,8 @@ class VehicleIcon(VehicleAnimationBase):
             **{**kwargs, **args},
         )
 
-    def _update(self, x):
+    def _update(self, x: ArrayLike) -> None:
+        assert self._ax is not None  # add() has been called
 
         # center_x = self._width // 2
         # center_y = self._height // 2
@@ -446,7 +474,7 @@ if __name__ == "__main__":
 
     print(veh.f([0, 0, 0], odo))
 
-    def control(v, t, x):
+    def control(v: Any, t: float, x: NDArray) -> tuple[float, float]:
         goal = (6, 6)
         goal_heading = atan2(goal[1] - x[1], goal[0] - x[0])
         d_heading = base.angdiff(goal_heading, x[2])
