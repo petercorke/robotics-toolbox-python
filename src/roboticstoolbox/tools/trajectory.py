@@ -868,16 +868,16 @@ def cmstraj():
 
 
 def mstraj(
-    viapoints,
-    dt,
-    tacc,
-    qdmax=None,
-    tsegment=None,
-    q0=None,
-    qd0=None,
-    qdf=None,
-    verbose=False,
-):
+    viapoints: np.ndarray,
+    dt: float,
+    tacc: float | ArrayLike,
+    qdmax: float | ArrayLike | None = None,
+    tsegment: ArrayLike | None = None,
+    q0: ArrayLike | None = None,
+    qd0: ArrayLike | None = None,
+    qdf: ArrayLike | None = None,
+    verbose: bool = False,
+) -> Trajectory:
     """
     Multi-segment multi-axis trajectory
 
@@ -894,9 +894,9 @@ def mstraj(
     :type tsegment: array_like, optional
     :param q0: initial coordinates, defaults to first row of viapoints
     :type q0: array_like(n), optional
-    :param qd0: inital  velocity, defaults to zero
+    :param qd0: initial velocity, defaults to zero
     :type qd0: array_like(n), optional
-    :param qdf: final  velocity, defaults to zero
+    :param qdf: final velocity, defaults to zero
     :type qdf: array_like(n), optional
     :param verbose: print debug information, defaults to False
     :type verbose: bool, optional
@@ -928,21 +928,23 @@ def mstraj(
 
             traj = mstraj(viapoints, dt, tacc, qdmax=SPEED)
 
-    The return value is a namedtuple (named ``mstraj``) with elements:
+    The returned :class:`Trajectory` has attributes:
 
-        - ``t``  the time coordinate as a numpy ndarray, shape=(K,)
-        - ``q``  the axis values as a numpy ndarray, shape=(K,N)
-        - ``arrive`` a list of arrival times for each segment
-        - ``info`` a list of named tuples, one per segment that describe the
+        - ``t`` the time coordinate in seconds, shape=(K,)
+        - ``q`` the axis values, shape=(K,N)
+        - ``qd`` the axis velocities in units per second, shape=(K,N)
+        - ``qdd`` the axis accelerations in units per second squared, shape=(K,N)
+        - ``arrive`` an array of arrival times for each segment
+        - ``info`` a list of named tuples, one per segment, that describe the
           slowest axis, segment time,  and time stamp
-        - ``via`` the passed set of via points
+        - ``via`` the passed set of via points (excluding the initial row if
+          ``q0`` is omitted)
 
-    The  trajectory proper is (``traj.t``, ``traj.q``).  The trajectory is a
-    matrix has one row per time step, and one column per axis.
+    Trajectory arrays have one row per time step and one column per axis.
 
     .. note::
 
-        - Only one of ``qdmag`` or ``tsegment`` can be specified
+        - Only one of ``qdmax`` or ``tsegment`` can be specified
         - If ``tacc`` is greater than zero then the path smoothly accelerates
           between segments using a polynomial blend.  This means that the the via
           point is not actually reached.
@@ -954,7 +956,9 @@ def mstraj(
           correspond to translation and orientation in RPY or Euler angle form.
         - If ``qdmax`` is a scalar then all axes are assumed to have the same
           maximum speed.
-        - ``tg`` has extra attributes ``arrive``, ``info`` and ``via``
+        - With ``tacc=0``, velocity changes at via points are instantaneous;
+          the sampled acceleration is zero within each linear segment.
+        - The returned trajectory also has ``arrive``, ``info`` and ``via``.
 
     :References:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
@@ -1019,7 +1023,9 @@ def mstraj(
 
     clock = 0  # keep track of time
     arrive = np.zeros((ns,))  # record planned time of arrival at via points
-    tg = np.zeros((0, nj))
+    q_parts = []
+    qd_parts = []
+    qdd_parts = []
     infolist = []
     info = namedtuple("mstraj_info", "slowest segtime clock")
 
@@ -1108,12 +1114,14 @@ def mstraj(
 
         # add the blend polynomial
         if taccx > 0:
-            qb = jtraj(
+            blend = jtraj(
                 q0, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd
-            ).s
+            )
             if verbose:  # pragma nocover
-                print(qb)
-            tg = np.vstack([tg, qb[1:, :]])
+                print(blend.q)
+            q_parts.append(blend.q[1:, :])
+            qd_parts.append(blend.qd[1:, :])
+            qdd_parts.append(blend.qdd[1:, :])
 
         clock = clock + taccx  # update the clock
 
@@ -1123,7 +1131,9 @@ def mstraj(
             q0 = (1 - s) * q_prev + s * q_next  # linear step
             if verbose:  # pragma nocover
                 print(t, s, q0)
-            tg = np.vstack([tg, q0])
+            q_parts.append(q0[np.newaxis, :])
+            qd_parts.append(qd[np.newaxis, :])
+            qdd_parts.append(np.zeros((1, nj)))
             clock += dt
 
         q_prev = q_next  # next target becomes previous target
@@ -1131,12 +1141,17 @@ def mstraj(
 
     # add the final blend
     if tacc2 > 0:
-        qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).s
-        tg = np.vstack([tg, qb[1:, :]])
+        blend = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf)
+        q_parts.append(blend.q[1:, :])
+        qd_parts.append(blend.qd[1:, :])
+        qdd_parts.append(blend.qdd[1:, :])
 
     infolist.append(info(None, tseg, clock))
 
-    traj = Trajectory("mstraj", dt * np.arange(0, tg.shape[0]), tg)
+    q = np.vstack(q_parts)
+    qd = np.vstack(qd_parts)
+    qdd = np.vstack(qdd_parts)
+    traj = Trajectory("mstraj", dt * np.arange(0, q.shape[0]), q, qd, qdd, istime=True)
     traj.arrive = arrive
     traj.info = infolist
     traj.via = viapoints
