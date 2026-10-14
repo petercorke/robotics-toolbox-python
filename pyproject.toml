@@ -242,6 +242,7 @@ module = [
     "roboticstoolbox.mobile.LatticePlanner",
     "roboticstoolbox.mobile.DubinsPlanner",
     "roboticstoolbox.mobile.ReedsSheppPlanner",
+    "roboticstoolbox.mobile.DstarPlanner",
 ]
 disallow_untyped_defs = true
 
@@ -293,7 +294,6 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.mobile.DstarPlanner",
     "roboticstoolbox.mobile.EKF",
     "roboticstoolbox.mobile.ParticleFilter",
     "roboticstoolbox.mobile.PoseGraph",
