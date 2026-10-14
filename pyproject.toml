@@ -241,6 +241,7 @@ module = [
     "roboticstoolbox.mobile.RRTPlanner",
     "roboticstoolbox.mobile.LatticePlanner",
     "roboticstoolbox.mobile.DubinsPlanner",
+    "roboticstoolbox.mobile.ReedsSheppPlanner",
 ]
 disallow_untyped_defs = true
 
@@ -296,7 +297,6 @@ module = [
     "roboticstoolbox.mobile.EKF",
     "roboticstoolbox.mobile.ParticleFilter",
     "roboticstoolbox.mobile.PoseGraph",
-    "roboticstoolbox.mobile.ReedsSheppPlanner",
     "roboticstoolbox.mobile.sensors",
 ]
 ignore_errors = true
