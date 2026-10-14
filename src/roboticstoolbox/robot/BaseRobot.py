@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-from typing import Any
 # import sys
 import io
 from abc import ABC
@@ -23,31 +22,28 @@ from typing import (
     cast,
 )
 
-from typing_extensions import Literal as L
-
 import numpy as np
-
-from spatialmath import SE3
-from spatialmath.base.argcheck import (
-    getvector,
-    getmatrix,
-    getunit,
-)
-
 from ansitable import ANSITable, Column
 from spatialgeometry import SceneNode
-from roboticstoolbox.backends.Connector import Connector
+from spatialmath import SE3
+from spatialmath.base.argcheck import (
+    getmatrix,
+    getunit,
+    getvector,
+)
+from typing_extensions import Literal as L
 
-from roboticstoolbox.ets.fknm import Robot_link_T
 import roboticstoolbox as rtb
+from roboticstoolbox.backends.Connector import Connector
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.ets.fknm import Robot_link_T
+from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link
-from roboticstoolbox.ets.ETS import ETS
-from roboticstoolbox.ets.ET import ET
-from roboticstoolbox.robot.Dynamics import DynamicsMixin
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.robot.RobotPlottingMPL import RobotPlottingMPLMixin
+from roboticstoolbox.tools.params import rtb_get_param
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:
     from matplotlib.typing import ColorType as Color  # pragma nocover
@@ -1959,6 +1955,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         backend: L["swift", "pyplot", "pyplot2"] | None = None,
     ) -> Connector:
         import sys
+
         from roboticstoolbox.backends import load_backend
 
         # Resolve which backend name to use
@@ -2309,8 +2306,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
 
         # Lazy import
-        import tempfile
         import subprocess
+        import tempfile
         import webbrowser
 
         # create the temporary dotfile
@@ -2433,9 +2430,9 @@ graph [rankdir=LR];
                         )
                     )
 
-                file.write("  {} -> {}_ets;\n".format(parent, link.name))
+                file.write(f"  {parent} -> {link.name}_ets;\n")
                 file.write(
-                    "  {}_ets -> {} [{}];\n".format(link.name, link.name, edge_options)
+                    f"  {link.name}_ets -> {link.name} [{edge_options}];\n"
                 )
             else:
                 # put the ets fragment as an edge label
@@ -2452,12 +2449,7 @@ graph [rankdir=LR];
                     return
                 try:
                     file.write(
-                        '  {} -> {} [label="{}", {}];\n'.format(
-                            parent,
-                            link.name,
-                            estr,
-                            edge_options,
-                        )
+                        f'  {parent} -> {link.name} [label="{estr}", {edge_options}];\n'
                     )
                 except UnicodeEncodeError:  # pragma nocover
                     file.write(
@@ -2483,13 +2475,13 @@ graph [rankdir=LR];
             else:
                 node_options = 'shape="circle"'
 
-            file.write("  {} [{}];\n".format(link.name, node_options))
+            file.write(f"  {link.name} [{node_options}];\n")
 
             draw_edge(link, etsbox, jtype, static)
 
         for gripper in self.grippers:
             for link in gripper.links:
-                file.write("  {} [shape=cds];\n".format(link.name))
+                file.write(f"  {link.name} [shape=cds];\n")
                 draw_edge(link, etsbox, jtype, static)
 
         file.write("}\n")

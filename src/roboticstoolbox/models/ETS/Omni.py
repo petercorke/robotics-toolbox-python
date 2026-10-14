@@ -1,16 +1,15 @@
 
 from __future__ import annotations
 
-from typing import Any
 #!/usr/bin/env python
-
 import numpy as np
-from roboticstoolbox.ets.ET import ET
-from roboticstoolbox.ets.ETS import ETS
-from roboticstoolbox.robot.Robot import Robot
-from roboticstoolbox.robot.Link import Link
 import spatialgeometry as sg
 import spatialmath as sm
+
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.Robot import Robot
 
 
 class Omni(Robot):

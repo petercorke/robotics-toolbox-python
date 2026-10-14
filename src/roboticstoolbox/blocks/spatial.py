@@ -1,17 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
-import numpy as np
-from math import sin, cos, pi
-
 # import matplotlib.pyplot as plt
-import time
-from spatialmath import SE3
+from typing import Any
+
 import spatialmath.base as smb
-
 from bdsim.block_types import FunctionBlock
-
-from roboticstoolbox import quintic_func, trapezoidal_func
+from spatialmath import SE3
 
 
 class Tr2Delta(FunctionBlock):

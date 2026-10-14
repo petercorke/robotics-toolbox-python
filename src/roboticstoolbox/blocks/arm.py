@@ -1,20 +1,16 @@
 from __future__ import annotations
 
+# import matplotlib.pyplot as plt
+from math import cos, pi, sin
 from typing import Any
 
-from roboticstoolbox.tools.types import ArrayLike
 import numpy as np
-from math import sin, cos, pi
-
-# import matplotlib.pyplot as plt
-import time
-from spatialmath import SE3
 import spatialmath.base as smb
-
-from bdsim.block_types import GraphicsBlock, ContinuousBlock, FunctionBlock, SourceBlock
-
+from bdsim.block_types import ContinuousBlock, FunctionBlock, GraphicsBlock, SourceBlock
+from spatialmath import SE3
 
 from roboticstoolbox import quintic_func, trapezoidal_func
+from roboticstoolbox.tools.types import ArrayLike
 
 """
 Robot blocks:

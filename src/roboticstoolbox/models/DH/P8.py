@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from math import pi
 
 # 2/8/95  changed D3 to 150.05mm which is closer to data from Lee, AKB86 and
 # Tarn fixed errors in COG for links 2 and 3
@@ -16,15 +16,12 @@ from typing import Any
 # 14/2/91 to use Paul's value of link twist (alpha) to be consistant
 #  with ARCL.  This is the -ve of Lee's values, which means the
 #  zero angle position is a righty for Paul, and lefty for Lee.
-
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
-
 # from math import pi
 import numpy as np
-from roboticstoolbox import DHRobot, PrismaticDH, models
 from spatialmath import SE3
-from spatialmath import base
-from math import pi
+
+from roboticstoolbox import DHRobot, PrismaticDH, models
 
 
 class P8(DHRobot):
@@ -52,7 +49,7 @@ class P8(DHRobot):
     .. codeauthor:: Peter Corke
 
     :seealso: :func:`models.DH.Puma560`
-    """  # noqa
+    """
 
     def __init__(self) -> None:
 

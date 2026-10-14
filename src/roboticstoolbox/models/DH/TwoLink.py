@@ -6,11 +6,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from roboticstoolbox import DHRobot, RevoluteDH, RevoluteMDH
+import numpy as np
 
 # from math import pi
 from spatialmath import SE3
-import numpy as np
+
+from roboticstoolbox import DHRobot, RevoluteDH, RevoluteMDH
 
 
 class TwoLink(DHRobot):

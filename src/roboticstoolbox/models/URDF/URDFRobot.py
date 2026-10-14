@@ -11,24 +11,21 @@ Provides:
 
 from __future__ import annotations
 
-from typing import Any
-
-from roboticstoolbox.tools.types import NDArray
-
-from pathlib import Path
 import importlib
 import re
 import sys
 import tempfile
 import warnings
 import xml.parsers.expat
-from typing import Callable, TextIO
+from pathlib import Path
+from typing import Any, Callable, TextIO
 
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base import unitvec_norm, angvec2r, tr2rpy
-
+from spatialmath.base import angvec2r, tr2rpy, unitvec_norm
 from xacrodoc import XacroDoc, packages
+
+from roboticstoolbox.tools.types import NDArray
 
 try:
     from xacro import XacroException
@@ -46,11 +43,11 @@ except ImportError:  # pragma nocover
         pass
 
 
-from roboticstoolbox.tools.urdf import URDF, URDFError
-from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.tools.urdf import URDF, URDFError
 
 
 def _register_rd_packages(urdf_path: Path) -> None:
@@ -167,7 +164,7 @@ def _load_rd_module(robot_name: str) -> Any:
     ) from last_error
 
 
-def _load_urdf_from_RD(robot_name: str) -> "tuple[Path, dict | None]":
+def _load_urdf_from_RD(robot_name: str) -> tuple[Path, dict | None]:
     """Fetch the URDF/xacro path from robot_descriptions and register its packages.
 
     robot_descriptions models expose different path attributes depending on their
@@ -242,7 +239,7 @@ def _reset_xacro_stacks() -> None:
         pass
 
 
-def _package_not_found(e: BaseException) -> "PackageNotFoundError | None":
+def _package_not_found(e: BaseException) -> PackageNotFoundError | None:
     """Return the PackageNotFoundError at the root of a xacro error chain, if any.
 
     xacro wraps the exceptions raised while evaluating ``$(find pkg)`` in one
@@ -255,7 +252,7 @@ def _package_not_found(e: BaseException) -> "PackageNotFoundError | None":
     return cause if isinstance(cause, PackageNotFoundError) else None
 
 
-def _expand_xacro(source: str, expand: "Callable[[], XacroDoc]") -> XacroDoc:
+def _expand_xacro(source: str, expand: Callable[[], XacroDoc]) -> XacroDoc:
     """Run one of the XacroDoc constructors, converting its failures to URDFError."""
     _reset_xacro_stacks()
     try:
@@ -477,10 +474,10 @@ def _links_from_urdf(urdf: URDF) -> Any:
 
 
 def URDF_file(
-    file: "str | Path | TextIO",
-    model: "str | None" = None,
-    patch: "Callable[[str], str] | None" = None,
-    extra_packages: "dict[str, str] | None" = None,
+    file: str | Path | TextIO,
+    model: str | None = None,
+    patch: Callable[[str], str] | None = None,
+    extra_packages: dict[str, str] | None = None,
 ) -> tuple:
     """Parse a URDF or xacro file, return (elinks, name).
 
@@ -566,7 +563,7 @@ def URDF_file(
 
 
 def URDF_read(
-    urdf_path: "str | Path", patch: "Callable[[str], str] | None" = None
+    urdf_path: str | Path, patch: Callable[[str], str] | None = None
 ) -> tuple:
     """Load a URDF/xacro file, return (elinks, name, filepath).
 
@@ -600,12 +597,12 @@ class URDFRobot(Robot):
 
     def __init__(
         self,
-        urdf_path: "str | Path",
+        urdf_path: str | Path,
         manufacturer: str = "",
-        gripper_link_index: "int | None" = None,
-        gripper_link_name: "str | list[str] | None" = None,
-        patch: "Callable[[str], str] | None" = None,
-        extra_packages: "dict[str, str] | None" = None,
+        gripper_link_index: int | None = None,
+        gripper_link_name: str | list[str] | None = None,
+        patch: Callable[[str], str] | None = None,
+        extra_packages: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
         elinks, name, filepath = URDF_file(

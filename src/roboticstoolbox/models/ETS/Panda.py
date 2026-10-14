@@ -1,13 +1,12 @@
 
 from __future__ import annotations
 
-from typing import Any
 #!/usr/bin/env python
-
 import numpy as np
+
 from roboticstoolbox.ets.ET import ET
-from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.Robot import Robot
 
 
 class Panda(Robot):

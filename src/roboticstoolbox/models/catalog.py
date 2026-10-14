@@ -1,14 +1,16 @@
 
 from __future__ import annotations
 
-from typing import Any
+import inspect
 import warnings
+from typing import Any
+
+from ansitable import ANSITable, Column
+
+from roboticstoolbox.models.URDF.URDFRobot import _rd_link
+from roboticstoolbox.robot.ERobot import ERobot2
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.tools import rtb_get_param
-from roboticstoolbox.robot.ERobot import ERobot2
-from roboticstoolbox.models.URDF.URDFRobot import _rd_link
-from ansitable import ANSITable, Column
-import inspect
 
 # import importlib
 

@@ -7,10 +7,11 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
-from spatialmath import base
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import colormaps
+from spatialmath import base
+
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 

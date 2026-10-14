@@ -6,11 +6,12 @@
 
 from __future__ import annotations
 
+from math import pi
 from typing import Any
 
-from roboticstoolbox import DHRobot, RevoluteDH
-from math import pi
 import numpy as np
+
+from roboticstoolbox import DHRobot, RevoluteDH
 
 
 class Ball(DHRobot):

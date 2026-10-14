@@ -7,44 +7,38 @@
 
 from __future__ import annotations
 
-# import sys
-from os.path import splitext
 from copy import deepcopy
-from warnings import warn
-from pathlib import PurePosixPath, Path
-from typing import Any, TextIO, TypeVar, Literal as L, overload, cast
 
+# import sys
+from typing import Any, TypeVar, cast, overload
+from typing import Literal as L
+from warnings import warn
 
 import numpy as np
-
 import spatialmath.base as smb
+from spatialgeometry import CollisionShape, Cylinder, Shape
+from spatialmath import (
+    SE2,
+    SE3,
+    SpatialAcceleration,
+    SpatialForce,
+    SpatialInertia,
+    SpatialVelocity,
+)
 from spatialmath.base.argcheck import (
-    getvector,
     getmatrix,
+    getvector,
     verifymatrix,
 )
 
-from spatialgeometry import Shape, CollisionShape, Cylinder
-
-from spatialmath import (
-    SE3,
-    SE2,
-    SpatialAcceleration,
-    SpatialVelocity,
-    SpatialInertia,
-    SpatialForce,
-)
-
 import roboticstoolbox as rtb
-from roboticstoolbox.robot.BaseRobot import BaseRobot
-from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
-from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.Link import BaseLink, Link, Link2
 from roboticstoolbox.ets.ETS import ETS
 from roboticstoolbox.ets.ETS2 import ETS2
-from roboticstoolbox.tools import URDF
+from roboticstoolbox.robot.BaseRobot import BaseRobot
+from roboticstoolbox.robot.Gripper import Gripper
+from roboticstoolbox.robot.Link import BaseLink, Link, Link2
+from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-from roboticstoolbox.tools.data import rtb_path_to_datafile
 
 # A generic type variable representing any subclass of BaseLink
 LinkType = TypeVar("LinkType", bound=BaseLink)

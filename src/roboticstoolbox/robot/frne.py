@@ -13,9 +13,13 @@ from typing import Any
 
 try:
     from roboticstoolbox._frne_c import (
-        init as _c_init,
-        frne as _c_frne,
         delete as _c_delete,
+    )
+    from roboticstoolbox._frne_c import (
+        frne as _c_frne,
+    )
+    from roboticstoolbox._frne_c import (
+        init as _c_init,
     )
 
     _C_AVAILABLE = True

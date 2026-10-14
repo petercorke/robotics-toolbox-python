@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from typing import Any
-from typing_extensions import Self
-import numpy as np
-import matplotlib.pyplot as plt
-from spatialmath import base
-import scipy.ndimage as sp
 from abc import ABC
-import spatialmath.base as smb
+from typing import Any
 
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.ndimage as sp
+import spatialmath.base as smb
 from spatialmath.geom2d import Polygon2
+from typing_extensions import Self
+
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 

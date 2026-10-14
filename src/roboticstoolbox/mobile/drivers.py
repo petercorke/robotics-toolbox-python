@@ -7,22 +7,19 @@ Python Vehicle
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from math import atan2, pi
 from typing import TYPE_CHECKING, Any
-import warnings
-from math import pi, sin, cos, tan, atan2
-import numpy as np
-from scipy import integrate, linalg, interpolate
 
 import matplotlib.pyplot as plt
-from matplotlib import patches
-import matplotlib.transforms as mtransforms
+import numpy as np
+from spatialmath import base
 
-from spatialmath import SE2, base
 import roboticstoolbox as rtb
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+
     from roboticstoolbox.mobile.Vehicle import VehicleBase
 
 

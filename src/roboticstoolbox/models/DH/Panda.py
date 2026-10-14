@@ -1,11 +1,10 @@
 
 from __future__ import annotations
 
-from typing import Any
 #!/usr/bin/env python
-
 import numpy as np
-from spatialmath.base import trotz, transl
+from spatialmath.base import transl, trotz
+
 from roboticstoolbox import DHRobot, RevoluteMDH
 
 

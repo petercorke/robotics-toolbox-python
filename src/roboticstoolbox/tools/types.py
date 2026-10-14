@@ -4,6 +4,7 @@
 """
 
 from collections.abc import Sequence
+
 from numpy import ndarray
 
 NDArray = ndarray

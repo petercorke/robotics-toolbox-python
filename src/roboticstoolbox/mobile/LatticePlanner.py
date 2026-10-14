@@ -16,13 +16,13 @@ except ImportError:
     DGraph = _PGraphMissing
     DVertex = _PGraphMissing
     Edge = _PGraphMissing
+
+import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import SE2
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-import matplotlib.pyplot as plt
-import itertools
+
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 def make_arc(dir: str, radius: float = 1, npoints: int = 20) -> NDArray:

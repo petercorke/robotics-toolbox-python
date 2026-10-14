@@ -1,16 +1,12 @@
 from __future__ import annotations
 
-from typing import Any
-from typing import Type
 import warnings
-import numpy as np
-from math import sin, cos, atan2, tan, sqrt, pi
+from math import pi
+from typing import Any
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-import time
-
-from bdsim.block_types import GraphicsBlock, ContinuousBlock
+import numpy as np
+from bdsim.block_types import ContinuousBlock, GraphicsBlock
 
 from roboticstoolbox import mobile
 
@@ -120,9 +116,7 @@ class Bicycle(ContinuousBlock):
         if x0 is None:
             self._x0 = np.zeros((self.nstates,))
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
-                len(x0), self.nstates
-            )
+            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
             self._x0 = x0
 
         self.inport_names(("v", r"$\gamma$"))
@@ -216,9 +210,7 @@ class Unicycle(ContinuousBlock):
         if x0 is None:
             self._x0 = np.zeros((self.nstates,))
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
-                len(x0), self.nstates
-            )
+            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
             self._x0 = x0
 
         self.vehicle = mobile.Unicycle(
@@ -333,9 +325,7 @@ class DiffSteer(ContinuousBlock):
             # `slef` is a typo for `self`, so this raises NameError: see findings
             self._x0 = np.zeros((slef.nstates,))  # type: ignore[name-defined,has-type]
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
-                len(x0), self.nstates
-            )
+            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
             self._x0 = x0
 
         self.vehicle = mobile.DiffSteer(

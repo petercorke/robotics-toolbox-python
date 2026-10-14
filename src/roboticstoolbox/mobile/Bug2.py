@@ -11,11 +11,10 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
-from spatialmath import base
-
 # from matplotlib import cm
 import matplotlib.pyplot as plt
+import numpy as np
+from spatialmath import base
 
 # from matplotlib import animation
 from roboticstoolbox.mobile.PlannerBase import PlannerBase

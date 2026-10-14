@@ -29,20 +29,19 @@ alternative to fall back on the way ``DHRobot`` has two.
 
 from __future__ import annotations
 
-from typing import Any, Callable, Literal as L, NamedTuple
-import numpy as np
-from spatialmath.base import getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
-from scipy import integrate, interpolate
-from spatialmath.base import symbolic as sym
-from roboticstoolbox.tools.params import rtb_get_param
-from roboticstoolbox.robot.RobotProto import RobotProto
-
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-from typing_extensions import Self
-import roboticstoolbox as rtb
-
-from ansitable import ANSITable, Column
 import warnings
+from typing import Any, Callable, NamedTuple
+from typing import Literal as L
+
+import numpy as np
+from ansitable import ANSITable, Column
+from scipy import integrate, interpolate
+from spatialmath.base import getmatrix, getvector, isscalar, verifymatrix
+
+import roboticstoolbox as rtb
+from roboticstoolbox.robot.RobotProto import RobotProto
+from roboticstoolbox.tools.params import rtb_get_param
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class fdyn(NamedTuple):
@@ -98,7 +97,7 @@ class DynamicsMixin:
 
         """
         for j, link in enumerate(self.links):
-            print("\nLink {:d}::".format(j), link)
+            print(f"\nLink {j:d}::", link)
             print(link.dyn(indent=2))
 
     # --------------------------------------------------------------------- #

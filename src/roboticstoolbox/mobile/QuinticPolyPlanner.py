@@ -5,6 +5,7 @@ from typing import NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
@@ -360,7 +361,6 @@ class QuinticPolyPlanner(PlannerBase):
 
 
 if __name__ == "__main__":
-    from math import pi
 
     start = (10, 10, np.deg2rad(10.0))
     goal = (30, -10, np.deg2rad(20.0))

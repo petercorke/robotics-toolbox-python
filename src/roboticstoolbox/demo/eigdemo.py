@@ -14,13 +14,13 @@ negative if the hands are anti-parallel.
 
 from __future__ import annotations
 
+import sys
+from math import cos, pi, sin
 from typing import Any
 
-import sys
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from math import pi, sin, cos
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def eigdemo(A: Any) -> None:

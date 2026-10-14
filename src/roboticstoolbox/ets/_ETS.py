@@ -12,45 +12,30 @@ without a cycle).
 """
 
 from __future__ import annotations
+
 from collections.abc import Iterable, MutableSequence
-from functools import wraps, cached_property
+from copy import deepcopy
+from functools import cached_property, wraps
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast, overload
+
 import numpy as np
 from numpy.random import uniform
-from numpy.linalg import inv, det, cond, svd
-from spatialmath import SE3, SE2
 from spatialmath.base import (
+    getmatrix,
     getvector,
     issymbol,
-    tr2jac,
-    verifymatrix,
-    tr2jac2,
-    t2r,
-    rotvelxform,
-    simplify,
-    getmatrix,
 )
-from roboticstoolbox.tools.params import rtb_get_param
+from typing_extensions import Self
 
+from roboticstoolbox.ets._ET import BaseET
 from roboticstoolbox.ets.fknm import (
     ETS_init,
-    ETS_fkine,
-    ETS_jacob0,
-    ETS_jacobe,
-    ETS_hessian0,
-    ETS_hessiane,
-    IK_NR_c,
-    IK_GN_c,
-    IK_LM_c,
 )
-from copy import deepcopy
-from roboticstoolbox.ets._ET import BaseET
-from typing import Any, Callable, cast, overload, TypeVar, TYPE_CHECKING
-from typing_extensions import Self
-from typing import Literal as L
+from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:  # pragma: nocover
-    from roboticstoolbox.ets.ETS import ETS
+    pass
 
 #: the element type of an ETS: ``ET`` for ``ETS``, ``ET2`` for ``ETS2``
 ETT = TypeVar("ETT", bound=BaseET)
@@ -713,10 +698,10 @@ class BaseETS(MutableSequence[ETT]):
         return result
 
     def plot(self, *args: Any, **kwargs: Any) -> None:
-        from roboticstoolbox.robot.Robot import Robot, Robot2
         # Deferred (like Robot/Robot2 above): BaseETS can't import the
         # concrete ETS without a cycle (ETS.py imports BaseETS from here).
         from roboticstoolbox.ets.ETS import ETS
+        from roboticstoolbox.robot.Robot import Robot, Robot2
 
         if isinstance(self, ETS):
             robot = Robot(self)
@@ -726,8 +711,8 @@ class BaseETS(MutableSequence[ETT]):
         robot.plot(*args, **kwargs)
 
     def teach(self, *args: Any, **kwargs: Any) -> None:
-        from roboticstoolbox.robot.Robot import Robot, Robot2
         from roboticstoolbox.ets.ETS import ETS
+        from roboticstoolbox.robot.Robot import Robot, Robot2
 
         if isinstance(self, ETS):
             robot = Robot(self)

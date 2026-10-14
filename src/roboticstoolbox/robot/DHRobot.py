@@ -4,41 +4,39 @@
 """
 
 from __future__ import annotations
-from collections import namedtuple
-from email import message
-from typing import Any
-from roboticstoolbox.tools.data import rtb_path_to_datafile
-import warnings
-import copy
-import numpy as np
-from roboticstoolbox.robot.Robot import Robot  # DHLink
-from roboticstoolbox.robot.BaseRobot import _is_symbolic
-from roboticstoolbox.ets.ETS import ETS, ET
-from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox.tools.params import rtb_set_param
-from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
-# from spatialmath import base
-from spatialmath.base import (
-    tr2jac,
-    tr2eul,
-    tr2rpy,
-    t2r,
-    trlog,
-    rotvelxform,
-)
-from spatialmath import SE3, Twist3
+import copy
+import warnings
+from typing import Any
+
+import numpy as np
 import spatialmath.base.symbolic as sym
 
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
-from scipy.linalg import block_diag
-from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox.tools.params import rtb_get_param
-from roboticstoolbox.robot.frne import init, frne, delete
 from numpy import any
 from numpy.typing import ArrayLike, NDArray
+from spatialmath import SE3, Twist3
+
+# from spatialmath import base
+from spatialmath.base import (
+    rotvelxform,
+    t2r,
+    tr2eul,
+    tr2jac,
+    tr2rpy,
+    trlog,
+)
+from spatialmath.base.argcheck import getmatrix, getvector, isscalar, verifymatrix
+
+from roboticstoolbox.ets.ETS import ET, ETS
+from roboticstoolbox.robot.BaseRobot import _is_symbolic
+from roboticstoolbox.robot.DHLink import DHLink
+from roboticstoolbox.robot.frne import delete, frne, init
 from roboticstoolbox.robot.IK import IKSolution
+from roboticstoolbox.robot.Robot import Robot  # DHLink
+from roboticstoolbox.tools.data import rtb_path_to_datafile
+from roboticstoolbox.tools.params import rtb_get_param
 
 # iksol = namedtuple("IKsolution", "q, success, reason")
 
@@ -136,7 +134,7 @@ class DHRobot(Robot):
             self.meshdir = rtb_path_to_datafile(meshdir)
             self.basemesh = self.meshdir / "link0.stl"
             for j, link in enumerate(self._links, start=1):
-                link.mesh = self.meshdir / "link{:d}.stl".format(j)
+                link.mesh = self.meshdir / f"link{j:d}.stl"
             self._hasgeometry = True
         else:
             self.basemesh = None

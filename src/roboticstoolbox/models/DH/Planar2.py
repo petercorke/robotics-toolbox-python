@@ -6,10 +6,9 @@
 
 from __future__ import annotations
 
-from typing import Any
+import numpy as np
 
 from roboticstoolbox import DHRobot, RevoluteDH
-import numpy as np
 
 
 class Planar2(DHRobot):

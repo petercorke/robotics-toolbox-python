@@ -9,18 +9,18 @@
 
 from __future__ import annotations
 
-import math
 from typing import Any, NamedTuple
-from roboticstoolbox.mobile.OccGrid import PolygonMap
-from roboticstoolbox.mobile.Vehicle import VehicleBase
+
+import matplotlib.pyplot as plt
 
 # import rvcprint
 import numpy as np
-import matplotlib.pyplot as plt
+from spatialmath import Polygon2
 
-from spatialmath import Polygon2, SE2, base
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.mobile.DubinsPlanner import DubinsPlanner
+from roboticstoolbox.mobile.OccGrid import PolygonMap
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.Vehicle import VehicleBase
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # from roboticstoolbox.mobile.OccupancyGrid import OccupancyGrid

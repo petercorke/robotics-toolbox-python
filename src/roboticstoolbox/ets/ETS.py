@@ -6,42 +6,35 @@
 """
 
 from __future__ import annotations
-from functools import cached_property
+
+from copy import deepcopy
+from typing import Any, Sequence
+from typing import Literal as L
+
 import numpy as np
-from numpy.random import uniform
-from numpy.linalg import inv, det, cond, svd
-from spatialmath import SE3, SE2
+from numpy.linalg import cond, det, inv, svd
+from spatialmath import SE3
 from spatialmath.base import (
-    getvector,
-    issymbol,
-    tr2jac,
-    verifymatrix,
-    tr2jac2,
-    t2r,
+    getmatrix,
     rotvelxform,
     simplify,
-    getmatrix,
+    t2r,
 )
-from roboticstoolbox.tools.params import rtb_get_param
-from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution
 
+from roboticstoolbox.ets._ET import BaseET
+from roboticstoolbox.ets._ETS import BaseETS
+from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.fknm import (
-    ETS_init,
     ETS_fkine,
-    ETS_jacob0,
-    ETS_jacobe,
     ETS_hessian0,
     ETS_hessiane,
-    IK_NR_c,
+    ETS_jacob0,
+    ETS_jacobe,
     IK_GN_c,
     IK_LM_c,
+    IK_NR_c,
 )
-from copy import deepcopy
-from roboticstoolbox.ets.ET import ET
-from roboticstoolbox.ets._ET import BaseET
-from roboticstoolbox.ets._ETS import BaseETS, _dirties_fknm
-from typing import Any, Sequence, overload, TypeVar
-from typing import Literal as L
+from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
@@ -152,22 +145,22 @@ class ETS(BaseETS[ET]):
 
             self._auto_jindex = True
 
-    def __mul__(self, other: ET | ETS) -> "ETS":
+    def __mul__(self, other: ET | ETS) -> ETS:
         if isinstance(other, ET):
             return ETS([*self._data, other])
         else:
             return ETS([*self._data, *other._data])  # pragma: nocover
 
-    def __rmul__(self, other: ET | ETS) -> "ETS":
+    def __rmul__(self, other: ET | ETS) -> ETS:
         return ETS([other, *self._data])  # pragma: nocover
 
-    def __imul__(self, rest: ET | ETS) -> "ETS":
+    def __imul__(self, rest: ET | ETS) -> ETS:
         return self + rest  # pragma: nocover
 
-    def __add__(self, rest: ET | ETS) -> "ETS":
+    def __add__(self, rest: ET | ETS) -> ETS:
         return self.__mul__(rest)  # pragma: nocover
 
-    def compile(self) -> "ETS":
+    def compile(self) -> ETS:
         """
         Compile an ETS
 
@@ -1978,7 +1971,7 @@ class ETS(BaseETS[ET]):
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
     @staticmethod
-    def _template_consume(elements: Sequence["BaseET"], template: list[str]) -> int:
+    def _template_consume(elements: Sequence[BaseET], template: list[str]) -> int:
         """
         Greedily match a run of ETs against an ordered template of ``kind``
         strings, where each template slot is optional but present slots must
@@ -2017,7 +2010,7 @@ class ETS(BaseETS[ET]):
         if len(idx) == 0:
             raise ValueError("ETS has no joints")
 
-        def joint_slot(et: "ET") -> int:
+        def joint_slot(et: ET) -> int:
             if et.kind not in template or template.index(et.kind) not in joint_slots:
                 raise ValueError(
                     "ETS is not a valid DH/MDH parameterisation: "
@@ -2066,7 +2059,7 @@ class ETS(BaseETS[ET]):
         segments = [self.__class__(self[start[i] : end[i]]) for i in range(len(idx))]
         return segments, head, tail
 
-    def split(self, method: str = "last") -> list["ETS"]:
+    def split(self, method: str = "last") -> list[ETS]:
         r"""
         Split ETS into link segments
 

@@ -2,14 +2,16 @@
 from __future__ import annotations
 
 from typing import Any
+
 # PoERobot
 import numpy as np
-from spatialmath import Twist3, SE3
+from spatialmath import SE3, Twist3
 from spatialmath.base import skew
-from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.robot.Robot import Robot
+
 from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.Robot import Robot
 
 
 class PoELink(Link):

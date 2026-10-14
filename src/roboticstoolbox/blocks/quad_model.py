@@ -46,10 +46,10 @@
 # - This is a heavy lift quadrotor
 #
 
+from math import inf, pi, sqrt
 from typing import Any
 
 import numpy as np
-from math import pi, sqrt, inf
 
 quadrotor: dict[str, Any] = {}
 quadrotor["nrotors"] = 4  # 4 rotors

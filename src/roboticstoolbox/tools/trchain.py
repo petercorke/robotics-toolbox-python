@@ -7,9 +7,10 @@ from collections.abc import Callable, Mapping, Sequence
 from typing import NamedTuple
 
 import numpy as np
-from roboticstoolbox.tools.types import ArrayLike, NDArray
 from spatialmath.base import symbolic as sym
 from spatialmath.base import transl, transl2, trot2, trotx, troty, trotz
+
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class TrChainToken(NamedTuple):

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Any
-from pathlib import Path
-import sys
 import importlib
+from pathlib import Path
+from typing import Any
 
 
 def _candidate_rtbdata_roots() -> Any:
@@ -54,9 +53,9 @@ def rtb_load_matfile(filename: Any) -> Any:
 
     :seealso: :func:`path_to_datafile`
     """
+
     from scipy.io import loadmat
     from scipy.io.matlab.mio5_params import mat_struct
-    from collections import namedtuple
 
     # get results as a dict
     data = rtb_load_data(filename, loadmat, squeeze_me=True, struct_as_record=False)

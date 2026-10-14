@@ -6,19 +6,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import roboticstoolbox as rtb
 from numpy import array, ndarray, pi
-from spatialmath.base import trotx, troty, trotz
+
 # Aliased: the bottom of this module rebinds the bare name `SE3` to the
 # ET.SE3 classmethod (the free-function alias), so the spatialmath class
 # needs its own name here.
 from spatialmath import SE3 as SE3T
+from spatialmath.base import trotx, troty, trotz
 
-from typing import TYPE_CHECKING
-
-from roboticstoolbox.ets._ET import BaseET, Sym, _AXIS_TO_INT, _resolve_param
+import roboticstoolbox as rtb
+from roboticstoolbox.ets._ET import _AXIS_TO_INT, BaseET, Sym, _resolve_param
 from roboticstoolbox.ets.fknm import ET_T, ET_init, ET_update
 
 if TYPE_CHECKING:  # pragma: nocover
@@ -42,10 +41,10 @@ class ET(BaseET):
         # all final), do the one real build of the compiled struct.
         self._accel_init()
 
-    def __mul__(self, other: "ET") -> "ETS":
+    def __mul__(self, other: ET) -> ETS:
         return rtb.ETS([self, other])  # type: ignore[operator]
 
-    def __add__(self, other: "ET") -> "ETS":
+    def __add__(self, other: ET) -> ETS:
         return self.__mul__(other)
 
     # ------------------------------------------------------------------
@@ -179,7 +178,7 @@ class ET(BaseET):
         *,
         eta: float | None = None,
         **kwargs: Any,
-    ) -> "ET":
+    ) -> ET:
         """
         Pure rotation about the x-axis
 
@@ -214,7 +213,7 @@ class ET(BaseET):
         *,
         eta: float | None = None,
         **kwargs: Any,
-    ) -> "ET":
+    ) -> ET:
         """
         Pure rotation about the y-axis
 
@@ -249,7 +248,7 @@ class ET(BaseET):
         *,
         eta: float | None = None,
         **kwargs: Any,
-    ) -> "ET":
+    ) -> ET:
         """
         Pure rotation about the z-axis
 
@@ -283,7 +282,7 @@ class ET(BaseET):
         *,
         eta: float | None = None,
         **kwargs: Any,
-    ) -> "ET":
+    ) -> ET:
         """
         Pure translation along the x-axis
 
@@ -328,7 +327,7 @@ class ET(BaseET):
         *,
         eta: float | None = None,
         **kwargs: Any,
-    ) -> "ET":
+    ) -> ET:
         """
         Pure translation along the y-axis
 
@@ -372,7 +371,7 @@ class ET(BaseET):
         *,
         eta: float | None = None,
         **kwargs: Any,
-    ) -> "ET":
+    ) -> ET:
         """
         Pure translation along the z-axis
 
@@ -410,7 +409,7 @@ class ET(BaseET):
         return cls(axis="tz", axis_func=axis_func, param=param, **kwargs)
 
     @classmethod
-    def SE3(cls, T: ndarray | SE3T, **kwargs: Any) -> "ET":
+    def SE3(cls, T: ndarray | SE3T, **kwargs: Any) -> ET:
         """
         A static SE3
 

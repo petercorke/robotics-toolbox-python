@@ -6,23 +6,19 @@
 
 from __future__ import annotations
 
-from typing import Any
-
-import numpy as np
-import roboticstoolbox as rtb
-import spatialgeometry as gm
 import copy
 import os
 import xml.etree.ElementTree as ETT
-from spatialmath import SE3
-from spatialmath.base import unitvec_norm, angvec2r, tr2rpy
-
 from io import BytesIO
-from roboticstoolbox.tools.data import rtb_path_to_datafile
 from pathlib import PurePosixPath
+from typing import Any
 
+import numpy as np
+import spatialgeometry as gm
 
-from .utils import parse_origin, configure_origin
+from roboticstoolbox.tools.data import rtb_path_to_datafile
+
+from .utils import configure_origin, parse_origin
 
 # Global variable for the base path of the robot meshes
 _base_path = None
@@ -59,12 +55,12 @@ class URDFError(ValueError):
         msg: str,
         *,
         stage: str = "urdf",
-        source: "str | os.PathLike | None" = None,
+        source: str | os.PathLike | None = None,
         line: int | None = None,
         column: int | None = None,
         element: str | None = None,
         location: list[str] | None = None,
-        expanded_file: "str | os.PathLike | None" = None,
+        expanded_file: str | os.PathLike | None = None,
     ) -> None:
         super().__init__(msg)
         self.msg = msg
@@ -326,7 +322,7 @@ class Box(URDFType):
         self.size = size
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Box(size={})".format(self.size)
+        return f"Box(size={self.size})"
     
     @property
     def size(self) -> Any:
@@ -359,7 +355,7 @@ class Cylinder(URDFType):
         self.length = length
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Cylinder(radius={}, length={})".format(self.radius, self.length)
+        return f"Cylinder(radius={self.radius}, length={self.length})"
 
     @property
     def radius(self) -> Any:
@@ -397,7 +393,7 @@ class Sphere(URDFType):
         self.radius = radius
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Sphere(radius={})".format(self.radius)
+        return f"Sphere(radius={self.radius})"
 
     @property
     def radius(self) -> Any:
@@ -429,7 +425,7 @@ class Mesh(URDFType):
         self.scale = scale
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Mesh(filename={}, scale={})".format(self.filename, self.scale)
+        return f"Mesh(filename={self.filename}, scale={self.scale})"
 
     @property
     def filename(self) -> Any:
@@ -482,9 +478,7 @@ class Material(URDFType):
         A texture for the material.
     """
     def __repr__(self) -> str:  # pragma nocover
-        return "Material(name={}, color={}, texture={})".format(
-            self.name, self.color, self.texture
-        )
+        return f"Material(name={self.name}, color={self.color}, texture={self.texture})"
 
     _ATTRIBS = {"name": (str, True)}
     _ELEMENTS: dict[str, Any] = {}
@@ -560,9 +554,7 @@ class Geometry(URDFType):
             self.ob = gm.Mesh(mesh.filename, scale=mesh.scale)
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Geometry(box={}, cylinder={}, sphere={}, mesh={})".format(
-            self.box, self.cylinder, self.sphere, self.mesh
-        )
+        return f"Geometry(box={self.box}, cylinder={self.cylinder}, sphere={self.sphere}, mesh={self.mesh})"
     
     @property
     def box(self) -> Any:
@@ -650,9 +642,7 @@ class Collision(URDFType):
         self.geometry.ob.T = origin
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Collision(name={}, origin={}, geometry={})".format(
-            self.name, self.origin, self.geometry
-        )
+        return f"Collision(name={self.name}, origin={self.origin}, geometry={self.geometry})"
     
     @property
     def geometry(self) -> Any:
@@ -733,9 +723,7 @@ class Visual(URDFType):
 
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Visual(name={}, origin={}, geometry={}, material={})".format(
-            self.name, self.origin, self.geometry, self.material
-        )
+        return f"Visual(name={self.name}, origin={self.origin}, geometry={self.geometry}, material={self.material})"
 
     @property
     def geometry(self) -> Any:
@@ -796,7 +784,7 @@ class Inertial(URDFType):
         self._origin = origin
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Inertial(mass={}, inertia={}, origin={})".format(self.mass, self.inertia, self.origin)
+        return f"Inertial(mass={self.mass}, inertia={self.inertia}, origin={self.origin})"
     
     @property
     def mass(self) -> Any:
@@ -889,7 +877,7 @@ class JointCalibration(URDFType):  # pragma nocover
         self.falling = falling
 
     def __repr__(self) -> str:  # pragma nocover
-        return "JointCalibration(rising={}, falling={})".format(self.rising, self.falling)
+        return f"JointCalibration(rising={self.rising}, falling={self.falling})"
 
     @property
     def rising(self) -> Any:
@@ -953,7 +941,7 @@ class JointDynamics(URDFType):
         self.friction = friction
 
     def __repr__(self) -> str:  # pragma nocover
-        return "JointDynamics(damping={}, friction={})".format(self.damping, self.friction)
+        return f"JointDynamics(damping={self.damping}, friction={self.friction})"
     
     @property
     def damping(self) -> Any:  # pragma nocover
@@ -1010,9 +998,7 @@ class JointLimit(URDFType):
         self.upper = upper
 
     def __repr__(self) -> str:  # pragma nocover
-        return "JointLimit(effort={}, velocity={}, lower={}, upper={})".format(
-            self.effort, self.velocity, self.lower, self.upper
-        )
+        return f"JointLimit(effort={self.effort}, velocity={self.velocity}, lower={self.lower}, upper={self.upper})"
 
     @property
     def effort(self) -> Any:
@@ -1083,9 +1069,7 @@ class JointMimic(URDFType):  # pragma nocover
         self.offset = offset
 
     def __repr__(self) -> str:  # pragma nocover
-        return "JointMimic(joint={}, multiplier={}, offset={})".format(
-            self.joint, self.multiplier, self.offset
-        )
+        return f"JointMimic(joint={self.joint}, multiplier={self.multiplier}, offset={self.offset})"
 
     @property
     def joint(self) -> Any:
@@ -1162,9 +1146,7 @@ class SafetyController(URDFType):  # pragma nocover
         self.soft_upper_limit = soft_upper_limit
 
     def __repr__(self) -> str:  # pragma nocover
-        return "SafetyController(k_velocity={}, k_position={}, soft_lower_limit={}, soft_upper_limit={})".format(
-            self.k_velocity, self.k_position, self.soft_lower_limit, self.soft_upper_limit
-        )
+        return f"SafetyController(k_velocity={self.k_velocity}, k_position={self.k_position}, soft_lower_limit={self.soft_lower_limit}, soft_upper_limit={self.soft_upper_limit})"
 
     @property
     def soft_lower_limit(self) -> Any:
@@ -1247,9 +1229,7 @@ class Actuator(URDFType):
 
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Actuator(name={}, mechanicalReduction={}, hardwareInterfaces={})".format(
-            self.name, self.mechanicalReduction, self.hardwareInterfaces
-        )
+        return f"Actuator(name={self.name}, mechanicalReduction={self.mechanicalReduction}, hardwareInterfaces={self.hardwareInterfaces})"
 
     @property
     def name(self) -> Any:  # pragma nocover
@@ -1320,9 +1300,7 @@ class TransmissionJoint(URDFType):
         self.hardwareInterfaces = hardwareInterfaces
 
     def __repr__(self) -> str:  # pragma nocover
-        return "TransmissionJoint(name={}, hardwareInterfaces={})".format(
-            self.name, self.hardwareInterfaces
-        )
+        return f"TransmissionJoint(name={self.name}, hardwareInterfaces={self.hardwareInterfaces})"
     
     @property
     def name(self) -> Any:  # pragma nocover
@@ -1396,9 +1374,7 @@ class Transmission(URDFType):
         self.actuators = actuators
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Transmission(name={}, trans_type={}, joints={}, actuators={})".format(
-            self.name, self.trans_type, self.joints, self.actuators
-        )
+        return f"Transmission(name={self.name}, trans_type={self.trans_type}, joints={self.joints}, actuators={self.actuators})"
 
     @property
     def name(self) -> Any:
@@ -1547,9 +1523,7 @@ class Joint(URDFType):
         self.mimic = mimic
 
     def __repr__(self) -> str:
-        return "Joint(name={}, joint_type={}, parent={}, child={})".format(
-            self.name, self.joint_type, self.parent, self.child
-        )
+        return f"Joint(name={self.name}, joint_type={self.joint_type}, parent={self.parent}, child={self.child})"
 
     @property
     def name(self) -> Any:
@@ -1569,7 +1543,7 @@ class Joint(URDFType):
     def joint_type(self, value: Any) -> None:
         value = str(value)
         if value not in Joint.TYPES:  # pragma nocover
-            raise ValueError("Unsupported joint type {}".format(value))
+            raise ValueError(f"Unsupported joint type {value}")
         self._joint_type = value
 
     @property
@@ -1775,9 +1749,7 @@ class Link(URDFType):
         self.collisions = collisions
 
     def __repr__(self) -> str:  # pragma nocover
-        return "Link(name={}, inertial={}, visuals={}, collisions={})".format(
-            self.name, self.inertial, self.visuals, self.collisions
-        )
+        return f"Link(name={self.name}, inertial={self.inertial}, visuals={self.visuals}, collisions={self.collisions})"
     
     @property
     def name(self) -> Any:
@@ -1902,7 +1874,7 @@ class URDF(URDFType):
 
         for x in self._materials:
             if x.name in self._material_map:
-                raise ValueError("Two materials with name {} found".format(x.name))
+                raise ValueError(f"Two materials with name {x.name} found")
             self._material_map[x.name] = x
 
         # check for duplicate names
@@ -2035,7 +2007,7 @@ class URDF(URDFType):
                 tree = ETT.parse(file_obj, parser=parser)
                 path, _ = os.path.split(file_obj)
             else:
-                raise ValueError("{} is not a file".format(file_obj))
+                raise ValueError(f"{file_obj} is not a file")
         else:
             parser = ETT.XMLParser()
             tree = ETT.parse(file_obj, parser=parser)
@@ -2088,9 +2060,7 @@ class URDF(URDFType):
             for joint in t.joints:
                 if joint.name not in self._joint_map:  # type: ignore[attr-defined]
                     raise ValueError(
-                        "Transmission {} has invalid joint name {}".format(
-                            t.name, joint.name
-                        )
+                        f"Transmission {t.name} has invalid joint name {joint.name}"
                     )
 
     @classmethod

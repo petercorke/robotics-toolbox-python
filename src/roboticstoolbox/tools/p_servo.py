@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Any
-#!/usr/bin/env python
+import math
+from typing import Any, Union
 
+#!/usr/bin/env python
 import numpy as np
 from spatialmath import SE3, base
-import math
-from typing import Union
-from roboticstoolbox.tools.types import NDArray, ArrayLike
+
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # ArrayLike = Union[list, np.ndarray, tuple, set]
 

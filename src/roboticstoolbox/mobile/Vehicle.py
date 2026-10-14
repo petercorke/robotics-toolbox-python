@@ -6,25 +6,25 @@ Python Vehicle
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Callable, TypeAlias
-import warnings
 import sys
-from math import pi, sin, cos, tan
-import numpy as np
-from scipy import interpolate
+import warnings
+from abc import ABC, abstractmethod
+from math import cos, pi, sin, tan
+from typing import Any, Callable, TypeAlias
 
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure, SubFigure
+from scipy import interpolate
 
 # from matplotlib import patches
 # import matplotlib.transforms as mtransforms
+from spatialmath import SE2, Polygon2, base
 
-from spatialmath import SE2, base, Polygon2
-from roboticstoolbox.mobile.drivers import VehicleDriverBase
 from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehiclePolygon
+from roboticstoolbox.mobile.drivers import VehicleDriverBase
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # what can be given as the control for a vehicle, see VehicleBase.control
@@ -1935,10 +1935,9 @@ class VehicleTrailer(VehicleBase):
 
 
 if __name__ == "__main__":
-    from roboticstoolbox import RandomPath
+
 
     import roboticstoolbox as rtb
-    import time
 
     def steering(v: VehicleBase, t: float, x: ArrayLike) -> tuple[float, float]:
         speed = (0.5, 0.5)

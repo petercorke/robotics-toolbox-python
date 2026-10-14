@@ -7,43 +7,18 @@
 
 from __future__ import annotations
 
-from typing import Any
-from functools import cached_property
-import numpy as np
-from numpy.random import uniform
-from numpy.linalg import inv, det, cond, svd
-from spatialmath import SE3, SE2
-from spatialmath.base import (
-    getvector,
-    issymbol,
-    tr2jac,
-    verifymatrix,
-    tr2jac2,
-    t2r,
-    rotvelxform,
-    simplify,
-    getmatrix,
-)
-from roboticstoolbox.tools.params import rtb_get_param
-from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP
-
-from roboticstoolbox.ets.fknm import (
-    ETS_init,
-    ETS_fkine,
-    ETS_jacob0,
-    ETS_jacobe,
-    ETS_hessian0,
-    ETS_hessiane,
-    IK_NR_c,
-    IK_GN_c,
-    IK_LM_c,
-)
 from copy import deepcopy
+from typing import Any
+
+import numpy as np
+from spatialmath import SE2
+from spatialmath.base import (
+    simplify,
+    tr2jac2,
+)
+
+from roboticstoolbox.ets._ETS import BaseETS
 from roboticstoolbox.ets.ET2 import ET2
-from roboticstoolbox.ets._ET import BaseET
-from roboticstoolbox.ets._ETS import BaseETS, _dirties_fknm
-from typing import overload, TypeVar
-from typing import Literal as L
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
@@ -145,22 +120,22 @@ class ETS2(BaseETS[ET2]):
                 joint.jindex = j
             self._auto_jindex = True
 
-    def __mul__(self, other: ET2 | ETS2) -> "ETS2":
+    def __mul__(self, other: ET2 | ETS2) -> ETS2:
         if isinstance(other, ET2):
             return ETS2([*self._data, other])
         else:
             return ETS2([*self._data, *other._data])  # pragma: nocover
 
-    def __rmul__(self, other: ET2 | ETS2) -> "ETS2":
+    def __rmul__(self, other: ET2 | ETS2) -> ETS2:
         return ETS2([other, *self._data])  # pragma: nocover
 
-    def __imul__(self, rest: ET2 | ETS2) -> "ETS2":
+    def __imul__(self, rest: ET2 | ETS2) -> ETS2:
         return self + rest  # pragma: nocover
 
-    def __add__(self, rest: ET2 | ETS2) -> "ETS2":
+    def __add__(self, rest: ET2 | ETS2) -> ETS2:
         return self.__mul__(rest)  # pragma: nocover
 
-    def compile(self) -> "ETS2":
+    def compile(self) -> ETS2:
         """
         Compile an ETS2
 

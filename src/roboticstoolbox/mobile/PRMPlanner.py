@@ -16,7 +16,8 @@ import numpy as np
 
 # from spatialmath.pose2d import SE2
 # from spatialmath.base import animate
-from matplotlib import cm, pyplot as plt
+from matplotlib import pyplot as plt
+
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
@@ -351,6 +352,7 @@ class PRMPlanner(PlannerBase):
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+
     from roboticstoolbox import *
 
     house = rtb_load_matfile("data/house.mat")

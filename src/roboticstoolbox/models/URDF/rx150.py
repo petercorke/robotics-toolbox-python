@@ -1,10 +1,9 @@
 
 from __future__ import annotations
 
-from typing import Any
 #!/usr/bin/env python
-
 import numpy as np
+
 from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
