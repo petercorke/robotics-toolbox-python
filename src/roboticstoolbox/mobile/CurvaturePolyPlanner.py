@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Callable, NamedTuple
+from typing import Any, NamedTuple
+
+import numpy as np
 import scipy.integrate
 import scipy.optimize
-import numpy as np
 
 # import matplotlib.pyplot as plt
 from roboticstoolbox.mobile.PlannerBase import PlannerBase

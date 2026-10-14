@@ -1,14 +1,10 @@
 from __future__ import annotations
 
+from math import atan2, cos, pi, sin, sqrt
 from typing import Any
+
 import numpy as np
-from math import sin, cos, atan2, tan, sqrt, pi
-
-import matplotlib.pyplot as plt
-import time
-
-
-from bdsim.block_types import GraphicsBlock, ContinuousBlock, FunctionBlock
+from bdsim.block_types import ContinuousBlock, FunctionBlock, GraphicsBlock
 
 
 class MultiRotor(ContinuousBlock):

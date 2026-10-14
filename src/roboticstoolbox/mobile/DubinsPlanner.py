@@ -11,12 +11,13 @@ from __future__ import annotations
 
 import math
 from typing import Any, NamedTuple
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
+
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # (t, p, q, mode) of a candidate path, None when it does not exist
 _Segments = tuple[float | None, float | None, float | None, list[str]]

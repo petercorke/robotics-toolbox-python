@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from abc import ABC
-from typing import Any
 import warnings
-import numpy as np
-import scipy as sp
-from math import pi, sin, cos
-import matplotlib.pyplot as plt
-from spatialmath import base
-import roboticstoolbox as rtb
+from abc import ABC
 from collections.abc import Iterable
+from math import cos, pi, sin
+from typing import Any
+
+import numpy as np
+from spatialmath import base
+
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 """
@@ -791,8 +790,9 @@ class RangeBearingSensor(SensorBase):
 
 
 if __name__ == "__main__":
-    from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
     from math import pi
+
+    from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
 
     robot = Bicycle()
     map = LandmarkMap(20)

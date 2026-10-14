@@ -6,28 +6,27 @@ Python Navigation Abstract Class
 
 from __future__ import annotations
 
-from abc import ABC
+import copy
 import os
+from abc import ABC
 from typing import Any
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
+from colored import attr, fg
+
+# from spatialmath import SE2, SE3
+from matplotlib import animation, cm
 
 # from scipy import integrate
 # from scipy.ndimage import interpolation
 from spatialmath.base.argcheck import getvector
-from spatialmath.base.graphics import axes_logic, plotvol2, axes_get_scale
+from spatialmath.base.graphics import axes_get_scale, axes_logic, plotvol2
 
-# from spatialmath import SE2, SE3
-from matplotlib import animation, cm
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import copy
-from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid, BinaryOccupancyGrid
 from roboticstoolbox.mobile.Animations import VehiclePolygon
+from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid, BinaryOccupancyGrid
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-from colored import fg, attr
-
-from spatialmath.base.graphics import axes_logic
 
 try:
     from progress.bar import FillingCirclesBar

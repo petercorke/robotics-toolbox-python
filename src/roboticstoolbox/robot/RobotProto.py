@@ -1,11 +1,12 @@
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-from typing import Any, Callable, Literal
+from typing import Callable, Literal
+
+from spatialmath import SE3
 from typing_extensions import Protocol, Self
 
-from roboticstoolbox.robot.Link import Link, BaseLink
-from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.ets.ETS import ETS
-from spatialmath import SE3
+from roboticstoolbox.robot.Gripper import Gripper
+from roboticstoolbox.robot.Link import BaseLink, Link
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class KinematicsProtocol(Protocol):

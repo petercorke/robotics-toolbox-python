@@ -1,14 +1,13 @@
 
 from __future__ import annotations
 
-from typing import Any
 #!/usr/bin/env python
-
 import numpy as np
+
 from roboticstoolbox.ets.ET2 import ET2
 from roboticstoolbox.ets.ETS2 import ETS2
-from roboticstoolbox.robot.Robot import Robot2
 from roboticstoolbox.robot.Link import Link2
+from roboticstoolbox.robot.Robot import Robot2
 
 
 class Planar2(Robot2):

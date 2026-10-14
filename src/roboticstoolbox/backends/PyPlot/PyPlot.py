@@ -5,19 +5,20 @@
 
 from __future__ import annotations
 
-import time
 import io
 import sys
+import time
 from typing import Any
-import roboticstoolbox as rp
-import numpy as np
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-from roboticstoolbox.backends.Connector import Connector
 
-from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
-from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
-from spatialmath.base.argcheck import getvector
+import numpy as np
 from spatialgeometry import Shape
+from spatialmath.base.argcheck import getvector
+
+import roboticstoolbox as rp
+from roboticstoolbox.backends.Connector import Connector
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
+from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
+from roboticstoolbox.tools.types import ArrayLike
 
 # from roboticstoolbox.tools import Ticker
 
@@ -49,10 +50,10 @@ except ImportError:  # pragma nocover
     pass
 
 try:
-    from IPython.display import display as _ipy_display
-    from IPython.display import Image as _ipy_image
     from IPython.display import SVG as _ipy_svg
+    from IPython.display import Image as _ipy_image
     from IPython.display import clear_output as _ipy_clear_output
+    from IPython.display import display as _ipy_display
 except ImportError:  # pragma nocover
     pass
 
@@ -621,12 +622,12 @@ class PyPlot(Connector):
             T = robot.fkine(q)
             t = np.round(T.t, 3)
             r = np.round(T.rpy("deg"), 3)
-            text[0].set_text("x: {0}".format(t[0]))
-            text[1].set_text("y: {0}".format(t[1]))
-            text[2].set_text("z: {0}".format(t[2]))
-            text[3].set_text("r: {0}".format(r[0]))
-            text[4].set_text("p: {0}".format(r[1]))
-            text[5].set_text("y: {0}".format(r[2]))
+            text[0].set_text(f"x: {t[0]}")
+            text[1].set_text(f"y: {t[1]}")
+            text[2].set_text(f"z: {t[2]}")
+            text[3].set_text(f"r: {r[0]}")
+            text[4].set_text(f"p: {r[1]}")
+            text[5].set_text(f"y: {r[2]}")
 
         # Update the self state in mpl and the text
         def update(val: float, text: list[Any], robot: Any) -> None:  # pragma: no cover
@@ -678,32 +679,32 @@ class PyPlot(Connector):
         )
         text.append(
             fig.text(
-                0.03, 1 - ym + 0.20, "x: {0}".format(t[0]), fontsize=9, color="#2b2b2b"
+                0.03, 1 - ym + 0.20, f"x: {t[0]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.03, 1 - ym + 0.16, "y: {0}".format(t[1]), fontsize=9, color="#2b2b2b"
+                0.03, 1 - ym + 0.16, f"y: {t[1]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.03, 1 - ym + 0.12, "z: {0}".format(t[2]), fontsize=9, color="#2b2b2b"
+                0.03, 1 - ym + 0.12, f"z: {t[2]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.15, 1 - ym + 0.20, "r: {0}".format(r[0]), fontsize=9, color="#2b2b2b"
+                0.15, 1 - ym + 0.20, f"r: {r[0]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.15, 1 - ym + 0.16, "p: {0}".format(r[1]), fontsize=9, color="#2b2b2b"
+                0.15, 1 - ym + 0.16, f"p: {r[1]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.15, 1 - ym + 0.12, "y: {0}".format(r[2]), fontsize=9, color="#2b2b2b"
+                0.15, 1 - ym + 0.12, f"y: {r[2]}", fontsize=9, color="#2b2b2b"
             )
         )
         fig.text(

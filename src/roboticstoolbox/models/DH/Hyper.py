@@ -9,6 +9,7 @@ from typing import Any
 
 # from math import pi
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
 
 
@@ -48,7 +49,7 @@ class Hyper(DHRobot):
     :seealso: :func:`Coil`, :func:`Ball`
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
     def __init__(self, N: int = 10, a: Any = None, symbolic: bool = False) -> None:
 
@@ -58,7 +59,6 @@ class Hyper(DHRobot):
             zero = sym.zero()
             pi = sym.pi()
         else:
-            from math import pi
 
             zero = 0.0
 

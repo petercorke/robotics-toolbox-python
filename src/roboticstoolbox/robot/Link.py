@@ -1,28 +1,25 @@
 from __future__ import annotations
 
-from typing import Any
-
-from copy import deepcopy
 from abc import ABC
-from typing_extensions import Self
+from copy import deepcopy
+from functools import wraps
+from typing import Any
+from warnings import warn
 
 # from multiprocessing.sharedctypes import Value
 import numpy as np
-from functools import wraps
-from spatialmath.base import getvector, isscalar, isvector, ismatrix
-from spatialmath import SE3, SE2
 from ansitable import ANSITable, Column
-from spatialgeometry import Shape, SceneNode, SceneGroup
-from typing import overload
+from spatialgeometry import SceneGroup, SceneNode, Shape
+from spatialmath import SE2, SE3
+from spatialmath.base import getvector, ismatrix, isscalar, isvector
+from typing_extensions import Self
 
 import roboticstoolbox as rtb
-from roboticstoolbox.ets.ETS import ETS
-from roboticstoolbox.ets.ETS2 import ETS2
+from roboticstoolbox.ets._ET import BaseET
 from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.ET2 import ET2
-from roboticstoolbox.ets._ET import BaseET
-from warnings import warn
-
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.ets.ETS2 import ETS2
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # A generic type variable representing any subclass of BaseETS
@@ -502,7 +499,7 @@ class BaseLink(SceneNode, ABC):
         return self._robot
 
     @robot.setter
-    def robot(self, robot_ref: "rtb.BaseRobot") -> None:
+    def robot(self, robot_ref: rtb.BaseRobot) -> None:
         """
         Set the forward reference to the robot which owns this link
         """
@@ -1186,37 +1183,16 @@ class BaseLink(SceneNode, ABC):
         qlim = [0, 0] if self.qlim is None else self.qlim
 
         s = (
-            "m     =  {:8.2g} \n"
-            "r     =  {:8.2g} {:8.2g} {:8.2g} \n"
-            "        | {:8.2g} {:8.2g} {:8.2g} | \n"
-            "I     = | {:8.2g} {:8.2g} {:8.2g} | \n"
-            "        | {:8.2g} {:8.2g} {:8.2g} | \n"
-            "Jm    =  {:8.2g} \n"
-            "B     =  {:8.2g} \n"
-            "Tc    =  {:8.2g}(+) {:8.2g}(-) \n"
-            "G     =  {:8.2g} \n"
-            "qlim  =  {:8.2g} to {:8.2g}".format(
-                self.m,
-                self.r[0],
-                self.r[1],
-                self.r[2],
-                self.I[0, 0],
-                self.I[0, 1],
-                self.I[0, 2],
-                self.I[1, 0],
-                self.I[1, 1],
-                self.I[1, 2],
-                self.I[2, 0],
-                self.I[2, 1],
-                self.I[2, 2],
-                self.Jm,
-                self.B,
-                self.Tc[0],
-                self.Tc[1],
-                self.G,
-                qlim[0],
-                qlim[1],
-            )
+            f"m     =  {self.m:8.2g} \n"
+            f"r     =  {self.r[0]:8.2g} {self.r[1]:8.2g} {self.r[2]:8.2g} \n"
+            f"        | {self.I[0, 0]:8.2g} {self.I[0, 1]:8.2g} {self.I[0, 2]:8.2g} | \n"
+            f"I     = | {self.I[1, 0]:8.2g} {self.I[1, 1]:8.2g} {self.I[1, 2]:8.2g} | \n"
+            f"        | {self.I[2, 0]:8.2g} {self.I[2, 1]:8.2g} {self.I[2, 2]:8.2g} | \n"
+            f"Jm    =  {self.Jm:8.2g} \n"
+            f"B     =  {self.B:8.2g} \n"
+            f"Tc    =  {self.Tc[0]:8.2g}(+) {self.Tc[1]:8.2g}(-) \n"
+            f"G     =  {self.G:8.2g} \n"
+            f"qlim  =  {qlim[0]:8.2g} to {qlim[1]:8.2g}"
         )
 
         if indent > 0:
@@ -1282,7 +1258,7 @@ class BaseLink(SceneNode, ABC):
         symbol: str | None = None,
         ignorevalue: Any = None,
         indices: Any = None,
-    ) -> None:  # noqa  # pragma nocover
+    ) -> None:  # pragma nocover
         # if value == ignorevalue then don't display it
 
         v = getattr(self, name)

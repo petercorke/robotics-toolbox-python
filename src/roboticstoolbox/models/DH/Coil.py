@@ -5,9 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
 
 
@@ -48,7 +47,7 @@ class Coil(DHRobot):
     :seealso: :func:`Hyper`, :func:`Ball`
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
     def __init__(self, N: int = 10, symbolic: bool = False) -> None:
 

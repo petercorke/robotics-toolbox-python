@@ -11,12 +11,11 @@ http://www.robots.ox.ac.uk/~pnewman
 
 from collections import namedtuple
 
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
-import matplotlib.pyplot as plt
-from matplotlib import animation
-
 import spatialmath.base as smb
+from matplotlib import animation
 
 """
 Monte-carlo based localisation for estimating vehicle pose based on

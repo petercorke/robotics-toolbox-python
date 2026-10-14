@@ -13,24 +13,52 @@ from typing import Any
 
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base import getvector, getmatrix, verifymatrix, tr2jac
+from spatialmath.base import getmatrix, getvector, tr2jac, verifymatrix
 
 try:
     from roboticstoolbox._fknm_c import (
-        ETS_init as _c_ETS_init,
-        ETS_fkine as _c_ETS_fkine,
-        ETS_jacob0 as _c_ETS_jacob0,
-        ETS_jacobe as _c_ETS_jacobe,
-        ETS_hessian0 as _c_ETS_hessian0,
-        ETS_hessiane as _c_ETS_hessiane,
-        IK_NR_c as _c_IK_NR_c,
-        IK_GN_c as _c_IK_GN_c,
-        IK_LM_c as _c_IK_LM_c,
         ET_T as _c_ET_T,
-        ET_init as _c_ET_init,
-        ET_update as _c_ET_update,
+    )
+    from roboticstoolbox._fknm_c import (
         Angle_Axis as _c_Angle_Axis,
+    )
+    from roboticstoolbox._fknm_c import (
+        ET_init as _c_ET_init,
+    )
+    from roboticstoolbox._fknm_c import (
+        ET_update as _c_ET_update,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_fkine as _c_ETS_fkine,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_hessian0 as _c_ETS_hessian0,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_hessiane as _c_ETS_hessiane,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_init as _c_ETS_init,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_jacob0 as _c_ETS_jacob0,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_jacobe as _c_ETS_jacobe,
+    )
+    from roboticstoolbox._fknm_c import (
+        IK_GN_c as _c_IK_GN_c,
+    )
+    from roboticstoolbox._fknm_c import (
+        IK_LM_c as _c_IK_LM_c,
+    )
+    from roboticstoolbox._fknm_c import (
+        IK_NR_c as _c_IK_NR_c,
+    )
+    from roboticstoolbox._fknm_c import (
         Robot_link_T as _c_Robot_link_T,
+    )
+    from roboticstoolbox._fknm_c import (
         r2q as _c_r2q,
     )
 
@@ -53,7 +81,7 @@ def _is_symbolic(q: Any) -> bool:
 
 def _python_fkine(data: Any, q: Any, base: Any, tool: Any, include_base: Any) -> Any:
     q = getmatrix(q, (None, None))
-    l, _ = q.shape  # noqa: E741
+    l, _ = q.shape
     end = data[-1]
 
     if isinstance(tool, SE3):

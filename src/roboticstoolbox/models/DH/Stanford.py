@@ -5,11 +5,11 @@
 
 from __future__ import annotations
 
-from typing import Any
-
-from roboticstoolbox import DHRobot, RevoluteDH, PrismaticDH
 from math import pi
+
 import numpy as np
+
+from roboticstoolbox import DHRobot, PrismaticDH, RevoluteDH
 
 
 class Stanford(DHRobot):

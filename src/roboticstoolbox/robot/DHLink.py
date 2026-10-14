@@ -5,18 +5,19 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
+from functools import wraps
 from typing import Any
+
+from numpy import array, cos, sin
+from spatialmath import SE3
 
 # import numpy as np
 # from spatialmath import SE3
 import roboticstoolbox as rp
-from roboticstoolbox.robot.Link import Link, _dirties_frne, _copy_shapes
-from roboticstoolbox.ets.ETS import ETS
 from roboticstoolbox.ets.ET import ET
-from spatialmath import SE3
-from functools import wraps
-from numpy import ndarray, cos, sin, array
-from copy import deepcopy
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.robot.Link import Link, _copy_shapes, _dirties_frne
 from roboticstoolbox.tools.types import ArrayLike
 
 

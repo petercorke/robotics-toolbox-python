@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import math
 from typing import Any, NamedTuple
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
+
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # (found, t, u, v) of a candidate path
 _Segments = tuple[bool, float, float, float]
@@ -33,7 +35,7 @@ class _Path:
 
     def __repr__(self) -> str:
         s = f"_Path: L={self.L:.2g}, "
-        s += f"[{', '.join(['{}={:.2g}'.format(c, l) for c, l in zip(self.ctypes, self.lengths)])}]"
+        s += f"[{', '.join([f'{c}={l:.2g}' for c, l in zip(self.ctypes, self.lengths)])}]"
         if len(self.x) > 0:
             s += f", {len(self.x)} points on path"
         return s

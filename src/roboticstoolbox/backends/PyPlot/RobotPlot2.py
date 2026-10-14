@@ -7,10 +7,11 @@ from __future__ import annotations
 
 from typing import Any
 
-# import numpy as np
-from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 import numpy as np
 from spatialmath import SE2
+
+# import numpy as np
+from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 
 
 class RobotPlot2(RobotPlot):

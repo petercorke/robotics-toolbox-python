@@ -8,8 +8,9 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-import roboticstoolbox as rp
 from spatialmath import SE3
+
+import roboticstoolbox as rp
 
 
 class RobotPlot:

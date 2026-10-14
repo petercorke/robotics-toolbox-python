@@ -16,15 +16,13 @@ from typing import Any
 # 14/2/91 to use Paul's value of link twist (alpha) to be consistant
 #  with ARCL.  This is the -ve of Lee's values, which means the
 #  zero angle position is a righty for Paul, and lefty for Lee.
-
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
-
 # from math import pi
 import numpy as np
-from roboticstoolbox import DHRobot, RevoluteDH, IKSolution, angle_axis
+from spatialmath import SE3, base
+
+from roboticstoolbox import DHRobot, IKSolution, RevoluteDH, angle_axis
 from roboticstoolbox.tools.types import NDArray
-from spatialmath import SE3
-from spatialmath import base
 
 
 class Puma560(DHRobot):
@@ -75,7 +73,7 @@ class Puma560(DHRobot):
         - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
     def __init__(self, symbolic: bool = False) -> None:
 

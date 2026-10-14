@@ -1,11 +1,12 @@
 
 from __future__ import annotations
 
-from typing import Any
-import numpy as np
 from math import pi
-from roboticstoolbox import DHRobot, RevoluteDH
+
+import numpy as np
 from spatialmath import SE3
+
+from roboticstoolbox import DHRobot, RevoluteDH
 
 
 class Baxter(DHRobot):
@@ -46,7 +47,7 @@ class Baxter(DHRobot):
           Z. Ju, C. Yang, H. Ma, Chinese Control Conf, 2015.
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
     def __init__(self, arm: str = "left") -> None:
 

@@ -1,16 +1,16 @@
-import numpy as np
 import math
 import warnings
 from collections import namedtuple
+
 import matplotlib.pyplot as plt
+import numpy as np
 from numpy.typing import ArrayLike
 from spatialmath import SE3
 from spatialmath.base.argcheck import (
-    isvector,
-    getvector,
     # assertmatrix,
     getvector,
     isscalar,
+    isvector,
 )
 
 
@@ -1171,8 +1171,9 @@ if __name__ == "__main__":
     # t = trapezoidal(0, 1, np.linspace(0, 1, 50))
     # t.plot(block=True)
 
-    from roboticstoolbox import *
     from spatialmath import SO2
+
+    from roboticstoolbox import *
 
     # puma = models.DH.Puma560()
 

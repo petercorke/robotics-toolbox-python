@@ -5,18 +5,17 @@
 
 from __future__ import annotations
 
-from typing import Any
+from functools import lru_cache
+from typing import Any, Callable, Generic, TypeVar
 
 import numpy as np
-from spatialmath import SE3
 import spatialmath as sm
+from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
-from roboticstoolbox.robot.Link import Link
-from functools import lru_cache
-from typing import TypeVar, Generic, Callable
+
 from roboticstoolbox.ets.fknm import Robot_link_T
+from roboticstoolbox.robot.Link import BaseLink, Link
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-from roboticstoolbox.robot.Link import BaseLink
 
 # A generic type variable representing any subclass of BaseLink
 LinkType = TypeVar("LinkType", bound=BaseLink)

@@ -1,15 +1,13 @@
 
 from __future__ import annotations
 
-from typing import Any
 #!/usr/bin/env python
-
 import re
 
 import numpy as np
-from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.robot.Robot import Robot
+
 from roboticstoolbox.models.URDF.URDFRobot import URDF_read
+from roboticstoolbox.robot.Robot import Robot
 
 
 def _patch_valkyrie_urdf(text: str) -> str:

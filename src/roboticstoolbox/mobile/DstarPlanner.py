@@ -8,20 +8,17 @@ See Wikipedia article (https://en.wikipedia.org/wiki/D*)
 
 from __future__ import annotations
 
+import heapq
 import math
-
-from sys import maxsize
-from typing import Any, Callable, NamedTuple
 from enum import IntEnum, auto
+from typing import Any, Callable, NamedTuple
+
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.cm as cm
+
+from roboticstoolbox.mobile.OccGrid import OccupancyGrid
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-import heapq
-import bisect
-import math
 
 show_animation = True
 

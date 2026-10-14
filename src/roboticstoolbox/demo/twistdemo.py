@@ -6,15 +6,16 @@
 
 from __future__ import annotations
 
+import sys
+from math import pi
 from typing import Any
 
-import sys
-import swift
-from math import pi
-import roboticstoolbox as rtb
-from spatialgeometry import Mesh, Cylinder
-from spatialmath import SO3, SE3, Twist3
 import numpy as np
+import swift
+from spatialgeometry import Cylinder, Mesh
+from spatialmath import SE3, SO3, Twist3
+
+import roboticstoolbox as rtb
 
 
 def demo(test: bool = False) -> None:

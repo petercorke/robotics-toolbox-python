@@ -5,15 +5,14 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
+import matplotlib.pyplot as plt
 import numpy as np
-import warnings
 
 # import scipy as sp
-from spatialmath import base
-from spatialmath import SE3
-import matplotlib.pyplot as plt
+from spatialmath import SE3, base
 
 
 class ShapePlot:

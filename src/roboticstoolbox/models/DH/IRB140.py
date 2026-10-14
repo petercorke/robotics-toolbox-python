@@ -5,11 +5,11 @@
 
 from __future__ import annotations
 
-from typing import Any
+from math import pi
+
+import numpy as np
 
 from roboticstoolbox import DHRobot, RevoluteDH
-from math import pi
-import numpy as np
 
 
 class IRB140(DHRobot):
@@ -42,7 +42,7 @@ class IRB140(DHRobot):
         - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
     def __init__(self) -> None:
         deg = pi / 180

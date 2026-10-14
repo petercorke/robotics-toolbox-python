@@ -7,11 +7,11 @@
 
 from __future__ import annotations
 
-from typing import Any
+from math import pi
+
+import numpy as np
 
 from roboticstoolbox import DHRobot, RevoluteDH
-from math import pi
-import numpy as np
 
 
 class KR5(DHRobot):
@@ -44,7 +44,7 @@ class KR5(DHRobot):
     .. codeauthor:: Gautam Sinha, Indian Institute of Technology, Kanpur (original MATLAB version)
     .. codeauthor:: Samuel Drew
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
     def __init__(self) -> None:
         deg = pi / 180

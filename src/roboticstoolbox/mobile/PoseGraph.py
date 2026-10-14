@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import types
 from typing import Any, Callable, cast
 
 import roboticstoolbox as rtb
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-import types
+
 try:
     import pgraph
 except ImportError:
@@ -20,16 +21,17 @@ except ImportError:
     pgraph = types.SimpleNamespace(
         UVertex=_PGraphMissing, Edge=_PGraphMissing, UGraph=_PGraphMissing
     )
-from spatialmath import SE2
-import spatialmath.base as smb
+import math
+import time
+import zipfile
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
-import zipfile
-import time
-import math
-from pathlib import Path
+import spatialmath.base as smb
 from progress.bar import FillingCirclesBar
+from spatialmath import SE2
 
 
 class PGVertex(pgraph.UVertex):

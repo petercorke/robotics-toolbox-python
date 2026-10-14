@@ -12,16 +12,14 @@ without a cycle).
 
 from __future__ import annotations
 
-from typing import Any
-
 import re
 import warnings
 from copy import deepcopy
+from typing import TYPE_CHECKING, Any, Callable
 
-from numpy import array, ndarray, deg2rad, eye, pi
+from numpy import deg2rad, eye, ndarray, pi
 from numpy.linalg import inv as npinv
 from spatialmath.base import getvector, issymbol, tr2rpy, tr2xyt
-from typing import Callable, TYPE_CHECKING
 
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
@@ -34,8 +32,8 @@ else:  # pragma: nocover
 
 
 def _resolve_param(
-    param: "float | Sym | None", eta: "float | None"
-) -> "float | Sym | None":
+    param: float | Sym | None, eta: float | None
+) -> float | Sym | None:
     """
     Merge the `param` kwarg with the deprecated `eta` kwarg.
 
@@ -54,7 +52,7 @@ def _resolve_param(
     return param
 
 
-def _parse_joint_descriptor(s: str) -> "tuple[int | None, bool]":
+def _parse_joint_descriptor(s: str) -> tuple[int | None, bool]:
     """
     Parse a joint descriptor string into (jindex, flip).
 
@@ -625,7 +623,7 @@ class BaseET:
             >>> print(e)
             >>> print(e.inv())
 
-        """  # noqa
+        """
 
         inv = deepcopy(self)
 

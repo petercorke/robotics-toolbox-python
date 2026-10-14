@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from abc import ABC
 from typing import Any
-import numpy as np
-import scipy as sp
-from math import pi, sin, cos
+
 import matplotlib.pyplot as plt
+import numpy as np
 from spatialmath import base
-import roboticstoolbox as rtb
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+
+from roboticstoolbox.tools.types import NDArray
 
 
 class LandmarkMap:
@@ -188,4 +186,4 @@ class LandmarkMap:
 
 
 if __name__ == "__main__":
-    import unittest
+    pass

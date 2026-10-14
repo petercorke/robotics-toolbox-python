@@ -1,16 +1,15 @@
 
 from __future__ import annotations
 
-from typing import Any
 #!/usr/bin/env python
-
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
-from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.ets.ETS import ETS
-from roboticstoolbox.ets.ET import ET
-from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 from spatialmath import SE3
+
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.models.URDF.URDFRobot import URDF_read
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.Robot import Robot
 
 
 class FrankieOmni(Robot):

@@ -1,12 +1,12 @@
 
 from __future__ import annotations
 
-from typing import Any
-#!/usr/bin/env python
-
-import numpy as np
-from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 from math import pi
+
+#!/usr/bin/env python
+import numpy as np
+
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
 class UR5(URDFRobot):

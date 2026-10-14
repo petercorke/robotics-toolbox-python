@@ -6,14 +6,14 @@
 
 from __future__ import annotations
 
-from typing import Any
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Tuple, cast
 
 import numpy as np
-from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Tuple, cast
-import roboticstoolbox as rtb
-from dataclasses import dataclass
 from spatialmath import SE3
+
+import roboticstoolbox as rtb
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:  # pragma: nocover
@@ -162,7 +162,7 @@ class IKSolution:
         if self.q is None:
             return None
 
-        fmt = {"float": lambda x: "{:.4g}".format(0 if abs(x) < 1e-6 else x)}
+        fmt = {"float": lambda x: f"{0 if abs(x) < 1e-6 else x:.4g}"}
 
         def text(a: NDArray) -> str:
             return np.array2string(
@@ -276,7 +276,7 @@ class IKSolver(ABC):
 
     def solve(
         self,
-        ets: "ETS",
+        ets: ETS,
         Tep: SE3 | ArrayLike,
         q0: ArrayLike | None = None,
     ) -> IKSolution:
@@ -394,7 +394,7 @@ class IKSolver(ABC):
 
         return sol
 
-    def _solve(self, ets: "ETS", Tep: NDArray, q0: NDArray) -> IKSolution:
+    def _solve(self, ets: ETS, Tep: NDArray, q0: NDArray) -> IKSolution:
         # Iteration count
         i = 0
         total_i = 0
@@ -499,7 +499,7 @@ class IKSolver(ABC):
 
     @abstractmethod
     def step(
-        self, ets: "ETS", Tep: NDArray, q: NDArray
+        self, ets: ETS, Tep: NDArray, q: NDArray
     ) -> Tuple[float, NDArray]:
         """
         Abstract step method
@@ -517,7 +517,7 @@ class IKSolver(ABC):
         """
         pass  # pragma: nocover
 
-    def _random_q(self, ets: "ETS", i: int = 1) -> NDArray:
+    def _random_q(self, ets: ETS, i: int = 1) -> NDArray:
         """
         Generate a random valid joint configuration using a private RNG
 
@@ -558,7 +558,7 @@ class IKSolver(ABC):
 
         return q
 
-    def _normalise_q(self, ets: "ETS", q: NDArray) -> None:
+    def _normalise_q(self, ets: ETS, q: NDArray) -> None:
         """
         Choose equivalent revolute coordinates without changing prismatic joints.
 
@@ -574,7 +574,7 @@ class IKSolver(ABC):
         revolute = np.array([joint.isrotation for joint in joints])
         q[jindex] = normalise_q(q[jindex], ets.qlim, revolute)
 
-    def _check_jl(self, ets: "ETS", q: NDArray) -> bool:
+    def _check_jl(self, ets: ETS, q: NDArray) -> bool:
         """
         Checks if the joints are within their respective limits
 
@@ -651,7 +651,7 @@ def within_limits(q: ArrayLike, qlim: ArrayLike) -> bool:
     qlim = np.asarray(qlim, dtype=float)
     return not bool(np.any((q < qlim[0]) | (q > qlim[1])))
 
-def _null_Σ(ets: "ETS", q: NDArray, ps: float, pi: ArrayLike | float) -> Any:
+def _null_Σ(ets: ETS, q: NDArray, ps: float, pi: ArrayLike | float) -> Any:
     """
     Formulates a relationship between joint limits and the joint velocity.
     When this is projected into the null-space of the differential kinematics
@@ -687,7 +687,7 @@ def _null_Σ(ets: "ETS", q: NDArray, ps: float, pi: ArrayLike | float) -> Any:
 
 
 def _calc_qnull(
-    ets: "ETS",
+    ets: ETS,
     q: NDArray,
     J: NDArray,
     λΣ: float,
@@ -851,7 +851,7 @@ class IK_NR(IKSolver):
             self.name += " Jm"
 
     def step(
-        self, ets: "ETS", Tep: NDArray, q: NDArray
+        self, ets: ETS, Tep: NDArray, q: NDArray
     ) -> Tuple[float, NDArray]:
         r"""
         Performs a single iteration of the Newton-Raphson optimisation method
@@ -1027,7 +1027,7 @@ class IK_LM(IKSolver):
         if self.km > 0.0:
             self.name += " Jm"
 
-    def step(self, ets: "ETS", Tep: NDArray, q: NDArray) -> Any:
+    def step(self, ets: ETS, Tep: NDArray, q: NDArray) -> Any:
         r"""
         Performs a single iteration of the Levenberg-Marquardt optimisation
 
@@ -1249,7 +1249,7 @@ class IK_GN(IKSolver):
             self.name += " Jm"
 
     def step(
-        self, ets: "ETS", Tep: NDArray, q: NDArray
+        self, ets: ETS, Tep: NDArray, q: NDArray
     ) -> Tuple[float, NDArray]:
         r"""
         Performs a single iteration of the Gauss-Newton optimisation method
@@ -1431,7 +1431,7 @@ class IK_QP(IKSolver):
             self.name += " Jm"
 
     def step(
-        self, ets: "ETS", Tep: NDArray, q: NDArray
+        self, ets: ETS, Tep: NDArray, q: NDArray
     ) -> Tuple[float, NDArray]:
         r"""
         Performs a single iteration of the QP optimisation method

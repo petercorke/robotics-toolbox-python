@@ -5,17 +5,18 @@
 
 from __future__ import annotations
 
-from typing import Any
-
-import roboticstoolbox as rp
-import numpy as np
-from roboticstoolbox.backends.Connector import Connector
-from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
-from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-import time
 import io
 import sys
+import time
+from typing import Any
+
+import numpy as np
 from spatialmath import SE2
+
+import roboticstoolbox as rp
+from roboticstoolbox.backends.Connector import Connector
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
 
 _mpl = False
 _ipy_display: Any = None
@@ -42,10 +43,10 @@ except ImportError:  # pragma nocover
     pass
 
 try:
-    from IPython.display import display as _ipy_display
-    from IPython.display import Image as _ipy_image
     from IPython.display import SVG as _ipy_svg
+    from IPython.display import Image as _ipy_image
     from IPython.display import clear_output as _ipy_clear_output
+    from IPython.display import display as _ipy_display
 except ImportError:  # pragma nocover
     pass
 
@@ -390,9 +391,9 @@ class PyPlot2(Connector):
             T = robot.fkine(q, end=robot.ee_links[0])
             t = np.round(T.t, 3)
             r = np.round(T.theta(), 3)
-            text[0].set_text("x: {0}".format(t[0]))
-            text[1].set_text("y: {0}".format(t[1]))
-            text[2].set_text("yaw: {0}".format(r))
+            text[0].set_text(f"x: {t[0]}")
+            text[1].set_text(f"y: {t[1]}")
+            text[2].set_text(f"yaw: {r}")
 
         # Update the self state in mpl and the text
         def update(val: Any, text: Any, robot: Any) -> None:  # pragma: no cover
@@ -443,17 +444,17 @@ class PyPlot2(Connector):
         )
         text.append(
             fig.text(
-                0.03, 1 - ym + 0.20, "x: {0}".format(t[0]), fontsize=9, color="#2b2b2b"
+                0.03, 1 - ym + 0.20, f"x: {t[0]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.03, 1 - ym + 0.16, "y: {0}".format(t[1]), fontsize=9, color="#2b2b2b"
+                0.03, 1 - ym + 0.16, f"y: {t[1]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.15, 1 - ym + 0.20, "yaw: {0}".format(r), fontsize=9, color="#2b2b2b"
+                0.15, 1 - ym + 0.20, f"yaw: {r}", fontsize=9, color="#2b2b2b"
             )
         )
         fig.text(

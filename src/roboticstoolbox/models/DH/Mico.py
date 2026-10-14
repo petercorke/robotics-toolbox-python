@@ -1,13 +1,12 @@
 
 from __future__ import annotations
 
-from typing import Any
 #!/usr/bin/env python
+from math import cos, sin
 
-from math import pi, sin, cos
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class Mico(DHRobot):

@@ -1,10 +1,9 @@
 
 from __future__ import annotations
 
-from typing import Any
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class UR10(DHRobot):
@@ -45,7 +44,7 @@ class UR10(DHRobot):
 
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
     def __init__(self, symbolic: bool = False) -> None:
         if symbolic:

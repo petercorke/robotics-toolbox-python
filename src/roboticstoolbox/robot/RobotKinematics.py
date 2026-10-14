@@ -4,16 +4,17 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, overload
+from typing import Literal as L
 
 import numpy as np
-from roboticstoolbox.robot.RobotProto import KinematicsProtocol
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-from roboticstoolbox.robot.Link import Link
+from spatialmath import SE3
+
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.IK import IKSolution
-from spatialmath import SE3
-from typing import Literal as L, overload
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.RobotProto import KinematicsProtocol
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 def _as_se3(T: NDArray | SE3) -> SE3:

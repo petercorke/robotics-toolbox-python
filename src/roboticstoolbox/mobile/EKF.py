@@ -7,16 +7,17 @@ Python EKF Planner
 from __future__ import annotations
 
 from typing import Any, NamedTuple
+
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import animation
 from scipy.linalg import block_diag
 from scipy.stats.distributions import chi2
-import matplotlib.pyplot as plt
-from matplotlib import animation
+from spatialmath import SE2, base
 
-from spatialmath import base, SE2
 from roboticstoolbox.mobile import VehicleBase
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
-from roboticstoolbox.mobile.sensors import SensorBase, RangeBearingSensor
+from roboticstoolbox.mobile.sensors import RangeBearingSensor, SensorBase
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 

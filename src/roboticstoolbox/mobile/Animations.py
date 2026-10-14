@@ -6,18 +6,19 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from math import pi, atan2
-from typing import Any, Literal, Sequence
-import numpy as np
+from math import atan2, pi
 
 # from scipy import integrate, linalg, interpolate
 from pathlib import Path
-import matplotlib.pyplot as plt
-from matplotlib import patches, colors
-import matplotlib.transforms as mtransforms
-from matplotlib.axes import Axes
+from typing import Any, Literal, Sequence
 
-from spatialmath import SE2, base, Polygon2
+import matplotlib.pyplot as plt
+import matplotlib.transforms as mtransforms
+import numpy as np
+from matplotlib import colors, patches
+from matplotlib.axes import Axes
+from spatialmath import SE2, Polygon2, base
+
 from roboticstoolbox import rtb_load_data
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
