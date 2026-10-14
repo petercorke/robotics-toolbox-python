@@ -223,6 +223,16 @@ module = [
 ]
 ignore_errors = true
 
+# Modules that are fully annotated: every function needs its annotations.
+# Add a module here when it is done.
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.mobile.Animations",
+    "roboticstoolbox.mobile.drivers",
+    "roboticstoolbox.mobile.Vehicle",
+]
+disallow_untyped_defs = true
+
 # The to-do list for the typing pass.  A module is listed here because it still
 # has type errors; fix a module, delete its line, and mypy then holds it to
 # zero.  The list should only ever get shorter.  A module that is not listed
@@ -271,7 +281,6 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.mobile.Animations",
     "roboticstoolbox.mobile.Bug2",
     "roboticstoolbox.mobile.CurvaturePolyPlanner",
     "roboticstoolbox.mobile.DistanceTransformPlanner",
@@ -286,8 +295,6 @@ module = [
     "roboticstoolbox.mobile.QuinticPolyPlanner",
     "roboticstoolbox.mobile.RRTPlanner",
     "roboticstoolbox.mobile.ReedsSheppPlanner",
-    "roboticstoolbox.mobile.Vehicle",
-    "roboticstoolbox.mobile.drivers",
     "roboticstoolbox.mobile.sensors",
 ]
 ignore_errors = true
