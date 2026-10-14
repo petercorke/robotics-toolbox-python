@@ -336,6 +336,10 @@ def quintic(
         time scaling is based on the first and last element. The returned
         trajectory retains the supplied time vector.
 
+    The samples are evaluated using :func:`quintic_hermite_func`, which works in
+    normalized time. The linear-system derivation is available separately in
+    :func:`quintic_func`.
+
     :References:
 
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
@@ -353,7 +357,7 @@ def quintic(
         raise TypeError("bad argument for time, must be int or vector")
     tf = t[-1] - t[0]
 
-    polyfunc = quintic_func(q0, qf, tf, qd0, qdf)
+    polyfunc = quintic_hermite_func(q0, qf, tf, qd0, qdf)
 
     # evaluate the polynomials
     traj = polyfunc(t - t[0])
@@ -368,7 +372,7 @@ def quintic_func(
     q0: float, qf: float, T: float, qd0: float = 0, qdf: float = 0
 ) -> Callable[[ArrayLike], tuple[ArrayLike, ArrayLike, ArrayLike]]:
     r"""
-    Quintic scalar polynomial as a function
+    Quintic scalar polynomial from a linear system
 
     :param q0: initial value
     :param qf: final value
@@ -376,12 +380,25 @@ def quintic_func(
     :param qd0: initial velocity, defaults to 0
     :param qdf: final velocity, defaults to 0
     :returns: polynomial function :math:`f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))`
+    :raises numpy.linalg.LinAlgError: the boundary-condition matrix is numerically
+        singular or contains non-finite values
 
-    Returns a function which computes the specific quintic polynomial, and its
-    derivatives, as described by the parameters. The polynomial is solved and
-    evaluated in normalized time to avoid ill-conditioning for short or long
-    durations. Returned derivatives are with respect to the supplied time, with
-    zero acceleration at both endpoints.
+    The six polynomial coefficients are found by solving a linear system for
+    the initial and final position, velocity and zero acceleration. Derivatives
+    are with respect to the supplied time units. This formulation is useful for
+    illustrating how those boundary conditions determine a quintic polynomial.
+
+    Very short or long durations make the powers of ``T`` in the matrix differ
+    greatly in magnitude. The least-squares solver can then discard a boundary
+    condition: for example, ``quintic_func(1, 2, 1000)`` previously returned a
+    function whose initial position was close to zero instead of one.
+
+    The matrix condition number is checked against ``1 / (6 * eps)``, where
+    ``eps`` is float64 machine precision. This is the numerical-rank cutoff of
+    ``numpy.linalg.lstsq(..., rcond=None)`` for this six-by-six system. At or above
+    this cutoff, including zero duration, an error is raised. Passing the check
+    does not guarantee accurate results for every ill-conditioned system; use
+    :func:`quintic_hermite_func` to avoid this duration-dependent conditioning.
 
     Example:
 
@@ -393,18 +410,95 @@ def quintic_func(
         >>> f(5)
         >>> f(2.5)
 
-    :seealso: :func:`quintic` :func:`trapezoidal_func`
+    :seealso: :func:`quintic_hermite_func`, :func:`quintic`, :func:`trapezoidal_func`
+    """
+
+    # solve for the polynomial coefficients using least squares
+    # fmt: off
+    X = [
+        [ 0.0,          0.0,         0.0,        0.0,     0.0,  1.0],
+        [ T**5,         T**4,        T**3,       T**2,    T,    1.0],
+        [ 0.0,          0.0,         0.0,        0.0,     1.0,  0.0],
+        [ 5.0 * T**4,   4.0 * T**3,  3.0 * T**2, 2.0 * T, 1.0,  0.0],
+        [ 0.0,          0.0,         0.0,        2.0,     0.0,  0.0],
+        [20.0 * T**3,  12.0 * T**2,  6.0 * T,    2.0,     0.0,  0.0],
+    ]
+    # fmt: on
+    # Match lstsq's default singular-value cutoff for this square system.
+    if not np.all(np.isfinite(X)) or np.linalg.cond(X) >= 1 / (
+        len(X) * np.finfo(float).eps
+    ):
+        raise np.linalg.LinAlgError(
+            "quintic boundary-condition matrix is ill-conditioned; "
+            "use quintic_hermite_func instead"
+        )
+    coeffs, resid, rank, s = np.linalg.lstsq(
+        X, np.r_[q0, qf, qd0, qdf, 0, 0], rcond=None
+    )
+
+    # coefficients of derivatives
+    coeffs_d = coeffs[0:5] * np.arange(5, 0, -1)
+    coeffs_dd = coeffs_d[0:4] * np.arange(4, 0, -1)
+
+    return lambda x: (
+        np.polyval(coeffs, x),
+        np.polyval(coeffs_d, x),
+        np.polyval(coeffs_dd, x),
+    )
+
+
+def quintic_hermite_func(
+    q0: float, qf: float, T: float, qd0: float = 0, qdf: float = 0
+) -> Callable[[ArrayLike], tuple[ArrayLike, ArrayLike, ArrayLike]]:
+    r"""
+    Quintic scalar polynomial using a Hermite basis
+
+    :param q0: initial value
+    :param qf: final value
+    :param T: trajectory duration
+    :param qd0: initial velocity, defaults to 0
+    :param qdf: final velocity, defaults to 0
+    :returns: polynomial function :math:`f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))`
+    :raises ValueError: trajectory duration is not finite
+
+    Returns a function which computes the specific quintic polynomial, and its
+    derivatives, as described by the parameters. The polynomial is constructed and
+    evaluated in normalized time to avoid ill-conditioning for short or long
+    durations. Returned derivatives are with respect to the supplied time, with
+    zero acceleration at both endpoints.
+
+    The returned function accepts scalar or array-like elapsed times, preserving
+    the sample shape. ``qd0`` and ``qdf`` use position units per supplied time
+    unit. The duration is promoted to the coefficient dtype before scaling.
+    For ``T == 0``, the degenerate linear least-squares result is retained:
+    the position starts at the mean of ``q0`` and ``qf``, velocity is the mean
+    of ``qd0`` and ``qdf``, and acceleration is zero. This zero-duration case
+    cannot satisfy distinct endpoint conditions.
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import quintic_hermite_func
+        >>> f = quintic_hermite_func(1, 2, 1000)
+        >>> f(0)
+        >>> f(1000)
+        >>> f(500)
+
+    :seealso: :func:`quintic_func`, :func:`quintic`, :func:`trapezoidal_func`
     """
 
     # Hermite basis functions use normalized time. Factor the derivatives so
     # zero endpoint acceleration is not lost through polynomial cancellation.
-    tscal = T if T != 0 else 1.0
+    if not np.isfinite(T):
+        raise ValueError("trajectory duration must be finite")
     boundary = np.r_[q0, qf, qd0, qdf, 0, 0]
     if boundary.shape != (6,):
         raise np.linalg.LinAlgError("Incompatible dimensions")
     coefficient_dtype = np.result_type(boundary.dtype, np.asarray(T).dtype, np.float64)
     if coefficient_dtype not in (np.float64, np.complex128):
         raise TypeError(f"array type {coefficient_dtype} is unsupported in linalg")
+    tscal = coefficient_dtype.type(T) if T != 0 else 1.0
     q0, qf, v0, vf, _, _ = boundary * np.r_[1.0, 1.0, tscal, tscal, 1.0, 1.0]
     delta = qf - q0
 
@@ -437,7 +531,8 @@ def quintic_func(
             * tau
             * remaining
             * (5 * delta * (1 - 2 * tau) - v0 * (3 - 5 * tau) - vf * (2 - 5 * tau))
-            / tscal**2,
+            / tscal
+            / tscal,
         )
 
     return polynomial
