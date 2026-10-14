@@ -1438,84 +1438,50 @@ class DynamicsMixin:
         frame: int = 1,
         q: ArrayLike | None = None,
     ):
-        """
-        Static payload capacity of a robot
+        """Compute static payload capacity along a wrench direction.
 
-        :param w: The payload wrench
-        :type w: ndarray(6,)
-        :param tauR: Joint torque matrix minimum and maximums
-        :type tauR: ndarray(n,2)
-        :param frame: The frame in which to torques are expressed in when J
-            is not supplied. 'base' means base frame of the robot, 'ee' means
-            end-effector frame
-        :param q: Joint coordinates
-        :type q: ndarray(n,)
-        :returns: The maximum permissible payload wrench
-        :rtype: ndarray(6,)
-
-        ``wmax, joint = paycap(q, w, f, tauR)`` returns the maximum permissible
-        payload wrench ``wmax`` (6) applied at the end-effector, and the index
-        of the joint (zero indexed) which hits its force/torque limit at that
-        wrench. ``q`` (n) is the manipulator pose, ``w`` the payload wrench
-        (6), ``f`` the wrench reference frame and tauR (nx2) is a matrix of
-        joint forces/torques (first col is maximum, second col minimum).
-
-        **Trajectory operation:**
-
-        In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
-        the results at the pose given by corresponding row of q.
+        :param w: Nonzero payload wrench direction (6,), or (m, 6) for
+            m configurations. Its magnitude is ignored.
+        :param tauR: Joint torque limits (n, 2): maximum in column 0,
+            minimum in column 1.
+        :param frame: Wrench reference frame: 0 for base, 1 for end-effector.
+        :param q: Joint coordinates (n,), or (m, n) for m configurations.
+            Defaults to the robot's current configuration.
+        :returns: Tuple ``(wmax, joint)``. ``wmax`` contains one allowable
+            load scale per joint (n,), and ``joint`` is the zero-based index
+            of the limiting joint. With m configurations, their shapes are
+            (m, n) and (m,), respectively. The maximum load scale in the
+            specified direction is ``wmax.min()`` per configuration.
 
         .. rubric:: Notes
 
-        - Wrench vector and Jacobian must be from the same reference frame
-        - Tool transforms are taken into consideration for frame=1.
-
+        - Wrench and Jacobian must use the same reference frame.
+        - Tool transforms are taken into consideration for ``frame=1``.
+        - Gravity compensation requires a robot model with valid dynamics.
         """
-
-        # TODO rewrite
-        trajn = 1
-
-        if q is None:
-            q = self.q
-        else:
-            q = np.array(q)
-
-        try:
-            q = np.array(getvector(q, self.n, "row"))
-            w = np.array(getvector(w, 6, "row"))
-        except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (trajn, self.n))
-            verifymatrix(w, (trajn, 6))
-
+        q = getmatrix(self.q if q is None else q, (None, self.n))
+        w = getmatrix(w, (None, 6))
+        if q.shape[0] != w.shape[0]:
+            raise ValueError("q and w must have the same number of rows")
         verifymatrix(tauR, (self.n, 2))
 
-        wmax = np.zeros((trajn, 6))
+        w_norm = np.linalg.norm(w, axis=1)
+        if np.any(w_norm == 0):
+            raise ValueError("w must contain nonzero wrench directions")
+
+        trajn = q.shape[0]
+        wmax = np.zeros((trajn, self.n))
         joint = np.zeros(trajn, dtype=int)
 
         for i in range(trajn):
             tauB = self.gravload(q[i, :])
+            tauP = self.pay(w[i, :] / w_norm[i], q=q[i, :], frame=frame)
 
-            # tauP = self.rne(
-            #     np.zeros(self.n), np.zeros(self.n),
-            #     q, grav=[0, 0, 0], fext=w/np.linalg.norm(w))
-
-            tauP = self.pay(w[i, :] / np.linalg.norm(w[i, :]), q=q[i, :], frame=frame)
-
-            M = tauP > 0
-            m = tauP <= 0
-
-            TAUm = np.ones(self.n)
-            TAUM = np.ones(self.n)
-
-            for c in range(self.n):
-                TAUM[c] = tauR[c, 0]
-                TAUm[c] = tauR[c, 1]
-
-            WM = np.zeros(self.n)
-            WM[M] = (TAUM[M] - tauB[M]) / tauP[M]
-            WM[m] = (TAUm[m] - tauB[m]) / tauP[m]
-
+            positive = tauP > 0
+            negative = tauP < 0
+            WM = np.full(self.n, np.inf)
+            WM[positive] = (tauR[positive, 0] - tauB[positive]) / tauP[positive]
+            WM[negative] = (tauR[negative, 1] - tauB[negative]) / tauP[negative]
             WM[WM == -np.inf] = np.inf
 
             wmax[i, :] = WM
@@ -1523,8 +1489,7 @@ class DynamicsMixin:
 
         if trajn == 1:
             return wmax[0, :], joint[0]
-        else:
-            return wmax, joint
+        return wmax, joint
 
     def perturb(self: RobotProto, p=0.1):
         """

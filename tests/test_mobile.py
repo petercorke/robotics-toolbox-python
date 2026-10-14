@@ -8,6 +8,7 @@ import roboticstoolbox as rtb
 import numpy as np
 import spatialmath.base as sm
 import unittest
+import pytest
 
 # from roboticstoolbox import Bug2, DistanceTransformPlanner, rtb_loadmat
 from roboticstoolbox import Bug2
@@ -16,6 +17,7 @@ from roboticstoolbox.mobile.landmarkmap import *
 from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.sensors import *
 from roboticstoolbox.mobile.Vehicle import *
+from roboticstoolbox.mobile.Vehicle import DiffSteer, Unicycle
 from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
 
 # from roboticstoolbox.mobile import Planner
@@ -319,6 +321,35 @@ class TestBicycle(unittest.TestCase):
         nt.assert_almost_equal(
             veh.Fv(xv, odo), base.numjac(lambda d: veh.f(xv, d), odo), decimal=4
         )
+
+
+@pytest.mark.parametrize("width", [0.5, 1.0, 2.0])
+@pytest.mark.parametrize("turn_rate", [-0.4, 0.4])
+def test_unicycle_turn_rate_units(width: float, turn_rate: float) -> None:
+    vehicle = Unicycle(W=width)
+    state = np.array([1.0, 2.0, np.pi / 4])
+    control = [0.7, turn_rate]
+    expected = [0.7 / np.sqrt(2), 0.7 / np.sqrt(2), turn_rate]
+    nt.assert_allclose(vehicle.deriv(state, control, limits=False), expected)
+    nt.assert_allclose(vehicle.deriv(state, control), expected)
+
+
+@pytest.mark.parametrize("width", [0.5, 1.0, 2.0])
+@pytest.mark.parametrize("turn_rate", [-0.4, 0.4])
+def test_unicycle_turn_rate_limit_step(width: float, turn_rate: float) -> None:
+    vehicle = Unicycle(W=width, steer_max=0.3, dt=0.1)
+    expected_turn_rate = np.copysign(0.3, turn_rate)
+    for step in range(1, 4):
+        odometry = vehicle.step([0.0, turn_rate], animate=False)
+        nt.assert_allclose(odometry, [0.0, expected_turn_rate * 0.1])
+        nt.assert_allclose(vehicle.x, [0.0, 0.0, step * expected_turn_rate * 0.1])
+
+
+@pytest.mark.parametrize("width", [0.5, 1.0, 2.0])
+def test_diffsteer_wheel_speed_units(width: float) -> None:
+    vehicle = DiffSteer(W=width)
+    state = np.array([1.0, 2.0, 0.0])
+    nt.assert_allclose(vehicle.deriv(state, [1.0, 2.0]), [1.5, 0.0, 1.0 / width])
 
 
 class TestUnicycle(unittest.TestCase):
