@@ -195,9 +195,15 @@ class TestETS(unittest.TestCase):
 
         reduced = ets.fixjoint(0, q[3])
         self.assertEqual(reduced.n, 1)
-        self.assertEqual(reduced.joints()[0].jindex, 0)
+        self.assertEqual([e.jindex for e in reduced.joints()], [7])
         self.assertTrue(reduced.joints()[0].isflip)
         nt.assert_allclose(reduced.eval([q[7]]), original)
+        nt.assert_allclose(reduced.eval(q), original)
+
+        reduced = ets.fixjoint(1, q[7])
+        self.assertEqual([e.jindex for e in reduced.joints()], [3])
+        nt.assert_allclose(reduced.eval([q[3]]), original)
+        nt.assert_allclose(reduced.eval(q), original)
         self.assertEqual([e.jindex for e in ets.joints()], [3, 7])
 
     def test_fixjoint_single_joint_and_bad_indices(self):
