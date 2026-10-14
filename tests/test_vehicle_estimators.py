@@ -366,16 +366,71 @@ class TestEKF(unittest.TestCase):
         ekf.plot_error()
         plt.close("all")
 
-    @unittest.expectedFailure
-    def test_plot_error_slam(self) -> None:
-        # the error is computed against the whole state vector, which includes
-        # the landmarks in SLAM, so the shapes (3,) and (3+2N,) do not match
+    def slam(self, T: float = 5) -> tuple[EKF, Bicycle]:
         robot = self.robot()
         map = self.map()
-        ekf = EKF(robot=(robot, V), P0=P0, sensor=(self.sensor(robot, map), W), animate=False)
-        quiet(ekf.run, T=5)
+        ekf = EKF(
+            robot=(robot, V), P0=P0, sensor=(self.sensor(robot, map), W), animate=False
+        )
+        quiet(ekf.run, T=T)
+        return ekf, robot
+
+    def test_plot_error_slam(self) -> None:
+        # the state vector includes the landmarks, only the pose is compared
+        ekf, _ = self.slam()
         ekf.plot_error()
         plt.close("all")
+
+    def test_plot_error_is_against_time(self) -> None:
+        ekf, _ = self.dead_reckoning(T=5)
+        ekf.plot_error()
+        axes = plt.gcf().axes
+        self.assertEqual(len(axes), 3)
+        for ax in axes:
+            line = ax.get_lines()[0]
+            nt.assert_allclose(line.get_xdata(), ekf.get_t())
+            self.assertEqual(len(line.get_ydata()), len(ekf.history))
+        plt.close("all")
+
+    def test_plot_error_error_and_bounds(self) -> None:
+        from scipy.stats import norm
+
+        ekf, robot = self.slam()
+        ekf.plot_error(confidence=0.95)
+        ax = plt.gcf().axes[0]
+        # error is truth - estimate, for the x coordinate
+        expected = np.array([robot.x_hist[k, 0] - h.xest[0] for k, h in enumerate(ekf.history)])
+        nt.assert_allclose(ax.get_lines()[0].get_ydata(), expected)
+        # a 95% interval on a scalar quantity is 1.96 sigma
+        sigma = np.array([np.sqrt(h.P[0, 0]) for h in ekf.history])
+        vertices = ax.patches[0].get_xy()
+        upper = vertices[: len(ekf.history), 1]
+        nt.assert_allclose(upper, norm.ppf(0.975) * sigma, rtol=1e-9)
+        plt.close("all")
+
+    def test_plot_error_bgcolor(self) -> None:
+        from matplotlib.colors import to_rgb
+
+        ekf, _ = self.dead_reckoning(T=2)
+        ekf.plot_error(bgcolor="g")
+        for ax in plt.gcf().axes:
+            nt.assert_allclose(ax.patches[0].get_facecolor()[:3], to_rgb("g"))
+        plt.close("all")
+
+    def test_plot_error_without_bounds(self) -> None:
+        ekf, _ = self.dead_reckoning(T=2)
+        ekf.plot_error(confidence=None)
+        for ax in plt.gcf().axes:
+            self.assertEqual(len(ax.patches), 0)
+        plt.close("all")
+
+    def test_plot_error_needs_a_vehicle_estimate(self) -> None:
+        robot = self.robot(covar=None)
+        map = self.map()
+        ekf = EKF(robot=(robot, None), sensor=(self.sensor(robot, map), W), animate=False)
+        quiet(ekf.run, T=2)
+        with self.assertRaises(ValueError):
+            ekf.plot_error()
 
 
 class TestParticleFilter(unittest.TestCase):
