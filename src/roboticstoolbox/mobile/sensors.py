@@ -237,15 +237,20 @@ class RangeBearingSensor(SensorBase):
         :type robot: :class:`VehicleBase` subclass
         :param map: map of landmarks
         :type map: :class:`LandmarkMap` instance
-        :param polygon: polygon style for sensing region, see :class:`~spatialmath.base.graphics.plot_polygon`, defaults to None
-        :type polygon: dict, optional
-        :param covar: covariance matrix for sensor readings, defaults to None
-        :type covar: ndarray(2,2), optional
+        :param line_style: style of the line to the observed landmark, defaults to None
+        :type line_style: dict, optional
+        :param poly_style: style for the sensing region polygon, defaults to None
+        :type poly_style: dict, optional
+        :param covar: covariance matrix for sensor readings, or the variance
+            of each of range and bearing, defaults to None (noise free)
+        :type covar: ndarray(2,2) or array_like(2), optional
         :param range: maximum range :math:`r_{max}` or range span :math:`[r_{min}, r_{max}]`, defaults to None
         :type range: float or array_like(2), optional
-        :param angle: angular field of view, from :math:`[-\theta, \theta]` defaults to None
-        :type angle: float, optional
-        :param plot: animate the sensor beams, defaults to False
+        :param angle: angular field of view, either :math:`\theta` for the
+            span :math:`[-\theta, \theta]` or the span :math:`[\theta_{min}, \theta_{max}]`,
+            defaults to None
+        :type angle: float or array_like(2), optional
+        :param plot: plot the map and a line to each observed landmark, defaults to False
         :type plot: bool, optional
         :param seed: random number seed, defaults to 0
         :type seed: int, optional
@@ -259,10 +264,12 @@ class RangeBearingSensor(SensorBase):
         The sensor can have a maximum range, or a minimum and maximum range. The
         sensor can also have a restricted angular field of view.
 
-        The sensing region can be displayed by setting the polygon parameter
-        which can show an outline or a filled polygon.  This is updated every
-        time :meth:`reading` is called, based on the current configuration of
-        the ``robot``.
+        If ``plot`` is True the landmark map is displayed and a line is drawn
+        from the robot to the landmark observed each time :meth:`reading` is
+        called.
+
+        .. note:: ``line_style`` and ``poly_style`` are accepted but are not
+            currently used.
 
         .. runblock:: pycon
 
@@ -275,8 +282,8 @@ class RangeBearingSensor(SensorBase):
 
         :seealso: :class:`~roboticstoolbox.mobile.LandmarkMap` :class:`~roboticstoolbox.mobile.EKF`
 
-        .. deprecated:: the ``animate`` keyword is deprecated, use ``plot``
-            instead.
+        .. deprecated:: 1.4.0
+            The ``animate`` keyword, use ``plot`` instead.
         """
 
         animate = kwargs.pop("animate", None)
