@@ -35,3 +35,8 @@ Part of the RVC ecosystem. **Read [rvc-ecosystem/AGENTS.md](https://github.com/p
   one place to change what "array-like" means.
 - New code uses modern annotation syntax: `X | Y`, `X | None`, `list[X]`, `dict[K, V]`, not
   `Union`, `Optional`, `List` or `Dict`.
+- Type checking: `mypy` (config in `pyproject.toml`, run it from the repo root with no arguments).
+  The package is being annotated module by module, so the config lists the modules that still
+  have errors; when you annotate a module, delete its entry and keep it at zero errors. Do not add
+  new entries. `backends/Dynamixel` and `backends/ROS` are unmaintained sketches with no tests and
+  are excluded for good: do not spend a PR annotating them.
