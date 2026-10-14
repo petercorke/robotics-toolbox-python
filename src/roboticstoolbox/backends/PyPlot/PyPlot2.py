@@ -3,6 +3,10 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import roboticstoolbox as rp
 import numpy as np
 from roboticstoolbox.backends.Connector import Connector
@@ -14,10 +18,10 @@ import sys
 from spatialmath import SE2
 
 _mpl = False
-_ipy_display = None
-_ipy_image = None
-_ipy_svg = None
-_ipy_clear_output = None
+_ipy_display: Any = None
+_ipy_image: Any = None
+_ipy_svg: Any = None
+_ipy_clear_output: Any = None
 
 try:
     import matplotlib
@@ -49,18 +53,18 @@ except ImportError:  # pragma nocover
 class PyPlot2(Connector):
     supports_ellipse: bool = True
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         super(PyPlot2, self).__init__()
-        self.robots = []
-        self.ellipses = []
-        self.sim_time = 0
+        self.robots: list[RobotPlot2] = []
+        self.ellipses: list[EllipsePlot] = []
+        self.sim_time: float = 0
         self.render_mode = "window"
         self.inline_every_n = 1
         self.inline_format = "svg"
-        self.inline_dpi = None
+        self.inline_dpi: float | None = None
         self._inline_step_count = 0
-        self._inline_display_handle = None
+        self._inline_display_handle: Any = None
         self._inline_is_jl = False
 
         if not _mpl:  # pragma nocover
@@ -69,7 +73,7 @@ class PyPlot2(Connector):
                 "pip install matplotlib\n\n"
             )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         s = ""
         for robot in self.robots:
             s += f"  robot: {robot.name}\n"
@@ -81,7 +85,7 @@ class PyPlot2(Connector):
         else:
             return f"PyPlot2D backend, t = {self.sim_time}, scene:\n" + s
 
-    def launch(self, name=None, limits=None, **kwargs):
+    def launch(self, name: Any = None, limits: Any = None, **kwargs: Any) -> None:
         """
         env = launch() launchs a blank 2D matplotlib figure
 
@@ -98,7 +102,6 @@ class PyPlot2(Connector):
 
         """
 
-        super().launch()
 
         self.render_mode = _resolve_render_mode(kwargs.get("render_mode"))
         self.inline_every_n = max(1, int(kwargs.get("inline_every_n", 1)))
@@ -126,8 +129,8 @@ class PyPlot2(Connector):
         # Create a 2D axes
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_facecolor("white")
-        plt.get_current_fig_manager().set_window_title(
-            f"Robotics Toolbox for Python (Figure {self.ax.figure.number})"
+        plt.get_current_fig_manager().set_window_title(  # type: ignore[union-attr]
+            f"Robotics Toolbox for Python (Figure {self.ax.figure.number})"  # type: ignore[union-attr]
         )
 
         self.ax.set_xbound(-0.5, 0.5)
@@ -139,8 +142,8 @@ class PyPlot2(Connector):
         self.ax.autoscale(enable=True, axis="both", tight=False)
 
         if limits is not None:
-            self.ax.set_xlim([limits[0], limits[1]])
-            self.ax.set_ylim([limits[2], limits[3]])
+            self.ax.set_xlim((limits[0], limits[1]))
+            self.ax.set_ylim((limits[2], limits[3]))
 
         self.ax.axis("equal")
 
@@ -165,7 +168,7 @@ class PyPlot2(Connector):
         # signal.signal(signal.SIGALRM, self._plot_handler)
         # signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
 
-    def step(self, dt=0.05):
+    def step(self, dt: float = 0.05) -> None:
         """
         state = step(args) triggers the external program to make a time step
         of defined time updating the state of the environment as defined by
@@ -180,7 +183,6 @@ class PyPlot2(Connector):
 
         """
 
-        super().step()
 
         self._step_robots(dt)
 
@@ -204,31 +206,28 @@ class PyPlot2(Connector):
 
         self._update_robots()
 
-    def reset(self):
+    def reset(self) -> None:
         """
         state = reset() triggers the external program to reset to the
         original state defined by launch
 
         """
 
-        super().reset()
 
-    def restart(self):
+    def restart(self) -> None:
         """
         state = restart() triggers the external program to close and relaunch
         to thestate defined by launch
 
         """
 
-        super().restart()
 
-    def close(self):
+    def close(self) -> None:
         """
         close() closes the plot
 
         """
 
-        super().close()
 
         # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.close(self.fig)
@@ -237,7 +236,15 @@ class PyPlot2(Connector):
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self, ob, readonly=False, display=True, eeframe=True, name=False, **kwargs):
+    def add(
+        self,
+        ob: Any,
+        readonly: bool = False,
+        display: bool = True,
+        eeframe: bool = True,
+        name: bool = False,
+        **kwargs: Any,
+    ) -> None:
         """
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -245,7 +252,6 @@ class PyPlot2(Connector):
 
         """
 
-        super().add()
 
         if isinstance(ob, rp.Robot2):
             self.robots.append(RobotPlot2(ob, self, readonly, display, eeframe, name))
@@ -263,15 +269,14 @@ class PyPlot2(Connector):
             plt.draw()
             plt.show(block=False)
 
-    def remove(self):
+    def remove(self) -> None:
         """
         id = remove(robot) removes the robot to the external environment.
 
         """
 
-        super().remove()  # ???
 
-    def hold(self):  # pragma: no cover
+    def hold(self) -> None:  # pragma: no cover
         """
         hold() keeps the plot open i.e. stops the plot from closing once
         the main script has finished.
@@ -291,7 +296,7 @@ class PyPlot2(Connector):
     #  Private methods
     #
 
-    def _step_robots(self, dt):
+    def _step_robots(self, dt: Any) -> None:
 
         for rpl in self.robots:
             robot = rpl.robot
@@ -312,20 +317,20 @@ class PyPlot2(Connector):
                     "Invalid robot.control_type. Must be one of 'p', 'v', or 'a'"
                 )
 
-    def _update_robots(self):
+    def _update_robots(self) -> None:
         pass
 
-    def _draw_robots(self):
+    def _draw_robots(self) -> None:
 
         for i in range(len(self.robots)):
             self.robots[i].draw()
 
-    def _draw_ellipses(self):
+    def _draw_ellipses(self) -> None:
 
         for i in range(len(self.ellipses)):
             self.ellipses[i].draw2()
 
-    def _push_inline_frame(self):
+    def _push_inline_frame(self) -> None:
         # Push a snapshot into notebook output for inline animation.
         if _ipy_display is None:
             return
@@ -357,7 +362,9 @@ class PyPlot2(Connector):
     # def _plot_handler(self, sig, frame):
     #     plt.pause(0.001)
 
-    def _add_teach_panel(self, robot, q, handle=None, block=True):
+    def _add_teach_panel(
+        self, robot: Any, q: Any, handle: Any = None, block: bool = True
+    ) -> None:
         """
         Add a teach panel
 
@@ -378,7 +385,7 @@ class PyPlot2(Connector):
         fig = self.fig
 
         # Add text to the plots
-        def text_trans(text, q):  # pragma: no cover
+        def text_trans(text: Any, q: Any) -> None:  # pragma: no cover
             # update displayed robot pose value
             T = robot.fkine(q, end=robot.ee_links[0])
             t = np.round(T.t, 3)
@@ -388,7 +395,7 @@ class PyPlot2(Connector):
             text[2].set_text("yaw: {0}".format(r))
 
         # Update the self state in mpl and the text
-        def update(val, text, robot):  # pragma: no cover
+        def update(val: Any, text: Any, robot: Any) -> None:  # pragma: no cover
             for j in range(robot.n):
                 if robot.isrevolute(j):
                     robot.q[j] = np.radians(self.sjoint[j].val)
@@ -461,7 +468,7 @@ class PyPlot2(Connector):
         for j in range(robot.n):
             # for each joint
             ymin = (1 - ym) - j * yh
-            self.axjoint.append(fig.add_axes([x1, ymin, x2, 0.03], facecolor="#dbdbdb"))
+            self.axjoint.append(fig.add_axes((x1, ymin, x2, 0.03), facecolor="#dbdbdb"))
 
             if robot.isrevolute(j):
                 slider = Slider(
@@ -488,7 +495,7 @@ class PyPlot2(Connector):
         self.step()
 
 
-def _isnotebook():
+def _isnotebook() -> Any:
     """
     Determine if code is being run from a Jupyter notebook or JupyterLite
 
@@ -507,7 +514,7 @@ def _isnotebook():
 
     # Fall back to checking IPython shell type
     try:
-        shell = get_ipython().__class__.__name__
+        shell = get_ipython().__class__.__name__  # type: ignore[name-defined]
         if shell == "ZMQInteractiveShell":
             return True  # Jupyter notebook or qtconsole
         elif shell == "TerminalInteractiveShell":
@@ -518,7 +525,7 @@ def _isnotebook():
         return False  # Probably standard Python interpreter
 
 
-def _resolve_render_mode(render_mode=None):
+def _resolve_render_mode(render_mode: Any = None) -> Any:
     if render_mode is not None:
         if render_mode not in ["window", "notebook-widget", "notebook-inline"]:
             raise ValueError(

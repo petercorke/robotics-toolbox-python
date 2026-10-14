@@ -246,6 +246,14 @@ module = [
     "roboticstoolbox.mobile.PoseGraph",
     "roboticstoolbox.mobile.EKF",
     "roboticstoolbox.mobile.sensors",
+    "roboticstoolbox.backends",
+    "roboticstoolbox.backends.Connector",
+    "roboticstoolbox.backends.swift",
+    "roboticstoolbox.backends.PyPlot.PyPlot",
+    "roboticstoolbox.backends.PyPlot.PyPlot2",
+    "roboticstoolbox.backends.PyPlot.RobotPlot",
+    "roboticstoolbox.backends.PyPlot.RobotPlot2",
+    "roboticstoolbox.backends.PyPlot.EllipsePlot",
 ]
 disallow_untyped_defs = true
 
@@ -255,11 +263,6 @@ disallow_untyped_defs = true
 # is checked, and must stay clean.
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.backends.PyPlot.EllipsePlot",
-    "roboticstoolbox.backends.PyPlot.PyPlot",
-    "roboticstoolbox.backends.PyPlot.PyPlot2",
-    "roboticstoolbox.backends.PyPlot.RobotPlot",
-    "roboticstoolbox.backends.PyPlot.RobotPlot2",
 ]
 ignore_errors = true
 
