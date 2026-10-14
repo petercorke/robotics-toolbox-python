@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -30,7 +34,7 @@ class LBR(URDFRobot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # The bundled file does $(find kuka_lbr_iiwa_support) to locate its
         # own macro file, but rtb-data ships that content under the

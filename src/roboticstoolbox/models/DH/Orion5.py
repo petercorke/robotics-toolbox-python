@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 # Created by: Aditya Dua
 # 5 October 2017
@@ -41,7 +45,7 @@ class Orion5(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self, base=None):
+    def __init__(self, base: Any = None) -> None:
 
         mm = 1e-3
         deg = pi / 180

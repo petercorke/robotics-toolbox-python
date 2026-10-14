@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from copy import deepcopy
 from abc import ABC
 from typing_extensions import Self
@@ -28,7 +30,7 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 # ETType = TypeVar("ETType", bound=BaseET)
 
 
-def _copy_shapes(shapes, link_name):
+def _copy_shapes(shapes: Any, link_name: Any) -> Any:
     """Copy a list of coal/geometry shape objects, warning and skipping any that
     do not support deepcopy (coal CollisionObject instances cannot be pickled)."""
     import warnings
@@ -53,7 +55,7 @@ def _copy_shapes(shapes, link_name):
     return result
 
 
-def _dirties_frne(func):
+def _dirties_frne(func: Any) -> Any:
     """
     @_dirties_frne
 
@@ -80,7 +82,7 @@ def _dirties_frne(func):
     """
 
     @wraps(func)
-    def wrapper_dirties_frne(*args):
+    def wrapper_dirties_frne(*args: Any) -> Any:
         if args[0]._robot is not None:
             args[0]._robot.dynchanged()
         args[0]._hasdynamics = True
@@ -134,7 +136,7 @@ class BaseLink(SceneNode, ABC):
     def __init__(
         self,
         ets: ETS | ETS2 | ET | ET2 = ETS(),
-        name=None,
+        name: Any = None,
         parent: Self | str | None = None,
         joint_name: str | None = None,
         m: float | None = None,
@@ -149,13 +151,13 @@ class BaseLink(SceneNode, ABC):
         tlim: float | None = None,
         geometry: list[Shape] = [],
         collision: list[Shape] = [],
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         # Initialise the scene node
         super().__init__()
 
         # Reference to parent robot
-        self._robot = None
+        self._robot: rtb.BaseRobot | None = None
 
         # Set name of link and joint()
         if name is None:
@@ -172,7 +174,7 @@ class BaseLink(SceneNode, ABC):
         self._scene_children.append(self._collision)
 
         # Link dynamic Parameters
-        def dynpar(self, name, value, default):
+        def dynpar(self: Any, name: Any, value: Any, default: Any) -> Any:
             if value is None:
                 value = default
                 setattr(self, name, value)
@@ -213,7 +215,7 @@ class BaseLink(SceneNode, ABC):
         if parent is not None:
             if isinstance(parent, str):
                 self.parent = None
-                self._parent_name = parent
+                self._parent_name: str | None = parent
             elif isinstance(parent, BaseLink):
                 self.parent = parent
                 self._parent_name = None
@@ -221,11 +223,11 @@ class BaseLink(SceneNode, ABC):
             else:
                 raise TypeError("parent must be BaseLink subclass")
         else:
-            self._parent = None
+            self._parent: Self | None = None
             self._parent_name = None
 
         self._joint_name = joint_name
-        self._children = []
+        self._children: list[Self] = []
 
         self.number = 0
 
@@ -241,7 +243,7 @@ class BaseLink(SceneNode, ABC):
 
     # -------------------------------------------------------------------------- #
 
-    def _init_Ts(self):
+    def _init_Ts(self) -> None:
         # Compute the leading, constant, part of the ETS
 
         if isinstance(self, Link2):
@@ -301,10 +303,10 @@ class BaseLink(SceneNode, ABC):
 
         """
 
-        return self._ets  # type: ignore[return-value]  # _ets is ETS|ETS2; ETS for Link subclasses
+        return self._ets  # _ets is ETS|ETS2; ETS for Link subclasses
 
     @ets.setter
-    def ets(self, new_ets: ETS | ETS2):
+    def ets(self, new_ets: ETS | ETS2) -> None:
         if new_ets.n > 1:
             raise ValueError("An elementary link can only have one joint variable")
 
@@ -314,6 +316,7 @@ class BaseLink(SceneNode, ABC):
         self._ets = new_ets
         self._init_Ts()
 
+        self._v: ET | ET2 | None
         if self._ets.n:
             self._v = self._ets[-1]
             self._isjoint = True
@@ -361,7 +364,7 @@ class BaseLink(SceneNode, ABC):
         s += ")"
         return s
 
-    def _repr_pretty_(self, p, cycle):
+    def _repr_pretty_(self, p: Any, cycle: Any) -> None:
         """
         Pretty string for IPython
 
@@ -390,10 +393,10 @@ class BaseLink(SceneNode, ABC):
 
         return deepcopy(self)
 
-    def _copy(self):
+    def _copy(self) -> None:
         raise DeprecationWarning("Use copy method of Link class")
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> Any:
         ets = deepcopy(self.ets)
         name = deepcopy(self.name)
         parent = self.parent
@@ -427,8 +430,8 @@ class BaseLink(SceneNode, ABC):
             qlim=qlim,
             qdlim=qdlim,
             tlim=tlim,
-            geometry=geometry,  # type: ignore
-            collision=collision,  # type: ignore
+            geometry=geometry,
+            collision=collision,
         )
 
         if self._children:
@@ -480,7 +483,7 @@ class BaseLink(SceneNode, ABC):
         return self._name
 
     @name.setter
-    def name(self, name: str):
+    def name(self, name: str) -> None:
         self._name = name
 
     # -------------------------------------------------------------------------- #
@@ -499,7 +502,7 @@ class BaseLink(SceneNode, ABC):
         return self._robot
 
     @robot.setter
-    def robot(self, robot_ref: "rtb.BaseRobot"):
+    def robot(self, robot_ref: "rtb.BaseRobot") -> None:
         """
         Set the forward reference to the robot which owns this link
         """
@@ -532,7 +535,7 @@ class BaseLink(SceneNode, ABC):
             return None
 
     @qlim.setter
-    def qlim(self, qlim_new: ArrayLike):
+    def qlim(self, qlim_new: ArrayLike) -> None:
         if self.v:
             self.ets.qlim = qlim_new
         else:
@@ -559,7 +562,7 @@ class BaseLink(SceneNode, ABC):
         return self._qdlim
     
     @qdlim.setter
-    def qdlim(self, qdlim_new: float):
+    def qdlim(self, qdlim_new: float) -> None:
         self._qdlim = qdlim_new
 
     @property
@@ -583,7 +586,7 @@ class BaseLink(SceneNode, ABC):
         return self._tlim   
     
     @tlim.setter
-    def tlim(self, tlim_new: float):
+    def tlim(self, tlim_new: float) -> None:
         self._tlim = tlim_new
 
     @property
@@ -656,7 +659,7 @@ class BaseLink(SceneNode, ABC):
 
     @m.setter
     @_dirties_frne
-    def m(self, m_new: float):
+    def m(self, m_new: float) -> None:
         self._m = m_new
 
     # -------------------------------------------------------------------------- #
@@ -676,11 +679,11 @@ class BaseLink(SceneNode, ABC):
         - ``link.r = ...`` checks and sets the link centre of mass
         """
 
-        return self._r  # type: ignore
+        return self._r
 
     @r.setter
     @_dirties_frne
-    def r(self, r_new: ArrayLike):
+    def r(self, r_new: ArrayLike) -> None:
         self._r = getvector(r_new, 3)
 
     # -------------------------------------------------------------------------- #
@@ -716,11 +719,11 @@ class BaseLink(SceneNode, ABC):
 
         """
 
-        return self._I  # type: ignore
+        return self._I
 
     @I.setter
     @_dirties_frne
-    def I(self, I_new: ArrayLike):
+    def I(self, I_new: ArrayLike) -> None:
         if ismatrix(I_new, (3, 3)):
             # 3x3 matrix passed
             if np.any(np.abs(I_new - I_new.T) > 1e-8):  # type: ignore
@@ -729,7 +732,7 @@ class BaseLink(SceneNode, ABC):
         elif isvector(I_new, 9):
             # 3x3 matrix passed as a 1d vector
             I_new = I_new.reshape(3, 3)  # type: ignore
-            if np.any(np.abs(I_new - I_new.T) > 1e-8):  # type: ignore
+            if np.any(np.abs(I_new - I_new.T) > 1e-8):
                 raise ValueError("3x3 matrix is not symmetric")
 
         elif isvector(I_new, 6):
@@ -737,15 +740,15 @@ class BaseLink(SceneNode, ABC):
             # [Ixx Iyy Izz Ixy Iyz Ixz]
             I_new = np.array(
                 [
-                    [I_new[0], I_new[3], I_new[5]],  # type: ignore
-                    [I_new[3], I_new[1], I_new[4]],  # type: ignore
-                    [I_new[5], I_new[4], I_new[2]],  # type: ignore
+                    [I_new[0], I_new[3], I_new[5]],
+                    [I_new[3], I_new[1], I_new[4]],
+                    [I_new[5], I_new[4], I_new[2]],
                 ]
             )
 
         elif isvector(I_new, 3):
             # 3-vector passed, moments of inertia [Ixx Iyy Izz]
-            I_new = np.diag(I_new)  # type: ignore
+            I_new = np.diag(I_new)
 
         else:
             raise ValueError("invalid shape passed: must be (3,3), (6,), (3,)")
@@ -774,7 +777,7 @@ class BaseLink(SceneNode, ABC):
 
     @Jm.setter
     @_dirties_frne
-    def Jm(self, Jm_new: float):
+    def Jm(self, Jm_new: float) -> None:
         self._Jm = Jm_new
 
     # -------------------------------------------------------------------------- #
@@ -799,7 +802,7 @@ class BaseLink(SceneNode, ABC):
 
     @B.setter
     @_dirties_frne
-    def B(self, B_new: float):
+    def B(self, B_new: float) -> None:
         if isscalar(B_new):
             self._B = B_new
         else:
@@ -841,12 +844,12 @@ class BaseLink(SceneNode, ABC):
 
     @Tc.setter
     @_dirties_frne
-    def Tc(self, Tc_new: ArrayLike):
+    def Tc(self, Tc_new: ArrayLike) -> None:
         try:
             # sets Coulomb friction parameters to [F -F], for a symmetric
             # Coulomb friction model.
             Tc = getvector(Tc_new, 1)
-            Tc_new = np.array([Tc[0], -Tc[0]])  # type: ignore
+            Tc_new = np.array([Tc[0], -Tc[0]])
         except ValueError:
             # [FP FM] sets Coulomb friction to [FP FM], for an asymmetric
             # Coulomb friction model. FP>0 and FM<0.  FP is applied for a
@@ -880,7 +883,7 @@ class BaseLink(SceneNode, ABC):
 
     @G.setter
     @_dirties_frne
-    def G(self, G_new: float):
+    def G(self, G_new: float) -> None:
         self._G = G_new
 
     # -------------------------------------------------------------------------- #
@@ -899,6 +902,15 @@ class BaseLink(SceneNode, ABC):
 
         """
         return self._geometry
+
+    @geometry.setter
+    def geometry(self, geom: SceneGroup | list[Shape] | Shape) -> None:
+        if isinstance(geom, list):
+            self.geometry.scene_children = geom
+        elif isinstance(geom, Shape):
+            self.geometry.scene_children.append(geom)
+        elif isinstance(geom, SceneGroup):
+            self._geometry = geom
 
     @property
     def collision(self) -> SceneGroup:
@@ -919,22 +931,13 @@ class BaseLink(SceneNode, ABC):
         return self._collision
 
     @collision.setter
-    def collision(self, coll: SceneGroup | list[Shape] | Shape):
+    def collision(self, coll: SceneGroup | list[Shape] | Shape) -> None:
         if isinstance(coll, list):
-            self.collision.scene_children = coll  # type: ignore
+            self.collision.scene_children = coll
         elif isinstance(coll, Shape):
             self.collision.scene_children.append(coll)
         elif isinstance(coll, SceneGroup):
             self._collision = coll
-
-    @geometry.setter
-    def geometry(self, geom: SceneGroup | list[Shape] | Shape):
-        if isinstance(geom, list):
-            self.geometry.scene_children = geom  # type: ignore
-        elif isinstance(geom, Shape):
-            self.geometry.scene_children.append(geom)
-        elif isinstance(geom, SceneGroup):
-            self._geometry = geom
 
     # -------------------------------------------------------------------------- #
 
@@ -990,7 +993,7 @@ class BaseLink(SceneNode, ABC):
         return None if not self.v else self.v._jindex
 
     @jindex.setter
-    def jindex(self, j: int):
+    def jindex(self, j: int) -> None:
         if self.v:
             self.v.jindex = j
             self.ets._auto_jindex = False
@@ -1039,7 +1042,7 @@ class BaseLink(SceneNode, ABC):
         return self._parent
 
     @parent.setter
-    def parent(self, parent: Self | None):
+    def parent(self, parent: Self | None) -> None:
         self._parent = parent
 
     @property
@@ -1081,7 +1084,7 @@ class BaseLink(SceneNode, ABC):
 
     def closest_point(
         self, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    ) -> tuple[int | None, NDArray | None, NDArray | None]:
+    ) -> tuple[float | None, NDArray | None, NDArray | None]:
         """
         Finds the closest point to a shape
 
@@ -1104,7 +1107,7 @@ class BaseLink(SceneNode, ABC):
             self.update()
             shape.update()
 
-        d = 10000
+        d: float | None = 10000
         p1 = None
         p2 = None
 
@@ -1143,7 +1146,7 @@ class BaseLink(SceneNode, ABC):
 
         return False
 
-    def collided(self, shape: Shape, skip: bool = False):
+    def collided(self, shape: Shape, skip: bool = False) -> Any:
         """
         Checks for collision with a shape
 
@@ -1157,7 +1160,7 @@ class BaseLink(SceneNode, ABC):
         warn("base kwarg is deprecated, use pose instead", FutureWarning)
         return self.iscollided(shape=shape, skip=skip)
 
-    def dyn(self, indent=0):
+    def dyn(self, indent: int = 0) -> Any:
         """
         Inertial properties of link as a string
 
@@ -1225,7 +1228,7 @@ class BaseLink(SceneNode, ABC):
 
         return s
 
-    def _dyn2list(self, fmt="{: .3g}"):
+    def _dyn2list(self, fmt: str = "{: .3g}") -> Any:
         """
         Inertial properties of link as a string
 
@@ -1245,7 +1248,7 @@ class BaseLink(SceneNode, ABC):
             border="thin",
         )
 
-        def format(l, fmt, val):
+        def format(l: Any, fmt: Any, val: Any) -> None:
             if isinstance(val, np.ndarray):
                 try:
                     s = ", ".join([fmt.format(v) for v in val])
@@ -1260,7 +1263,7 @@ class BaseLink(SceneNode, ABC):
                     s = str(val)
             l.append(s)
 
-        dyn = []
+        dyn: list[str] = []
         format(dyn, fmt, self.m)
         format(dyn, fmt, self.r)
         I = self.I.flatten()
@@ -1274,12 +1277,12 @@ class BaseLink(SceneNode, ABC):
 
     def _format_param(
         self,
-        l,
-        name,
-        symbol=None,
-        ignorevalue=None,
-        indices=None,
-    ):  # noqa  # pragma nocover
+        l: list[str],
+        name: str,
+        symbol: str | None = None,
+        ignorevalue: Any = None,
+        indices: Any = None,
+    ) -> None:  # noqa  # pragma nocover
         # if value == ignorevalue then don't display it
 
         v = getattr(self, name)
@@ -1313,9 +1316,9 @@ class BaseLink(SceneNode, ABC):
         if s is not None:
             l.append(s)
 
-    def _params(self, name: bool = True):  # pragma nocover
+    def _params(self, name: bool = True) -> Any:  # pragma nocover
 
-        l = []
+        l: list[str] = []
         if name:
             self._format_param(l, "name")
         if self.parent_name is not None:
@@ -1336,7 +1339,7 @@ class BaseLink(SceneNode, ABC):
 
         return l
 
-    def islimit(self, q: float):
+    def islimit(self, q: float) -> Any:
         """
         Checks if joint exceeds limit
 
@@ -1358,7 +1361,7 @@ class BaseLink(SceneNode, ABC):
         else:
             return q < self.qlim[0] or q > self.qlim[1]
 
-    def nofriction(self, coulomb: bool = True, viscous: bool = False):
+    def nofriction(self, coulomb: bool = True, viscous: bool = False) -> Any:
         """
         Clone link without friction
 
@@ -1387,7 +1390,7 @@ class BaseLink(SceneNode, ABC):
 
         return link
 
-    def friction(self, qd: float, coulomb: bool = True):
+    def friction(self, qd: float, coulomb: bool = True) -> Any:
         r"""
         Compute joint friction
 
@@ -1479,8 +1482,8 @@ class Link(BaseLink):
     """
 
     def __init__(
-        self, ets: ETS | ET = ETS(), jindex: int | None = None, **kwargs
-    ):
+        self, ets: ETS | ET = ETS(), jindex: int | None = None, **kwargs: Any
+    ) -> None:
         # process common options
         super().__init__(ets=ets, **kwargs)
 
@@ -1519,7 +1522,9 @@ class Link(BaseLink):
 
 
 class Link2(BaseLink):
-    def __init__(self, ets: ETS2 = ETS2(), jindex: int | None = None, **kwargs):
+    def __init__(
+        self, ets: ETS2 = ETS2(), jindex: int | None = None, **kwargs: Any
+    ) -> None:
         # process common options
         super().__init__(ets=ets, **kwargs)
 

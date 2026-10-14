@@ -6,6 +6,7 @@
 from __future__ import annotations
 from collections import namedtuple
 from email import message
+from typing import Any
 from roboticstoolbox.tools.data import rtb_path_to_datafile
 import warnings
 import copy
@@ -77,7 +78,7 @@ class DHRobot(Robot):
 
     """
 
-    def __init__(self, links, meshdir=None, **kwargs):
+    def __init__(self, links: Any, meshdir: Any = None, **kwargs: Any) -> None:
         # Verify L
         if not isinstance(links, list):
             raise TypeError("The links must be stored in a list.")
@@ -144,10 +145,10 @@ class DHRobot(Robot):
         self._frne = None
 
     @property
-    def links(self) -> list[DHLink]:  # type: ignore[override]
-        return self._links  # type: ignore[return-value]
+    def links(self) -> list[DHLink]:
+        return self._links
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Pretty prints the DH Model of the robot. Will output angles in degrees
 
@@ -186,7 +187,7 @@ class DHRobot(Robot):
             dh = "standard"
         s += f", {dh} DH parameters\n"
 
-        def qstr(j, link):
+        def qstr(j: Any, link: Any) -> Any:
             j += 1
             if link.isflip:
                 s = f"-q{j:d}"
@@ -202,7 +203,7 @@ class DHRobot(Robot):
                     s += f" {sign} {offset * deg:.3g}\u00b0"
             return s
 
-        def angle(theta, fmt=None):
+        def angle(theta: Any, fmt: Any = None) -> Any:
             if sym.issymbol(theta):  # pragma nocover
                 return "<<red>>" + str(theta)
             else:
@@ -211,7 +212,7 @@ class DHRobot(Robot):
                 else:
                     return str(theta * deg) + "\u00b0"
 
-        def format_attr(attr) -> str:
+        def format_attr(attr: Any) -> str:
             if isinstance(attr, float):
                 return f"{attr:.4g}"
             else:
@@ -242,7 +243,7 @@ class DHRobot(Robot):
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
-                        ql = [qlim[0, j], qlim[1, j]]
+                        ql = [format_attr(qlim[k, j]) for k in [0, 1]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
@@ -265,7 +266,7 @@ class DHRobot(Robot):
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
-                        ql = [qlim[0, j], qlim[1, j]]
+                        ql = [format_attr(qlim[k, j]) for k in [0, 1]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
@@ -314,7 +315,7 @@ class DHRobot(Robot):
 
         return s
 
-    def __add__(self, L):
+    def __add__(self, L: Any) -> Any:
         nlinks = []
 
         # TODO - Should I do a deep copy here a physically copy the DHLinks
@@ -340,7 +341,7 @@ class DHRobot(Robot):
             gravity=self.gravity,
         )
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> Any:
         links = []
 
         for link in self.links:
@@ -419,7 +420,7 @@ class DHRobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    def _set_link_fk(self, q):
+    def _set_link_fk(self, q: Any) -> None:
         """
         robot._set_link_fk(q) evaluates fkine for each link within a
         robot and stores that pose in a private variable within the link.
@@ -452,7 +453,7 @@ class DHRobot(Robot):
     # --------------------------------------------------------------------- #
 
     @property
-    def mdh(self):
+    def mdh(self) -> Any:
         """
         Modified Denavit-Hartenberg status
 
@@ -474,7 +475,7 @@ class DHRobot(Robot):
         return self._mdh
 
     @property
-    def d(self):
+    def d(self) -> Any:
         r"""
         Link offset values
 
@@ -500,7 +501,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def a(self):
+    def a(self) -> Any:
         r"""
         Link length values
 
@@ -526,7 +527,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def theta(self):
+    def theta(self) -> Any:
         r"""
         Joint angle values
 
@@ -552,7 +553,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def alpha(self):
+    def alpha(self) -> Any:
         r"""
         Link twist values
 
@@ -578,7 +579,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def r(self):
+    def r(self) -> Any:
         r"""
         Link centre of mass values
 
@@ -600,7 +601,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def offset(self):
+    def offset(self) -> Any:
         r"""
         Joint offset values
 
@@ -621,7 +622,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def reach(self):
+    def reach(self) -> Any:
         r"""
         Reach of the robot
 
@@ -653,7 +654,7 @@ class DHRobot(Robot):
         return self._reach
 
     @property
-    def nbranches(self):
+    def nbranches(self) -> Any:
         """
         Number of branches
 
@@ -674,7 +675,7 @@ class DHRobot(Robot):
         """
         return 1
 
-    def A(self, j, q=None):
+    def A(self, j: Any, q: Any = None) -> Any:
         """
         Link forward kinematics
 
@@ -717,7 +718,7 @@ class DHRobot(Robot):
 
         return T
 
-    def islimit(self, q=None):
+    def islimit(self, q: Any = None) -> Any:
         """
         Joint limit test
 
@@ -748,7 +749,7 @@ class DHRobot(Robot):
 
         return [link.islimit(qk) for (link, qk) in zip(self, q)]
 
-    def isspherical(self):
+    def isspherical(self) -> Any:
         """
         Test for spherical wrist
 
@@ -785,7 +786,7 @@ class DHRobot(Robot):
             and L[2].sigma == 0
         )
 
-    def dhunique(self):
+    def dhunique(self) -> None:
         """
         Print the unique DH parameters
 
@@ -820,7 +821,7 @@ class DHRobot(Robot):
                 table.row(f"⍺{j}", link.alpha)
         table.print()
 
-    def twists(self, q=None):
+    def twists(self, q: Any = None) -> Any:
         """
         Joint axes as  twists
 
@@ -859,9 +860,9 @@ class DHRobot(Robot):
             # MDH case
             for j, link in enumerate(self):
                 if link.sigma == 0:
-                    tw[j] = Twist3.UnitRevolute(T[j].a, T[j].t)  # type: ignore[union-attr]
+                    tw[j] = Twist3.UnitRevolute(T[j].a, T[j].t)
                 else:
-                    tw[j] = Twist3.UnitPrismatic(T[j].a)  # type: ignore[union-attr]
+                    tw[j] = Twist3.UnitPrismatic(T[j].a)
         else:
             # DH case
             for j, link in enumerate(self):
@@ -875,13 +876,13 @@ class DHRobot(Robot):
                 else:
                     # subsequent links
                     if link.sigma == 0:
-                        tw[j] = Twist3.UnitRevolute(T[j - 1].a, T[j - 1].t)  # type: ignore[union-attr]  # revolute
+                        tw[j] = Twist3.UnitRevolute(T[j - 1].a, T[j - 1].t)  # revolute
                     else:
                         tw[j] = Twist3.UnitPrismatic(T[j - 1].a)  # prismatic
 
         return tw, T[-1]
 
-    def ets(self, *args, **kwargs) -> ETS:
+    def ets(self, *args: Any, **kwargs: Any) -> ETS:  # type: ignore[override]
         """
         Robot kinematics as an elemenary transform sequence
 
@@ -908,6 +909,7 @@ class DHRobot(Robot):
         else:
             tool = self.tool.A
 
+        ets: Any
         if base is None:
             ets = ETS()
         else:
@@ -923,7 +925,7 @@ class DHRobot(Robot):
 
         return ets
 
-    def fkine(self, q, **kwargs):
+    def fkine(self, q: Any, **kwargs: Any) -> Any:  # type: ignore[override]
         """
         Forward kinematics
 
@@ -974,17 +976,17 @@ class DHRobot(Robot):
                     Tr = L.A(q)
                     first = False
                 else:
-                    Tr *= L.A(q)  # type: ignore
+                    Tr *= L.A(q)
 
             if base is not None:
-                Tr = base * Tr  # type: ignore
+                Tr = base * Tr
             if tool is not None:
-                Tr = Tr * tool  # type: ignore
-            T.append(Tr)  # type: ignore
+                Tr = Tr * tool
+            T.append(Tr)
 
         return T
 
-    def fkine_path(self, q, old=None):
+    def fkine_path(self, q: Any, old: Any = None) -> Any:
         """
         Compute the pose of every link frame
 
@@ -1016,12 +1018,12 @@ class DHRobot(Robot):
 
         return T
 
-    def segments(self):
-        segments = [None]
+    def segments(self) -> Any:
+        segments: list[Any] = [None]
         segments.extend(self.links)
         return [segments]
 
-    def fkine_all(self, q=None, old=True):
+    def fkine_all(self, q: Any = None, old: bool = True) -> Any:
         """
         Forward kinematics for all link frames
 
@@ -1069,7 +1071,7 @@ class DHRobot(Robot):
             Tall.append(Tj)
         return Tall
 
-    def jacobe(self, q, half=None, **kwargs):
+    def jacobe(self, q: Any, half: Any = None, **kwargs: Any) -> Any:  # type: ignore[override]
         r"""
         Manipulator Jacobian in end-effector frame
 
@@ -1104,14 +1106,14 @@ class DHRobot(Robot):
 
         n = self.n
         L = self.links
-        J = np.zeros((6, self.n), dtype=q.dtype)  # type: ignore
+        J = np.zeros((6, self.n), dtype=q.dtype)
 
         U: NDArray = np.asarray(self.tool.A)
 
         for j in range(n - 1, -1, -1):
             if self.mdh == 0:
                 # standard DH convention
-                U = L[j].A(q[j]).A @ U  # type: ignore
+                U = L[j].A(q[j]).A @ U
 
             if not L[j].sigma:
                 # revolute axis
@@ -1132,7 +1134,7 @@ class DHRobot(Robot):
 
             if self.mdh != 0:
                 # modified DH convention
-                U = L[j].A(q[j]).A @ U  # type: ignore
+                U = L[j].A(q[j]).A @ U
 
         # return top or bottom half if asked
         if half is not None:
@@ -1145,7 +1147,14 @@ class DHRobot(Robot):
 
         return J
 
-    def jacob0(self, q=None, T=None, half=None, start=None, end=None):
+    def jacob0(  # type: ignore[override]
+        self,
+        q: Any = None,
+        T: Any = None,
+        half: Any = None,
+        start: Any = None,
+        end: Any = None,
+    ) -> Any:
         r"""
         Manipulator Jacobian in world frame
 
@@ -1203,7 +1212,7 @@ class DHRobot(Robot):
                 raise ValueError("bad half specified")
         return J0
 
-    def jacob0_analytical(self, q, representation=None, T=None):
+    def jacob0_analytical(self, q: Any, representation: Any = None, T: Any = None) -> Any:  # type: ignore[override]
         r"""
         Manipulator Jacobian in world frame
 
@@ -1280,7 +1289,9 @@ class DHRobot(Robot):
         A = rotvelxform(gamma, representation=representation, inverse=True, full=True)
         return A @ J0
 
-    def hessian0(self, q=None, J0=None, start=None, end=None):
+    def hessian0(  # type: ignore[override]
+        self, q: Any = None, J0: Any = None, start: Any = None, end: Any = None
+    ) -> Any:
         r"""
         Manipulator Hessian in base frame
 
@@ -1336,14 +1347,14 @@ class DHRobot(Robot):
 
         return self.ets().hessian0(q, J0)
 
-    def _get_limit_links(self, end=None, start=None):
+    def _get_limit_links(self, end: Any = None, start: Any = None) -> Any:  # type: ignore[override]
         # For compatibility with ERobot
 
         return None, None, None
 
     # -------------------------------------------------------------------------- #
 
-    def _copy_to_cpp(self):
+    def _copy_to_cpp(self) -> None:
         # Compress link data into a 1D array
         L = np.zeros(24 * self.n)
 
@@ -1368,7 +1379,7 @@ class DHRobot(Robot):
         self._frne = init(self.n, self.mdh, L)
         self._frne_stale = False
 
-    def delete_rne(self):
+    def delete_rne(self) -> None:
         """
         Frees the memory holding the robot object in C if it has been
         initialised.  Not normally needed — the destructor handles this
@@ -1379,7 +1390,15 @@ class DHRobot(Robot):
             self._frne = None
             self._frne_stale = True
 
-    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None, base_wrench=False):
+    def rne(  # type: ignore[override]
+        self,
+        q: Any,
+        qd: Any = None,
+        qdd: Any = None,
+        gravity: Any = None,
+        fext: Any = None,
+        base_wrench: bool = False,
+    ) -> Any:
         r"""
         Inverse dynamics
 
@@ -1513,14 +1532,14 @@ class DHRobot(Robot):
 
     def rne_python(
         self,
-        Q,
-        QD=None,
-        QDD=None,
-        gravity=None,
-        fext=None,
-        debug=False,
-        base_wrench=False,
-    ):
+        Q: Any,
+        QD: Any = None,
+        QDD: Any = None,
+        gravity: Any = None,
+        fext: Any = None,
+        debug: bool = False,
+        base_wrench: bool = False,
+    ) -> Any:
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
 
@@ -1567,7 +1586,7 @@ class DHRobot(Robot):
         else:
             base = self.base.A
 
-        def removesmall(x):
+        def removesmall(x: Any) -> Any:
             return x
 
         n = self.n
@@ -1656,7 +1675,7 @@ class DHRobot(Robot):
             w = np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
             wd = np.zeros((3,), dtype=dtype)
-            vd = -gravity  # type: ignore
+            vd = -gravity
 
             if base is not None:
                 Rb = t2r(base).T
@@ -1873,7 +1892,31 @@ class DHRobot(Robot):
 
     # -------------------------------------------------------------------------- #
 
-    def ikine_6s(self, T, config, ikfunc):
+    def ikine_6s(self, T: Any, config: Any, ikfunc: Any) -> Any:
+        """
+        Analytic inverse kinematics for a robot with a spherical wrist
+
+        .. deprecated:: 1.4.5
+            This came from the MATLAB Toolbox and is not general.  It only handles
+            the wrist, the user supplied ``ikfunc`` must solve the first three
+            joints, and that is specific to one robot geometry.  It also
+            mishandles trajectories and unreachable poses.  It is no longer used by
+            :meth:`Puma560.ikine_a`, which is self-contained.  A hand-written
+            solution belongs in the class of the robot it is written for.
+
+        :param T: end-effector pose
+        :param config: arm configuration string
+        :param ikfunc: function ``ikfunc(robot, T, config)`` which returns the
+            joint angles of the first three joints
+        :returns: an IKSolution
+        """
+        warnings.warn(
+            "ikine_6s is deprecated and will be removed in a future release, "
+            "write a hand-written solution for your robot, as Puma560.ikine_a does",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         # Undo base and tool transformations, but if they are not
         # set, skip the operation.  Nicer for symbolics
         if np.array_equal(self.base.A, np.eye(4)):
@@ -1915,7 +1958,7 @@ class DHRobot(Robot):
                     self.links[5].alpha
                 )
 
-                R = Td4.inv() * T13.inv() * Tk * Tt.inv()  # type: ignore[union-attr]
+                R = Td4.inv() * T13.inv() * Tk * Tt.inv()
 
                 # The spherical wrist implements Euler angles
                 if "f" in config:
@@ -1935,22 +1978,24 @@ class DHRobot(Robot):
             else:
                 # ikfunc can return None or a str reason
                 if theta is None:
-                    solution = IKSolution(q=None, success=False)
+                    solution = IKSolution(q=None, success=False)  # type: ignore[arg-type]
                 else:
-                    solution = IKSolution(q=None, success=False, reason=theta)
+                    solution = IKSolution(q=None, success=False, reason=theta)  # type: ignore[arg-type]
 
             solutions.append(solution)
 
         if len(T) == 1:
             return solutions[0]
         else:
+            # the 2nd and 3rd positional arguments are not what IKSolution
+            # takes (success, iterations): see findings
             return IKSolution(
                 np.vstack([sol.q for sol in solutions]),
-                np.array([sol.success for sol in solutions]),
-                [sol.reason for sol in solutions],
+                np.array([sol.success for sol in solutions]),  # type: ignore[arg-type]
+                [sol.reason for sol in solutions],  # type: ignore[arg-type]
             )
 
-    def config_validate(self, config, allowables):
+    def config_validate(self, config: Any, allowables: Any) -> Any:
         """
         Validate a configuration string
 
@@ -1996,17 +2041,17 @@ class DHRobot(Robot):
 
     # -------------------------------------------------------------------------- #
 
-    def ikine_LM(
-        self,
-        Tep: np.ndarray | SE3,
-        q0: ArrayLike | None = None,
-        **ikargs,
-    ):
+    def ikine_LM(  # type: ignore[override]
+        self, Tep: np.ndarray | SE3, q0: ArrayLike | None = None, **ikargs: Any
+    ) -> Any:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization
 
-        :param Tep: The desired end-effector pose
-        :param q0: The initial joint coordinate vector
+        :param Tep: The desired end-effector pose or pose trajectory, see
+            :meth:`ETS.ikine_LM` for how a trajectory is handled
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ikargs: |ikargs|
         :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
         :rtype: IKSolution
@@ -2017,18 +2062,18 @@ class DHRobot(Robot):
 
         .. seealso:: :meth:`ikine_LM` (:class:`~roboticstoolbox.ETS`)
         """
-        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)
+        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)  # type: ignore[arg-type]
 
 
 class SerialLink(DHRobot):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         warnings.warn(
             "SerialLink is deprecated, use DHRobot instead", DeprecationWarning
         )
         super().__init__(*args, **kwargs)
 
 
-def _cross(a, b):
+def _cross(a: Any, b: Any) -> Any:
     return np.r_[
         a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]
     ]
@@ -2047,7 +2092,7 @@ if __name__ == "__main__":  # pragma nocover
     # tw, T0 = puma.twists(puma.qz)
     # print(planar)
 
-    puma = rtb.models.DH.Puma560()
+    puma = rtb.models.DH.Puma560()  # type: ignore[operator]  # class, not module
     print(puma)
     # print(puma.jacob0(puma.qn, analytical="eul"))
     # puma.base = None

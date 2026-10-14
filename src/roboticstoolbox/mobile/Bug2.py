@@ -7,15 +7,19 @@ Python Bug Planner
 # from scipy import integrate
 
 # from spatialmath.pose2d import SE2
+from __future__ import annotations
+
+from typing import Any
+
+import numpy as np
 from spatialmath import base
-from spatialmath.base.animate import *
-from scipy.ndimage import *
 
 # from matplotlib import cm
 import matplotlib.pyplot as plt
 
 # from matplotlib import animation
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class Bug2(PlannerBase):
@@ -42,18 +46,18 @@ class Bug2(PlannerBase):
     :seealso: :class:`PlannerBase`
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(ndims=2, **kwargs)
 
-        self.H = []  # hit points
+        self.H: list[NDArray] = []  # hit points
         self._j = 0
         self._step = 1
-        self._m_line = None
-        self._edge = None
-        self._k = None
+        self._m_line: NDArray | None = None
+        self._edge: list[NDArray] | None = None
+        self._k: int | None = None
 
     @property
-    def m_line(self):
+    def m_line(self) -> NDArray | None:
         """
         Get m-line
 
@@ -67,14 +71,14 @@ class Bug2(PlannerBase):
     # override query method of base class
     def run(
         self,
-        start=None,
-        goal=None,
-        animate=False,
-        pause=0.001,
-        trail=True,
-        movie=None,
-        **kwargs,
-    ):
+        start: ArrayLike | None = None,
+        goal: ArrayLike | None = None,
+        animate: bool = False,
+        pause: float = 0.001,
+        trail: bool = True,
+        movie: Any = None,
+        **kwargs: Any,
+    ) -> NDArray:
         """
         Find a path using Bug2 reactive navigation algorithm
 
@@ -107,11 +111,13 @@ class Bug2(PlannerBase):
         # make sure start and goal are set and valid
         self.start = self.validate_endpoint(start, dtype=int)
         self.goal = self.validate_endpoint(goal, dtype=int)
+        if self._start is None or self._goal is None:
+            raise ValueError("start and goal must be specified")
 
         # compute the m-line
         #  create homogeneous representation of the line
         #  line*[x y 1]' = 0
-        self._m_line = hom_line(self.start, self.goal)
+        self._m_line = hom_line(self._start, self._goal)
 
         if movie is not None:
             animate = True
@@ -123,9 +129,9 @@ class Bug2(PlannerBase):
 
         # movie = MovieWriter(movie)
 
-        robot = self.start
+        robot: NDArray | None = self._start
         self._step = 1
-        path = robot
+        path: NDArray = self._start
         h = None
 
         (trail_line,) = plt.plot(0, 0, "y.", label="robot path")
@@ -133,6 +139,7 @@ class Bug2(PlannerBase):
 
         # iterate using the next() method until we reach the goal
         while True:
+            assert robot is not None
             if animate:
                 trailHead.set_data(robot[0], robot[1])
                 if trail:
@@ -165,7 +172,7 @@ class Bug2(PlannerBase):
 
         return path
 
-    def plot_m_line(self, ls=None):
+    def plot_m_line(self, ls: str | None = None) -> None:
         """
         Plot m-line
 
@@ -176,6 +183,9 @@ class Bug2(PlannerBase):
         """
         if ls is None:
             ls = "k--"
+
+        if self._m_line is None or self._start is None:
+            raise ValueError("no m-line, call run() first")
 
         x_min, x_max = plt.gca().get_xlim()
         y_min, y_max = plt.gca().get_ylim()
@@ -191,7 +201,7 @@ class Bug2(PlannerBase):
             y = y / self._m_line[1]
             plt.plot([x_min, x_max], y, ls, zorder=10, label="m-line")
 
-    def next(self, position):
+    def next(self, position: NDArray) -> NDArray | None:
         """
         One step of the finite state automaton
 
@@ -205,24 +215,29 @@ class Bug2(PlannerBase):
         l = None
         y = None
 
-        if all(self._goal == position):
+        goal = self._goal
+        m_line = self._m_line
+        if goal is None or m_line is None:
+            raise ValueError("no goal or m-line, call run() first")
+
+        if np.all(goal == position):
             return None  # we have arrived
 
         if self._step == 1:
             # Step 1.  Move along the M-line toward the goal
             self.message(f"{position}: moving along the M-line (step 1)")
             # motion on line toward goal
-            d = self._goal - position
+            d = goal - position
             if abs(d[0]) > abs(d[1]):
                 # line slope less than 45 deg
                 dx = 1 if d[0] >= 0 else -1  # np.sign(d[0])
-                l = self._m_line
+                l = m_line
                 y = -((position[0] + dx) * l[0] + l[2]) / l[1]
                 dy = int(round(y - position[1]))
             else:
                 # line slope greater than 45 deg
                 dy = 1 if d[1] >= 0 else -1  # np.sign(d[1])
-                l = self._m_line
+                l = m_line
                 x = -((position[1] + dy) * l[1] + l[2]) / l[0]
                 dx = int(round(x - position[0]))
 
@@ -234,6 +249,7 @@ class Bug2(PlannerBase):
                 self.message(f"  {position}: change to step 2")
 
                 # get a list of all the points around the obstacle
+                assert self.occgrid is not None
                 self._edge, _ = edgelist(self.occgrid.grid == 0, position)
                 self._k = 0
             else:
@@ -244,6 +260,7 @@ class Bug2(PlannerBase):
             # on the M-line closer than when we started.
 
             self.message(f"{position}: moving around the obstacle (step 2)")
+            assert self._edge is not None and self._k is not None
             if self._k < len(self._edge):
                 n = self._edge[self._k]  # next edge point
             else:
@@ -253,13 +270,11 @@ class Bug2(PlannerBase):
                 raise RuntimeError("robot is trapped")
 
             # are we on the M-line now ?
-            if abs(np.inner(np.r_[position, 1], self._m_line)) <= 0.5:
+            if abs(np.inner(np.r_[position, 1], m_line)) <= 0.5:
                 self.message(f"  {position}: crossed the M-line")
 
                 # are we closer than when we encountered the obstacle?
-                if base.norm(position - self._goal) < base.norm(
-                    self.H[-1] - self._goal
-                ):
+                if base.norm(position - goal) < base.norm(self.H[-1] - goal):
                     self._step = 1  # transition to step 1
                     self.message(f"  {position}: change to step 1")
                     return n
@@ -269,10 +284,10 @@ class Bug2(PlannerBase):
 
         return n
 
-    def query(self):
+    def query(self) -> None:  # type: ignore[override]
         raise NotImplementedError("This class has no query method")
 
-    def plan(self):
+    def plan(self) -> None:
         raise NotImplementedError("This class has no plan method")
 
 
@@ -293,7 +308,9 @@ _dirs = np.array([
         [-1, -1],
     ])
 # fmt: on
-def edgelist(im, p, direction=1):
+def edgelist(
+    im: NDArray, p: ArrayLike, direction: int = 1
+) -> tuple[list[NDArray], list[int]]:
     """
     Find edge of a region
 
@@ -337,31 +354,31 @@ def edgelist(im, p, direction=1):
       IAPR Workshop on Machine Vision Applications Dec. 13-15, 1994, Kawasaki
 
     """
-    p = base.getvector(p, 2, dtype=int)
+    pos: NDArray = np.asarray(base.getvector(p, 2, dtype=int))
     if direction > 0:
-        neighbours = np.arange(start=0, stop=8, step=1)
+        neighbours = np.arange(0, 8, 1)
     else:
-        neighbours = np.arange(start=7, stop=-1, step=-1)
+        neighbours = np.arange(7, -1, -1)
 
     try:
-        pix0 = im[p[1], p[0]]  # color of pixel we start at
+        pix0 = im[int(pos[1]), int(pos[0])]  # color of pixel we start at
     except:
         raise ValueError("specified coordinate is not within image")
 
-    q = adjacent_point(im, p, pix0)
+    q = adjacent_point(im, pos, pix0)
 
     # find an adjacent point outside the blob
     if q is None:
         raise ValueError("no neighbour outside the blob")
 
     d = None
-    e = [p]  # initialize the edge list
-    dir = []  # initialize the direction list
-    p0 = None
+    e: list[NDArray] = [pos]  # initialize the edge list
+    dir: list[int] = []  # initialize the direction list
+    pos0 = None
 
     while True:
         # find which direction is Q
-        dq = q - p
+        dq = q - pos
         for kq in range(0, 8):
             # get index of neighbour's direction in range [1,8]
             if np.all(dq == _dirs[kq]):
@@ -375,28 +392,28 @@ def edgelist(im, p, direction=1):
             #     k = k - 7
 
             # compute coordinate of the k'th neighbour
-            nk = p + _dirs[k]
+            nk = pos + _dirs[k]
 
             try:
                 if im[nk[1], nk[0]] == pix0:
                     # if this neighbour is in the blob it is the next edge pixel
-                    p = nk
+                    pos = nk
                     break
             except:
                 raise ValueError("Something went wrong calculating edgelist")
 
             q = nk
 
-        dir.append(k)
+        dir.append(int(k))
         # check if we are back where we started
-        if p0 is None:
-            p0 = p  # make a note of where we started
+        if pos0 is None:
+            pos0 = pos  # make a note of where we started
         else:
-            if all(p == p0):
+            if np.all(pos == pos0):
                 break
 
         # keep going, add this point to the edgelist
-        e.append(p)
+        e.append(pos)
 
     return e, dir
 
@@ -405,7 +422,7 @@ def edgelist(im, p, direction=1):
 # https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m
 
 
-def adjacent_point(im, seed, pix0):
+def adjacent_point(im: NDArray, seed: NDArray, pix0: Any) -> NDArray | None:
     """Find adjacent point
 
     :param im: occupancy grid
@@ -436,7 +453,7 @@ def adjacent_point(im, seed, pix0):
 
 # Implementation of Peter Corke's matlab homline function from:
 # https://github.com/petercorke/spatialmath-matlab/blob/master/homline.m
-def hom_line(p1, p2):
+def hom_line(p1: ArrayLike, p2: ArrayLike) -> NDArray:
     line = np.cross(np.r_[p1[0], p1[1], 1], np.r_[p2[0], p2[1], 1])
 
     # normalize so that the result of x*l' is the pixel distance

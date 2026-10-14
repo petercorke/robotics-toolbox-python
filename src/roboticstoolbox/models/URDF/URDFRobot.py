@@ -9,6 +9,12 @@ Provides:
   - URDFRobot         — base class for simple URDF-loaded robot models
 """
 
+from __future__ import annotations
+
+from typing import Any
+
+from roboticstoolbox.tools.types import NDArray
+
 from pathlib import Path
 import importlib
 import re
@@ -28,7 +34,7 @@ try:
     from xacro import XacroException
 except ImportError:  # pragma nocover
 
-    class XacroException(Exception):
+    class XacroException(Exception):  # type: ignore[no-redef]
         pass
 
 
@@ -36,7 +42,7 @@ try:
     from xacrodoc.packages import PackageNotFoundError
 except ImportError:  # pragma nocover
 
-    class PackageNotFoundError(Exception):
+    class PackageNotFoundError(Exception):  # type: ignore[no-redef]
         pass
 
 
@@ -94,7 +100,7 @@ def _find_rd_rename(robot_name: str, tried: list[str]) -> str | None:
     return None
 
 
-def _load_rd_module(robot_name: str):
+def _load_rd_module(robot_name: str) -> Any:
     """Import the robot_descriptions submodule for ``robot_name``, trying the
     current name first and falling back to older/newer naming schemes.
 
@@ -309,7 +315,7 @@ def _attach_expanded(err: URDFError, urdf_str: str, source: str) -> None:
             break
 
 
-def _parse_urdf(urdf_str: str, source: str = "<URDF text>"):
+def _parse_urdf(urdf_str: str, source: str = "<URDF text>") -> Any:
     """Parse a URDF string into (elinks, name).
 
     :raises URDFError: if the text is not well-formed XML or is not a valid
@@ -324,22 +330,44 @@ def _parse_urdf(urdf_str: str, source: str = "<URDF text>"):
         raise
 
 
-def _links_from_urdf(urdf: URDF):
+def _inertia_in_link_frame(
+    inertial: Any,
+) -> tuple[NDArray | None, NDArray | None]:
+    """Centre of mass and inertia tensor of a URDF link, in the link frame.
+
+    URDF gives the inertia tensor in the link's *inertial* frame, whose pose
+    relative to the link frame is ``<inertial><origin xyz rpy>``. The toolbox
+    wants the tensor about the centre of mass but with axes parallel to the
+    link frame (see :attr:`Link.I`), so rotate it: ``I_link = R I R^T``.
+    ``xyz`` is already the centre of mass in the link frame.
+
+    :param inertial: a parsed :class:`~roboticstoolbox.tools.urdf.Inertial`
+    :returns: ``(r, I)``, either of which is ``None`` when not given
+    """
+    origin = inertial.origin
+    r = None if origin is None else origin[:3, 3]
+
+    I = inertial.inertia
+    if I is not None and origin is not None:
+        R = origin[:3, :3]
+        I = R @ I @ R.T
+        I = 0.5 * (I + I.T)  # remove rounding asymmetry; Link.I checks to 1e-8
+    return r, I
+
+
+def _links_from_urdf(urdf: URDF) -> Any:
     """Convert a parsed :class:`URDF` into (elinks, name)."""
     elinks = []
     elinkdict = {}
 
     for link in urdf._links:
-        elink = Link(
-            name=link.name,
-            m=link.inertial.mass,
-            r=link.inertial.origin[:3, 3] if link.inertial.origin is not None else None,
-            I=link.inertial.inertia,
-        )
+        r, I = _inertia_in_link_frame(link.inertial)
+        elink = Link(name=link.name, m=link.inertial.mass, r=r, I=I)
         elinks.append(elink)
         elinkdict[link.name] = elink
 
         try:
+            # geometry has no setter, so this raises AttributeError and is ignored
             elink.geometry = [v.geometry.ob for v in link.visuals]
         except AttributeError:
             pass
@@ -378,6 +406,7 @@ def _links_from_urdf(urdf: URDF):
         trans = SE3(joint.origin).t
         rot = joint.rpy
 
+        ets: Any
         if np.count_nonzero(joint.axis) < 2:
             ets = ET.SE3(SE3(trans) * SE3.RPY(rot))
         else:
@@ -577,8 +606,8 @@ class URDFRobot(Robot):
         gripper_link_name: "str | list[str] | None" = None,
         patch: "Callable[[str], str] | None" = None,
         extra_packages: "dict[str, str] | None" = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         elinks, name, filepath = URDF_file(
             urdf_path, patch=patch, extra_packages=extra_packages
         )

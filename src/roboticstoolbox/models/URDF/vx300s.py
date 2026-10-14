@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -30,7 +34,7 @@ class vx300s(URDFRobot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         super().__init__(
             "trossen_descriptions/urdf/vx300s.urdf.xacro", manufacturer="Interbotix"

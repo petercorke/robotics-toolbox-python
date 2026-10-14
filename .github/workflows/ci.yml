@@ -124,6 +124,27 @@ jobs:
             exit 1
           fi
 
+  # Advisory for now: the package is being annotated module by module, and
+  # pyproject.toml lists the modules that still have errors.  Not in
+  # `all-tests-passed`, so it cannot block a merge.  Make it required once that
+  # list is empty.
+  mypy:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        run: pip install .[dev,swift] mypy
+
+      - name: Type check
+        run: mypy
+
   coverage:
     needs: [test-core, test]
     runs-on: ubuntu-latest

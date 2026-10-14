@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 #!/usr/bin/env python
 
 import numpy as np
@@ -32,7 +36,7 @@ class LWR4(DHRobot):
     .. codeauthor:: Peter Corke
     """  # noqa
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # deg = np.pi/180
         mm = 1e-3

@@ -4,7 +4,10 @@ Python Vehicle
 @Author: Kristian Gibson, initial MATLAB port
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import Any, Callable, TypeAlias
 import warnings
 import sys
 from math import pi, sin, cos, tan
@@ -13,16 +16,24 @@ from scipy import interpolate
 
 import matplotlib.pyplot as plt
 from matplotlib import animation
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure, SubFigure
 
 # from matplotlib import patches
 # import matplotlib.transforms as mtransforms
 
-from spatialmath import SE2, base
+from spatialmath import SE2, base, Polygon2
 from roboticstoolbox.mobile.drivers import VehicleDriverBase
-from roboticstoolbox.mobile.Animations import VehiclePolygon
+from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehiclePolygon
+from roboticstoolbox.tools.types import ArrayLike, NDArray
+
+# what can be given as the control for a vehicle, see VehicleBase.control
+ControlLike: TypeAlias = (
+    ArrayLike | Callable[..., ArrayLike] | interpolate.interp1d | VehicleDriverBase
+)
 
 
-def _isnotebook():
+def _isnotebook() -> bool:
     """
     Determine if code is being run from a Jupyter notebook or JupyterLite.
     """
@@ -43,7 +54,9 @@ def _isnotebook():
         return False
 
 
-def _refresh_animation_frame(fig, dt, pause):
+def _refresh_animation_frame(
+    fig: Figure | SubFigure | None, dt: float, pause: bool | None
+) -> None:
     """
     Refresh animation for desktop and notebook backends.
 
@@ -88,7 +101,14 @@ def _refresh_animation_frame(fig, dt, pause):
 
 
 class Trailer:
-    def __init__(self, L1=1, L2=1, animation=None, polygon=None, **kwargs):
+    def __init__(
+        self,
+        L1: float = 1,
+        L2: float = 1,
+        animation: VehicleAnimationBase | str | None = None,
+        polygon: Polygon2 | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         _summary_
 
@@ -105,6 +125,7 @@ class Trailer:
         self._L2 = L2
 
         self._polygon = polygon
+        self._animation: VehicleAnimationBase | None = None
         if animation is not None:
             if isinstance(animation, str):
                 animation = VehiclePolygon(animation)
@@ -118,20 +139,20 @@ class Trailer:
 class VehicleBase(ABC):
     def __init__(
         self,
-        covar=None,
-        speed_max=np.inf,
-        accel_max=np.inf,
-        x0=[0, 0, 0],
-        dt=0.1,
-        control=None,
-        seed=0,
-        animation=None,
-        verbose=False,
-        plot=False,
-        workspace=None,
-        polygon=None,
-        trailers=None,
-    ):
+        covar: NDArray | None = None,
+        speed_max: float = np.inf,
+        accel_max: float = np.inf,
+        x0: ArrayLike | None = [0, 0, 0],
+        dt: float = 0.1,
+        control: ControlLike | None = None,
+        seed: int | None = 0,
+        animation: VehicleAnimationBase | str | None = None,
+        verbose: bool = False,
+        plot: bool = False,
+        workspace: Any = None,
+        polygon: Polygon2 | None = None,
+        trailers: Any = None,
+    ) -> None:
         r"""
         Superclass for vehicle kinematic models
 
@@ -181,40 +202,44 @@ class VehicleBase(ABC):
 
         self._V = covar
         self._dt = dt
+        x0v: NDArray
         if x0 is None:
-            x0 = np.zeros((3,), dtype=float)
+            x0v = np.zeros((3,), dtype=float)
         else:
-            x0 = base.getvector(x0)
-            if len(x0) not in (2, 3):
+            x0v = base.getvector(x0)
+            if len(x0v) not in (2, 3):
                 raise ValueError("x0 must be length 2 or 3")
-        self._x0 = x0
-        self._x = x0.copy()
+        self._x0 = x0v
+        self._x = x0v.copy()
 
         self._random = np.random.default_rng(seed)
         self._seed = seed
         self._speed_max = speed_max
         self._accel_max = accel_max
-        self._v_prev = [0]
+        self._v_prev: list[float] = [0]
 
         self._polygon = polygon
         if isinstance(animation, str):
             animation = VehiclePolygon(animation)
         self._animation = animation
-        self._ax = None
+        self._ax: Axes | None = None
+        self._timer: Any = None  # Matplotlib Text, when animated
 
         if control is not None:
-            self.add_driver(control)
+            # fails if the control is not a driver, see findings
+            self.add_driver(control)  # type: ignore[arg-type]
 
         self._dt = dt
-        self._t = 0
+        self._t: float = 0
         self._stopsim = False
 
         self._verbose = verbose
         self._plot = False
 
         self._control = control
-        self._x_hist = []
+        self._x_hist: list[tuple[float, ...]] = []
 
+        self._workspace: NDArray | None
         if workspace:
             try:
                 self._workspace = workspace.workspace
@@ -223,7 +248,7 @@ class VehicleBase(ABC):
         else:
             self._workspace = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         String representation of vehicle (superclass)
 
@@ -234,10 +259,10 @@ class VehicleBase(ABC):
         s += f"x = {base.array2str(self._x)}"
         return s
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def f(self, x, odo, v=None):
+    def f(self, x: ArrayLike, odo: ArrayLike, v: ArrayLike | None = None) -> NDArray:
         r"""
         State transition function
 
@@ -272,11 +297,13 @@ class VehicleBase(ABC):
             # x is Nx3 set of vehicle states, do vectorized form
             # used by particle filter
             dd, dth = odo
-            theta = x[:, 2]
+            thetas = x[:, 2]
             return (
                 np.array(x)
                 + np.c_[
-                    dd * np.cos(theta), dd * np.sin(theta), np.full(theta.shape, dth)
+                    dd * np.cos(thetas),
+                    dd * np.sin(thetas),
+                    np.full(thetas.shape, dth),
                 ]
             )
         else:
@@ -292,7 +319,7 @@ class VehicleBase(ABC):
 
             return x + np.r_[dd * np.cos(theta), dd * np.sin(theta), dth]
 
-    def Fx(self, x, odo):
+    def Fx(self, x: ArrayLike, odo: ArrayLike) -> NDArray:
         r"""
         Jacobian of state transition function df/dx
 
@@ -320,7 +347,7 @@ class VehicleBase(ABC):
         # fmt: on
         return J
 
-    def Fv(self, x, odo):
+    def Fv(self, x: ArrayLike, odo: ArrayLike) -> NDArray:
         r"""
         Jacobian of state transition function df/dv
 
@@ -349,7 +376,7 @@ class VehicleBase(ABC):
         return J
 
     @property
-    def control(self):
+    def control(self) -> ControlLike | None:
         """
         Get/set vehicle control (superclass)
 
@@ -379,7 +406,7 @@ class VehicleBase(ABC):
         return self._control
 
     @control.setter
-    def control(self, control):
+    def control(self, control: ControlLike | None) -> None:
 
         # * a function called as ``f(vehicle, t, x)`` that returns a tuple
         # * an interpolator called as f(t) that returns a tuple, see
@@ -390,7 +417,7 @@ class VehicleBase(ABC):
             # if this is a driver agent, connect it to the vehicle
             control.vehicle = self
 
-    def eval_control(self, control, x):
+    def eval_control(self, control: ControlLike | None, x: ArrayLike) -> NDArray:
         """
         Evaluate vehicle control input (superclass method)
 
@@ -417,6 +444,7 @@ class VehicleBase(ABC):
         """
         # was called control() in the MATLAB version
 
+        u: ArrayLike
         if base.isvector(control, 2):
             # control is a constant
             u = base.getvector(control, 2)
@@ -440,7 +468,7 @@ class VehicleBase(ABC):
         ulim = self.u_limited(u)
         return ulim
 
-    def limits_va(self, v, v_prev):
+    def limits_va(self, v: float, v_prev: list[float]) -> float:
         """
         Apply velocity and acceleration limits (superclass)
 
@@ -472,7 +500,7 @@ class VehicleBase(ABC):
             v = np.clip(v, -self._speed_max, self._speed_max)
         return v
 
-    def polygon(self, q):
+    def polygon(self, q: ArrayLike) -> Polygon2:
         """
         Bounding polygon at vehicle configuration
 
@@ -487,14 +515,24 @@ class VehicleBase(ABC):
 
         :seealso: :class:`~spatialmath.geom2d.Polygon2`
         """
+        if self._polygon is None:
+            raise ValueError("vehicle has no bounding polygon")
         return self._polygon.transformed(SE2(q))
 
     # This function is overridden by the child class
     @abstractmethod
-    def deriv(self, x, u):
+    def deriv(self, x: ArrayLike, u: ArrayLike, limits: bool = True) -> NDArray:
         pass
 
-    def add_driver(self, driver):
+    def u_limited(self, u: ArrayLike) -> NDArray:
+        """
+        Apply vehicle velocity, acceleration and steering limits (superclass)
+
+        This function is overridden by the child class.
+        """
+        raise NotImplementedError("u_limited must be provided by the subclass")
+
+    def add_driver(self, driver: VehicleDriverBase) -> None:
         """
         Add a driver agent (superclass)
 
@@ -510,7 +548,13 @@ class VehicleBase(ABC):
         self._control = driver
         driver._veh = self
 
-    def run(self, T=10, x0=None, control=None, animate=True):
+    def run(
+        self,
+        T: float = 10,
+        x0: ArrayLike | None = None,
+        control: ControlLike | None = None,
+        animate: bool = True,
+    ) -> NDArray:
         r"""
         Simulate motion of vehicle (superclass)
 
@@ -520,7 +564,7 @@ class VehicleBase(ABC):
         :type x0: array_like(3) or array_like(2)
         :param control: vehicle control inputs, defaults to None
         :type control: array_like(2), callable, driving agent
-        :param animate: Enable graphical animation of vehicle, defaults to False
+        :param animate: Enable graphical animation of vehicle, defaults to True
         :type animate: bool, optional
         :return: State trajectory, each row is :math:`(x,y,\theta)`.
         :rtype: ndarray(n,3)
@@ -562,9 +606,16 @@ class VehicleBase(ABC):
 
         return self.x_hist
 
-    def run_animation(self, T=10, x0=None, control=None, format=None, file=None):
+    def run_animation(
+        self,
+        T: float = 10,
+        x0: ArrayLike | None = None,
+        control: ControlLike | None = None,
+        format: str | None = None,
+        file: str | None = None,
+    ) -> animation.FuncAnimation | str | None:
         r"""
-        Simulate motion of vehicle (superclass)
+        Animate motion of vehicle (superclass)
 
         :param T: Simulation time in seconds, defaults to 10
         :type T: float, optional
@@ -617,7 +668,7 @@ class VehicleBase(ABC):
               attribute set by the constructor.
             * integration uses rectangular integration.
 
-        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
+        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run`
         """
 
         fig, ax = plt.subplots()
@@ -640,13 +691,19 @@ class VehicleBase(ABC):
         elif format == "jshtml":
             ret = anim.to_jshtml()  # convert to embeddable Javascript/HTML animation
         elif format == "gif":
+            if file is None:
+                raise ValueError("file is required for gif format")
             anim.save(
-                file, writer=animation.PillowWriter(fps=1 / self.dt)
+                file,
+                writer=animation.PillowWriter(fps=1 / self.dt),  # type: ignore[arg-type]
             )  # convert to GIF
             ret = None
         elif format == "mp4":
+            if file is None:
+                raise ValueError("file is required for mp4 format")
             anim.save(
-                file, writer=animation.FFMpegWriter(fps=1 / self.dt)
+                file,
+                writer=animation.FFMpegWriter(fps=1 / self.dt),  # type: ignore[arg-type]
             )  # convert to mp4/H264
             ret = None
         elif format == None:
@@ -662,7 +719,12 @@ class VehicleBase(ABC):
         plt.close(fig)
         return ret
 
-    def init(self, x0=None, control=None, animate=True):
+    def init(
+        self,
+        x0: ArrayLike | None = None,
+        control: ControlLike | None = None,
+        animate: bool = True,
+    ) -> None:
         """
         Initialize for simulation (superclass)
 
@@ -713,8 +775,9 @@ class VehicleBase(ABC):
             self._ax.set_ylabel("y")
             self._ax.set_aspect("equal")
             try:
-                self._ax.figure.canvas.manager.set_window_title(
-                    f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"
+                # AttributeError is handled, for a backend without a manager
+                self._ax.figure.canvas.manager.set_window_title(  # type: ignore[union-attr]
+                    f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"  # type: ignore[union-attr]
                 )
             except AttributeError:
                 pass
@@ -726,10 +789,16 @@ class VehicleBase(ABC):
         if isinstance(self._control, VehicleDriverBase):
             self._control.init(ax=self._ax)
 
-    def plot(self, x):
-        self._animation.update(x)
+    def plot(self, x: ArrayLike) -> None:
+        if self._animation is not None:
+            self._animation.update(x)
 
-    def step(self, u=None, animate=True, pause=True):
+    def step(
+        self,
+        u: ControlLike | None = None,
+        animate: bool = True,
+        pause: bool | None = True,
+    ) -> NDArray:
         r"""
         Step simulator by one time step (superclass)
 
@@ -743,7 +812,7 @@ class VehicleBase(ABC):
         #. Returns the odometry
 
         - ``veh.step((vel, steer))`` for a Bicycle vehicle model
-        - ``veh.step((vel, vel_diff))`` for a Unicycle vehicle model
+        - ``veh.step((vel, turn_rate))`` for a Unicycle vehicle model
         - ``veh.step()`` as above but control is taken from the ``control``
           attribute which might be a function or driver agent.
 
@@ -807,7 +876,7 @@ class VehicleBase(ABC):
         return odo
 
     @property
-    def workspace(self):
+    def workspace(self) -> NDArray | None:
         """
         Size of robot workspace (superclass)
 
@@ -822,10 +891,11 @@ class VehicleBase(ABC):
         if self._workspace is not None:
             return self._workspace
         if self._control is not None and hasattr(self._control, "_workspace"):
-            return self._control._workspace
+            return getattr(self._control, "_workspace")
+        return None
 
     @property
-    def x(self):
+    def x(self) -> NDArray:
         r"""
         Get vehicle state/configuration (superclass)
 
@@ -837,7 +907,7 @@ class VehicleBase(ABC):
         return self._x
 
     @property
-    def q(self):
+    def q(self) -> NDArray:
         r"""
         Get vehicle state/configuration (superclass)
 
@@ -849,7 +919,7 @@ class VehicleBase(ABC):
         return self._x
 
     @property
-    def x0(self):
+    def x0(self) -> NDArray:
         r"""
         Get vehicle initial state/configuration (superclass)
 
@@ -864,7 +934,7 @@ class VehicleBase(ABC):
         return self._x0
 
     @x0.setter
-    def x0(self, x0):
+    def x0(self, x0: ArrayLike) -> None:
         r"""
         Set vehicle initial state/configuration (superclass)
 
@@ -879,7 +949,7 @@ class VehicleBase(ABC):
         self._x0 = base.getvector(x0, 3)
 
     @property
-    def random(self):
+    def random(self) -> np.random.Generator:
         """
         Get private random number generator
 
@@ -902,7 +972,7 @@ class VehicleBase(ABC):
         return self._random
 
     @property
-    def x_hist(self):
+    def x_hist(self) -> NDArray:
         """
         Get vehicle state/configuration history (superclass)
 
@@ -917,7 +987,7 @@ class VehicleBase(ABC):
         return np.array(self._x_hist)
 
     @property
-    def speed_max(self):
+    def speed_max(self) -> float:
         """
         Get maximum speed of vehicle (superclass)
 
@@ -931,7 +1001,7 @@ class VehicleBase(ABC):
         return self._speed_max
 
     @property
-    def accel_max(self):
+    def accel_max(self) -> float:
         """
         Get maximum acceleration of vehicle (superclass)
 
@@ -945,7 +1015,7 @@ class VehicleBase(ABC):
         return self._accel_max
 
     @property
-    def dt(self):
+    def dt(self) -> float:
         """
         Get sample time (superclass)
 
@@ -960,7 +1030,7 @@ class VehicleBase(ABC):
         return self._dt
 
     @property
-    def verbose(self):
+    def verbose(self) -> bool:
         """
         Get verbosity (superclass)
 
@@ -972,7 +1042,7 @@ class VehicleBase(ABC):
         return self._verbose
 
     @verbose.setter
-    def verbose(self, verbose):
+    def verbose(self, verbose: bool) -> None:
         """
         Set verbosity (superclass)
 
@@ -983,7 +1053,7 @@ class VehicleBase(ABC):
         """
         self._verbose = verbose
 
-    def stopsim(self):
+    def stopsim(self) -> None:
         """
         Stop the simulation (superclass)
 
@@ -994,7 +1064,7 @@ class VehicleBase(ABC):
         """
         self._stopsim = True
 
-    def plot_xy(self, *args, block=None, **kwargs):
+    def plot_xy(self, *args: Any, block: bool | None = None, **kwargs: Any) -> None:
         """
         Plot xy-path from history
 
@@ -1016,7 +1086,7 @@ class VehicleBase(ABC):
         if block is not None:
             plt.show(block=block)
 
-    def plot_xyt(self, block=None, **kwargs):
+    def plot_xyt(self, block: bool | None = None, **kwargs: Any) -> None:
         """
         Plot configuration vs time from history
 
@@ -1042,7 +1112,9 @@ class VehicleBase(ABC):
 
 
 class Bicycle(VehicleBase):
-    def __init__(self, L=1, steer_max=0.45 * pi, **kwargs):
+    def __init__(
+        self, L: float = 1, steer_max: float = 0.45 * pi, **kwargs: Any
+    ) -> None:
         r"""
         Create bicycle kinematic model
 
@@ -1071,7 +1143,7 @@ class Bicycle(VehicleBase):
         self._l = L
         self._steer_max = steer_max
 
-    def __str__(self):
+    def __str__(self) -> str:
 
         s = super().__str__()
         s += (
@@ -1081,7 +1153,7 @@ class Bicycle(VehicleBase):
         return s
 
     @property
-    def l(self):
+    def l(self) -> float:
         """
         Vehicle wheelbase
 
@@ -1091,7 +1163,7 @@ class Bicycle(VehicleBase):
         return self._l
 
     @property
-    def radius_min(self):
+    def radius_min(self) -> float:
         r"""
         Vehicle turning radius
 
@@ -1108,7 +1180,7 @@ class Bicycle(VehicleBase):
         return self.l / np.tan(self.steer_max)
 
     @property
-    def curvature_max(self):
+    def curvature_max(self) -> float:
         r"""
         Vehicle maximum path curvature
 
@@ -1125,7 +1197,7 @@ class Bicycle(VehicleBase):
         return 1.0 / self.radius_min
 
     @property
-    def steer_max(self):
+    def steer_max(self) -> float:
         """
         Vehicle maximum steered wheel angle
 
@@ -1134,7 +1206,7 @@ class Bicycle(VehicleBase):
         """
         return self._steer_max
 
-    def deriv(self, x, u, limits=True):
+    def deriv(self, x: ArrayLike, u: ArrayLike, limits: bool = True) -> NDArray:
         r"""
         Time derivative of state
 
@@ -1171,7 +1243,7 @@ class Bicycle(VehicleBase):
 
         return v * np.r_[cos(theta), sin(theta), tan(gamma) / self.l]
 
-    def u_limited(self, u):
+    def u_limited(self, u: ArrayLike) -> NDArray:
         r"""
         Apply vehicle velocity, acceleration and steering limits
 
@@ -1195,7 +1267,9 @@ class Bicycle(VehicleBase):
 
 
 class Unicycle(VehicleBase):
-    def __init__(self, W=1, steer_max=np.inf, **kwargs):
+    def __init__(
+        self, W: float = 1, steer_max: float = np.inf, **kwargs: Any
+    ) -> None:
         r"""
         Create unicycle kinematic model
 
@@ -1223,7 +1297,7 @@ class Unicycle(VehicleBase):
         self._W = W
         self._steer_max = steer_max
 
-    def __str__(self):
+    def __str__(self) -> str:
 
         s = super().__str__()
         s += (
@@ -1232,7 +1306,12 @@ class Unicycle(VehicleBase):
         )
         return s
 
-    def deriv(self, x, u, limits=True):
+    def deriv(
+        self,
+        x: ArrayLike,
+        u: ArrayLike,
+        limits: bool = True,
+    ) -> NDArray:
         r"""
         Time derivative of state
 
@@ -1253,8 +1332,9 @@ class Unicycle(VehicleBase):
                     \dot{y} &= v \sin \theta \\
                     \dot{\theta} &= \omega
 
-        If ``limits`` is True then speed, acceleration and steer-angle limits are
-        applied to ``u``.
+        The turn rate is an angular velocity in radians per second, independent
+        of the vehicle width ``W``. If ``limits`` is True then speed, acceleration
+        and turn-rate limits are applied to ``u``.
 
         :seealso: :meth:`f`
         """
@@ -1263,11 +1343,11 @@ class Unicycle(VehicleBase):
         # unpack some variables
         theta = x[2]
         v = u[0]
-        vdiff = u[1]
+        omega = u[1]
 
-        return np.r_[v * cos(theta), v * sin(theta), vdiff / self._W]
+        return np.r_[v * cos(theta), v * sin(theta), omega]
 
-    def u_limited(self, u):
+    def u_limited(self, u: ArrayLike) -> NDArray:
         r"""
         Apply vehicle velocity, acceleration and steering limits
 
@@ -1292,7 +1372,7 @@ class Unicycle(VehicleBase):
 
 
 class DiffSteer(Unicycle):
-    def __init__(self, W=1, **kwargs):
+    def __init__(self, W: float = 1, **kwargs: Any) -> None:
         r"""
         Create differential steering kinematic model
 
@@ -1316,20 +1396,25 @@ class DiffSteer(Unicycle):
         """
         super().__init__(**kwargs)
         self._W = W
-        self._v_prev_L = [0]
-        self._v_prev_R = [0]
+        self._v_prev_L: list[float] = [0]
+        self._v_prev_R: list[float] = [0]
 
-    def __str__(self):
+    def __str__(self) -> str:
 
         s = super().__str__()
         return s
 
-    def init(self, **kwargs):
-        super().init(**kwargs)
+    def init(
+        self,
+        x0: ArrayLike | None = None,
+        control: ControlLike | None = None,
+        animate: bool = True,
+    ) -> None:
+        super().init(x0=x0, control=control, animate=animate)
         self._v_prev_L = [0]
         self._v_prev_R = [0]
 
-    def u_limited(self, u):
+    def u_limited(self, u: ArrayLike) -> NDArray:
         r"""
         Apply vehicle velocity and acceleration limits
 
@@ -1349,7 +1434,7 @@ class DiffSteer(Unicycle):
 
         return ulim
 
-    def deriv(self, x, u, limits=True):
+    def deriv(self, x: ArrayLike, u: ArrayLike, limits: bool = True) -> NDArray:
         r"""
         Time derivative of state
 
@@ -1397,7 +1482,15 @@ class DiffSteer(Unicycle):
 
 
 class DiffSteerTrailer(Unicycle):
-    def __init__(self, W=1, L1=1, L2=1, x0=[0.0, 0, 0, 0], trailer=None, **kwargs):
+    def __init__(
+        self,
+        W: float = 1,
+        L1: float = 1,
+        L2: float = 1,
+        x0: ArrayLike = [0.0, 0, 0, 0],
+        trailer: VehicleAnimationBase | None = None,
+        **kwargs: Any,
+    ) -> None:
         r"""
         Create differential steering kinematic model with trailer
 
@@ -1427,7 +1520,7 @@ class DiffSteerTrailer(Unicycle):
         """
         super().__init__(**kwargs)
         self._x0 = np.r_[x0]
-        self._x = x0.copy()
+        self._x = x0.copy()  # type: ignore[union-attr]  # a list in practice
         self._W = W
         self._L1 = L1
         self._L2 = L2
@@ -1435,16 +1528,25 @@ class DiffSteerTrailer(Unicycle):
         self._v_prev_L = [0]
         self._v_prev_R = [0]
 
-    def __str__(self):
+    def __str__(self) -> str:
 
         s = super().__str__()
         return s
 
-    def init(self, **kwargs):
-        super().init(**kwargs)
-        self._animation_trailer.add(ax=self._ax)  # add trailer animation to axis
+    def init(
+        self,
+        x0: ArrayLike | None = None,
+        control: ControlLike | None = None,
+        animate: bool = True,
+    ) -> None:
+        super().init(x0=x0, control=control, animate=animate)
+        if self._animation_trailer is not None:
+            # add trailer animation to axis
+            self._animation_trailer.add(ax=self._ax)
 
-    def plot(self, x):
+    def plot(self, x: ArrayLike) -> None:
+        assert self._animation is not None
+        assert self._animation_trailer is not None
         self._animation.update(x[:3])  # show robot
 
         theta = x[2]
@@ -1456,7 +1558,7 @@ class DiffSteerTrailer(Unicycle):
         )
         self._animation_trailer.update(np.concatenate((Q, [eta])))  # show trailer
 
-    def deriv(self, x, u, limits=True):
+    def deriv(self, x: ArrayLike, u: ArrayLike, limits: bool = True) -> NDArray:
         r"""
         Time derivative of state
 
@@ -1518,7 +1620,13 @@ class DiffSteerTrailer(Unicycle):
 
 # composite of vehicle + trailers
 class VehicleTrailer(VehicleBase):
-    def __init__(self, vehicle, trailers, x0=None, verbose=False):
+    def __init__(
+        self,
+        vehicle: VehicleBase,
+        trailers: Trailer | list[Trailer],
+        x0: ArrayLike | None = None,
+        verbose: bool = False,
+    ) -> None:
         r"""
         Create a kinematic system with a vehicle with one or more trailers
 
@@ -1542,6 +1650,7 @@ class VehicleTrailer(VehicleBase):
         :seealso: :class:`VehicleBase` :class:`Trailer`
         """
         self.vehicle = vehicle
+        self.trailers: list[Trailer]
         if isinstance(trailers, Trailer):
             self.trailers = [trailers]
         else:
@@ -1549,10 +1658,10 @@ class VehicleTrailer(VehicleBase):
 
         if x0 is None:
             x0 = np.zeros((3 + len(self.trailers),))
-        self._x0 = x0
+        self._x0 = x0  # type: ignore[assignment]  # not made an array, see findings
         self._verbose = verbose
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Pretty print the vehicle and trailers
         """
@@ -1562,7 +1671,7 @@ class VehicleTrailer(VehicleBase):
             s += f"\n  + trailer {k}: L1={trailer._L1}, L2={trailer._L2}"
         return s
 
-    def polygon(self, q):
+    def polygon(self, q: ArrayLike) -> list[Polygon2]:
         r"""
         Bounding polygons at vehicle configuration
 
@@ -1577,15 +1686,22 @@ class VehicleTrailer(VehicleBase):
 
         :seealso: :class:`~spatialmath.geom2d.Polygon2`
         """
+        assert self.vehicle._polygon is not None
         polygons = [self.vehicle._polygon.transformed(SE2(q))]
 
         for trailer, delta in zip(self.trailers, q[3:]):
+            assert trailer._polygon is not None
             polygons.append(trailer._polygon.transformed(SE2(delta)))
 
         return polygons
 
-    def init(self, **kwargs):
-        self.vehicle.init(**kwargs)
+    def init(
+        self,
+        x0: ArrayLike | None = None,
+        control: ControlLike | None = None,
+        animate: bool = True,
+    ) -> None:
+        self.vehicle.init(x0=x0, control=control, animate=animate)
         self._x = self._x0
         self._t = 0
         self._x_hist = []
@@ -1597,10 +1713,16 @@ class VehicleTrailer(VehicleBase):
                 )  # add trailer animation to axis
 
     @property
-    def dt(self):
+    def dt(self) -> float:
         return self.vehicle.dt
 
-    def run(self, T=10, x0=None, control=None, animate=True):
+    def run(
+        self,
+        T: float = 10,
+        x0: ArrayLike | None = None,
+        control: ControlLike | None = None,
+        animate: bool = True,
+    ) -> NDArray:
         r"""
         Simulate motion of vehicle and m trailers
 
@@ -1610,7 +1732,7 @@ class VehicleTrailer(VehicleBase):
         :type x0: array_like(3+m) where `m` is the number of trailers, optional
         :param control: vehicle control inputs, defaults to None
         :type control: array_like(2), callable, driving agent
-        :param animate: Enable graphical animation of vehicle, defaults to False
+        :param animate: Enable graphical animation of vehicle, defaults to True
         :type animate: bool, optional
         :return: State trajectory, each row is :math:`(x,y,\theta, \delta_i, \cdots)`.
         :rtype: ndarray(n,3)
@@ -1652,7 +1774,12 @@ class VehicleTrailer(VehicleBase):
 
         return self.x_hist
 
-    def step(self, u=None, animate=True, pause=True):
+    def step(  # type: ignore[override]
+        self,
+        u: ControlLike | None = None,
+        animate: bool = True,
+        pause: bool | None = True,
+    ) -> None:
         r"""
         Step simulator by one time step
 
@@ -1702,7 +1829,8 @@ class VehicleTrailer(VehicleBase):
                     + trailer._L2 * np.r_[cos(x[2] + delta), sin(x[2] + delta)]
                 )
                 x[2] += delta
-                trailer._animation.update(x)  # show trailer
+                if trailer._animation is not None:
+                    trailer._animation.update(x)  # show trailer
             # if self._timer is not None:
             #     self._timer.set_text(f"t = {self._t:.2f}")
             _refresh_animation_frame(
@@ -1721,19 +1849,23 @@ class VehicleTrailer(VehicleBase):
                 f" {self._x[1]:8.2f}, {self._x[2]:8.2f})"
             )
 
-    def plot(self, x):
-        self._animation.update(x[:3])  # show robot
+    def plot(self, x: ArrayLike) -> None:
+        # a copy of DiffSteerTrailer.plot, uses attributes that do not exist
+        # here, see findings
+        self._animation.update(x[:3])  # type: ignore[union-attr]  # show robot
 
         theta = x[2]
         eta = theta + x[3]
         Q = (
             x[:2]
-            - self._L1 * (cos(theta), sin(theta))
-            - self._L2 * (cos(eta), sin(eta))
+            - self._L1 * (cos(theta), sin(theta))  # type: ignore[attr-defined]
+            - self._L2 * (cos(eta), sin(eta))  # type: ignore[attr-defined]
         )
-        self._animation_trailer.update(np.concatenate((Q, [eta])))  # show trailer
+        self._animation_trailer.update(  # type: ignore[attr-defined]
+            np.concatenate((Q, [eta]))
+        )  # show trailer
 
-    def deriv(self, x, u, limits=True):
+    def deriv(self, x: ArrayLike, u: ArrayLike, limits: bool = True) -> NDArray:
         r"""
         Time derivative of state
 
@@ -1808,7 +1940,7 @@ if __name__ == "__main__":
     import roboticstoolbox as rtb
     import time
 
-    def steering(v, t, x):
+    def steering(v: VehicleBase, t: float, x: ArrayLike) -> tuple[float, float]:
         speed = (0.5, 0.5)
         if 3 <= t < 5:
             speed = (0.4, 0.6)

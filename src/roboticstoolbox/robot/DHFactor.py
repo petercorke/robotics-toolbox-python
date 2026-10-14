@@ -1,4 +1,5 @@
-from roboticstoolbox import ETS, ET
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
 import re
 import sympy
 import numpy as np

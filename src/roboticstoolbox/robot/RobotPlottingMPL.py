@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal as L
 
 if TYPE_CHECKING:  # pragma: nocover
-    from roboticstoolbox.backends.PyPlot import PyPlot
+    from roboticstoolbox.backends.PyPlot.PyPlot import PyPlot
     from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
     from roboticstoolbox.tools.types import ArrayLike
 
@@ -24,7 +24,7 @@ class RobotPlottingMPLMixin:
     # Colour helpers
     # ------------------------------------------------------------------
 
-    def linkcolormap(self, linkcolors: list[Any] | str = "viridis"):
+    def linkcolormap(self, linkcolors: list[Any] | str = "viridis") -> Any:
         """
         Create a colormap for robot joints.
 
@@ -67,7 +67,7 @@ class RobotPlottingMPLMixin:
         if isinstance(linkcolors, list) and len(linkcolors) == self.n:  # type: ignore[attr-defined]
             return colors.ListedColormap(linkcolors)
         else:
-            return colormaps.get_cmap(linkcolors).resampled(6)
+            return colormaps.get_cmap(linkcolors).resampled(6)  # type: ignore[arg-type]
 
     # ------------------------------------------------------------------
     # Ellipse creation
@@ -112,7 +112,7 @@ class RobotPlottingMPLMixin:
         if isinstance(self, rtb.ERobot):  # pragma: nocover
             raise NotImplementedError("ERobot fellipse not implemented yet")
 
-        q = getunit(q, unit)  # type: ignore[assignment]
+        q = getunit(q, unit)
         ell = EllipsePlot(self, q, "f", opt, centre=centre)
 
         if add:
@@ -161,7 +161,7 @@ class RobotPlottingMPLMixin:
         if isinstance(self, rtb.ERobot):  # pragma: nocover
             raise NotImplementedError("ERobot vellipse not implemented yet")
 
-        q = getunit(q, unit)  # type: ignore[assignment]
+        q = getunit(q, unit)
         ell = EllipsePlot(self, q, "v", opt, centre=centre, scale=scale)
 
         if add:
@@ -212,7 +212,7 @@ class RobotPlottingMPLMixin:
 
         ``robot.plot_ellipse(ellipsoid)`` displays the ellipsoid.
         """
-        from roboticstoolbox.backends.PyPlot import PyPlot
+        from roboticstoolbox.backends.PyPlot.PyPlot import PyPlot
         from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 
         if not isinstance(ellipse, EllipsePlot):  # pragma: nocover

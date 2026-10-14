@@ -1,3 +1,7 @@
+
+from __future__ import annotations
+
+from typing import Any
 import numpy as np
 from math import pi
 from roboticstoolbox import DHRobot, RevoluteDH
@@ -44,7 +48,7 @@ class Baxter(DHRobot):
     .. codeauthor:: Peter Corke
     """  # noqa
 
-    def __init__(self, arm="left"):
+    def __init__(self, arm: str = "left") -> None:
 
         links = [
             RevoluteDH(d=0.27, a=0.069, alpha=-pi / 2),

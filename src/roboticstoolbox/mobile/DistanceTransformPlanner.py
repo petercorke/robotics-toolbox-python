@@ -3,14 +3,16 @@
 @Author: Kristian Gibson, initial MATLAB port
 """
 
-from spatialmath.base.transforms2d import *
-from spatialmath.base.vectors import *
-from spatialmath.pose2d import SE2
+from __future__ import annotations
+
+from typing import Any
+
+import numpy as np
 from spatialmath import base
-from scipy.ndimage import *
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class DistanceTransformPlanner(PlannerBase):
@@ -65,14 +67,19 @@ class DistanceTransformPlanner(PlannerBase):
     :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`
     """
 
-    def __init__(self, occgrid=None, metric="euclidean", **kwargs):
+    def __init__(
+        self,
+        occgrid: NDArray | None = None,
+        metric: str = "euclidean",
+        **kwargs: Any,
+    ) -> None:
 
         super().__init__(occgrid=occgrid, ndims=2, **kwargs)
         self._metric = metric
-        self._distancemap = None
+        self._distancemap: NDArray | None = None
 
     @property
-    def metric(self):
+    def metric(self) -> str:
         """
         Get the distance metric
 
@@ -82,7 +89,7 @@ class DistanceTransformPlanner(PlannerBase):
         return self._metric
 
     @property
-    def distancemap(self):
+    def distancemap(self) -> NDArray | None:
         """
         Get the distance map
 
@@ -95,7 +102,7 @@ class DistanceTransformPlanner(PlannerBase):
         """
         return self._distancemap
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = super().__str__()
         s += f"\n  Distance metric: {self._metric}"
         if self.distancemap is not None:
@@ -105,7 +112,12 @@ class DistanceTransformPlanner(PlannerBase):
 
         return s
 
-    def plan(self, goal=None, animate=False, summary=False):
+    def plan(
+        self,
+        goal: ArrayLike | None = None,
+        animate: bool = False,
+        summary: bool = False,
+    ) -> None:
         r"""
         Plan path using distance transform
 
@@ -130,6 +142,9 @@ class DistanceTransformPlanner(PlannerBase):
         if self._goal is None:
             raise ValueError("No goal specified here or in constructor")
 
+        if self.occgrid is None:
+            raise ValueError("an occupancy grid is required")
+
         self._distancemap = distancexform(
             self.occgrid.grid,
             goal=self._goal,
@@ -138,7 +153,7 @@ class DistanceTransformPlanner(PlannerBase):
             summary=summary,
         )
 
-    def next(self, position):
+    def next(self, position: ArrayLike) -> NDArray | None:
         """
         Find next point on the path
 
@@ -174,12 +189,13 @@ class DistanceTransformPlanner(PlannerBase):
         x = int(position[0])
         y = int(position[1])
 
+        distancemap = self.distancemap
         min_dist = np.inf
         for d in directions:
             try:
-                if self._distancemap[y + d[0], x + d[1]] < min_dist:
+                if distancemap[y + d[0], x + d[1]] < min_dist:
                     min_dir = d
-                    min_dist = self._distancemap[y + d[0], x + d[1]]
+                    min_dist = distancemap[y + d[0], x + d[1]]
             except:
                 # come here if the neighbouring cell is outside the map bounds
                 # raise RuntimeError(f"Unexpected error finding next min dist at {d}")
@@ -197,7 +213,9 @@ class DistanceTransformPlanner(PlannerBase):
         else:
             return next
 
-    def plot_3d(self, path=None, ls=None):
+    def plot_3d(
+        self, path: NDArray | None = None, ls: dict[str, Any] | None = None
+    ) -> Any:
         """
         Plot path on 3D cost surface
 
@@ -218,6 +236,8 @@ class DistanceTransformPlanner(PlannerBase):
         ax = fig.add_subplot(111, projection="3d")
 
         distance = self._distancemap
+        if distance is None:
+            raise ValueError("no distance map computed, you need to plan")
         X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
         surf = ax.plot_surface(
             X,
@@ -230,7 +250,7 @@ class DistanceTransformPlanner(PlannerBase):
         if path is not None:
             # k = sub2ind(np.shape(self._distancemap), p[:, 1], p[:, 0])
             height = distance[path[:, 1], path[:, 0]]
-            ax.plot(path[:, 0], path[:, 1], height, **ls)
+            ax.plot(path[:, 0], path[:, 1], height, **(ls or {}))
 
         plt.xlabel("x")
         plt.ylabel("y")
@@ -239,10 +259,14 @@ class DistanceTransformPlanner(PlannerBase):
         return ax
 
 
-import numpy as np
 
-
-def distancexform(occgrid, goal, metric="cityblock", animate=False, summary=False):
+def distancexform(
+    occgrid: NDArray,
+    goal: ArrayLike,
+    metric: str = "cityblock",
+    animate: bool = False,
+    summary: bool = False,
+) -> NDArray:
     """
     Distance transform for path planning
 
@@ -282,7 +306,7 @@ def distancexform(occgrid, goal, metric="cityblock", animate=False, summary=Fals
     distance = occgrid.astype(np.float32)
     distance[occgrid > 0] = np.nan  # assign nan to obstacle cells
     distance[occgrid == 0] = np.inf  # assign inf to other cells
-    distance[goal[1], goal[0]] = 0  # assign zero to goal
+    distance[int(goal[1]), int(goal[0])] = 0  # assign zero to goal
 
     # create the appropriate distance matrix D
     if metric.lower() in ("manhattan", "cityblock"):
@@ -305,7 +329,7 @@ def distancexform(occgrid, goal, metric="cityblock", animate=False, summary=Fals
 
     # get ready to iterate
     count = 0
-    ninf = np.inf  # number of infinities in the map
+    ninf: float = np.inf  # number of infinities in the map
 
     h = None
     while True:
@@ -338,14 +362,14 @@ def distancexform(occgrid, goal, metric="cityblock", animate=False, summary=Fals
             # it may never get to zero if there are unreachable cells in the map
             break
 
-        ninf = ninfnow
+        ninf = int(ninfnow)
 
     if summary:
         print(f"{count:d} iterations, {ninf:d} unreachable cells")
     return distance
 
 
-def grassfire_step(G, D):
+def grassfire_step(G: NDArray, D: NDArray) -> NDArray:
 
     # pad with inf
     H = np.pad(G, max(D.shape) // 2, "constant", constant_values=np.inf)

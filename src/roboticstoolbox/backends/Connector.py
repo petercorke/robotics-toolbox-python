@@ -3,7 +3,10 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class Connector(ABC):
@@ -13,7 +16,11 @@ class Connector(ABC):
     #: True if the backend can render EllipsePlot objects.
     supports_ellipse: bool = False
 
-    def __init__(self):
+    #: velocity and force ellipsoids shown by the teach pendant, set by it
+    _teach_vellipse: Any
+    _teach_fellipse: Any
+
+    def __init__(self) -> None:
         super().__init__()
 
     #
@@ -21,7 +28,7 @@ class Connector(ABC):
     #
 
     @abstractmethod
-    def launch(self):
+    def launch(self, *args: Any, **kwargs: Any) -> Any:
         """
         launch(args) launch the external program with an empty or
         specific scene as defined by args
@@ -31,7 +38,7 @@ class Connector(ABC):
         pass
 
     @abstractmethod
-    def step(self):
+    def step(self, *args: Any, **kwargs: Any) -> Any:
         """
         step(dt) triggers the external program to make a time step
         of defined time updating the state of the environment as defined by
@@ -49,7 +56,7 @@ class Connector(ABC):
         pass
 
     @abstractmethod
-    def reset(self):
+    def reset(self, *args: Any, **kwargs: Any) -> Any:
         """
         reset() triggers the external program to reset to the
         original state defined by launch
@@ -59,7 +66,7 @@ class Connector(ABC):
         pass
 
     @abstractmethod
-    def restart(self):
+    def restart(self, *args: Any, **kwargs: Any) -> Any:
         """
         restart() triggers the external program to close and relaunch
         to thestate defined by launch
@@ -69,7 +76,7 @@ class Connector(ABC):
         pass
 
     @abstractmethod
-    def close(self):
+    def close(self, *args: Any, **kwargs: Any) -> Any:
         """
         close() triggers the external program to gracefully close
 
@@ -82,7 +89,7 @@ class Connector(ABC):
     #
 
     @abstractmethod
-    def add(self):
+    def add(self, *args: Any, **kwargs: Any) -> Any:
         """
         id = add(object) adds the object to the external environment. object must
         be of an appropriate class. This adds a object object to a list of
@@ -93,7 +100,7 @@ class Connector(ABC):
         pass
 
     @abstractmethod
-    def remove(self):
+    def remove(self, *args: Any, **kwargs: Any) -> Any:
         """
         remove(id) removes the object from the external environment.
 
@@ -101,8 +108,21 @@ class Connector(ABC):
 
         pass
 
+    def _add_teach_panel(
+        self, robot: Any, q: Any, handle: Any = None, block: bool = True
+    ) -> Any:
+        """
+        Add the teach pendant controls for ``robot``, if the backend supports
+        them (see ``supports_teach``).
+
+        :return: True if the backend has already blocked until dismissed
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not have a teach pendant"
+        )
+
     @abstractmethod
-    def hold(self):  # pragma nocover
+    def hold(self, *args: Any, **kwargs: Any) -> Any:  # pragma nocover
         """
         hold() keeps the backend open i.e. stops the program from closing once
         the main script has finished. This method may need keep an even loop

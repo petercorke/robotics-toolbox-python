@@ -1,5 +1,9 @@
 from collections import namedtuple
+from contextlib import redirect_stdout
+from io import StringIO
 from math import pi
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 import numpy.testing as nt
 import numpy as np
 import unittest
@@ -179,6 +183,35 @@ class TestPlanners(unittest.TestCase):
 
     #     dx.plot()
     #     dx.plot(path=path)
+
+
+class TestRRTQuery(unittest.TestCase):
+    def test_returns_path_without_printing(self):
+        """Query must preserve its path and status without printing graph vertices."""
+        from roboticstoolbox.mobile.RRTPlanner import RRTPlanner
+
+        start = (1.0, 2.0, 0.0)
+        segment = np.array([[1.0, 2.0, 0.0], [2.0, 3.0, 0.0]])
+        root = SimpleNamespace(path=None)
+        vertex = SimpleNamespace(path=segment)
+        vertices = [root, vertex]
+
+        planner = object.__new__(RRTPlanner)
+        planner.g = MagicMock()
+        planner.g.closest.return_value = (vertex, 0.25)
+        planner.g.__getitem__.return_value = root
+        planner.g.path_UCS.return_value = (vertices, 1.5, None)
+
+        captured = StringIO()
+        with redirect_stdout(captured):
+            path, status = planner.query(start)
+
+        np.testing.assert_array_equal(path, segment)
+        self.assertEqual(status.length, 1.5)
+        self.assertEqual(status.initial_d, 0.25)
+        self.assertIs(status.vertices, vertices)
+        self.assertEqual(planner._start, start)
+        self.assertEqual(captured.getvalue(), "")
 
 
 if __name__ == "__main__":  # pragma nocover

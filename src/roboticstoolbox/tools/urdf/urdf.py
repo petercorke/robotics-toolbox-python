@@ -4,6 +4,10 @@
 @author (Adapted by) Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 import roboticstoolbox as rtb
 import spatialgeometry as gm
@@ -61,7 +65,7 @@ class URDFError(ValueError):
         element: str | None = None,
         location: list[str] | None = None,
         expanded_file: "str | os.PathLike | None" = None,
-    ):
+    ) -> None:
         super().__init__(msg)
         self.msg = msg
         self.stage = stage
@@ -102,7 +106,7 @@ class URDFError(ValueError):
         return "\n".join(lines)
 
 
-def _describe(node) -> str:
+def _describe(node: Any) -> str:
     """Short description of an XML element for error messages."""
     name = node.attrib.get("name")
     if name is None:
@@ -110,7 +114,7 @@ def _describe(node) -> str:
     return f'<{node.tag} name="{name}">'
 
 
-def _parse_child(cls, node, path):
+def _parse_child(cls: Any, node: Any, path: Any) -> Any:
     """Call ``cls._from_xml(node, path)``, attaching element context to any error."""
     try:
         return cls._from_xml(node, path)
@@ -147,15 +151,15 @@ class URDFType():
       containing this type of object.
     """
 
-    _ATTRIBS = {}  # Map from attrib name to (type, required)
-    _ELEMENTS = {}  # Map from element name to (type, required, multiple)
+    _ATTRIBS: dict[str, Any] = {}  # Map from attrib name to (type, required)
+    _ELEMENTS: dict[str, Any] = {}  # Map from element name to (type, required, multiple)
     _TAG = ""  # XML tag for this element
 
-    def __init__(self):  # pragma nocover
+    def __init__(self) -> None:  # pragma nocover
         pass
 
     @classmethod
-    def _parse_attrib(cls, val_type, val):
+    def _parse_attrib(cls, val_type: Any, val: Any) -> Any:
         """Parse an XML attribute into a python value.
         Parameters
         ----------
@@ -175,7 +179,7 @@ class URDFType():
         return val
 
     @classmethod
-    def _parse_simple_attribs(cls, node):
+    def _parse_simple_attribs(cls, node: Any) -> Any:
         """Parse all attributes in the _ATTRIBS array for this class.
         Parameters
         ----------
@@ -222,7 +226,7 @@ class URDFType():
         return kwargs
 
     @classmethod
-    def _parse_simple_elements(cls, node, path):
+    def _parse_simple_elements(cls, node: Any, path: Any) -> Any:
         """Parse all elements in the _ELEMENTS array from the children of
         this node.
         Parameters
@@ -264,7 +268,7 @@ class URDFType():
         return kwargs
 
     @classmethod
-    def _parse(cls, node, path):
+    def _parse(cls, node: Any, path: Any) -> Any:
         """Parse all elements and attributes in the _ELEMENTS and _ATTRIBS
         arrays for a node.
         Parameters
@@ -285,7 +289,7 @@ class URDFType():
         return kwargs
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         """Create an instance of this class from an XML node.
         Parameters
         ----------
@@ -318,19 +322,19 @@ class Box(URDFType):
     _ATTRIBS = {"size": (np.ndarray, True)}
     _TAG = "box"
 
-    def __init__(self, size):
+    def __init__(self, size: Any) -> None:
         self.size = size
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Box(size={})".format(self.size)
     
     @property
-    def size(self):
+    def size(self) -> Any:
         """(3,) float : The length, width, and height of the box in meters."""
         return self._size
 
     @size.setter
-    def size(self, value):
+    def size(self, value: Any) -> None:
         self._size = np.asanyarray(value).astype(np.float64)
 
 
@@ -350,29 +354,29 @@ class Cylinder(URDFType):
     }
     _TAG = "cylinder"
 
-    def __init__(self, radius, length):
+    def __init__(self, radius: Any, length: Any) -> None:
         self.radius = radius
         self.length = length
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Cylinder(radius={}, length={})".format(self.radius, self.length)
 
     @property
-    def radius(self):
+    def radius(self) -> Any:
         """float : The radius of the cylinder in meters."""
         return self._radius
 
     @radius.setter
-    def radius(self, value):
+    def radius(self, value: Any) -> None:
         self._radius = float(value)
 
     @property
-    def length(self):
+    def length(self) -> Any:
         """float : The length of the cylinder in meters."""
         return self._length
 
     @length.setter
-    def length(self, value):
+    def length(self, value: Any) -> None:
         self._length = float(value)
 
 
@@ -389,19 +393,19 @@ class Sphere(URDFType):
     }
     _TAG = "sphere"
 
-    def __init__(self, radius):
+    def __init__(self, radius: Any) -> None:
         self.radius = radius
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Sphere(radius={})".format(self.radius)
 
     @property
-    def radius(self):
+    def radius(self) -> Any:
         """float : The radius of the sphere in meters."""
         return self._radius
 
     @radius.setter
-    def radius(self, value):
+    def radius(self, value: Any) -> None:
         self._radius = float(value)
 
 
@@ -420,20 +424,20 @@ class Mesh(URDFType):
     _ATTRIBS = {"filename": (str, True), "scale": (np.ndarray, False)}
     _TAG = "mesh"
 
-    def __init__(self, filename, scale=None):
+    def __init__(self, filename: Any, scale: Any = None) -> None:
         self.filename = filename
         self.scale = scale
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Mesh(filename={}, scale={})".format(self.filename, self.scale)
 
     @property
-    def filename(self):
+    def filename(self) -> Any:
         """str : The path to the mesh file for this object."""
         return self._filename
 
     @filename.setter
-    def filename(self, value):
+    def filename(self, value: Any) -> None:
 
         global _base_path
 
@@ -450,18 +454,18 @@ class Mesh(URDFType):
         self._filename = str(value)
 
     @property
-    def scale(self):
+    def scale(self) -> Any:
         """(3,) float : A scaling for the mesh along its local XYZ axes."""
         return self._scale
 
     @scale.setter
-    def scale(self, value):
+    def scale(self, value: Any) -> None:
         if value is not None:
             value = np.asanyarray(value).astype(np.float64)
         self._scale = value
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         kwargs = cls._parse(node, path)
         return Mesh(**kwargs)
 
@@ -477,16 +481,16 @@ class Material(URDFType):
     texture : :class:`.Texture`, optional
         A texture for the material.
     """
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Material(name={}, color={}, texture={})".format(
             self.name, self.color, self.texture
         )
 
     _ATTRIBS = {"name": (str, True)}
-    _ELEMENTS = {}
+    _ELEMENTS: dict[str, Any] = {}
     _TAG = "material"
 
-    def __init__(self, name, color=None, texture=None):
+    def __init__(self, name: Any, color: Any = None, texture: Any = None) -> None:
         # if color is None:
         #     color = name
 
@@ -495,7 +499,7 @@ class Material(URDFType):
         self.texture = texture
 
     @classmethod
-    def _from_xml(cls, node, path):  # pragma nocover
+    def _from_xml(cls, node: Any, path: Any) -> Any:  # pragma nocover
         kwargs = cls._parse(node, path)
 
         # Extract the color -- it's weirdly an attribute of a subelement
@@ -531,7 +535,9 @@ class Geometry(URDFType):
     }
     _TAG = "geometry"
 
-    def __init__(self, box=None, cylinder=None, sphere=None, mesh=None):
+    def __init__(
+        self, box: Any = None, cylinder: Any = None, sphere: Any = None, mesh: Any = None
+    ) -> None:
         if (
             box is None and cylinder is None and sphere is None and mesh is None
         ):  # pragma nocover
@@ -553,57 +559,57 @@ class Geometry(URDFType):
             self.mesh = mesh
             self.ob = gm.Mesh(mesh.filename, scale=mesh.scale)
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Geometry(box={}, cylinder={}, sphere={}, mesh={})".format(
             self.box, self.cylinder, self.sphere, self.mesh
         )
     
     @property
-    def box(self):
+    def box(self) -> Any:
         """:class:`.Box` : Box geometry."""
         return self._box
 
     @box.setter
-    def box(self, value):
+    def box(self, value: Any) -> None:
         if value is not None and not isinstance(value, Box):  # pragma nocover
             raise TypeError("Expected Box type")
         self._box = value
 
     @property
-    def cylinder(self):
+    def cylinder(self) -> Any:
         """:class:`.Cylinder` : Cylinder geometry."""
         return self._cylinder
 
     @cylinder.setter
-    def cylinder(self, value):
+    def cylinder(self, value: Any) -> None:
         if value is not None and not isinstance(value, Cylinder):
             raise TypeError("Expected Cylinder type")  # pragma nocover
         self._cylinder = value
 
     @property
-    def sphere(self):
+    def sphere(self) -> Any:
         """:class:`.Sphere` : Spherical geometry."""
         return self._sphere
 
     @sphere.setter
-    def sphere(self, value):
+    def sphere(self, value: Any) -> None:
         if value is not None and not isinstance(value, Sphere):
             raise TypeError("Expected Sphere type")  # pragma nocover
         self._sphere = value
 
     @property
-    def mesh(self):
+    def mesh(self) -> Any:
         """:class:`.Mesh` : Mesh geometry."""
         return self._mesh
 
     @mesh.setter
-    def mesh(self, value):
+    def mesh(self, value: Any) -> None:
         if value is not None and not isinstance(value, Mesh):
             raise TypeError("Expected Mesh type")  # pragma nocover
         self._mesh = value
 
     @property
-    def geometry(self):  # pragma nocover
+    def geometry(self) -> Any:  # pragma nocover
         """:class:`.Box`, :class:`.Cylinder`, :class:`.Sphere`, or
         :class:`.Mesh` : The valid geometry element.
         """
@@ -637,50 +643,50 @@ class Collision(URDFType):
     }
     _TAG = "collision"
 
-    def __init__(self, name, origin, geometry):
+    def __init__(self, name: Any, origin: Any, geometry: Any) -> None:
         self.geometry = geometry
         self.name = name
         self.origin = origin
         self.geometry.ob.T = origin
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Collision(name={}, origin={}, geometry={})".format(
             self.name, self.origin, self.geometry
         )
     
     @property
-    def geometry(self):
+    def geometry(self) -> Any:
         """:class:`.Geometry` : The geometry of this element."""
         return self._geometry
 
     @geometry.setter
-    def geometry(self, value):
+    def geometry(self, value: Any) -> None:
         if not isinstance(value, Geometry):  # pragma nocover
             raise TypeError("Must set geometry with Geometry object")
         self._geometry = value
 
     @property
-    def name(self):
+    def name(self) -> Any:
         """str : The name of this collision element."""
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: Any) -> None:
         if value is not None:
             value = str(value)
         self._name = value
 
     @property
-    def origin(self):
+    def origin(self) -> Any:
         """(4,4) float : The pose of this element relative to the link frame."""
         return self._origin
 
     @origin.setter
-    def origin(self, value):
+    def origin(self, value: Any) -> None:
         self._origin = configure_origin(value)
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         kwargs = cls._parse(node, path)
         kwargs["origin"], _ = parse_origin(node)
         return Collision(**kwargs)
@@ -708,7 +714,9 @@ class Visual(URDFType):
     }
     _TAG = "visual"
 
-    def __init__(self, geometry, name=None, origin=None, material=None):
+    def __init__(
+        self, geometry: Any, name: Any = None, origin: Any = None, material: Any = None
+    ) -> None:
         self.geometry = geometry
         geometry.ob.T = origin
         self.name = name
@@ -724,44 +732,44 @@ class Visual(URDFType):
             self.geometry.ob.color = material.color
 
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Visual(name={}, origin={}, geometry={}, material={})".format(
             self.name, self.origin, self.geometry, self.material
         )
 
     @property
-    def geometry(self):
+    def geometry(self) -> Any:
         """:class:`.Geometry` : The geometry of this element."""
         return self._geometry
 
     @geometry.setter
-    def geometry(self, value):
+    def geometry(self, value: Any) -> None:
         if not isinstance(value, Geometry):  # pragma nocover
             raise TypeError("Must set geometry with Geometry object")
         self._geometry = value
 
     @property
-    def name(self):
+    def name(self) -> Any:
         """str : The name of this visual element."""
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: Any) -> None:
         if value is not None:
             value = str(value)
         self._name = value
 
     @property
-    def origin(self):
+    def origin(self) -> Any:
         """(4,4) float : The pose of this element relative to the link frame."""
         return self._origin
 
     @origin.setter
-    def origin(self, value):
+    def origin(self, value: Any) -> None:
         self._origin = configure_origin(value)
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         kwargs = cls._parse(node, path)
         kwargs["origin"], _ = parse_origin(node)
         return Visual(**kwargs)
@@ -782,46 +790,46 @@ class Inertial(URDFType):
 
     _TAG = "inertial"
 
-    def __init__(self, mass=None, inertia=None, origin=None):
+    def __init__(self, mass: Any = None, inertia: Any = None, origin: Any = None) -> None:
         self._mass = mass
         self._inertia = inertia
         self._origin = origin
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Inertial(mass={}, inertia={}, origin={})".format(self.mass, self.inertia, self.origin)
     
     @property
-    def mass(self):
+    def mass(self) -> Any:
         """float : The mass of the link in kilograms."""
         return self._mass
 
     @mass.setter
-    def mass(self, value):
+    def mass(self, value: Any) -> None:
         self._mass = float(value)
 
     @property
-    def inertia(self):
+    def inertia(self) -> Any:
         """(3,3) float : The 3x3 symmetric rotational inertia matrix."""
         return self._inertia
 
     @inertia.setter
-    def inertia(self, value):
+    def inertia(self, value: Any) -> None:
         value = np.asanyarray(value).astype(np.float64)
         if not np.allclose(value, value.T):  # pragma nocover
             raise ValueError("Inertia must be a symmetric matrix")
         self._inertia = value
 
     @property
-    def origin(self):
+    def origin(self) -> Any:
         """(4,4) float : The pose of the inertials relative to the link frame."""
         return self._origin
 
     @origin.setter
-    def origin(self, value):
+    def origin(self, value: Any) -> None:
         self._origin = configure_origin(value)
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         origin, _ = parse_origin(node)
         mass_node = node.find("mass")
         if mass_node is None or "value" not in mass_node.attrib:
@@ -876,36 +884,36 @@ class JointCalibration(URDFType):  # pragma nocover
     _ATTRIBS = {"rising": (float, False), "falling": (float, False)}
     _TAG = "calibration"
 
-    def __init__(self, rising=None, falling=None):
+    def __init__(self, rising: Any = None, falling: Any = None) -> None:
         self.rising = rising
         self.falling = falling
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "JointCalibration(rising={}, falling={})".format(self.rising, self.falling)
 
     @property
-    def rising(self):
+    def rising(self) -> Any:
         """float : description."""
         return self._rising
 
     @rising.setter
-    def rising(self, value):
+    def rising(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         self._rising = value
 
     @property
-    def falling(self):
+    def falling(self) -> Any:
         """float : description."""
         return self._falling
 
     @falling.setter
-    def falling(self, value):
+    def falling(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         self._falling = value
 
-    def copy(self, prefix="", scale=None):
+    def copy(self, prefix: str = "", scale: Any = None) -> Any:
         """Create a deep copy of the visual with the prefix applied to all names.
         Parameters
         ----------
@@ -940,31 +948,31 @@ class JointDynamics(URDFType):
     }
     _TAG = "dynamics"
 
-    def __init__(self, damping, friction):
+    def __init__(self, damping: Any, friction: Any) -> None:
         self.damping = damping
         self.friction = friction
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "JointDynamics(damping={}, friction={})".format(self.damping, self.friction)
     
     @property
-    def damping(self):  # pragma nocover
+    def damping(self) -> Any:  # pragma nocover
         """float : The damping value of the joint."""
         return self._damping
 
     @damping.setter
-    def damping(self, value):
+    def damping(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         self._damping = value
 
     @property
-    def friction(self):
+    def friction(self) -> Any:
         """float : The static friction value of the joint."""
         return self._friction
 
     @friction.setter
-    def friction(self, value):
+    def friction(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         self._friction = value
@@ -993,53 +1001,55 @@ class JointLimit(URDFType):
     }
     _TAG = "limit"
 
-    def __init__(self, effort, velocity, lower=None, upper=None):
+    def __init__(
+        self, effort: Any, velocity: Any, lower: Any = None, upper: Any = None
+    ) -> None:
         self.effort = effort
         self.velocity = velocity
         self.lower = lower
         self.upper = upper
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "JointLimit(effort={}, velocity={}, lower={}, upper={})".format(
             self.effort, self.velocity, self.lower, self.upper
         )
 
     @property
-    def effort(self):
+    def effort(self) -> Any:
         """float : The maximum joint effort."""
         return self._effort
 
     @effort.setter
-    def effort(self, value):
+    def effort(self, value: Any) -> None:
         self._effort = float(value)
 
     @property
-    def velocity(self):
+    def velocity(self) -> Any:
         """float : The maximum joint velocity."""
         return self._velocity
 
     @velocity.setter
-    def velocity(self, value):
+    def velocity(self, value: Any) -> None:
         self._velocity = float(value)
 
     @property
-    def lower(self):
+    def lower(self) -> Any:
         """float : The lower joint limit."""
         return self._lower
 
     @lower.setter
-    def lower(self, value):
+    def lower(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         self._lower = value
 
     @property
-    def upper(self):
+    def upper(self) -> Any:
         """float : The upper joint limit."""
         return self._upper
 
     @upper.setter
-    def upper(self, value):
+    def upper(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         self._upper = value
@@ -1067,32 +1077,32 @@ class JointMimic(URDFType):  # pragma nocover
     }
     _TAG = "mimic"
 
-    def __init__(self, joint, multiplier=None, offset=None):
+    def __init__(self, joint: Any, multiplier: Any = None, offset: Any = None) -> None:
         self.joint = joint
         self.multiplier = multiplier
         self.offset = offset
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "JointMimic(joint={}, multiplier={}, offset={})".format(
             self.joint, self.multiplier, self.offset
         )
 
     @property
-    def joint(self):
+    def joint(self) -> Any:
         """float : The name of the joint to mimic."""
         return self._joint
 
     @joint.setter
-    def joint(self, value):
+    def joint(self, value: Any) -> None:
         self._joint = str(value)
 
     @property
-    def multiplier(self):
+    def multiplier(self) -> Any:
         """float : The multiplier for the joint configuration."""
         return self._multiplier
 
     @multiplier.setter
-    def multiplier(self, value):
+    def multiplier(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         else:
@@ -1100,12 +1110,12 @@ class JointMimic(URDFType):  # pragma nocover
         self._multiplier = value
 
     @property
-    def offset(self):
+    def offset(self) -> Any:
         """float : The offset for the joint configuration"""
         return self._offset
 
     @offset.setter
-    def offset(self, value):
+    def offset(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         else:
@@ -1140,25 +1150,29 @@ class SafetyController(URDFType):  # pragma nocover
     _TAG = "safety_controller"
 
     def __init__(
-        self, k_velocity, k_position=None, soft_lower_limit=None, soft_upper_limit=None
-    ):
+        self,
+        k_velocity: Any,
+        k_position: Any = None,
+        soft_lower_limit: Any = None,
+        soft_upper_limit: Any = None,
+    ) -> None:
         self.k_velocity = k_velocity
         self.k_position = k_position
         self.soft_lower_limit = soft_lower_limit
         self.soft_upper_limit = soft_upper_limit
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "SafetyController(k_velocity={}, k_position={}, soft_lower_limit={}, soft_upper_limit={})".format(
             self.k_velocity, self.k_position, self.soft_lower_limit, self.soft_upper_limit
         )
 
     @property
-    def soft_lower_limit(self):
+    def soft_lower_limit(self) -> Any:
         """float : The soft lower limit where the safety controller kicks in."""
         return self._soft_lower_limit
 
     @soft_lower_limit.setter
-    def soft_lower_limit(self, value):
+    def soft_lower_limit(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         else:
@@ -1166,12 +1180,12 @@ class SafetyController(URDFType):  # pragma nocover
         self._soft_lower_limit = value
 
     @property
-    def soft_upper_limit(self):
+    def soft_upper_limit(self) -> Any:
         """float : The soft upper limit where the safety controller kicks in."""
         return self._soft_upper_limit
 
     @soft_upper_limit.setter
-    def soft_upper_limit(self, value):
+    def soft_upper_limit(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         else:
@@ -1179,12 +1193,12 @@ class SafetyController(URDFType):  # pragma nocover
         self._soft_upper_limit = value
 
     @property
-    def k_position(self):
+    def k_position(self) -> Any:
         """float : A relation between the position and velocity limits."""
         return self._k_position
 
     @k_position.setter
-    def k_position(self, value):
+    def k_position(self, value: Any) -> None:
         if value is not None:
             value = float(value)
         else:
@@ -1192,12 +1206,12 @@ class SafetyController(URDFType):  # pragma nocover
         self._k_position = value
 
     @property
-    def k_velocity(self):
+    def k_velocity(self) -> Any:
         """float : A relation between the effort and velocity limits."""
         return self._k_velocity
 
     @k_velocity.setter
-    def k_velocity(self, value):
+    def k_velocity(self, value: Any) -> None:
         self._k_velocity = float(value)
 
 
@@ -1224,44 +1238,46 @@ class Actuator(URDFType):
     }
     _TAG = "actuator"
 
-    def __init__(self, name, mechanicalReduction=None, hardwareInterfaces=None):
+    def __init__(
+        self, name: Any, mechanicalReduction: Any = None, hardwareInterfaces: Any = None
+    ) -> None:
         self.name = name
         self.mechanicalReduction = mechanicalReduction
         self.hardwareInterfaces = hardwareInterfaces
 
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Actuator(name={}, mechanicalReduction={}, hardwareInterfaces={})".format(
             self.name, self.mechanicalReduction, self.hardwareInterfaces
         )
 
     @property
-    def name(self):  # pragma nocover
+    def name(self) -> Any:  # pragma nocover
         """str : The name of this actuator."""
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: Any) -> None:
         self._name = str(value)
 
     @property
-    def mechanicalReduction(self):  # pragma nocover
+    def mechanicalReduction(self) -> Any:  # pragma nocover
         """str : A specifier for the type of mechanical reduction."""
         return self._mechanicalReduction
 
     @mechanicalReduction.setter
-    def mechanicalReduction(self, value):
+    def mechanicalReduction(self, value: Any) -> None:
         if value is not None:
             value = str(value)
         self._mechanicalReduction = value
 
     @property
-    def hardwareInterfaces(self):  # pragma nocover
+    def hardwareInterfaces(self) -> Any:  # pragma nocover
         """list of str : The supported hardware interfaces."""
         return self._hardwareInterfaces
 
     @hardwareInterfaces.setter
-    def hardwareInterfaces(self, value):  # pragma nocover
+    def hardwareInterfaces(self, value: Any) -> None:  # pragma nocover
         if value is None:
             value = []
         else:
@@ -1271,7 +1287,7 @@ class Actuator(URDFType):
         self._hardwareInterfaces = value
 
     @classmethod
-    def _from_xml(cls, node, path):  # pragma nocover
+    def _from_xml(cls, node: Any, path: Any) -> Any:  # pragma nocover
         kwargs = cls._parse(node, path)
         mr = node.find("mechanicalReduction")
         if mr is not None:
@@ -1299,31 +1315,31 @@ class TransmissionJoint(URDFType):
     }
     _TAG = "joint"
 
-    def __init__(self, name, hardwareInterfaces):
+    def __init__(self, name: Any, hardwareInterfaces: Any) -> None:
         self.name = name
         self.hardwareInterfaces = hardwareInterfaces
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "TransmissionJoint(name={}, hardwareInterfaces={})".format(
             self.name, self.hardwareInterfaces
         )
     
     @property
-    def name(self):  # pragma nocover
+    def name(self) -> Any:  # pragma nocover
         """str : The name of this transmission joint."""
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: Any) -> None:
         self._name = str(value)
 
     @property
-    def hardwareInterfaces(self):  # pragma nocover
+    def hardwareInterfaces(self) -> Any:  # pragma nocover
         """list of str : The supported hardware interfaces."""
         return self._hardwareInterfaces
 
     @hardwareInterfaces.setter
-    def hardwareInterfaces(self, value):  # pragma nocover
+    def hardwareInterfaces(self, value: Any) -> None:  # pragma nocover
         if value is None:
             value = []
         else:
@@ -1333,7 +1349,7 @@ class TransmissionJoint(URDFType):
         self._hardwareInterfaces = value
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         kwargs = cls._parse(node, path)
         hi = node.findall("hardwareInterface")
         if len(hi) > 0:
@@ -1371,44 +1387,46 @@ class Transmission(URDFType):
     }
     _TAG = "transmission"
 
-    def __init__(self, name, trans_type, joints=None, actuators=None):
+    def __init__(
+        self, name: Any, trans_type: Any, joints: Any = None, actuators: Any = None
+    ) -> None:
         self.name = name
         self.trans_type = trans_type
         self.joints = joints
         self.actuators = actuators
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Transmission(name={}, trans_type={}, joints={}, actuators={})".format(
             self.name, self.trans_type, self.joints, self.actuators
         )
 
     @property
-    def name(self):
+    def name(self) -> Any:
         """str : The name of this transmission."""
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: Any) -> None:
         self._name = str(value)
 
     @property
-    def trans_type(self):  # pragma nocover
+    def trans_type(self) -> Any:  # pragma nocover
         """str : The type of this transmission."""
         return self._trans_type
 
     @trans_type.setter
-    def trans_type(self, value):
+    def trans_type(self, value: Any) -> None:
         self._trans_type = str(value)
 
     @property
-    def joints(self):  # pragma nocover
+    def joints(self) -> Any:  # pragma nocover
         """:class:`.TransmissionJoint` : The joints the transmission is
         connected to.
         """
         return self._joints
 
     @joints.setter
-    def joints(self, value):  # pragma nocover
+    def joints(self, value: Any) -> None:  # pragma nocover
         if value is None:
             value = []
         else:
@@ -1419,12 +1437,12 @@ class Transmission(URDFType):
         self._joints = value
 
     @property
-    def actuators(self):  # pragma nocover
+    def actuators(self) -> Any:  # pragma nocover
         """:class:`.Actuator` : The actuators the transmission is connected to."""
         return self._actuators
 
     @actuators.setter
-    def actuators(self, value):  # pragma nocover
+    def actuators(self, value: Any) -> None:  # pragma nocover
         if value is None:
             value = []
         else:
@@ -1435,7 +1453,7 @@ class Transmission(URDFType):
         self._actuators = value
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         kwargs = cls._parse(node, path)
         if node.find("type") is not None:
             kwargs["trans_type"] = node.find("type").text
@@ -1502,19 +1520,19 @@ class Joint(URDFType):
 
     def __init__(
         self,
-        name,
-        joint_type,
-        parent,
-        child,
-        axis=None,
-        origin=None,
-        limit=None,
-        dynamics=None,
-        safety_controller=None,
-        calibration=None,
-        mimic=None,
-        rpy=None,
-    ):
+        name: Any,
+        joint_type: Any,
+        parent: Any,
+        child: Any,
+        axis: Any = None,
+        origin: Any = None,
+        limit: Any = None,
+        dynamics: Any = None,
+        safety_controller: Any = None,
+        calibration: Any = None,
+        mimic: Any = None,
+        rpy: Any = None,
+    ) -> None:
         self.name = name
         self.parent = parent
         self.child = child
@@ -1528,57 +1546,57 @@ class Joint(URDFType):
         self.calibration = calibration
         self.mimic = mimic
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Joint(name={}, joint_type={}, parent={}, child={})".format(
             self.name, self.joint_type, self.parent, self.child
         )
 
     @property
-    def name(self):
+    def name(self) -> Any:
         """str : Name for this joint."""
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: Any) -> None:
         self._name = str(value)
 
     @property
-    def joint_type(self):
+    def joint_type(self) -> Any:
         """str : The type of this joint."""
         return self._joint_type
 
     @joint_type.setter
-    def joint_type(self, value):
+    def joint_type(self, value: Any) -> None:
         value = str(value)
         if value not in Joint.TYPES:  # pragma nocover
             raise ValueError("Unsupported joint type {}".format(value))
         self._joint_type = value
 
     @property
-    def parent(self):
+    def parent(self) -> Any:
         """str : The name of the parent link."""
         return self._parent
 
     @parent.setter
-    def parent(self, value):
+    def parent(self, value: Any) -> None:
         self._parent = str(value)
 
     @property
-    def child(self):
+    def child(self) -> Any:
         """str : The name of the child link."""
         return self._child
 
     @child.setter
-    def child(self, value):
+    def child(self, value: Any) -> None:
         self._child = str(value)
 
     @property
-    def axis(self):
+    def axis(self) -> Any:
         """(3,) float : The joint axis in the joint frame."""
         return self._axis
 
     @axis.setter
-    def axis(self, value):
+    def axis(self, value: Any) -> None:
         if value is None:
             value = np.array([1.0, 0.0, 0.0], dtype=np.float64)
         else:
@@ -1592,31 +1610,31 @@ class Joint(URDFType):
         self._axis = value
 
     @property
-    def origin(self):
+    def origin(self) -> Any:
         """(4,4) float : The pose of child and joint frames relative to the
         parent link's frame.
         """
         return self._origin
 
     @origin.setter
-    def origin(self, value):
+    def origin(self, value: Any) -> None:
         self._origin = configure_origin(value)
 
     @property
-    def rpy(self):
+    def rpy(self) -> Any:
         return self._rpy
 
     @rpy.setter
-    def rpy(self, value):
+    def rpy(self, value: Any) -> None:
         self._rpy = value
 
     @property
-    def limit(self):
+    def limit(self) -> Any:
         """:class:`.JointLimit` : The limits for this joint."""
         return self._limit
 
     @limit.setter
-    def limit(self, value):
+    def limit(self, value: Any) -> None:
         if value is None:
             if self.joint_type in ["prismatic", "revolute"]:  # pragma nocover
                 raise ValueError(
@@ -1627,54 +1645,54 @@ class Joint(URDFType):
         self._limit = value
 
     @property
-    def dynamics(self):
+    def dynamics(self) -> Any:
         """:class:`.JointDynamics` : The dynamics for this joint."""
         return self._dynamics
 
     @dynamics.setter
-    def dynamics(self, value):
+    def dynamics(self, value: Any) -> None:
         if value is not None:
             if not isinstance(value, JointDynamics):  # pragma nocover
                 raise TypeError("Expected JointDynamics type")
         self._dynamics = value
 
     @property
-    def safety_controller(self):  # pragma nocover
+    def safety_controller(self) -> Any:  # pragma nocover
         """:class:`.SafetyController` : The safety controller for this joint."""
         return self._safety_controller
 
     @safety_controller.setter
-    def safety_controller(self, value):
+    def safety_controller(self, value: Any) -> None:
         if value is not None:
             if not isinstance(value, SafetyController):  # pragma nocover
                 raise TypeError("Expected SafetyController type")
         self._safety_controller = value
 
     @property
-    def calibration(self):  # pragma nocover
+    def calibration(self) -> Any:  # pragma nocover
         """:class:`.JointCalibration` : The calibration for this joint."""
         return self._calibration
 
     @calibration.setter
-    def calibration(self, value):
+    def calibration(self, value: Any) -> None:
         if value is not None:
             if not isinstance(value, JointCalibration):  # pragma nocover
                 raise TypeError("Expected JointCalibration type")
         self._calibration = value
 
     @property
-    def mimic(self):  # pragma nocover
+    def mimic(self) -> Any:  # pragma nocover
         """:class:`.JointMimic` : The mimic for this joint."""
         return self._mimic
 
     @mimic.setter
-    def mimic(self, value):
+    def mimic(self, value: Any) -> None:
         if value is not None:
             if not isinstance(value, JointMimic):  # pragma nocover
                 raise TypeError("Expected JointMimic type")
         self._mimic = value
 
-    def is_valid(self, cfg):  # pragma nocover
+    def is_valid(self, cfg: Any) -> Any:  # pragma nocover
         """Check if the provided configuration value is valid for this joint.
         Parameters
         ----------
@@ -1687,11 +1705,11 @@ class Joint(URDFType):
         """
         if self.joint_type not in ["fixed", "revolute"]:
             return True
-        if self.joint_limit is None:
+        if self.joint_limit is None:  # type: ignore[attr-defined]
             return True
         cfg = float(cfg)
-        lower = -np.infty
-        upper = np.infty
+        lower = -np.inf
+        upper = np.inf
         if self.limit.lower is not None:
             lower = self.limit.lower
         if self.limit.upper is not None:
@@ -1699,7 +1717,7 @@ class Joint(URDFType):
         return cfg >= lower and cfg <= upper
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         kwargs = cls._parse(node, path)
         if "type" not in node.attrib:
             raise URDFError(
@@ -1750,33 +1768,33 @@ class Link(URDFType):
     }
     _TAG = "link"
 
-    def __init__(self, name, inertial, visuals, collisions):
+    def __init__(self, name: Any, inertial: Any, visuals: Any, collisions: Any) -> None:
         self.name = name
         self.inertial = inertial
         self.visuals = visuals
         self.collisions = collisions
 
-    def __repr__(self):  # pragma nocover
+    def __repr__(self) -> str:  # pragma nocover
         return "Link(name={}, inertial={}, visuals={}, collisions={})".format(
             self.name, self.inertial, self.visuals, self.collisions
         )
     
     @property
-    def name(self):
+    def name(self) -> Any:
         """str : The name of this link."""
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: Any) -> None:
         self._name = str(value)
 
     @property
-    def inertial(self):
+    def inertial(self) -> Any:
         """:class:`.Inertial` : Inertial properties of the link."""
         return self._inertial
 
     @inertial.setter
-    def inertial(self, value):
+    def inertial(self, value: Any) -> None:
         if value is not None and not isinstance(value, Inertial):
             raise TypeError("Expected Inertial object")  # pragma nocover
         # Set default inertial
@@ -1785,12 +1803,12 @@ class Link(URDFType):
         self._inertial = value
 
     @property
-    def visuals(self):
+    def visuals(self) -> Any:
         """list of :class:`.Visual` : The visual properties of this link."""
         return self._visuals
 
     @visuals.setter
-    def visuals(self, value):
+    def visuals(self, value: Any) -> None:
         if value is None:  # pragma nocover
             value = []
         else:
@@ -1801,12 +1819,12 @@ class Link(URDFType):
         self._visuals = value
 
     @property
-    def collisions(self):
+    def collisions(self) -> Any:
         """list of :class:`.Collision` : The collision properties of this link."""
         return self._collisions
 
     @collisions.setter
-    def collisions(self, value):
+    def collisions(self, value: Any) -> None:
         if value is None:  # pragma nocover
             value = []
         else:
@@ -1851,13 +1869,13 @@ class URDF(URDFType):
 
     def __init__(
         self,
-        name,
-        links,
-        joints=None,
-        transmissions=None,
-        materials=None,
-        other_xml=None,
-    ):
+        name: Any,
+        links: Any,
+        joints: Any = None,
+        transmissions: Any = None,
+        materials: Any = None,
+        other_xml: Any = None,
+    ) -> None:
         if joints is None:  # pragma nocover
             joints = []
         if transmissions is None:  # pragma nocover
@@ -1880,7 +1898,7 @@ class URDF(URDFType):
         self._joints = list(joints)
         self._transmissions = list(transmissions)
         self._materials = list(materials)
-        self._material_map = {}
+        self._material_map: dict[str, Any] = {}
 
         for x in self._materials:
             if x.name in self._material_map:
@@ -1902,16 +1920,16 @@ class URDF(URDFType):
                 )
 
     @property
-    def name(self):
+    def name(self) -> Any:
         """str : The name of the URDF."""
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: Any) -> None:
         self._name = str(value)
 
     @property
-    def links(self):
+    def links(self) -> Any:
         """list of :class:`.Link` : The links of the URDF.
         This returns a copy of the links array which cannot be edited
         directly. If you want to add or remove links, use
@@ -1920,16 +1938,17 @@ class URDF(URDFType):
         return copy.copy(self._links)
 
     @property
-    def link_map(self):  # pragma nocover
+    def link_map(self) -> Any:  # pragma nocover
         """dict : Map from link names to the links themselves.
         This returns a copy of the link map which cannot be edited
         directly. If you want to add or remove links, use
         the appropriate functions.
         """
-        return copy.copy(self._link_map)
+        # `_link_map` is never set: AttributeError, see findings
+        return copy.copy(self._link_map)  # type: ignore[attr-defined]
 
     @property
-    def joints(self):
+    def joints(self) -> Any:
         """list of :class:`.Joint` : The links of the URDF.
         This returns a copy of the joints array which cannot be edited
         directly. If you want to add or remove joints, use
@@ -1938,16 +1957,16 @@ class URDF(URDFType):
         return copy.copy(self._joints)
 
     @property
-    def joint_map(self):  # pragma nocover
+    def joint_map(self) -> Any:  # pragma nocover
         """dict : Map from joint names to the joints themselves.
         This returns a copy of the joint map which cannot be edited
         directly. If you want to add or remove joints, use
         the appropriate functions.
         """
-        return copy.copy(self._joint_map)
+        return copy.copy(self._joint_map)  # type: ignore[attr-defined]
 
     @property
-    def transmissions(self):
+    def transmissions(self) -> Any:
         """list of :class:`.Transmission` : The transmissions of the URDF.
         This returns a copy of the transmissions array which cannot be edited
         directly. If you want to add or remove transmissions, use
@@ -1956,39 +1975,39 @@ class URDF(URDFType):
         return copy.copy(self._transmissions)
 
     @property
-    def transmission_map(self):  # pragma nocover
+    def transmission_map(self) -> Any:  # pragma nocover
         """dict : Map from transmission names to the transmissions themselves.
         This returns a copy of the transmission map which cannot be edited
         directly. If you want to add or remove transmissions, use
         the appropriate functions.
         """
-        return copy.copy(self._transmission_map)
+        return copy.copy(self._transmission_map)  # type: ignore[attr-defined]
 
     @property
-    def other_xml(self):  # pragma nocover
+    def other_xml(self) -> Any:  # pragma nocover
         """str : Any extra XML that belongs with the URDF."""
         return self._other_xml
 
     @other_xml.setter
-    def other_xml(self, value):
+    def other_xml(self, value: Any) -> None:
         self._other_xml = value
 
     @property
-    def actuated_joints(self):  # pragma nocover
+    def actuated_joints(self) -> Any:  # pragma nocover
         """list of :class:`.Joint` : The joints that are independently
         actuated.
         This excludes mimic joints and fixed joints. The joints are listed
         in topological order, starting from the base-most joint.
         """
-        return self._actuated_joints
+        return self._actuated_joints  # type: ignore[attr-defined]
 
-    def _merge_materials(self):
+    def _merge_materials(self) -> None:
         """Merge the top-level material set with the link materials."""
         for link in self.links:
             for v in link.visuals:
                 if v.material is None:
                     continue
-                if v.material.name in self.material_map:
+                if v.material.name in self.material_map:  # type: ignore[attr-defined]
                     v.material = self._material_map[v.material.name]
                     v.geometry.ob.color = v.material.color
                 else:
@@ -1996,7 +2015,7 @@ class URDF(URDFType):
                     self._material_map[v.material.name] = v.material
 
     @staticmethod
-    def load(file_obj):  # pragma nocover
+    def load(file_obj: Any) -> Any:  # pragma nocover
         """Load a URDF from a file.
         Parameters
         ----------
@@ -2026,7 +2045,7 @@ class URDF(URDFType):
         return URDF._from_xml(node, path)
 
     @staticmethod
-    def loadstr(str_obj, file_obj, base_path=None):
+    def loadstr(str_obj: Any, file_obj: Any, base_path: Any = None) -> Any:
         """Load a URDF from a file.
         Parameters
         ----------
@@ -2060,14 +2079,14 @@ class URDF(URDFType):
 
         return _parse_child(URDF, tree.getroot(), None)
 
-    def _validate_transmissions(self):
+    def _validate_transmissions(self) -> None:
         """Raise an exception if any transmissions are invalidly specified.
         Checks for the following:
         - Transmission joints have valid joint names.
         """
         for t in self.transmissions:  # pragma nocover
             for joint in t.joints:
-                if joint.name not in self._joint_map:
+                if joint.name not in self._joint_map:  # type: ignore[attr-defined]
                     raise ValueError(
                         "Transmission {} has invalid joint name {}".format(
                             t.name, joint.name
@@ -2075,7 +2094,7 @@ class URDF(URDFType):
                     )
 
     @classmethod
-    def _from_xml(cls, node, path):
+    def _from_xml(cls, node: Any, path: Any) -> Any:
         valid_tags = set(["joint", "link", "transmission", "material"])
         kwargs = cls._parse(node, path)
 
