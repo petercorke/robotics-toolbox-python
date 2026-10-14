@@ -7,9 +7,11 @@ from typing import Any, Callable, cast
 import roboticstoolbox as rtb
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 import types
+
 try:
     import pgraph
 except ImportError:
+
     class _PGraphMissing:  # pragma: no cover
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             raise ImportError(
@@ -33,13 +35,10 @@ from progress.bar import FillingCirclesBar
 
 
 class PGVertex(pgraph.UVertex):
-    nvertices = 0  # reset this before each PGGraph build
-
-    def __init__(self, type: str, **kwargs: Any) -> None:
+    def __init__(self, type: str, index: int, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.type = type
-        self.index = PGVertex.nvertices
-        PGVertex.nvertices += 1
+        self.index = index
 
 
 class PGEdge(pgraph.Edge):
@@ -181,7 +180,6 @@ class PoseGraph:
 
             self.vindex = {}
             firstlidar = True
-            PGVertex.nvertices = 0  # reset vertex counter in PGVertex class
             for line_number, line in enumerate(f, start=1):
                 # for zip file, we get data as bytes not str
                 if isinstance(line, bytes):
@@ -202,14 +200,14 @@ class PoseGraph:
                     coord = np.array([float(x) for x in tokens[2:5]])
                     id = tokens[1]
 
-                    v = PGVertex("vertex", coord=coord, name=id)
+                    v = PGVertex("vertex", index=self.graph.n, coord=coord, name=id)
                     self.graph.add_vertex(v)
 
                 elif tokens[0] == "VERTEX_XY":
                     coord = np.array([float(x) for x in tokens[2:4]])
                     id = tokens[1]
 
-                    v = PGVertex("landmark", coord=coord, name=id)
+                    v = PGVertex("landmark", index=self.graph.n, coord=coord, name=id)
                     self.graph.add_vertex(v)
 
                 elif tokens[0] == "EDGE_SE2":
@@ -245,7 +243,7 @@ class PoseGraph:
                     coord = np.array([float(x) for x in tokens[2:5]])
                     id = tokens[1]
 
-                    v = PGVertex("vertex", coord=coord, name=id)
+                    v = PGVertex("vertex", index=self.graph.n, coord=coord, name=id)
                     self.graph.add_vertex(v)
 
                 elif tokens[0] == "EDGE2":
