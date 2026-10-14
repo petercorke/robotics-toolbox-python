@@ -243,6 +243,7 @@ module = [
     "roboticstoolbox.mobile.DubinsPlanner",
     "roboticstoolbox.mobile.ReedsSheppPlanner",
     "roboticstoolbox.mobile.DstarPlanner",
+    "roboticstoolbox.mobile.PoseGraph",
 ]
 disallow_untyped_defs = true
 
@@ -296,7 +297,6 @@ ignore_errors = true
 module = [
     "roboticstoolbox.mobile.EKF",
     "roboticstoolbox.mobile.ParticleFilter",
-    "roboticstoolbox.mobile.PoseGraph",
     "roboticstoolbox.mobile.sensors",
 ]
 ignore_errors = true
