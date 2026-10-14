@@ -599,6 +599,18 @@ class TestUnicycle(unittest.TestCase):
 #
 
 
+class TestRandomPathWorkspace(unittest.TestCase):
+    def test_workspace_is_required(self):
+        # the driver chooses waypoints inside the workspace, so it needs one;
+        # this used to fail with an obscure TypeError on None
+        with self.assertRaises(ValueError):
+            rtb.RandomPath()
+
+    def test_workspace_given(self):
+        driver = rtb.RandomPath(workspace=10)
+        self.assertIsNotNone(driver)
+
+
 if __name__ == "__main__":  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])
