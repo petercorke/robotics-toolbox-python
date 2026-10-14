@@ -520,7 +520,7 @@ class VehicleBase(ABC):
         :type x0: array_like(3) or array_like(2)
         :param control: vehicle control inputs, defaults to None
         :type control: array_like(2), callable, driving agent
-        :param animate: Enable graphical animation of vehicle, defaults to False
+        :param animate: Enable graphical animation of vehicle, defaults to True
         :type animate: bool, optional
         :return: State trajectory, each row is :math:`(x,y,\theta)`.
         :rtype: ndarray(n,3)
@@ -564,7 +564,7 @@ class VehicleBase(ABC):
 
     def run_animation(self, T=10, x0=None, control=None, format=None, file=None):
         r"""
-        Simulate motion of vehicle (superclass)
+        Animate motion of vehicle (superclass)
 
         :param T: Simulation time in seconds, defaults to 10
         :type T: float, optional
@@ -617,7 +617,7 @@ class VehicleBase(ABC):
               attribute set by the constructor.
             * integration uses rectangular integration.
 
-        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
+        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run`
         """
 
         fig, ax = plt.subplots()
@@ -1610,7 +1610,7 @@ class VehicleTrailer(VehicleBase):
         :type x0: array_like(3+m) where `m` is the number of trailers, optional
         :param control: vehicle control inputs, defaults to None
         :type control: array_like(2), callable, driving agent
-        :param animate: Enable graphical animation of vehicle, defaults to False
+        :param animate: Enable graphical animation of vehicle, defaults to True
         :type animate: bool, optional
         :return: State trajectory, each row is :math:`(x,y,\theta, \delta_i, \cdots)`.
         :rtype: ndarray(n,3)
