@@ -351,15 +351,40 @@ class MobileBlockTest(unittest.TestCase):
         # and a caller's dict is not modified
         polyargs = dict(filled=False)
         with mock.patch.object(mobile, "VehiclePolygon"):
-            VehiclePlot(size=3, polyargs=polyargs)
+            VehiclePlot(size=3, polygon_style=polyargs)
         self.assertEqual(polyargs, dict(filled=False))
 
     def test_vehicleplot_scale(self):
         # a 2-element scale applies to both axes
-        block = VehiclePlot(scale=[0, 10])
-        self.assertEqual(list(block.scale), [0, 10, 0, 10])
-        block = VehiclePlot(scale=np.array([0, 10]))
-        self.assertEqual(list(block.scale), [0, 10, 0, 10])
+        block = VehiclePlot(limits=[0, 10])
+        self.assertEqual(list(block.limits), [0, 10, 0, 10])
+        block = VehiclePlot(limits=np.array([0, 10]))
+        self.assertEqual(list(block.limits), [0, 10, 0, 10])
+        block = VehiclePlot(limits=[0, 10, -1, 1])
+        self.assertEqual(list(block.limits), [0, 10, -1, 1])
+
+    def test_vehicleplot_deprecated_names(self):
+        from unittest import mock
+
+        from roboticstoolbox import mobile
+
+        def init(ax):
+            pass
+
+        for old, new, value in [
+            ("path", "path_style", "r--"),
+            ("init", "init_func", init),
+            ("scale", "limits", [0, 5, 0, 5]),
+            ("polyargs", "polygon_style", dict(alpha=0.5)),
+        ]:
+            with self.subTest(old=old):
+                with mock.patch.object(mobile, "VehiclePolygon") as polygon:
+                    with self.assertWarns(DeprecationWarning):
+                        block = VehiclePlot(**{old: value})
+                if new == "polygon_style":
+                    self.assertEqual(polygon.call_args.kwargs["alpha"], 0.5)
+                else:
+                    self.assertEqual(getattr(block, new), value)
 
     @unittest.skip("cant test bdsim plot blocks")
     def test_vehicleplot(self):

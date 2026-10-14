@@ -374,71 +374,100 @@ class VehiclePlot(GraphicsBlock):
     def __init__(
         self,
         animation: mobile.VehicleAnimationBase | None = None,
-        path: str | dict[str, Any] | None = None,
+        path_style: str | dict[str, Any] | None = None,
         labels: tuple[str, str] = ("X", "Y"),
         square: bool = True,
-        init: Callable[[Axes], None] | None = None,
-        scale: str | ArrayLike = "auto",
+        init_func: Callable[[Axes], None] | None = None,
+        limits: str | ArrayLike = "auto",
         shape: str = "car",
         size: float | ArrayLike | None = None,
-        polyargs: dict[str, Any] | None = None,
+        polygon_style: dict[str, Any] | None = None,
         **blockargs: Any,
     ) -> None:
         """
         :param animation: Graphical animation of vehicle, a
             :class:`~roboticstoolbox.mobile.Animations.VehicleAnimationBase`
             subclass, defaults to a :class:`~roboticstoolbox.mobile.Animations.VehiclePolygon`
-        :param path: Matplotlib linestyle string or dict of arguments used to plot
-            the path taken by vehicle, defaults to None (no path)
+        :param path_style: Matplotlib linestyle string or dict of arguments used to
+            plot the path taken by vehicle, defaults to None (no path)
         :param labels: axis labels (xlabel, ylabel), defaults to ("X", "Y")
         :param square: Set aspect ratio to 1, defaults to True
-        :param init: function called with the axes to initialize graphics,
+        :param init_func: function called with the axes to initialize graphics,
             defaults to None
-        :param scale: axis limits: ``"auto"``, ``[min, max]`` used for both axes, or
+        :param limits: axis limits: ``"auto"``, ``[min, max]`` used for both axes, or
             ``[xmin, xmax, ymin, ymax]``, defaults to ``"auto"``
         :param shape: shape of vehicle, passed to the default animation, defaults
             to ``"car"``
         :param size: size of vehicle, passed to the default animation, defaults to
             None (the animation's default)
-        :param polyargs: arguments passed to the default animation
+        :param polygon_style: Matplotlib patch options (``color``, ``alpha``,
+            ``edgecolor``, ...) for the default animation
             :class:`~roboticstoolbox.mobile.Animations.VehiclePolygon`, defaults
             to None.  The dict is not modified.
-        :raises TypeError: ``animation`` is not a ``VehicleAnimationBase``
         :param blockargs: |GraphicsBlockOptions|
+        :raises TypeError: ``animation`` is not a ``VehicleAnimationBase``
+
+        .. deprecated:: 1.4.5
+            the arguments ``path``, ``init``, ``scale`` and ``polyargs`` are
+            deprecated, use ``path_style``, ``init_func``, ``limits`` and
+            ``polygon_style`` instead.
 
         .. note::
 
-            - The ``init`` function is called after the axes are initialized
+            - The ``init_func`` function is called after the axes are initialized
               and can be used to draw application specific detail on the
               plot. In the example below, this is the dot and star.
             - If an ``animation`` object is not provided then a default polygon animation is
               created.  It's size and shape can be set by the ``size`` and ``shape`` parameters, which are passed to the animation object,
-              or a dictionary of arguments ``polyargs`` which is passed to the default animation object.
+              or a dictionary of arguments ``polygon_style`` which is passed to the default animation object.
             - A dynamic trail, showing path to date can be animated if
-              the option ``path`` is set to a linestyle.
+              the option ``path_style`` is set to a linestyle.
         """
+        # deprecated names, mapped to the new ones
+        for old, new in (
+            ("path", "path_style"),
+            ("init", "init_func"),
+            ("scale", "limits"),
+            ("polyargs", "polygon_style"),
+        ):
+            if old in blockargs:
+                warnings.warn(
+                    f"{old} is deprecated, use {new} instead",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                value = blockargs.pop(old)
+                if new == "path_style":
+                    path_style = value
+                elif new == "init_func":
+                    init_func = value
+                elif new == "limits":
+                    limits = value
+                else:
+                    polygon_style = value
+
         super().__init__(**blockargs)
         self.xdata: list[float] = []
         self.ydata: list[float] = []
         # self.type = "vehicleplot"
-        if init is not None:
-            assert callable(init), "graphics init function must be callable"
-        self.init = init
+        if init_func is not None:
+            assert callable(init_func), "graphics init function must be callable"
+        self.init_func = init_func
         self.square = square
 
-        self.pathstyle = path
+        self.path_style = path_style
 
-        self.scale: str | list[float]
-        if isinstance(scale, str):
-            self.scale = scale
+        self.limits: str | list[float]
+        if isinstance(limits, str):
+            self.limits = limits
         else:
-            scale = list(scale)
+            limits = list(limits)
             # [min, max] applies to both axes
-            self.scale = scale * 2 if len(scale) == 2 else scale
+            self.limits = limits * 2 if len(limits) == 2 else limits
         self.labels = labels
 
         # a copy, so as not to modify the caller's dict
-        polyargs = dict(polyargs or {})
+        polyargs = dict(polygon_style or {})
         polyargs.update(
             {k: v for k, v in [("shape", shape), ("scale", size)] if v is not None}
         )
@@ -471,16 +500,16 @@ class VehiclePlot(GraphicsBlock):
         self.ax.set_xlabel(self.labels[0])
         self.ax.set_ylabel(self.labels[1])
         self.ax.set_title(self.name)
-        if not isinstance(self.scale, str):
-            self.ax.set_xlim(*self.scale[0:2])
-            self.ax.set_ylim(*self.scale[2:4])
-        if self.init is not None:
-            self.init(self.ax)
+        if not isinstance(self.limits, str):
+            self.ax.set_xlim(*self.limits[0:2])
+            self.ax.set_ylim(*self.limits[2:4])
+        if self.init_func is not None:
+            self.init_func(self.ax)
 
-        if isinstance(self.pathstyle, str):
-            (self.line,) = plt.plot(0, 0, self.pathstyle)
-        elif isinstance(self.pathstyle, dict):
-            (self.line,) = plt.plot(0, 0, **self.pathstyle)
+        if isinstance(self.path_style, str):
+            (self.line,) = plt.plot(0, 0, self.path_style)
+        elif isinstance(self.path_style, dict):
+            (self.line,) = plt.plot(0, 0, **self.path_style)
 
         self.animation.add()
 
@@ -504,7 +533,7 @@ class VehiclePlot(GraphicsBlock):
         # update the vehicle pose
         self.animation.update(xyt)
 
-        if isinstance(self.scale, str):
+        if isinstance(self.limits, str):
             self.ax.relim()
             self.ax.autoscale_view()
         super().step(t, inports)
