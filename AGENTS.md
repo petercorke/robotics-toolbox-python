@@ -22,3 +22,16 @@ Part of the RVC ecosystem. **Read [rvc-ecosystem/AGENTS.md](https://github.com/p
   was large enough that closely-related entries were clustered into parent issues with
   checklists rather than a flat 1:1 mapping — follow that pattern if filing a cluster of
   related findings rather than one issue each.
+- Array type annotations use the project's own aliases, not `numpy.typing` and not an inline
+  `Sequence[float] | np.ndarray`:
+
+  ```python
+  from roboticstoolbox.tools.types import ArrayLike, NDArray
+  ```
+
+  `ArrayLike` for arguments (an `ndarray`, list, tuple, range or other sequence of numbers) and
+  `NDArray` for returned arrays. The shape goes in the docstring (`:type q: array_like(n)`,
+  `:rtype: ndarray(6,n)`) where it adds information, not in the annotation. One definition means
+  one place to change what "array-like" means.
+- New code uses modern annotation syntax: `X | Y`, `X | None`, `list[X]`, `dict[K, V]`, not
+  `Union`, `Optional`, `List` or `Dict`.

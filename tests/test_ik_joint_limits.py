@@ -6,7 +6,7 @@ import pytest
 
 import roboticstoolbox as rtb
 from roboticstoolbox.ets import fknm
-from roboticstoolbox.robot.IK import IKSolution
+from roboticstoolbox.robot.IK import IKSolution, normalise_q, within_limits
 from tests import skip_no_qp
 
 skip_no_c = pytest.mark.skipif(
@@ -220,3 +220,53 @@ def test_ik_trajectory_retains_prismatic_coordinates(
     for q, target in zip(solution.q, targets):
         nt.assert_allclose(ets.fkine(q).A, target.A, atol=2e-6)
     nt.assert_allclose(solution.q[:, :3], qs[:, :3], atol=2e-6)
+
+
+# ---- the module-level helpers shared with other IK implementations ----------
+
+
+def test_normalise_q_preserves_coordinates_within_limits():
+    qlim = [[-10.0, -1.0], [10.0, 1.0]]
+    q = np.array([7.0, 0.5])  # revolute, outside the principal interval
+    nt.assert_array_equal(normalise_q(q, qlim, [True, True]), q)
+
+
+def test_normalise_q_shifts_into_limits_and_does_not_modify_input():
+    qlim = [[0.0, 0.0], [2 * np.pi, 2 * np.pi]]
+    q = np.array([-0.4, 1.0])
+    out = normalise_q(q, qlim, [True, True])
+    nt.assert_allclose(out, [2 * np.pi - 0.4, 1.0])
+    nt.assert_array_equal(q, [-0.4, 1.0])
+
+
+def test_normalise_q_prefers_principal_angle():
+    # 11 is outside the limits, the principal angle is 11 - 4 pi
+    out = normalise_q([11.0], [[-10.0], [10.0]], [True])
+    nt.assert_allclose(out, [11.0 - 4 * np.pi])
+
+
+def test_normalise_q_leaves_prismatic_alone():
+    out = normalise_q([50.0, 3.0], [[-1.0, -1.0], [1.0, 1.0]], [False, True])
+    assert out[0] == 50.0  # out of limits, but prismatic: never wrapped
+
+
+def test_normalise_q_without_equivalent_in_limits_is_rejected_by_check():
+    qlim = np.array([[0.2], [0.3]])
+    out = normalise_q([1.0], qlim, [True])
+    assert not within_limits(out, qlim)
+
+
+@pytest.mark.parametrize("turns", [-3, -1, 1, 3, 100])
+def test_normalise_q_keeps_limit_endpoint_after_whole_turns(turns):
+    qlim = np.array([[0.2], [0.3]])
+    out = normalise_q([0.2 + turns * 2 * np.pi], qlim, [True])
+    assert within_limits(out, qlim)
+    nt.assert_allclose(out, [0.2], atol=1e-12)
+
+
+def test_within_limits_is_inclusive():
+    qlim = [[-1.0, 0.0], [1.0, 2.0]]
+    assert within_limits([-1.0, 2.0], qlim)
+    assert within_limits([0.0, 1.0], qlim)
+    assert not within_limits([1.0 + 1e-12, 1.0], qlim)
+    assert not within_limits([0.0, -1e-12], qlim)
