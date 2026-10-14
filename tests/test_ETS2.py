@@ -205,6 +205,31 @@ class TestETS2(unittest.TestCase):
         nt.assert_allclose(reduced.eval(q), original)
         self.assertEqual([e.jindex for e in ets.joints()], [3, 7])
 
+    def test_fixjoint_rotation_in_degrees(self):
+        ets = R() * tx(qlim=[-1, 1]) * R(flip=True)
+        q = np.array([np.pi / 2, 0.25, -np.pi / 2])
+        expected = ets.eval(q)
+
+        for j in (0, 2):
+            with self.subTest(j=j):
+                reduced = ets.fixjoint(j, float(np.rad2deg(q[j])), unit="deg")
+                self.assertIsInstance(reduced, rtb.ETS2)
+                nt.assert_allclose(reduced.eval(np.delete(q, j)), expected)
+                nt.assert_allclose(
+                    reduced.eval(np.delete(q, j)),
+                    ets.fixjoint(j, q[j]).eval(np.delete(q, j)),
+                )
+
+        # A translation stays in metres and cannot accept angular degrees.
+        nt.assert_allclose(
+            ets.fixjoint(1, q[1]).eval(np.delete(q, 1)), expected
+        )
+        with self.assertRaisesRegex(ValueError, "only valid for rotational"):
+            ets.fixjoint(1, 90, unit="deg")
+        with self.assertRaisesRegex(ValueError, "unit must"):
+            ets.fixjoint(0, 90, unit="grad")
+        nt.assert_allclose(ets.eval(q), expected)
+
     def test_fixjoint_single_joint_and_bad_indices(self):
         ets = rtb.ETS2(R())
         fixed = ets.fixjoint(0, 0.3)
