@@ -1149,15 +1149,19 @@ class EKF:
         r"""
         Plot error with uncertainty bounds
 
-        :param bgcolor: background color, defaults to 'r'
+        :param bgcolor: color of the confidence bound polygons, defaults to 'r'
         :type bgcolor: str, optional
-        :param confidence: confidence interval, defaults to 0.95
+        :param confidence: confidence interval, defaults to 0.95, None for no bounds
         :type confidence: float, optional
+        :param ax: axes to plot into, one for each of :math:`(x, y, \theta)`,
+            defaults to a new figure with three stacked axes
+        :type ax: array_like(3) of Axes, optional
         :param block: hold plot until figure is closed, defaults to None
         :type block: bool, optional
+        :raises ValueError: if the vehicle pose is not part of the estimated state
 
         Plot the error between actual and estimated vehicle
-        path :math:`(x, y, \theta)`` versus time as three stacked plots.
+        path :math:`(x, y, \theta)` versus time as three stacked plots.
         Heading error is wrapped into the range :math:`[-\pi,\pi)`
 
 
@@ -1168,22 +1172,44 @@ class EKF:
 
         .. note:: Observations will decrease the uncertainty while periods of dead-reckoning increase it.
 
+        .. versionchanged:: 1.4.5
+            - The ``confidence`` bounds are the interval that contains that
+              fraction of a one-dimensional Gaussian, :math:`\pm 1.96\sigma`
+              for 0.95.  Earlier versions used the radius of a
+              two-dimensional confidence region, :math:`\pm 2.45\sigma` for
+              0.95, which made the shaded region about 25% wider than its
+              label.  Plots produced with earlier versions show wider bounds.
+            - The error is plotted against time.  Earlier versions plotted it
+              against sample number on axes limited to the time range, so only
+              the start of a run was visible.
+            - ``bgcolor`` is used, it was previously ignored.
+            - Works for SLAM, where the state also holds the landmarks, and
+              raises ``ValueError`` if the vehicle pose is not estimated.
+
         :seealso: :meth:`get_P` :meth:`run` :meth:`history`
         """
+        if not self._est_vehicle:
+            raise ValueError("the vehicle pose is not part of the estimated state")
+
         error = []
         bounds = []
-        ppf = chi2.ppf(confidence, df=2)
+        # the bound on a scalar error is the interval that contains
+        # ``confidence`` of a 1-dimensional Gaussian, ie. chi-squared with one
+        # degree of freedom
+        ppf = chi2.ppf(confidence, df=1) if confidence is not None else None
 
         x_gt = self.robot.x_hist
         for k in range(len(self.history)):
             hk = self.history[k]
-            # error is true - estimated
-            e = x_gt[k, :] - hk.xest
+            # error is true - estimated, the vehicle pose is the first three
+            # elements of the state which, for SLAM, is followed by the landmarks
+            e = x_gt[k, :3] - hk.xest[:3]
             e[2] = base.wrap_mpi_pi(e[2])
             error.append(e)
 
-            P = np.diag(hk.P)
-            bounds.append(np.sqrt(ppf * P[:3]))
+            if ppf is not None:
+                P = np.diag(hk.P)
+                bounds.append(np.sqrt(ppf * P[:3]))
 
         error = np.array(error)
         bounds = np.array(bounds)
@@ -1204,10 +1230,10 @@ class EKF:
                     ]
                 )
                 polygon = plt.Polygon(
-                    edge.T, closed=True, facecolor="r", edgecolor="none", alpha=0.3
+                    edge.T, closed=True, facecolor=bgcolor, edgecolor="none", alpha=0.3
                 )
                 ax.add_patch(polygon)
-            ax.plot(error[:, k], **kwargs)
+            ax.plot(t, error[:, k], **kwargs)
             ax.grid(True)
             ax.set_ylabel(labels[k] + " error")
             ax.set_xlim(0, t[-1])

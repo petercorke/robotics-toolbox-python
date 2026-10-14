@@ -355,12 +355,10 @@ class ParticleFilter:
         # self.robot.plot()
 
         # iterate over time
-        import time
-
         for i in range(round(T / self.robot.dt)):
             self._step()
-            # time.sleep(0.2)
-            plt.pause(0.2)
+            if self._animate:
+                plt.pause(0.2)
             # plt.draw()
             # anim.add()
         # anim.close()
