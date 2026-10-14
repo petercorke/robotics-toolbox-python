@@ -1415,6 +1415,7 @@ class DHRobot(Robot):
 
         :seealso: :func:`rne_python`
         """
+        self._require_dynamics()
 
         # Symbolic-aware dispatch (rne.md issues 1/2/4): the C extension
         # requires float64 link/state data throughout, so route straight to
@@ -1561,6 +1562,7 @@ class DHRobot(Robot):
 
         :seealso: :func:`rne`
         """
+        self._require_dynamics()
 
         if np.array_equal(self.base.A, np.eye(4)):
             base = None

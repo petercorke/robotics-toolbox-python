@@ -1748,6 +1748,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             guard if the Robot/Link class hierarchy is ever redesigned --
             see https://github.com/petercorke/robotics-toolbox-python/issues/571.
         """
+        self._require_dynamics()
 
         # Checked via the `mdh` attribute rather than isinstance/class name:
         # joint-last compliance tracks the DH convention actually in use
