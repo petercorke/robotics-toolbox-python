@@ -1,8 +1,12 @@
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 from spatialmath import base
 
 
-def jacobian_numerical(f, x, dx=1e-8, N=0):
+def jacobian_numerical(f: Any, x: Any, dx: float = 1e-8, N: int = 0) -> Any:
     r"""
     Numerically compute Jacobian of function
 
@@ -45,7 +49,7 @@ def jacobian_numerical(f, x, dx=1e-8, N=0):
     return np.c_[Jcol].T
 
 
-def hessian_numerical(J, x, dx=1e-8):
+def hessian_numerical(J: Any, x: Any, dx: float = 1e-8) -> Any:
     r"""
     Numerically compute Hessian of Jacobian function
 
@@ -84,7 +88,7 @@ if __name__ == "__main__":
         formatter={"float": lambda x: f"{x:8.4g}" if abs(x) > 1e-10 else f"{0:8.4g}"},
     )
 
-    robot = rtb.models.DH.Puma560()
+    robot = rtb.models.DH.Puma560()  # type: ignore[operator]  # class, not module
     q = robot.qn
 
     J = jacobian_numerical(lambda q: robot.fkine(q).A, q, N=3)

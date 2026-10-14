@@ -1,7 +1,12 @@
-import numpy as np
+
+from __future__ import annotations
+
 from math import pi
-from roboticstoolbox import DHRobot, RevoluteDH
+
+import numpy as np
 from spatialmath import SE3
+
+from roboticstoolbox import DHRobot, RevoluteDH
 
 
 class Baxter(DHRobot):
@@ -42,9 +47,9 @@ class Baxter(DHRobot):
           Z. Ju, C. Yang, H. Ma, Chinese Control Conf, 2015.
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
-    def __init__(self, arm="left"):
+    def __init__(self, arm: str = "left") -> None:
 
         links = [
             RevoluteDH(d=0.27, a=0.069, alpha=-pi / 2),

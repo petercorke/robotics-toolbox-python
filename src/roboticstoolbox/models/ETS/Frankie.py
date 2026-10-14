@@ -1,10 +1,13 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import numpy as np
+
 from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.ETS import ETS
-from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.Robot import Robot
 
 
 class Frankie(Robot):
@@ -35,7 +38,7 @@ class Frankie(Robot):
         Sequence, J. Haviland and P. Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         deg = np.pi / 180
         mm = 1e-3

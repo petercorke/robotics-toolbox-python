@@ -12,77 +12,80 @@ without a cycle).
 """
 
 from __future__ import annotations
-from collections.abc import MutableSequence
-from functools import wraps, cached_property
+
+from collections.abc import Iterable, MutableSequence
+from copy import deepcopy
+from functools import cached_property, wraps
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast, overload
+
 import numpy as np
 from numpy.random import uniform
-from numpy.linalg import inv, det, cond, svd
-from spatialmath import SE3, SE2
 from spatialmath.base import (
+    getmatrix,
     getvector,
     issymbol,
-    tr2jac,
-    verifymatrix,
-    tr2jac2,
-    t2r,
-    rotvelxform,
-    simplify,
-    getmatrix,
 )
-from roboticstoolbox.tools.params import rtb_get_param
+from typing_extensions import Self
 
+from roboticstoolbox.ets._ET import BaseET
 from roboticstoolbox.ets.fknm import (
     ETS_init,
-    ETS_fkine,
-    ETS_jacob0,
-    ETS_jacobe,
-    ETS_hessian0,
-    ETS_hessiane,
-    IK_NR_c,
-    IK_GN_c,
-    IK_LM_c,
 )
-from copy import deepcopy
-from roboticstoolbox.ets._ET import BaseET
-from typing import overload, TypeVar
-from typing import Literal as L
+from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
-T = TypeVar("T", bound="BaseETS")
+if TYPE_CHECKING:  # pragma: nocover
+    pass
+
+#: the element type of an ETS: ``ET`` for ``ETS``, ``ET2`` for ``ETS2``
+ETT = TypeVar("ETT", bound=BaseET)
+_F = TypeVar("_F", bound=Callable[..., Any])
 
 
-def _dirties_fknm(func):
+def _dirties_fknm(func: _F) -> _F:
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         result = func(self, *args, **kwargs)
         self._fknm_stale = True
         return result
-    return wrapper
+
+    return wrapper  # type: ignore[return-value]
 
 
-class BaseETS(MutableSequence):
-    def __init__(self):
-        self._data: list = []
+class BaseETS(MutableSequence[ETT]):
+    def __init__(self) -> None:
+        self._data: list[ETT] = []
         self._fknm_stale = True
-        self._BaseETS__fknm = None
+        self._BaseETS__fknm: Any = None
 
     # ------------------------------------------------------------------
     # MutableSequence abstract methods
     # ------------------------------------------------------------------
 
+    def _new(self, data: Iterable[ETT]) -> Self:
+        """A new ETS of the same concrete type as ``self`` from elements"""
+        # the concrete subclasses, ETS and ETS2, take the list of elements
+        return self.__class__(data)  # type: ignore[call-arg]
+
     def __len__(self) -> int:
         return len(self._data)
 
+    @overload
+    def __setitem__(self, i: int, value: ETT) -> None: ...
+
+    @overload
+    def __setitem__(self, i: slice, value: Iterable[ETT]) -> None: ...
+
     @_dirties_fknm
-    def __setitem__(self, i, value):
+    def __setitem__(self, i: Any, value: Any) -> None:
         self._data[i] = value
 
     @_dirties_fknm
-    def __delitem__(self, i):
+    def __delitem__(self, i: int | slice) -> None:
         del self._data[i]
 
     @_dirties_fknm
-    def insert(self, index: int, value) -> None:
+    def insert(self, index: int, value: ETT) -> None:
         self._data.insert(index, value)
 
     def __repr__(self) -> str:
@@ -95,7 +98,7 @@ class BaseETS(MutableSequence):
 
     __hash__ = None  # type: ignore[assignment]
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> Any:
         # lets sum() work without an explicit start value, since its
         # default start is the int 0, which has no idea how to compose
         # with an ETS/ETS2
@@ -108,20 +111,20 @@ class BaseETS(MutableSequence):
     # ------------------------------------------------------------------
 
     @property
-    def _fknm(self):
+    def _fknm(self) -> Any:
         if self._fknm_stale:
             self._copy_to_cpp()
         return self._BaseETS__fknm
 
-    def _copy_to_cpp(self):
+    def _copy_to_cpp(self) -> None:
         self._BaseETS__fknm = ETS_init(
-            [et.fknm for et in self._data],
+            [et.fknm for et in self._data],  # type: ignore[attr-defined]
             self.n,
             self.m,
         )
         self._fknm_stale = False
 
-    def __str__(self, q: str | None = None):
+    def __str__(self, q: str | None = None) -> str:
         """
         Pretty prints the ETS
 
@@ -174,7 +177,7 @@ class BaseETS(MutableSequence):
         es = []
         j = 0
         c = 0
-        s = None
+        s = ""
         unicode = rtb_get_param("unicode")
 
         # An empty SE3
@@ -222,7 +225,7 @@ class BaseETS(MutableSequence):
                 if issymbol(et.param):
                     s = f"{et.kind}({et.param})"
                 else:
-                    s = f"{et.kind}({et.param * 180 / np.pi:.4g}°)"
+                    s = f"{et.kind}({cast(float, et.param) * 180 / np.pi:.4g}°)"
 
             elif et.istranslation:
                 try:
@@ -241,7 +244,7 @@ class BaseETS(MutableSequence):
         else:  # pragma: nocover
             return " * ".join(es)
 
-    def _repr_pretty_(self, p, cycle):
+    def _repr_pretty_(self, p: Any, cycle: bool) -> None:
         """
         Pretty string for IPython
 
@@ -261,7 +264,7 @@ class BaseETS(MutableSequence):
 
         print(self.__str__())  # pragma: nocover
 
-    def joint_idx(self) -> list[int]:
+    def joint_idx(self) -> NDArray:
         """
         Get index of joint transforms
 
@@ -279,9 +282,9 @@ class BaseETS(MutableSequence):
 
         """
 
-        return np.where([e.isjoint for e in self])[0]  # type: ignore
+        return np.where([e.isjoint for e in self])[0]
 
-    def joints(self) -> list[BaseET]:
+    def joints(self) -> list[ETT]:
         """
         Get a list of the variable ETs with this ETS
 
@@ -301,7 +304,7 @@ class BaseETS(MutableSequence):
 
         return [e for e in self if e.isjoint]
 
-    def split(self, method: str = "last") -> list["BaseETS"]:
+    def split(self, method: str = "last") -> list[Self]:
         """
         Split ETS into link segments
 
@@ -331,7 +334,7 @@ class BaseETS(MutableSequence):
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
         """
 
-        segments = []
+        segments: list[Self] = []
         joint_idx = self.joint_idx()
         head = self[0:0]
         tail = self[0:0]
@@ -344,19 +347,19 @@ class BaseETS(MutableSequence):
                 for k in joint_idx[1:]:
                     ets_j = self[start: k]
                     start = k
-                    segments.append(self.__class__(ets_j))
-                segments.append(self.__class__(self[joint_idx[-1]:]))
+                    segments.append(self._new(ets_j))
+                segments.append(self._new(self[joint_idx[-1]:]))
             case "last":
                 start = 0
                 for k in joint_idx:
                     ets_j = self[start : k + 1]
                     start = k + 1
-                    segments.append(self.__class__(ets_j))
+                    segments.append(self._new(ets_j))
                 tail = self[start:]
             case _:
                 raise ValueError(f"unknown split method '{method}'")
 
-        return [head] + segments + [tail]  # type: ignore
+        return [head] + segments + [tail]
 
     def jindex_set(self) -> set[int]:  #
         """
@@ -376,7 +379,7 @@ class BaseETS(MutableSequence):
 
         """
 
-        return set([self[j].jindex for j in self.joint_idx()])  # type: ignore
+        return set([self[j].jindex for j in self.joint_idx()])
 
     @cached_property
     def jindices(self) -> NDArray:
@@ -397,7 +400,7 @@ class BaseETS(MutableSequence):
 
         """
 
-        return np.array([j.jindex for j in self.joints()])  # type: ignore
+        return np.array([j.jindex for j in self.joints()])
 
     def _resolve_q(self, q: ArrayLike, allow_trajectory: bool = False) -> NDArray:
         """
@@ -435,7 +438,9 @@ class BaseETS(MutableSequence):
         n = self.n
         jindices = self.jindices
 
-        q = getmatrix(q, (None, None)) if allow_trajectory else getvector(q, None)
+        q = np.asarray(
+            getmatrix(q, (None, None)) if allow_trajectory else getvector(q, None)
+        )
 
         if n == 0 or jindices.dtype == object:
             # no joints, or at least one joint has no jindex assigned yet
@@ -472,7 +477,7 @@ class BaseETS(MutableSequence):
         )
 
     @property
-    def qlim(self):
+    def qlim(self) -> NDArray:
         r"""
         Get/Set Joint limits
 
@@ -501,6 +506,7 @@ class BaseETS(MutableSequence):
 
         limits = np.zeros((2, self.n))
 
+        v: ArrayLike
         for i, et in enumerate(self.joints()):
             if et.isrotation:
                 if et.qlim is None:
@@ -519,7 +525,7 @@ class BaseETS(MutableSequence):
         return limits
 
     @qlim.setter
-    def qlim(self, new_qlim: ArrayLike):
+    def qlim(self, new_qlim: ArrayLike) -> None:
         new_qlim = np.array(new_qlim)
 
         if new_qlim.shape == (2,) and self.n == 1:
@@ -609,30 +615,16 @@ class BaseETS(MutableSequence):
 
         return len(self._data)
 
-    @overload
-    def data(self: "ETS") -> list[ET]: ...  # pragma: nocover
-
-    @overload
-    def data(self: "ETS2") -> list[ET2]: ...  # pragma: nocover
-
     @property
-    def data(self):
+    def data(self) -> list[ETT]:
         return self._data
 
     @data.setter
-    @overload
-    def data(self: "ETS", new_data: list[ET]): ...  # pragma: nocover
-
-    @data.setter
-    @overload
-    def data(self: "ETS", new_data: list[ET2]): ...  # pragma: nocover
-
-    @data.setter
-    def data(self, new_data):
+    def data(self, new_data: list[ETT]) -> None:
         self._data = new_data
         self._fknm_stale = True
 
-    def inv(self: T) -> T:
+    def inv(self) -> Self:
         r"""
         Inverse of ETS
 
@@ -662,24 +654,15 @@ class BaseETS(MutableSequence):
 
         """
 
-        return self.__class__([et.inv() for et in reversed(self._data)])  # type: ignore[call-arg]
+        return self._new([et.inv() for et in reversed(self._data)])
 
     @overload
-    def __getitem__(self: "BaseETS", i: int) -> BaseET: ...
+    def __getitem__(self, i: int) -> ETT: ...
 
     @overload
-    def __getitem__(self: "ETS", i: int) -> ET: ...
+    def __getitem__(self, i: slice) -> Self: ...
 
-    @overload
-    def __getitem__(self: "ETS", i: slice) -> "ETS": ...
-
-    @overload
-    def __getitem__(self: "ETS2", i: int) -> ET2: ...
-
-    @overload
-    def __getitem__(self: "ETS2", i: slice) -> "ETS2": ...
-
-    def __getitem__(self, i):
+    def __getitem__(self, i: int | slice) -> ETT | Self:
         """
         Index or slice an ETS
 
@@ -701,25 +684,24 @@ class BaseETS(MutableSequence):
 
         """
         if isinstance(i, slice):
-            return self.__class__(self._data[i])
+            return self._new(self._data[i])
         return self._data[i]
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: dict[int, Any]) -> Self:
         new_data = []
 
         for data in self:
             new_data.append(deepcopy(data))
 
-        cls = self.__class__
-        result = cls(new_data)
+        result = self._new(new_data)
         memo[id(self)] = result
         return result
 
-    def plot(self, *args, **kwargs):
-        from roboticstoolbox.robot.Robot import Robot, Robot2
+    def plot(self, *args: Any, **kwargs: Any) -> None:
         # Deferred (like Robot/Robot2 above): BaseETS can't import the
         # concrete ETS without a cycle (ETS.py imports BaseETS from here).
         from roboticstoolbox.ets.ETS import ETS
+        from roboticstoolbox.robot.Robot import Robot, Robot2
 
         if isinstance(self, ETS):
             robot = Robot(self)
@@ -728,9 +710,9 @@ class BaseETS(MutableSequence):
 
         robot.plot(*args, **kwargs)
 
-    def teach(self, *args, **kwargs):
-        from roboticstoolbox.robot.Robot import Robot, Robot2
+    def teach(self, *args: Any, **kwargs: Any) -> None:
         from roboticstoolbox.ets.ETS import ETS
+        from roboticstoolbox.robot.Robot import Robot, Robot2
 
         if isinstance(self, ETS):
             robot = Robot(self)
@@ -847,7 +829,7 @@ class BaseETS(MutableSequence):
             raise ValueError("Transforms are both joints")  # pragma: nocover
 
         else:
-            self._data[i].param = e1.param + e2.param
+            self._data[i].param = e1.param + e2.param  # type: ignore[operator]
             del self._data[i + 1]
             self._fknm_stale = True
 

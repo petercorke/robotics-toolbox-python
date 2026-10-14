@@ -8,21 +8,25 @@ Python PRM
 # from numpy import disp
 # from scipy import integrate
 # from spatialmath.base.animate import Animate
-from spatialmath.base.transforms2d import *
-from spatialmath.base.vectors import *
+from __future__ import annotations
+
+from typing import Any
+
+import numpy as np
 
 # from spatialmath.pose2d import SE2
 # from spatialmath.base import animate
-from scipy.ndimage import *
-from matplotlib import cm, pyplot as plt
+from matplotlib import pyplot as plt
+
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 try:
     from pgraph import UGraph
 except ImportError:
 
-    class UGraph:  # pragma: no cover
-        def __init__(self, *args, **kwargs):
+    class UGraph:  # type: ignore[no-redef]  # pragma: no cover
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             raise ImportError(
                 "PRMPlanner requires optional dependency 'pgraph'. "
                 "Install it with: pip install pgraph-python"
@@ -76,31 +80,40 @@ class PRMPlanner(PlannerBase):
     :seealso: :class:`PlannerBase`
     """
 
-    def __init__(self, occgrid=None, npoints=100, dist_thresh=None, **kwargs):
+    def __init__(
+        self,
+        occgrid: NDArray | None = None,
+        npoints: int = 100,
+        dist_thresh: float | None = None,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(occgrid, ndims=2, **kwargs)
 
+        if self.occgrid is None:
+            raise ValueError("PRMPlanner requires an occupancy grid")
         if dist_thresh is None:
-            self._dist_thresh = 0.3 * self.occgrid.maxdim
+            dist_thresh = 0.3 * self.occgrid.maxdim
+        self._dist_thresh = dist_thresh
 
         self._npoints = npoints
         # self._npoints0 = npoints
         self._dist_thresh0 = self.dist_thresh
-        self._graph = None
+        self._graph: UGraph | None = None
         self._v_goal = None
         self._v_start = None
         self._local_goal = None
         self._local_path = None
-        self._v_path = None
+        self._v_path: NDArray | None = None
         self._g_path = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = super().__str__()
         if self.graph is not None:
             s += "\n  " + str(self.graph)
         return s
 
     @property
-    def npoints(self):
+    def npoints(self) -> int:
         """
         Number of points in the roadmap
 
@@ -110,7 +123,7 @@ class PRMPlanner(PlannerBase):
         return self._npoints
 
     @property
-    def dist_thresh(self):
+    def dist_thresh(self) -> float:
         """
         Distance threshold
 
@@ -131,7 +144,7 @@ class PRMPlanner(PlannerBase):
     #     return self._dist_thresh0
 
     @property
-    def graph(self):
+    def graph(self) -> UGraph | None:
         """
         Roadmap graph
 
@@ -140,8 +153,15 @@ class PRMPlanner(PlannerBase):
         """
         return self._graph
 
-    def _create_roadmap(self, npoints, dist_thresh, animate=None):
+    def _create_roadmap(
+        self, npoints: int, dist_thresh: float | None, animate: Any = None
+    ) -> None:
         # a = Animate(animate, fps=5)
+        occgrid = self.occgrid
+        graph = self._graph
+        if occgrid is None or graph is None:
+            raise ValueError("no occupancy grid or graph")
+
         self.progress_start(npoints)
 
         x = None
@@ -150,19 +170,19 @@ class PRMPlanner(PlannerBase):
             # find a random point in freespace
             while True:
                 # pick a random unoccupied point
-                x = self.random.uniform(self.occgrid.xmin, self.occgrid.xmax)
-                y = self.random.uniform(self.occgrid.ymin, self.occgrid.ymax)
-                if not self.occgrid.isoccupied((x, y)):
+                x = self.random.uniform(occgrid.xmin, occgrid.xmax)
+                y = self.random.uniform(occgrid.ymin, occgrid.ymax)
+                if not occgrid.isoccupied((x, y)):
                     break
 
             # add it as a vertex to the graph
-            vnew = self.graph.add_vertex([x, y])
+            vnew = graph.add_vertex([x, y])
 
         # compute distance between vertices
-        for vertex in self.graph:
+        for vertex in graph:
             # find distance from vertex to all other vertices
             distances = []
-            for othervertex in self.graph:
+            for othervertex in graph:
                 # skip self
                 if vertex is othervertex:
                     continue
@@ -181,7 +201,7 @@ class PRMPlanner(PlannerBase):
                 # test if obstacle free path connecting them
                 if self._test_path(vertex, othervertex):
                     # add an edge
-                    self.graph.add_edge(vertex, othervertex, cost=distance)
+                    graph.add_edge(vertex, othervertex, cost=distance)
             self.progress_next()
 
         self.progress_end()
@@ -190,7 +210,7 @@ class PRMPlanner(PlannerBase):
         #     if not np.empty(movie):
         #         a.add()
 
-    def _test_path(self, v1, v2, npoints=None):
+    def _test_path(self, v1: Any, v2: Any, npoints: int | None = None) -> bool:
         # vector from v1 to v2
         dir = v2.coord - v1.coord
 
@@ -201,12 +221,18 @@ class PRMPlanner(PlannerBase):
             npoints = int(round(np.linalg.norm(dir)))
 
         # test each point along the line from v1 to v2
+        assert self.occgrid is not None
         for s in np.linspace(0, 1, npoints):
             if self.occgrid.isoccupied(v1.coord + s * dir):
                 return False
         return True
 
-    def plan(self, npoints=None, dist_thresh=None, animate=None):
+    def plan(
+        self,
+        npoints: int | None = None,
+        dist_thresh: float | None = None,
+        animate: Any = None,
+    ) -> None:
         """
         Plan PRM path
 
@@ -245,7 +271,9 @@ class PRMPlanner(PlannerBase):
         self.random_init()  # reset the random number generator
         self._create_roadmap(npoints, dist_thresh, animate)
 
-    def query(self, start, goal, **kwargs):
+    def query(  # type: ignore[override]
+        self, start: ArrayLike, goal: ArrayLike, **kwargs: Any
+    ) -> NDArray:
         """
         Find a path from start to goal using planner
 
@@ -256,6 +284,8 @@ class PRMPlanner(PlannerBase):
         :param kwargs: options passed to :meth:`PlannerBase.query`
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
+        :raises RuntimeError: if :meth:`plan` has not been called, or no path
+            exists through the roadmap
 
         The path is a sparse sequence of waypoints, with variable distance
         between them.
@@ -265,7 +295,7 @@ class PRMPlanner(PlannerBase):
             motion segment is not guaranteed to be obstacle free.
 
         """
-        if self.graph.n == 0:
+        if self.graph is None or self.graph.n == 0:
             raise RuntimeError("no plan computed")
 
         super().query(start=start, goal=goal, next=False, **kwargs)
@@ -285,7 +315,13 @@ class PRMPlanner(PlannerBase):
 
         return np.array(path)
 
-    def plot(self, *args, vertex={}, edge={}, **kwargs):
+    def plot(
+        self,
+        *args: Any,
+        vertex: dict[str, Any] = {},
+        edge: dict[str, Any] = {},
+        **kwargs: Any,
+    ) -> None:
         """
         Plot PRM path
 
@@ -309,12 +345,14 @@ class PRMPlanner(PlannerBase):
         edge = {**dict(linewidth=0.5), **edge}
 
         # add the roadmap graph
-        self.graph.plot(text=False, vopt=vertex, eopt=edge, ax=ax)
+        assert self._graph is not None
+        self._graph.plot(text=False, vopt=vertex, eopt=edge, ax=ax)
         print("plotted roadmap")
 
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+
     from roboticstoolbox import *
 
     house = rtb_load_matfile("data/house.mat")

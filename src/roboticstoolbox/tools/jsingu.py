@@ -1,6 +1,8 @@
-import numpy as np
-from scipy.linalg import lu
+from __future__ import annotations
 
+from typing import Any
+
+import numpy as np
 
 # def jsingu(J):
 
@@ -16,7 +18,7 @@ from scipy.linalg import lu
 #                     [str(i) for i in range(j) if all(U[:, j] == U[:, i])]))
 
 
-def jsingu(J):
+def jsingu(J: Any) -> None:
 
     indep_columns = np.empty((J.shape[0], 0))
     rank = 0
@@ -45,7 +47,7 @@ if __name__ == "__main__":  # pragma nocover
     import roboticstoolbox as rtb
 
     # robot = rtb.models.DH.Puma560()
-    robot = rtb.models.URDF.UR5()
+    robot = rtb.models.URDF.UR5()  # type: ignore[operator]  # class, not module
     J = robot.jacob0(robot.qr)
 
     jsingu(J)

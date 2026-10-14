@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import Any
 import numpy as np
 
 from swift.SwiftRoute import SwiftServer, SwiftSocket, start_servers
@@ -19,7 +22,7 @@ class Swift(_SwiftBase):
     supports_teach: bool = True
     supports_ellipse: bool = False
 
-    def _add_teach_panel(self, robot, q, handle, block):
+    def _add_teach_panel(self, robot: Any, q: Any, handle: Any, block: Any) -> Any:
         """
         Add a joint-slider teach panel plus a live end-effector pose
         readout, and wire the sliders to drive ``handle`` (the
@@ -64,7 +67,7 @@ class Swift(_SwiftBase):
         for label in pose_labels:
             self.add(label)
 
-        def update_pose_labels(qv):
+        def update_pose_labels(qv: Any) -> None:
             T = robot.fkine(qv)
             t = np.round(T.t, 3)
             r = np.round(T.rpy(unit="deg"), 3)
@@ -75,7 +78,7 @@ class Swift(_SwiftBase):
             pose_labels[4].label = f"p: {r[1]}&#176;"
             pose_labels[5].label = f"y: {r[2]}&#176;"
 
-        def teach_update(t, values):
+        def teach_update(t: Any, values: Any) -> Any:
             # Sliders display revolute joints in degrees, prismatic in
             # native units (metres) -- toradians() converts the whole
             # vector back in one call, only touching revolute entries.
@@ -92,7 +95,11 @@ class Swift(_SwiftBase):
         for j in range(robot.n):
             lo, hi = qlim[0, j], qlim[1, j]
             if robot.isrevolute(j):
-                lo_disp, hi_disp, val_disp = np.degrees(lo), np.degrees(hi), np.degrees(q[j])
+                lo_disp, hi_disp, val_disp = (
+                    np.degrees(lo),
+                    np.degrees(hi),
+                    np.degrees(q[j]),
+                )
                 step = 1.0
                 unit = "&#176;"
             else:

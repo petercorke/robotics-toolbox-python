@@ -3,25 +3,29 @@
 @author Jesse Haviland
 """
 
-import numpy as np
+from __future__ import annotations
+
 import warnings
+from typing import Any
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 # import scipy as sp
-from spatialmath import base
-from spatialmath import SE3
-import matplotlib.pyplot as plt
+from spatialmath import SE3, base
 
 
 class ShapePlot:
-    def __init__(self, shape, wireframe=True, **kwargs):
+    def __init__(self, shape: Any, wireframe: bool = True, **kwargs: Any) -> None:
         self.shape = shape  # reference to the spatialgeom shape
         self.wireframe = wireframe
         self.args = kwargs
-        self.mpl = None
+        self.mpl: Any = None
 
-    def plot(self):
-        if ax is None:
-            ax = self.ax
+    def plot(self) -> None:
+        # `ax` is not a parameter or defined here: NameError, see findings
+        if ax is None:  # type: ignore[used-before-def,has-type]
+            ax = self.ax  # type: ignore[has-type]
 
         if ax is None:
             plt.figure()
@@ -30,7 +34,7 @@ class ShapePlot:
 
         self.draw()
 
-    def draw(self, ax=None):
+    def draw(self, ax: Any = None) -> None:
         # TODO only remove and redraw if base has changed
         if self.mpl is not None:
             self.mpl.remove()
@@ -51,12 +55,20 @@ class ShapePlot:
             # radius, length
             pass
 
-    def make(self):
+    def make(self) -> None:
         pass
 
 
 class EllipsePlot:
-    def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1.0):
+    def __init__(
+        self,
+        robot: Any,
+        q: Any,
+        etype: Any,
+        opt: str = "trans",
+        centre: Any = [0, 0, 0],
+        scale: float = 1.0,
+    ) -> None:
         super(EllipsePlot, self).__init__()
 
         try:
@@ -70,11 +82,11 @@ class EllipsePlot:
                     "Centre must be a three vector or 'ee' meaningend-effector"
                 )
 
-        self.ell = None
+        self.ell: Any = None
         self.robot = robot
         self.opt = str(opt).lower()
         self.centre = centre
-        self.ax = None
+        self.ax: Any = None
         self.scale = scale
         self._valid_opt = self.opt in ("trans", "rot")
 
@@ -97,7 +109,7 @@ class EllipsePlot:
             self.vell = False
             self.name = "Force Ellipse"
 
-    def draw(self):
+    def draw(self) -> None:
         ok = self.make_ellipsoid()
         if not ok:
             return
@@ -113,7 +125,7 @@ class EllipsePlot:
             self.x, self.y, self.z, rstride=6, cstride=6, color="#2980b9", alpha=0.2
         )
 
-    def draw2(self):
+    def draw2(self) -> None:
         ok = self.make_ellipsoid2()
         if not ok:
             return
@@ -123,7 +135,7 @@ class EllipsePlot:
         else:
             self.ell = self.ax.plot(self.x, self.y, color="#2980b9")
 
-    def plot(self, ax=None):
+    def plot(self, ax: Any = None) -> None:
         if ax is None:
             ax = self.ax
 
@@ -134,7 +146,7 @@ class EllipsePlot:
 
         self.draw()
 
-    def plot2(self, ax=None):
+    def plot2(self, ax: Any = None) -> None:
         if ax is None:
             ax = self.ax
 
@@ -144,7 +156,7 @@ class EllipsePlot:
 
         self.draw2()
 
-    def make_ellipsoid(self):
+    def make_ellipsoid(self) -> Any:
         """
         Plot the 3d Ellipsoid
 
@@ -207,7 +219,7 @@ class EllipsePlot:
         self.z = z * self.scale + centre[2]
         return True
 
-    def make_ellipsoid2(self):
+    def make_ellipsoid2(self) -> Any:
         """
         Plot the 2d Ellipsoid
 

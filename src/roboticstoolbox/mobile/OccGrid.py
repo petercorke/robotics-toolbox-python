@@ -1,15 +1,25 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from spatialmath import base
-import scipy.ndimage as sp
-from abc import ABC
-import spatialmath.base as smb
+from __future__ import annotations
 
+from abc import ABC
+from typing import Any
+
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.ndimage as sp
+import spatialmath.base as smb
 from spatialmath.geom2d import Polygon2
+from typing_extensions import Self
+
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class BaseMap(ABC):
-    def __init__(self, workspace=None, name=None, **unused):
+    def __init__(
+        self,
+        workspace: Any = None,
+        name: str | None = None,
+        **unused: Any,
+    ) -> None:
         """
         Abstract base class for maps
 
@@ -29,6 +39,7 @@ class BaseMap(ABC):
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
         """
+        self._workspace: NDArray | None = None
         if workspace is not None:
             workspace = smb.expand_dims(workspace)
             self._workspace = workspace
@@ -38,7 +49,14 @@ class BaseMap(ABC):
 
 
 class BaseOccupancyGrid(BaseMap):
-    def __init__(self, grid=None, origin=(0, 0), value=0, cellsize=1, **kwargs):
+    def __init__(
+        self,
+        grid: NDArray | None = None,
+        origin: ArrayLike = (0, 0),
+        value: Any = 0,
+        cellsize: float = 1,
+        **kwargs: Any,
+    ) -> None:
         """
         Occupancy grid (superclass)
 
@@ -64,6 +82,8 @@ class BaseOccupancyGrid(BaseMap):
         """
         super().__init__(**kwargs)
 
+        self._grid: NDArray
+        self._origin: NDArray
         if grid is not None:
             self._grid = grid
             self._origin = smb.getvector(origin, 2)
@@ -76,7 +96,7 @@ class BaseOccupancyGrid(BaseMap):
 
         self._cellsize = cellsize
 
-    def copy(self):
+    def copy(self) -> Self:
         """
         Copy an occupancy grid (superclass)
 
@@ -90,10 +110,10 @@ class BaseOccupancyGrid(BaseMap):
             name=self._name,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Compact string description of occupancy grid (superclass)
 
@@ -109,7 +129,7 @@ class BaseOccupancyGrid(BaseMap):
         return s
 
     @property
-    def grid(self):
+    def grid(self) -> NDArray:
         """
         Occupancy grid as a NumPy array (superclass)
 
@@ -122,7 +142,7 @@ class BaseOccupancyGrid(BaseMap):
         return self._grid
 
     @property
-    def xmin(self):
+    def xmin(self) -> float:
         """
         Minimum x-coordinate of this grid (superclass)
 
@@ -132,7 +152,7 @@ class BaseOccupancyGrid(BaseMap):
         return self._origin[0]
 
     @property
-    def xmax(self):
+    def xmax(self) -> float:
         """
         Maximum x-coordinate of this grid (superclass)
 
@@ -142,7 +162,7 @@ class BaseOccupancyGrid(BaseMap):
         return (self._grid.shape[1] - 1) * self._cellsize + self._origin[0]
 
     @property
-    def ymin(self):
+    def ymin(self) -> float:
         """
         Minimum y-coordinate of this grid (superclass)
 
@@ -152,7 +172,7 @@ class BaseOccupancyGrid(BaseMap):
         return self._origin[1]
 
     @property
-    def ymax(self):
+    def ymax(self) -> float:
         """
         Maximum y-coordinate of this grid (superclass)
 
@@ -162,7 +182,7 @@ class BaseOccupancyGrid(BaseMap):
         return (self._grid.shape[0] - 1) * self._cellsize + self._origin[1]
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """
         Shape of the occupancy grid array (superclass)
 
@@ -174,7 +194,7 @@ class BaseOccupancyGrid(BaseMap):
         return self._grid.shape
 
     @property
-    def maxdim(self):
+    def maxdim(self) -> float:
         """
         Maximum dimension of grid in world coordinates (superclass)
 
@@ -184,7 +204,7 @@ class BaseOccupancyGrid(BaseMap):
         return max(self.grid.shape) * self._cellsize
 
     @property
-    def workspace(self):
+    def workspace(self) -> NDArray:
         """
         Bounds of the occupancy grid in world coordinates (superclass)
 
@@ -196,7 +216,7 @@ class BaseOccupancyGrid(BaseMap):
         return np.r_[self.xmin, self.xmax, self.ymin, self.ymax]
 
     @property
-    def name(self):
+    def name(self) -> str | None:
         """
         Occupancy grid name (superclass)
 
@@ -206,7 +226,7 @@ class BaseOccupancyGrid(BaseMap):
         return self._name
 
     @name.setter
-    def name(self, name):
+    def name(self, name: str | None) -> None:
         """
         Set occupancy grid name (superclass)
 
@@ -215,7 +235,7 @@ class BaseOccupancyGrid(BaseMap):
         """
         self._name = name
 
-    def set(self, region, value):
+    def set(self, region: ArrayLike, value: Any) -> None:
         """
         Set region of map (superclass)
 
@@ -228,7 +248,7 @@ class BaseOccupancyGrid(BaseMap):
         tr = self.w2g([region[1], region[3]])
         self.grid[bl[1] : tr[1] + 1, bl[0] : tr[0] + 1] = value
 
-    def g2w(self, p):
+    def g2w(self, p: ArrayLike) -> NDArray:
         """
         Convert grid coordinate to world coordinate (superclass)
 
@@ -240,10 +260,10 @@ class BaseOccupancyGrid(BaseMap):
         The grid cell size and offset are used to convert occupancy grid
         coordinate ``p`` to a world coordinate.
         """
-        p = smb.getvector(p, 2)
-        return p * self._cellsize + self._origin
+        pv = smb.getvector(p, 2)
+        return pv * self._cellsize + self._origin
 
-    def w2g(self, p):
+    def w2g(self, p: ArrayLike) -> NDArray:
         """
         Convert world coordinate to grid coordinate (superclass)
 
@@ -258,7 +278,13 @@ class BaseOccupancyGrid(BaseMap):
         """
         return (np.round((p - self._origin) / self._cellsize)).astype(int)
 
-    def plot(self, map=None, ax=None, block=None, **kwargs):
+    def plot(
+        self,
+        map: NDArray | None = None,
+        ax: Any = None,
+        block: bool | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Plot the occupancy grid (superclass)
 
@@ -291,7 +317,7 @@ class BaseOccupancyGrid(BaseMap):
         if block is not None:
             plt.show(block=block)
 
-    def line_w(self, p1, p2):
+    def line_w(self, p1: ArrayLike, p2: ArrayLike) -> NDArray:
         """
         Get index of cells along a line segment (superclass)
 
@@ -315,14 +341,14 @@ class BaseOccupancyGrid(BaseMap):
 
         return self._line(gp1, gp2)
 
-    def _line(self, p1, p2):
+    def _line(self, p1: ArrayLike, p2: ArrayLike) -> NDArray:
 
         x, y = smb.bresenham(p1, p2)
         z = np.ravel_multi_index(np.vstack((y, x)), self.grid.shape)
         return z
 
     @property
-    def ravel(self):
+    def ravel(self) -> NDArray:
         """
         Ravel the grid (superclass)
 
@@ -333,7 +359,9 @@ class BaseOccupancyGrid(BaseMap):
 
 
 class BinaryOccupancyGrid(BaseOccupancyGrid):
-    def __init__(self, grid=None, **kwargs):
+    def __init__(
+        self, grid: NDArray | BinaryOccupancyGrid | None = None, **kwargs: Any
+    ) -> None:
         """
         Create a binary occupancy grid instance
 
@@ -376,7 +404,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
 
         super().__init__(grid=grid, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = super().__str__()
 
         ncells = np.prod(self._grid.shape)
@@ -384,7 +412,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         s += f", {nobs / ncells * 100:.1f}% occupied"
         return s
 
-    def isoccupied(self, p):
+    def isoccupied(self, p: ArrayLike) -> bool:
         """
         Test if coordinate is occupied
 
@@ -406,7 +434,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         except IndexError:
             return True
 
-    def inflate(self, radius):
+    def inflate(self, radius: float) -> None:
         """
         Inflate obstales
 
@@ -452,7 +480,7 @@ class OccupancyGrid(BaseOccupancyGrid):
     :seealso: :class:`BinaryOccupancyGrid`
     """
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = super().__str__()
 
         g = self._grid
@@ -462,7 +490,11 @@ class OccupancyGrid(BaseOccupancyGrid):
 
 
 class PolygonMap(BaseMap):
-    def __init__(self, workspace=None, polygons=[]):
+    def __init__(
+        self,
+        workspace: Any = None,
+        polygons: list[Polygon2] = [],
+    ) -> None:
         """
         Polygonal obstacle map
 
@@ -491,7 +523,7 @@ class PolygonMap(BaseMap):
 
         self.polygons = polygons
 
-    def add(self, polygon):
+    def add(self, polygon: Polygon2 | NDArray) -> None:
         """
         Add a polygon to map
 
@@ -506,7 +538,7 @@ class PolygonMap(BaseMap):
                 Polygon2(polygon)
             )  # lgtm [py/modification-of-default-value]
 
-    def iscollision(self, polygon):
+    def iscollision(self, polygon: Polygon2) -> bool:
         """
         Test for collision
 
@@ -522,7 +554,7 @@ class PolygonMap(BaseMap):
         """
         return polygon.intersects(self.polygons)
 
-    def plot(self, block=None):
+    def plot(self, block: bool | None = None) -> None:
         smb.plotvol2(self.workspace)
 
         for polygon in self.polygons:
@@ -531,7 +563,7 @@ class PolygonMap(BaseMap):
         if block is not None:
             plt.show(block=block)
 
-    def isoccupied(self, p):
+    def isoccupied(self, p: ArrayLike) -> bool:
         """
         Test if point lies inside an obstacle
 
@@ -550,7 +582,7 @@ class PolygonMap(BaseMap):
         return False
 
     @property
-    def workspace(self):
+    def workspace(self) -> NDArray | None:
         """
         Bounds of the occupancy grid
 

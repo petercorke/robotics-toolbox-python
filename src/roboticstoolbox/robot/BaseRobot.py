@@ -6,6 +6,7 @@
 """
 
 from __future__ import annotations
+
 # import sys
 import io
 from abc import ABC
@@ -21,34 +22,31 @@ from typing import (
     cast,
 )
 
-from typing_extensions import Literal as L
-
 import numpy as np
-
-from spatialmath import SE3
-from spatialmath.base.argcheck import (
-    getvector,
-    getmatrix,
-    getunit,
-)
-
 from ansitable import ANSITable, Column
 from spatialgeometry import SceneNode
-from roboticstoolbox.backends.Connector import Connector
+from spatialmath import SE3
+from spatialmath.base.argcheck import (
+    getmatrix,
+    getunit,
+    getvector,
+)
+from typing_extensions import Literal as L
 
-from roboticstoolbox.ets.fknm import Robot_link_T
 import roboticstoolbox as rtb
+from roboticstoolbox.backends.Connector import Connector
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.ets.fknm import Robot_link_T
+from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link
-from roboticstoolbox.ets.ETS import ETS
-from roboticstoolbox.ets.ET import ET
-from roboticstoolbox.robot.Dynamics import DynamicsMixin
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.robot.RobotPlottingMPL import RobotPlottingMPLMixin
+from roboticstoolbox.tools.params import rtb_get_param
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:
-    from matplotlib.cm import Color  # pragma nocover
+    from matplotlib.typing import ColorType as Color  # pragma nocover
 else:
     Color = None
 
@@ -76,6 +74,9 @@ def _is_symbolic(value: Any) -> bool:
 
 
 class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[LinkType]):
+    # set when the links are processed in the constructor
+    _base_link: LinkType
+
     def __init__(
         self,
         links: list[LinkType],
@@ -90,7 +91,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         symbolic: bool = False,
         configs: dict[str, NDArray] | None = None,
         check_jindex: bool = True,
-    ):
+    ) -> None:
         # Initialise the scene node
         SceneNode.__init__(self)
 
@@ -140,7 +141,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self.manufacturer = manufacturer
         self.comment = comment
         self._symbolic = symbolic
-        self._reach = None
+        self._reach: float | None = None
         self._hasdynamics = False
         self._hasgeometry = False
         self._hascollision = False
@@ -156,7 +157,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             if link.hasdynamics:
                 self._hasdynamics = True
             if link.geometry:
-                self._hasgeometry = []
+                # an empty list, not True (replaced just below if it has geometry)
+                self._hasgeometry = []  # type: ignore[assignment]
             if link.collision:
                 self._hascollision = True
 
@@ -211,10 +213,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 self._valid_qlim = True
 
         # SceneNode, set a reference to the first link
-        self.scene_children = [self.links[0]]  # type: ignore
+        self.scene_children = [self.links[0]]
 
         self._default_backend = None
-        self._active_plot_env = None
+        self._active_plot_env: Any = None
 
     # --------------------------------------------------------------------- #
     # --------- Private Methods ------------------------------------------- #
@@ -225,7 +227,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         links: list[LinkType],
         gripper_links: LinkType | list[LinkType] | None,
         check_jindex: bool,
-    ):
+    ) -> None:
         """
         This method does several things for setting up the links of a robot
 
@@ -362,7 +364,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             # No joints have an index
             jindex = [0]  # "mutable integer" hack
 
-            def visit_link(link, jindex):
+            def visit_link(link: Any, jindex: Any) -> None:
                 # if it's a joint, assign it a jindex and increment it
                 if link.isjoint and link in links:
                     link.jindex = jindex[0]
@@ -405,7 +407,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # ---------
         self._links = orlinks
 
-    def dynchanged(self, what: str | None = None):
+    def dynchanged(self, what: str | None = None) -> None:
         """
         Dynamic parameters have changed
 
@@ -426,7 +428,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     # --------- Magic Methods --------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    def __iter__(self):
+    def __iter__(self) -> Any:
         self._iter = 0
         return self
 
@@ -514,7 +516,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             if link.isjoint:
                 jname = link.jindex
             else:
-                jname = ""
+                jname = ""  # type: ignore[assignment]
             table.row(
                 # link.jindex,
                 k,
@@ -630,7 +632,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._n
 
     @property
-    def nlinks(self):
+    def nlinks(self) -> Any:
         """
         Number of links
 
@@ -700,7 +702,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._name
 
     @name.setter
-    def name(self, name_new: str):
+    def name(self, name_new: str) -> None:
         self._name = name_new
 
     @property
@@ -717,11 +719,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._comment
 
     @comment.setter
-    def comment(self, comment_new: str):
+    def comment(self, comment_new: str) -> None:
         self._comment = comment_new
 
     @property
-    def manufacturer(self):
+    def manufacturer(self) -> Any:
         """
         Get/set robot manufacturer's name
 
@@ -733,7 +735,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._manufacturer
 
     @manufacturer.setter
-    def manufacturer(self, manufacturer_new):
+    def manufacturer(self, manufacturer_new: Any) -> None:
         self._manufacturer = manufacturer_new
 
     @property
@@ -749,7 +751,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._symbolic
 
     @property
-    def hasdynamics(self):
+    def hasdynamics(self) -> Any:
         """
         Robot has dynamic parameters
 
@@ -770,7 +772,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._hasdynamics
 
     @property
-    def hasgeometry(self):
+    def hasgeometry(self) -> Any:
         """
         Robot has geometry model
 
@@ -796,7 +798,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._hasgeometry
 
     @property
-    def hascollision(self):
+    def hascollision(self) -> Any:
         """
         Robot has collision model
 
@@ -821,7 +823,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._hascollision
 
     @property
-    def default_backend(self):
+    def default_backend(self) -> Any:
         """
         Get default graphical backend
 
@@ -836,7 +838,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._default_backend
 
     @default_backend.setter
-    def default_backend(self, be):
+    def default_backend(self, be: Any) -> None:
         self._default_backend = be
 
     @property
@@ -858,7 +860,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._gravity
 
     @gravity.setter
-    def gravity(self, gravity_new: ArrayLike):
+    def gravity(self, gravity_new: ArrayLike) -> None:
         self._gravity = np.array(getvector(gravity_new, 3))
         self.dynchanged()
 
@@ -879,7 +881,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._q
 
     @q.setter
-    def q(self, q_new: ArrayLike):
+    def q(self, q_new: ArrayLike) -> None:
         self._q = np.array(getvector(q_new, self.n))
 
     @property
@@ -896,7 +898,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._qd
 
     @qd.setter
-    def qd(self, qd_new: ArrayLike):
+    def qd(self, qd_new: ArrayLike) -> None:
         self._qd = np.array(getvector(qd_new, self.n))
 
     @property
@@ -912,7 +914,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._qdd
 
     @qdd.setter
-    def qdd(self, qdd_new: ArrayLike):
+    def qdd(self, qdd_new: ArrayLike) -> None:
         self._qdd = np.array(getvector(qdd_new, self.n))
 
     @property
@@ -943,6 +945,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         limits = np.zeros((2, self.n))
         j = 0
+        v: ArrayLike
 
         for link in self.links:
             if link.isrevolute:
@@ -969,7 +972,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return limits
 
     @qlim.setter
-    def qlim(self, new_qlim: ArrayLike):
+    def qlim(self, new_qlim: ArrayLike) -> None:
         new_qlim = np.array(new_qlim)
 
         if new_qlim.shape != (2, self.n):
@@ -1099,7 +1102,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._control_mode
 
     @control_mode.setter
-    def control_mode(self, cn: str):
+    def control_mode(self, cn: str) -> None:
         if cn == "p" or cn == "v" or cn == "a":
             self._control_mode = cn
         else:
@@ -1132,7 +1135,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T: SE3 | NDArray):
+    def tool(self, T: SE3 | NDArray) -> None:
         if isinstance(T, SE3):
             if len(T) != 1:
                 raise ValueError("tool must be a single SE3, not a batch")
@@ -1160,7 +1163,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return SE3(self._T, check=False)
 
     @base.setter
-    def base(self, T: NDArray | SE3):
+    def base(self, T: NDArray | SE3) -> None:
         if isinstance(self, rtb.Robot):
             # All 3D robots
             # Set the SceneNode T
@@ -1191,10 +1194,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
 
         def search(
-            start,
-            end,
-            explored: set[LinkType | Link],
-            path: list[LinkType | Link],
+            start: Any, end: Any, explored: set[LinkType | Link], path: list[LinkType | Link]
         ) -> list[LinkType | Link] | None:
             link = self._getlink(start, self.base_link)
             end = self._getlink(end, self.ee_links[0])
@@ -1237,6 +1237,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                     if p is not None and len(p) > 0:
                         return p
 
+            return None
+
         end, start, tool = self._get_limit_links(end=end, start=start)
 
         path = search(start, end, set(), [])
@@ -1249,7 +1251,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         if tool is None:
             tool = SE3()
 
-        return path, len(path), tool  # type: ignore
+        return path, len(path), tool
 
     @lru_cache(maxsize=32)
     def _getlink(
@@ -1301,7 +1303,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             raise TypeError("unknown argument")
 
-    def _find_ets(self, start, end, explored, path) -> ETS | None:
+    def _find_ets(self, start: Any, end: Any, explored: Any, path: Any) -> ETS | None:
         """
         Privade method which will recursively find the ETS of a path
         see ets()
@@ -1343,6 +1345,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                     p = self._find_ets(parent, end, explored, path * link.ets.inv())
                 if p is not None:
                     return p
+
+        return None
 
     def _gripper_ets(self, gripper: Gripper) -> ETS:
         """
@@ -1421,7 +1425,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             start_ret = self._getlink(start)
 
         # because Gripper returns Link not LinkType
-        return end_ret, start_ret, tool  # type: ignore
+        return end_ret, start_ret, tool
 
     @lru_cache(maxsize=32)
     def ets(
@@ -1488,13 +1492,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             if isinstance(end, Gripper):
                 ets_end = self._gripper_ets(end)
-                end_link = end.links[0].parent  # type: ignore
+                end_link = end.links[0].parent
                 if end_link is None:  # pragma nocover
                     raise ValueError("Invalid robot link configuration")
             else:
                 end_link = self._getlink(end, self.ee_links[0])
 
-        explored = set()
+        explored: set[Any] = set()
 
         if link is end_link:
             ets = link.ets
@@ -1514,14 +1518,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         return ets
 
-    def copy(self):
+    def copy(self) -> Any:
         return deepcopy(self)
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> Any:
         links = []
 
         # if isinstance(self, rtb.DHRobot):
         #     cls = rtb.DHRobot
+        cls: type[BaseRobot[Any]]
         if isinstance(self, rtb.Robot2):
             cls = rtb.Robot2
         else:
@@ -1545,7 +1550,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             name=name,
             manufacturer=manufacturer,
             comment=comment,
-            base=base,  # type: ignore
+            base=base,
             tool=tool,
             gravity=gravity,
             keywords=keywords,
@@ -1564,7 +1569,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     # --------------------------------------------------------------------- #
 
-    def todegrees(self, q) -> NDArray:
+    def todegrees(self, q: Any) -> NDArray:
         """
         Convert joint angles to degrees
 
@@ -1599,7 +1604,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             return q
 
-    def toradians(self, q) -> NDArray:
+    def toradians(self, q: Any) -> NDArray:
         """
         Convert joint angles to radians
 
@@ -1635,7 +1640,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             return q
 
-    def isrevolute(self, j) -> bool:
+    def isrevolute(self, j: Any) -> bool:
         """
         Check if joint is revolute
 
@@ -1660,7 +1665,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         return self.revolutejoints[j]
 
-    def isprismatic(self, j) -> bool:
+    def isprismatic(self, j: Any) -> bool:
         """
         Check if joint is prismatic
 
@@ -1691,7 +1696,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     def dfs_links(
         self,
         start: LinkType,
-        func: Callable[[LinkType | None, Any]] = None,
+        func: Callable[[LinkType | None], Any] | None = None,
     ) -> list[LinkType]:
         """
         A link search method
@@ -1706,7 +1711,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         visited = []
 
-        def vis_children(link):
+        def vis_children(link: Any) -> None:
             visited.append(link)
             if func is not None:
                 func(link)
@@ -1719,7 +1724,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         return visited
 
-    def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
+    def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad") -> None:
         """
         Add a named joint configuration as an attribute
 
@@ -1755,7 +1760,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self._configs[name] = v
         setattr(self, name, v)
 
-    def addconfiguration(self, name: str, q: ArrayLike):
+    def addconfiguration(self, name: str, q: ArrayLike) -> None:
         """
         Add a named joint configuration
 
@@ -1783,11 +1788,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         self._configs[name] = np.array(getvector(q, self.n))
 
-    def configurations_str(self, border="thin"):
+    def configurations_str(self, border: str = "thin") -> Any:
         deg = 180 / np.pi
 
         # TODO: factor this out of DHRobot
-        def angle(theta, fmt=None):
+        def angle(theta: Any, fmt: Any = None) -> Any:
             if fmt is not None:
                 try:
                     return fmt.format(theta * deg) + "\u00b0"
@@ -1820,7 +1825,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:  # pragma nocover
             return ""
 
-    def random_q(self):
+    def random_q(self) -> Any:
         """
         Return a random joint configuration
 
@@ -1863,7 +1868,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
-        def recurse(link, indent=0):
+        def recurse(link: Any, indent: int = 0) -> None:
             print(" " * indent * 2, link.name)
             if link.children is not None:
                 for child in link.children:
@@ -1899,7 +1904,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             segments
         """
 
-        def recurse(link: Link):
+        def recurse(link: Link) -> Any:
             segs = [link.parent]
             while True:
                 segs.append(link)
@@ -1909,36 +1914,37 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                     link = link.children[0]  # type: ignore
                     continue
                 elif link.nchildren > 1:
-                    segs = [segs]
+                    segs = [segs]  # type: ignore[list-item]
 
                     for child in link.children:  # type: ignore
                         segs.extend(recurse(child))
 
                     return segs
 
-        return recurse(self.links[0])  # type: ignore
+        return recurse(self.links[0])
 
     # --------------------------------------------------------------------- #
     # Scene Graph section
     # --------------------------------------------------------------------- #
 
-    def _update_link_tf(self, q: ArrayLike | None = None):
+    def _update_link_tf(self, q: ArrayLike | None = None) -> None:
         """
         This private method updates the local transform of each link within
         this robot according to q (or self.q if q is none)
         """
 
         @lru_cache(maxsize=2)
-        def get_link_ets():
+        def get_link_ets() -> Any:
             return [link.ets._fknm for link in self.links]
 
         @lru_cache(maxsize=2)
-        def get_link_scene_node():
+        def get_link_scene_node() -> Any:
             return [link._T_reference for link in self.links]
 
         Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
 
-        [gripper._update_link_tf() for gripper in self.grippers]
+        for gripper in self.grippers:
+            gripper._update_link_tf()
 
     # --------------------------------------------------------------------- #
     # --------- PyPlot Methods -------------------------------------------- #
@@ -1949,6 +1955,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         backend: L["swift", "pyplot", "pyplot2"] | None = None,
     ) -> Connector:
         import sys
+
         from roboticstoolbox.backends import load_backend
 
         # Resolve which backend name to use
@@ -1998,14 +2005,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         q: ArrayLike,
         backend: L["swift", "pyplot", "pyplot2"] | None = None,
         block: bool = False,
-        dt: float = 0.050,
+        dt: float = 0.05,
         limits: ArrayLike | None = None,
         vellipse: bool = False,
         fellipse: bool = False,
         fig: str | None = None,
         movie: str | None = None,
         loop: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> Connector:
         """
         Graphical display and animation
@@ -2254,7 +2261,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     # --------- Utility Methods ------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    def showgraph(self, display_graph: bool = True, **kwargs) -> str | None:
+    def showgraph(self, display_graph: bool = True, **kwargs: Any) -> str | None:
         """
         Display a link transform graph in browser
 
@@ -2299,8 +2306,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
 
         # Lazy import
-        import tempfile
         import subprocess
+        import tempfile
         import webbrowser
 
         # create the temporary dotfile
@@ -2318,6 +2325,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             return pdffile.name
 
+        return None
+
     def dotfile(
         self,
         filename: str | IO[str],
@@ -2325,7 +2334,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         ets: L["full", "brief"] = "full",
         jtype: bool = False,
         static: bool = True,
-    ):
+    ) -> None:
         """
         Write a link transform graph as a GraphViz dot file
 
@@ -2368,6 +2377,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
+        file: IO[str]
         if isinstance(filename, str):
             file = open(filename, "w", encoding="utf-8")
         else:
@@ -2377,7 +2387,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 graph [rankdir=LR];
 """
 
-        def draw_edge(link, etsbox, jtype, static):
+        def draw_edge(link: Any, etsbox: Any, jtype: Any, static: Any) -> None:
             # draw the edge
             if jtype:
                 if link.isprismatic:
@@ -2420,9 +2430,9 @@ graph [rankdir=LR];
                         )
                     )
 
-                file.write("  {} -> {}_ets;\n".format(parent, link.name))
+                file.write(f"  {parent} -> {link.name}_ets;\n")
                 file.write(
-                    "  {}_ets -> {} [{}];\n".format(link.name, link.name, edge_options)
+                    f"  {link.name}_ets -> {link.name} [{edge_options}];\n"
                 )
             else:
                 # put the ets fragment as an edge label
@@ -2439,12 +2449,7 @@ graph [rankdir=LR];
                     return
                 try:
                     file.write(
-                        '  {} -> {} [label="{}", {}];\n'.format(
-                            parent,
-                            link.name,
-                            estr,
-                            edge_options,
-                        )
+                        f'  {parent} -> {link.name} [label="{estr}", {edge_options}];\n'
                     )
                 except UnicodeEncodeError:  # pragma nocover
                     file.write(
@@ -2470,13 +2475,13 @@ graph [rankdir=LR];
             else:
                 node_options = 'shape="circle"'
 
-            file.write("  {} [{}];\n".format(link.name, node_options))
+            file.write(f"  {link.name} [{node_options}];\n")
 
             draw_edge(link, etsbox, jtype, static)
 
         for gripper in self.grippers:
             for link in gripper.links:
-                file.write("  {} [shape=cds];\n".format(link.name))
+                file.write(f"  {link.name} [shape=cds];\n")
                 draw_edge(link, etsbox, jtype, static)
 
         file.write("}\n")
@@ -2488,7 +2493,7 @@ graph [rankdir=LR];
         self,
         format: L["dot", "mermaid", "mermaid_fenced"] = "dot",
         filename: str | IO[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> str:
         """
         Render a link transform graph as text
@@ -2537,7 +2542,7 @@ graph [rankdir=LR];
             lines = ["flowchart LR"]
             node_ids: dict[Any, str] = {}
 
-            def node_id(link) -> str:
+            def node_id(link: Any) -> str:
                 return node_ids.setdefault(link, f"n{len(node_ids)}")
 
             lines.append('    BASE["BASE"]')
@@ -2553,7 +2558,7 @@ graph [rankdir=LR];
                 for link in gripper.links:
                     lines.append(f'    {node_id(link)}{{{{"{link.name}"}}}}')
 
-            def edge_label(link) -> str:
+            def edge_label(link: Any) -> str:
                 if not link.isjoint:
                     return ""
                 kind = "P" if link.isprismatic else "R"

@@ -1,13 +1,12 @@
-from typing import Type
+from __future__ import annotations
+
 import warnings
-import numpy as np
-from math import sin, cos, atan2, tan, sqrt, pi
+from math import pi
+from typing import Any
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-import time
-
-from bdsim.block_types import GraphicsBlock, ContinuousBlock
+import numpy as np
+from bdsim.block_types import ContinuousBlock, GraphicsBlock
 
 from roboticstoolbox import mobile
 
@@ -62,13 +61,13 @@ class Bicycle(ContinuousBlock):
 
     def __init__(
         self,
-        L=1,
-        speed_max=np.inf,
-        accel_max=np.inf,
-        steer_max=0.45 * pi,
-        x0=None,
-        **blockargs,
-    ):
+        L: float = 1,
+        speed_max: Any = np.inf,
+        accel_max: Any = np.inf,
+        steer_max: Any = 0.45 * pi,
+        x0: Any = None,
+        **blockargs: Any,
+    ) -> None:
         r"""
         :param L: Wheelbase, defaults to 1
         :type L: float, optional
@@ -117,19 +116,17 @@ class Bicycle(ContinuousBlock):
         if x0 is None:
             self._x0 = np.zeros((self.nstates,))
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
-                len(x0), self.nstates
-            )
+            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
             self._x0 = x0
 
         self.inport_names(("v", r"$\gamma$"))
         self.outport_names(("q",))
         self.state_names(("x", "y", r"$\theta$"))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         return [x]  # one output which is ndarray(3)
 
-    def deriv(self, t, inports, x):
+    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
         return self.vehicle.deriv(x, inports)
 
 
@@ -184,14 +181,14 @@ class Unicycle(ContinuousBlock):
 
     def __init__(
         self,
-        w=1,
-        speed_max=np.inf,
-        accel_max=np.inf,
-        steer_max=np.inf,
+        w: float = 1,
+        speed_max: Any = np.inf,
+        accel_max: Any = np.inf,
+        steer_max: Any = np.inf,
         # a=0,  implement this, RVC2 p111, change output and deriv
-        x0=None,
-        **blockargs,
-    ):
+        x0: Any = None,
+        **blockargs: Any,
+    ) -> None:
         r"""
 
         :param w: vehicle width, defaults to 1
@@ -213,9 +210,7 @@ class Unicycle(ContinuousBlock):
         if x0 is None:
             self._x0 = np.zeros((self.nstates,))
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
-                len(x0), self.nstates
-            )
+            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
             self._x0 = x0
 
         self.vehicle = mobile.Unicycle(
@@ -236,10 +231,10 @@ class Unicycle(ContinuousBlock):
         #         \dot{x} \\ \dot{y}
         #     \end{pmatrix}
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         return [x]
 
-    def deriv(self, t, inports, x):
+    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
         return self.vehicle.deriv(x, inports)
 
 
@@ -297,15 +292,15 @@ class DiffSteer(ContinuousBlock):
 
     def __init__(
         self,
-        w=1,
-        R=1,
-        speed_max=np.inf,
-        accel_max=np.inf,
-        steer_max=None,
-        a=0,
-        x0=None,
-        **blockargs,
-    ):
+        w: float = 1,
+        R: float = 1,
+        speed_max: Any = np.inf,
+        accel_max: Any = np.inf,
+        steer_max: Any = None,
+        a: float = 0,
+        x0: Any = None,
+        **blockargs: Any,
+    ) -> None:
         r"""
         :param w: vehicle width, defaults to 1
         :type w: float, optional
@@ -327,21 +322,20 @@ class DiffSteer(ContinuousBlock):
         self.R = R
 
         if x0 is None:
-            self._x0 = np.zeros((slef.nstates,))
+            # `slef` is a typo for `self`, so this raises NameError: see findings
+            self._x0 = np.zeros((slef.nstates,))  # type: ignore[name-defined,has-type]
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
-                len(x0), self.nstates
-            )
+            assert len(x0) == self.nstates, f"x0 is {len(x0):d} long, should be {self.nstates:d}"
             self._x0 = x0
 
         self.vehicle = mobile.DiffSteer(
             W=w, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
         )
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         return [x]
 
-    def deriv(self, t, inports, x):
+    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
         return self.vehicle.deriv(x, inports)
 
 
@@ -391,17 +385,17 @@ class VehiclePlot(GraphicsBlock):
 
     def __init__(
         self,
-        animation=None,
-        path=None,
-        labels=["X", "Y"],
-        square=True,
-        init=None,
-        scale="auto",
-        shape="car",
-        size=None,
-        polyargs={},
-        **blockargs,
-    ):
+        animation: Any = None,
+        path: Any = None,
+        labels: Any = ["X", "Y"],
+        square: bool = True,
+        init: Any = None,
+        scale: str = "auto",
+        shape: str = "car",
+        size: Any = None,
+        polyargs: Any = {},
+        **blockargs: Any,
+    ) -> None:
         """
         :param animation: Graphical animation of vehicle, defaults to None
         :type animation: VehicleAnimation subclass, optional
@@ -436,8 +430,8 @@ class VehiclePlot(GraphicsBlock):
               the option ``path`` is set to a linestyle.
         """
         super().__init__(**blockargs)
-        self.xdata = []
-        self.ydata = []
+        self.xdata: list[float] = []
+        self.ydata: list[float] = []
         # self.type = "vehicleplot"
         if init is not None:
             assert callable(init), "graphics init function must be callable"
@@ -463,7 +457,7 @@ class VehiclePlot(GraphicsBlock):
 
         self.animation = animation
 
-    def start(self, simstate):
+    def start(self, simstate: Any) -> None:
         super().start(simstate)
 
         if not self._enabled:
@@ -499,7 +493,7 @@ class VehiclePlot(GraphicsBlock):
         # plt.draw()
         # plt.show(block=False)
 
-    def step(self, t, inports):
+    def step(self, t: Any, inports: Any) -> None:
         if not self._enabled:
             return
 

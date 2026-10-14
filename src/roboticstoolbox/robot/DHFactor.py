@@ -1,8 +1,10 @@
-from roboticstoolbox import ETS, ET
 import re
-import sympy
+
 import numpy as np
+import sympy
 from spatialmath import base
+
+from roboticstoolbox.ets.ET import ET
 
 pi2 = base.pi() / 2
 deg = base.pi() / sympy.Integer("180")

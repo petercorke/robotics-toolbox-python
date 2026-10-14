@@ -1,15 +1,27 @@
+
+from __future__ import annotations
+
+import inspect
 import warnings
+from typing import Any
+
+from ansitable import ANSITable, Column
+
+from roboticstoolbox.models.URDF.URDFRobot import _rd_link
+from roboticstoolbox.robot.ERobot import ERobot2
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.tools import rtb_get_param
-from roboticstoolbox.robot.ERobot import ERobot2
-from roboticstoolbox.models.URDF.URDFRobot import _rd_link
-from ansitable import ANSITable, Column
-import inspect
 
 # import importlib
 
 
-def catalog(keywords=None, dof=None, mtype=None, sorton=None, border="thin"):
+def catalog(
+    keywords: Any = None,
+    dof: Any = None,
+    mtype: Any = None,
+    sorton: Any = None,
+    border: str = "thin",
+) -> None:
     """
     Display all robot models in summary form
 
@@ -86,7 +98,7 @@ def catalog(keywords=None, dof=None, mtype=None, sorton=None, border="thin"):
                 f"sorton must be one of {sorted(sort_map)}, got {sorton!r}"
             )
 
-    def make_table(border=None):
+    def make_table(border: Any = None) -> None:
         table = ANSITable(
             Column("class", headalign="^", colalign="<"),
             Column("robot name", headalign="^", colalign="<"),
@@ -112,7 +124,7 @@ def catalog(keywords=None, dof=None, mtype=None, sorton=None, border="thin"):
                 if inspect.isclass(cls) and issubclass(cls, Robot):
                     # we found a BaseRobot subclass, instantiate it
                     try:
-                        robot = cls()
+                        robot = cls()  # type: ignore[call-arg]  # subclasses take no args
                     except Exception:
                         print(f"failed to load {cls}")
                         continue
@@ -152,7 +164,7 @@ def catalog(keywords=None, dof=None, mtype=None, sorton=None, border="thin"):
             table.sort(sort_col_main, key=sort_key)
         table.print()
 
-    def make_rd_table(border=None):
+    def make_rd_table(border: Any = None) -> None:
         from robot_descriptions import DESCRIPTIONS
         from robot_descriptions._descriptions import Format
 
@@ -198,9 +210,13 @@ def catalog(keywords=None, dof=None, mtype=None, sorton=None, border="thin"):
         make_rd_table(border=border)
 
 
-def list(  # pragma nocover
-    keywords=None, dof=None, mtype=None, sorton=None, border="thin"
-):
+def list(
+    keywords: Any = None,
+    dof: Any = None,
+    mtype: Any = None,
+    sorton: Any = None,
+    border: str = "thin",
+) -> Any:
     """
     Display all robot models in summary form (deprecated)
 

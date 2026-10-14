@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+from typing import Any, NamedTuple
+
 try:
     from pgraph import DGraph, DVertex, Edge
 except ImportError:
+
     class _PGraphMissing:  # pragma: no cover
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             raise ImportError(
                 "LatticePlanner requires optional dependency 'pgraph'. "
                 "Install it with: pip install pgraph-python"
@@ -11,17 +16,17 @@ except ImportError:
     DGraph = _PGraphMissing
     DVertex = _PGraphMissing
     Edge = _PGraphMissing
+
+import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import SE2
-import matplotlib.pyplot as plt
-import itertools
+
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
-from collections import namedtuple
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
-def make_arc(dir, radius=1, npoints=20):
-    points = []
+def make_arc(dir: str, radius: float = 1, npoints: int = 20) -> NDArray:
+    points: list[tuple[float, float]] = []
 
     if dir == "S":
         points.append((0, 0))
@@ -42,17 +47,24 @@ def make_arc(dir, radius=1, npoints=20):
     return np.array(points).T
 
 
-arcs = {}
+arcs: dict[str, NDArray] = {}
 
 
 class LatticeVertex(DVertex):
-    def __init__(self, move=None, pose=None, name=None):
+    def __init__(
+        self,
+        move: str | None = None,
+        pose: SE2 | None = None,
+        name: str | None = None,
+    ) -> None:
         super().__init__(name=name)
+        if pose is None:
+            raise ValueError("pose is required")
         self.move = move
         self.pose = pose
         self.coord = pose.xyt()
 
-    def icoord(self):
+    def icoord(self) -> str:
         xyt = self.coord
         ix = int(round(xyt[0]))
         iy = int(round(xyt[1]))
@@ -61,13 +73,17 @@ class LatticeVertex(DVertex):
 
 
 class LatticeEdge(Edge):
-    def __init__(self, v1, v2, cost, pose, move):
+    def __init__(
+        self, v1: Any, v2: Any, cost: float, pose: SE2, move: str
+    ) -> None:
         super().__init__(v1, v2, cost)
         self.pose = pose
         self.move = move
         self.arc = arcs[move]
 
-    def plot(self, configspace=False, unwrap=False, **kwargs):
+    def plot(
+        self, configspace: bool = False, unwrap: bool = False, **kwargs: Any
+    ) -> None:
         T = self.pose
         xy = self.pose * self.arc
         if configspace:
@@ -86,6 +102,14 @@ class LatticeEdge(Edge):
         else:
             # 2D plot
             plt.plot(xy[0, :], xy[1, :], **kwargs)
+
+
+class LatticeStatus(NamedTuple):
+    """Cost, move sequence and edges of the path"""
+
+    cost: float
+    segments: list[str]
+    edges: list[Any]
 
 
 class LatticePlanner(PlannerBase):
@@ -146,7 +170,12 @@ class LatticePlanner(PlannerBase):
     :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`
     """
 
-    def __init__(self, costs=None, root=(0, 0, 0), **kwargs):
+    def __init__(
+        self,
+        costs: ArrayLike | None = None,
+        root: ArrayLike = (0, 0, 0),
+        **kwargs: Any,
+    ) -> None:
 
         global arcs
 
@@ -163,19 +192,23 @@ class LatticePlanner(PlannerBase):
         for move in self.moves:
             arcs[move] = make_arc(move)
 
-    def __str__(self):
-        s = (
-            super().__str__()
-            + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
-        )
+    def __str__(self) -> str:
+        # was: super().__str__() + curvature and stepsize, which do not exist
+        # here, and no return statement
+        return super().__str__()
 
-    def _icoord(self, xyt):
+    def _icoord(self, xyt: ArrayLike) -> str:
         ix = int(round(xyt[0]))
         iy = int(round(xyt[1]))
         it = int(round(xyt[2] * 2 / np.pi))
         return f"({ix:d},{iy:d},{it:d})"
 
-    def plan(self, iterations=None, verbose=False, summary=False):
+    def plan(
+        self,
+        iterations: int | None = None,
+        verbose: bool = False,
+        summary: bool = False,
+    ) -> None:
         """
         Create a lattice plan
 
@@ -266,7 +299,9 @@ class LatticePlanner(PlannerBase):
         if summary:
             print(f"{self.graph.n} vertices and {self.graph.ne} edges created")
 
-    def query(self, start, goal):
+    def query(  # type: ignore[override]
+        self, start: ArrayLike, goal: ArrayLike
+    ) -> tuple[NDArray, LatticeStatus]:
         r"""
         Find a path through the lattice
 
@@ -306,8 +341,6 @@ class LatticePlanner(PlannerBase):
         except TypeError:
             raise RuntimeError("no path found") from None
 
-        status = namedtuple("LatticeStatus", ["cost", "segments", "edges"])
-
         segments = []
         edges = []
         for p, n in zip(path[:-1], path[1:]):
@@ -315,9 +348,13 @@ class LatticePlanner(PlannerBase):
             edges.append(e)
             segments.append(e.move)
 
-        return np.array([p.coord for p in path]), status(cost, segments, edges)
+        return np.array([p.coord for p in path]), LatticeStatus(
+            cost, segments, edges
+        )
 
-    def plot(self, path=None, **kwargs):
+    def plot(  # type: ignore[override]
+        self, path: NDArray | None = None, **kwargs: Any
+    ) -> None:
         super().plot(**kwargs)
 
         if kwargs.get("configspace", False):

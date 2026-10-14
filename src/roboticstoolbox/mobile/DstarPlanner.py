@@ -6,19 +6,19 @@ See Wikipedia article (https://en.wikipedia.org/wiki/D*)
 
 """
 
-import math
+from __future__ import annotations
 
-from sys import maxsize
-from collections import namedtuple
+import heapq
+import math
 from enum import IntEnum, auto
+from typing import Any, Callable, NamedTuple
+
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.cm as cm
+
+from roboticstoolbox.mobile.OccGrid import OccupancyGrid
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid
-import heapq
-import bisect
-import math
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 show_animation = True
 
@@ -53,31 +53,33 @@ class _Tag(IntEnum):
 
 
 class _State:
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
-        self.parent = None  # 'back pointer' to next _State
+        self.parent: _State | None = None  # 'back pointer' to next _State
         self.t = _Tag.NEW  # open closed new
-        self.h = 0  # cost to goal
-        self.k = 0  # estimate of shortest path cost
+        self.h: float = 0  # cost to goal
+        self.k: float = 0  # estimate of shortest path cost
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.x}, {self.y})"  # [{self.h:.1f}, {self.k:.1f}]"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
         return True
 
 
 class _Map:
-    def __init__(self, row, col):
+    costmap: NDArray  # assigned by DstarPlanner
+
+    def __init__(self, row: int, col: int) -> None:
         self.row = row
         self.col = col
         self._Map = self.init__Map()
 
-    def init__Map(self):
+    def init__Map(self) -> list[list[_State]]:
         _Map_list = []  # list of rows
         for i in range(self.row):
             # for each row, make a list
@@ -89,7 +91,7 @@ class _Map:
 
     _neighbours = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
-    def get_neighbors(self, _State):
+    def get_neighbors(self, _State: _State) -> list[_State]:
         _State_list = []
 
         for i, j in self._neighbours:
@@ -102,7 +104,7 @@ class _Map:
 
     _root2 = np.sqrt(2)
 
-    def cost(self, _State1, _State2):
+    def cost(self, _State1: _State, _State2: _State) -> float:
         c = (
             self.costmap[_State1.y, _State1.x] + self.costmap[_State2.y, _State2.x]
         ) / 2
@@ -118,7 +120,7 @@ class _Map:
         # return c * math.sqrt(()**2 +
         #                  ()**2)
 
-    def show_h(self):
+    def show_h(self) -> None:
         h = np.empty((self.col, self.row))
 
         for x in range(self.col):
@@ -128,14 +130,14 @@ class _Map:
 
 
 class _Dstar:
-    def __init__(self, _Map, tol=1e-6):
+    def __init__(self, _Map: _Map, tol: float = 1e-6) -> None:
         self._Map = _Map
         # self.open_list = set()
-        self.open_list = []
+        self.open_list: list[tuple[float, _State]] = []
         self.nexpand = 0
         self.tol = tol
 
-    def process__State(self, verbose=False):
+    def process__State(self, verbose: bool = False) -> float:
         if verbose:
             print(
                 "FRONTIER ", " ".join([f"({x[1].x}, {x[1].y})" for x in self.open_list])
@@ -237,7 +239,7 @@ class _Dstar:
     ninsert = 0
     nin = 0
 
-    def insert(self, _State, h_new):
+    def insert(self, _State: _State, h_new: float) -> None:
         self.ninsert += 1
 
         if _State.t is _Tag.NEW:
@@ -280,9 +282,10 @@ class _Dstar:
         # self.open_list.add(_State)
         heapq.heappush(self.open_list, (_State.k, _State))
 
-    def modify_cost(self, x, newcost):
+    def modify_cost(self, x: _State, newcost: float) -> float:
         self._Map.costmap[x.y, x.x] = newcost
         if x.t is _Tag.CLOSED:
+            assert x.parent is not None
             self.insert(x, x.parent.h + self._Map.cost(x, x.parent))
         if len(self.open_list) == 0:
             return -1
@@ -290,7 +293,7 @@ class _Dstar:
             # lowest priority item is always at index 0 according to docs
             return self.open_list[0][0]
 
-    def showparents(self):
+    def showparents(self) -> None:
         for y in range(self._Map.row - 1, -1, -1):
             if y == self._Map.row - 1:
                 print("   ", end="")
@@ -299,8 +302,8 @@ class _Dstar:
                 print()
             print(f"{y}: ", end="")
             for x in range(self._Map.col):
-                x = self._Map._Map[y][x]
-                par = x.parent
+                state = self._Map._Map[y][x]
+                par = state.parent
                 if par is None:
                     print("  G   ", end="")
                 else:
@@ -314,6 +317,12 @@ class _Dstar:
 
 # Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
 # Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
+class DstarStatus(NamedTuple):
+    """Cost of the path"""
+
+    cost: float
+
+
 class DstarPlanner(PlannerBase):
     r"""
     D* path planner
@@ -358,7 +367,9 @@ class DstarPlanner(PlannerBase):
     :seealso: :class:`PlannerBase`
     """
 
-    def __init__(self, costmap=None, **kwargs):
+    def __init__(
+        self, costmap: NDArray | OccupancyGrid | None = None, **kwargs: Any
+    ) -> None:
         super().__init__(ndims=2, **kwargs)
 
         if isinstance(costmap, np.ndarray):
@@ -373,7 +384,13 @@ class DstarPlanner(PlannerBase):
         self._Map.costmap = self.costmap
         self._Dstar = _Dstar(self._Map)  # , tol=0)
 
-    def plan(self, goal=None, animate=False, progress=True, summary=False):
+    def plan(
+        self,
+        goal: ArrayLike | None = None,
+        animate: bool = False,
+        progress: bool = True,
+        summary: bool = False,
+    ) -> None:
         r"""
         Plan D* path
 
@@ -412,7 +429,7 @@ class DstarPlanner(PlannerBase):
             print(self._Dstar.ninsert, self._Dstar.nin)
 
     @property
-    def nexpand(self):
+    def nexpand(self) -> int:
         """
         Number of node expansions
 
@@ -424,7 +441,13 @@ class DstarPlanner(PlannerBase):
         """
         return self._Dstar.nexpand
 
-    def query(self, start, sensor=None, animate=False, verbose=False):
+    def query(  # type: ignore[override]
+        self,
+        start: ArrayLike,
+        sensor: Callable[..., Any] | None = None,
+        animate: bool = False,
+        verbose: bool = False,
+    ) -> tuple[NDArray, DstarStatus]:
         """
         Find path with replanning
 
@@ -457,9 +480,7 @@ class DstarPlanner(PlannerBase):
         :seealso: :meth:`plan`
         """
         self.start = start
-        start_State = self._Map._Map[start[1]][start[0]]
-        s = start_State
-        s = s.parent
+        start_State = self._Map._Map[int(start[1])][int(start[0])]
         tmp = start_State
 
         if sensor is not None and not callable(sensor):
@@ -492,17 +513,11 @@ class DstarPlanner(PlannerBase):
                         # print('open set', len(self._Dstar.open_list))
                     # self._Dstar.showparents()
 
+            assert tmp.parent is not None
             tmp = tmp.parent
             # print('move to ', tmp)
 
-        status = namedtuple(
-            "_DstarStatus",
-            [
-                "cost",
-            ],
-        )
-
-        return np.array(path), status(cost)
+        return np.array(path), DstarStatus(cost)
 
     # # Just feed self._h into plot function from parent as p
 
@@ -541,13 +556,14 @@ if __name__ == "__main__":
 
     # ds.plot(path=path)
 
-    def sensorfunc(pos):
+    def sensorfunc(pos: tuple[int, int]) -> list[tuple[int, int, int]] | None:
         if pos == (3, 3):
             changes = []
             for x in range(3, 6):
                 for y in range(0, 4):
                     changes.append((x, y, 100))
             return changes
+        return None
 
     path2, status2 = ds.query(start=start, sensor=sensorfunc, verbose=False)
     print(ds._Map.costmap)

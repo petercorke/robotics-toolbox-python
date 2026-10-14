@@ -5,11 +5,12 @@
 """
 
 import unittest
-import roboticstoolbox as rp
-from roboticstoolbox.tools import URDF, xacro
+
 import numpy as np
 import numpy.testing as nt
 
+import roboticstoolbox as rp
+from roboticstoolbox.tools import URDF, xacro
 from roboticstoolbox.tools.data import rtb_path_to_datafile
 
 
@@ -20,13 +21,13 @@ class TestURDF(unittest.TestCase):
             rtb_path_to_datafile(
                 "xacro/franka_description/robots/panda_arm_hand.urdf.xacro"
             )
-        )  # noqa
+        )
         urdf = URDF.loadstr(
             urdf_string,
             rtb_path_to_datafile(
                 "xacro/franka_description/robots/panda_arm_hand.urdf.xacro"
             ),
-        )  # noqa
+        )
 
         urdf.links[0].visuals[0].name = "Lonk"
         self.assertTrue(urdf.links[0].visuals[0].name == "Lonk")
@@ -75,13 +76,13 @@ class TestURDF(unittest.TestCase):
             rtb_path_to_datafile(
                 "xacro/franka_description/robots/panda_arm_hand.urdf.xacro"
             )
-        )  # noqa
+        )
         urdf = URDF.loadstr(
             urdf_string,
             rtb_path_to_datafile(
                 "xacro/franka_description/robots/panda_arm_hand.urdf.xacro"
             ),
-        )  # noqa
+        )
 
         urdf.links[0].collisions[0].name = "Lonk"
         self.assertTrue(urdf.links[0].collisions[0].name == "Lonk")
@@ -99,13 +100,13 @@ class TestURDF(unittest.TestCase):
             rtb_path_to_datafile(
                 "xacro/franka_description/robots/panda_arm_hand.urdf.xacro"
             )
-        )  # noqa
+        )
         urdf = URDF.loadstr(
             urdf_string,
             rtb_path_to_datafile(
                 "xacro/franka_description/robots/panda_arm_hand.urdf.xacro"
             ),
-        )  # noqa
+        )
 
         self.assertEqual(urdf.joints[0].limit.effort, 87.0)
         self.assertEqual(urdf.joints[0].limit.velocity, 2.175)

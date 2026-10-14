@@ -1,20 +1,26 @@
+from __future__ import annotations
+
 import math
+from typing import Any, NamedTuple
+
+import numpy as np
 import scipy.integrate
 import scipy.optimize
-import numpy as np
 
 # import matplotlib.pyplot as plt
-from collections import namedtuple
-from roboticstoolbox.mobile import *
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
-def solvepath(x, q0=[0, 0, 0], **kwargs):
+def solvepath(
+    x: ArrayLike, q0: ArrayLike = [0, 0, 0], **kwargs: Any
+) -> tuple[NDArray, float]:
     # x[:4] is 4 coeffs of curvature polynomial
     # x[4] is total path length
     # q0 is initial state of the vehicle
     maxcurvature = 0
 
-    def dotfunc(s, q, poly):
+    def dotfunc(s: float, q: ArrayLike, poly: ArrayLike) -> tuple[float, float, float]:
         # q = (x, y, θ)
         # qdot = (cosθ, sinθ, ϰ)
         k = poly[0] * s**3 + poly[1] * s**2 + poly[2] * s + poly[3]
@@ -33,13 +39,13 @@ def solvepath(x, q0=[0, 0, 0], **kwargs):
     return sol.y, maxcurvature
 
 
-def xcurvature(x):
+def xcurvature(x: ArrayLike) -> float:
     # inequality constraint function, must be non-negative
     _, maxcurvature = solvepath(x, q0=(0, 0, 0))
     return maxcurvature
 
 
-def costfunc(x, start, goal):
+def costfunc(x: ArrayLike, start: ArrayLike, goal: ArrayLike) -> float:
     # final cost of path from start with params
     # p[0:4] is polynomial: k0, a, b, c
     # p[4] is s_f
@@ -54,8 +60,16 @@ def costfunc(x, start, goal):
     return e
 
 
+class CurvaturePolyStatus(NamedTuple):
+    """Length, maximum curvature and curvature polynomial of the path"""
+
+    length: float
+    maxcurvature: float
+    poly: NDArray
+
+
 class CurvaturePolyPlanner(PlannerBase):
-    def __init__(self, curvature=None):
+    def __init__(self, curvature: float | None = None) -> None:
         r"""
         Continuous curvature path planner
 
@@ -85,7 +99,9 @@ class CurvaturePolyPlanner(PlannerBase):
         super().__init__(ndims=3)
         self.curvature = curvature
 
-    def query(self, start, goal):
+    def query(  # type: ignore[override]
+        self, start: ArrayLike, goal: ArrayLike
+    ) -> tuple[NDArray, CurvaturePolyStatus]:
         r"""
         Find a path between two configurations
 
@@ -111,13 +127,13 @@ class CurvaturePolyPlanner(PlannerBase):
         +-------------------+-----------------------------------------------+
 
         """
-        goal = np.r_[goal]
-        start = np.r_[start]
-        self._start = start
-        self._goal = goal
+        goal_: NDArray = np.r_[goal]
+        start_: NDArray = np.r_[start]
+        self._start = start_
+        self._goal = goal_
 
         # initial estimate of path length is Euclidean distance
-        d = np.linalg.norm(goal[:2] - start[:2])
+        d = np.linalg.norm(goal_[:2] - start_[:2])
         # state vector is kappa_0, a, b, c, s_f
 
         if self.curvature is not None:
@@ -125,23 +141,21 @@ class CurvaturePolyPlanner(PlannerBase):
                 scipy.optimize.NonlinearConstraint(xcurvature, 0, self.curvature),
             )
         else:
-            nlcontraints = ()
+            nlcontraints = ()  # type: ignore[assignment]
 
         sol = scipy.optimize.minimize(
             costfunc,
             [0, 0, 0, 0, d],
             constraints=nlcontraints,
             bounds=[(None, None), (None, None), (None, None), (None, None), (d, None)],
-            args=(start, goal),
+            args=(start_, goal_),
         )
         print(sol)
         path, maxcurvature = solvepath(
-            sol.x, q0=start, dense_output=True, max_step=1e-2
+            sol.x, q0=start_, dense_output=True, max_step=1e-2
         )
 
-        status = namedtuple("CurvaturePolyStatus", ["length", "maxcurvature", "poly"])(
-            sol.x[4], maxcurvature, sol.x[:4]
-        )
+        status = CurvaturePolyStatus(sol.x[4], maxcurvature, sol.x[:4])
 
         return path.T, status
 

@@ -1,10 +1,14 @@
-#!/usr/bin/env python
 
-from roboticstoolbox.robot.Link import Link
+from __future__ import annotations
+
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
-from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 import spatialmath as sm
+
+from roboticstoolbox.models.URDF.URDFRobot import URDF_read
+
+#!/usr/bin/env python
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.Robot import Robot
 
 
 class YuMi(Robot):
@@ -36,7 +40,7 @@ class YuMi(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         links, name, urdf_filepath = URDF_read("yumi")
 
