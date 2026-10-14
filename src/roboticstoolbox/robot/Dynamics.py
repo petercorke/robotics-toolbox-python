@@ -522,8 +522,17 @@ class DynamicsMixin:
         q in the frame given by frame which is 0 for base frame, 1 for
         end-effector frame.
 
-        Uses the formula tau = J'W, where W is a wrench vector applied at the
-        end effector, W = [Fx Fy Fz Mx My Mz]'.
+        Uses the formula tau = -J'W, where W = [Fx Fy Fz Mx My Mz]' is the
+        wrench that the payload applies to the end-effector.  The result is the
+        torque that the joint actuators must provide to support the payload, so
+        it adds directly to the torque from :meth:`gravload`.  For example, a
+        weight of 1 N on a robot whose base z-axis is vertical is
+        ``W = [0, 0, -1, 0, 0, 0]``, which gives a positive torque on a joint
+        that has to hold it up.
+
+        .. note:: Based on the MATLAB Robotics Toolbox method of the same name,
+            contributed by Bryan Moutrie (pHRIWARE), who also wrote
+            :meth:`paycap`.
 
         Trajectory operation:
           In the case q is nxm or J is 6xnxm then tau is nxm where each row
@@ -1438,26 +1447,61 @@ class DynamicsMixin:
         frame: int = 1,
         q: ArrayLike | None = None,
     ):
-        """Compute static payload capacity along a wrench direction.
+        r"""
+        Static payload capacity of a robot
 
-        :param w: Nonzero payload wrench direction (6,), or (m, 6) for
-            m configurations. Its magnitude is ignored.
-        :param tauR: Joint torque limits (n, 2): maximum in column 0,
-            minimum in column 1.
-        :param frame: Wrench reference frame: 0 for base, 1 for end-effector.
-        :param q: Joint coordinates (n,), or (m, n) for m configurations.
-            Defaults to the robot's current configuration.
-        :returns: Tuple ``(wmax, joint)``. ``wmax`` contains one allowable
-            load scale per joint (n,), and ``joint`` is the zero-based index
-            of the limiting joint. With m configurations, their shapes are
-            (m, n) and (m,), respectively. The maximum load scale in the
-            specified direction is ``wmax.min()`` per configuration.
+        :param w: payload wrench direction :math:`(F_x, F_y, F_z, M_x, M_y, M_z)`,
+            or (m, 6) for m configurations.  This is the wrench that the payload
+            applies to the end-effector, only its direction is used.
+        :param tauR: joint torque limits (n, 2): maximum in column 0, minimum in
+            column 1
+        :param frame: wrench reference frame, 0 for base, 1 for end-effector
+        :param q: joint coordinates (n,), or (m, n) for m configurations,
+            defaults to the robot's current configuration
+        :returns: ``(wmax, joint)``: the payload capacity and the zero-based
+            index of the joint that reaches its limit first
+        :rtype: float, int, or ndarray(m), ndarray(m) for m configurations
+
+        The payload is the wrench :math:`\hat{w} = w / \|w\|` scaled by a
+        positive factor, and ``wmax`` is the largest factor for which no joint
+        exceeds its torque limit, given the torque needed to support the robot
+        against gravity at that pose.  It is a magnitude in the units of the
+        wrench: newtons if ``w`` is a pure force, newton metres if a pure
+        moment.  The payload wrench at the limit is ``wmax * w / norm(w)``.
+
+        Each joint has its own limit.  For joint :math:`j`, with gravity torque
+        :math:`\tau_{B,j}` and torque :math:`\tau_{P,j}` for the unit wrench
+
+        .. math::
+
+            s_j = \frac{\tau_{max,j} - \tau_{B,j}}{\tau_{P,j}} \quad
+            (\tau_{P,j} > 0), \qquad
+            s_j = \frac{\tau_{min,j} - \tau_{B,j}}{\tau_{P,j}} \quad
+            (\tau_{P,j} < 0)
+
+        and a joint that the wrench does not load, to within rounding error,
+        has :math:`s_j = \infty`.
+        ``wmax`` is the smallest :math:`s_j` and ``joint`` the index of it.
 
         .. rubric:: Notes
 
+        - ``wmax`` is negative if gravity alone is beyond a joint's limit at
+          this pose, ie. the robot cannot support itself, let alone a payload.
         - Wrench and Jacobian must use the same reference frame.
         - Tool transforms are taken into consideration for ``frame=1``.
         - Gravity compensation requires a robot model with valid dynamics.
+
+        .. versionchanged:: 1.4.5
+            ``wmax`` is the capacity, a scalar for a configuration, as in the
+            MATLAB Robotics Toolbox.  It was documented as a wrench and
+            returned one value per joint, which only had the right shape for
+            a six-joint robot.
+
+        .. note:: Based on the MATLAB Robotics Toolbox method of the same name,
+            contributed by Bryan Moutrie (pHRIWARE), who also wrote
+            :meth:`pay`.
+
+        :seealso: :meth:`pay` :meth:`gravload`
         """
         q = getmatrix(self.q if q is None else q, (None, self.n))
         w = getmatrix(w, (None, 6))
@@ -1470,25 +1514,28 @@ class DynamicsMixin:
             raise ValueError("w must contain nonzero wrench directions")
 
         trajn = q.shape[0]
-        wmax = np.zeros((trajn, self.n))
+        wmax = np.zeros(trajn)
         joint = np.zeros(trajn, dtype=int)
 
         for i in range(trajn):
             tauB = self.gravload(q[i, :])
             tauP = self.pay(w[i, :] / w_norm[i], q=q[i, :], frame=frame)
 
-            positive = tauP > 0
-            negative = tauP < 0
+            # a joint that the wrench does not load has a torque of zero, in
+            # floating point this is ~1e-17 not 0, which would otherwise give
+            # a huge finite capacity instead of an unbounded one
+            tol = 1e-10 * max(np.abs(tauP).max(), 1.0)
+            positive = tauP > tol
+            negative = tauP < -tol
             WM = np.full(self.n, np.inf)
             WM[positive] = (tauR[positive, 0] - tauB[positive]) / tauP[positive]
             WM[negative] = (tauR[negative, 1] - tauB[negative]) / tauP[negative]
-            WM[WM == -np.inf] = np.inf
 
-            wmax[i, :] = WM
             joint[i] = np.argmin(WM)
+            wmax[i] = WM[joint[i]]
 
         if trajn == 1:
-            return wmax[0, :], joint[0]
+            return wmax[0], joint[0]
         return wmax, joint
 
     def perturb(self: RobotProto, p=0.1):
