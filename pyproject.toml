@@ -254,6 +254,22 @@ module = [
     "roboticstoolbox.backends.PyPlot.RobotPlot",
     "roboticstoolbox.backends.PyPlot.RobotPlot2",
     "roboticstoolbox.backends.PyPlot.EllipsePlot",
+    "roboticstoolbox.blocks.arm",
+    "roboticstoolbox.blocks.mobile",
+    "roboticstoolbox.blocks.spatial",
+    "roboticstoolbox.blocks.uav",
+    "roboticstoolbox.blocks.quad_model",
+    "roboticstoolbox.tools.Ticker",
+    "roboticstoolbox.tools.data",
+    "roboticstoolbox.tools.jsingu",
+    "roboticstoolbox.tools.null",
+    "roboticstoolbox.tools.numerical",
+    "roboticstoolbox.tools.p_servo",
+    "roboticstoolbox.tools.params",
+    "roboticstoolbox.tools.plot",
+    "roboticstoolbox.tools.trchain",
+    "roboticstoolbox.tools.urdf.urdf",
+    "roboticstoolbox.tools.urdf.utils",
 ]
 disallow_untyped_defs = true
 
@@ -263,17 +279,7 @@ disallow_untyped_defs = true
 # is checked, and must stay clean.
 [[tool.mypy.overrides]]
 module = [
-]
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = [
     "roboticstoolbox.bin.rtbtool",
-]
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = [
 ]
 ignore_errors = true
 
@@ -333,15 +339,9 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.tools.DHFactor",
-    "roboticstoolbox.tools.Ticker",
-    "roboticstoolbox.tools.data",
-    "roboticstoolbox.tools.jsingu",
-    "roboticstoolbox.tools.numerical",
     "roboticstoolbox.tools.trajectory",
-    "roboticstoolbox.tools.trchain",
     "roboticstoolbox.tools.urdf.tests.test_urdf",
-    "roboticstoolbox.tools.urdf.urdf",
+    "roboticstoolbox.tools.DHFactor",
 ]
 ignore_errors = true
 

@@ -187,14 +187,14 @@ class Unicycle(ContinuousBlock):
 
     def __init__(
         self,
-        w=1,
-        speed_max=np.inf,
-        accel_max=np.inf,
-        steer_max=np.inf,
+        w: float = 1,
+        speed_max: Any = np.inf,
+        accel_max: Any = np.inf,
+        steer_max: Any = np.inf,
         # a=0,  implement this, RVC2 p111, change output and deriv
-        x0=None,
-        **blockargs,
-    ):
+        x0: Any = None,
+        **blockargs: Any,
+    ) -> None:
         r"""
 
         :param w: vehicle width, defaults to 1
