@@ -234,6 +234,7 @@ module = [
     "roboticstoolbox.mobile.landmarkmap",
     "roboticstoolbox.mobile.PlannerBase",
     "roboticstoolbox.mobile.Bug2",
+    "roboticstoolbox.mobile.DistanceTransformPlanner",
 ]
 disallow_untyped_defs = true
 
@@ -286,7 +287,6 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = [
     "roboticstoolbox.mobile.CurvaturePolyPlanner",
-    "roboticstoolbox.mobile.DistanceTransformPlanner",
     "roboticstoolbox.mobile.DstarPlanner",
     "roboticstoolbox.mobile.DubinsPlanner",
     "roboticstoolbox.mobile.EKF",
