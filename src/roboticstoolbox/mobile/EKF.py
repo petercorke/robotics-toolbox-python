@@ -1335,15 +1335,7 @@ class EKF:
         :seealso: :meth:`landmarks`  :meth:`run` :meth:`history`
 
         """
-        xy = []
-        for lm_id, (jx, n) in self._landmarks.items():
-            #  jx is an index into the *landmark* part of the state
-            #  vector, we need to offset it to account for the vehicle
-            #  state if we are estimating vehicle as well
-            if self._est_vehicle:
-                jx += 3
-            xf = self._x_est[jx : jx + 2]
-            xy.append(xf)
+        xy = [self.landmark_x(lm_id) for lm_id in self._landmarks]
         return np.array(xy)
 
     def plot_map(
