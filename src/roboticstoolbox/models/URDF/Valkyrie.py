@@ -1,11 +1,13 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import re
 
 import numpy as np
-from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.robot.Robot import Robot
+
 from roboticstoolbox.models.URDF.URDFRobot import URDF_read
+from roboticstoolbox.robot.Robot import Robot
 
 
 def _patch_valkyrie_urdf(text: str) -> str:
@@ -61,7 +63,7 @@ class Valkyrie(Robot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self, variant="A"):
+    def __init__(self, variant: str = "A") -> None:
 
         if not variant in "ABCD":
             raise ValueError("variant must be in the range A-D")

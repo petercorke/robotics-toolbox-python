@@ -1,19 +1,23 @@
-import numpy as np
+from __future__ import annotations
+
+from typing import Any
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def xplot(
-    x,
-    y=None,
-    wrist=False,
-    unwrap=False,
-    block=False,
-    labels=None,
-    loc=None,
-    grid=True,
-    stack=False,
-    **kwargs,
-):
+    x: Any,
+    y: Any = None,
+    wrist: bool = False,
+    unwrap: bool = False,
+    block: bool = False,
+    labels: Any = None,
+    loc: Any = None,
+    grid: bool = True,
+    stack: bool = False,
+    **kwargs: Any,
+) -> Any:
     r"""
     Plot trajectory data
 

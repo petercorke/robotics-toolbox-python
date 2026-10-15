@@ -3,9 +3,13 @@
 @author: Peter Corke
 """
 
-from roboticstoolbox import DHRobot, RevoluteDH, PrismaticDH
+from __future__ import annotations
+
 from math import pi
+
 import numpy as np
+
+from roboticstoolbox import DHRobot, PrismaticDH, RevoluteDH
 
 
 class Stanford(DHRobot):
@@ -44,7 +48,7 @@ class Stanford(DHRobot):
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         deg = pi / 180
         inch = 0.0254

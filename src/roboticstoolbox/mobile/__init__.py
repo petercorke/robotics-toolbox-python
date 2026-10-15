@@ -3,7 +3,7 @@ from roboticstoolbox.mobile.Vehicle import VehicleBase, Bicycle, Unicycle, DiffS
 
 
 # planners
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.PlannerBase import PlannerBase, NoPathError
 from roboticstoolbox.mobile.DistanceTransformPlanner import DistanceTransformPlanner
 from roboticstoolbox.mobile.DstarPlanner import DstarPlanner
 from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
@@ -66,6 +66,7 @@ __all__ = [
     "BinaryOccupancyGrid",
     "OccupancyGrid",
     "PlannerBase",
+    "NoPathError",
     "RRTPlanner",
     "EKF",
     "ParticleFilter",

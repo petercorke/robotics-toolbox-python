@@ -1,8 +1,12 @@
-#!/usr/bin/env python
 
-import numpy as np
-from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
+from __future__ import annotations
+
 from math import pi
+
+#!/usr/bin/env python
+import numpy as np
+
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
 class Puma560(URDFRobot):
@@ -37,7 +41,7 @@ class Puma560(URDFRobot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         super().__init__(
             "unimation_puma560_description/urdf/puma560_robot.urdf.xacro",

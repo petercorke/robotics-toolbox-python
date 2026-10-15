@@ -1,11 +1,16 @@
+
+from __future__ import annotations
+
 #!/usr/bin/env python
 # Created by: Aditya Dua
 # 5 October 2017
-
 from math import pi
+from typing import Any
+
 import numpy as np
-from roboticstoolbox import DHRobot, RevoluteDH
 from spatialmath import SE3
+
+from roboticstoolbox import DHRobot, RevoluteDH
 
 
 class Orion5(DHRobot):
@@ -41,7 +46,7 @@ class Orion5(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self, base=None):
+    def __init__(self, base: Any = None) -> None:
 
         mm = 1e-3
         deg = pi / 180

@@ -10,6 +10,8 @@ import numpy as np
 from spatialmath.base import symbolic as sym
 from spatialmath.base import transl, transl2, trot2, trotx, troty, trotz
 
+from roboticstoolbox.tools.types import ArrayLike, NDArray
+
 
 class TrChainToken(NamedTuple):
     """A parsed elementary-transform token.
@@ -21,7 +23,7 @@ class TrChainToken(NamedTuple):
 
     op: str
     arg: str
-    index: int
+    index: int  # type: ignore[assignment]  # shadows tuple.index, kept for the API
 
 
 _TOKEN_RE = re.compile(r"(?P<op>R.?|T.)\(")
@@ -34,7 +36,7 @@ _BINARY_OPERATORS: dict[type[ast.operator], Callable[[object, object], object]] 
     ast.Mod: operator.mod,
     ast.Pow: operator.pow,
 }
-_UNARY_OPERATORS: dict[type[ast.unaryop], Callable[[object], object]] = {
+_UNARY_OPERATORS: dict[type[ast.unaryop], Callable[..., object]] = {
     ast.UAdd: operator.pos,
     ast.USub: operator.neg,
 }
@@ -46,7 +48,7 @@ _DEFAULT_VALUES = {
     "sqrt": sym.sqrt,
 }
 
-_Transform = Callable[[object, str], np.ndarray]
+_Transform = Callable[[object, str], NDArray]
 _TRANSFORMS_3D: dict[str, _Transform] = {
     "Rx": lambda value, unit: trotx(value, unit),
     "Ry": lambda value, unit: troty(value, unit),
@@ -127,13 +129,13 @@ def _eval_expression(expression: str, values: Mapping[str, object]) -> object:
 
 def _evaluate_chain(
     chain: str | Sequence[TrChainToken],
-    q: Sequence[object] | np.ndarray | None,
+    q: ArrayLike | Sequence[object] | None,
     unit: str,
     qvar: str,
     variables: Mapping[str, object] | None,
     transforms: Mapping[str, _Transform],
     size: int,
-) -> tuple[np.ndarray, tuple[TrChainToken, ...]]:
+) -> tuple[NDArray, tuple[TrChainToken, ...]]:
     if unit not in {"rad", "deg"}:
         raise ValueError("unit must be 'rad' or 'deg'")
     if not qvar.isidentifier():
@@ -172,13 +174,13 @@ def _evaluate_chain(
 
 def trchain(
     chain: str | Sequence[TrChainToken],
-    q: Sequence[object] | np.ndarray | None = None,
+    q: ArrayLike | Sequence[object] | None = None,
     unit: str = "rad",
     *,
     qvar: str = "q",
     variables: Mapping[str, object] | None = None,
     return_tokens: bool = False,
-) -> np.ndarray | tuple[np.ndarray, tuple[TrChainToken, ...]]:
+) -> NDArray | tuple[NDArray, tuple[TrChainToken, ...]]:
     """Compound SE(3) elementary transforms from a string.
 
     :param chain: transform chain or tokens returned by an earlier call
@@ -203,13 +205,13 @@ def trchain(
 
 def trchain2(
     chain: str | Sequence[TrChainToken],
-    q: Sequence[object] | np.ndarray | None = None,
+    q: ArrayLike | Sequence[object] | None = None,
     unit: str = "rad",
     *,
     qvar: str = "q",
     variables: Mapping[str, object] | None = None,
     return_tokens: bool = False,
-) -> np.ndarray | tuple[np.ndarray, tuple[TrChainToken, ...]]:
+) -> NDArray | tuple[NDArray, tuple[TrChainToken, ...]]:
     """Compound SE(2) elementary transforms from a string.
 
     :param chain: transform chain or tokens returned by an earlier call

@@ -1,8 +1,11 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import numpy as np
-from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 from spatialmath import SE3
+
+from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
 class Panda(URDFRobot):
@@ -43,7 +46,7 @@ class Panda(URDFRobot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self, use_robot_descriptions: bool = False):
+    def __init__(self, use_robot_descriptions: bool = False) -> None:
 
         if use_robot_descriptions:
             super().__init__(

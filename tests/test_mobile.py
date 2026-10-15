@@ -8,6 +8,7 @@ import roboticstoolbox as rtb
 import numpy as np
 import spatialmath.base as sm
 import unittest
+import pytest
 
 # from roboticstoolbox import Bug2, DistanceTransformPlanner, rtb_loadmat
 from roboticstoolbox import Bug2
@@ -16,6 +17,7 @@ from roboticstoolbox.mobile.landmarkmap import *
 from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.sensors import *
 from roboticstoolbox.mobile.Vehicle import *
+from roboticstoolbox.mobile.Vehicle import DiffSteer, Unicycle
 from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
 
 # from roboticstoolbox.mobile import Planner
@@ -294,6 +296,204 @@ class DriversTest(unittest.TestCase):
         self.assertIsInstance(u, np.ndarray)
         self.assertTrue(u.shape, (2,))
 
+    def test_purepursuit_path(self):
+        # a list of lists is converted to a 2xN float array
+        pp = rtb.PurePursuit([[0, 10, 10], [0, 0, 10]], lookahead=2)
+        self.assertIsInstance(pp._path, np.ndarray)
+        self.assertEqual(pp._path.shape, (2, 3))
+
+        # one column per point, so the wrong orientation is an error
+        with self.assertRaises(ValueError):
+            rtb.PurePursuit([[0, 0], [10, 0], [10, 10]])
+
+        with self.assertRaises(ValueError):
+            rtb.PurePursuit([0, 1, 2])
+
+    def test_purepursuit_str(self):
+        pp = rtb.PurePursuit([[0, 10], [0, 10]], workspace=[0, 10, -5, 5])
+        s = str(pp)
+        self.assertIn("X 0.0 : 10.0", s)
+        self.assertIn("Y -5.0 : 5.0", s)
+
+        # no workspace
+        self.assertIsInstance(str(rtb.PurePursuit([[0, 10], [0, 10]])), str)
+
+    def test_style_merge(self):
+        from roboticstoolbox.mobile.drivers import GOAL_STYLE, PATH_STYLE
+
+        # defaults
+        rp = rtb.RandomPath(workspace=10)
+        self.assertEqual(rp._goal_style, GOAL_STYLE)
+
+        # a user dict is merged over the defaults, and wins
+        rp = rtb.RandomPath(workspace=10, goal_style=dict(marker="s", color="b"))
+        self.assertEqual(rp._goal_style["marker"], "s")
+        self.assertEqual(rp._goal_style["color"], "b")
+        self.assertEqual(rp._goal_style["markersize"], GOAL_STYLE["markersize"])
+
+        pp = rtb.PurePursuit([[0, 10], [0, 10]], path_style=dict(linewidth=1))
+        self.assertEqual(pp._path_style["linewidth"], 1)
+        self.assertEqual(pp._path_style["color"], PATH_STYLE["color"])
+
+        # the module defaults are not modified
+        self.assertEqual(GOAL_STYLE["marker"], "D")
+        self.assertEqual(PATH_STYLE["linewidth"], 3)
+
+    def test_goalmarkerstyle_deprecated(self):
+        with self.assertWarns(DeprecationWarning):
+            rp = rtb.RandomPath(workspace=10, goalmarkerstyle=dict(marker="s"))
+        # the old name still works
+        self.assertEqual(rp._goal_style["marker"], "s")
+
+        # the new name wins if both are given
+        with self.assertWarns(DeprecationWarning):
+            rp = rtb.RandomPath(
+                workspace=10,
+                goalmarkerstyle=dict(marker="s"),
+                goal_style=dict(marker="o"),
+            )
+        self.assertEqual(rp._goal_style["marker"], "o")
+
+    def test_purepursuit_run(self):
+        # without animation, there is no goal marker
+        path = np.array([[0.0, 10, 10], [0, 0, 10]])
+        veh = rtb.Bicycle(control=rtb.PurePursuit(path, lookahead=2, speed=2))
+        veh.run(5, animate=False)
+        self.assertIsNone(veh.control._goal_marker)
+
+        u = veh.control.demand()
+        self.assertEqual(u.shape, (2,))
+
+    def test_goal_marker(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        # a dense path, as produced by a trajectory generator
+        xs = np.arange(0, 50, 0.5)
+        path = np.vstack((xs, np.zeros_like(xs)))
+        pp = rtb.PurePursuit(path, lookahead=3, speed=2)
+        veh = rtb.Bicycle(control=pp)
+        veh.init(animate=False)
+
+        fig, ax = plt.subplots()
+        nlines = len(ax.lines)
+        pp.init(ax=ax)
+        # the path and a single goal marker
+        self.assertEqual(len(ax.lines), nlines + 2)
+
+        # the goal marker moves, rather than leaving a trail
+        goals = []
+        for _ in range(50):
+            pp.demand()
+            goals.append(pp._goal_marker.get_xydata().copy())
+            veh.step()
+        self.assertEqual(len(ax.lines), nlines + 2)
+        self.assertFalse(np.allclose(goals[0], goals[-1]))
+        plt.close(fig)
+
+    def test_randompath_goal_marker(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        rp = rtb.RandomPath(workspace=10)
+        veh = rtb.Bicycle(control=rp)
+        veh.init(animate=False)
+
+        fig, ax = plt.subplots()
+        rp.init(ax=ax)
+        rp.demand()
+        self.assertEqual(len(ax.lines), 1)
+        np.testing.assert_allclose(rp._goal_marker.get_xydata()[0], rp._goal)
+        plt.close(fig)
+
+
+class TestVehicleBase(unittest.TestCase):
+    def test_constructor_control_constant(self):
+        veh = rtb.Bicycle(control=(1.0, 0.1))
+        self.assertEqual(veh.control, (1.0, 0.1))
+        u = veh.eval_control(veh.control, veh.x)
+        nt.assert_allclose(u, [1.0, 0.1])
+
+    def test_constructor_control_function(self):
+        veh = rtb.Bicycle(control=lambda v, t, x: (2.0, 0.0))
+        nt.assert_allclose(veh.eval_control(veh.control, veh.x), [2.0, 0.0])
+
+    def test_constructor_control_driver(self):
+        # a driver is connected without the deprecation warning
+        import warnings
+
+        rp = rtb.RandomPath(workspace=10)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            veh = rtb.Bicycle(control=rp)
+        self.assertIs(veh.control, rp)
+        self.assertIs(rp.vehicle, veh)
+
+    def test_init_control_driver(self):
+        # a driver given to init/run is connected to the vehicle
+        veh = rtb.Bicycle()
+        rp = rtb.RandomPath(workspace=10)
+        veh.init(control=rp, animate=False)
+        self.assertIs(rp.vehicle, veh)
+        self.assertEqual(veh.run(1, control=rp, animate=False).shape[1], 3)
+
+    def test_bad_control(self):
+        veh = rtb.Bicycle()
+        with self.assertRaises(ValueError):
+            veh.eval_control("bad", veh.x)
+
+    def test_polygon(self):
+        veh = rtb.Bicycle()
+        with self.assertRaises(ValueError):
+            veh.polygon([0, 0, 0])
+
+    def test_run_animation_file_required(self):
+        veh = rtb.Bicycle(control=(1.0, 0.0))
+        for fmt in ("gif", "mp4"):
+            with self.assertRaises(ValueError):
+                veh.run_animation(T=1, format=fmt)
+        with self.assertRaises(ValueError):
+            veh.run_animation(T=1, format="bad")
+
+    def test_plot_xyt(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        veh = rtb.Bicycle(control=(1.0, 0.1), dt=0.1)
+        veh.run(2, animate=False)
+        n = veh.x_hist.shape[0]
+
+        fig = plt.figure()
+        veh.plot_xyt()
+        lines = plt.gca().lines
+        self.assertEqual(len(lines), 3)
+        t = lines[0].get_xdata()
+        self.assertEqual(len(t), n)
+        nt.assert_allclose(t, np.arange(n) * 0.1)
+        # the y-data are x, y, theta
+        nt.assert_allclose(lines[2].get_ydata(), veh.x_hist[:, 2])
+        plt.close(fig)
+
+    def test_plot_xy(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        veh = rtb.Bicycle(control=(1.0, 0.1))
+        veh.run(1, animate=False)
+        fig = plt.figure()
+        veh.plot_xy()
+        veh.plot_xy("r--", label="path")
+        self.assertEqual(len(plt.gca().lines), 2)
+        plt.close(fig)
+
 
 class TestBicycle(unittest.TestCase):
     # def test_deriv(self):
@@ -319,6 +519,35 @@ class TestBicycle(unittest.TestCase):
         nt.assert_almost_equal(
             veh.Fv(xv, odo), base.numjac(lambda d: veh.f(xv, d), odo), decimal=4
         )
+
+
+@pytest.mark.parametrize("width", [0.5, 1.0, 2.0])
+@pytest.mark.parametrize("turn_rate", [-0.4, 0.4])
+def test_unicycle_turn_rate_units(width: float, turn_rate: float) -> None:
+    vehicle = Unicycle(W=width)
+    state = np.array([1.0, 2.0, np.pi / 4])
+    control = [0.7, turn_rate]
+    expected = [0.7 / np.sqrt(2), 0.7 / np.sqrt(2), turn_rate]
+    nt.assert_allclose(vehicle.deriv(state, control, limits=False), expected)
+    nt.assert_allclose(vehicle.deriv(state, control), expected)
+
+
+@pytest.mark.parametrize("width", [0.5, 1.0, 2.0])
+@pytest.mark.parametrize("turn_rate", [-0.4, 0.4])
+def test_unicycle_turn_rate_limit_step(width: float, turn_rate: float) -> None:
+    vehicle = Unicycle(W=width, steer_max=0.3, dt=0.1)
+    expected_turn_rate = np.copysign(0.3, turn_rate)
+    for step in range(1, 4):
+        odometry = vehicle.step([0.0, turn_rate], animate=False)
+        nt.assert_allclose(odometry, [0.0, expected_turn_rate * 0.1])
+        nt.assert_allclose(vehicle.x, [0.0, 0.0, step * expected_turn_rate * 0.1])
+
+
+@pytest.mark.parametrize("width", [0.5, 1.0, 2.0])
+def test_diffsteer_wheel_speed_units(width: float) -> None:
+    vehicle = DiffSteer(W=width)
+    state = np.array([1.0, 2.0, 0.0])
+    nt.assert_allclose(vehicle.deriv(state, [1.0, 2.0]), [1.5, 0.0, 1.0 / width])
 
 
 class TestUnicycle(unittest.TestCase):
@@ -597,6 +826,23 @@ class TestUnicycle(unittest.TestCase):
 
 # end
 #
+
+
+class TestRandomPathWorkspace(unittest.TestCase):
+    def test_workspace_is_required(self):
+        # the driver chooses waypoints inside the workspace, so it needs one,
+        # its own or that of the vehicle it is attached to.  It is checked when
+        # the simulation is initialized; this used to fail with an obscure
+        # TypeError on None
+        driver = rtb.RandomPath()
+        veh = rtb.Bicycle()
+        veh.control = driver
+        with self.assertRaises(ValueError):
+            veh.init(animate=False)
+
+    def test_workspace_given(self):
+        driver = rtb.RandomPath(workspace=10)
+        self.assertIsNotNone(driver)
 
 
 if __name__ == "__main__":  # pragma nocover
