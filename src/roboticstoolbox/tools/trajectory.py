@@ -337,6 +337,11 @@ def quintic(
         time scaling is based on the first and last element. The returned
         trajectory retains the supplied time vector.
 
+    .. versionchanged:: 1.5.0
+        Accurate for long and short durations, see :func:`quintic_func`.  A time
+        vector, or an integer, giving fewer than two samples raises
+        ``ValueError``; it previously returned the mean of ``q0`` and ``qf``.
+
     :References:
 
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
@@ -438,6 +443,13 @@ def quintic_func(
 
     .. note:: The Hermite form is due to Afloat16, who found the loss of
         accuracy for long and short durations in PR #736.
+
+    .. versionchanged:: 1.5.0
+        The system is solved in normalized time.  Previously the result was
+        silently wrong for long and short durations, for example the initial
+        value of ``quintic_func(1, 2, 1000)`` was close to zero.  Added
+        ``method``.  A zero or non-finite ``T`` raises ``ValueError``, where it
+        previously gave a degenerate result.
 
     :seealso: :func:`quintic` :func:`trapezoidal_func`
     """
