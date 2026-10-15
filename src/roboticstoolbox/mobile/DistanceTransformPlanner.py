@@ -1,19 +1,27 @@
 """
+Distance transform path planner
+
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colormaps
 from spatialmath import base
+from spatialmath.base.types import ArrayLike2
 
+from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.tools.types import NDArray
+
+#: the names of the distance metrics, as accepted by :func:`distancexform`
+METRICS = ("euclidean", "manhattan", "cityblock")
 
 
 class DistanceTransformPlanner(PlannerBase):
@@ -21,10 +29,11 @@ class DistanceTransformPlanner(PlannerBase):
     Distance transform path planner
 
     :param occgrid: occupancy grid
-    :type occgrid: :class:`BinaryOccGrid` or ndarray(h,w)
-    :param metric: distane metric, one of: "euclidean" [default], "manhattan"
-    :type metric: str optional
+    :type occgrid: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid` or ndarray(h,w)
+    :param metric: distance metric, one of: "euclidean" [default], "manhattan"
+        ("cityblock" is a synonym)
     :param kwargs: common planner options, see :class:`PlannerBase`
+    :raises ValueError: ``metric`` is not recognised
 
     ==================   ========================
     Feature              Capability
@@ -37,15 +46,15 @@ class DistanceTransformPlanner(PlannerBase):
 
     Creates a planner that finds the path between two points in the 2D grid
     using omnidirectional motion and avoiding occupied cells.  The path
-    comprises a set of 4- or -way connected points in adjacent cells.  Also
+    comprises a set of 4- or 8-way connected points in adjacent cells.  Also
     known as the wavefront, grassfire or brushfire planning algorithm.
 
     The map is described by a 2D occupancy ``occgrid`` whose elements are zero
-    if traversable of nonzero if untraversable, ie. an obstacle.
+    if traversable or nonzero if untraversable, ie. an obstacle.
 
     The cells are assumed to be unit squares. Crossing the cell horizontally or
     vertically is a travel distance of 1, and for the Euclidean distance
-    measure, the crossing the cell diagonally is a distance of :math:`\sqrt{2}`.
+    measure, crossing the cell diagonally is a distance of :math:`\sqrt{2}`.
 
     Example:
 
@@ -70,10 +79,12 @@ class DistanceTransformPlanner(PlannerBase):
 
     def __init__(
         self,
-        occgrid: NDArray | None = None,
+        occgrid: BinaryOccupancyGrid | NDArray | None = None,
         metric: str = "euclidean",
         **kwargs: Any,
     ) -> None:
+        if metric.lower() not in METRICS:
+            raise ValueError(f"unknown metric {metric!r}, must be one of {METRICS}")
 
         super().__init__(occgrid=occgrid, ndims=2, **kwargs)
         self._metric = metric
@@ -84,8 +95,7 @@ class DistanceTransformPlanner(PlannerBase):
         """
         Get the distance metric
 
-        :return: Get the metric, either "euclidean" or "manhattan"
-        :rtype: str
+        :return: the metric, either "euclidean" or "manhattan"
         """
         return self._metric
 
@@ -104,6 +114,12 @@ class DistanceTransformPlanner(PlannerBase):
         return self._distancemap
 
     def __str__(self) -> str:
+        """
+        Compact representation of the planner
+
+        :return: the base class description, the metric and whether a distance
+            map has been computed
+        """
         s = super().__str__()
         s += f"\n  Distance metric: {self._metric}"
         if self.distancemap is not None:
@@ -115,7 +131,7 @@ class DistanceTransformPlanner(PlannerBase):
 
     def plan(
         self,
-        goal: ArrayLike | None = None,
+        goal: ArrayLike2 | None = None,
         animate: bool = False,
         summary: bool = False,
     ) -> None:
@@ -123,7 +139,11 @@ class DistanceTransformPlanner(PlannerBase):
         Plan path using distance transform
 
         :param goal: goal position :math:`(x, y)`, defaults to previously set value
-        :type goal: array_like(2), optional
+        :param animate: show the iterations of the algorithm, defaults to False
+        :param summary: print the number of iterations and of unreachable cells,
+            defaults to False
+        :raises ValueError: no goal is given here or to the constructor, or
+            there is no occupancy grid
 
         Compute the distance transform for all non-obstacle cells, which is the
         minimum obstacle-free distance to the goal using the particular distance
@@ -131,12 +151,6 @@ class DistanceTransformPlanner(PlannerBase):
 
         :seealso: :meth:`query`
         """
-        # show = None
-        # if animate:
-        #     show = 0.05
-        # else:
-        #     show = 0
-
         if goal is not None:
             self.goal = goal
 
@@ -154,14 +168,14 @@ class DistanceTransformPlanner(PlannerBase):
             summary=summary,
         )
 
-    def next(self, position: ArrayLike) -> NDArray | None:
+    def next(self, position: ArrayLike2) -> NDArray | None:
         """
         Find next point on the path
 
         :param position: current robot position
-        :type position: array_like(2)
-        :raises RuntimeError: no plan has been computed
-        :return: next robot position
+        :raises ValueError: no plan has been computed
+        :raises RuntimeError: there is no neighbouring cell with a finite distance
+        :return: next robot position, None if the next point is the goal
         :rtype: ndarray(2)
 
         Return the robot position that is one step closer to the goal. Called
@@ -191,18 +205,19 @@ class DistanceTransformPlanner(PlannerBase):
         y = int(position[1])
 
         distancemap = self.distancemap
+        rows, columns = distancemap.shape
         min_dist = np.inf
+        min_dir = None
         for d in directions:
-            try:
-                if distancemap[y + d[0], x + d[1]] < min_dist:
-                    min_dir = d
-                    min_dist = distancemap[y + d[0], x + d[1]]
-            except:
-                # come here if the neighbouring cell is outside the map bounds
-                # raise RuntimeError(f"Unexpected error finding next min dist at {d}")
-                pass
+            r = y + d[0]
+            c = x + d[1]
+            # a neighbouring cell outside the map is not a candidate, note that
+            # a negative index would wrap around to the far side of the map
+            if 0 <= r < rows and 0 <= c < columns and distancemap[r, c] < min_dist:
+                min_dir = d
+                min_dist = distancemap[r, c]
 
-        if np.isinf(min_dist):
+        if min_dir is None or np.isinf(min_dist):
             raise RuntimeError("no minimum found, shouldn't happen")
 
         x = x + min_dir[1]
@@ -215,24 +230,45 @@ class DistanceTransformPlanner(PlannerBase):
             return next
 
     def plot_3d(
-        self, path: NDArray | None = None, ls: dict[str, Any] | None = None
+        self,
+        path: NDArray | None = None,
+        path_style: dict[str, Any] | None = None,
+        block: bool | None = True,
+        *,
+        ls: dict[str, Any] | None = None,
     ) -> Any:
         """
         Plot path on 3D cost surface
 
-        :param path: robot path, defaults to None
-        :type path: ndarray(N,2), optional
-        :param ls: dictionary of Matplotlib linestyle options, defaults to None
-        :type ls: dict, optional
+        :param path: robot path, one point per row, defaults to None
+        :type path: ndarray(N,2)
+        :param path_style: dictionary of Matplotlib line options for the path,
+            defaults to None
+        :param block: block until the figure is closed, defaults to True; None
+            returns without showing the figure
+        :param ls: deprecated, use ``path_style``
+        :raises ValueError: no plan has been computed
         :return: Matplotlib 3D axes
         :rtype: Axes
 
         Creates a 3D plot showing distance from the goal as a cost surface.
         Overlays the path if given.
 
+        .. deprecated:: 1.4.5
+            ``ls`` is deprecated, use ``path_style``.
+
         .. warning:: The visualization is poor because of Matplotlib's poor hidden
             line/surface handling.
         """
+        if ls is not None:
+            warnings.warn(
+                "ls is deprecated, use path_style instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if path_style is None:
+                path_style = ls
+
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
 
@@ -240,7 +276,7 @@ class DistanceTransformPlanner(PlannerBase):
         if distance is None:
             raise ValueError("no distance map computed, you need to plan")
         X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
-        surf = ax.plot_surface(
+        ax.plot_surface(
             X,
             Y,
             distance,
@@ -251,19 +287,19 @@ class DistanceTransformPlanner(PlannerBase):
         if path is not None:
             # k = sub2ind(np.shape(self._distancemap), p[:, 1], p[:, 0])
             height = distance[path[:, 1], path[:, 0]]
-            ax.plot(path[:, 0], path[:, 1], height, **(ls or {}))
+            ax.plot(path[:, 0], path[:, 1], height, **(path_style or {}))
 
         plt.xlabel("x")
         plt.ylabel("y")
         ax.set_zlabel("z")
-        plt.show()
+        if block is not None:
+            plt.show(block=block)
         return ax
-
 
 
 def distancexform(
     occgrid: NDArray,
-    goal: ArrayLike,
+    goal: ArrayLike2,
     metric: str = "cityblock",
     animate: bool = False,
     summary: bool = False,
@@ -272,14 +308,16 @@ def distancexform(
     Distance transform for path planning
 
     :param occgrid: Occupancy grid, 0 is free, >0 is occupied/obstacle
-    :type occgrid: NumPy ndarray
+    :type occgrid: ndarray(h,w)
     :param goal: Goal position (x,y)
-    :type goal: 2-element array-like
-    :param metric: distance metric, defaults to 'cityblock'
-    :type metric: str, optional
-    :param animate: animate the iterations of the algorithm
+    :param metric: distance metric, one of "cityblock" (or "manhattan") or
+        "euclidean", defaults to 'cityblock'
+    :param animate: animate the iterations of the algorithm, defaults to False
+    :param summary: print the number of iterations and of unreachable cells,
+        defaults to False
+    :raises ValueError: ``metric`` is not recognised
     :return: Distance transform matrix
-    :rtype: NumPy ndarray
+    :rtype: ndarray(h,w)
 
     Implements the grass/brush fire algorithm to compute, for every reachable
     cell in the occupancy grid, its distance from the goal.
@@ -327,6 +365,8 @@ def distancexform(
                 [ r2,   1,   r2]
                 ])
         # fmt: on
+    else:
+        raise ValueError(f"unknown metric {metric!r}, must be one of {METRICS}")
 
     # get ready to iterate
     count = 0
@@ -347,7 +387,6 @@ def distancexform(
                 plt.figure()
                 plt.xlabel("x")
                 plt.ylabel("y")
-                ax = plt.gca()
                 plt.pause(0.001)
                 cmap = colormaps.get_cmap("gray").with_extremes(bad="red", over="white")
                 h = plt.imshow(display, cmap=cmap)
@@ -371,7 +410,18 @@ def distancexform(
 
 
 def grassfire_step(G: NDArray, D: NDArray) -> NDArray:
+    """
+    One step of the grassfire algorithm
 
+    :param G: distance matrix, ``nan`` for an obstacle, ``inf`` for a cell not
+        yet reached
+    :type G: ndarray(h,w)
+    :param D: 3x3 matrix of the distance to each neighbour
+    :type D: ndarray(3,3)
+    :return: distance matrix in which each cell is the minimum, over its
+        neighbours, of the neighbour's distance plus the distance to it
+    :rtype: ndarray(h,w)
+    """
     # pad with inf
     H = np.pad(G, max(D.shape) // 2, "constant", constant_values=np.inf)
     rows, columns = G.shape
@@ -385,34 +435,3 @@ def grassfire_step(G: NDArray, D: NDArray) -> NDArray:
             minimum = np.fmin(minimum, v)
 
     return minimum
-
-
-if __name__ == "__main__":
-    pass
-
-    # # make a simple map, as per the MOOCs
-    # occgrid = np.zeros((10,10))
-    # occgrid[3:6,2:7] = 1
-    # occgrid[4,3:5] = 0  # hole in the obstacle
-    # # occgrid[7:8,7] = 1  # extra bit
-
-    # print(occgrid)
-    # print()
-
-    # goal=[5,7]
-    # np.set_printoptions(precision=1)
-    # dx = distancexform(occgrid, goal, metric='Euclidean')
-    # print(dx)
-
-    # from roboticstoolbox import DistanceTransformPlanner, rtb_loadmat
-
-    # house = rtb_loadmat('data/house.mat')
-    # floorplan = house['floorplan']
-    # places = house['places']
-
-    # dx = DistanceTransformPlanner(floorplan)
-    # print(dx)
-    # dx.goal = [1,2]
-    # dx.plan(places.kitchen)
-    # path = dx.query(places.br3)
-    # dx.plot(path, block=True)
