@@ -381,9 +381,9 @@ class PRMPlanner(PlannerBase):
 
         # add the roadmap graph
         self._graph.plot(
-            text=False,
-            vopt=VERTEX_STYLE | (vertex_style or {}),
-            eopt=EDGE_STYLE | (edge_style or {}),
+            labels=False,
+            vertex_opt=VERTEX_STYLE | (vertex_style or {}),
+            edge_opt=EDGE_STYLE | (edge_style or {}),
             ax=ax,
         )
         return ax

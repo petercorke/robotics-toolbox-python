@@ -4,7 +4,7 @@ from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pgraph import DGraph, DVertex, Edge
+from pgraph import DGraph, Edge, Vertex
 from spatialmath import SE2
 
 from spatialmath.base.types import ArrayLike3
@@ -37,7 +37,7 @@ def make_arc(dir: str, radius: float = 1, npoints: int = 20) -> NDArray:
 arcs: dict[str, NDArray] = {}
 
 
-class LatticeVertex(DVertex):
+class LatticeVertex(Vertex):
     def __init__(
         self,
         move: str | None = None,

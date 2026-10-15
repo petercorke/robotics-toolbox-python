@@ -187,8 +187,8 @@ class TestOptimizeStyles(unittest.TestCase):
                     edge_style={"linewidth": 3},
                 )
         for call in graph_plot.call_args_list:
-            self.assertEqual(call.kwargs["vopt"], {"markersize": 2})
-            self.assertEqual(call.kwargs["eopt"]["linewidth"], 3)
+            self.assertEqual(call.kwargs["vertex_opt"], {"markersize": 2})
+            self.assertEqual(call.kwargs["edge_opt"]["linewidth"], 3)
 
     def test_deprecated_names(self):
         import unittest.mock as mock
@@ -200,6 +200,41 @@ class TestOptimizeStyles(unittest.TestCase):
                     quiet(
                         pg.optimize, iterations=1, animate=True, eopt={"linewidth": 3}
                     )
+
+
+class TestNoPgraphDeprecations(unittest.TestCase):
+    """Our own calls to pgraph use its current option names"""
+
+    def tearDown(self):
+        plt.close("all")
+
+    def test_plot_and_optimize(self):
+        import unittest.mock as mock
+
+        pg = quiet(PoseGraph, "data/pg1.g2o")
+        with warnings.catch_warnings():
+            warnings.filterwarnings("error", category=DeprecationWarning)
+            pg.plot()
+            with mock.patch.object(plt, "pause"):
+                quiet(pg.optimize, iterations=2, animate=True)
+
+    def test_text_option_is_forwarded(self):
+        import unittest.mock as mock
+
+        pg = quiet(PoseGraph, "data/pg1.g2o")
+        with mock.patch.object(pg.graph, "plot") as graph_plot:
+            pg.plot(text=False)
+        self.assertIs(graph_plot.call_args.kwargs["labels"], False)
+        self.assertNotIn("text", graph_plot.call_args.kwargs)
+
+    def test_prm_plot(self):
+        from roboticstoolbox import PRMPlanner
+
+        prm = PRMPlanner(np.zeros((20, 20)), seed=0, progress=False)
+        prm.plan(npoints=20)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("error", category=DeprecationWarning)
+            prm.plot()
 
 
 class TestPlotStyles(unittest.TestCase):
@@ -222,30 +257,30 @@ class TestPlotStyles(unittest.TestCase):
 
     def test_defaults(self):
         self.pg.plot()
-        self.assertEqual(self.passed()["vopt"]["markersize"], 8)
-        self.assertEqual(self.passed()["eopt"]["linewidth"], 1)
+        self.assertEqual(self.passed()["vertex_opt"]["markersize"], 8)
+        self.assertEqual(self.passed()["edge_opt"]["linewidth"], 1)
 
     def test_styles_merge_over_defaults(self):
         self.pg.plot(vertex_style={"markersize": 3}, edge_style={"color": "r"})
-        self.assertEqual(self.passed()["vopt"]["markersize"], 3)
-        self.assertEqual(self.passed()["vopt"]["markerfacecolor"], "blue")
-        self.assertEqual(self.passed()["eopt"]["linewidth"], 1)
-        self.assertEqual(self.passed()["eopt"]["color"], "r")
+        self.assertEqual(self.passed()["vertex_opt"]["markersize"], 3)
+        self.assertEqual(self.passed()["vertex_opt"]["markerfacecolor"], "blue")
+        self.assertEqual(self.passed()["edge_opt"]["linewidth"], 1)
+        self.assertEqual(self.passed()["edge_opt"]["color"], "r")
 
     def test_style_dicts_are_not_modified(self):
         style = {"markersize": 3}
         self.pg.plot(vertex_style=style)
         self.assertEqual(style, {"markersize": 3})
         self.pg.plot()
-        self.assertEqual(self.passed()["vopt"]["markersize"], 8)
+        self.assertEqual(self.passed()["vertex_opt"]["markersize"], 8)
 
     def test_deprecated_names(self):
         with self.assertWarns(DeprecationWarning):
             self.pg.plot(vopt={"markersize": 2})
-        self.assertEqual(self.passed()["vopt"]["markersize"], 2)
+        self.assertEqual(self.passed()["vertex_opt"]["markersize"], 2)
         with self.assertWarns(DeprecationWarning):
             self.pg.plot(eopt={"linewidth": 4})
-        self.assertEqual(self.passed()["eopt"]["linewidth"], 4)
+        self.assertEqual(self.passed()["edge_opt"]["linewidth"], 4)
 
 
 if __name__ == "__main__":

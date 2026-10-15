@@ -33,14 +33,14 @@ VERTEX_STYLE: dict[str, Any] = dict(
 EDGE_STYLE: dict[str, Any] = dict(linewidth=1)
 
 
-class PGVertex(pgraph.UVertex):
+class PGVertex(pgraph.Vertex):
     """
     Vertex of a pose graph
 
     :param type: ``"vertex"`` for a robot pose :math:`(x, y, \\theta)`, or
         ``"landmark"`` for a landmark position :math:`(x, y)`
     :param index: index of the vertex in the graph, in order of creation
-    :param kwargs: options passed to :class:`pgraph.UVertex`
+    :param kwargs: options passed to :class:`pgraph.Vertex`
     """
 
     def __init__(self, type: str, index: int, **kwargs: Any) -> None:
@@ -511,11 +511,19 @@ class PoseGraph:
             elif new == "edge_style" and edge_style is None:
                 edge_style = value
 
+        # the option names of pgraph before 1.0 are forwarded to the new names
+        if "text" in kwargs:
+            text = kwargs.pop("text")
+            if text is False:
+                kwargs.setdefault("labels", False)
+            elif isinstance(text, dict):
+                kwargs.setdefault("text_opt", text)
+
         self.graph.plot(
-            colorcomponents=False,
-            force2d=True,
-            vopt=VERTEX_STYLE | (vertex_style or {}),
-            eopt=EDGE_STYLE | (edge_style or {}),
+            color_components=False,
+            force_2d=True,
+            vertex_opt=VERTEX_STYLE | (vertex_style or {}),
+            edge_opt=EDGE_STYLE | (edge_style or {}),
             **kwargs,
         )
         plt.xlabel("x")
@@ -670,9 +678,13 @@ class PoseGraph:
                 else:
                     eopt = {**eo, **dict(color=tuple(colors[i, :]), label=i)}
                 if vertex_style is not None:
-                    kwargs["vopt"] = vertex_style
+                    kwargs["vertex_opt"] = vertex_style
                 self.graph.plot(
-                    eopt=eopt, force2d=True, colorcomponents=False, ax=ax, **kwargs
+                    edge_opt=eopt,
+                    force_2d=True,
+                    color_components=False,
+                    ax=ax,
+                    **kwargs,
                 )
                 plt.pause(0.5)
 
