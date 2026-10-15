@@ -1,35 +1,38 @@
 """
-Python Bug Planner
+Bug2 reactive navigation
+
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
-# from numpy import disp
-# from scipy import integrate
 
-# from spatialmath.pose2d import SE2
 from __future__ import annotations
 
 from typing import Any
 
-# from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
+from spatialmath.base.types import R3, ArrayLike2
 
-# from matplotlib import animation
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.mobile.PlannerBase import MovieWriter, PlannerBase
+from roboticstoolbox.tools.types import NDArray
+
+# The robot has crossed the m-line when it is within this distance of it, in
+# cells.  Half a cell is not enough: a line at 45 degrees to the grid passes
+# between two diagonal neighbours at sqrt(2)/2 from each, so the robot could step
+# over it without being within half a cell of it at any point on its path.  The
+# small addition absorbs rounding, since a diagonal neighbour is exactly
+# sqrt(2)/2 away.
+_M_LINE_TOLERANCE = np.sqrt(2) / 2 + 1e-9
 
 
 class Bug2(PlannerBase):
     """
     Construct a Bug2 reactive navigator
 
-    :param occgrid: occupancy grid
-    :type occgrid: :class:`OccGrid` instance or ndarray(N,M)
-    :param kwargs: common arguments for :class:`PlannerBase` superclass
+    :param kwargs: common arguments for :class:`PlannerBase` superclass, in
+        particular ``occgrid``
     :return: Bug2 reactive navigator
-    :rtype: Bug2 instance
 
     Creates an object which simulates an automaton, capable of omnidirectional
     motion, finding a path across an occupancy grid using only a bump sensor.
@@ -51,50 +54,55 @@ class Bug2(PlannerBase):
         self.H: list[NDArray] = []  # hit points
         self._j = 0
         self._step = 1
-        self._m_line: NDArray | None = None
+        self._m_line: R3 | None = None
         self._edge: list[NDArray] | None = None
         self._k: int | None = None
 
     @property
-    def m_line(self) -> NDArray | None:
+    def m_line(self) -> R3 | None:
         """
         Get m-line
 
-        :return: m-line in homogeneous form
+        :return: m-line in homogeneous form, None if :meth:`run` has not been
+            called
         :rtype: ndarray(3)
 
         This is the m-line computed for the last :meth:`run`.
         """
         return self._m_line
 
-    # override query method of base class
+    # the Bug2 automaton is run, rather than planned and then queried
     def run(
         self,
-        start: ArrayLike | None = None,
-        goal: ArrayLike | None = None,
+        start: ArrayLike2 | None = None,
+        goal: ArrayLike2 | None = None,
         animate: bool = False,
         pause: float = 0.001,
         trail: bool = True,
-        movie: Any = None,
-        **kwargs: Any,
+        movie: str | tuple[str, float] | None = None,
+        label: str = "robot path",
     ) -> NDArray:
         """
         Find a path using Bug2 reactive navigation algorithm
 
-        :param start: starting position
-        :type start: array_like(2)
-        :param goal: goal position
-        :type goal: array_like(2)
+        :param start: starting position, defaults to the planner's start
+        :param goal: goal position, defaults to the planner's goal
         :param animate: show animation of robot moving over the map,
             defaults to False
-        :type animate: bool, optional
-        :param movie: save animation as a movie, defaults to None. Is either
-            name of movie or a tuple (filename, frame interval)
-        :type movie: str or tuple(str, float), optional
+        :param pause: time to pause between frames of the animation, defaults to
+            0.001 seconds
         :param trail: show the path followed by the robot, defaults to True
-        :type current: bool, optional
-        :return: path from ``start`` to ``goal``
-        :rtype: ndarray(2,N)
+        :param movie: save animation as a movie, defaults to None. Is either
+            name of movie or a tuple (filename, frame interval).  Implies
+            ``animate``.
+        :type movie: str or tuple(str, float)
+        :param label: legend label for the path followed by the robot, defaults
+            to "robot path"
+        :raises ValueError: ``start`` and ``goal`` are not both given, or lie
+            inside an obstacle
+        :raises RuntimeError: the robot is trapped
+        :return: path from ``start`` to ``goal``, one point per row
+        :rtype: ndarray(N,2)
 
         Compute the path from ``start`` to ``goal`` assuming the robot is capable
         of 8-way motion from its current cell to the next.
@@ -102,16 +110,31 @@ class Bug2(PlannerBase):
         .. note:: ``start`` and ``goal`` are given as (x,y) coordinates in the
               occupancy grid map, not as matrix row and column coordinates.
 
+        .. versionchanged:: 1.4.5
+            The robot is considered to have crossed the m-line when it is within
+            :math:`\\sqrt{2}/2` cells of it, previously half a cell.  A line at
+            45 degrees to the grid passes between two diagonal neighbours at that
+            distance from each, and could be stepped over without being seen, so
+            that the robot was reported as trapped.  Paths can differ by a cell
+            from earlier versions: the house floorplan example from the bedroom
+            to the kitchen has 1306 points rather than 1307.
+
         :seealso: :meth:`Bug2.plot`
         """
 
-        # make sure start and goal are set and valid
-        # super().query(start=start, goal=goal, dtype=np.int, **kwargs)
         # make sure start and goal are set and valid
         self.start = self.validate_endpoint(start, dtype=int)
         self.goal = self.validate_endpoint(goal, dtype=int)
         if self._start is None or self._goal is None:
             raise ValueError("start and goal must be specified")
+
+        self.H = []
+        self._step = 1
+
+        if np.all(self._start == self._goal):
+            # nothing to do, and there is no m-line
+            self._m_line = None
+            return np.atleast_2d(self._start)
 
         # compute the m-line
         #  create homogeneous representation of the line
@@ -126,38 +149,33 @@ class Bug2(PlannerBase):
             self.plot_m_line()
             plt.pause(0.05)
 
-        # movie = MovieWriter(movie)
+        writer = MovieWriter(movie)
 
         robot: NDArray | None = self._start
-        self._step = 1
         path: NDArray = self._start
-        h = None
 
-        (trail_line,) = plt.plot(0, 0, "y.", label="robot path")
-        (trailHead,) = plt.plot(0, 0, "ko", zorder=10)
+        trail_line = trail_head = None
+        if animate:
+            (trail_line,) = plt.plot(0, 0, "y.", label=label)
+            (trail_head,) = plt.plot(0, 0, "ko", zorder=10)
 
         # iterate using the next() method until we reach the goal
         while True:
             assert robot is not None
             if animate:
-                trailHead.set_data(robot[0], robot[1])
+                assert trail_head is not None and trail_line is not None
+                trail_head.set_data([robot[0]], [robot[1]])
                 if trail:
-                    trail_line.set_data(path.T)
+                    x, y = np.atleast_2d(path).T
+                    trail_line.set_data(x, y)
 
                 if pause > 0:
                     plt.pause(pause)
-                # plt.draw()
-                # plt.show(block=False)
-                # plt.gcf().canvas.flush_events()
 
-                # movie.add()
+                writer.add()
 
             # move to next point on path
             robot = self.next(robot)
-
-            # # have we been here before, ie. in a loop
-            # if any([all(robot == x) for x in path]):
-            #     raise RuntimeError('trapped')
 
             # are we there yet?
             if robot is None:
@@ -165,40 +183,43 @@ class Bug2(PlannerBase):
             else:
                 path = np.vstack((path, robot))
 
-        # movie.done()
-        if animate:
-            trailHead.remove()
+        writer.done()
+        if trail_head is not None:
+            trail_head.remove()
 
         return path
 
-    def plot_m_line(self, ls: str | None = None) -> None:
+    def plot_m_line(self, *args: Any, **kwargs: Any) -> None:
         """
         Plot m-line
 
-        :param ls: linestyle, defaults to ``"k--"``
-        :type ls: str, optional
+        :param args: positional arguments passed to
+            :meth:`~matplotlib.axes.Axes.plot`, for example a format string
+        :param kwargs: keyword arguments passed to
+            :meth:`~matplotlib.axes.Axes.plot`
+        :raises ValueError: there is no m-line, :meth:`run` has not been called
 
-        Plots the m-line on the current axes.
+        Plots the m-line on the current axes.  By default it is a black dashed
+        line.
         """
-        if ls is None:
-            ls = "k--"
-
         if self._m_line is None or self._start is None:
             raise ValueError("no m-line, call run() first")
+
+        if not args and not kwargs:
+            args = ("k--",)
+        style: dict[str, Any] = {"zorder": 10, "label": "m-line"} | kwargs
 
         x_min, x_max = plt.gca().get_xlim()
         y_min, y_max = plt.gca().get_ylim()
         if self._m_line[1] == 0:
             # handle the case that the line is vertical
-            plt.plot(
-                [self._start[0], self._start[0]], [y_min, y_max], "k--", label="m-line"
-            )
+            plt.plot([self._start[0], self._start[0]], [y_min, y_max], *args, **style)
         else:
             # regular line
             x = np.array([[x_min, 1], [x_max, 1]])
             y = -x @ np.r_[self._m_line[0], self._m_line[2]]
             y = y / self._m_line[1]
-            plt.plot([x_min, x_max], y, ls, zorder=10, label="m-line")
+            plt.plot([x_min, x_max], y, *args, **style)
 
     def next(self, position: NDArray) -> NDArray | None:
         """
@@ -206,14 +227,12 @@ class Bug2(PlannerBase):
 
         :param position: current robot position
         :type position: ndarray(2)
+        :raises ValueError: there is no goal or m-line, :meth:`run` has not been
+            called
         :raises RuntimeError: robot is trapped
-        :return: next robot position
+        :return: next robot position, None if the goal has been reached
         :rtype: ndarray(2)
         """
-
-        l = None
-        y = None
-
         goal = self._goal
         m_line = self._m_line
         if goal is None or m_line is None:
@@ -230,14 +249,12 @@ class Bug2(PlannerBase):
             if abs(d[0]) > abs(d[1]):
                 # line slope less than 45 deg
                 dx = 1 if d[0] >= 0 else -1  # np.sign(d[0])
-                l = m_line
-                y = -((position[0] + dx) * l[0] + l[2]) / l[1]
+                y = -((position[0] + dx) * m_line[0] + m_line[2]) / m_line[1]
                 dy = int(round(y - position[1]))
             else:
                 # line slope greater than 45 deg
                 dy = 1 if d[1] >= 0 else -1  # np.sign(d[1])
-                l = m_line
-                x = -((position[1] + dy) * l[1] + l[2]) / l[0]
+                x = -((position[1] + dy) * m_line[1] + m_line[2]) / m_line[0]
                 dx = int(round(x - position[0]))
 
             # detect if next step is an obstacle
@@ -265,11 +282,10 @@ class Bug2(PlannerBase):
             else:
                 # we are at the end of the list of edge points, we
                 # are back where we started.  Step 2.c test.
-                plt.show(block=True)
                 raise RuntimeError("robot is trapped")
 
             # are we on the M-line now ?
-            if abs(np.inner(np.r_[position, 1], m_line)) <= 0.5:
+            if abs(np.inner(np.r_[position, 1], m_line)) <= _M_LINE_TOLERANCE:
                 self.message(f"  {position}: crossed the M-line")
 
                 # are we closer than when we encountered the obstacle?
@@ -294,7 +310,8 @@ class Bug2(PlannerBase):
 # https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m
 
 
-#  these are directions of 8-neighbours in a clockwise direction
+#  these are directions of 8-neighbours in a clockwise direction, as (x, y)
+#  with y increasing down the image: W SW S SE E NE N NW
 # fmt: off
 _dirs = np.array([
         [-1,  0],
@@ -307,8 +324,15 @@ _dirs = np.array([
         [-1, -1],
     ])
 # fmt: on
+
+
+def _inside(im: NDArray, x: int, y: int) -> bool:
+    """Is the (column, row) coordinate within the image"""
+    return 0 <= x < im.shape[1] and 0 <= y < im.shape[0]
+
+
 def edgelist(
-    im: NDArray, p: ArrayLike, direction: int = 1
+    im: NDArray, p: ArrayLike2, direction: int = 1
 ) -> tuple[list[NDArray], list[int]]:
     """
     Find edge of a region
@@ -316,12 +340,10 @@ def edgelist(
     :param im: binary image
     :type im: ndarray(h,w,int)
     :param p: initial point
-    :type p: array_like(2)
     :param direction: direction to traverse region, +1 clockwise [default], -1
         counter-clockwise
-    :type direction: int, optional
-    :raises ValueError: initial point is not on the edge
-    :raises RuntimeError: not able to find path to the goal
+    :raises ValueError: initial point is not within the image, or has no
+        neighbour outside the blob
     :return: edge list, direction vector list
     :rtype: tuple of lists
 
@@ -329,27 +351,29 @@ def edgelist(
     in the binary image ``im``.  ``seed=[X,Y]`` is the coordinate of a point on
     the edge of the region of interest, but belonging to the region.
 
-    ``edge`` is a list of coordinates (2) of edge pixels of a region in theThe
-    elements of the edgelist are NumPy ndarray(2).
+    ``edge`` is a list of coordinates (2) of edge pixels of a region in the
+    image.  The elements of the edgelist are NumPy ndarray(2).
 
     ``dirs`` is a list of integers representing the direction of the edge from
     the corresponding point in ``edge`` to the next point in ``edge``.  The
-    integers in the range 0 to 7 represent directions: W SW S SE E NW N NW
+    integers in the range 0 to 7 represent directions: W SW S SE E NE N NW
     respectively.
 
     - Coordinates are given and returned assuming the matrix is an image, so the
       indices are always in the form (x,y) or (column,row).
-    - ``im` is a binary image where 0 is assumed to be background, non-zero
+    - ``im`` is a binary image where 0 is assumed to be background, non-zero
       is an object.
     - ``p`` must be a point on the edge of the region.
     - The initial point is always the first and last element of the returned edgelist.
+    - The area outside the image is not part of the region, so a region that
+      touches the border of the image has the border as part of its edge.
     - 8-direction chain coding can give incorrect results when used with
       blobs founds using 4-way connectivty.
 
     :Reference:
 
     - METHODS TO ESTIMATE AREAS AND PERIMETERS OF BLOB-LIKE OBJECTS: A COMPARISON
-      Luren Yang, Fritz Albregtsen, Tor Lgnnestad and Per Grgttum
+      Luren Yang, Fritz Albregtsen, Tor Lønnestad and Per Grøttum
       IAPR Workshop on Machine Vision Applications Dec. 13-15, 1994, Kawasaki
 
     """
@@ -359,10 +383,9 @@ def edgelist(
     else:
         neighbours = np.arange(7, -1, -1)
 
-    try:
-        pix0 = im[int(pos[1]), int(pos[0])]  # color of pixel we start at
-    except:
+    if not _inside(im, int(pos[0]), int(pos[1])):
         raise ValueError("specified coordinate is not within image")
+    pix0 = im[int(pos[1]), int(pos[0])]  # color of pixel we start at
 
     q = adjacent_point(im, pos, pix0)
 
@@ -370,40 +393,35 @@ def edgelist(
     if q is None:
         raise ValueError("no neighbour outside the blob")
 
-    d = None
     e: list[NDArray] = [pos]  # initialize the edge list
-    dir: list[int] = []  # initialize the direction list
+    directions: list[int] = []  # initialize the direction list
     pos0 = None
 
     while True:
         # find which direction is Q
         dq = q - pos
         for kq in range(0, 8):
-            # get index of neighbour's direction in range [1,8]
+            # get index of neighbour's direction in range [0,7]
             if np.all(dq == _dirs[kq]):
                 break
 
         # now test for directions relative to Q
         for j in neighbours:
-            # get index of neighbour's direction in range [1,8]
+            # get index of neighbour's direction in range [0,7]
             k = (j + kq) % 8
-            # if k > 7:
-            #     k = k - 7
 
             # compute coordinate of the k'th neighbour
             nk = pos + _dirs[k]
 
-            try:
-                if im[nk[1], nk[0]] == pix0:
-                    # if this neighbour is in the blob it is the next edge pixel
-                    pos = nk
-                    break
-            except:
-                raise ValueError("Something went wrong calculating edgelist")
+            # if this neighbour is in the blob it is the next edge pixel, a
+            # neighbour outside the image is not in the blob
+            if _inside(im, int(nk[0]), int(nk[1])) and im[nk[1], nk[0]] == pix0:
+                pos = nk
+                break
 
             q = nk
 
-        dir.append(int(k))
+        directions.append(int(k))
         # check if we are back where we started
         if pos0 is None:
             pos0 = pos  # make a note of where we started
@@ -414,7 +432,7 @@ def edgelist(
         # keep going, add this point to the edgelist
         e.append(pos)
 
-    return e, dir
+    return e, directions
 
 
 # Ported from Peter Corke's adjacent_point function found:
@@ -422,42 +440,54 @@ def edgelist(
 
 
 def adjacent_point(im: NDArray, seed: NDArray, pix0: Any) -> NDArray | None:
-    """Find adjacent point
+    """
+    Find adjacent point
 
     :param im: occupancy grid
     :type im: ndarray(m,n)
     :param seed: initial point
     :type seed: ndarray(2)
     :param pix0: value of occupancy grid at ``seed`` coordinate
-    :type pix0: int
-    :return: coordinate of a neighbour
+    :return: coordinate of a neighbour, None if there is none
     :rtype: ndarray(2) or None
 
     Is a neighbouring point of the coordinate ``seed`` that is not within the
     region containing the coordinate ``seed``, ie. it is a neighbour but
-    outside.
+    outside.  The area outside the image is not part of the region, so a
+    neighbour that is off the edge of the image counts as outside it.
     """
-    p = None
-
     for d in _dirs:
         p = seed + d
-        try:
-            if im[p[1], p[0]] != pix0:
-                return p
-        except:
-            pass
+        if not _inside(im, int(p[0]), int(p[1])) or im[p[1], p[0]] != pix0:
+            return p
 
     return None
 
 
 # Implementation of Peter Corke's matlab homline function from:
 # https://github.com/petercorke/spatialmath-matlab/blob/master/homline.m
-def hom_line(p1: ArrayLike, p2: ArrayLike) -> NDArray:
+def hom_line(p1: ArrayLike2, p2: ArrayLike2) -> R3:
+    """
+    Homogeneous line through two points
+
+    :param p1: first point :math:`(x, y)`
+    :param p2: second point :math:`(x, y)`
+    :raises ValueError: the points are coincident
+    :return: line in homogeneous form :math:`(a, b, c)` such that a point
+        :math:`(x, y)` is on the line if :math:`ax + by + c = 0`
+
+    The line is normalized so that ``line @ [x, y, 1]`` is the distance of the
+    point :math:`(x, y)` from the line.
+    """
     line = np.cross(np.r_[p1[0], p1[1], 1], np.r_[p2[0], p2[1], 1])
+
+    norm = np.linalg.norm(line[0:2])
+    if norm == 0:
+        raise ValueError("the points are coincident, there is no line")
 
     # normalize so that the result of x*l' is the pixel distance
     # from the line
-    return line / np.linalg.norm(line[0:2])
+    return line / norm
 
 
 if __name__ == "__main__":
@@ -467,5 +497,4 @@ if __name__ == "__main__":
     map = vars["map"]
 
     bug2 = Bug2(occgrid=map)
-    # bug.plan()
     path = bug2.run([20, 10], [50, 35], animate=True)
