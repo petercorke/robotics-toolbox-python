@@ -296,6 +296,120 @@ class DriversTest(unittest.TestCase):
         self.assertIsInstance(u, np.ndarray)
         self.assertTrue(u.shape, (2,))
 
+    def test_purepursuit_path(self):
+        # a list of lists is converted to a 2xN float array
+        pp = rtb.PurePursuit([[0, 10, 10], [0, 0, 10]], lookahead=2)
+        self.assertIsInstance(pp._path, np.ndarray)
+        self.assertEqual(pp._path.shape, (2, 3))
+
+        # one column per point, so the wrong orientation is an error
+        with self.assertRaises(ValueError):
+            rtb.PurePursuit([[0, 0], [10, 0], [10, 10]])
+
+        with self.assertRaises(ValueError):
+            rtb.PurePursuit([0, 1, 2])
+
+    def test_purepursuit_str(self):
+        pp = rtb.PurePursuit([[0, 10], [0, 10]], workspace=[0, 10, -5, 5])
+        s = str(pp)
+        self.assertIn("X 0.0 : 10.0", s)
+        self.assertIn("Y -5.0 : 5.0", s)
+
+        # no workspace
+        self.assertIsInstance(str(rtb.PurePursuit([[0, 10], [0, 10]])), str)
+
+    def test_style_merge(self):
+        from roboticstoolbox.mobile.drivers import GOAL_STYLE, PATH_STYLE
+
+        # defaults
+        rp = rtb.RandomPath(workspace=10)
+        self.assertEqual(rp._goal_style, GOAL_STYLE)
+
+        # a user dict is merged over the defaults, and wins
+        rp = rtb.RandomPath(workspace=10, goal_style=dict(marker="s", color="b"))
+        self.assertEqual(rp._goal_style["marker"], "s")
+        self.assertEqual(rp._goal_style["color"], "b")
+        self.assertEqual(rp._goal_style["markersize"], GOAL_STYLE["markersize"])
+
+        pp = rtb.PurePursuit([[0, 10], [0, 10]], path_style=dict(linewidth=1))
+        self.assertEqual(pp._path_style["linewidth"], 1)
+        self.assertEqual(pp._path_style["color"], PATH_STYLE["color"])
+
+        # the module defaults are not modified
+        self.assertEqual(GOAL_STYLE["marker"], "D")
+        self.assertEqual(PATH_STYLE["linewidth"], 3)
+
+    def test_goalmarkerstyle_deprecated(self):
+        with self.assertWarns(DeprecationWarning):
+            rp = rtb.RandomPath(workspace=10, goalmarkerstyle=dict(marker="s"))
+        # the old name still works
+        self.assertEqual(rp._goal_style["marker"], "s")
+
+        # the new name wins if both are given
+        with self.assertWarns(DeprecationWarning):
+            rp = rtb.RandomPath(
+                workspace=10,
+                goalmarkerstyle=dict(marker="s"),
+                goal_style=dict(marker="o"),
+            )
+        self.assertEqual(rp._goal_style["marker"], "o")
+
+    def test_purepursuit_run(self):
+        # without animation, there is no goal marker
+        path = np.array([[0.0, 10, 10], [0, 0, 10]])
+        veh = rtb.Bicycle(control=rtb.PurePursuit(path, lookahead=2, speed=2))
+        veh.run(5, animate=False)
+        self.assertIsNone(veh.control._goal_marker)
+
+        u = veh.control.demand()
+        self.assertEqual(u.shape, (2,))
+
+    def test_goal_marker(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        # a dense path, as produced by a trajectory generator
+        xs = np.arange(0, 50, 0.5)
+        path = np.vstack((xs, np.zeros_like(xs)))
+        pp = rtb.PurePursuit(path, lookahead=3, speed=2)
+        veh = rtb.Bicycle(control=pp)
+        veh.init(animate=False)
+
+        fig, ax = plt.subplots()
+        nlines = len(ax.lines)
+        pp.init(ax=ax)
+        # the path and a single goal marker
+        self.assertEqual(len(ax.lines), nlines + 2)
+
+        # the goal marker moves, rather than leaving a trail
+        goals = []
+        for _ in range(50):
+            pp.demand()
+            goals.append(pp._goal_marker.get_xydata().copy())
+            veh.step()
+        self.assertEqual(len(ax.lines), nlines + 2)
+        self.assertFalse(np.allclose(goals[0], goals[-1]))
+        plt.close(fig)
+
+    def test_randompath_goal_marker(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        rp = rtb.RandomPath(workspace=10)
+        veh = rtb.Bicycle(control=rp)
+        veh.init(animate=False)
+
+        fig, ax = plt.subplots()
+        rp.init(ax=ax)
+        rp.demand()
+        self.assertEqual(len(ax.lines), 1)
+        np.testing.assert_allclose(rp._goal_marker.get_xydata()[0], rp._goal)
+        plt.close(fig)
+
 
 class TestBicycle(unittest.TestCase):
     # def test_deriv(self):

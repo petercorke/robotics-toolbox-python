@@ -1,11 +1,13 @@
 """
-Python Vehicle
+Driving agents (drivers) for mobile robot vehicles
+
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
 
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
 from math import atan2, pi
 from typing import TYPE_CHECKING, Any
@@ -13,23 +15,33 @@ from typing import TYPE_CHECKING, Any
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
+from spatialmath.base.types import R2, ArrayLike2, Points2
 
 import roboticstoolbox as rtb
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.tools.types import NDArray
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from roboticstoolbox.mobile.Vehicle import VehicleBase
 
+# default Matplotlib styles, a user supplied dict is merged over these
+GOAL_STYLE: dict[str, Any] = {
+    "marker": "D",
+    "markersize": 6,
+    "color": "r",
+    "linestyle": "None",
+}
+PATH_STYLE: dict[str, Any] = {"color": "r", "linewidth": 3, "alpha": 0.7, "zorder": 0}
+
 
 class VehicleDriverBase(ABC):
     """
-    Abstract Vehicle driver class
+    Abstract vehicle driver class
 
-    Abtract class that can drive a mobile robot.
+    Abstract class for an agent that can drive a mobile robot.
 
-    :seealso: :class:`RandomPath`
+    :seealso: :class:`RandomPath` :class:`PurePursuit`
     """
 
     def __init__(
@@ -37,27 +49,30 @@ class VehicleDriverBase(ABC):
         workspace: Any = None,
         speed: float = 1,
         headinggain: float = 0.3,
-        goalmarkerstyle: dict[str, Any] | None = None,
+        goal_style: dict[str, Any] | None = None,
         verbose: bool = False,
+        goalmarkerstyle: dict[str, Any] | None = None,
     ) -> None:
         """
         Abstract vehicle driver
 
-        :param workspace: dimension of workspace, see :func:`spatialmath.base.graphics.expand_dims`
+        :param workspace: dimension of workspace, see
+            :func:`spatialmath.base.graphics.expand_dims`, defaults to None
         :type workspace: scalar, array_like(2), array_like(4)
         :param speed: forward speed, defaults to 1
-        :type speed: float, optional
         :param headinggain: gain of the proportional controller that steers the
             vehicle towards the current goal, defaults to 0.3
-        :type headinggain: float, optional
-        :param goalmarkerstyle: Matplotlib style of the marker used to display
-            the current goal, defaults to None
-        :type goalmarkerstyle: dict, optional
+        :param goal_style: Matplotlib line style of the marker used to display
+            the current goal, merged over the default :data:`GOAL_STYLE` (a red
+            diamond)
         :param verbose: display debug information, defaults to False
-        :type verbose: bool, optional
+        :param goalmarkerstyle: deprecated, use ``goal_style``
 
-        The workspace of the robot is a rectangular region defined by `workspace`
-        that is specified by  (see ``plotvol2``):
+        .. deprecated:: 1.4.5
+            ``goalmarkerstyle`` is deprecated, use ``goal_style`` instead.
+
+        The workspace of the robot is a rectangular region defined by ``workspace``
+        that is specified by (see :func:`~spatialmath.base.graphics.plotvol2`):
 
         ==============  =======  =======
         ``workspace``   x-range  y-range
@@ -82,27 +97,30 @@ class VehicleDriverBase(ABC):
         # the vehicle under control, set by the vehicle's control setter
         self._veh: VehicleBase | None = None
 
+        # Matplotlib Line2D showing the current goal, once displayed
+        self._goal_marker: Any = None
+
         self._speed = speed
         self._headinggain = headinggain
         self._verbose = verbose
 
-        self._goal_marker_style: dict[str, Any]
-        if goalmarkerstyle is None:
-            self._goal_marker_style = {
-                "marker": "D",
-                "markersize": 6,
-                "color": "r",
-                "linestyle": "None",
-            }
-        else:
-            self._goal_marker_style = goalmarkerstyle
+        if goalmarkerstyle is not None:
+            warnings.warn(
+                "goalmarkerstyle is deprecated, use goal_style instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if goal_style is None:
+                goal_style = goalmarkerstyle
+
+        self._goal_style: dict[str, Any] = GOAL_STYLE | (goal_style or {})
 
     @abstractmethod
-    def demand(self) -> NDArray:
+    def demand(self) -> R2:
         """
-        Compute speed and heading
+        Compute speed and steering angle
 
-        :return: speed and steering for :class:`VehicleBase`
+        :return: speed and steering angle demand for :class:`VehicleBase`
 
         When an instance of a :class:`VehicleDriverBase` class is attached as
         the control for an instance of a :class:`VehicleBase` class, this method
@@ -111,25 +129,25 @@ class VehicleDriverBase(ABC):
         Has access to the vehicle and its state through the :meth:`vehicle`
         property.
         """
-        pass
 
     @abstractmethod
     def init(self, ax: Axes | None = None) -> None:
         """
         Initialize driving agent
 
+        :param ax: axes in which to draw markers, defaults to None
+
         Called at the start of a simulation run.  Used to initialize state
         including random number generator state.
         """
-        pass
 
     @property
     def vehicle(self) -> VehicleBase | None:
         """
         Set/get the vehicle under control
 
-        :getter: return :class:`VehicleBase` instance
-        :setter: set :class:`VehicleBase` instance
+        :getter: return the :class:`VehicleBase` instance, or None
+        :setter: set the :class:`VehicleBase` instance
 
         .. note:: The setter is invoked by ``vehicle.control = driver``
         """
@@ -137,8 +155,20 @@ class VehicleDriverBase(ABC):
 
     @vehicle.setter
     def vehicle(self, v: VehicleBase) -> None:
-
         self._veh = v
+
+    def _init_goal_marker(self, ax: Axes | None, label: str = "goal") -> None:
+        """
+        Create the goal marker, to be moved by :meth:`driveto`
+
+        :param ax: axes in which to draw the goal, None for no graphics
+        :param label: legend label for the marker
+        """
+        self._goal_marker = None
+        if ax is not None:
+            self._goal_marker = plt.plot(
+                np.nan, np.nan, **self._goal_style, label=label
+            )[0]
 
     def _attached_vehicle(self) -> VehicleBase:
         """The vehicle under control, which must have been attached"""
@@ -147,6 +177,11 @@ class VehicleDriverBase(ABC):
         return self._veh
 
     def __repr__(self) -> str:
+        """
+        Convert to string, same as :meth:`__str__`
+
+        :return: driver parameters and state in a compact human readable format
+        """
         return str(self)
 
     @property
@@ -154,17 +189,30 @@ class VehicleDriverBase(ABC):
         """
         Size of robot driving workspace
 
-        :return: workspace bounds [xmin, xmax, ymin, ymax]
-        :rtype: ndarray(4)
+        :return: workspace bounds [xmin, xmax, ymin, ymax], or None
+        :rtype: ndarray(4) or None
 
         Returns the bounds of the workspace as specified by constructor
         option ``workspace``
         """
         return self._workspace
 
-    def driveto(self, goal: ArrayLike) -> NDArray:
+    def driveto(self, goal: ArrayLike2) -> R2:
+        """
+        Speed and steering demand to drive towards a goal point
 
+        :param goal: goal point (x, y)
+        :return: speed and steering angle demand
+
+        The speed demand is the constant ``speed``.  The steering angle demand
+        is the heading error to the goal, :math:`\\Delta\\theta`, scaled by
+        ``headinggain``.
+
+        If the goal marker is displayed, it is moved to the goal.
+        """
         veh = self._attached_vehicle()
+        if self._goal_marker is not None:
+            self._goal_marker.set_data([goal[0]], [goal[1]])
         goal_heading = atan2(goal[1] - veh._x[1], goal[0] - veh._x[0])
         delta_heading = base.angdiff(goal_heading, veh._x[2])
         if veh.verbose or self._verbose:
@@ -188,9 +236,7 @@ class RandomPath(VehicleDriverBase):
 
         :param dthresh: distance threshold as a fraction of the larger workspace
             dimension, defaults to 0.05
-        :type dthresh: float, optional
         :param seed: random number seed, defaults to 0, None for a random seed
-        :type seed: int, optional
         :param kwargs: arguments passed to :class:`VehicleDriverBase`, in
             particular ``workspace`` which is required
         :raises ValueError: no workspace specified
@@ -219,20 +265,18 @@ class RandomPath(VehicleDriverBase):
             - The vehicle chooses a new waypoint when it is closer than ``dthresh``
               times the larger workspace dimension to the current waypoint.
             - Uses its own random number generator so as to not influence the performance
-              of other randomized algorithms such as path planning. Set ``seed=None`` to have it randomly initialized from the
-              operating system.
+              of other randomized algorithms such as path planning. Set
+              ``seed=None`` to have it randomly initialized from the operating
+              system.
 
         :seealso: :class:`Bicycle` :class:`Unicycle` :func:`~spatialmath.base.graphics.plotvol2`
         """
 
         # TODO options to specify region, maybe accept a Map object?
-
         super().__init__(**kwargs)
 
         if self._workspace is None:
             raise ValueError("RandomPath requires a workspace")
-
-        self._goal_marker: Any = None  # Matplotlib Line2D, once displayed
 
         self._d_prev = np.inf
         self._random = np.random.default_rng(seed)
@@ -244,18 +288,19 @@ class RandomPath(VehicleDriverBase):
         )
 
     def __str__(self) -> str:
-        """Convert to string
+        """
+        Convert to string
 
-        :return: driver parameters and state in in a compact human readable format
-        :rtype: str
+        :return: driver parameters and state in a compact human readable format
         """
 
         # the constructor guarantees a workspace
         assert self._workspace is not None
         s = "RandomPath driver object\n"
         s += (
-            f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} :"
-            f" {self._workspace[1]}, dthresh={self._dthresh}\n"
+            f"  X {self._workspace[0]} : {self._workspace[1]}; "
+            f"Y {self._workspace[2]} : {self._workspace[3]}, "
+            f"dthresh={self._dthresh}\n"
         )
         s += f"  current goal={self._goal}"
         return s
@@ -264,34 +309,32 @@ class RandomPath(VehicleDriverBase):
         """
         Initialize random path driving agent
 
-        :param ax: axes in which to draw via points, defaults to None
-        :type ax: Axes, optional
+        :param ax: axes in which to draw the current goal, defaults to None
 
         Called at the start of a simulation run.  Ensures that the
-        random number generated is reseeded to ensure that
-        the sequence of random waypoints is repeatable.
+        random number generator is reseeded so that the sequence of random
+        waypoints is repeatable.
         """
 
         if self._seed is not None:
             self._random = np.random.default_rng(self._seed)
 
         self._goal = None
-        # delete(driver.h_goal);   % delete the goal
-        # driver.h_goal = [];
-        if ax is not None:
-            self._goal_marker = plt.plot(
-                np.nan, np.nan, **self._goal_marker_style, label="random waypoint"
-            )[0]
+        self._init_goal_marker(ax, label="random waypoint")
 
-    def demand(self) -> NDArray:
+    def demand(self) -> R2:
         """
-        Compute speed and heading for random waypoint
-            %
-            % [SPEED,STEER] = R.demand() is the speed and steer angle to
-            % drive the vehicle toward the next waypoint.  When the vehicle is
-            % within R.dtresh a new waypoint is chosen.
-            %
-            % See also Vehicle."""
+        Compute speed and steering angle for the current random waypoint
+
+        :return: speed and steering angle demand for :class:`VehicleBase`
+
+        This is the speed and steering angle that drives the vehicle toward the
+        current waypoint.  When the vehicle is within ``dthresh`` times the
+        larger workspace dimension of the waypoint, a new random waypoint is
+        chosen.
+
+        :seealso: :class:`VehicleBase`
+        """
 
         if self._goal is None:
             self._new_goal()
@@ -307,9 +350,8 @@ class RandomPath(VehicleDriverBase):
 
         return self.driveto(self._goal)
 
-    ## private method, invoked from demand() to compute a new waypoint
-
     def _new_goal(self) -> None:
+        """Choose a new random goal, invoked from :meth:`demand`"""
 
         # the constructor guarantees a workspace
         assert self._workspace is not None
@@ -332,11 +374,6 @@ class RandomPath(VehicleDriverBase):
         if veh.verbose or self._verbose:
             print(f"set goal: {self._goal}")
 
-        # update the goal marker
-        if self._goal_marker is not None:
-            self._goal_marker.set_xdata([self._goal[0]])
-            self._goal_marker.set_ydata([self._goal[1]])
-
 
 # ========================================================================= #
 
@@ -344,51 +381,98 @@ class RandomPath(VehicleDriverBase):
 class PurePursuit(VehicleDriverBase):
     def __init__(
         self,
-        path: NDArray,
+        path: Points2,
         lookahead: float = 1,
-        linemarkerstyle: dict[str, Any] | None = None,
+        path_style: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         """
         Driving agent for pure pursuit
 
-        :param path: path as a set of waypoints
-        :type path: array_like(2,n) one column per point, optional
+        :param path: path as a set of waypoints, one column per point
+        :type path: ndarray(2,n)
         :param lookahead: lookahead distance, defaults to 1
-        :type lookahead: float, optional
+        :param path_style: Matplotlib line style used to display the path,
+            merged over the default :data:`PATH_STYLE` (a wide, translucent red
+            line)
+        :param kwargs: arguments passed to :class:`VehicleDriverBase`
+        :raises ValueError: ``path`` is not a 2xN array
+
+        Returns a *driver* object that drives the attached vehicle along the
+        path using the pure pursuit algorithm: the vehicle steers toward the
+        first point on the path that is at least ``lookahead`` away from the
+        vehicle, beyond the closest point.
+
+        The driver is connected to the vehicle by::
+
+            veh = Bicycle(control=driver)
+
+        or::
+
+            veh = Bicycle()
+            veh.control = driver
+
+        If the simulation is animated, the path is plotted using ``path_style``
+        and the current goal point, which changes at every time step, is shown
+        using ``goal_style``.
+
+        :seealso: :class:`RandomPath` :class:`VehicleBase`
         """
         super().__init__(**kwargs)
+
+        # this should be a capability of spatialmath.base.getmatrix(), see
+        # https://github.com/rai-opensource/spatialmath-python/issues/255
+        path = np.asarray(path, dtype=float)
+        if path.ndim != 2 or path.shape[0] != 2:
+            raise ValueError("path must be a 2xN array, one column per point")
+
         self._path = path
         self._lookahead = lookahead
-        self._linemarkerstyle = linemarkerstyle
+
+        self._path_style: dict[str, Any] = PATH_STYLE | (path_style or {})
 
     def __str__(self) -> str:
-        """Convert to string
+        """
+        Convert to string
 
-        :return: driver parameters and state in in a compact human readable format
-        :rtype: str
+        :return: driver parameters and state in a compact human readable format
         """
 
         s = "PurePursuit driver object\n"
         if self._workspace is None:
             return s + f"  lookahead={self._lookahead}\n"
         s += (
-            f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} :"
-            f" {self._workspace[1]}, lookahead={self._lookahead}\n"
+            f"  X {self._workspace[0]} : {self._workspace[1]}; "
+            f"Y {self._workspace[2]} : {self._workspace[3]}, "
+            f"lookahead={self._lookahead}\n"
         )
         return s
 
     def init(self, ax: Axes | None = None) -> None:
-        if ax is not None:
-            h = plt.plot(
-                self._path[0, :],
-                self._path[1, :],
-                **self._linemarkerstyle,  # type: ignore[arg-type]  # None crashes, see findings
-                label="waypoints",
-            )[0]
-        self._current_waypint = None
+        """
+        Initialize pure pursuit driving agent
 
-    def demand(self) -> NDArray:
+        :param ax: axes in which to draw the path and waypoints, defaults to None
+
+        Called at the start of a simulation run.  If ``ax`` is given, plot the
+        path and create the goal marker.
+        """
+        if ax is not None:
+            plt.plot(
+                self._path[0, :], self._path[1, :], **self._path_style, label="path"
+            )
+        self._init_goal_marker(ax, label="pursuit goal")
+
+    def demand(self) -> R2:
+        """
+        Compute speed and steering angle to follow the path
+
+        :return: speed and steering angle demand for :class:`VehicleBase`
+
+        The goal is the first point on the path, beyond the point closest to the
+        vehicle, that is at least ``lookahead`` away from the vehicle.  If there
+        is no such point the goal is the end of the path.
+        """
 
         cp = self._attached_vehicle()._x[0:2]  # current point
 
@@ -401,19 +485,9 @@ class PurePursuit(VehicleDriverBase):
         if len(k) == 0:
             # no such points, we must be near the end, goal is the end
             goal = self._path[:, -1]
-            k = -1
         else:
-            # many such points, take the first one
-            k = k[0] + 1  # first point beyond look ahead distance
-            goal = self._path[:, k + i]
-            k += i
-
-        # _waypoint_marker is never assigned, so this always fails: see findings
-        if self._waypoint_marker is not None:  # type: ignore[attr-defined]
-            pass
-            for marker in self._waypoint_marker:  # type: ignore[attr-defined]
-                marker.set_color("blue")
-            self._waypoint_marker[k].set_color("red")  # type: ignore[attr-defined]
+            # many such points, take the first one beyond look ahead distance
+            goal = self._path[:, i + 1 + k[0]]
 
         return self.driveto(goal)
 
