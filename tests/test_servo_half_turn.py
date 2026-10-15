@@ -50,7 +50,7 @@ def test_p_servo_half_turn_uses_the_same_rotation_error(as_matrix):
     )
 
     nt.assert_allclose(np.linalg.norm(velocity[3:]), 2 * np.pi, atol=1e-14)
-    assert not arrived
+    nt.assert_equal(arrived, False)
     recovered = SE3.AngVec(np.linalg.norm(velocity[3:] / 2), velocity[3:])
     nt.assert_allclose(recovered.R, SE3.AngVec(np.pi, axis).R, atol=1e-14)
 
@@ -74,8 +74,8 @@ def test_ik_does_not_accept_an_underestimated_half_turn_residual(solver_name):
         joint_limits=False,
     )
 
-    assert not result.success
-    assert result.residual > 3.0
+    nt.assert_equal(result.success, False)
+    nt.assert_array_less(3.0, result.residual)
     if solver_name.startswith("ik_"):
         nt.assert_allclose(result.residual, np.pi**2 / 2, atol=1e-14)
 
