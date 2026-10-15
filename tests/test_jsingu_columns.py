@@ -22,7 +22,7 @@ def test_dependent_columns_keep_original_indices(jacobian, expected, capsys):
     rtb.jsingu(matrix)
     lines = capsys.readouterr().out.splitlines()
 
-    assert expected in lines
+    nt.assert_equal(expected in lines, True)
     for line in lines:
         header, expression = line.split("=", 1)
         dependent = int(header.split()[1])
@@ -37,7 +37,7 @@ def test_dependent_columns_keep_original_indices(jacobian, expected, capsys):
 
 def test_full_rank_matrix_has_no_dependent_columns(capsys):
     rtb.jsingu(np.eye(3))
-    assert capsys.readouterr().out == ""
+    nt.assert_equal(capsys.readouterr().out, "")
 
 
 @pytest.mark.parametrize("spherical_chain", [False, True])
@@ -50,7 +50,7 @@ def test_robot_jacobian_reports_original_joint_columns(capsys, spherical_chain):
     rtb.jsingu(jacobian)
     lines = capsys.readouterr().out.splitlines()
 
-    assert lines
+    nt.assert_equal(bool(lines), True)
     for line in lines:
         header, expression = line.split("=", 1)
         dependent = int(header.split()[1])
