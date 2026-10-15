@@ -18,6 +18,7 @@ from spatialmath import SE2, base
 from roboticstoolbox.mobile import VehicleBase
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
 from roboticstoolbox.mobile.sensors import RangeBearingSensor, SensorBase
+from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
@@ -48,7 +49,7 @@ class EKF:
         x0: ArrayLike = [0, 0, 0],
         verbose: bool = False,
         history: bool = True,
-        workspace: Any = None,
+        workspace: WorkspaceLike | None = None,
     ) -> None:
         r"""
         Extended Kalman filter
@@ -287,14 +288,17 @@ class EKF:
             raise TypeError("map must be LandmarkMap instance")
         self._ekf_map = map  # prior map for localization
 
+        # the workspace, in order of precedence: the explicit argument, the map,
+        # the sensor's map, the vehicle
+        world = map if map is not None else (sensor[0].map if sensor else None)
+        self._workspace: NDArray | None = resolve_workspace(
+            workspace, world, self._robot
+        )
         if animate:
-            if map is not None:
-                self._workspace = map.workspace
-                self._robot._workspace = map.workspace
-            elif sensor is not None:
-                self._workspace = sensor[0].map.workspace
-                self._robot._workspace = sensor[0].map.workspace
-            elif self.robot.workspace is None:
+            if world is not None:
+                # animate the vehicle in the workspace of the map
+                self._robot.workspace = world.workspace
+            elif self._workspace is None:
                 raise ValueError("for animation robot must have a defined workspace")
         self.animate = animate
 
@@ -325,14 +329,7 @@ class EKF:
         self._keep_history = history  #  keep history
         self._htuple = EKFLog
 
-        self._dim: NDArray | None
-        if workspace is not None:
-            # `dim` is not defined, so this raises NameError: see findings
-            self._dim = base.expand_dims(dim)  # type: ignore[name-defined]
-        elif self.sensor is not None:
-            self._dim = self.sensor.map.workspace
-        else:
-            self._dim = self._robot.workspace
+        self._dim: NDArray | None = self._workspace
 
         # self.robot.init()
 
@@ -1122,9 +1119,7 @@ class EKF:
             xyt = None
         return xyt
 
-    def plot_xy(
-        self, *args: Any, block: bool | None = None, **kwargs: Any
-    ) -> None:
+    def plot_xy(self, *args: Any, block: bool | None = None, **kwargs: Any) -> None:
         """
         Plot estimated vehicle position
 

@@ -25,6 +25,7 @@ from spatialmath import SE2, Polygon2, base
 
 from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehiclePolygon
 from roboticstoolbox.mobile.drivers import VehicleDriverBase
+from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # what can be given as the control for a vehicle, see VehicleBase.control
@@ -148,7 +149,7 @@ class VehicleBase(ABC):
         seed: int | None = 0,
         animation: VehicleAnimationBase | str | None = None,
         verbose: bool = False,
-        workspace: Any = None,
+        workspace: WorkspaceLike | None = None,
         polygon: Polygon2 | None = None,
     ) -> None:
         r"""
@@ -233,14 +234,7 @@ class VehicleBase(ABC):
         self.control = control
         self._x_hist: list[tuple[float, ...]] = []
 
-        self._workspace: NDArray | None
-        if workspace:
-            try:
-                self._workspace = workspace.workspace
-            except AttributeError:
-                self._workspace = base.expand_dims(workspace)
-        else:
-            self._workspace = None
+        self._workspace: NDArray | None = resolve_workspace(workspace)
 
     def __str__(self) -> str:
         """
@@ -888,6 +882,10 @@ class VehicleBase(ABC):
         if self._control is not None and hasattr(self._control, "_workspace"):
             return getattr(self._control, "_workspace")
         return None
+
+    @workspace.setter
+    def workspace(self, workspace: WorkspaceLike | None) -> None:
+        self._workspace = resolve_workspace(workspace)
 
     @property
     def x(self) -> NDArray:
