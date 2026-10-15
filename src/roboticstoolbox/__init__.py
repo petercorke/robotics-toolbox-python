@@ -45,7 +45,6 @@ __all__ = [
     "Ticker",
     "quintic",
     "quintic_func",
-    "quintic_hermite_func",
     "jtraj",
     "ctraj",
     "trapezoidal",

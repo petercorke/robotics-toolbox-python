@@ -5,7 +5,6 @@ from roboticstoolbox.tools.urdf import *  # noqa
 from roboticstoolbox.tools.trajectory import (
     quintic,
     quintic_func,
-    quintic_hermite_func,
     jtraj,
     mtraj,
     ctraj,
@@ -34,7 +33,6 @@ __all__ = [
     "Ticker",
     "quintic",
     "quintic_func",
-    "quintic_hermite_func",
     "jtraj",
     "ctraj",
     "trapezoidal",
