@@ -138,7 +138,8 @@ class PoseGraph:
 
     :param filename: name of file to load, G2O or TORO format, can be zipped
     :param lidar: load lidar scans, defaults to False
-    :param verbose: show details of processing, defaults to False
+    :param verbose: print a summary of the file when loaded and the cost of
+        each optimization iteration, defaults to False
     :raises RuntimeError: file syntax error
     :raises ValueError: an edge references an unknown vertex, or a lidar
         record precedes any vertex
@@ -181,6 +182,7 @@ class PoseGraph:
 
         self.lidar = lidar
 
+        self.verbose = verbose
         self.graph = pgraph.UGraph(verbose=verbose)
 
         path = Path(rtb.rtb_path_to_datafile(filename))
@@ -351,10 +353,11 @@ class PoseGraph:
                 filetype = "TORO/LAGO"
             else:
                 filetype = "g2o"
-            print(
-                f"loaded {filetype} format file: {self.graph.n} vertices,"
-                f" {self.graph.ne} edges"
-            )
+            if verbose:
+                print(
+                    f"loaded {filetype} format file: {self.graph.n} vertices,"
+                    f" {self.graph.ne} edges"
+                )
 
             if nlidar > 0:
                 lidar_f = [float(x) for x in lidarmeta]
@@ -363,11 +366,12 @@ class PoseGraph:
                 self._angmax = sum(lidar_f[0:2])
                 self._maxrange = lidar_f[3]
 
-                fov = np.degrees([self._angmin, self._angmax])
-                print(
-                    f"  {nlidar} lidar scans: {nbeams} beams, fov {fov[0]:.1f}° to"
-                    f" {fov[1]:.1f}°, max range {self._maxrange}"
-                )
+                if verbose:
+                    fov = np.degrees([self._angmin, self._angmax])
+                    print(
+                        f"  {nlidar} lidar scans: {nbeams} beams, fov {fov[0]:.1f}° to"
+                        f" {fov[1]:.1f}°, max range {self._maxrange}"
+                    )
 
     def _add_vertex(self, type: str, coord: NDArray, name: str) -> PGVertex:
         v = PGVertex(type, len(self._vertices), coord=coord, name=name)
@@ -686,6 +690,8 @@ class PoseGraph:
         :return: total cost, the sum of squared errors of all the edges, before
             the poses are updated
 
+        If the graph is ``verbose`` the cost and the time taken are printed.
+
         The first vertex is anchored, since the measurements are all relative.
 
         :seealso: :meth:`optimize`
@@ -750,8 +756,9 @@ class PoseGraph:
             # normalize the angles between -PI and PI
             vertex.coord[2] = smb.angdiff(vertex.coord[2])
 
-        dt = time.time() - t0
-        print(f"done in {dt * 1e3:0.2f} msec.  Total cost {etotal:g}")
+        if self.verbose:
+            dt = time.time() - t0
+            print(f"done in {dt * 1e3:0.2f} msec.  Total cost {etotal:g}")
 
         return etotal
 
