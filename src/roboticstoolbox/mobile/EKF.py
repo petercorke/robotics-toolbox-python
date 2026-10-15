@@ -6,6 +6,7 @@ Python EKF Planner
 
 from __future__ import annotations
 
+import warnings
 from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
@@ -14,10 +15,11 @@ from matplotlib import animation
 from scipy.linalg import block_diag
 from scipy.stats.distributions import chi2
 from spatialmath import SE2, base
+from spatialmath.base.types import ArrayLike3, R3x3
 
 from roboticstoolbox.mobile import VehicleBase
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
-from roboticstoolbox.mobile.sensors import RangeBearingSensor, SensorBase
+from roboticstoolbox.mobile.sensors import RangeBearingSensor
 from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
@@ -42,11 +44,11 @@ class EKF:
         robot: tuple[VehicleBase, NDArray | None],
         sensor: tuple[RangeBearingSensor, NDArray] | None = None,
         map: LandmarkMap | None = None,
-        P0: NDArray | None = None,
+        P0: R3x3 | None = None,
         x_est: NDArray | None = None,
         joseph: bool = True,
         animate: bool = True,
-        x0: ArrayLike = [0, 0, 0],
+        x0: ArrayLike3 = (0, 0, 0),
         verbose: bool = False,
         history: bool = True,
         workspace: WorkspaceLike | None = None,
@@ -65,15 +67,11 @@ class EKF:
         :param x_est: initial state estimate, defaults to None
         :type x_est: array_like(n), optional
         :param joseph: use Joseph update of covariance, defaults to True
-        :type joseph: bool, optional
         :param animate: show animation of vehicle motion, defaults to True
-        :type animate: bool, optional
-        :param x0: initial EKF state, defaults to [0, 0, 0]
+        :param x0: initial vehicle state :math:`(x, y, \\theta)`, defaults to (0, 0, 0)
         :type x0: array_like(n), optional
         :param verbose: display extra debug information, defaults to False
-        :type verbose: bool, optional
         :param history: retain step-by-step history, defaults to True
-        :type history: bool, optional
         :param workspace: dimension of workspace, see :func:`~spatialmath.base.graphics.expand_dims`
         :type workspace: scalar, array_like(2), array_like(4)
 
@@ -275,9 +273,12 @@ class EKF:
             if (
                 not isinstance(sensor, tuple)
                 or len(sensor) != 2
-                or not isinstance(sensor[0], SensorBase)
+                or not isinstance(sensor[0], RangeBearingSensor)
             ):
-                raise TypeError("sensor must be tuple (sensor, W_est)")
+                raise TypeError(
+                    "sensor must be tuple (RangeBearingSensor, W_est), "
+                    "the EKF needs the sensor's h, Hx, Hw, Hp, g, Gx, Gz and reading"
+                )
             self._sensor = sensor[0]  # reference to the sensor
             self._W_est = sensor[1]  # estimate of sensor covariance W
         else:
@@ -376,9 +377,9 @@ class EKF:
             return s.replace("\n", "\n" + spaces)
 
         estimating = []
-        if self._est_vehicle is not None:
+        if self._est_vehicle:
             estimating.append("vehicle pose")
-        if self._est_ekf_map is not None:
+        if self._est_ekf_map:
             estimating.append("map")
         if len(estimating) > 0:
             s += ", estimating: " + ", ".join(estimating)
@@ -556,7 +557,6 @@ class EKF:
         Landmark information
 
         :param id: landmark index
-        :type id: int
         :return: order in which it was first seen, number of times seen
         :rtype: int, int
 
@@ -575,7 +575,6 @@ class EKF:
         Landmark index in complete state vector
 
         :param id: landmark index
-        :type id: int
         :return: index in the state vector
         :rtype: int
 
@@ -597,7 +596,6 @@ class EKF:
         Landmark index in map state vector
 
         :param id: landmark index
-        :type id: int
         :return: index in the state vector
         :rtype: int
 
@@ -616,7 +614,6 @@ class EKF:
         Landmark position
 
         :param id: landmark index
-        :type id: int
         :return: landmark position :math:`(x,y)`
         :rtype: ndarray(2)
 
@@ -626,9 +623,12 @@ class EKF:
         return self._x_est[jx : jx + 2]
 
     def init(self) -> None:
-        # EKF.init Reset the filter
-        #
-        # E.init() resets the filter state and clears landmarks and history.
+        """
+        Reset the filter
+
+        Resets the filter state and covariance to their initial values, and
+        clears the landmarks and history.
+        """
         self.robot.init()
         if self.sensor is not None:
             self.sensor.init()
@@ -638,14 +638,17 @@ class EKF:
 
         if self._V_est is None:
             # perfect vehicle case
-            self._estVehicle = False
             self._x_est = np.empty((0,))
             self._P_est = np.empty((0, 0))
         else:
-            # noisy odometry case
-            self._x_est = np.asarray(self._x0)
-            self._P_est = np.empty((0, 0)) if self._P0 is None else self._P0
-            self._estVehicle = True
+            # noisy odometry case, the state is a copy so that the filter
+            # never changes the arrays the user passed in
+            self._x_est = np.array(self._x0, dtype=float)
+            self._P_est = (
+                np.empty((0, 0))
+                if self._P0 is None
+                else np.array(self._P0, dtype=float)
+            )
 
         if self.sensor is not None:
             # landmark dictionary maps lm_id to list[index, nseen]
@@ -658,9 +661,7 @@ class EKF:
         Run the EKF simulation
 
         :param T: maximum simulation time in seconds
-        :type T: float
         :param animate: animate motion of vehicle, defaults to False
-        :type animate: bool, optional
 
         Simulates the motion of a vehicle (under the control of a driving agent)
         and the EKF estimator.  The steps are:
@@ -705,11 +706,8 @@ class EKF:
         Run the EKF simulation
 
         :param T: maximum simulation time in seconds
-        :type T: float
         :param format: Output format
-        :type format: str, optional
         :param file: File name
-        :type file: str, optional
         :return: Matplotlib animation object
         :rtype: :meth:`matplotlib.animation.FuncAnimation`
 
@@ -803,9 +801,12 @@ class EKF:
         plt.close(fig)
         return ret
 
-    def step(self, pause: bool | None = None) -> None:
+    def step(self, pause: bool = False) -> None:
         """
         Execute one timestep of the simulation
+
+        :param pause: pause for the vehicle's time step after drawing the
+            animation, defaults to False
         """
 
         # move the robot
@@ -1126,15 +1127,12 @@ class EKF:
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param block: hold plot until figure is closed, defaults to None
-        :type block: bool, optional
 
         Plot the estimated vehicle path in the xy-plane.
 
         :seealso: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` :meth:`plot_P`
             :meth:`run` :meth:`history`
         """
-        if args is None and "color" not in kwargs:
-            kwargs["color"] = "r"
         xyt = self.get_xyt()
         if xyt is None:
             raise ValueError("the vehicle pose is not part of the estimated state")
@@ -1153,11 +1151,8 @@ class EKF:
         Plot uncertainty ellipses
 
         :param confidence: ellipse confidence interval, defaults to 0.95
-        :type confidence: float, optional
         :param N: number of ellipses to plot, defaults to 10
-        :type N: int, optional
         :param block: hold plot until figure is closed, defaults to None
-        :type block: bool, optional
         :param kwargs: arguments passed to :meth:`spatialmath.base.graphics.plot_ellipse`
 
         Plot ``N`` uncertainty ellipses spaced evenly along the trajectory.
@@ -1207,14 +1202,11 @@ class EKF:
         Plot error with uncertainty bounds
 
         :param bgcolor: color of the confidence bound polygons, defaults to 'r'
-        :type bgcolor: str, optional
         :param confidence: confidence interval, defaults to 0.95, None for no bounds
-        :type confidence: float, optional
         :param ax: axes to plot into, one for each of :math:`(x, y, \theta)`,
             defaults to a new figure with three stacked axes
         :type ax: array_like(3) of Axes, optional
         :param block: hold plot until figure is closed, defaults to None
-        :type block: bool, optional
         :raises ValueError: if the vehicle pose is not part of the estimated state
 
         Plot the error between actual and estimated vehicle
@@ -1298,31 +1290,6 @@ class EKF:
         if block is not None:
             plt.show(block=block)
 
-        # subplot(opt.nplots*100+12)
-        # if opt.confidence
-        #     edge = [pxy(:,2); -pxy(end:-1:1,2)];
-        #     h = patch(t, edge, opt.color);
-        #     set(h, 'EdgeColor', 'none', 'FaceAlpha', 0.3);
-        # end
-        # hold on
-        # plot(err(:,2), args{:});
-        # hold off
-        # grid
-        # ylabel('y error')
-
-        # subplot(opt.nplots*100+13)
-        # if opt.confidence
-        #     edge = [pxy(:,3); -pxy(end:-1:1,3)];
-        #     h = patch(t, edge, opt.color);
-        #     set(h, 'EdgeColor', 'none', 'FaceAlpha', 0.3);
-        # end
-        # hold on
-        # plot(err(:,3), args{:});
-        # hold off
-        # grid
-        # xlabel('Time step')
-        # ylabel('\theta error')
-
     def get_map(self) -> NDArray:
         """
         Get estimated map
@@ -1340,29 +1307,60 @@ class EKF:
 
     def plot_map(
         self,
-        marker: dict[str, Any] | None = None,
-        ellipse: dict[str, Any] | None = None,
+        marker_style: dict[str, Any] | None = None,
+        ellipse_style: dict[str, Any] | None = None,
         confidence: float = 0.95,
         block: bool | None = None,
+        *,
+        marker: dict[str, Any] | None = None,
+        ellipse: dict[str, Any] | None = None,
     ) -> None:
         """
         Plot estimated landmarks
 
-        :param marker: plot marker for landmark, arguments passed to :meth:`~matplotlib.axes.Axes.plot`, defaults to "r+"
-        :type marker: dict, optional
-        :param ellipse: arguments passed to :meth:`~spatialmath.base.graphics.plot_ellipse`, defaults to None
-        :type ellipse: dict, optional
+        :param marker_style: Matplotlib options for the landmark marker, defaults
+            to a red ``+``
+        :param ellipse_style: options passed to
+            :func:`~spatialmath.base.graphics.plot_ellipse`, ellipses are drawn
+            only if this is given
         :param confidence: ellipse confidence interval, defaults to 0.95
-        :type confidence: float, optional
         :param block: hold plot until figure is closed, defaults to None
-        :type block: bool, optional
+        :param marker: deprecated, use ``marker_style``
+        :param ellipse: deprecated, use ``ellipse_style``
 
-        Plot a marker  and covariance ellipses for each estimated landmark.
+        Plot a marker and, if ``ellipse_style`` is given, a covariance ellipse
+        for each estimated landmark.
+
+        .. deprecated:: 1.4.5
+            ``marker`` and ``ellipse`` are deprecated, use ``marker_style`` and
+            ``ellipse_style``.
+
+        .. versionchanged:: 1.4.5
+            Each ellipse is now drawn with the covariance of its own landmark.
+            Previously the covariance was taken from the wrong place in the
+            state covariance matrix, so that the ellipses after the first were
+            wrong, and in SLAM were not landmark covariances at all.
 
         :seealso: :meth:`get_map` :meth:`run` :meth:`history`
         """
-        if marker is None:
-            marker = {
+        for old, new, value in (
+            ("marker", "marker_style", marker),
+            ("ellipse", "ellipse_style", ellipse),
+        ):
+            if value is None:
+                continue
+            warnings.warn(
+                f"{old} is deprecated, use {new} instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if new == "marker_style" and marker_style is None:
+                marker_style = value
+            elif new == "ellipse_style" and ellipse_style is None:
+                ellipse_style = value
+
+        if marker_style is None:
+            marker_style = {
                 "marker": "+",
                 "markersize": 10,
                 "markerfacecolor": "red",
@@ -1377,31 +1375,25 @@ class EKF:
 
         # mark the estimate as a point
         xm = xm.reshape((-1, 2))  # arrange as Nx2
-        plt.plot(xm[:, 0], xm[:, 1], label="estimated landmark", **marker)
+        plt.plot(xm[:, 0], xm[:, 1], label="estimated landmark", **marker_style)
 
-        # add an ellipse
-        if ellipse is not None:
+        # add an ellipse for each landmark, using its 2x2 block of the covariance
+        if ellipse_style is not None:
             for i in range(len(xm)):
-                Pi = self.P_est[i : i + 2, i : i + 2]
+                Pi = P[2 * i : 2 * i + 2, 2 * i : 2 * i + 2]
                 # put ellipse in the legend only once
-                if i == 0:
-                    base.plot_ellipse(
-                        Pi,
-                        centre=xm[i, :],
-                        confidence=confidence,
-                        inverted=True,
-                        label=f"{confidence * 100:.3g}% confidence",
-                        **ellipse,
-                    )
-                else:
-                    base.plot_ellipse(
-                        Pi,
-                        centre=xm[i, :],
-                        confidence=confidence,
-                        inverted=True,
-                        **ellipse,
-                    )
-        # plot_ellipse( P * chi2inv_rtb(opt.confidence, 2), xf, args{:});
+                label = (
+                    {"label": f"{confidence * 100:.3g}% confidence"} if i == 0 else {}
+                )
+                base.plot_ellipse(
+                    Pi,
+                    centre=xm[i, :],
+                    confidence=confidence,
+                    inverted=True,
+                    **label,
+                    **ellipse_style,
+                )
+
         if block is not None:
             plt.show(block=block)
 
@@ -1410,7 +1402,6 @@ class EKF:
         Get covariance matrices from simulation
 
         :param k: timestep, defaults to None
-        :type k: int, optional
         :return: covariance matrix
         :rtype: ndarray(n,n) or list of ndarray(n,n)
 
@@ -1429,7 +1420,6 @@ class EKF:
         Get covariance norm from simulation
 
         :param k: timestep, defaults to None
-        :type k: int, optional
         :return: covariance matrix norm
         :rtype: float or ndarray(n)
 
