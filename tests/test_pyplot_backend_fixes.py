@@ -2,6 +2,7 @@
 PyPlot backend: things that raised on a headless backend or before launch.
 """
 
+import importlib
 import unittest
 import unittest.mock as mock
 from types import SimpleNamespace
@@ -60,12 +61,11 @@ class TestWindowTitle(unittest.TestCase):
         # Agg: the manager exists but is not a window
         for cls in (PyPlot, PyPlot2):
             with self.subTest(backend=cls.__name__):
-                with mock.patch(
-                    "roboticstoolbox.backends.PyPlot."
-                    + cls.__module__.split(".")[-1]
-                    + ".set_window_title",
-                    return_value=False,
-                ):
+                # the package attribute of the same name is the class, so the
+                # module is fetched explicitly (Python 3.10 mock resolves the
+                # dotted name to the class)
+                module = importlib.import_module(cls.__module__)
+                with mock.patch.object(module, "set_window_title", return_value=False):
                     cls().launch()
                 plt.close("all")
 
