@@ -316,6 +316,76 @@ class MobileBlockTest(unittest.TestCase):
         nt.assert_array_almost_equal(block.test_output(5, -5, x=x)[0], x)
         nt.assert_array_almost_equal(block.test_deriv(5, -5, x=x), [0, 0, -10/2])
 
+    def test_default_x0(self):
+        # without x0 the initial state is zero, for each of the vehicle blocks
+        for cls in (Bicycle, Unicycle, DiffSteer):
+            with self.subTest(block=cls.__name__):
+                block = cls()
+                nt.assert_array_equal(block._x0, [0, 0, 0])
+
+    def test_x0_wrong_length(self):
+        for cls in (Bicycle, Unicycle, DiffSteer):
+            with self.subTest(block=cls.__name__):
+                with self.assertRaises(ValueError):
+                    cls(x0=[0, 0])
+
+    def test_x0_is_array(self):
+        for cls in (Bicycle, Unicycle, DiffSteer):
+            with self.subTest(block=cls.__name__):
+                block = cls(x0=[1, 2, 3])
+                self.assertIsInstance(block._x0, np.ndarray)
+                nt.assert_array_equal(block._x0, [1, 2, 3])
+
+    def test_vehicleplot_defaults_are_not_shared(self):
+        # a size given to one VehiclePlot must not leak into the next
+        from unittest import mock
+
+        from roboticstoolbox import mobile
+
+        with mock.patch.object(mobile, "VehiclePolygon") as polygon:
+            VehiclePlot(size=3)
+            VehiclePlot()
+        self.assertEqual(polygon.call_args_list[0].kwargs["scale"], 3)
+        self.assertNotIn("scale", polygon.call_args_list[1].kwargs)
+
+        # and a caller's dict is not modified
+        polyargs = dict(filled=False)
+        with mock.patch.object(mobile, "VehiclePolygon"):
+            VehiclePlot(size=3, polygon_style=polyargs)
+        self.assertEqual(polyargs, dict(filled=False))
+
+    def test_vehicleplot_scale(self):
+        # a 2-element scale applies to both axes
+        block = VehiclePlot(limits=[0, 10])
+        self.assertEqual(list(block.limits), [0, 10, 0, 10])
+        block = VehiclePlot(limits=np.array([0, 10]))
+        self.assertEqual(list(block.limits), [0, 10, 0, 10])
+        block = VehiclePlot(limits=[0, 10, -1, 1])
+        self.assertEqual(list(block.limits), [0, 10, -1, 1])
+
+    def test_vehicleplot_deprecated_names(self):
+        from unittest import mock
+
+        from roboticstoolbox import mobile
+
+        def init(ax):
+            pass
+
+        for old, new, value in [
+            ("path", "path_style", "r--"),
+            ("init", "init_func", init),
+            ("scale", "limits", [0, 5, 0, 5]),
+            ("polyargs", "polygon_style", dict(alpha=0.5)),
+        ]:
+            with self.subTest(old=old):
+                with mock.patch.object(mobile, "VehiclePolygon") as polygon:
+                    with self.assertWarns(DeprecationWarning):
+                        block = VehiclePlot(**{old: value})
+                if new == "polygon_style":
+                    self.assertEqual(polygon.call_args.kwargs["alpha"], 0.5)
+                else:
+                    self.assertEqual(getattr(block, new), value)
+
     @unittest.skip("cant test bdsim plot blocks")
     def test_vehicleplot(self):
 
