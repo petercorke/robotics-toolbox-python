@@ -10,7 +10,7 @@ from roboticstoolbox import DubinsPlanner, ReedsSheppPlanner
 
 def assert_endpoint(actual, expected):
     np.testing.assert_allclose(actual[:2], expected[:2], atol=1e-9)
-    assert abs(wrap_mpi_pi(actual[2] - expected[2])) < 1e-9
+    np.testing.assert_array_less(abs(wrap_mpi_pi(actual[2] - expected[2])), 1e-9)
 
 
 @pytest.mark.parametrize("curvature", [0.5, 1.0, 2.0])
@@ -20,11 +20,11 @@ def test_reeds_shepp_keeps_zero_x_terminal_pose(curvature, stepsize, relative_go
     start = np.zeros(3)
     goal = np.asarray(relative_goal)
     path, status = ReedsSheppPlanner(curvature, stepsize).query(start, goal)
-    assert len(path) > 0
+    np.testing.assert_array_less(0, len(path))
     assert_endpoint(path[0], start)
     assert_endpoint(path[-1], goal)
-    assert len(status.direction) == len(path)
-    assert np.isfinite(path).all()
+    np.testing.assert_equal(len(status.direction), len(path))
+    np.testing.assert_equal(np.isfinite(path).all(), True)
 
 
 @pytest.mark.parametrize("start", [(3, -4, 0.7), (-2, 5, -1.2)])
@@ -33,16 +33,16 @@ def test_reeds_shepp_terminal_pose_is_frame_invariant(start):
     path, status = ReedsSheppPlanner().query(start, goal)
     assert_endpoint(path[0], start)
     assert_endpoint(path[-1], goal)
-    assert len(status.direction) == len(path)
+    np.testing.assert_equal(len(status.direction), len(path))
 
 
 @pytest.mark.parametrize("start", [(0, 0, 0), (3, -4, 0.7), (-2, 5, -1.2)])
 def test_dubins_keeps_stationary_path_pose(start):
     path, status = DubinsPlanner().query(start, start)
-    assert len(path) > 0
+    np.testing.assert_array_less(0, len(path))
     assert_endpoint(path[0], start)
     assert_endpoint(path[-1], start)
-    assert status.length == pytest.approx(0)
+    np.testing.assert_equal(status.length == pytest.approx(0), True)
 
 
 @pytest.mark.parametrize("planner", [DubinsPlanner, ReedsSheppPlanner])
