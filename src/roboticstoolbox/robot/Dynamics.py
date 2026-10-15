@@ -1070,9 +1070,10 @@ class DynamicsMixin:
 
         .. math::
 
-            \mathbf{C}_x = \mathbf{J}(q)^{-T} \left(
-                \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q)
-                \right) \mathbf{J}(q)^{-1}
+            \mathbf{C}_x = \mathbf{J}(q)^{-T} \mathbf{C}(q, \dot{q})
+                \mathbf{J}(q)^{-1}
+                - \mathbf{M}_x(q) \dot{\mathbf{J}}(q, \dot{q})
+                \mathbf{J}(q)^{-1}
 
         The product :math:`\mathbf{C} \dot{x}` is the operational space wrench
         due to joint velocity coupling. This matrix is also known as the
@@ -1094,8 +1095,8 @@ class DynamicsMixin:
         **Trajectory operation**
 
         If ``q`` and `qd` are matrices (m,n), each row is interpretted as a
-        joint configuration, and the result (n,n,m) is a 3d-matrix where
-        each plane corresponds to a row of ``q`` and ``qd``.
+        joint configuration, and the result is an array (m,6,6) where
+        each matrix corresponds to a row of ``q`` and ``qd``.
 
         Examples
         --------
@@ -1126,43 +1127,33 @@ class DynamicsMixin:
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
+        if q.shape[0] != qd.shape[0]:
+            raise ValueError("q and qd must have the same number of rows")
         n = q.shape[1]
         if n != 6:
             pinv = True
 
+        Ct = np.zeros((q.shape[0], 6, 6))
+
+        for k, (qk, qdk) in enumerate(zip(q, qd)):
+            Jik = Ji
+            if Jik is None:
+                Ja = J if J is not None else self.jacob0_analytical(qk, representation)
+                Jik = np.linalg.pinv(Ja) if pinv else np.linalg.inv(Ja)
+
+            Ck = C if C is not None else self.coriolis(qk, qdk)
+            Mxk = Mx if Mx is not None else self.inertia_x(qk, Ji=Jik)
+            Jdk = (
+                Jd
+                if Jd is not None
+                else self.jacob0_dot(qk, qdk, representation=representation)
+            )
+
+            Ct[k, :, :] = Jik.T @ Ck @ Jik - Mxk @ Jdk @ Jik
+
         if q.shape[0] == 1:
-            # single q case
-            if Ji is None:
-                Ja = self.jacob0_analytical(q[0, :], representation)
-                if pinv:
-                    Ji = np.linalg.pinv(Ja)
-                else:
-                    Ji = np.linalg.inv(Ja)
-            if C is None:
-                C = self.coriolis(q[0, :], qd[0, :])
-            if Mx is None:
-                Mx = self.inertia_x(q[0, :], Ji=Ji)
-            if Jd is None:
-                Jd = self.jacob0_dot(q[0, :], qd[0, :], J0=Ja)
-            return Ji.T @ (C - Mx @ Jd) @ Ji
+            return Ct[0, :, :]
         else:
-            # trajectory case
-            Ct = np.zeros((q.shape[0], 6, 6))
-
-            for k, (qk, qdk) in enumerate(zip(q, qd)):
-                if Ji is None:
-                    Ja = self.jacob0_analytical(q[0, :], representation)
-                    if pinv:
-                        Ji = np.linalg.pinv(Ja)
-                    else:
-                        Ji = np.linalg.inv(Ja)
-
-                C = self.coriolis(qk, qdk)
-                Mx = self.inertia_x(qk, Ji=Ji)
-                Jd = self.jacob0_dot(qk, qdk, J0=J)
-
-                Ct[k, :, :] = Ji.T @ (C - Mx @ Jd) @ Ji
-
             return Ct
 
     def gravload_x(
