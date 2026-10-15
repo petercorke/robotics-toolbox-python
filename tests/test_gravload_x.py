@@ -52,7 +52,7 @@ def test_gravity_trajectory_returns_six_components_per_pose(model: str) -> None:
 
     result = robot.gravload_x(q, gravity=gravity)
 
-    assert result.shape == (2, 6)
+    npt.assert_equal(result.shape, (2, 6))
     npt.assert_allclose(result, expected, atol=1e-12)
 
 
