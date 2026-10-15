@@ -269,8 +269,9 @@ class RRTPlanner(PlannerBase):
         +---------------+---------------------------------------------------+
 
         """
-        self._start = start  # type: ignore[assignment]  # kept as given
-        vstart, d = self.g.closest(start)
+        self.validate_start_goal(start)
+        assert self.start is not None
+        vstart, d = self.g.closest(self.start)
 
         vpath, cost, _ = self.g.path_UCS(vstart, self.g[0])
 

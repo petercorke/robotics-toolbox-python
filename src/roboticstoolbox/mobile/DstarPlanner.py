@@ -479,7 +479,7 @@ class DstarPlanner(PlannerBase):
 
         :seealso: :meth:`plan`
         """
-        self.start = start
+        self.validate_start_goal(start)
         start_State = self._Map._Map[int(start[1])][int(start[0])]
         tmp = start_State
 
