@@ -65,6 +65,16 @@ class TestNoPathError(unittest.TestCase):
         with self.assertRaises(NoPathError):
             bug.run((10, 10), (1, 10))
 
+    def test_bug2_goal_enclosed_by_the_obstacle(self):
+        # used to loop forever: leave the wall on the far side, step toward
+        # the goal, hit the wall again, and repeat
+        g = np.zeros((20, 20), dtype=int)
+        g[5:15, 5:15] = 1
+        g[7:13, 7:13] = 0  # a closed box with the goal inside
+        bug = Bug2(occgrid=g)
+        with self.assertRaises(NoPathError):
+            bug.run((1, 10), (10, 10))
+
 
 class TestQueryBeforePlan(unittest.TestCase):
     def test_distance_transform(self):

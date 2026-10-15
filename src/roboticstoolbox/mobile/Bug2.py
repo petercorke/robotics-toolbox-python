@@ -100,7 +100,8 @@ class Bug2(PlannerBase):
             to "robot path"
         :raises ValueError: ``start`` and ``goal`` are not both given, or lie
             inside an obstacle
-        :raises NoPathError: the robot is trapped
+        :raises NoPathError: the robot is trapped, or the goal is enclosed by
+            an obstacle
         :return: path from ``start`` to ``goal``, one point per row
         :rtype: ndarray(N,2)
 
@@ -254,6 +255,11 @@ class Bug2(PlannerBase):
             # detect if next step is an obstacle
             if self.isoccupied(position + np.r_[dx, dy]):
                 self.message(f"  {position}: obstacle at {position + np.r_[dx, dy]}")
+                # each hit point is closer to the goal than the one before, so
+                # meeting the same one again means no progress is being made
+                # and the goal is enclosed by the obstacle
+                if any(np.all(position == h) for h in self.H):
+                    raise NoPathError("robot is trapped")
                 self.H.append(position)  # save hit point
                 self._step = 2  # transition to step 2
                 self.message(f"  {position}: change to step 2")
