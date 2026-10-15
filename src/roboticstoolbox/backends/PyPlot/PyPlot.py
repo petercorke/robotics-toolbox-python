@@ -90,11 +90,11 @@ class PyPlot(Connector):
     fig: Any  # the Matplotlib figure, set by launch()
     timer: Any  # time display, set by launch()
     limits: ArrayLike | None
-    sim_time: float
 
     def __init__(self) -> None:
 
         super(PyPlot, self).__init__()
+        self.sim_time: float = 0
         self.robots: list[RobotPlot] = []
         self.ellipses: list[EllipsePlot] = []
         self.shapes: list[ShapePlot] = []

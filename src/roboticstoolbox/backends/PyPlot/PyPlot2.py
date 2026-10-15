@@ -130,9 +130,11 @@ class PyPlot2(Connector):
         # Create a 2D axes
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_facecolor("white")
-        plt.get_current_fig_manager().set_window_title(  # type: ignore[union-attr]
-            f"Robotics Toolbox for Python (Figure {self.ax.figure.number})"  # type: ignore[union-attr]
-        )
+        manager = plt.get_current_fig_manager()
+        if manager is not None and hasattr(manager, "set_window_title"):
+            manager.set_window_title(
+                f"Robotics Toolbox for Python (Figure {self.ax.figure.number})"  # type: ignore[union-attr]
+            )
 
         self.ax.set_xbound(-0.5, 0.5)
         self.ax.set_ybound(-0.5, 0.5)
