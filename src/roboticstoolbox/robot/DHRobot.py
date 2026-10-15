@@ -1696,8 +1696,8 @@ class DHRobot(Robot):
                     d = link.d
                 else:
                     # prismatic
-                    Tj = link.A(link.theta).A
-                    d = q_k[j]
+                    Tj = link.A(q_k[j]).A
+                    d = q_k[j] + link.offset
 
                 # compute pstar:
                 #   O_{j-1} to O_j in {j}, negative inverse of link xform
