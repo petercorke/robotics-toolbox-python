@@ -273,7 +273,6 @@ class RandomPath(VehicleDriverBase):
         # TODO options to specify region, maybe accept a Map object?
         super().__init__(**kwargs)
 
-
         self._d_prev = np.inf
         self._random = np.random.default_rng(seed)
         self._seed = seed
