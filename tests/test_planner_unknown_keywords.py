@@ -124,6 +124,11 @@ class TestLabelValues(unittest.TestCase):
         dx.plot(labelvalues=True)
         self.assertEqual(self.texts()[(2, 2)], "1.4")
 
+    def test_default_labels_are_red(self):
+        # the book says the cell labels are red
+        self.dx.plot(labelvalues=True)
+        self.assertEqual({t.get_color() for t in plt.gca().texts}, {"red"})
+
     def test_label_style(self):
         self.dx.plot(labelvalues=True, label_style=dict(fontsize=14, color="m"))
         text = plt.gca().texts[0]
@@ -134,6 +139,48 @@ class TestLabelValues(unittest.TestCase):
         dx = DistanceTransformPlanner(self.grid, goal=(1, 1))
         with self.assertWarns(UserWarning):
             dx.plot(labelvalues=True)
+
+
+class TestBackgroundArguments(unittest.TestCase):
+    """colorbar, colorbar_style, inflated and cmap are arguments of plot()"""
+
+    def tearDown(self):
+        plt.close("all")
+
+    def planner(self):
+        dx = DistanceTransformPlanner(grid(), goal=(6, 6), inflate=1)
+        dx.plan()
+        return dx
+
+    def test_colorbar_style_reaches_the_colorbar(self):
+        self.planner().plot(colorbar_style=dict(label="cost"))
+        labels = [a.get_ylabel() for a in plt.gcf().axes]
+        self.assertIn("cost", labels)
+
+    def test_colorbar_false(self):
+        self.planner().plot(colorbar=False)
+        self.assertEqual(len(plt.gcf().axes), 1)
+
+    def test_colorbar_default(self):
+        self.planner().plot()
+        self.assertEqual(len(plt.gcf().axes), 2)
+
+    def test_cmap(self):
+        self.planner().plot(cmap="viridis")
+        self.assertEqual(plt.gca().images[0].get_cmap().name, "viridis")
+
+    def test_inflated(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            self.planner().plot(inflated=False)
+
+    def test_bgargs_still_works(self):
+        self.planner().plot(bgargs=dict(colorbar=False))
+        self.assertEqual(len(plt.gcf().axes), 1)
+
+    def test_explicit_argument_does_not_override_bgargs(self):
+        self.planner().plot(colorbar=True, bgargs=dict(colorbar=False))
+        self.assertEqual(len(plt.gcf().axes), 1)
 
 
 class TestDistanceSynonym(unittest.TestCase):

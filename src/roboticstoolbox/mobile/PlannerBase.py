@@ -661,6 +661,10 @@ class PlannerBase:
         goal_vehicle: dict[str, Any] | None = None,
         labelvalues: bool = False,
         label_style: dict[str, Any] | None = None,
+        inflated: bool | None = None,
+        colorbar: bool | dict[str, Any] | None = None,
+        colorbar_style: dict[str, Any] | None = None,
+        cmap: str | None = None,
         **unused: Any,
     ) -> Axes:
         r"""
@@ -697,6 +701,12 @@ class PlannerBase:
             distance field, defaults to False.  Useful for small grids, see
             :meth:`plot_bg`.
         :param label_style: Matplotlib text options for ``labelvalues``
+        :param inflated: show the inflated obstacles, passed to :meth:`plot_bg`
+        :param colorbar: show a colorbar for the distance field, passed to
+            :meth:`plot_bg`
+        :param colorbar_style: options for the colorbar, passed to
+            :meth:`plot_bg`
+        :param cmap: colormap for the distance field, passed to :meth:`plot_bg`
         :param path_marker: deprecated, use ``path_style``
         :param path_marker_reverse: deprecated, use ``path_reverse_style``
         :param line: deprecated, use ``path_style``
@@ -832,6 +842,15 @@ class PlannerBase:
         if labelvalues:
             bgargs["labelvalues"] = True
             bgargs.setdefault("label_style", label_style)
+        # arguments of the background that are given here rather than in bgargs
+        for bg_name, bg_value in (
+            ("inflated", inflated),
+            ("colorbar", colorbar),
+            ("colorbar_style", colorbar_style),
+            ("cmap", cmap),
+        ):
+            if bg_value is not None:
+                bgargs.setdefault(bg_name, bg_value)
 
         ndims = self._ndims
 
@@ -1041,8 +1060,8 @@ class PlannerBase:
         :param labelvalues: write the value in each cell of the distance field,
             defaults to False
         :param label_style: Matplotlib text options for the values, merged over
-            a centered ``fontsize`` 8 label that is white on dark cells and
-            black on bright ones.  The axes are set to show every cell whole.
+            a red, centered ``fontsize`` 8 label, as in the book.  The axes
+            are set to show every cell whole.
 
         .. deprecated:: 1.4.5
             Giving a dict as ``colorbar`` is deprecated, use ``colorbar=True``
@@ -1112,7 +1131,7 @@ class PlannerBase:
 
             # change all inf to large value, so they are not 'bad' ie. red
             distance[np.isinf(distance)] = 2 * vmax
-            c_map.set_over(color=(0, 0, 1))  # ex-infs are now blue
+            c_map = c_map.with_extremes(over=(0, 0, 1))  # ex-infs are now blue
 
             # display image
             norm = mpl.colors.Normalize(vmin=0, vmax=vmax, clip=False)
@@ -1202,7 +1221,7 @@ class PlannerBase:
                 "ha": "center",
                 "va": "center",
                 "fontsize": 8,
-                "color": "white" if norm(value) < 0.5 else "black",
+                "color": "red",
                 "zorder": 5,
             } | (label_style or {})
             ax.text(c, r, f"{value:.0f}" if integral else f"{value:.1f}", **style)
