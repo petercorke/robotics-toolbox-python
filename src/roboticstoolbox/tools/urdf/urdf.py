@@ -1855,13 +1855,6 @@ class URDF(URDFType):
         if materials is None:
             materials = []
 
-        # TODO, what does this next line do?
-        # why arent the other things validated
-        try:
-            self._validate_transmissions()
-        except Exception:
-            pass
-
         self.name = name
         self.other_xml = other_xml
 
@@ -1891,6 +1884,13 @@ class URDF(URDFType):
                     stage="urdf",
                 )
 
+        self._link_map = {link.name: link for link in self._links}
+        self._joint_map = {joint.name: joint for joint in self._joints}
+        self._transmission_map = {
+            transmission.name: transmission for transmission in self._transmissions
+        }
+        self._validate_transmissions()
+
     @property
     def name(self) -> Any:
         """str : The name of the URDF."""
@@ -1916,8 +1916,7 @@ class URDF(URDFType):
         directly. If you want to add or remove links, use
         the appropriate functions.
         """
-        # `_link_map` is never set: AttributeError, see findings
-        return copy.copy(self._link_map)  # type: ignore[attr-defined]
+        return copy.copy(self._link_map)
 
     @property
     def joints(self) -> Any:
@@ -1935,7 +1934,7 @@ class URDF(URDFType):
         directly. If you want to add or remove joints, use
         the appropriate functions.
         """
-        return copy.copy(self._joint_map)  # type: ignore[attr-defined]
+        return copy.copy(self._joint_map)
 
     @property
     def transmissions(self) -> Any:
@@ -1953,7 +1952,7 @@ class URDF(URDFType):
         directly. If you want to add or remove transmissions, use
         the appropriate functions.
         """
-        return copy.copy(self._transmission_map)  # type: ignore[attr-defined]
+        return copy.copy(self._transmission_map)
 
     @property
     def other_xml(self) -> Any:  # pragma nocover
@@ -2058,7 +2057,7 @@ class URDF(URDFType):
         """
         for t in self.transmissions:  # pragma nocover
             for joint in t.joints:
-                if joint.name not in self._joint_map:  # type: ignore[attr-defined]
+                if joint.name not in self._joint_map:
                     raise ValueError(
                         f"Transmission {t.name} has invalid joint name {joint.name}"
                     )

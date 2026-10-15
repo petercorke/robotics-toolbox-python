@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Union
+from typing import Any
 
 #!/usr/bin/env python
 import numpy as np
@@ -32,12 +32,8 @@ def angle_axis_python(T: Any, Td: Any) -> Any:
     li = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]])
 
     if base.iszerovec(li):
-        # diagonal matrix case
-        if np.trace(R) > 0:
-            # (1,1,1) case
-            a = np.zeros((3,))
-        else:
-            a = np.pi / 2 * (np.diag(R) + 1)
+        # The skew part also vanishes for a half-turn about an arbitrary axis.
+        a = base.trlog(R, check=False, twist=True)
     else:
         # non-diagonal matrix case
         ln = base.norm(li)
@@ -51,7 +47,7 @@ def angle_axis_python(T: Any, Td: Any) -> Any:
 def p_servo(
     wTe: Any,
     wTep: Any,
-    gain: Union[float, ArrayLike] = 1.0,
+    gain: float | ArrayLike = 1.0,
     threshold: float = 0.1,
     method: str = "rpy",
 ) -> Any:
