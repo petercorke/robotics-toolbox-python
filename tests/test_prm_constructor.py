@@ -28,9 +28,9 @@ class TestPRMConstructor(unittest.TestCase):
 
                 with patch.object(planner, "_create_roadmap") as create_roadmap:
                     planner.plan(npoints=1)
-                create_roadmap.assert_called_once_with(1, threshold, None)
+                create_roadmap.assert_called_once_with(1, threshold)
 
                 with patch.object(planner, "_create_roadmap") as create_roadmap:
                     planner.plan(npoints=1, dist_thresh=3.0)
-                create_roadmap.assert_called_once_with(1, 3.0, None)
+                create_roadmap.assert_called_once_with(1, 3.0)
                 self.assertEqual(planner.dist_thresh, threshold)
