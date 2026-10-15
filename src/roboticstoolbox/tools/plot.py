@@ -6,6 +6,33 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+try:
+    # spatialmath.base.set_window_title, once released (SMTB PR #263)
+    from spatialmath.base import set_window_title
+except ImportError:  # pragma: no cover
+
+    def set_window_title(fig: Any, title: str) -> bool:
+        """
+        Set the title of the window of a Matplotlib figure, if it has one
+
+        :param fig: the figure
+        :param title: the window title
+        :return: True if the title was set
+
+        A figure on a headless backend, or one that is not managed by pyplot,
+        has no window and the title is not set.  This is the one place in RTB
+        that sets a window title.
+
+        .. note:: A copy of ``spatialmath.base.set_window_title``, used until
+            the minimum version of Spatial Math has it.
+        """
+        manager = getattr(fig.canvas, "manager", None)
+        if manager is not None and hasattr(manager, "set_window_title"):
+            manager.set_window_title(title)
+            return True
+        return False
+
+
 def xplot(
     x: Any,
     y: Any = None,

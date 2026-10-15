@@ -2236,12 +2236,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         if vellipse:
             vell = self.vellipse(q, centre="ee", add=False)
-            env._teach_vellipse = vell
+            # the ellipsoid shown by the teach pendant, read back by the
+            # backend; not part of the backend interface
+            setattr(env, "_teach_vellipse", vell)
             env.add(vell)
 
         if fellipse:
             fell = self.fellipse(q, centre="ee", add=False)
-            env._teach_fellipse = fell
+            setattr(env, "_teach_fellipse", fell)
             env.add(fell)
 
         # Keep the plot open -- skipped if the backend already blocked
