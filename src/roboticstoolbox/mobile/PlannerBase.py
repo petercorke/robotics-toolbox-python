@@ -145,6 +145,34 @@ class PlannerBase:
     - at planning time by specifying ``goal`` to the planner's ``plan`` method
     - at query time by specifying ``start`` to the planner's ``query`` method
 
+    The planners do not share one call signature, since the algorithms need
+    different things at different times.  The verbs a planner has are the ones
+    that make sense for it, and they fall into four families:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 30 40 30
+
+       * - Family
+         - Planners
+         - Verbs
+       * - plan for a goal, then query many starts
+         - DistanceTransformPlanner, DstarPlanner, RRTPlanner
+         - ``plan(goal)``, ``query(start)``
+       * - build a map of the space, then query both ends
+         - PRMPlanner, LatticePlanner
+         - ``plan(npoints)`` or ``plan(iterations)``, ``query(start, goal)``
+       * - nothing to plan
+         - DubinsPlanner, ReedsSheppPlanner, QuinticPolyPlanner,
+           CurvaturePolyPlanner
+         - ``query(start, goal)``
+       * - reactive
+         - Bug2
+         - ``run(start, goal)``
+
+    A planner raises ``ValueError`` for invalid arguments and :class:`NoPathError`
+    when a valid problem has no solution.
+
     :seealso: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid`
     """
 
