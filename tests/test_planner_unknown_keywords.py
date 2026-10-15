@@ -98,6 +98,27 @@ class TestLabelValues(unittest.TestCase):
             warnings.simplefilter("error", DeprecationWarning)
             self.dx.plot(labelvalues=True)
 
+    def test_labels_is_the_argument(self):
+        self.dx.plot(labels=True)
+        self.assertEqual(
+            len(plt.gca().texts), len(np.argwhere(np.isfinite(self.dx.distancemap)))
+        )
+
+    def test_labelvalues_is_a_synonym(self):
+        # the book's name, without a warning
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            self.dx.plot(labelvalues=True)
+        a = {t.get_position(): t.get_text() for t in plt.gca().texts}
+        plt.close("all")
+        self.dx.plot(labels=True)
+        b = {t.get_position(): t.get_text() for t in plt.gca().texts}
+        self.assertEqual(a, b)
+
+    def test_plot_bg_labels(self):
+        self.dx.plot_bg(labels=True)
+        self.assertGreater(len(plt.gca().texts), 0)
+
     def test_default_has_no_labels(self):
         self.dx.plot()
         self.assertEqual(len(plt.gca().texts), 0)

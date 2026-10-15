@@ -659,8 +659,9 @@ class PlannerBase:
         goal_marker: dict[str, Any] | None = None,
         start_vehicle: dict[str, Any] | None = None,
         goal_vehicle: dict[str, Any] | None = None,
-        labelvalues: bool = False,
+        labels: bool = False,
         label_style: dict[str, Any] | None = None,
+        labelvalues: bool = False,
         inflated: bool | None = None,
         colorbar: bool | dict[str, Any] | None = None,
         colorbar_style: dict[str, Any] | None = None,
@@ -697,10 +698,11 @@ class PlannerBase:
         :param ax: axes to plot into, defaults to a new axes
         :param block: block after displaying the plot, defaults to None
         :param bgargs: arguments passed to :meth:`plot_bg`, defaults to None
-        :param labelvalues: write the distance value in each cell of the
-            distance field, defaults to False.  Useful for small grids, see
+        :param labels: write the distance value in each cell of the distance
+            field, defaults to False.  Useful for small grids, see
             :meth:`plot_bg`.
-        :param label_style: Matplotlib text options for ``labelvalues``
+        :param label_style: Matplotlib text options for ``labels``
+        :param labelvalues: a synonym of ``labels``, the name used in the book
         :param inflated: show the inflated obstacles, passed to :meth:`plot_bg`
         :param colorbar: show a colorbar for the distance field, passed to
             :meth:`plot_bg`
@@ -839,8 +841,8 @@ class PlannerBase:
         start_vehicle_options = START_VEHICLE_STYLE | (start_vehicle_style or {})
         goal_vehicle_options = GOAL_VEHICLE_STYLE | (goal_vehicle_style or {})
         bgargs = dict(bgargs or {})
-        if labelvalues:
-            bgargs["labelvalues"] = True
+        if labels or labelvalues:
+            bgargs["labels"] = True
             bgargs.setdefault("label_style", label_style)
         # arguments of the background that are given here rather than in bgargs
         for bg_name, bg_value in (
@@ -1038,8 +1040,9 @@ class PlannerBase:
         colorbar: bool | dict[str, Any] = True,
         block: bool | None = None,
         colorbar_style: dict[str, Any] | None = None,
-        labelvalues: bool = False,
+        labels: bool = False,
         label_style: dict[str, Any] | None = None,
+        labelvalues: bool = False,
         **unused: Any,
     ) -> None:
         """
@@ -1057,8 +1060,9 @@ class PlannerBase:
         :param colorbar_style: options for the colorbar, passed to
             :meth:`matplotlib.figure.Figure.colorbar`, defaults to None.  The
             label defaults to "Distance".
-        :param labelvalues: write the value in each cell of the distance field,
+        :param labels: write the value in each cell of the distance field,
             defaults to False
+        :param labelvalues: a synonym of ``labels``, the name used in the book
         :param label_style: Matplotlib text options for the values, merged over
             a red, centered ``fontsize`` 8 label, as in the book.  The axes
             are set to show every cell whole.
@@ -1163,14 +1167,14 @@ class PlannerBase:
             c_map = mpl.colors.ListedColormap(colors)
             occgrid.plot(image, cmap=c_map, zorder=1)
 
-            if labelvalues:
+            if labels or labelvalues:
                 self._label_values(ax, distance, norm, vmax, label_style)
 
         else:
             # occupancy grid only
-            if labelvalues:
+            if labels or labelvalues:
                 warnings.warn(
-                    "labelvalues has no effect, there is no distance field",
+                    "labels has no effect, there is no distance field",
                     UserWarning,
                     stacklevel=2,
                 )
