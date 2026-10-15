@@ -73,9 +73,7 @@ class LatticeVertex(DVertex):
 
 
 class LatticeEdge(Edge):
-    def __init__(
-        self, v1: Any, v2: Any, cost: float, pose: SE2, move: str
-    ) -> None:
+    def __init__(self, v1: Any, v2: Any, cost: float, pose: SE2, move: str) -> None:
         super().__init__(v1, v2, cost)
         self.pose = pose
         self.move = move
@@ -299,9 +297,7 @@ class LatticePlanner(PlannerBase):
         if summary:
             print(f"{self.graph.n} vertices and {self.graph.ne} edges created")
 
-    def query(  # type: ignore[override]
-        self, start: ArrayLike, goal: ArrayLike
-    ) -> tuple[NDArray, LatticeStatus]:
+    def query(self, start: ArrayLike, goal: ArrayLike) -> tuple[NDArray, LatticeStatus]:
         r"""
         Find a path through the lattice
 
@@ -348,9 +344,7 @@ class LatticePlanner(PlannerBase):
             edges.append(e)
             segments.append(e.move)
 
-        return np.array([p.coord for p in path]), LatticeStatus(
-            cost, segments, edges
-        )
+        return np.array([p.coord for p in path]), LatticeStatus(cost, segments, edges)
 
     def plot(  # type: ignore[override]
         self, path: NDArray | None = None, **kwargs: Any

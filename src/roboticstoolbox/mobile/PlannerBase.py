@@ -10,7 +10,6 @@ from __future__ import annotations
 import copy
 import os
 import warnings
-from abc import ABC
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
@@ -88,7 +87,7 @@ def _layers(
     return tuple(style)
 
 
-class PlannerBase(ABC):
+class PlannerBase:
     r"""
     Mobile robot motion planner (superclass)
 
@@ -117,7 +116,7 @@ class PlannerBase(ABC):
     includes:
 
     - encapsulates an occupancy grid and optionally inflates it
-    - validates ``start`` and ``goal`` if given
+    - validates ``start`` and ``goal`` if given, see :meth:`validate_start_goal`
     - encapsulates a private random number generator with specifiable seed
     - encapsulates state such as start, goal, and the plan
     - provides a message channel for diagnostic output
@@ -126,8 +125,8 @@ class PlannerBase(ABC):
 
     - at constructor time by the arguments ``start`` or ``goal``
     - by assigning the attributes ``start`` or ``goal``
-    - at planning time by specifying ``goal`` to :meth:`plan`
-    - at query time by specifying ``start`` to :meth:`query`
+    - at planning time by specifying ``goal`` to the planner's ``plan`` method
+    - at query time by specifying ``start`` to the planner's ``query`` method
 
     :seealso: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid`
     """
@@ -313,26 +312,6 @@ class PlannerBase(ABC):
     #     if self._seed is not None:
     #         self._private_random = np.random.default_rng(seed=self._seed)
 
-    def next(self, *args: Any, **kwargs: Any) -> Any:
-        """
-        Next point on the path, provided by the planner subclass
-
-        :raises NotImplementedError: the planner subclass does not provide it
-        """
-        raise NotImplementedError
-
-    def plan(self, *args: Any, **kwargs: Any) -> Any:
-        r"""
-        Plan path (superclass)
-
-        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value passed to constructor
-        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value passed to constructor
-
-        The implementation depends on the particular planner.  Some may have
-        no planning phase.  The plan may also depend on just the start or goal.
-        """
-        pass
-
     @property
     def occgrid(self) -> BinaryOccupancyGrid | None:
         """
@@ -452,74 +431,36 @@ class PlannerBase(ABC):
         if self._progress:
             self._bar.finish()
 
-    def query(
+    def validate_start_goal(
         self,
         start: ArrayLike2 | ArrayLike3 | None = None,
         goal: ArrayLike2 | ArrayLike3 | None = None,
         dtype: Any = None,
-        next: bool = True,
-        animate: bool = False,
-        movie: Any = None,
-    ) -> NDArray | None:
+    ) -> None:
         r"""
-        Find a path from start to goal using planner (superclass)
+        Validate and store the start and goal
 
-        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value specified to constructor
-        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value specified to constructor
-        :param dtype: data type of the returned path, defaults to int
-        :param next: invoke :meth:`next` method of class, defaults to True
-        :param animate: show the vehicle path, defaults to False
-        :param movie: unused, kept for compatibility
-        :raises ValueError: there is no start point
-        :return: path from start to goal, one point :math:`(x, y)` or configuration :math:`(x, y, \theta)` per row
-        :rtype: ndarray(N,2) or ndarray(N,3)
+        :param start: start position :math:`(x, y)` or configuration
+            :math:`(x, y, \theta)`, defaults to the value already set
+        :param goal: goal position :math:`(x, y)` or configuration
+            :math:`(x, y, \theta)`, defaults to the value already set
+        :param dtype: data type for the coordinates, defaults to None
+        :raises ValueError: ``start`` or ``goal`` is of the wrong length or is
+            inside an obstacle
 
-        Find a path from ``start`` to ``goal`` using a previously computed plan.
+        Each given value is tested against the planner's dimensionality and the
+        occupancy grid, and then stored as :attr:`start` or :attr:`goal`.  A
+        value of None leaves the existing value unchanged.  If either is invalid
+        neither is stored.
 
-        This is a generic method that works for any planner
-        (:math:`\mathbb{R}^2` or :math:`\SE{2}`) that can incrementally
-        determine the next point on the path.  The method performs the following
-        steps:
-
-        - Validate start and goal
-        - If ``animate``, visualize the environment using :meth:`plot`
-        - Iterate on the class's :meth:`next` method until the ``goal`` is
-          achieved, and if ``animate`` plot points.
-
-        :seealso: :meth:`next` :meth:`plan`
+        :seealso: :meth:`validate_endpoint` :attr:`start` :attr:`goal`
         """
-        # make sure start and goal are set and valid
-        self.start = self.validate_endpoint(start, dtype=dtype)
-        self.goal = self.validate_endpoint(goal, dtype=dtype)
-
-        # if movie is not None:
-        #     animate = True
-
-        if animate:
-            self.plot()
-
-        # movie = MovieWriter(movie)
-
-        robot = self._start
-        if robot is None:
-            raise ValueError("no start point")
-        path: list[NDArray | None] = [robot]
-
-        while next:
-            if animate:
-                plt.plot(robot[0], robot[1], "y.", markersize=12)
-                plt.pause(0.05)
-
-            # get next point on the path
-            robot = self.next(robot)
-
-            # are we are done?
-            if robot is None:
-                path.append(self._goal)
-                return np.array(path).astype(dtype if dtype is not None else int)
-
-            path.append(robot)
-        return None
+        start_ = self.validate_endpoint(start, dtype=dtype)
+        goal_ = self.validate_endpoint(goal, dtype=dtype)
+        if start_ is not None:
+            self._start = start_
+        if goal_ is not None:
+            self._goal = goal_
 
     def plot(
         self,

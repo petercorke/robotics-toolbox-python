@@ -254,18 +254,16 @@ class PRMPlanner(PlannerBase):
         self.random_init()  # reset the random number generator
         self._create_roadmap(npoints, dist_thresh)
 
-    def query(  # type: ignore[override]
+    def query(
         self,
         start: ArrayLike2 | None = None,
         goal: ArrayLike2 | None = None,
-        **kwargs: Any,
     ) -> NDArray:
         """
         Find a path from start to goal using planner
 
         :param start: start position :math:`(x, y)`, defaults to previously set value
         :param goal: goal position :math:`(x, y)`, defaults to previously set value
-        :param kwargs: options passed to :meth:`PlannerBase.query`
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
         :raises RuntimeError: if :meth:`plan` has not been called, or no path
@@ -283,7 +281,7 @@ class PRMPlanner(PlannerBase):
         if self.graph is None or self.graph.n == 0:
             raise RuntimeError("no plan computed")
 
-        super().query(start=start, goal=goal, next=False, **kwargs)
+        self.validate_start_goal(start, goal)
 
         # find roadmap vertices closest to start and goal
         vstart, _ = self.graph.closest(self.start)

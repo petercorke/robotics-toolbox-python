@@ -245,9 +245,7 @@ class RRTPlanner(PlannerBase):
 
         self.progress_end()
 
-    def query(  # type: ignore[override]
-        self, start: ArrayLike
-    ) -> tuple[NDArray, RRTStatus]:
+    def query(self, start: ArrayLike) -> tuple[NDArray, RRTStatus]:
         r"""
         Find a path from start configuration
 

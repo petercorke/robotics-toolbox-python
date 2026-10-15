@@ -441,7 +441,7 @@ class DstarPlanner(PlannerBase):
         """
         return self._Dstar.nexpand
 
-    def query(  # type: ignore[override]
+    def query(
         self,
         start: ArrayLike,
         sensor: Callable[..., Any] | None = None,

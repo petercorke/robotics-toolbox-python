@@ -101,9 +101,9 @@ class TestRun(unittest.TestCase):
 
     def test_query_and_plan_are_not_provided(self):
         bug = Bug2(occgrid=block_map())
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(AttributeError):
             bug.query()
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(AttributeError):
             bug.plan()
 
 

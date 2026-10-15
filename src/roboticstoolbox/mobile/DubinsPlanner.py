@@ -431,9 +431,7 @@ class DubinsPlanner(PlannerBase):
     def stepsize(self) -> float:
         return self._stepsize
 
-    def query(  # type: ignore[override]
-        self, start: ArrayLike, goal: ArrayLike, **kwargs: Any
-    ) -> tuple[NDArray, DubinsStatus]:
+    def query(self, start: ArrayLike, goal: ArrayLike) -> tuple[NDArray, DubinsStatus]:
         r"""
         Find a path between two configurations
 
@@ -462,7 +460,7 @@ class DubinsPlanner(PlannerBase):
         +-------------+-----------------------------------------------------+
 
         """
-        super().query(start=start, goal=goal, next=False, **kwargs)
+        self.validate_start_goal(start, goal)
 
         assert self.start is not None and self.goal is not None
         path, length, mode, lengths = path_planning(

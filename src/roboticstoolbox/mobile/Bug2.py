@@ -123,8 +123,7 @@ class Bug2(PlannerBase):
         """
 
         # make sure start and goal are set and valid
-        self.start = self.validate_endpoint(start, dtype=int)
-        self.goal = self.validate_endpoint(goal, dtype=int)
+        self.validate_start_goal(start, goal, dtype=int)
         if self._start is None or self._goal is None:
             raise ValueError("start and goal must be specified")
 
@@ -298,12 +297,6 @@ class Bug2(PlannerBase):
             self._k += 1
 
         return n
-
-    def query(self) -> None:  # type: ignore[override]
-        raise NotImplementedError("This class has no query method")
-
-    def plan(self) -> None:
-        raise NotImplementedError("This class has no plan method")
 
 
 # Ported from Peter Corke's edgelist function found:

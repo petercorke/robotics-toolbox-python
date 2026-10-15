@@ -523,8 +523,8 @@ class ReedsSheppPlanner(PlannerBase):
             + f"\n  curvature={self._curvature}, stepsize={self._stepsize}"
         )
 
-    def query(  # type: ignore[override]
-        self, start: ArrayLike, goal: ArrayLike, **kwargs: Any
+    def query(
+        self, start: ArrayLike, goal: ArrayLike
     ) -> tuple[NDArray, ReedsSheppStatus]:
         r"""
         Find a path between two configurations
@@ -559,7 +559,7 @@ class ReedsSheppPlanner(PlannerBase):
             backwards.
 
         """
-        super().query(start=start, goal=goal, next=False, **kwargs)
+        self.validate_start_goal(start, goal)
 
         assert self.start is not None and self.goal is not None
         bpath = reeds_shepp_path_planning(

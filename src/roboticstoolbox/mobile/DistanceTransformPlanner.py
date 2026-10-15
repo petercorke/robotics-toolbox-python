@@ -168,6 +168,78 @@ class DistanceTransformPlanner(PlannerBase):
             summary=summary,
         )
 
+    def query(
+        self,
+        start: ArrayLike2 | None = None,
+        goal: ArrayLike2 | None = None,
+        dtype: Any = None,
+        animate: bool = False,
+        *,
+        next: bool | None = None,
+        movie: Any = None,
+    ) -> NDArray:
+        r"""
+        Find a path from start to goal using the distance map
+
+        :param start: start position :math:`(x, y)`, defaults to value specified
+            to constructor
+        :param goal: goal position :math:`(x, y)`, defaults to value specified
+            to constructor
+        :param dtype: data type of the returned path, defaults to int
+        :param animate: show the vehicle path, defaults to False
+        :param next: deprecated, has no effect
+        :param movie: deprecated, has no effect
+        :raises ValueError: there is no start point, or no plan has been computed
+        :raises RuntimeError: the goal cannot be reached from ``start``
+        :return: path from start to goal, one point :math:`(x, y)` per row
+        :rtype: ndarray(N,2)
+
+        Repeatedly steps to the neighbouring cell with the lowest distance
+        until the goal is reached.
+
+        .. deprecated:: 1.4.5
+            ``next`` and ``movie`` were accepted but had no effect.
+
+        :seealso: :meth:`plan`
+        """
+        for name, value in (("next", next), ("movie", movie)):
+            if value is not None:
+                warnings.warn(
+                    f"{name} is deprecated and has no effect",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+
+        self.validate_start_goal(start, goal, dtype=dtype)
+        if self._start is None:
+            raise ValueError("no start point")
+
+        if self.distancemap is None:
+            raise ValueError("No distance map computed, you need to plan.")
+
+        if animate:
+            self.plot()
+
+        robot = self._start
+        path: list[NDArray] = [robot]
+
+        while True:
+            if animate:
+                plt.plot(robot[0], robot[1], "y.", markersize=12)
+                plt.pause(0.05)
+
+            # get next point on the path
+            step = self.next(robot)
+
+            # are we are done?
+            if step is None:
+                assert self._goal is not None
+                path.append(self._goal)
+                return np.array(path).astype(dtype if dtype is not None else int)
+
+            robot = step
+            path.append(robot)
+
     def next(self, position: ArrayLike2) -> NDArray | None:
         """
         Find next point on the path

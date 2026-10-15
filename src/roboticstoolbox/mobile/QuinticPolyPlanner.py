@@ -300,7 +300,7 @@ class QuinticPolyPlanner(PlannerBase):
         self.min_t = min_t
         self.max_t = max_t
 
-    def query(  # type: ignore[override]
+    def query(
         self, start: ArrayLike3, goal: ArrayLike3
     ) -> tuple[NDArray, QuinticPolyStatus]:
         r"""
@@ -324,11 +324,10 @@ class QuinticPolyPlanner(PlannerBase):
         ``jerk``    jerk profile along the path
         ==========  ===================================================
 
-        :seealso: :meth:`PlannerBase.query`
+
         """
         # stored as arrays, as for the other planners
-        self.start = start
-        self.goal = goal
+        self.validate_start_goal(start, goal)
         start_ = self.start
         goal_ = self.goal
         assert start_ is not None and goal_ is not None
