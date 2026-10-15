@@ -17,9 +17,10 @@ from typing import Any, Callable, NamedTuple
 import matplotlib.pyplot as plt
 import numpy as np
 
+from spatialmath.base.types import ArrayLike2
 from roboticstoolbox.mobile.OccGrid import OccupancyGrid
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.tools.types import NDArray
 
 show_animation = True
 
@@ -387,7 +388,7 @@ class DstarPlanner(PlannerBase):
 
     def plan(
         self,
-        goal: ArrayLike | None = None,
+        goal: ArrayLike2 | None = None,
         animate: bool | None = None,
         progress: bool = True,
         summary: bool = False,
@@ -396,7 +397,6 @@ class DstarPlanner(PlannerBase):
         Plan D* path
 
         :param goal: goal position :math:`(x, y)`, defaults to previously set value
-        :type goal: array_like(2), optional
         :param animate: deprecated, animating the planning is not implemented
         :param progress: deprecated, has no effect
         :param summary: print the number of insertions, defaults to False
@@ -445,7 +445,6 @@ class DstarPlanner(PlannerBase):
         Number of node expansions
 
         :return: number of expansions
-        :rtype: int
 
         This number will increase during initial planning, and also if
         replanning is invoked during the :meth:`query`.
@@ -454,7 +453,7 @@ class DstarPlanner(PlannerBase):
 
     def query(
         self,
-        start: ArrayLike,
+        start: ArrayLike2,
         sensor: Callable[..., Any] | None = None,
         animate: bool | None = None,
         verbose: bool = False,
@@ -464,16 +463,13 @@ class DstarPlanner(PlannerBase):
         Find path with replanning
 
         :param start: start position :math:`(x,y)`
-        :type start: array_like(2)
         :param sensor: sensor function, defaults to None
-        :type sensor: callable, optional
         :param animate: animate the motion of the robot, defaults to the
             planner's :attr:`animate`
         :param movie: save the animation as a movie file, filename or tuple
             (filename, frame interval), defaults to the planner's :attr:`movie`.
             Implies ``animate``.
         :param verbose: display detailed diagnostic information about D* operations, defaults to False
-        :type verbose: bool, optional
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
 

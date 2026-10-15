@@ -16,8 +16,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
 
+from spatialmath.base.types import ArrayLike3
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.tools.types import NDArray
 
 # (t, p, q, mode) of a candidate path, None when it does not exist
 _Segments = tuple[float | None, float | None, float | None, list[str]]
@@ -312,7 +313,7 @@ def generate_local_course(
 
 
 def path_planning(
-    start: ArrayLike, goal: ArrayLike, curvature: float, step_size: float = 0.1
+    start: ArrayLike3, goal: ArrayLike3, curvature: float, step_size: float = 0.1
 ) -> tuple[NDArray, float, list[str], list[float]]:
     """
     Dubins path planner
@@ -369,11 +370,8 @@ class DubinsPlanner(PlannerBase):
     Dubins path planner
 
     :param curvature: maximum path curvature, defaults to 1.0
-    :type curvature: float, optional
     :param stepsize: spacing between points on the path, defaults to 0.1
-    :type stepsize: float, optional
     :return: Dubins path planner
-    :rtype: DubinsPlanner instance
 
     ==================   ========================
     Feature              Capability
@@ -431,14 +429,14 @@ class DubinsPlanner(PlannerBase):
     def stepsize(self) -> float:
         return self._stepsize
 
-    def query(self, start: ArrayLike, goal: ArrayLike) -> tuple[NDArray, DubinsStatus]:
+    def query(
+        self, start: ArrayLike3, goal: ArrayLike3
+    ) -> tuple[NDArray, DubinsStatus]:
         r"""
         Find a path between two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
-        :type start: array_like(3), optional
         :param goal: goal configuration :math:`(x, y, \theta)`
-        :type goal: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
