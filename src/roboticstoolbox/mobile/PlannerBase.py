@@ -659,6 +659,8 @@ class PlannerBase:
         goal_marker: dict[str, Any] | None = None,
         start_vehicle: dict[str, Any] | None = None,
         goal_vehicle: dict[str, Any] | None = None,
+        labelvalues: bool = False,
+        label_style: dict[str, Any] | None = None,
         **unused: Any,
     ) -> Axes:
         r"""
@@ -691,6 +693,10 @@ class PlannerBase:
         :param ax: axes to plot into, defaults to a new axes
         :param block: block after displaying the plot, defaults to None
         :param bgargs: arguments passed to :meth:`plot_bg`, defaults to None
+        :param labelvalues: write the distance value in each cell of the
+            distance field, defaults to False.  Useful for small grids, see
+            :meth:`plot_bg`.
+        :param label_style: Matplotlib text options for ``labelvalues``
         :param path_marker: deprecated, use ``path_style``
         :param path_marker_reverse: deprecated, use ``path_reverse_style``
         :param line: deprecated, use ``path_style``
@@ -823,6 +829,9 @@ class PlannerBase:
         start_vehicle_options = START_VEHICLE_STYLE | (start_vehicle_style or {})
         goal_vehicle_options = GOAL_VEHICLE_STYLE | (goal_vehicle_style or {})
         bgargs = dict(bgargs or {})
+        if labelvalues:
+            bgargs["labelvalues"] = True
+            bgargs.setdefault("label_style", label_style)
 
         ndims = self._ndims
 
@@ -1010,6 +1019,8 @@ class PlannerBase:
         colorbar: bool | dict[str, Any] = True,
         block: bool | None = None,
         colorbar_style: dict[str, Any] | None = None,
+        labelvalues: bool = False,
+        label_style: dict[str, Any] | None = None,
         **unused: Any,
     ) -> None:
         """
@@ -1027,6 +1038,11 @@ class PlannerBase:
         :param colorbar_style: options for the colorbar, passed to
             :meth:`matplotlib.figure.Figure.colorbar`, defaults to None.  The
             label defaults to "Distance".
+        :param labelvalues: write the value in each cell of the distance field,
+            defaults to False
+        :param label_style: Matplotlib text options for the values, merged over
+            a centered ``fontsize`` 8 label that is white on dark cells and
+            black on bright ones.  The axes are set to show every cell whole.
 
         .. deprecated:: 1.4.5
             Giving a dict as ``colorbar`` is deprecated, use ``colorbar=True``
@@ -1128,8 +1144,17 @@ class PlannerBase:
             c_map = mpl.colors.ListedColormap(colors)
             occgrid.plot(image, cmap=c_map, zorder=1)
 
+            if labelvalues:
+                self._label_values(ax, distance, norm, vmax, label_style)
+
         else:
             # occupancy grid only
+            if labelvalues:
+                warnings.warn(
+                    "labelvalues has no effect, there is no distance field",
+                    UserWarning,
+                    stacklevel=2,
+                )
 
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
@@ -1148,6 +1173,39 @@ class PlannerBase:
         # plt.draw()
         if block is not None:
             plt.show(block=block)
+
+    @staticmethod
+    def _label_values(
+        ax: Axes,
+        distance: NDArray,
+        norm: mpl.colors.Normalize,
+        vmax: float,
+        label_style: dict[str, Any] | None,
+    ) -> None:
+        """
+        Write the value of each free cell of a distance field into the cell
+
+        :param distance: distance field, nan for obstacles and a large value
+            for cells that cannot be reached
+        """
+        # show every cell whole, so that the values on the edge are legible
+        rows, columns = distance.shape
+        ax.set_xlim(-0.5, columns - 0.5)
+        ax.set_ylim(-0.5, rows - 0.5)
+
+        free = np.isfinite(distance) & (distance <= vmax)
+        values = distance[free]
+        integral = bool(np.all(values == np.round(values)))
+        for r, c in np.argwhere(free):
+            value = distance[r, c]
+            style: dict[str, Any] = {
+                "ha": "center",
+                "va": "center",
+                "fontsize": 8,
+                "color": "white" if norm(value) < 0.5 else "black",
+                "zorder": 5,
+            } | (label_style or {})
+            ax.text(c, r, f"{value:.0f}" if integral else f"{value:.1f}", **style)
 
     def message(self, s: str, color: str | None = None) -> None:
         """

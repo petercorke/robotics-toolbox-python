@@ -3,7 +3,7 @@ Unknown keyword arguments to the planners' constructor and plot methods.
 
 RTB 1.4.4 silently swallowed them (``**unused``), RTB 1.4.5 first made them an
 error, which broke code printed in the book, for example
-``dx.plot(labelvalues=True)``.  They are ignored with a ``DeprecationWarning``.
+``dx.plot(nonsense=True)``.  They are ignored with a ``DeprecationWarning``.
 """
 
 import unittest
@@ -30,8 +30,8 @@ class TestUnknownKeywords(unittest.TestCase):
         dx = DistanceTransformPlanner(grid(), goal=(6, 6))
         dx.plan()
         with self.assertWarns(DeprecationWarning) as cm:
-            dx.plot(labelvalues=True)
-        self.assertIn("labelvalues", str(cm.warning))
+            dx.plot(nonsense=True)
+        self.assertIn("nonsense", str(cm.warning))
         # and it did plot
         self.assertGreater(len(plt.gcf().axes), 0)
 
@@ -40,9 +40,9 @@ class TestUnknownKeywords(unittest.TestCase):
         dx.plan()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            dx.plot(labelvalues=True, colorbar_size=3)
+            dx.plot(nonsense=True, colorbar_size=3)
         text = " ".join(str(x.message) for x in w)
-        self.assertIn("labelvalues", text)
+        self.assertIn("nonsense", text)
         self.assertIn("colorbar_size", text)
 
     def test_known_keywords_do_not_warn(self):
@@ -62,15 +62,101 @@ class TestUnknownKeywords(unittest.TestCase):
         dx = DistanceTransformPlanner(grid(), goal=(6, 6))
         dx.plan()
         with self.assertWarns(DeprecationWarning):
-            dx.plot_bg(labelvalues=True)
+            dx.plot_bg(nonsense=True)
 
     def test_warning_points_at_the_caller(self):
         dx = DistanceTransformPlanner(grid(), goal=(6, 6))
         dx.plan()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            dx.plot(labelvalues=True)
+            dx.plot(nonsense=True)
         self.assertTrue(any(x.filename == __file__ for x in w))
+
+
+class TestLabelValues(unittest.TestCase):
+    """dx.plot(labelvalues=True), in the book's chapter 5 notebook"""
+
+    def setUp(self):
+        # the 6x6 example from the book
+        g = np.zeros((6, 6), dtype=int)
+        g[2:5, 3:5] = 1
+        g[3:5, 2] = 1
+        self.grid = g
+        self.dx = DistanceTransformPlanner(g, metric="manhattan")
+        self.dx.plan(goal=(1, 1))
+
+    def tearDown(self):
+        plt.close("all")
+
+    def texts(self):
+        return {
+            tuple(map(int, t.get_position())): t.get_text() for t in plt.gca().texts
+        }
+
+    def test_no_warning(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            self.dx.plot(labelvalues=True)
+
+    def test_default_has_no_labels(self):
+        self.dx.plot()
+        self.assertEqual(len(plt.gca().texts), 0)
+
+    def test_every_free_cell_is_labelled_with_its_distance(self):
+        self.dx.plot(labelvalues=True)
+        texts = self.texts()
+        d = self.dx.distancemap
+        free = np.argwhere(np.isfinite(d))
+        self.assertEqual(len(texts), len(free))
+        for r, c in free:
+            self.assertEqual(texts[(c, r)], str(int(d[r, c])))
+        self.assertEqual(texts[(1, 1)], "0")
+
+    def test_obstacles_are_not_labelled(self):
+        self.dx.plot(labelvalues=True)
+        texts = self.texts()
+        for r, c in np.argwhere(self.grid > 0):
+            self.assertNotIn((c, r), texts)
+
+    def test_euclidean_values_have_one_decimal(self):
+        dx = DistanceTransformPlanner(self.grid, metric="euclidean")
+        dx.plan(goal=(1, 1))
+        dx.plot(labelvalues=True)
+        self.assertEqual(self.texts()[(2, 2)], "1.4")
+
+    def test_label_style(self):
+        self.dx.plot(labelvalues=True, label_style=dict(fontsize=14, color="m"))
+        text = plt.gca().texts[0]
+        self.assertEqual(text.get_fontsize(), 14)
+        self.assertEqual(text.get_color(), "m")
+
+    def test_without_a_distance_field(self):
+        dx = DistanceTransformPlanner(self.grid, goal=(1, 1))
+        with self.assertWarns(UserWarning):
+            dx.plot(labelvalues=True)
+
+
+class TestDistanceSynonym(unittest.TestCase):
+    """The book's notebook gives distance="manhattan", which was ignored"""
+
+    def test_distance_is_metric(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", DeprecationWarning)
+            dx = DistanceTransformPlanner(grid(), distance="manhattan")
+        self.assertEqual(dx.metric, "manhattan")
+
+    def test_default_is_unchanged(self):
+        self.assertEqual(DistanceTransformPlanner(grid()).metric, "euclidean")
+
+    def test_conflict(self):
+        with self.assertRaises(ValueError):
+            DistanceTransformPlanner(grid(), metric="manhattan", distance="euclidean")
+        # the same thing twice is fine
+        DistanceTransformPlanner(grid(), metric="manhattan", distance="manhattan")
+
+    def test_bad_value(self):
+        with self.assertRaises(ValueError):
+            DistanceTransformPlanner(grid(), distance="chebyshev")
 
 
 if __name__ == "__main__":

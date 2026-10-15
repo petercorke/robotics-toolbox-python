@@ -32,8 +32,10 @@ class DistanceTransformPlanner(PlannerBase):
     :type occgrid: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid` or ndarray(h,w)
     :param metric: distance metric, one of: "euclidean" [default], "manhattan"
         ("cityblock" is a synonym)
+    :param distance: a synonym for ``metric``, the name used in the book
     :param kwargs: common planner options, see :class:`PlannerBase`
-    :raises ValueError: ``metric`` is not recognised
+    :raises ValueError: ``metric`` is not recognised, or ``metric`` and
+        ``distance`` are both given and are different
 
     ==================   ========================
     Feature              Capability
@@ -81,8 +83,16 @@ class DistanceTransformPlanner(PlannerBase):
         self,
         occgrid: BinaryOccupancyGrid | NDArray | None = None,
         metric: str = "euclidean",
+        *,
+        distance: str | None = None,
         **kwargs: Any,
     ) -> None:
+        if distance is not None:
+            if metric != "euclidean" and metric.lower() != distance.lower():
+                raise ValueError(
+                    f"metric {metric!r} and distance {distance!r} are different"
+                )
+            metric = distance
         if metric.lower() not in METRICS:
             raise ValueError(f"unknown metric {metric!r}, must be one of {METRICS}")
 
