@@ -3,20 +3,25 @@
 @author: Jesse Haviland
 """
 
+from __future__ import annotations
+
+from copy import deepcopy
+from functools import wraps
+from typing import Any
+
+from numpy import array, cos, sin
+from spatialmath import SE3
+
 # import numpy as np
 # from spatialmath import SE3
 import roboticstoolbox as rp
-from roboticstoolbox.robot.Link import Link, _dirties_frne, _copy_shapes
-from roboticstoolbox.ets.ETS import ETS
 from roboticstoolbox.ets.ET import ET
-from spatialmath import SE3
-from functools import wraps
-from numpy import ndarray, cos, sin, array
-from copy import deepcopy
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.robot.Link import Link, _copy_shapes, _dirties_frne
 from roboticstoolbox.tools.types import ArrayLike
 
 
-def _check_rne(func):
+def _check_rne(func: Any) -> Any:
     """
     @_check_rne decorator
 
@@ -36,7 +41,7 @@ def _check_rne(func):
     """
 
     @wraps(func)
-    def wrapper_check_rne(*args, **kwargs):
+    def wrapper_check_rne(*args: Any, **kwargs: Any) -> Any:
         if args[0]._frne is None or args[0]._frne_stale:
             args[0]._copy_to_cpp()
         return func(*args, **kwargs)
@@ -50,25 +55,25 @@ try:  # pragma: no cover
     # print('Using SymPy')
     import sympy as sym
 
-    def _issymbol(x):  # type: ignore
+    def _issymbol(x: Any) -> Any:
         return isinstance(x, sym.Expr)
 
 except ImportError:
 
-    def _issymbol(x):  # pylint: disable=unused-argument
+    def _issymbol(x: Any) -> Any:  # pylint: disable=unused-argument
         return False
 
 
-def _cos(theta) -> float:
+def _cos(theta: Any) -> float:
     if _issymbol(theta):
-        return sym.cos(theta)  # type: ignore
+        return sym.cos(theta)
     else:
         return cos(theta)
 
 
-def _sin(theta) -> float:
+def _sin(theta: Any) -> float:
     if _issymbol(theta):
-        return sym.sin(theta)  # type: ignore
+        return sym.sin(theta)
     else:
         return sin(theta)
 
@@ -125,8 +130,8 @@ class DHLink(Link):
         offset: float = 0,
         flip: bool = False,
         qlim: ArrayLike | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         super().__init__(**kwargs)
 
         ets = self._to_ets(sigma, theta, d, alpha, a, offset, flip, mdh)
@@ -152,7 +157,8 @@ class DHLink(Link):
         self.offset = offset
         self.id = None
         self.mesh = None
-        self.number = None
+        # set when the link is added to a robot
+        self.number = None  # type: ignore[assignment]
 
     def _to_ets(self, sigma: int, theta: float, d: float, alpha: float, a: float, offset: float, flip: bool, mdh: bool) -> ETS:
         ets = ETS()
@@ -311,7 +317,7 @@ class DHLink(Link):
 
     #     return new_links
 
-    def __add__(self, L):
+    def __add__(self, L: Any) -> Any:
         if isinstance(L, DHLink):
             return rp.DHRobot([self, L])
 
@@ -336,7 +342,7 @@ class DHLink(Link):
         else:
             raise TypeError("Cannot add a Link with a non Link object")
 
-    def __str__(self):
+    def __str__(self) -> str:
 
         s = ""
 
@@ -359,9 +365,9 @@ class DHLink(Link):
             )
         return s
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         name = self.__class__.__name__
-        args = []
+        args: list[str] = []
         if self.isrevolute:
             self._format_param(args, "d")
         else:
@@ -371,7 +377,7 @@ class DHLink(Link):
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> Any:
         kwargs = {
             "name": deepcopy(self.name),
             "joint_name": deepcopy(self._joint_name),
@@ -417,7 +423,7 @@ class DHLink(Link):
     # -------------------------------------------------------------------------- #
 
     @property
-    def theta(self):
+    def theta(self) -> Any:
         """
         Get/set joint angle.
 
@@ -431,7 +437,7 @@ class DHLink(Link):
 
     @theta.setter
     @_dirties_frne
-    def theta(self, theta_new):
+    def theta(self, theta_new: Any) -> None:
         if not self.sigma and theta_new != 0.0:
             raise ValueError("theta is not valid for revolute joints")
         else:
@@ -440,7 +446,7 @@ class DHLink(Link):
     # -------------------------------------------------------------------------- #
 
     @property
-    def d(self):
+    def d(self) -> Any:
         """
         Get/set link offset.
 
@@ -454,7 +460,7 @@ class DHLink(Link):
 
     @d.setter
     @_dirties_frne
-    def d(self, d_new):
+    def d(self, d_new: Any) -> None:
         if self.sigma and d_new != 0.0:
             raise ValueError("f is not valid for prismatic joints")
         else:
@@ -463,7 +469,7 @@ class DHLink(Link):
     # -------------------------------------------------------------------------- #
 
     @property
-    def a(self):
+    def a(self) -> Any:
         """
         Get/set link length.
 
@@ -477,13 +483,13 @@ class DHLink(Link):
 
     @a.setter
     @_dirties_frne
-    def a(self, a_new):
+    def a(self, a_new: Any) -> None:
         self._a = a_new
 
     # -------------------------------------------------------------------------- #
 
     @property
-    def alpha(self):
+    def alpha(self) -> Any:
         """
         Get/set link twist.
 
@@ -497,13 +503,13 @@ class DHLink(Link):
 
     @alpha.setter
     @_dirties_frne
-    def alpha(self, alpha_new):
+    def alpha(self, alpha_new: Any) -> None:
         self._alpha = alpha_new
 
     # -------------------------------------------------------------------------- #
 
     @property
-    def sigma(self):
+    def sigma(self) -> Any:
         """
         Get/set joint type.
 
@@ -520,13 +526,13 @@ class DHLink(Link):
 
     @sigma.setter
     @_dirties_frne
-    def sigma(self, sigma_new):
+    def sigma(self, sigma_new: Any) -> None:
         self._sigma = sigma_new
 
     # -------------------------------------------------------------------------- #
 
     @property
-    def mdh(self):
+    def mdh(self) -> Any:
         """
         Get/set kinematic convention.
 
@@ -543,13 +549,13 @@ class DHLink(Link):
 
     @mdh.setter
     @_dirties_frne
-    def mdh(self, mdh_new):
+    def mdh(self, mdh_new: Any) -> None:
         self._mdh = int(mdh_new)
 
     # -------------------------------------------------------------------------- #
 
     @property
-    def offset(self):
+    def offset(self) -> Any:
         """
         Get/set joint variable offset
 
@@ -568,12 +574,12 @@ class DHLink(Link):
         return self._offset
 
     @offset.setter
-    def offset(self, offset_new):
+    def offset(self, offset_new: Any) -> None:
         self._offset = offset_new
 
     # -------------------------------------------------------------------------- #
 
-    def A(self, q: float) -> SE3:
+    def A(self, q: float = 0.0) -> SE3:
         r"""
         Link transform matrix
 
@@ -656,7 +662,7 @@ class DHLink(Link):
         return SE3(T, check=False)
 
     @property
-    def isrevolute(self):
+    def isrevolute(self) -> Any:
         """
         Checks if the joint is of revolute type
 
@@ -672,7 +678,7 @@ class DHLink(Link):
             return False
 
     @property
-    def isprismatic(self):
+    def isprismatic(self) -> Any:
         """
         Checks if the joint is of prismatic type
 
@@ -732,9 +738,15 @@ class RevoluteDH(DHLink):
     """
 
     def __init__(
-        self, d: float = 0.0, a: float = 0.0, alpha: float = 0.0, offset: float = 0.0,
-        qlim: ArrayLike | None = None, flip: bool = False, **kwargs
-    ):
+        self,
+        d: float = 0.0,
+        a: float = 0.0,
+        alpha: float = 0.0,
+        offset: float = 0.0,
+        qlim: ArrayLike | None = None,
+        flip: bool = False,
+        **kwargs: Any,
+    ) -> None:
 
         theta = 0.0
         sigma = 0
@@ -795,9 +807,15 @@ class PrismaticDH(DHLink):
     """
 
     def __init__(
-        self, theta: float = 0.0, a: float = 0.0, alpha: float = 0.0,
-        offset: float = 0.0, qlim: ArrayLike | None = None, flip: bool = False, **kwargs
-    ):
+        self,
+        theta: float = 0.0,
+        a: float = 0.0,
+        alpha: float = 0.0,
+        offset: float = 0.0,
+        qlim: ArrayLike | None = None,
+        flip: bool = False,
+        **kwargs: Any,
+    ) -> None:
 
         d = 0.0
         sigma = 1
@@ -861,9 +879,15 @@ class RevoluteMDH(DHLink):
     """
 
     def __init__(
-        self, d: float = 0.0, a: float = 0.0, alpha: float = 0.0, offset: float = 0.0,
-        qlim: ArrayLike | None = None, flip: bool = False, **kwargs
-    ):
+        self,
+        d: float = 0.0,
+        a: float = 0.0,
+        alpha: float = 0.0,
+        offset: float = 0.0,
+        qlim: ArrayLike | None = None,
+        flip: bool = False,
+        **kwargs: Any,
+    ) -> None:
 
         theta = 0.0
         sigma = 0
@@ -927,9 +951,15 @@ class PrismaticMDH(DHLink):
     """
 
     def __init__(
-        self, theta: float = 0.0, a: float = 0.0, alpha: float = 0.0,
-        offset: float = 0.0, qlim: ArrayLike | None = None, flip: bool = False, **kwargs
-    ):
+        self,
+        theta: float = 0.0,
+        a: float = 0.0,
+        alpha: float = 0.0,
+        offset: float = 0.0,
+        qlim: ArrayLike | None = None,
+        flip: bool = False,
+        **kwargs: Any,
+    ) -> None:
 
         d = 0.0
         sigma = 1

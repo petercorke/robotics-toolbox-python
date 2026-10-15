@@ -1,8 +1,10 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import numpy as np
+
 from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
-from math import pi
 
 
 class AL5D(URDFRobot):
@@ -27,7 +29,7 @@ class AL5D(URDFRobot):
     .. codeauthor:: Tassos Natsakis
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "lynxmotion_al5d_description/urdf/al5d_robot.urdf",
             manufacturer="Lynxmotion",

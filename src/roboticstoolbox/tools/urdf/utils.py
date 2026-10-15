@@ -1,10 +1,14 @@
 """Utilities for URDF parsing."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 import spatialmath as sm
 
 
-def parse_origin(node):
+def parse_origin(node: Any) -> Any:
     """Find the ``origin`` subelement of an XML node and convert it
     into a 4x4 homogenous transformation matrix.
     Parameters
@@ -33,7 +37,7 @@ def parse_origin(node):
     return matrix.A, rpy
 
 
-def configure_origin(value):
+def configure_origin(value: Any) -> Any:
     """Convert a value into a 4x4 transform matrix.
     Parameters
     ----------

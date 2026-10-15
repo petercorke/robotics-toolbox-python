@@ -1,15 +1,16 @@
-import numpy as np
-from math import sin, cos, pi
+from __future__ import annotations
 
 # import matplotlib.pyplot as plt
-import time
-from spatialmath import SE3
+from math import cos, pi, sin
+from typing import Any
+
+import numpy as np
 import spatialmath.base as smb
-
-from bdsim.block_types import GraphicsBlock, ContinuousBlock, FunctionBlock, SourceBlock
-
+from bdsim.block_types import ContinuousBlock, FunctionBlock, GraphicsBlock, SourceBlock
+from spatialmath import SE3
 
 from roboticstoolbox import quintic_func, trapezoidal_func
+from roboticstoolbox.tools.types import ArrayLike
 
 """
 Robot blocks:
@@ -59,7 +60,7 @@ class FKine(FunctionBlock):
     inlabels = ("q",)
     outlabels = ("T",)
 
-    def __init__(self, robot=None, args={}, **blockargs):
+    def __init__(self, robot: Any = None, args: Any = {}, **blockargs: Any) -> None:
         """
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
@@ -82,7 +83,7 @@ class FKine(FunctionBlock):
         self.inport_names(("q",))
         self.outport_names(("T",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         q = inports[0]
         return [self.robot.fkine(q, **self.args)]
 
@@ -132,14 +133,14 @@ class IKine(FunctionBlock):
 
     def __init__(
         self,
-        robot=None,
-        q0=None,
-        useprevious=True,
-        ik=None,
-        args={},
-        seed=None,
-        **blockargs,
-    ):
+        robot: Any = None,
+        q0: Any = None,
+        useprevious: bool = True,
+        ik: Any = None,
+        args: Any = {},
+        seed: Any = None,
+        **blockargs: Any,
+    ) -> None:
         """
         :param robot: Robot model, defaults to None
         :type robot: Robot subclass, optional
@@ -175,12 +176,12 @@ class IKine(FunctionBlock):
         self.inport_names(("T",))
         self.outport_names(("q",))
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         if self.useprevious:
             self.qprev = self.q0
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         if self.useprevious:
             q0 = self.qprev
         else:
@@ -242,15 +243,15 @@ class Jacobian(FunctionBlock):
 
     def __init__(
         self,
-        robot,
-        frame="0",
-        representation=None,
-        inverse=False,
-        pinv=False,
-        damping=None,
-        transpose=False,
-        **blockargs,
-    ):
+        robot: Any,
+        frame: str = "0",
+        representation: Any = None,
+        inverse: bool = False,
+        pinv: bool = False,
+        damping: Any = None,
+        transpose: bool = False,
+        **blockargs: Any,
+    ) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -315,7 +316,7 @@ class Jacobian(FunctionBlock):
         self.inport_names(("q",))
         self.outport_names(("J",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         q = inports[0]
 
         J = self.jfunc(q)
@@ -377,7 +378,9 @@ class ArmPlot(GraphicsBlock):
     inlabels = ("q",)
     PLOT3D = True
 
-    def __init__(self, robot=None, q0=None, backend=None, **blockargs):
+    def __init__(
+        self, robot: Any = None, q0: Any = None, backend: Any = None, **blockargs: Any
+    ) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -399,9 +402,9 @@ class ArmPlot(GraphicsBlock):
         self.robot = robot
         self.backend = backend
         self.q0 = q0
-        self.env = None
+        self.env: Any = None
 
-    def start(self, simstate):
+    def start(self, simstate: Any) -> None:
         # create the plot
         # super().reset()
         # if state.options.graphics:
@@ -419,7 +422,7 @@ class ArmPlot(GraphicsBlock):
             block=False,
         )
 
-    def step(self, t, inports):
+    def step(self, t: Any, inports: Any) -> None:
         if not self._enabled:
             return
 
@@ -476,7 +479,15 @@ class JTraj(SourceBlock):
     nout = 3
     outlabels = ("q", "qd", "qdd")
 
-    def __init__(self, q0, qf, qd0=None, qdf=None, T=None, **blockargs):
+    def __init__(
+        self,
+        q0: Any,
+        qf: Any,
+        qd0: Any = None,
+        qdf: Any = None,
+        T: Any = None,
+        **blockargs: Any,
+    ) -> None:
         """
 
         :param q0: initial joint coordinate
@@ -510,13 +521,14 @@ class JTraj(SourceBlock):
         if qd0 is None:
             qd0 = np.zeros(q0.shape)
         else:
-            qd0 = getvector(qd0)
+            # `getvector` is not imported here: NameError, see findings
+            qd0 = getvector(qd0)  # type: ignore[name-defined]
             if not len(qd0) == len(q0):
                 raise ValueError("qd0 has wrong size")
         if qdf is None:
             qdf = np.zeros(q0.shape)
         else:
-            qd1 = getvector(qdf)
+            qd1 = getvector(qdf)  # type: ignore[name-defined]
             if not len(qd1) == len(q0):
                 raise ValueError("qd1 has wrong size")
 
@@ -525,11 +537,11 @@ class JTraj(SourceBlock):
         self.qd0 = qd0
         self.qdf = qf
 
-        self.coeffs = None  # indicate that coefficients have not been computed yet
+        self.coeffs: Any = None  # indicate that coefficients have not been computed yet
 
         self.T = T
 
-    def start(self, simstate):
+    def start(self, simstate: Any) -> None:
         if self.T is None:
             # use simulation tmax
             self.T = simstate.tf
@@ -564,7 +576,7 @@ class JTraj(SourceBlock):
             ]
         )
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         if self.coeffs is None:
             # called from compile before start() is called
             n = len(self.q0)
@@ -629,7 +641,9 @@ class CTraj(SourceBlock):
     nout = 1
     outlabels = ("T",)
 
-    def __init__(self, T1, T2, T, trapezoidal=True, **blockargs):
+    def __init__(
+        self, T1: Any, T2: Any, T: Any, trapezoidal: bool = True, **blockargs: Any
+    ) -> None:
         """
         :param T1: initial pose
         :type T1: SE3
@@ -652,13 +666,13 @@ class CTraj(SourceBlock):
         self.T = T
         self.trapezoidal = trapezoidal
 
-    def start(self, simstate):
+    def start(self, simstate: Any) -> None:
         if self.T is None:
             self.T = simstate.T
         if self.trapezoidal:
             self.trapezoidalfunc = trapezoidal_func(0.0, 1.0, self.T)
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         if self.trapezoidal:
             s = self.trapezoidalfunc(t)[0]  # get the position from the trapezoidal function
         else:
@@ -707,13 +721,13 @@ class CirclePath(SourceBlock):
     def __init__(
         self,
         radius: float = 1,
-        centre=(0, 0, 0),
-        pose=None,
+        centre: Any = (0, 0, 0),
+        pose: Any = None,
         frequency: float = 1,
         unit: str = "rps",
         phase: float | None = None,
-        **blockargs,
-    ):
+        **blockargs: Any,
+    ) -> None:
         """
         :param radius: radius of circle, defaults to 1
         :type radius: float
@@ -757,7 +771,7 @@ class CirclePath(SourceBlock):
 
         self.outport_names(("y",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         theta = t * self.omega + self.phase
         x = self.radius * cos(theta) + self.centre[0]
         y = self.radius * sin(theta) + self.centre[1]
@@ -813,7 +827,9 @@ class Trapezoidal(SourceBlock):
 
     # TODO: change name to Trapezoidal, check if used anywhere
 
-    def __init__(self, q0, qf, V=None, T=None, **blockargs):
+    def __init__(
+        self, q0: Any, qf: Any, V: Any = None, T: Any = None, **blockargs: Any
+    ) -> None:
         """
         Compute a joint-space trajectory
 
@@ -834,12 +850,12 @@ class Trapezoidal(SourceBlock):
         self.q0 = q0
         self.qf = qf
 
-    def start(self, simstate):
+    def start(self, simstate: Any) -> None:
         if self.T is None:
             self.T = simstate.T
         self.trapezoidalfunc = trapezoidal_func(self.q0, self.qf, self.T)
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         return list(self.trapezoidalfunc(t))
 
 
@@ -898,7 +914,15 @@ class Traj(FunctionBlock):
     # TODO: this needs work, need better description of what this does for
     # time-based case
 
-    def __init__(self, y0=0, yf=1, T=None, time=False, traj="trapezoidal", **blockargs):
+    def __init__(
+        self,
+        y0: ArrayLike | float = 0,
+        yf: ArrayLike | float = 1,
+        T: Any = None,
+        time: bool = False,
+        traj: str = "trapezoidal",
+        **blockargs: Any,
+    ) -> None:
         """
         :param y0: initial value, defaults to 0
         :type y0: array_like(m), optional
@@ -925,19 +949,19 @@ class Traj(FunctionBlock):
 
         super().__init__(nin=nin, blockclass=blockclass, **blockargs)
 
-        y0 = smb.getvector(y0)
-        yf = smb.getvector(yf)
-        assert len(y0) == len(yf), "y0 and yf must have same length"
+        y0v = smb.getvector(y0)
+        yfv = smb.getvector(yf)
+        assert len(y0v) == len(yfv), "y0 and yf must have same length"
 
-        self.y0 = y0
-        self.yf = yf
+        self.y0 = y0v
+        self.yf = yfv
         self.time = time
         self.T = T
         self.traj = traj
 
         self.outport_names(("y", "yd", "ydd"))
 
-    def start(self, simstate):
+    def start(self, simstate: Any) -> None:
         # if self.time:
         #     assert self.x[0] <= 0, "interpolation not defined for t=0"
         #     assert self.x[-1] >= simstate.T, "interpolation not defined for t=T"
@@ -963,7 +987,7 @@ class Traj(FunctionBlock):
         for i in range(len(self.y0)):
             self.trajfuncs.append(trajfunc(self.y0[i], self.yf[i], xmax))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         if not self.time:
             t = inports[0]
 
@@ -1034,7 +1058,7 @@ class IDyn(FunctionBlock):
     inlabels = ("q", "qd", "qdd")
     outlabels = "τ"
 
-    def __init__(self, robot, gravity=None, **blockargs):
+    def __init__(self, robot: Any, gravity: Any = None, **blockargs: Any) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -1059,7 +1083,7 @@ class IDyn(FunctionBlock):
         self.inport_names(("q", "qd", "qdd"))
         self.outport_names(("$\tau$",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         tau = self.robot.rne(inports[0], inports[1], inports[2], gravity=self.gravity)
         return [tau]
 
@@ -1104,7 +1128,7 @@ class Gravload(FunctionBlock):
     inlabels = ("q",)
     outlabels = "τ"
 
-    def __init__(self, robot, gravity=None, **blockargs):
+    def __init__(self, robot: Any, gravity: Any = None, **blockargs: Any) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -1126,7 +1150,7 @@ class Gravload(FunctionBlock):
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         tau = self.robot.gravload(inports[0], gravity=self.gravity)
         return [tau]
 
@@ -1168,7 +1192,13 @@ class Gravload_X(FunctionBlock):
     inlabels = ("q",)
     outlabels = "w"
 
-    def __init__(self, robot, representation="rpy/xyz", gravity=None, **blockargs):
+    def __init__(
+        self,
+        robot: Any,
+        representation: str = "rpy/xyz",
+        gravity: Any = None,
+        **blockargs: Any,
+    ) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -1193,7 +1223,7 @@ class Gravload_X(FunctionBlock):
         self.outport_names(("$\tau$",))
         self.representation = representation
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         q = inports[0]
         w = self.robot.gravload_x(
             q, representation=self.representation, gravity=self.gravity
@@ -1244,7 +1274,7 @@ class Inertia(FunctionBlock):
     inlabels = ("q",)
     outlabels = "M"
 
-    def __init__(self, robot, **blockargs):
+    def __init__(self, robot: Any, **blockargs: Any) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -1261,7 +1291,7 @@ class Inertia(FunctionBlock):
         self.inport_names(("q",))
         self.outport_names(("M",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         q = inports[0]
         M = self.robot.inertia(q)
         return [M]
@@ -1306,7 +1336,13 @@ class Inertia_X(FunctionBlock):
     inlabels = ("q",)
     outlabels = "M"
 
-    def __init__(self, robot, representation="rpy/xyz", pinv=False, **blockargs):
+    def __init__(
+        self,
+        robot: Any,
+        representation: str = "rpy/xyz",
+        pinv: bool = False,
+        **blockargs: Any,
+    ) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -1327,7 +1363,7 @@ class Inertia_X(FunctionBlock):
         self.inport_names(("q",))
         self.outport_names(("M",))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         q = inports[0]
         Mx = self.robot.inertia_x(q, pinv=self.pinv, representation=self.representation)
         return [Mx]
@@ -1382,7 +1418,7 @@ class FDyn(ContinuousBlock):
     outlabels = ("q", "qd", "qdd")
     inlabels = "τ"
 
-    def __init__(self, robot, q0=None, **blockargs):
+    def __init__(self, robot: Any, q0: Any = None, **blockargs: Any) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -1412,14 +1448,14 @@ class FDyn(ContinuousBlock):
         self._x0 = np.r_[q0, np.zeros((robot.n,))]
         self._qdd = None
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         n = self.robot.n
         q = x[:n]
         qd = x[n:]
         qdd = self._qdd  # from last deriv
         return [q, qd, qdd]
 
-    def deriv(self, t, inports, x):
+    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
         # return [qd qdd]
         Q = inports[0]
         n = self.robot.n
@@ -1483,13 +1519,13 @@ class FDyn_X(ContinuousBlock):
 
     def __init__(
         self,
-        robot,
-        q0=None,
-        gravcomp=False,
-        velcomp=False,
-        representation="rpy/xyz",
-        **blockargs,
-    ):
+        robot: Any,
+        q0: Any = None,
+        gravcomp: bool = False,
+        velcomp: bool = False,
+        representation: str = "rpy/xyz",
+        **blockargs: Any,
+    ) -> None:
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -1540,7 +1576,7 @@ class FDyn_X(ContinuousBlock):
         # case (stateful blocks whose output() needs a resolved input).
         self._qdd = np.zeros((robot.n,))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         n = self.robot.n
         q = x[:n]
         qd = x[n:]
@@ -1557,7 +1593,7 @@ class FDyn_X(ContinuousBlock):
 
         return [q, qd, x, xd, xdd]
 
-    def deriv(self, t, inports, x):
+    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
         # return [qd qdd]
 
         # get current joint space state

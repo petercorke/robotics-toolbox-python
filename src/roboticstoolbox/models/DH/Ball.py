@@ -4,9 +4,14 @@
 @author: Samuel Drew
 """
 
-from roboticstoolbox import DHRobot, RevoluteDH
+from __future__ import annotations
+
 from math import pi
+from typing import Any
+
 import numpy as np
+
+from roboticstoolbox import DHRobot, RevoluteDH
 
 
 class Ball(DHRobot):
@@ -49,10 +54,10 @@ class Ball(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self, N=10):
+    def __init__(self, N: int = 10) -> None:
 
         links = []
-        q1 = []
+        q1: list[float] = []
 
         for i in range(N):
             links.append(RevoluteDH(a=0.1, alpha=pi / 2))
@@ -67,7 +72,7 @@ class Ball(DHRobot):
         self.addconfiguration("qz", self.qz)
 
 
-def _fract(i):
+def _fract(i: Any) -> Any:
     # i is "i-1" as per the paper
     theta1 = 1
     theta2 = -2 / 3

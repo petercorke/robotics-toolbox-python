@@ -9,26 +9,56 @@ visualisation helpers require the extension and raise at call time when absent.
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base import getvector, getmatrix, verifymatrix, tr2jac
+from spatialmath.base import getmatrix, getvector, tr2jac, verifymatrix
 
 try:
-    from roboticstoolbox._fknm_c import (  # type: ignore[import]
-        ETS_init as _c_ETS_init,
-        ETS_fkine as _c_ETS_fkine,
-        ETS_jacob0 as _c_ETS_jacob0,
-        ETS_jacobe as _c_ETS_jacobe,
-        ETS_hessian0 as _c_ETS_hessian0,
-        ETS_hessiane as _c_ETS_hessiane,
-        IK_NR_c as _c_IK_NR_c,
-        IK_GN_c as _c_IK_GN_c,
-        IK_LM_c as _c_IK_LM_c,
+    from roboticstoolbox._fknm_c import (
         ET_T as _c_ET_T,
-        ET_init as _c_ET_init,
-        ET_update as _c_ET_update,
+    )
+    from roboticstoolbox._fknm_c import (
         Angle_Axis as _c_Angle_Axis,
+    )
+    from roboticstoolbox._fknm_c import (
+        ET_init as _c_ET_init,
+    )
+    from roboticstoolbox._fknm_c import (
+        ET_update as _c_ET_update,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_fkine as _c_ETS_fkine,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_hessian0 as _c_ETS_hessian0,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_hessiane as _c_ETS_hessiane,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_init as _c_ETS_init,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_jacob0 as _c_ETS_jacob0,
+    )
+    from roboticstoolbox._fknm_c import (
+        ETS_jacobe as _c_ETS_jacobe,
+    )
+    from roboticstoolbox._fknm_c import (
+        IK_GN_c as _c_IK_GN_c,
+    )
+    from roboticstoolbox._fknm_c import (
+        IK_LM_c as _c_IK_LM_c,
+    )
+    from roboticstoolbox._fknm_c import (
+        IK_NR_c as _c_IK_NR_c,
+    )
+    from roboticstoolbox._fknm_c import (
         Robot_link_T as _c_Robot_link_T,
+    )
+    from roboticstoolbox._fknm_c import (
         r2q as _c_r2q,
     )
 
@@ -37,7 +67,7 @@ except ImportError:
     _C_AVAILABLE = False
 
 
-def _is_symbolic(q) -> bool:
+def _is_symbolic(q: Any) -> bool:
     """True when q contains SymPy symbols (object dtype array)."""
     if q is None:
         return False
@@ -49,9 +79,9 @@ def _is_symbolic(q) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _python_fkine(data, q, base, tool, include_base):
+def _python_fkine(data: Any, q: Any, base: Any, tool: Any, include_base: Any) -> Any:
     q = getmatrix(q, (None, None))
-    l, _ = q.shape  # noqa: E741
+    l, _ = q.shape
     end = data[-1]
 
     if isinstance(tool, SE3):
@@ -105,7 +135,7 @@ def _python_fkine(data, q, base, tool, include_base):
     return T
 
 
-def _python_jacob0(data, n, q, tool):
+def _python_jacob0(data: Any, n: Any, q: Any, tool: Any) -> Any:
     if tool is None:
         tools = np.eye(4)
     elif isinstance(tool, SE3):
@@ -173,13 +203,13 @@ def _python_jacob0(data, n, q, tool):
         return J  # symbolic elements — keep as object
 
 
-def _python_jacobe(data, n, q, tool):
+def _python_jacobe(data: Any, n: Any, q: Any, tool: Any) -> Any:
     T = _python_fkine(data, q, None, tool, False)
     return tr2jac(T.T) @ _python_jacob0(data, n, q, tool)
 
 
-def _python_hessian(J):
-    def cross(a, b):
+def _python_hessian(J: Any) -> Any:
+    def cross(a: Any, b: Any) -> Any:
         return np.array(
             [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
         )
@@ -200,14 +230,14 @@ def _python_hessian(J):
 # ---------------------------------------------------------------------------
 
 
-def ETS_init(fknm_data, n, m):
+def ETS_init(fknm_data: Any, n: Any, m: Any) -> Any:
     """Create the C++ ETS handle; returns None when C is absent or any ET is symbolic."""
     if _C_AVAILABLE and all(h is not None for h in fknm_data):
         return _c_ETS_init(fknm_data, n, m)
     return None
 
 
-def _to_q_array(q) -> np.ndarray:
+def _to_q_array(q: Any) -> np.ndarray:
     """Convert q to C-contiguous float64 ndarray; raises TypeError for non-numeric."""
     try:
         return np.ascontiguousarray(q, dtype=float)
@@ -215,7 +245,7 @@ def _to_q_array(q) -> np.ndarray:
         raise TypeError(f"q must be numeric, not {type(q).__name__}")
 
 
-def _to_f_array(x):
+def _to_f_array(x: Any) -> Any:
     """Convert SE3 or ndarray to float64 ndarray; pass through None."""
     if x is None:
         return None
@@ -224,7 +254,9 @@ def _to_f_array(x):
     return np.asarray(x, dtype=float)
 
 
-def ETS_fkine(fknm, q, base, tool, include_base, _data=None):
+def ETS_fkine(
+    fknm: Any, q: Any, base: Any, tool: Any, include_base: Any, _data: Any = None
+) -> Any:
     if fknm is not None and not _is_symbolic(q):
         return _c_ETS_fkine(
             fknm, _to_q_array(q),
@@ -233,19 +265,21 @@ def ETS_fkine(fknm, q, base, tool, include_base, _data=None):
     return _python_fkine(_data, q, base, tool, include_base)
 
 
-def ETS_jacob0(fknm, q, tool, _data=None, _n=None):
+def ETS_jacob0(fknm: Any, q: Any, tool: Any, _data: Any = None, _n: Any = None) -> Any:
     if fknm is not None and not _is_symbolic(q):
         return _c_ETS_jacob0(fknm, _to_q_array(q), _to_f_array(tool))
     return _python_jacob0(_data, _n, q, tool)
 
 
-def ETS_jacobe(fknm, q, tool, _data=None, _n=None):
+def ETS_jacobe(fknm: Any, q: Any, tool: Any, _data: Any = None, _n: Any = None) -> Any:
     if fknm is not None and not _is_symbolic(q):
         return _c_ETS_jacobe(fknm, _to_q_array(q), _to_f_array(tool))
     return _python_jacobe(_data, _n, q, tool)
 
 
-def ETS_hessian0(fknm, q, J0, tool, _data=None, _n=None):
+def ETS_hessian0(
+    fknm: Any, q: Any, J0: Any, tool: Any, _data: Any = None, _n: Any = None
+) -> Any:
     if fknm is not None and not _is_symbolic(q) and not _is_symbolic(J0):
         return _c_ETS_hessian0(fknm, _to_q_array(q), J0, _to_f_array(tool))
     if J0 is None:
@@ -258,7 +292,9 @@ def ETS_hessian0(fknm, q, J0, tool, _data=None, _n=None):
     return _python_hessian(J0)
 
 
-def ETS_hessiane(fknm, q, Je, tool, _data=None, _n=None):
+def ETS_hessiane(
+    fknm: Any, q: Any, Je: Any, tool: Any, _data: Any = None, _n: Any = None
+) -> Any:
     if fknm is not None and not _is_symbolic(q) and not _is_symbolic(Je):
         return _c_ETS_hessiane(fknm, _to_q_array(q), Je, _to_f_array(tool))
     if Je is None:
@@ -276,7 +312,7 @@ def ETS_hessiane(fknm, q, Je, tool, _data=None, _n=None):
 # ---------------------------------------------------------------------------
 
 
-def _ik_args_se3(args):
+def _ik_args_se3(args: Any) -> Any:
     """Convert Tep (first positional arg) from SE3 to ndarray if needed."""
     if not args:
         return args
@@ -286,7 +322,7 @@ def _ik_args_se3(args):
     return (tep,) + args[1:]
 
 
-def IK_NR_c(fknm, *args, **kwargs):
+def IK_NR_c(fknm: Any, *args: Any, **kwargs: Any) -> Any:
     if fknm is None:
         raise RuntimeError(
             "ik_NR requires the _fknm_c C extension; use ikine_NR for the Python solver"
@@ -294,7 +330,7 @@ def IK_NR_c(fknm, *args, **kwargs):
     return _c_IK_NR_c(fknm, *_ik_args_se3(args), **kwargs)
 
 
-def IK_GN_c(fknm, *args, **kwargs):
+def IK_GN_c(fknm: Any, *args: Any, **kwargs: Any) -> Any:
     if fknm is None:
         raise RuntimeError(
             "ik_GN requires the _fknm_c C extension; use ikine_GN for the Python solver"
@@ -302,7 +338,7 @@ def IK_GN_c(fknm, *args, **kwargs):
     return _c_IK_GN_c(fknm, *_ik_args_se3(args), **kwargs)
 
 
-def IK_LM_c(fknm, *args, **kwargs):
+def IK_LM_c(fknm: Any, *args: Any, **kwargs: Any) -> Any:
     if fknm is None:
         raise RuntimeError(
             "ik_LM requires the _fknm_c C extension; use ikine_LM for the Python solver"
@@ -315,7 +351,7 @@ def IK_LM_c(fknm, *args, **kwargs):
 # ---------------------------------------------------------------------------
 
 
-def ET_init(*args):
+def ET_init(*args: Any) -> Any:
     """Create a C ET handle; returns None when C extension is absent or inputs are symbolic."""
     if _C_AVAILABLE:
         try:
@@ -325,14 +361,14 @@ def ET_init(*args):
     return None
 
 
-def ET_T(et_handle, q):
+def ET_T(et_handle: Any, q: Any) -> Any:
     """Evaluate an ET at q via C.  Raises TypeError when C absent so ET.A() falls back."""
     if et_handle is None:
         raise TypeError("_fknm_c not available")
     return _c_ET_T(et_handle, q)
 
 
-def ET_update(et_handle, *args):
+def ET_update(et_handle: Any, *args: Any) -> None:
     """Update a C ET handle in-place; no-op when handle is None or inputs are symbolic."""
     if et_handle is not None:
         try:
@@ -346,20 +382,20 @@ def ET_update(et_handle, *args):
 # ---------------------------------------------------------------------------
 
 
-def Angle_Axis(T, Td):
+def Angle_Axis(T: Any, Td: Any) -> Any:
     """C angle-axis error; raises when C absent (p_servo.angle_axis has a Python fallback)."""
     if not _C_AVAILABLE:
         raise RuntimeError("_fknm_c not available")
     return _c_Angle_Axis(T, Td)
 
 
-def Robot_link_T(link_ets, link_scene_nodes, q0, q):
+def Robot_link_T(link_ets: Any, link_scene_nodes: Any, q0: Any, q: Any) -> None:
     """Update per-link scene-node transforms via C; no-op when C absent (visualisation only)."""
     if _C_AVAILABLE:
         _c_Robot_link_T(link_ets, link_scene_nodes, q0, q)
 
 
-def r2q(R):
+def r2q(R: Any) -> Any:
     """Convert rotation matrix to quaternion via C; raises when C absent."""
     if not _C_AVAILABLE:
         raise RuntimeError("_fknm_c not available")

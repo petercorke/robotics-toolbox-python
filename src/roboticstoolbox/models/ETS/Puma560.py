@@ -1,6 +1,10 @@
+
+from __future__ import annotations
+
+import numpy as np
+
 from roboticstoolbox import ET as ET
 from roboticstoolbox import Robot
-import numpy as np
 
 
 class Puma560(Robot):
@@ -27,9 +31,9 @@ class Puma560(Robot):
           no. 3, pp. 590-594, June 2007, doi: 10.1109/TRO.2007.896765.
         - https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters
 
-    """  # noqa
+    """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Puma dimensions (m)
         l1 = 0.672
         l2 = -0.2337

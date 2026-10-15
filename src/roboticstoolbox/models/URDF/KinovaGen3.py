@@ -1,6 +1,9 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import numpy as np
+
 from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 
@@ -29,7 +32,7 @@ class KinovaGen3(URDFRobot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "gen3",
             manufacturer="Kinova",

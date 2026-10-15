@@ -1,14 +1,17 @@
+"""
+Quintic polynomial path planner
+"""
+
+from __future__ import annotations
+
 import math
-from collections import namedtuple
+from typing import NamedTuple
 
-import matplotlib.pyplot as plt
 import numpy as np
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from spatialmath.base.types import ArrayLike3
 
-# parameter
-
-
-show_animation = True
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
+from roboticstoolbox.tools.types import NDArray
 
 # ======================================================================== #
 
@@ -21,7 +24,16 @@ show_animation = True
 
 
 class _QuinticPolynomial:
-    def __init__(self, xs, vxs, axs, xe, vxe, axe, time):
+    def __init__(
+        self,
+        xs: float,
+        vxs: float,
+        axs: float,
+        xe: float,
+        vxe: float,
+        axe: float,
+        time: float,
+    ) -> None:
         # calc coefficient of quintic polynomial
         # See jupyter notebook document for derivation of this equation.
         self.a0 = xs
@@ -48,7 +60,7 @@ class _QuinticPolynomial:
         self.a4 = x[1]
         self.a5 = x[2]
 
-    def calc_point(self, t):
+    def calc_point(self, t: float) -> float:
         xt = (
             self.a0
             + self.a1 * t
@@ -60,7 +72,7 @@ class _QuinticPolynomial:
 
         return xt
 
-    def calc_first_derivative(self, t):
+    def calc_first_derivative(self, t: float) -> float:
         xt = (
             self.a1
             + 2 * self.a2 * t
@@ -71,44 +83,61 @@ class _QuinticPolynomial:
 
         return xt
 
-    def calc_second_derivative(self, t):
+    def calc_second_derivative(self, t: float) -> float:
         xt = 2 * self.a2 + 6 * self.a3 * t + 12 * self.a4 * t**2 + 20 * self.a5 * t**3
 
         return xt
 
-    def calc_third_derivative(self, t):
+    def calc_third_derivative(self, t: float) -> float:
         xt = 6 * self.a3 + 24 * self.a4 * t + 60 * self.a5 * t**2
 
         return xt
 
 
 def quintic_polynomials_planner(
-    sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_accel, max_jerk, dt, MIN_T, MAX_T
-):
+    sx: float,
+    sy: float,
+    syaw: float,
+    sv: float,
+    sa: float,
+    gx: float,
+    gy: float,
+    gyaw: float,
+    gv: float,
+    ga: float,
+    max_accel: float,
+    max_jerk: float,
+    dt: float,
+    MIN_T: float,
+    MAX_T: float,
+) -> tuple[list[float], NDArray, list[float], list[float], list[float]]:
     """
-    quintic polynomial planner
+    Quintic polynomial planner
 
-    input
-        s_x: start x position [m]
-        s_y: start y position [m]
-        s_yaw: start yaw angle [rad]
-        sa: start accel [m/ss]
-        gx: goal x position [m]
-        gy: goal y position [m]
-        gyaw: goal yaw angle [rad]
-        ga: goal accel [m/ss]
-        max_accel: maximum accel [m/ss]
-        max_jerk: maximum jerk [m/sss]
-        dt: time tick [s]
+    :param sx: start x position [m]
+    :param sy: start y position [m]
+    :param syaw: start yaw angle [rad]
+    :param sv: start speed [m/s]
+    :param sa: start acceleration [m/s^2]
+    :param gx: goal x position [m]
+    :param gy: goal y position [m]
+    :param gyaw: goal yaw angle [rad]
+    :param gv: goal speed [m/s]
+    :param ga: goal acceleration [m/s^2]
+    :param max_accel: maximum acceleration [m/s^2]
+    :param max_jerk: maximum jerk [m/s^3]
+    :param dt: time step [s]
+    :param MIN_T: minimum path time, also the step in the time searched [s]
+    :param MAX_T: maximum path time [s]
+    :raises NoPathError: no path time in the range meets the acceleration
+        and jerk limits
+    :return: time, path, velocity, acceleration and jerk
+    :rtype: tuple(list, ndarray(N,3), list, list, list)
 
-    return
-        time: time result
-        rx: x position result list
-        ry: y position result list
-        ryaw: yaw angle result list
-        rv: velocity result list
-        ra: accel result list
-
+    The path time is searched from ``MIN_T`` to ``MAX_T`` in steps of ``MIN_T``
+    and the first time for which the maximum acceleration and jerk are within
+    their limits is used.  The path is :math:`(x, y, \\theta)` for each time
+    step.
     """
 
     vxs = sv * math.cos(syaw)
@@ -121,7 +150,13 @@ def quintic_polynomials_planner(
     axg = ga * math.cos(gyaw)
     ayg = ga * math.sin(gyaw)
 
-    time, rx, ry, ryaw, rv, ra, rj = [], [], [], [], [], [], []
+    time: list[float] = []
+    rx: list[float] = []
+    ry: list[float] = []
+    ryaw: list[float] = []
+    rv: list[float] = []
+    ra: list[float] = []
+    rj: list[float] = []
 
     for T in np.arange(MIN_T, MAX_T, MIN_T):
         xqp = _QuinticPolynomial(sx, vxs, axs, gx, vxg, axg, T)
@@ -159,8 +194,11 @@ def quintic_polynomials_planner(
             max([abs(i) for i in ra]) <= max_accel
             and max([abs(i) for i in rj]) <= max_jerk
         ):
-            print("find path!!")
             break
+    else:
+        raise NoPathError(
+            "no path time between MIN_T and MAX_T meets the acceleration and jerk limits"
+        )
 
     return time, np.c_[rx, ry, ryaw], rv, ra, rj
 
@@ -170,30 +208,28 @@ def quintic_polynomials_planner(
 
 # Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
 # Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
+class QuinticPolyStatus(NamedTuple):
+    """Time, velocity, acceleration and jerk along the path"""
+
+    t: list[float]
+    vel: list[float]
+    acc: list[float]
+    jerk: list[float]
+
+
 class QuinticPolyPlanner(PlannerBase):
     r"""
     Quintic polynomial path planner
 
     :param dt: time step, defaults to 0.1
-    :type dt: float, optional
     :param start_vel: initial velocity, defaults to 0
-    :type start_vel: float, optional
     :param start_acc: initial acceleration, defaults to 0
-    :type start_acc: float, optional
     :param goal_vel: goal velocity, defaults to 0
-    :type goal_vel: float, optional
     :param goal_acc: goal acceleration, defaults to 0
-    :type goal_acc: float, optional
     :param max_acc: maximum acceleration, defaults to 1
-    :type max_acc: int, optional
     :param max_jerk: maximum jerk, defaults to 0.5
-    :type min_t: float, optional
     :param min_t: minimum path time, defaults to 5
-    :type max_t: float, optional
     :param max_t: maximum path time, defaults to 100
-    :type max_jerk: float, optional
-    :return: Quintic polynomial path planner
-    :rtype: QuinticPolyPlanner instance
 
     ==================   ========================
     Feature              Capability
@@ -214,7 +250,7 @@ class QuinticPolyPlanner(PlannerBase):
             y(t) &= b_0 + b_1 t + b_2 t^2 + b_3 t^3 + b_4 t^4 + b_5 t^5
 
     that meets the given constraints.  Trajectory time is given as a range.
-    
+
     :reference: "Local Path Planning And Motion Control For AGV In
         Positioning",  Takahashi, T. Hongo, Y. Ninomiya and G.
         Sugimoto; Proceedings. IEEE/RSJ International Workshop on
@@ -237,22 +273,21 @@ class QuinticPolyPlanner(PlannerBase):
 
     :thanks: based on quintic polynomial planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
 
-
-    :seealso: :class:`Planner`
+    :seealso: :class:`PlannerBase` :class:`CurvaturePolyPlanner`
     """
 
     def __init__(
         self,
-        dt=0.1,
-        start_vel=0,
-        start_acc=0,
-        goal_vel=0,
-        goal_acc=0,
-        max_acc=1,
-        max_jerk=0.5,
-        min_t=5,
-        max_t=100,
-    ):
+        dt: float = 0.1,
+        start_vel: float = 0,
+        start_acc: float = 0,
+        goal_vel: float = 0,
+        goal_acc: float = 0,
+        max_acc: float = 1,
+        max_jerk: float = 0.5,
+        min_t: float = 5,
+        max_t: float = 100,
+    ) -> None:
 
         super().__init__(ndims=3)
         self.dt = dt
@@ -265,14 +300,16 @@ class QuinticPolyPlanner(PlannerBase):
         self.min_t = min_t
         self.max_t = max_t
 
-    def query(self, start, goal):
+    def query(
+        self, start: ArrayLike3, goal: ArrayLike3
+    ) -> tuple[NDArray, QuinticPolyStatus]:
         r"""
         Find a quintic polynomial path
 
         :param start: start configuration :math:`(x, y, \theta)`
-        :type start: array_like(3), optional
         :param goal: goal configuration :math:`(x, y, \theta)`
-        :type goal: array_like(3), optional
+        :raises NoPathError: no path time in the range ``min_t`` to ``max_t``
+            meets the acceleration and jerk limits
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
@@ -283,26 +320,29 @@ class QuinticPolyPlanner(PlannerBase):
         ==========  ===================================================
         ``t``       time to execute the path
         ``vel``     velocity profile along the path
-        ``accel``   acceleration profile along the path
+        ``acc``     acceleration profile along the path
         ``jerk``    jerk profile along the path
         ==========  ===================================================
 
-        :seealso: :meth:`Planner.query`
+
         """
-        self._start = start
-        self._goal = goal
+        # stored as arrays, as for the other planners
+        self.validate_start_goal(start, goal)
+        start_ = self.start
+        goal_ = self.goal
+        assert start_ is not None and goal_ is not None
 
         time, path, v, a, j = quintic_polynomials_planner(
-            start[0],
-            start[1],
-            start[2],
+            start_[0],
+            start_[1],
+            start_[2],
             self.start_vel,
             self.start_acc,
-            goal[0],
-            goal[1],
-            goal[2],
-            self.start_vel,
-            self.start_acc,
+            goal_[0],
+            goal_[1],
+            goal_[2],
+            self.goal_vel,
+            self.goal_acc,
             self.max_acc,
             self.max_jerk,
             dt=self.dt,
@@ -310,15 +350,13 @@ class QuinticPolyPlanner(PlannerBase):
             MAX_T=self.max_t,
         )
 
-        status = namedtuple("QuinticPolyStatus", ["t", "vel", "acc", "jerk"])(
-            time, v, a, j
-        )
+        status = QuinticPolyStatus(time, v, a, j)
 
         return path, status
 
 
 if __name__ == "__main__":
-    from math import pi
+    import matplotlib.pyplot as plt
 
     start = (10, 10, np.deg2rad(10.0))
     goal = (30, -10, np.deg2rad(20.0))

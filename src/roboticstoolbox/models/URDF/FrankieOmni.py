@@ -1,12 +1,15 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import numpy as np
-from roboticstoolbox.robot.Robot import Robot
-from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.ets.ETS import ETS
-from roboticstoolbox.ets.ET import ET
-from roboticstoolbox.models.URDF.URDFRobot import URDF_read
 from spatialmath import SE3
+
+from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.models.URDF.URDFRobot import URDF_read
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.Robot import Robot
 
 
 class FrankieOmni(Robot):
@@ -42,7 +45,7 @@ class FrankieOmni(Robot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         links_base, _, urdf_filepath = URDF_read(
             "clearpath_ridgeback_description/urdf/ridgeback.urdf.xacro"

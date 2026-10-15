@@ -4,9 +4,13 @@
 @author: Samuel Drew
 """
 
-from roboticstoolbox import DHRobot, RevoluteDH, PrismaticDH
+from __future__ import annotations
+
 from math import pi
+
 import numpy as np
+
+from roboticstoolbox import DHRobot, PrismaticDH, RevoluteDH
 
 
 class Cobra600(DHRobot):
@@ -34,7 +38,7 @@ class Cobra600(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         deg = pi / 180
 
         L = [

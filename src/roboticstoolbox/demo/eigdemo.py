@@ -12,14 +12,18 @@ negative if the hands are anti-parallel.
 
 """
 
+from __future__ import annotations
+
 import sys
-import numpy as np
-import matplotlib.pyplot as plt
+from math import cos, pi, sin
+from typing import Any
+
 import matplotlib.animation as animation
-from math import pi, sin, cos
+import matplotlib.pyplot as plt
+import numpy as np
 
 
-def eigdemo(A):
+def eigdemo(A: Any) -> None:
 
     print("matrix A =")
     print(A)
@@ -31,7 +35,7 @@ def eigdemo(A):
     s = np.max(np.abs(e))
 
     fig, ax = plt.subplots()
-    plt.axis([-s, s, -s, s])
+    plt.axis((-s, s, -s, s))
     plt.grid(True)
     plt.title("Eigenvector demonstration")
     plt.xlabel("x")
@@ -51,7 +55,7 @@ def eigdemo(A):
 
     print("\nto exit: type q, or close the window")
 
-    def animate(theta):
+    def animate(theta: Any) -> Any:
 
         x = np.r_[cos(-theta), sin(-theta)]
         y = A @ x
@@ -76,7 +80,7 @@ def eigdemo(A):
     plt.show(block=True)
 
 
-def main():
+def main() -> None:
     # eigdemo() prints λ1/λ2 -- on Windows, stdout defaults to the legacy
     # cp1252 console codepage (which can't encode λ) whenever it isn't a
     # real console, e.g. piped/redirected output. reconfigure() (3.7+)
@@ -84,7 +88,7 @@ def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
-    def help():
+    def help() -> None:
         print("eigdemo          # uses default matrix [1 2; 3 4]")
         print("eigdemo a b c d  # uses matrix [a b; c d]")
         sys.exit(0)

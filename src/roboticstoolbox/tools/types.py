@@ -3,11 +3,14 @@
 @author Jesse Haviland
 """
 
-from typing import Tuple, Union, List
+from collections.abc import Sequence
+
 from numpy import ndarray
 
 NDArray = ndarray
 
-PyArrayLike = Union[List[float], Tuple[float, ...]]
+# a list, tuple, range or any other sequence of numbers
+PyArrayLike = Sequence[float]
 
-ArrayLike = Union[NDArray, PyArrayLike]
+# the argument type for anything array-like, use NDArray for returned arrays
+ArrayLike = NDArray | PyArrayLike

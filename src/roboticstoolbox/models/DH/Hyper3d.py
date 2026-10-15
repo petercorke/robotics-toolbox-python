@@ -3,8 +3,13 @@
 @author: Peter Corke
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 # from math import pi
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
 
 
@@ -44,9 +49,9 @@ class Hyper3d(DHRobot):
     :seealso: :func:`Coil`, :func:`Ball`
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
-    def __init__(self, N=10, a=None, symbolic=False):
+    def __init__(self, N: int = 10, a: Any = None, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym

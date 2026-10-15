@@ -7,44 +7,38 @@
 
 from __future__ import annotations
 
-# import sys
-from os.path import splitext
 from copy import deepcopy
-from warnings import warn
-from pathlib import PurePosixPath, Path
-from typing import TextIO, TypeVar, Literal as L, overload, cast
 
+# import sys
+from typing import Any, TypeVar, cast, overload
+from typing import Literal as L
+from warnings import warn
 
 import numpy as np
-
 import spatialmath.base as smb
+from spatialgeometry import CollisionShape, Cylinder, Shape
+from spatialmath import (
+    SE2,
+    SE3,
+    SpatialAcceleration,
+    SpatialForce,
+    SpatialInertia,
+    SpatialVelocity,
+)
 from spatialmath.base.argcheck import (
-    getvector,
     getmatrix,
+    getvector,
     verifymatrix,
 )
 
-from spatialgeometry import Shape, CollisionShape, Cylinder
-
-from spatialmath import (
-    SE3,
-    SE2,
-    SpatialAcceleration,
-    SpatialVelocity,
-    SpatialInertia,
-    SpatialForce,
-)
-
 import roboticstoolbox as rtb
-from roboticstoolbox.robot.BaseRobot import BaseRobot
-from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
-from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.Link import BaseLink, Link, Link2
 from roboticstoolbox.ets.ETS import ETS
 from roboticstoolbox.ets.ETS2 import ETS2
-from roboticstoolbox.tools import URDF
+from roboticstoolbox.robot.BaseRobot import BaseRobot
+from roboticstoolbox.robot.Gripper import Gripper
+from roboticstoolbox.robot.Link import BaseLink, Link, Link2
+from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
 from roboticstoolbox.tools.types import ArrayLike, NDArray
-from roboticstoolbox.tools.data import rtb_path_to_datafile
 
 # A generic type variable representing any subclass of BaseLink
 LinkType = TypeVar("LinkType", bound=BaseLink)
@@ -79,7 +73,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         symbolic: bool = False,
         configs: dict[str, NDArray] | None = None,
         check_jindex: bool = True,
-    ):
+    ) -> None:
         # Process links
         if isinstance(arg, Robot):
             # We're passed a Robot, clone it
@@ -137,18 +131,18 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 # the first segment, so `base` is always empty and dropped;
                 # `gripper` holds trailing constant content, if any, and
                 # becomes one extra static (non-joint) link.
-                _, *segs, gripper = arg.split()
-                if gripper:
-                    segs.append(gripper)
+                _, *segs, tail_ets = arg.split()
+                if tail_ets:
+                    segs.append(tail_ets)
                 parent = None
                 for j, ets_j in enumerate(segs):
                     elink = Link(ETS(ets_j), parent=parent, name=f"link{j:d}")
                     if (
                         elink.qlim is None
                         and elink.v is not None
-                        and elink.v.qlim is not None  # type: ignore[union-attr]
+                        and elink.v.qlim is not None
                     ):
-                        elink.qlim = elink.v.qlim  # type: ignore[union-attr]  # pragma nocover
+                        elink.qlim = elink.v.qlim  # pragma nocover
                     parent = elink
                     links.append(elink)
 
@@ -178,7 +172,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     # --------- Swift Methods --------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
+    def _to_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
         ob = []
 
         for link in self.links:
@@ -208,7 +202,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return ob
 
-    def _fk_dict(self, robot_alpha=1.0, collision_alpha=0.0):
+    def _fk_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
         ob = []
 
         # Do the robot
@@ -343,7 +337,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #     )
 
     @classmethod
-    def URDF(cls, file, gripper=None, manufacturer=None):
+    def URDF(cls, file: Any, gripper: Any = None, manufacturer: Any = None) -> Any:
         """Deprecated. Use :class:`~roboticstoolbox.models.URDF.URDFRobot` as a
         base class, or call ``URDF_read()`` from
         ``roboticstoolbox.models.URDF.URDFRobot`` and construct ``Robot``
@@ -653,9 +647,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         # given ets. Then use an lru_cache to speed up return
 
         if self._reach is None:
-            d_all = []
+            d_all: list[float] = []
             for link in self.ee_links:
-                d = 0
+                d: float = 0
                 while True:
                     for et in link.ets:
                         if et.istranslation:
@@ -669,8 +663,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                                 elif et.qlim is not None:  # pragma nocover
                                     d += max(et.qlim)
                             else:
-                                d += abs(et.param)
-                    link = link.parent
+                                d += abs(cast(float, et.param))
+                    link = link.parent  # type: ignore[assignment]
                     if link is None or isinstance(link, str):
                         d_all.append(d)
                         break
@@ -722,7 +716,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             if link.isjoint
         }
 
-        def recurse(Tall, Tparent, q, link):
+        def recurse(Tall: Any, Tparent: Any, q: Any, link: Any) -> None:
             # if joint??
             T = Tparent
             while True:
@@ -820,7 +814,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             "yoshikawa", "asada", "minsingular", "invcondition"
         ] = "yoshikawa",
         axes: L["all", "trans", "rot"] | list[bool] = "all",
-        **kwargs,
+        **kwargs: Any,
     ) -> float | NDArray:  # pragma nocover
         ...
 
@@ -835,22 +829,20 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             "yoshikawa", "asada", "minsingular", "invcondition"
         ] = "yoshikawa",
         axes: L["all", "trans", "rot"] | list[bool] = "all",
-        **kwargs,
+        **kwargs: Any,
     ) -> float | NDArray:  # pragma nocover
         ...
 
     def manipulability(
         self,
-        q=None,
-        J=None,
+        q: Any = None,
+        J: Any = None,
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
-        method: L[
-            "yoshikawa", "asada", "minsingular", "invcondition"
-        ] = "yoshikawa",
+        method: L["yoshikawa", "asada", "minsingular", "invcondition"] = "yoshikawa",
         axes: L["all", "trans", "rot"] | list[bool] = "all",
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         """
         Manipulability measure
 
@@ -942,7 +934,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         else:
             raise ValueError("axes must be all, trans, rot or both")
 
-        def yoshikawa(robot, J, q, axes_list):
+        def yoshikawa(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
             J = J[axes_list, :]
             if J.shape[0] == J.shape[1]:
                 # simplified case for square matrix
@@ -951,20 +943,20 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 m2 = np.linalg.det(J @ J.T)
                 return np.sqrt(abs(m2))
 
-        def condition(robot, J, q, axes_list):
+        def condition(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
             J = J[axes_list, :]
 
             # return 1/cond(J)
             return 1 / np.linalg.cond(J)
 
-        def minsingular(robot, J, q, axes_list):
+        def minsingular(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
             J = J[axes_list, :]
             s = np.linalg.svd(J, compute_uv=False)
 
             # return last/smallest singular value of J
             return s[-1]
 
-        def asada(robot, J, q, axes_list):
+        def asada(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
             # dof = np.sum(axes_list)
             if np.linalg.matrix_rank(J) < 6:
                 return 0
@@ -989,6 +981,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             raise ValueError("Invalid method chosen")
 
         # Calculate manipulability based on supplied Jacobian
+        w: Any
         if J is not None:
             w = [mfunc(self, J, q, axes_list)]
 
@@ -997,7 +990,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             if q is None:
                 raise ValueError("Either J or q must be supplied")
 
-            q = getmatrix(q, (None, self.n))
             q = np.array(getmatrix(q, (None, self.n)))
             w = np.zeros(q.shape[0])
 
@@ -1012,40 +1004,57 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def jtraj(
         self,
-        T1: NDArray | SE3,
-        T2: NDArray | SE3,
-        t: NDArray | int,
-        **kwargs,
-    ):
+        q0: ArrayLike,
+        qf: ArrayLike,
+        t: ArrayLike | int,
+        qd0: ArrayLike | None = None,
+        qd1: ArrayLike | None = None,
+    ) -> Any:
         """
-        Joint-space trajectory between SE(3) poses
+        Joint-space trajectory between two joint configurations
 
-        :param T1: initial end-effector pose
-        :param T2: final end-effector pose
+        :param q0: initial joint coordinates
+        :param qf: final joint coordinates
         :param t: time vector or number of steps
-        :param kwargs: arguments passed to the IK solver
+        :param qd0: initial joint velocity, defaults to zero
+        :param qd1: final joint velocity, defaults to zero
+        :raises TypeError: if ``q0`` or ``qf`` is an :class:`SE3`
         :returns: trajectory
 
-        The initial and final poses are mapped to joint space using inverse
-        kinematics:
+        ``traj = robot.jtraj(q0, qf, t)`` is a trajectory object whose
+        attribute ``traj.q`` is a row-wise joint-space trajectory, a quintic
+        polynomial in time from ``q0`` to ``qf``.  It is the method form of
+        :func:`~roboticstoolbox.tools.trajectory.jtraj`.
 
-        - if the object has an analytic solution ``ikine_a`` that will be used,
-        - otherwise the general numerical algorithm ``ikine_lm`` will be used.
+        .. deprecated:: 1.4.5
+            Passing :class:`SE3` poses for ``q0`` or ``qf`` is deprecated and now
+            raises ``TypeError``.  The poses were converted to joint coordinates
+            by inverse kinematics, which is never simple: which solution is chosen
+            depends on the solver and its starting point, and it can fail.  Do
+            that explicitly, so you control and can check it::
 
-        ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
-        attribute ``traj.q`` is a row-wise joint-space trajectory.
+                q0 = robot.ikine_LM(T0, q0=robot.qr).q
+                qf = robot.ikine_LM(Tf, q0=q0).q
+                traj = robot.jtraj(q0, qf, t)
 
+            For a Cartesian trajectory see
+            :func:`~roboticstoolbox.tools.trajectory.ctraj`.
+
+        .. versionchanged:: 1.4.5
+            The arguments are joint coordinates only, they were named ``T1`` and
+            ``T2`` and could be poses.  The ``**kwargs`` that were passed to the
+            inverse kinematics method are gone.
         """
 
-        if hasattr(self, "ikine_a"):
-            ik = self.ikine_a  # type: ignore
-        else:
-            ik = self.ikine_LM
+        if isinstance(q0, SE3) or isinstance(qf, SE3):
+            raise TypeError(
+                "jtraj no longer accepts SE3 poses, this was deprecated in 1.4.5. "
+                "Solve the inverse kinematics explicitly and pass joint "
+                "coordinates, e.g. robot.jtraj(robot.ikine_LM(T0).q, "
+                "robot.ikine_LM(Tf).q, t)"
+            )
 
-        q1 = ik(T1, **kwargs)
-        q2 = ik(T2, **kwargs)
-
-        return rtb.jtraj(q1.q, q2.q, t)
+        return rtb.jtraj(q0, qf, t, qd0=qd0, qd1=qd1)
 
     @overload
     def jacob0_dot(
@@ -1069,22 +1078,32 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def jacob0_dot(
         self,
-        q,
+        q: Any,
         qd: ArrayLike,
-        J0=None,
+        J0: Any = None,
         representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
-    ):
+    ) -> Any:
         r"""
-        Derivative of Jacobian
+        Time derivative of manipulator Jacobian in frame {0}
 
-        :param q: The joint configuration of the robot
+        :param q: The joint configuration of the robot. Must be provided if
+            ``representation`` is specified; may be omitted if ``J0`` is
+            provided and ``representation`` is not.
+        :type q: ArrayLike(n), optional
         :param qd: The joint velocity of the robot
-        :param J0: Jacobian in {0} frame
-        :param representation: angular representation
-        :returns: The derivative of the manipulator Jacobian
+        :type qd: ArrayLike(n)
+        :param J0: Jacobian in {0} frame. Ignored if ``representation`` is
+            specified; may be provided to save computation if
+            ``representation`` is not specified.
+        :type J0: ndarray(6,n), optional
+        :param representation: Angular representation for analytical Jacobian
+            ('rpy/xyz', 'rpy/zyx', 'eul', or 'exp')
+        :type representation: str, optional
+        :returns: The time derivative of the manipulator Jacobian
+        :rtype: ndarray(6,n)
 
-        ``robot.jacob_dot(q, qd)`` computes the rate of change of the
-        Jacobian elements
+        ``robot.jacob0_dot(q, qd)`` computes the rate of change of the
+        manipulator Jacobian elements
 
         .. math::
 
@@ -1093,10 +1112,15 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         where the first term is the rank-3 Hessian.
 
         If ``J0`` is already calculated for the joint
-        coordinates ``q`` it can be passed in to to save computation time.
+        coordinates ``q`` it can be passed in to save computation time.
 
-        It is computed as the mode-3 product of the Hessian tensor and the
-        velocity vector.
+        For the geometric Jacobian (``representation=None``), it is computed
+        analytically as the mode-3 product of the Hessian tensor and the joint
+        velocity vector:
+
+        .. math::
+
+            \dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}
 
         The derivative of an analytical Jacobian can be obtained by setting
         ``representation`` as
@@ -1115,15 +1139,60 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
            * - ``'exp'``
              - exponential coordinate rates
 
+        When ``representation`` is specified, the Hessian of the analytical
+        Jacobian is evaluated numerically using finite differences via
+        :func:`spatialmath.base.numhess` and contracted with ``qd``. This is
+        an approximate, numerical calculation and is slower than the closed-form
+        geometric Jacobian derivative.
+
+        .. list-table:: Parameter interaction between ``representation``, ``q``, and ``J0``
+           :header-rows: 1
+
+           * - ``representation``
+             - ``q``
+             - ``J0``
+             - Behavior
+           * - Omitted / ``None``
+             - Provided
+             - Omitted / ``None``
+             - Geometric Jacobian: computes :math:`\mat{J}_0` and Hessian :math:`\mathcal{H}_0` from ``q``, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
+           * - Omitted / ``None``
+             - Omitted (or ``None``)
+             - Provided
+             - Geometric Jacobian: reuses precomputed ``J0`` to compute Hessian :math:`\mathcal{H}_0`, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
+           * - Specified (e.g. ``'rpy/xyz'``)
+             - Provided
+             - Ignored
+             - Analytical Jacobian: evaluates numerical Hessian via :func:`spatialmath.base.numhess` at ``q`` and contracts with ``qd``.
+           * - Specified (e.g. ``'rpy/xyz'``)
+             - Omitted (or ``None``)
+             - Any
+             - Raises :class:`ValueError` (``q`` is required to evaluate the analytical Jacobian).
+
         .. rubric:: References
 
         - Kinematic Derivatives using the Elementary Transform
-            Sequence, J. Haviland and P. Corke
+          Sequence, J. Haviland and P. Corke
 
-        See Also
-        --------
-        :func:`jacob0`
-        :func:`hessian0`
+        .. seealso:: :func:`jacob0`, :func:`hessian0`
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> q = robot.qn
+            >>> qd = [0.1, -0.2, 0.3, -0.1, 0.2, -0.3]
+            >>> j0_dot = robot.jacob0_dot(q, qd)
+            >>> j0_dot.shape
+            (6, 6)
+            >>> # If J0 is already computed, it can be passed in directly:
+            >>> J0 = robot.jacob0(q)
+            >>> j0_dot_fast = robot.jacob0_dot(None, qd, J0=J0)
+            >>> import numpy as np
+            >>> np.allclose(j0_dot, j0_dot_fast)
+            True
 
         """
 
@@ -1135,32 +1204,13 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             H = self.hessian0(q, J0=J0)
 
         else:
-            # # determine analytic rotation
-            # T = self.fkine(q).A
-            # gamma = smb.r2x(smb.t2r(T), representation=representation)
+            if q is None:
+                raise ValueError("q must be provided when representation is specified")
 
-            # # get transformation angular velocity to analytic velocity
-            # Ai = smb.rotvelxform(
-            #     gamma, representation=representation, inverse=True, full=True
-            # )
-
-            # # get analytic rate from joint rates
-            # omega = J0[3:, :] @ qd
-            # gamma_dot = Ai[3:, 3:] @ omega
-            # Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
-            # Ai_dot = sp.linalg.block_diag(np.zeros((3, 3)), Ai_dot)
-
-            # Jd = Ai_dot @ J0 + Ai @ Jd
-
-            # not actually sure this can be written in closed form
-
+            # Numerical Hessian of the analytical Jacobian
             H = smb.numhess(
                 lambda q: self.jacob0_analytical(q, representation=representation), q
             )
-
-            # Jd = Ai @ Jd
-
-            # return Jd
 
         return np.tensordot(H, qd, (0, 0))
 
@@ -1190,9 +1240,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def jacobm(
         self,
-        q=None,
-        J=None,
-        H=None,
+        q: Any = None,
+        J: Any = None,
+        H: Any = None,
         end: str | Link | Gripper | None = None,
         start: str | Link | Gripper | None = None,
         axes: L["all", "trans", "rot"] | list[bool] = "all",
@@ -1268,15 +1318,15 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             raise ValueError("Hessian must be numpy array of shape 6xnxn")
 
         manipulability = self.manipulability(
-            q,  # type: ignore[arg-type]
+            q,
             J=J,
             start=start,
             end=end,
-            axes=axes,  # type: ignore
+            axes=axes,
         )
 
-        J = J[axes, :]  # type: ignore
-        H = H[:, axes, :]  # type: ignore
+        J = J[axes, :]
+        H = H[:, axes, :]
 
         b = np.linalg.inv(J @ np.transpose(J))
         Jm = np.zeros((n, 1))
@@ -1293,7 +1343,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def closest_point(
         self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    ) -> tuple[int | None, NDArray | None, NDArray | None]:
+    ) -> tuple[float | None, NDArray | None, NDArray | None]:
         """
         Find the closest point between robot and shape
 
@@ -1316,14 +1366,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             self.update()
             shape.update()
 
-        d = 10000
+        d: float | None = 10000
         p1 = None
         p2 = None
 
         for link in self.links:
             td, tp1, tp2 = link.closest_point(shape, inf_dist, skip=True)
 
-            if td is not None and td < d:
+            if td is not None and d is not None and td < d:
                 d = td
                 p1 = tp1
                 p2 = tp2
@@ -1333,7 +1383,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return d, p1, p2
 
-    def iscollided(self, q, shape: Shape, skip: bool = False) -> bool:
+    def iscollided(self, q: Any, shape: Shape, skip: bool = False) -> bool:
         """
         Check if the robot is in collision with a shape
 
@@ -1363,7 +1413,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return False
 
-    def collided(self, q, shape: Shape, skip: bool = False) -> bool:
+    def collided(self, q: Any, shape: Shape, skip: bool = False) -> bool:
         """
         Check if the robot is in collision with a shape
 
@@ -1438,7 +1488,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         end: Link | None = None,
         start: Link | None = None,
         collision_list: list[Shape] | None = None,
-    ):
+    ) -> Any:
         """
         Compute a collision constrain for QP motion control
 
@@ -1475,7 +1525,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 curr = curr.parent
             return 0
 
-        def indiv_calculation(link: Link, link_col: CollisionShape, q: NDArray):
+        def indiv_calculation(link: Link, link_col: CollisionShape, q: NDArray) -> Any:
             d, wTlp, wTcp = link_col.closest_point(shape, di)
 
             if d is not None and wTlp is not None and wTcp is not None:
@@ -1484,7 +1534,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 norm = lpTcp / d
                 norm_h = np.expand_dims(
                     np.concatenate((norm, [0.0, 0.0, 0.0])),
-                    axis=0,  # type: ignore
+                    axis=0,
                 )
 
                 # tool = (self.fkine(q, end=link).inv() * SE3(wTlp)).A[:3, 3]
@@ -1520,7 +1570,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 col_list = [collision_list[j - 1]]  # pragma nocover
 
             for link_col in col_list:
-                l_Ain, l_bin = indiv_calculation(link, link_col, q)  # type: ignore
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)
 
                 if l_Ain is not None and l_bin is not None:
                     if Ain is None:
@@ -1540,14 +1590,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         shape: CollisionShape,
         camera: Robot | SE3 | None = None,
         camera_n: int = 0,
-        q=None,
-        di=0.3,
-        ds=0.05,
-        xi=1.0,
-        end=None,
-        start=None,
-        collision_list=None,
-    ):  # pragma nocover
+        q: ArrayLike | None = None,
+        di: float = 0.3,
+        ds: float = 0.05,
+        xi: float = 1.0,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        collision_list: Any = None,
+    ) -> tuple[NDArray | None, NDArray | None]:  # pragma nocover
         """
         Compute a vision collision constrain for QP motion control
 
@@ -1578,7 +1628,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = None
         bin = None
 
-        def rotation_between_vectors(a, b):
+        def rotation_between_vectors(a: Any, b: Any) -> Any:
             a = a / np.linalg.norm(a)
             b = b / np.linalg.norm(b)
 
@@ -1600,23 +1650,23 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         los_mid = SE3((wTcp + wTtp) / 2)
         los_orientation = rotation_between_vectors(
             np.array([0.0, 0.0, 1.0]),
-            wTcp - wTtp,  # type: ignore
+            wTcp - wTtp,
         )
 
         los = Cylinder(
             radius=0.001,
-            length=np.linalg.norm(wTcp - wTtp),  # type: ignore
+            length=np.linalg.norm(wTcp - wTtp),
             base=(los_mid * los_orientation),
         )
 
-        def indiv_calculation(link: Link, link_col: CollisionShape, q: NDArray):
+        def indiv_calculation(link: Link, link_col: CollisionShape, q: NDArray) -> Any:
             d, wTlp, wTvp = link_col.closest_point(los, di)
 
             if d is not None and wTlp is not None and wTvp is not None:
                 lpTvp = -wTlp + wTvp
 
                 norm = lpTvp / d
-                norm_h = np.expand_dims(np.concatenate((norm, [0.0, 0.0, 0.0])), axis=0)  # type: ignore
+                norm_h = np.expand_dims(np.concatenate((norm, [0.0, 0.0, 0.0])), axis=0)
 
                 tool = SE3(
                     (np.linalg.inv(self.fkine(q, end=link).A) @ SE3(wTlp).A)[:3, 3]
@@ -1626,11 +1676,11 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
                 n_dim = Je.shape[1]
 
-                if isinstance(camera, "Robot"):
+                if isinstance(camera, Robot):
                     Jv = camera.jacob0(camera.q)
                     Jv[:3, :] = self._T[:3, :3] @ Jv[:3, :]
 
-                    Jv *= np.linalg.norm(wTvp - shape.T[:3, -1]) / los.length  # type: ignore
+                    Jv *= np.linalg.norm(wTvp - shape.T[:3, -1]) / los.length
 
                     dpc = norm_h @ Jv
                     dpc = np.concatenate(
@@ -1644,7 +1694,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     dpc = np.zeros((1, self.n + camera_n))
 
                 dpt = norm_h @ shape.v
-                dpt *= np.linalg.norm(wTvp - wTcp) / los.length  # type: ignore
+                dpt *= np.linalg.norm(wTvp - wTcp) / los.length
 
                 l_Ain = np.zeros((1, self.n + camera_n))
                 l_Ain[0, :n_dim] = norm_h @ Je
@@ -1692,7 +1742,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         qdd: NDArray,
         symbolic: bool = False,
         gravity: ArrayLike | None = None,
-    ):
+    ) -> Any:
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
 
@@ -1855,7 +1905,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     I_int = I_int + SpatialInertia(m=link.m, r=link.r, I=link.I)
 
                 if link.v is not None:
-                    s.append(link.v.s)  # type: ignore[union-attr]
+                    s.append(link.v.s)  # type: ignore[attr-defined]  # ET, not ET2
                     past_joint = True
 
             I[i] = I_int
@@ -1908,8 +1958,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 # own ETS (the joint variable is guaranteed to be the last
                 # element of its segment -- see this method's docstring),
                 # so no further composition is needed.
-                Xup_int = SE3(joint.A(qk[jindex]))
-                Xup[j] = Xup_int.inv()  # type: ignore[union-attr]
+                Xup_int = SE3(joint.A(qk[jindex]))  # type: ignore[arg-type]
+                Xup[j] = Xup_int.inv()
 
                 # group_of_link_idx also covers a joint whose immediate
                 # .parent is a static link, or a run of them, rather than
@@ -1952,7 +2002,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 jindex = joint.jindex
                 Q[k, j] += (
                     joint.G**2 * joint.Jm * qddk[jindex]
-                    - joint.friction(qdk[jindex], coulomb=not symbolic)
+                    - joint.friction(
+                        qdk[jindex], coulomb=not symbolic  # type: ignore[arg-type]
+                    )
                 )
 
                 # See the forward recursion above: group_of_link_idx
@@ -2025,7 +2077,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
 
 class Robot2(BaseRobot[Link2]):
-    def __init__(self, arg, **kwargs):
+    def __init__(self, arg: Any, **kwargs: Any) -> None:
         if isinstance(arg, ETS2):
             # we're passed an ETS string
             links = []
@@ -2077,7 +2129,7 @@ class Robot2(BaseRobot[Link2]):
             no base transform, but this property will return ``SE3()`` which
             is an identity matrix.
         """
-        if self._base is None:  # pragma nocover
+        if self._base is None:  # type: ignore[has-type]  # pragma nocover
             self._base = SE2()
 
         # return a copy, otherwise somebody with
@@ -2085,19 +2137,19 @@ class Robot2(BaseRobot[Link2]):
         return self._base.copy()
 
     @base.setter
-    def base(self, T):
+    def base(self, T: Any) -> None:
         if isinstance(T, SE2):
             self._base = T
         elif SE2.isvalid(T):  # pragma nocover
             self._tool = SE2(T, check=True)
 
-    def jacob0(self, q, start=None, end=None):
+    def jacob0(self, q: Any, start: Any = None, end: Any = None) -> Any:
         return self.ets(start, end).jacob0(q)
 
-    def jacobe(self, q, start=None, end=None):
+    def jacobe(self, q: Any, start: Any = None, end: Any = None) -> Any:
         return self.ets(start, end).jacobe(q)
 
-    def fkine(self, q, end=None, start=None):
+    def fkine(self, q: Any, end: Any = None, start: Any = None) -> Any:
         return self.ets(start, end).fkine(q)
 
     @property
@@ -2128,9 +2180,9 @@ class Robot2(BaseRobot[Link2]):
         # given ets. Then use an lru_cache to speed up return
 
         if self._reach is None:
-            d_all = []
+            d_all: list[float] = []
             for link in self.ee_links:
-                d = 0
+                d: float = 0
                 while True:
                     for et in link.ets:
                         if et.istranslation:
@@ -2144,8 +2196,8 @@ class Robot2(BaseRobot[Link2]):
                                 elif et.qlim is not None:  # pragma nocover
                                     d += max(et.qlim)
                             else:
-                                d += abs(et.param)
-                    link = link.parent
+                                d += abs(cast(float, et.param))
+                    link = link.parent  # type: ignore[assignment]
                     if link is None or isinstance(link, str):
                         d_all.append(d)
                         break
@@ -2180,7 +2232,7 @@ class Robot2(BaseRobot[Link2]):
         linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
         linkframes[0] = Tbase
 
-        def recurse(Tall, Tparent, q, link):
+        def recurse(Tall: Any, Tparent: Any, q: Any, link: Any) -> None:
             # if joint??
             T = Tparent
             while True:

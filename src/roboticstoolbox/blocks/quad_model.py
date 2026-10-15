@@ -46,10 +46,12 @@
 # - This is a heavy lift quadrotor
 #
 
-import numpy as np
-from math import pi, sqrt, inf
+from math import inf, pi, sqrt
+from typing import Any
 
-quadrotor = {}
+import numpy as np
+
+quadrotor: dict[str, Any] = {}
 quadrotor["nrotors"] = 4  # 4 rotors
 quadrotor["g"] = 9.81  # g     Gravity
 quadrotor["rho"] = 1.184  # rho   Density of air
