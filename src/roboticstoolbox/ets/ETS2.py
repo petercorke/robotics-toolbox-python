@@ -171,10 +171,12 @@ class ETS2(BaseETS[ET2]):
                         raise ValueError("unit='deg' is only valid for rotational joints")
                     parts.append(constructor(fixed))
             else:
-                kwargs = {"flip": et.isflip, "qlim": et.qlim}
-                if not self._auto_jindex:
-                    kwargs["jindex"] = et.jindex
-                parts.append(constructor(**kwargs))
+                if self._auto_jindex:
+                    parts.append(constructor(flip=et.isflip, qlim=et.qlim))
+                else:
+                    parts.append(
+                        constructor(flip=et.isflip, qlim=et.qlim, jindex=et.jindex)
+                    )
             joint_index += 1
 
         return ETS2(parts)
