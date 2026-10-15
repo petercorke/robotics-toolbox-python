@@ -2,6 +2,7 @@
 Tests of the DistanceTransform, PRM, QuinticPoly and CurvaturePoly planners.
 """
 
+import collections
 import contextlib
 import io
 import unittest
@@ -144,6 +145,30 @@ class TestPRM(unittest.TestCase):
         vertex = dict(markersize=9)
         prm.plot(block=False, vertex_style=vertex)
         self.assertEqual(vertex, dict(markersize=9))
+
+    def test_each_connection_is_one_edge(self):
+        # the roadmap is undirected, but each connection used to be added from
+        # both of its ends, giving two parallel edges
+        prm = self.planner()
+        graph = prm.graph
+        pairs = collections.Counter(
+            frozenset((id(e.v1), id(e.v2))) for e in graph.edges()
+        )
+        self.assertGreater(len(pairs), 0)
+        self.assertEqual(set(pairs.values()), {1})
+        self.assertEqual(graph.ne, len(pairs))
+
+    def test_edges_are_drawn_straight(self):
+        # parallel edges are drawn as arcs, single edges as straight lines
+        prm = self.planner()
+        fig, ax = plt.subplots()
+        prm.plot(ax=ax, block=False)
+        curvature = {
+            round(p.get_connectionstyle().rad, 3)
+            for p in ax.patches
+            if hasattr(p, "get_connectionstyle")
+        }
+        self.assertEqual(curvature, {0.0})
 
     def test_query_uses_the_constructor_start_and_goal(self):
         prm = PRMPlanner(

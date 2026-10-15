@@ -161,16 +161,17 @@ class PRMPlanner(PlannerBase):
             # add it as a vertex to the graph
             graph.add_vertex([x, y])
 
-        # compute distance between vertices
-        for vertex in graph:
-            # find distance from vertex to all other vertices
-            distances = []
-            for othervertex in graph:
-                # skip self
-                if vertex is othervertex:
-                    continue
-                # add (distance, vertex) tuples to list
-                distances.append((vertex.distance(othervertex), othervertex))
+        # The roadmap is undirected, so each pair of vertices is considered
+        # once, from the earlier vertex.  Adding the edge from each end would
+        # make two parallel edges, which are counted twice and drawn as two arcs.
+        vertices = list(graph)
+        for i, vertex in enumerate(vertices):
+            # find distance from vertex to all the later vertices, as
+            # (distance, vertex) tuples
+            distances = [
+                (vertex.distance(othervertex), othervertex)
+                for othervertex in vertices[i + 1 :]
+            ]
 
             # sort into ascending distance
             distances.sort(key=lambda x: x[0])
