@@ -1216,9 +1216,9 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If q is a matrix (nxm) each column is interpreted as a joint
-        configuration vector, and the result is a matrix (nxm) each column
-        being the corresponding joint torques.
+        If q is a matrix (m,n), each row is interpreted as a joint
+        configuration vector, and the result is a matrix (m,6) with one
+        gravity wrench per row.
 
         Examples
         --------
@@ -1246,37 +1246,19 @@ class DynamicsMixin:
         if q.shape[1] != 6:
             pinv = True
 
-        # if gravity is None:
-        #     gravity = self.gravity
-        # else:
-        #     gravity = getvector(gravity, 3)
+        taug = np.zeros((q.shape[0], 6))
+        for k, qk in enumerate(q):
+            Jik = Ji
+            if Jik is None:
+                Ja = self.jacob0_analytical(qk, representation=representation)
+                Jik = np.linalg.pinv(Ja) if pinv else np.linalg.inv(Ja)
+
+            G = self.gravload(qk, gravity=gravity)
+            taug[k, :] = Jik.T @ G
 
         if q.shape[0] == 1:
-            # single q case
-            if Ji is None:
-                Ja = self.jacob0_analytical(q[0, :], representation=representation)
-                if pinv:
-                    Ji = np.linalg.pinv(Ja)
-                else:
-                    Ji = np.linalg.inv(Ja)
-            G = self.gravload(q[0, :])
-            return Ji.T @ G
-
+            return taug[0, :]
         else:
-            # trajectory case
-            taug = np.zeros((q.shape[0], self.n))
-            # z = np.zeros(self.n)
-
-            for k, qk in enumerate(q):
-                Ja = self.jacob0_analytical(qk, representation=representation)
-                G = self.gravload(qk)
-                if pinv:
-                    Ji = np.linalg.pinv(Ja)
-                else:
-                    Ji = np.linalg.inv(Ja)
-
-                taug[k, :] = Ji.T @ G
-
             return taug
 
     def accel_x(
