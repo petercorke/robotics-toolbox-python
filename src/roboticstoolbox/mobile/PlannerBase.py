@@ -17,7 +17,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from colored import attr, fg
-from matplotlib import animation, cm
+from matplotlib import animation, cm, patheffects
 from spatialmath.base.argcheck import getvector
 from spatialmath.base.graphics import axes_get_scale, axes_logic, plotvol2
 from spatialmath.base.types import R2, R3, ArrayLike2, ArrayLike3
@@ -85,6 +85,31 @@ def _layers(
     if isinstance(style, dict):
         return (style,)
     return tuple(style)
+
+
+#: outline of the cell value labels, so that the red text is legible on any
+#: gray of the distance field
+LABEL_OUTLINE = patheffects.withStroke(linewidth=2, foreground="white")
+
+
+def _warn_unused(unused: dict[str, Any], stacklevel: int = 3) -> None:
+    """
+    Warn about keyword arguments that are accepted and ignored
+
+    RTB 1.4.4 and earlier silently ignored unknown keyword arguments of the
+    planners, and code in the book relies on that, for example
+    ``dx.plot(labelvalues=True)``.  They are ignored with a warning so that a
+    mistyped option is not silent.
+
+    :param unused: the unknown keyword arguments
+    :param stacklevel: of the warning, relative to the caller of this function
+    """
+    for name in unused:
+        warnings.warn(
+            f"unknown argument {name!r} is ignored",
+            DeprecationWarning,
+            stacklevel=stacklevel,
+        )
 
 
 class NoPathError(RuntimeError):
@@ -190,7 +215,10 @@ class PlannerBase:
         seed: int | None = None,
         animate: bool = False,
         movie: str | tuple[str, float] | None = None,
+        **unused: Any,
     ) -> None:
+        # called by the constructor of a subclass, so the caller is 3 above
+        _warn_unused(unused, stacklevel=4)
 
         self._occgrid: BinaryOccupancyGrid | None = None
         self._occgrid0: BinaryOccupancyGrid | None = None
@@ -636,6 +664,14 @@ class PlannerBase:
         goal_marker: dict[str, Any] | None = None,
         start_vehicle: dict[str, Any] | None = None,
         goal_vehicle: dict[str, Any] | None = None,
+        labels: bool = False,
+        label_style: dict[str, Any] | None = None,
+        labelvalues: bool = False,
+        inflated: bool | None = None,
+        colorbar: bool | dict[str, Any] | None = None,
+        colorbar_style: dict[str, Any] | None = None,
+        cmap: str | None = None,
+        **unused: Any,
     ) -> Axes:
         r"""
         Plot vehicle path (superclass)
@@ -667,6 +703,17 @@ class PlannerBase:
         :param ax: axes to plot into, defaults to a new axes
         :param block: block after displaying the plot, defaults to None
         :param bgargs: arguments passed to :meth:`plot_bg`, defaults to None
+        :param labels: write the distance value in each cell of the distance
+            field, defaults to False.  Useful for small grids, see
+            :meth:`plot_bg`.
+        :param label_style: Matplotlib text options for ``labels``
+        :param labelvalues: deprecated, use ``labels``
+        :param inflated: show the inflated obstacles, passed to :meth:`plot_bg`
+        :param colorbar: show a colorbar for the distance field, passed to
+            :meth:`plot_bg`
+        :param colorbar_style: options for the colorbar, passed to
+            :meth:`plot_bg`
+        :param cmap: colormap for the distance field, passed to :meth:`plot_bg`
         :param path_marker: deprecated, use ``path_style``
         :param path_marker_reverse: deprecated, use ``path_reverse_style``
         :param line: deprecated, use ``path_style``
@@ -751,7 +798,17 @@ class PlannerBase:
             no effect.
 
         :seealso: :meth:`plot_bg` :func:`base.plot_poly`
+
+        .. note:: Unknown keyword arguments are ignored, with a
+            ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
+            earlier.
+
+        .. deprecated:: 1.4.5
+            ``labelvalues`` is deprecated, use ``labels``.  It is the name used
+            in the book, where it had no effect.
+
         """
+        _warn_unused(unused)
         # deprecated names, mapped to the new ones
         for old, new, value in (
             ("line", "path_style", line),
@@ -793,6 +850,25 @@ class PlannerBase:
         start_vehicle_options = START_VEHICLE_STYLE | (start_vehicle_style or {})
         goal_vehicle_options = GOAL_VEHICLE_STYLE | (goal_vehicle_style or {})
         bgargs = dict(bgargs or {})
+        if labelvalues:
+            warnings.warn(
+                "labelvalues is deprecated, use labels instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            labels = True
+        if labels:
+            bgargs["labels"] = True
+            bgargs.setdefault("label_style", label_style)
+        # arguments of the background that are given here rather than in bgargs
+        for bg_name, bg_value in (
+            ("inflated", inflated),
+            ("colorbar", colorbar),
+            ("colorbar_style", colorbar_style),
+            ("cmap", cmap),
+        ):
+            if bg_value is not None:
+                bgargs.setdefault(bg_name, bg_value)
 
         ndims = self._ndims
 
@@ -980,6 +1056,10 @@ class PlannerBase:
         colorbar: bool | dict[str, Any] = True,
         block: bool | None = None,
         colorbar_style: dict[str, Any] | None = None,
+        labels: bool = False,
+        label_style: dict[str, Any] | None = None,
+        labelvalues: bool = False,
+        **unused: Any,
     ) -> None:
         """
         Plot background (superclass)
@@ -996,6 +1076,13 @@ class PlannerBase:
         :param colorbar_style: options for the colorbar, passed to
             :meth:`matplotlib.figure.Figure.colorbar`, defaults to None.  The
             label defaults to "Distance".
+        :param labels: write the value in each cell of the distance field,
+            defaults to False
+        :param labelvalues: deprecated, use ``labels``
+        :param label_style: Matplotlib text options for the values, merged over
+            red, centered ``fontsize`` 8 text, as in the book, with a thin
+            white outline (``path_effects``) so that it is legible on any gray.
+            The axes are set to show every cell whole.
 
         .. deprecated:: 1.4.5
             Giving a dict as ``colorbar`` is deprecated, use ``colorbar=True``
@@ -1013,7 +1100,24 @@ class PlannerBase:
         If distance is provided, or the planner has a distancemap attribute
         the distance field will be used as the background and obstacle cells
         (actual or inflated) will be shown in red. A colorbar is added.
+
+        .. note:: Unknown keyword arguments are ignored, with a
+            ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
+            earlier.
+
+        .. deprecated:: 1.4.5
+            ``labelvalues`` is deprecated, use ``labels``.  It is the name used
+            in the book, where it had no effect.
+
         """
+        _warn_unused(unused)
+        if labelvalues:
+            warnings.warn(
+                "labelvalues is deprecated, use labels instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            labels = True
         occgrid = self._occgrid
         if occgrid is None:
             return
@@ -1059,7 +1163,7 @@ class PlannerBase:
 
             # change all inf to large value, so they are not 'bad' ie. red
             distance[np.isinf(distance)] = 2 * vmax
-            c_map.set_over(color=(0, 0, 1))  # ex-infs are now blue
+            c_map = c_map.with_extremes(over=(0, 0, 1))  # ex-infs are now blue
 
             # display image
             norm = mpl.colors.Normalize(vmin=0, vmax=vmax, clip=False)
@@ -1091,8 +1195,17 @@ class PlannerBase:
             c_map = mpl.colors.ListedColormap(colors)
             occgrid.plot(image, cmap=c_map, zorder=1)
 
+            if labels:
+                self._label_values(ax, distance, norm, vmax, label_style)
+
         else:
             # occupancy grid only
+            if labels:
+                warnings.warn(
+                    "labels has no effect, there is no distance field",
+                    UserWarning,
+                    stacklevel=2,
+                )
 
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
@@ -1111,6 +1224,40 @@ class PlannerBase:
         # plt.draw()
         if block is not None:
             plt.show(block=block)
+
+    @staticmethod
+    def _label_values(
+        ax: Axes,
+        distance: NDArray,
+        norm: mpl.colors.Normalize,
+        vmax: float,
+        label_style: dict[str, Any] | None,
+    ) -> None:
+        """
+        Write the value of each free cell of a distance field into the cell
+
+        :param distance: distance field, nan for obstacles and a large value
+            for cells that cannot be reached
+        """
+        # show every cell whole, so that the values on the edge are legible
+        rows, columns = distance.shape
+        ax.set_xlim(-0.5, columns - 0.5)
+        ax.set_ylim(-0.5, rows - 0.5)
+
+        free = np.isfinite(distance) & (distance <= vmax)
+        values = distance[free]
+        integral = bool(np.all(values == np.round(values)))
+        for r, c in np.argwhere(free):
+            value = distance[r, c]
+            style: dict[str, Any] = {
+                "ha": "center",
+                "va": "center",
+                "fontsize": 8,
+                "color": "red",
+                "path_effects": [LABEL_OUTLINE],
+                "zorder": 5,
+            } | (label_style or {})
+            ax.text(c, r, f"{value:.0f}" if integral else f"{value:.1f}", **style)
 
     def message(self, s: str, color: str | None = None) -> None:
         """

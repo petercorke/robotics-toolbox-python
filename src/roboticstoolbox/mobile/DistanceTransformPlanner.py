@@ -32,8 +32,14 @@ class DistanceTransformPlanner(PlannerBase):
     :type occgrid: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid` or ndarray(h,w)
     :param metric: distance metric, one of: "euclidean" [default], "manhattan"
         ("cityblock" is a synonym)
+    :param distance: deprecated, use ``metric``
     :param kwargs: common planner options, see :class:`PlannerBase`
-    :raises ValueError: ``metric`` is not recognised
+    :raises ValueError: ``metric`` is not recognised, or ``metric`` and
+        ``distance`` are both given and are different
+
+    .. deprecated:: 1.4.5
+        ``distance`` is deprecated, use ``metric``.  It was never an argument
+        (it was silently ignored), but code printed in the book uses it.
 
     ==================   ========================
     Feature              Capability
@@ -81,8 +87,21 @@ class DistanceTransformPlanner(PlannerBase):
         self,
         occgrid: BinaryOccupancyGrid | NDArray | None = None,
         metric: str = "euclidean",
+        *,
+        distance: str | None = None,
         **kwargs: Any,
     ) -> None:
+        if distance is not None:
+            warnings.warn(
+                "distance is deprecated, use metric instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if metric != "euclidean" and metric.lower() != distance.lower():
+                raise ValueError(
+                    f"metric {metric!r} and distance {distance!r} are different"
+                )
+            metric = distance
         if metric.lower() not in METRICS:
             raise ValueError(f"unknown metric {metric!r}, must be one of {METRICS}")
 
