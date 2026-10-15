@@ -20,7 +20,6 @@ import scipy.sparse.linalg
 import spatialmath.base as smb
 from progress.bar import FillingCirclesBar
 from spatialmath import SE2
-from spatialmath.base.types import ArrayLike2
 
 import roboticstoolbox as rtb
 from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid
