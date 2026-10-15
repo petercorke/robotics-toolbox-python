@@ -116,17 +116,20 @@ class Bug2(PlannerBase):
             :math:`\\sqrt{2}/2` cells of it, previously half a cell.  A line at
             45 degrees to the grid passes between two diagonal neighbours at that
             distance from each, and could be stepped over without being seen, so
-            that the robot was reported as trapped.  Paths can differ by a cell
-            from earlier versions: the house floorplan example from the bedroom
-            to the kitchen has 1304 points rather than 1307, see below.
+            that the robot was reported as trapped.  This shortens the house
+            floorplan example, from the bedroom to the kitchen, by one point.
 
         .. versionchanged:: 1.4.5
             The robot leaves an obstacle only where the next step along the
             m-line is free.  Previously it could leave, find the obstacle in
             the way, and hit it again from the same cell, so that cell appeared
             twice in the path, and a goal enclosed by an obstacle was never
-            given up on.  The house example above loses two such repeated
-            points.
+            given up on.  The cell where an obstacle is first hit is also no
+            longer repeated in the path.  Together these remove two repeated
+            points at the places the robot left an obstacle blocked, and two at
+            the first hits, so that the house floorplan example from the bedroom
+            to the kitchen has 1302 points rather than the 1307 of earlier
+            versions.
 
         :seealso: :meth:`Bug2.plot`
         """
@@ -287,7 +290,9 @@ class Bug2(PlannerBase):
                 # get a list of all the points around the obstacle
                 assert self.occgrid is not None
                 self._edge, _ = edgelist(self.occgrid.grid == 0, position)
-                self._k = 0
+                # the first point of the edge list is the hit point, where the
+                # robot already is
+                self._k = 1
             else:
                 n = position + np.array([dx, dy])
 

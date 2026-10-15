@@ -74,25 +74,24 @@ class TestRun(unittest.TestCase):
         nt.assert_array_equal(path[-1], [17, 17])
 
     def test_house_path_length(self):
-        # the example in the book, Fig 5.5: 1304 points since 1.4.5, 1307 before
+        # the example in the book, Fig 5.5: 1302 points since 1.4.5, 1307 before
         from roboticstoolbox import rtb_load_matfile
 
         house = rtb_load_matfile("data/house.mat")
         places = house["places"]
         path = Bug2(occgrid=house["floorplan"]).run(places.br3, places.kitchen)
-        self.assertEqual(path.shape, (1304, 2))
+        self.assertEqual(path.shape, (1302, 2))
 
-    def test_no_repeat_from_a_blocked_leave(self):
-        # the robot used to leave the obstacle where the next m-line step was
-        # blocked, hit it again from the same cell and so repeat that cell.
-        # Two repeats remain on this route, one at each first hit of an obstacle.
+    def test_path_has_no_repeated_points(self):
+        # a point used to be repeated where the obstacle was first hit, and
+        # where the robot left it and found the next step blocked
         from roboticstoolbox import rtb_load_matfile
 
         house = rtb_load_matfile("data/house.mat")
         places = house["places"]
         path = Bug2(occgrid=house["floorplan"]).run(places.br3, places.kitchen)
         repeats = np.all(np.diff(path, axis=0) == 0, axis=1)
-        self.assertEqual(int(repeats.sum()), 2)
+        self.assertEqual(int(repeats.sum()), 0)
 
     def test_trapped_does_not_block(self):
         # plt.show(block=True) used to be called before the exception
