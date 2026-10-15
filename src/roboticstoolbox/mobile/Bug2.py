@@ -118,7 +118,15 @@ class Bug2(PlannerBase):
             distance from each, and could be stepped over without being seen, so
             that the robot was reported as trapped.  Paths can differ by a cell
             from earlier versions: the house floorplan example from the bedroom
-            to the kitchen has 1306 points rather than 1307.
+            to the kitchen has 1304 points rather than 1307, see below.
+
+        .. versionchanged:: 1.4.5
+            The robot leaves an obstacle only where the next step along the
+            m-line is free.  Previously it could leave, find the obstacle in
+            the way, and hit it again from the same cell, so that cell appeared
+            twice in the path, and a goal enclosed by an obstacle was never
+            given up on.  The house example above loses two such repeated
+            points.
 
         :seealso: :meth:`Bug2.plot`
         """
@@ -216,6 +224,28 @@ class Bug2(PlannerBase):
             y = y / self._m_line[1]
             plt.plot([x_min, x_max], y, *args, **style)
 
+    def _m_line_move(self, position: NDArray) -> tuple[int, int]:
+        """
+        Step along the m-line toward the goal
+
+        :param position: current robot position
+        :return: step (dx, dy), each of -1, 0 or 1
+        """
+        assert self._goal is not None and self._m_line is not None
+        m_line = self._m_line
+        d = self._goal - position
+        if abs(d[0]) > abs(d[1]):
+            # line slope less than 45 deg
+            dx = 1 if d[0] >= 0 else -1  # np.sign(d[0])
+            y = -((position[0] + dx) * m_line[0] + m_line[2]) / m_line[1]
+            dy = int(round(y - position[1]))
+        else:
+            # line slope greater than 45 deg
+            dy = 1 if d[1] >= 0 else -1  # np.sign(d[1])
+            x = -((position[1] + dy) * m_line[1] + m_line[2]) / m_line[0]
+            dx = int(round(x - position[0]))
+        return dx, dy
+
     def next(self, position: NDArray) -> NDArray | None:
         """
         One step of the finite state automaton
@@ -240,17 +270,7 @@ class Bug2(PlannerBase):
             # Step 1.  Move along the M-line toward the goal
             self.message(f"{position}: moving along the M-line (step 1)")
             # motion on line toward goal
-            d = goal - position
-            if abs(d[0]) > abs(d[1]):
-                # line slope less than 45 deg
-                dx = 1 if d[0] >= 0 else -1  # np.sign(d[0])
-                y = -((position[0] + dx) * m_line[0] + m_line[2]) / m_line[1]
-                dy = int(round(y - position[1]))
-            else:
-                # line slope greater than 45 deg
-                dy = 1 if d[1] >= 0 else -1  # np.sign(d[1])
-                x = -((position[1] + dy) * m_line[1] + m_line[2]) / m_line[0]
-                dx = int(round(x - position[0]))
+            dx, dy = self._m_line_move(position)
 
             # detect if next step is an obstacle
             if self.isoccupied(position + np.r_[dx, dy]):
@@ -288,8 +308,15 @@ class Bug2(PlannerBase):
             if abs(np.inner(np.r_[position, 1], m_line)) <= _M_LINE_TOLERANCE:
                 self.message(f"  {position}: crossed the M-line")
 
-                # are we closer than when we encountered the obstacle?
-                if base.norm(position - goal) < base.norm(self.H[-1] - goal):
+                # are we closer than when we encountered the obstacle, and can
+                # we move toward the goal from here?  Leaving where the next
+                # step along the m-line is an obstacle would only hit it again
+                # at once, and for a goal enclosed by the obstacle would never
+                # end.
+                dx, dy = self._m_line_move(position)
+                if base.norm(position - goal) < base.norm(
+                    self.H[-1] - goal
+                ) and not self.isoccupied(position + np.r_[dx, dy]):
                     self._step = 1  # transition to step 1
                     self.message(f"  {position}: change to step 1")
                     return n
