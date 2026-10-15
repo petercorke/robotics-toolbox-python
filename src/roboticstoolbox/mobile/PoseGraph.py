@@ -212,7 +212,10 @@ class PoseGraph:
 
             # we keep an array self. = vindex(gi) to map g2o vertex index to PGraph vertex index
 
+            # vertex index to vertex, only for vertices with a lidar scan
             self.vindex: dict[int, PGVertex] = {}
+            # all the vertices in order of index
+            self._vertices: list[PGVertex] = []
             firstlidar = True
             v: PGVertex | None = None
             for line_number, line in enumerate(f, start=1):
@@ -339,6 +342,7 @@ class PoseGraph:
                     v.theta = np.arange(0, nbeams) * float(tokens[4]) + float(tokens[2])
                     v.range = np.array([float(x) for x in tokens[9 : nbeams + 9]])
                     v.time = float(tokens[21 + nbeams])
+                    self.vindex[v.index] = v
                     nlidar += 1
                 else:
                     raise RuntimeError(f"Unexpected line  {line} in {filename}")
@@ -366,19 +370,17 @@ class PoseGraph:
                 )
 
     def _add_vertex(self, type: str, coord: NDArray, name: str) -> PGVertex:
-        index = len(self.vindex)
-        v = PGVertex(type, index, coord=coord, name=name)
+        v = PGVertex(type, len(self._vertices), coord=coord, name=name)
         self.graph.add_vertex(v)
-        self.vindex[index] = v
+        self._vertices.append(v)
         return v
 
     def _vertex(self, i: int) -> PGVertex:
-        try:
-            return self.vindex[i]
-        except KeyError:
+        if not 0 <= i < len(self._vertices):
             raise IndexError(
-                f"no vertex {i}, the graph has {len(self.vindex)} vertices"
-            ) from None
+                f"no vertex {i}, the graph has {len(self._vertices)} vertices"
+            )
+        return self._vertices[i]
 
     def _scan_vertex(self, i: int) -> PGVertex:
         v = self._vertex(i)

@@ -119,6 +119,45 @@ class TestLoad(unittest.TestCase):
         self.assertIn(path, str(cm.exception))
 
 
+class TestVerbose(unittest.TestCase):
+    @staticmethod
+    def printed(f, *args, **kwargs):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            result = f(*args, **kwargs)
+        return result, out.getvalue()
+
+    def test_silent_by_default(self):
+        pg, text = self.printed(PoseGraph, "data/pg1.g2o")
+        self.assertEqual(text, "")
+        _, text = self.printed(pg.linearize_and_solve)
+        self.assertEqual(text, "")
+        _, text = self.printed(pg.optimize, iterations=2)
+        self.assertEqual(text, "")
+
+    def test_verbose_load(self):
+        pg, text = self.printed(PoseGraph, "data/pg1.g2o", verbose=True)
+        self.assertIn("loaded g2o format file: 4 vertices, 4 edges", text)
+
+    def test_verbose_lidar_summary(self):
+        _, text = self.printed(
+            PoseGraph, "data/killian.g2o.zip", lidar=True, verbose=True
+        )
+        self.assertIn("lidar scans", text)
+
+    def test_verbose_solve(self):
+        pg, _ = self.printed(PoseGraph, "data/pg1.g2o", verbose=True)
+        _, text = self.printed(pg.linearize_and_solve)
+        self.assertIn("Total cost", text)
+
+    def test_verbose_attribute(self):
+        pg, _ = self.printed(PoseGraph, "data/pg1.g2o")
+        self.assertFalse(pg.verbose)
+        pg.verbose = True
+        _, text = self.printed(pg.linearize_and_solve)
+        self.assertIn("Total cost", text)
+
+
 class TestOptimize(unittest.TestCase):
     def test_landmarks_are_not_supported(self):
         path = write(
