@@ -123,7 +123,7 @@ class RRTPlanner(PlannerBase):
         npoints: int = 50,
         **kwargs: Any,
     ) -> None:
-        super().__init__(ndims=2, **kwargs)
+        super().__init__(ndims=3, **kwargs)
 
         self.npoints = npoints
         self.map = map

@@ -55,7 +55,7 @@ class DistanceTransformPlanner(PlannerBase):
         >>> import numpy as np
         >>> simplegrid = np.zeros((6, 6));
         >>> simplegrid[2:5, 3:5] = 1
-        >>> dx = DistanceTransformPlanner(simplegrid, goal=(1, 1), distance="manhattan");
+        >>> dx = DistanceTransformPlanner(simplegrid, goal=(1, 1), metric="manhattan");
         >>> dx.plan()
         >>> path = dx.query(start=(5, 4))
         >>> print(path.T)
