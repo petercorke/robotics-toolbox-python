@@ -75,7 +75,8 @@ class PRMPlanner(PlannerBase):
     over.  If ``collision_step`` is given the edge is instead sampled at
     intervals of at most ``collision_step`` cells, and both endpoints are
     always tested.  A value of 0.5 or less cannot step over a wall one cell
-    thick.  Larger values are allowed, and are the user's responsibility.
+    thick, and smaller values give no gain for the increased cost.  Larger
+    values are allowed, and are the user's responsibility.
 
     Example:
 
