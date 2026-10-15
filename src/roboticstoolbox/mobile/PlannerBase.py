@@ -707,7 +707,7 @@ class PlannerBase:
             field, defaults to False.  Useful for small grids, see
             :meth:`plot_bg`.
         :param label_style: Matplotlib text options for ``labels``
-        :param labelvalues: a synonym of ``labels``, the name used in the book
+        :param labelvalues: deprecated, use ``labels``
         :param inflated: show the inflated obstacles, passed to :meth:`plot_bg`
         :param colorbar: show a colorbar for the distance field, passed to
             :meth:`plot_bg`
@@ -803,6 +803,10 @@ class PlannerBase:
             ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
             earlier.
 
+        .. deprecated:: 1.4.5
+            ``labelvalues`` is deprecated, use ``labels``.  It is the name used
+            in the book, where it had no effect.
+
         """
         _warn_unused(unused)
         # deprecated names, mapped to the new ones
@@ -846,7 +850,14 @@ class PlannerBase:
         start_vehicle_options = START_VEHICLE_STYLE | (start_vehicle_style or {})
         goal_vehicle_options = GOAL_VEHICLE_STYLE | (goal_vehicle_style or {})
         bgargs = dict(bgargs or {})
-        if labels or labelvalues:
+        if labelvalues:
+            warnings.warn(
+                "labelvalues is deprecated, use labels instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            labels = True
+        if labels:
             bgargs["labels"] = True
             bgargs.setdefault("label_style", label_style)
         # arguments of the background that are given here rather than in bgargs
@@ -1067,7 +1078,7 @@ class PlannerBase:
             label defaults to "Distance".
         :param labels: write the value in each cell of the distance field,
             defaults to False
-        :param labelvalues: a synonym of ``labels``, the name used in the book
+        :param labelvalues: deprecated, use ``labels``
         :param label_style: Matplotlib text options for the values, merged over
             red, centered ``fontsize`` 8 text, as in the book, with a thin
             white outline (``path_effects``) so that it is legible on any gray.
@@ -1094,8 +1105,19 @@ class PlannerBase:
             ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
             earlier.
 
+        .. deprecated:: 1.4.5
+            ``labelvalues`` is deprecated, use ``labels``.  It is the name used
+            in the book, where it had no effect.
+
         """
         _warn_unused(unused)
+        if labelvalues:
+            warnings.warn(
+                "labelvalues is deprecated, use labels instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            labels = True
         occgrid = self._occgrid
         if occgrid is None:
             return
@@ -1173,12 +1195,12 @@ class PlannerBase:
             c_map = mpl.colors.ListedColormap(colors)
             occgrid.plot(image, cmap=c_map, zorder=1)
 
-            if labels or labelvalues:
+            if labels:
                 self._label_values(ax, distance, norm, vmax, label_style)
 
         else:
             # occupancy grid only
-            if labels or labelvalues:
+            if labels:
                 warnings.warn(
                     "labels has no effect, there is no distance field",
                     UserWarning,

@@ -74,7 +74,7 @@ class TestUnknownKeywords(unittest.TestCase):
 
 
 class TestLabelValues(unittest.TestCase):
-    """dx.plot(labelvalues=True), in the book's chapter 5 notebook"""
+    """dx.plot(labels=True), in the book's chapter 5 notebook"""
 
     def setUp(self):
         # the 6x6 example from the book
@@ -96,7 +96,7 @@ class TestLabelValues(unittest.TestCase):
     def test_no_warning(self):
         with warnings.catch_warnings():
             warnings.simplefilter("error", DeprecationWarning)
-            self.dx.plot(labelvalues=True)
+            self.dx.plot(labels=True)
 
     def test_labels_is_the_argument(self):
         self.dx.plot(labels=True)
@@ -104,16 +104,26 @@ class TestLabelValues(unittest.TestCase):
             len(plt.gca().texts), len(np.argwhere(np.isfinite(self.dx.distancemap)))
         )
 
-    def test_labelvalues_is_a_synonym(self):
-        # the book's name, without a warning
-        with warnings.catch_warnings():
-            warnings.simplefilter("error", DeprecationWarning)
+    def test_labelvalues_is_deprecated(self):
+        # the book's name, which never did anything
+        with self.assertWarns(DeprecationWarning) as cm:
             self.dx.plot(labelvalues=True)
+        self.assertIn("labels", str(cm.warning))
         a = {t.get_position(): t.get_text() for t in plt.gca().texts}
         plt.close("all")
         self.dx.plot(labels=True)
         b = {t.get_position(): t.get_text() for t in plt.gca().texts}
         self.assertEqual(a, b)
+
+    def test_labelvalues_warning_points_at_the_caller(self):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            self.dx.plot(labelvalues=True)
+        self.assertTrue(any(x.filename == __file__ for x in w))
+
+    def test_plot_bg_labelvalues_is_deprecated(self):
+        with self.assertWarns(DeprecationWarning):
+            self.dx.plot_bg(labelvalues=True)
 
     def test_plot_bg_labels(self):
         self.dx.plot_bg(labels=True)
@@ -124,7 +134,7 @@ class TestLabelValues(unittest.TestCase):
         self.assertEqual(len(plt.gca().texts), 0)
 
     def test_every_free_cell_is_labelled_with_its_distance(self):
-        self.dx.plot(labelvalues=True)
+        self.dx.plot(labels=True)
         texts = self.texts()
         d = self.dx.distancemap
         free = np.argwhere(np.isfinite(d))
@@ -134,7 +144,7 @@ class TestLabelValues(unittest.TestCase):
         self.assertEqual(texts[(1, 1)], "0")
 
     def test_obstacles_are_not_labelled(self):
-        self.dx.plot(labelvalues=True)
+        self.dx.plot(labels=True)
         texts = self.texts()
         for r, c in np.argwhere(self.grid > 0):
             self.assertNotIn((c, r), texts)
@@ -142,12 +152,12 @@ class TestLabelValues(unittest.TestCase):
     def test_euclidean_values_have_one_decimal(self):
         dx = DistanceTransformPlanner(self.grid, metric="euclidean")
         dx.plan(goal=(1, 1))
-        dx.plot(labelvalues=True)
+        dx.plot(labels=True)
         self.assertEqual(self.texts()[(2, 2)], "1.4")
 
     def test_default_labels_are_red(self):
         # the book says the cell labels are red
-        self.dx.plot(labelvalues=True)
+        self.dx.plot(labels=True)
         self.assertEqual({t.get_color() for t in plt.gca().texts}, {"red"})
 
     def test_default_labels_have_a_white_outline(self):
@@ -164,7 +174,7 @@ class TestLabelValues(unittest.TestCase):
         self.assertEqual(plt.gca().texts[0].get_path_effects(), [])
 
     def test_label_style(self):
-        self.dx.plot(labelvalues=True, label_style=dict(fontsize=14, color="m"))
+        self.dx.plot(labels=True, label_style=dict(fontsize=14, color="m"))
         text = plt.gca().texts[0]
         self.assertEqual(text.get_fontsize(), 14)
         self.assertEqual(text.get_color(), "m")
@@ -172,7 +182,7 @@ class TestLabelValues(unittest.TestCase):
     def test_without_a_distance_field(self):
         dx = DistanceTransformPlanner(self.grid, goal=(1, 1))
         with self.assertWarns(UserWarning):
-            dx.plot(labelvalues=True)
+            dx.plot(labels=True)
 
 
 class TestBackgroundArguments(unittest.TestCase):
