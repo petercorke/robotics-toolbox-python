@@ -217,27 +217,45 @@ class TestBackgroundArguments(unittest.TestCase):
         self.assertEqual(len(plt.gcf().axes), 1)
 
 
-class TestDistanceSynonym(unittest.TestCase):
+class TestDistanceIsDeprecated(unittest.TestCase):
     """The book's notebook gives distance="manhattan", which was ignored"""
 
-    def test_distance_is_metric(self):
+    def test_distance_is_metric_with_a_warning(self):
+        with self.assertWarns(DeprecationWarning) as cm:
+            dx = DistanceTransformPlanner(grid(), distance="manhattan")
+        self.assertIn("metric", str(cm.warning))
+        self.assertEqual(dx.metric, "manhattan")
+
+    def test_warning_points_at_the_caller(self):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            DistanceTransformPlanner(grid(), distance="manhattan")
+        self.assertTrue(any(x.filename == __file__ for x in w))
+
+    def test_metric_does_not_warn(self):
         with warnings.catch_warnings():
             warnings.simplefilter("error", DeprecationWarning)
-            dx = DistanceTransformPlanner(grid(), distance="manhattan")
+            dx = DistanceTransformPlanner(grid(), metric="manhattan")
         self.assertEqual(dx.metric, "manhattan")
 
     def test_default_is_unchanged(self):
         self.assertEqual(DistanceTransformPlanner(grid()).metric, "euclidean")
 
     def test_conflict(self):
-        with self.assertRaises(ValueError):
-            DistanceTransformPlanner(grid(), metric="manhattan", distance="euclidean")
-        # the same thing twice is fine
-        DistanceTransformPlanner(grid(), metric="manhattan", distance="manhattan")
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            with self.assertRaises(ValueError):
+                DistanceTransformPlanner(
+                    grid(), metric="manhattan", distance="euclidean"
+                )
+            # the same thing twice is fine
+            DistanceTransformPlanner(grid(), metric="manhattan", distance="manhattan")
 
     def test_bad_value(self):
-        with self.assertRaises(ValueError):
-            DistanceTransformPlanner(grid(), distance="chebyshev")
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            with self.assertRaises(ValueError):
+                DistanceTransformPlanner(grid(), distance="chebyshev")
 
 
 if __name__ == "__main__":
