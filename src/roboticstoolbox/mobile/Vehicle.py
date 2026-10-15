@@ -148,10 +148,8 @@ class VehicleBase(ABC):
         seed: int | None = 0,
         animation: VehicleAnimationBase | str | None = None,
         verbose: bool = False,
-        plot: bool = False,
         workspace: Any = None,
         polygon: Polygon2 | None = None,
-        trailers: Any = None,
     ) -> None:
         r"""
         Superclass for vehicle kinematic models
@@ -194,7 +192,7 @@ class VehicleBase(ABC):
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
 
-        :note: Set ``seed=None`` to have it randomly initialized from the
+        .. note:: Set ``seed=None`` to have it randomly initialized from the
             operating system.
 
         :seealso: :class:`Bicycle` :class:`Unicycle` :class:`VehicleAnimationBase`
@@ -225,18 +223,14 @@ class VehicleBase(ABC):
         self._ax: Axes | None = None
         self._timer: Any = None  # Matplotlib Text, when animated
 
-        if control is not None:
-            # fails if the control is not a driver, see findings
-            self.add_driver(control)  # type: ignore[arg-type]
-
-        self._dt = dt
         self._t: float = 0
         self._stopsim = False
 
         self._verbose = verbose
-        self._plot = False
 
-        self._control = control
+        # the setter connects a driver agent to this vehicle
+        self._control: ControlLike | None = None
+        self.control = control
         self._x_hist: list[tuple[float, ...]] = []
 
         self._workspace: NDArray | None
@@ -260,6 +254,11 @@ class VehicleBase(ABC):
         return s
 
     def __repr__(self) -> str:
+        """
+        Convert to string, same as :meth:`__str__`
+
+        :return: String representation of vehicle object
+        """
         return str(self)
 
     def f(self, x: ArrayLike, odo: ArrayLike, v: ArrayLike | None = None) -> NDArray:
@@ -390,7 +389,7 @@ class VehicleBase(ABC):
             * a constant tuple as the control inputs to the vehicle
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as ``f(t)`` that returns a tuple
-            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.driversVehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         Example:
 
@@ -407,11 +406,6 @@ class VehicleBase(ABC):
 
     @control.setter
     def control(self, control: ControlLike | None) -> None:
-
-        # * a function called as ``f(vehicle, t, x)`` that returns a tuple
-        # * an interpolator called as f(t) that returns a tuple, see
-        #   SciPy interp1d
-
         self._control = control
         if isinstance(control, VehicleDriverBase):
             # if this is a driver agent, connect it to the vehicle
@@ -422,7 +416,7 @@ class VehicleBase(ABC):
         Evaluate vehicle control input (superclass method)
 
         :param control: vehicle control
-        :type control: [type]
+        :type control: array_like(2), callable, interp1d, VehicleDriverBase
         :param x: vehicle state :math:`(x, y, \theta)`
         :type x: array_like(3)
         :raises ValueError: bad control
@@ -442,8 +436,6 @@ class VehicleBase(ABC):
 
         :seealso: :meth:`run` :meth:`control` :func:`scipy.interpolate.interp1d`
         """
-        # was called control() in the MATLAB version
-
         u: ArrayLike
         if base.isvector(control, 2):
             # control is a constant
@@ -508,6 +500,7 @@ class VehicleBase(ABC):
         :type q: array_like(3)
         :return: bounding polygon of vehicle at configuration ``q``
         :rtype: :class:`~spatialmath.geom2d.Polygon2`
+        :raises ValueError: the vehicle has no bounding polygon
 
         The bounding polygon of the vehicle is returned for the configuration
         ``q``.  Can be used for collision checking using the :meth:`~spatialmath.geom2d.Polygon2.intersects`
@@ -627,6 +620,8 @@ class VehicleBase(ABC):
         :type format: str, optional
         :param file: File name
         :type file: str, optional
+        :raises ValueError: ``file`` is None for ``format`` ``"gif"`` or ``"mp4"``,
+            or ``format`` is not recognised
         :return: Matplotlib animation object
         :rtype: :meth:`matplotlib.animation.FuncAnimation`
 
@@ -757,8 +752,8 @@ class VehicleBase(ABC):
             self._random = np.random.default_rng(self._seed)
 
         if control is not None:
-            # override control
-            self._control = control
+            # override control, the setter connects a driver agent
+            self.control = control
 
         if isinstance(self._control, VehicleDriverBase):
             self._control.init()
@@ -838,7 +833,7 @@ class VehicleBase(ABC):
         else:
             u = self.eval_control(self._control, self._x)
 
-        # update state (used to be function control() in MATLAB version)
+        # update state
         xd = self._dt * self.deriv(self._x, u)  # delta state
 
         # update state vector
@@ -1069,18 +1064,14 @@ class VehicleBase(ABC):
         Plot xy-path from history
 
         :param block: block until plot dismissed, defaults to None
-        :type block: bool, optional
         :param args: positional arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-
 
         The :math:`(x,y)` trajectory from the simulation history is plotted as
         :math:`x` vs :math:`y`.
 
         :seealso: :meth:`run` :meth:`plot_xyt`
         """
-        if args is None and "color" not in kwargs:
-            kwargs["color"] = "b"
         xyt = self.x_hist
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
         if block is not None:
@@ -1090,9 +1081,7 @@ class VehicleBase(ABC):
         """
         Plot configuration vs time from history
 
-        :param block: block until plot dismissed, defaults to False
-        :type block: bool, optional
-        :param args: positional arguments passed to :meth:`~matplotlib.axes.Axes.plot`
+        :param block: block until plot dismissed, defaults to None
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
 
         The :math:`(x,y, \theta)` trajectory from the simulation history is plotted
@@ -1101,8 +1090,9 @@ class VehicleBase(ABC):
         :seealso: :meth:`run` :meth:`plot_xy`
         """
         xyt = self.x_hist
-        t = np.arange(0, xyt.shape[0] * self._dt, self._dt)
-        plt.plot(xyt[:, 0], xyt[:, :], **kwargs)
+        t = np.arange(xyt.shape[0]) * self._dt
+        plt.plot(t, xyt, **kwargs)
+        plt.xlabel("time (s)")
         plt.legend(["x", "y", "$\\theta$"])
         if block is not None:
             plt.show(block=block)
@@ -1267,9 +1257,7 @@ class Bicycle(VehicleBase):
 
 
 class Unicycle(VehicleBase):
-    def __init__(
-        self, W: float = 1, steer_max: float = np.inf, **kwargs: Any
-    ) -> None:
+    def __init__(self, W: float = 1, steer_max: float = np.inf, **kwargs: Any) -> None:
         r"""
         Create unicycle kinematic model
 
@@ -1935,8 +1923,6 @@ class VehicleTrailer(VehicleBase):
 
 
 if __name__ == "__main__":
-
-
     import roboticstoolbox as rtb
 
     def steering(v: VehicleBase, t: float, x: ArrayLike) -> tuple[float, float]:
