@@ -2,6 +2,7 @@
 Tests of EKF: its description, state, sensor type, map plot and arguments.
 """
 
+import importlib
 import unittest
 import unittest.mock as mock
 import warnings
@@ -40,6 +41,10 @@ def make(vehicle=True, map_given=False, sensor=True, p0=None, **kwargs):
         animate=False,
         **kwargs,
     )
+
+
+# roboticstoolbox.mobile.EKF is the class; the module is needed to patch it
+ekf_module = importlib.import_module("roboticstoolbox.mobile.EKF")
 
 
 class TestDescription(unittest.TestCase):
@@ -110,7 +115,7 @@ class TestPlotMap(unittest.TestCase):
         cls.ekf.run(T=8)
 
     def test_ellipses_use_each_landmarks_covariance(self):
-        with mock.patch("roboticstoolbox.mobile.EKF.base.plot_ellipse") as plot_ellipse:
+        with mock.patch.object(ekf_module.base, "plot_ellipse") as plot_ellipse:
             self.ekf.plot_map(ellipse_style=dict(color="g"))
         self.assertGreater(plot_ellipse.call_count, 1)
         P = self.ekf.P_est
@@ -119,7 +124,7 @@ class TestPlotMap(unittest.TestCase):
             nt.assert_allclose(call.args[0], expected)
 
     def test_ellipses_centred_on_the_landmarks(self):
-        with mock.patch("roboticstoolbox.mobile.EKF.base.plot_ellipse") as plot_ellipse:
+        with mock.patch.object(ekf_module.base, "plot_ellipse") as plot_ellipse:
             self.ekf.plot_map(ellipse_style=dict(color="g"))
         xy = self.ekf.get_map()
         for i, call in enumerate(plot_ellipse.call_args_list):

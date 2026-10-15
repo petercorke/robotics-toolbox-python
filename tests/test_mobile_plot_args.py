@@ -10,6 +10,7 @@ an Agg figure and examines the Matplotlib artists, so they are headless.
 
 import contextlib
 import io
+import importlib
 import unittest
 from unittest import mock
 
@@ -48,6 +49,10 @@ def lines_with(ax, **props):
         if all(getattr(line, f"get_{k}")() == v for k, v in props.items()):
             found.append(line)
     return found
+
+
+# roboticstoolbox.mobile.EKF is the class; the module is needed to patch it
+ekf_module = importlib.import_module("roboticstoolbox.mobile.EKF")
 
 
 class PlannerPlotTestCase(unittest.TestCase):
@@ -215,7 +220,7 @@ class TestEKFPlot(unittest.TestCase):
         # The covariance for landmark i is the 2x2 block at rows and columns
         # 3+2i.. (after the vehicle state).  plot_map used to take the block
         # at rows and columns i.., so ellipses after the first were wrong.
-        with mock.patch("roboticstoolbox.mobile.EKF.base.plot_ellipse") as plot_ellipse:
+        with mock.patch.object(ekf_module.base, "plot_ellipse") as plot_ellipse:
             self.ekf.plot_map(ellipse_style=dict(color="g"))
         P = self.ekf.P_est
         for i, call in enumerate(plot_ellipse.call_args_list):
