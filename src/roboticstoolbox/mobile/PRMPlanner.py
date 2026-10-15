@@ -12,6 +12,7 @@ import warnings
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from pgraph import UGraph
 from spatialmath.base.types import ArrayLike2
 
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
@@ -20,18 +21,6 @@ from roboticstoolbox.tools.types import NDArray
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-
-try:
-    from pgraph import UGraph
-except ImportError:
-
-    class UGraph:  # type: ignore[no-redef]  # pragma: no cover
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
-            raise ImportError(
-                "PRMPlanner requires optional dependency 'pgraph'. "
-                "Install it with: pip install pgraph-python"
-            )
-
 
 #: default Matplotlib style of the roadmap vertices and edges, a user's options
 #: are merged over these
@@ -392,9 +381,9 @@ class PRMPlanner(PlannerBase):
 
         # add the roadmap graph
         self._graph.plot(
-            text=False,
-            vopt=VERTEX_STYLE | (vertex_style or {}),
-            eopt=EDGE_STYLE | (edge_style or {}),
+            labels=False,
+            vertex_opt=VERTEX_STYLE | (vertex_style or {}),
+            edge_opt=EDGE_STYLE | (edge_style or {}),
             ax=ax,
         )
         return ax

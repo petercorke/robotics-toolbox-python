@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 
 # import rvcprint
 import numpy as np
+from pgraph import DGraph
 from spatialmath import Polygon2
 
 from spatialmath.base.types import ArrayLike3
@@ -23,18 +24,6 @@ from roboticstoolbox.mobile.OccGrid import PolygonMap
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.mobile.Vehicle import VehicleBase
 from roboticstoolbox.tools.types import NDArray
-
-# from roboticstoolbox.mobile.OccupancyGrid import OccupancyGrid
-try:
-    from pgraph import DGraph
-except ImportError:
-
-    class DGraph:  # type: ignore[no-redef]  # pragma: no cover
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
-            raise ImportError(
-                "RRTPlanner requires optional dependency 'pgraph'. "
-                "Install it with: pip install pgraph-python"
-            )
 
 
 class RRTStatus(NamedTuple):

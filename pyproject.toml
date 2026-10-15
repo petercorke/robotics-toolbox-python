@@ -15,7 +15,7 @@ dependencies = [
     "numpy",
     "spatialmath-python>=1.1.18",
     "spatialgeometry>=1.4.0",
-    "pgraph-python",
+    "pgraph-python>=1.0.0",
     "scipy",
     "matplotlib",
     "ansitable",
