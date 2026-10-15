@@ -494,6 +494,9 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         :seealso: :meth:`w2g`
         """
         c, r = self.w2g(p)
+        # NumPy accepts negative indices by wrapping around to the opposite edge.
+        if c < 0 or r < 0:
+            return True
         try:
             return self._grid[r, c]
         except IndexError:
