@@ -130,6 +130,39 @@ class TestOptimize(unittest.TestCase):
             quiet(pg.optimize, iterations=1)
 
 
+class TestOptimizeStyles(unittest.TestCase):
+    def tearDown(self):
+        plt.close("all")
+
+    def test_animate_styles(self):
+        import unittest.mock as mock
+
+        pg = quiet(PoseGraph, "data/pg1.g2o")
+        with mock.patch.object(pg.graph, "plot") as graph_plot:
+            with mock.patch.object(plt, "pause"):
+                quiet(
+                    pg.optimize,
+                    iterations=2,
+                    animate=True,
+                    vertex_style={"markersize": 2},
+                    edge_style={"linewidth": 3},
+                )
+        for call in graph_plot.call_args_list:
+            self.assertEqual(call.kwargs["vopt"], {"markersize": 2})
+            self.assertEqual(call.kwargs["eopt"]["linewidth"], 3)
+
+    def test_deprecated_names(self):
+        import unittest.mock as mock
+
+        pg = quiet(PoseGraph, "data/pg1.g2o")
+        with mock.patch.object(pg.graph, "plot"):
+            with mock.patch.object(plt, "pause"):
+                with self.assertWarns(DeprecationWarning):
+                    quiet(
+                        pg.optimize, iterations=1, animate=True, eopt={"linewidth": 3}
+                    )
+
+
 class TestPlotStyles(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

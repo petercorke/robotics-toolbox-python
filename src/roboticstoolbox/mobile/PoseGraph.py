@@ -1,41 +1,49 @@
-# PoseGraph Pose graph
+"""
+Pose graph optimization for SLAM
+"""
 
 from __future__ import annotations
 
-import types
-from typing import Any, Callable, cast
-
-import roboticstoolbox as rtb
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-
-try:
-    import pgraph
-except ImportError:
-
-    class _PGraphMissing:  # pragma: no cover
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
-            raise ImportError(
-                "PoseGraph requires optional dependency 'pgraph'. "
-                "Install it with: pip install pgraph-python"
-            )
-
-    pgraph = types.SimpleNamespace(
-        UVertex=_PGraphMissing, Edge=_PGraphMissing, UGraph=_PGraphMissing
-    )
 import math
 import time
+import warnings
 import zipfile
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
+import pgraph
+import scipy.sparse
+import scipy.sparse.linalg
 import spatialmath.base as smb
 from progress.bar import FillingCirclesBar
 from spatialmath import SE2
+from spatialmath.base.types import ArrayLike2
+
+import roboticstoolbox as rtb
+from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid
+from roboticstoolbox.tools.types import ArrayLike, NDArray
+
+#: default Matplotlib style of the vertices and edges drawn by :meth:`PoseGraph.plot`,
+#: a user's options are merged over these
+VERTEX_STYLE: dict[str, Any] = dict(
+    markersize=8, markerfacecolor="blue", markeredgecolor="None"
+)
+EDGE_STYLE: dict[str, Any] = dict(linewidth=1)
 
 
 class PGVertex(pgraph.UVertex):
+    """
+    Vertex of a pose graph
+
+    :param type: ``"vertex"`` for a robot pose :math:`(x, y, \\theta)`, or
+        ``"landmark"`` for a landmark position :math:`(x, y)`
+    :param index: index of the vertex in the graph, in order of creation
+    :param kwargs: options passed to :class:`pgraph.UVertex`
+    """
+
     def __init__(self, type: str, index: int, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.type = type
@@ -43,6 +51,16 @@ class PGVertex(pgraph.UVertex):
 
 
 class PGEdge(pgraph.Edge):
+    """
+    Edge of a pose graph, a relative pose measurement
+
+    :param v1: first vertex
+    :param v2: second vertex
+    :param mean: measured relative pose :math:`(x, y, \\theta)` of ``v2`` with
+        respect to ``v1``
+    :param info: information matrix, the inverse of the measurement covariance
+    """
+
     def __init__(self, v1: Any, v2: Any, mean: NDArray, info: NDArray) -> None:
         super().__init__(v1, v2)
         self.mean = mean
@@ -57,6 +75,12 @@ class PGEdge(pgraph.Edge):
     #  vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
 
     def linear_factors(self) -> tuple[NDArray, NDArray, NDArray]:
+        """
+        Linearize the error of this edge
+
+        :return: error and its Jacobians with respect to each vertex
+        :rtype: ndarray(3), ndarray(3,3), ndarray(3,3)
+        """
         # computes the Taylor expansion of the error function of the k_th edge
         # v: vertices positions
         # z: edge means
@@ -109,37 +133,46 @@ class PGEdge(pgraph.Edge):
 
 
 class PoseGraph:
-    # properties
-    #     graph
+    r"""
+    Pose graph optimization for SLAM
 
-    #     ngrid
-    #     center
-    #     cellsize
+    :param filename: name of file to load, G2O or TORO format, can be zipped
+    :param lidar: load lidar scans, defaults to False
+    :param verbose: show details of processing, defaults to False
+    :raises RuntimeError: file syntax error
+    :raises ValueError: an edge references an unknown vertex, or a lidar
+        record precedes any vertex
+
+    A pose graph has a vertex for each robot pose :math:`(x, y, \theta)` and
+    an edge for each relative pose measurement between two poses.  Optimization
+    adjusts the poses to best satisfy all the measurements.
+
+    The vertices are numbered in the order they appear in the file, and
+    :meth:`pose`, :meth:`scan` and :meth:`time` take this number, not the
+    vertex name which is the identifier in the file.
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import PoseGraph
+        >>> pg = PoseGraph("data/pg1.g2o")
+        >>> pg.optimize(iterations=3)
+
+    :references:
+
+        - Robotics, Vision & Control for Python, §6.5, P. Corke, Springer 2023.
+        - A Tutorial on Graph-Based SLAM,
+          G. Grisetti, R. Kümmerle, C. Stachniss and W. Burgard,
+          in IEEE Intelligent Transportation Systems Magazine,
+          vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
+
+    :seealso: :meth:`optimize` :meth:`plot` :meth:`scanmap`
+    """
 
     def __init__(
         self, filename: str, lidar: bool = False, verbose: bool = False
     ) -> None:
-        """
-        Pose graph optimization for SLAM
-
-        :param filename: name of file to load, G2O or TORO format, can be zipped
-        :type filename: str
-        :param lidar: process lidar data, defaults to False
-        :type lidar: bool, optional
-        :param verbose: show details of processing, defaults to False
-        :type verbose: bool, optional
-        :raises RuntimeError: file syntax error
-        :raises ValueError: an edge references an unknown vertex
-
-        :references:
-
-            - Robotics, Vision & Control for Python, §6.5, P. Corke, Springer 2023.
-            - A Tutorial on Graph-Based SLAM,
-              G. Grisetti, R. Kümmerle, C. Stachniss and W. Burgard,
-              in IEEE Intelligent Transportation Systems Magazine,
-              vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
-        """
-
         # parse the file data
         # we assume g2o format
         #    VERTEX* vertex_id X Y THETA
@@ -179,8 +212,9 @@ class PoseGraph:
 
             # we keep an array self. = vindex(gi) to map g2o vertex index to PGraph vertex index
 
-            self.vindex = {}
+            self.vindex: dict[int, PGVertex] = {}
             firstlidar = True
+            v: PGVertex | None = None
             for line_number, line in enumerate(f, start=1):
                 # for zip file, we get data as bytes not str
                 if isinstance(line, bytes):
@@ -201,15 +235,13 @@ class PoseGraph:
                     coord = np.array([float(x) for x in tokens[2:5]])
                     id = tokens[1]
 
-                    v = PGVertex("vertex", index=self.graph.n, coord=coord, name=id)
-                    self.graph.add_vertex(v)
+                    v = self._add_vertex("vertex", coord, id)
 
                 elif tokens[0] == "VERTEX_XY":
                     coord = np.array([float(x) for x in tokens[2:4]])
                     id = tokens[1]
 
-                    v = PGVertex("landmark", index=self.graph.n, coord=coord, name=id)
-                    self.graph.add_vertex(v)
+                    v = self._add_vertex("landmark", coord, id)
 
                 elif tokens[0] == "EDGE_SE2":
                     v1 = tokens[1]
@@ -244,8 +276,7 @@ class PoseGraph:
                     coord = np.array([float(x) for x in tokens[2:5]])
                     id = tokens[1]
 
-                    v = PGVertex("vertex", index=self.graph.n, coord=coord, name=id)
-                    self.graph.add_vertex(v)
+                    v = self._add_vertex("vertex", coord, id)
 
                 elif tokens[0] == "EDGE2":
                     toroformat = True
@@ -278,6 +309,11 @@ class PoseGraph:
                     if not lidar:
                         continue
 
+                    if v is None:
+                        raise ValueError(
+                            f"Lidar record before any vertex in {filename} at line {line_number}"
+                        )
+
                     # lidar records are associated with the immediately
                     # preceding VERTEX record
                     #
@@ -303,7 +339,6 @@ class PoseGraph:
                     v.theta = np.arange(0, nbeams) * float(tokens[4]) + float(tokens[2])
                     v.range = np.array([float(x) for x in tokens[9 : nbeams + 9]])
                     v.time = float(tokens[21 + nbeams])
-                    self.vindex[v.index] = v
                     nlidar += 1
                 else:
                     raise RuntimeError(f"Unexpected line  {line} in {filename}")
@@ -330,12 +365,57 @@ class PoseGraph:
                     f" {fov[1]:.1f}°, max range {self._maxrange}"
                 )
 
+    def _add_vertex(self, type: str, coord: NDArray, name: str) -> PGVertex:
+        index = len(self.vindex)
+        v = PGVertex(type, index, coord=coord, name=name)
+        self.graph.add_vertex(v)
+        self.vindex[index] = v
+        return v
+
+    def _vertex(self, i: int) -> PGVertex:
+        try:
+            return self.vindex[i]
+        except KeyError:
+            raise IndexError(
+                f"no vertex {i}, the graph has {len(self.vindex)} vertices"
+            ) from None
+
+    def _scan_vertex(self, i: int) -> PGVertex:
+        v = self._vertex(i)
+        if not hasattr(v, "range"):
+            raise ValueError(
+                f"vertex {i} has no lidar scan, load the graph with lidar=True"
+            )
+        return v
+
     def scan(self, i: int) -> tuple[NDArray, NDArray]:
-        v = self.vindex[i]
+        """
+        Lidar scan at a vertex
+
+        :param i: vertex number
+        :raises IndexError: there is no such vertex
+        :raises ValueError: the vertex has no lidar scan
+        :return: range and bearing of each beam
+        :rtype: ndarray(N), ndarray(N)
+
+        :seealso: :meth:`scanxy`
+        """
+        v = self._scan_vertex(i)
         return v.range, v.theta
 
     def scanxy(self, i: int) -> NDArray:
+        """
+        Lidar scan at a vertex as points in the sensor frame
 
+        :param i: vertex number
+        :raises IndexError: there is no such vertex
+        :raises ValueError: the vertex has no lidar scan
+        :return: points, one per column, NaN for beams that returned no
+            range less than the maximum range of the sensor
+        :rtype: ndarray(2,N)
+
+        :seealso: :meth:`scan`
+        """
         range, theta = self.scan(i)
         range = np.where(range < self._maxrange, range, np.nan)
         x = range * np.cos(theta)
@@ -343,62 +423,158 @@ class PoseGraph:
 
         return np.c_[x, y].T
 
-    def plot_scan(self, n: ArrayLike) -> None:
-        n = smb.getvector(n)
-        for i in n:
+    def plot_scan(self, n: int | ArrayLike, pause: float = 1, **kwargs: Any) -> None:
+        """
+        Plot lidar scans
+
+        :param n: vertex number, or a sequence of them
+        :param pause: time to display each scan, defaults to 1 second
+        :param kwargs: Matplotlib line options, merged over a marker size of 10
+
+        Each scan is plotted in the sensor frame, in turn.
+
+        :seealso: :meth:`scanxy`
+        """
+        style = dict(markersize=10) | kwargs
+        for i in smb.getvector(n):
             x, y = self.scanxy(int(i))
-            plt.plot(x, y, ".", "MarkerSize", 10)
-            plt.pause(1)
+            plt.plot(x, y, ".", **style)
+            plt.pause(pause)
 
     def pose(self, i: int) -> NDArray:
-        return self.vindex[i].coord
+        """
+        Pose of a vertex
+
+        :param i: vertex number
+        :raises IndexError: there is no such vertex
+        :return: pose :math:`(x, y, \\theta)`, or position :math:`(x, y)` for a
+            landmark, as stored in the graph so that it reflects any optimization
+        :rtype: ndarray(3) or ndarray(2)
+        """
+        return self._vertex(i).coord
 
     def time(self, i: int) -> float:
-        return self.vindex[i].time
+        """
+        Timestamp of the lidar scan at a vertex
 
-    def plot(self, **kwargs: Any) -> None:
-        if not "vopt" in kwargs:
-            kwargs["vopt"] = dict(
-                markersize=8, markerfacecolor="blue", markeredgecolor="None"
+        :param i: vertex number
+        :raises IndexError: there is no such vertex
+        :raises ValueError: the vertex has no lidar scan
+        :return: timestamp, as a Unix time
+        """
+        return self._scan_vertex(i).time
+
+    def plot(
+        self,
+        vertex_style: dict[str, Any] | None = None,
+        edge_style: dict[str, Any] | None = None,
+        *,
+        vopt: dict[str, Any] | None = None,
+        eopt: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Plot the pose graph
+
+        :param vertex_style: Matplotlib options for the vertices, merged over
+            :data:`VERTEX_STYLE`
+        :param edge_style: Matplotlib options for the edges, merged over
+            :data:`EDGE_STYLE`
+        :param vopt: deprecated, use ``vertex_style``
+        :param eopt: deprecated, use ``edge_style``
+        :param kwargs: options passed to :meth:`pgraph.UGraph.plot`
+
+        .. deprecated:: 1.4.5
+            ``vopt`` and ``eopt`` are deprecated, use ``vertex_style`` and
+            ``edge_style``.
+
+        :seealso: :meth:`optimize`
+        """
+        for old, new, value in (
+            ("vopt", "vertex_style", vopt),
+            ("eopt", "edge_style", eopt),
+        ):
+            if value is None:
+                continue
+            warnings.warn(
+                f"{old} is deprecated, use {new} instead",
+                DeprecationWarning,
+                stacklevel=2,
             )
-        if not "eopt" in kwargs:
-            kwargs["eopt"] = dict(linewidth=1)
-        self.graph.plot(colorcomponents=False, force2d=True, **kwargs)
+            if new == "vertex_style" and vertex_style is None:
+                vertex_style = value
+            elif new == "edge_style" and edge_style is None:
+                edge_style = value
+
+        self.graph.plot(
+            colorcomponents=False,
+            force2d=True,
+            vopt=VERTEX_STYLE | (vertex_style or {}),
+            eopt=EDGE_STYLE | (edge_style or {}),
+            **kwargs,
+        )
         plt.xlabel("x")
         plt.ylabel("y")
         plt.grid(True)
 
     def scanmatch(self, s1: int, s2: int) -> SE2:
+        """
+        Relative pose between two scans by scan matching
+
+        :param s1: vertex number of the first scan
+        :param s2: vertex number of the second scan
+        :raises IndexError: there is no such vertex
+        :raises ValueError: a vertex has no lidar scan
+        :return: relative pose, found by iterative closest point
+
+        :seealso: :func:`spatialmath.base.ICP2d`
+        """
         p1 = self.scanxy(s1)
         p2 = self.scanxy(s2)
         T = smb.ICP2d(p1, p2)
         return SE2(T)
 
-    def scanmap(self, occgrid: Any, maxrange: float | None = None) -> None:
-        # note about maxrange timing
+    def scanmap(
+        self, occgrid: BaseOccupancyGrid, maxrange: float | None = None, step: int = 5
+    ) -> None:
+        """
+        Build an occupancy grid from the lidar scans
 
+        :param occgrid: occupancy grid to update
+        :param maxrange: ignore range readings beyond this distance, defaults to
+            None for all
+        :param step: use every ``step``-th scan, defaults to 5
+        :raises ValueError: the graph has no lidar scans
+
+        Each scan is placed at the pose of its vertex, and the cells along each
+        ray are incremented as free, and the cell it ends in is decremented as
+        occupied.  Afterwards cells are -1 (occupied), +1 (free) or 0 (unknown).
+
+        .. note:: Scans are taken in vertex order, so the result depends on the
+            current vertex poses, and is best made after :meth:`optimize`.
+
+        :seealso: :meth:`scanxy` :meth:`~roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.line_world`
+        """
+        indices = range(0, self.graph.n, step)
         bar = FillingCirclesBar(
-            "Converting", max=self.graph.n, suffix="%(percent).1f%% - %(eta)ds"
+            "Converting", max=len(indices), suffix="%(percent).1f%% - %(eta)ds"
         )
 
         grid1d = occgrid.ravel
-        for i in range(0, self.graph.n, 5):
+        for i in indices:
             xy = self.scanxy(i)
             r, theta = self.scan(i)
             if maxrange is not None:
                 toofar = np.where(r > maxrange)[0]
                 xy = np.delete(xy, toofar, axis=1)
-            xyt = self.vindex[i].coord
+            xyt = self.pose(i)
 
             xy = SE2(xyt) * xy
 
-            # start of each ray
-            p1 = occgrid.w2g(xyt[:2])
-
-            for p2 in occgrid.w2g(xy.T):
-                # all cells along the ray
+            for p2 in xy.T:
+                # all cells along the ray, from the sensor to the point
                 try:
-                    k = occgrid._line(p1, p2)
+                    k = occgrid.line_world(xyt[:2], p2)
                 except ValueError:
                     # silently ignore rays to points outside the grid map
                     continue
@@ -414,33 +590,6 @@ class PoseGraph:
         grid1d[grid1d > 0] = 1
         bar.finish()
 
-    def w2g(self, w: ArrayLike) -> NDArray:
-        # _centre, _cellsize and _ngrid are never set, this is unfinished
-        # _centre, _cellsize and _ngrid are never set: this is unfinished
-        c, h, n = self._centre, self._cellsize, self._ngrid  # type: ignore[attr-defined]
-        return np.round((w - c) / h) + n / 2
-
-    def g2w(self, g: ArrayLike) -> NDArray:
-        c, h, n = self._centre, self._cellsize, self._ngrid  # type: ignore[attr-defined]
-        return (np.r_[g] - n / 2) * h + c
-
-    def plot_occgrid(self, w: NDArray, block: bool | None = None) -> None:
-
-        bl = self.g2w([0, 0])
-        tr = self.g2w([w.shape[1], w.shape[0]])
-
-        w = np.where(w < 0, -1, w)  # free cells are -1
-        w = np.where(w > 0, 1, w)  # occupied cells are +1
-        w = -w
-
-        # plot it
-        plt.imshow(w, cmap="gray", extent=(bl[0], tr[0], bl[1], tr[1]))
-        plt.xlabel("x")
-        plt.ylabel("y")
-
-        if block is not None:
-            plt.show(block=block)
-
     # The following methods were inspired by, and modeled on, the MATLAB/Octave file
     # ls-slam.m by Giorgio Grisetti and Gian Diego Tipaldi.
     #
@@ -454,19 +603,54 @@ class PoseGraph:
         iterations: int = 10,
         animate: bool = False,
         retain: bool = True,
+        vertex_style: dict[str, Any] | None = None,
+        edge_style: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
+        """
+        Optimize the pose graph
+
+        :param iterations: maximum number of iterations, defaults to 10
+        :param animate: show the graph after each iteration, defaults to False
+        :param retain: retain the graph of each iteration in the animation, in
+            increasingly dark gray, defaults to True
+        :param vertex_style: Matplotlib options for the vertices when animating
+        :param edge_style: Matplotlib options for the edges when animating, the
+            color is set by ``retain``
+        :param kwargs: options passed to :meth:`pgraph.UGraph.plot` when animating
+        :raises NotImplementedError: the graph has landmark vertices
+
+        .. deprecated:: 1.4.5
+            ``vopt`` and ``eopt`` are deprecated, use ``vertex_style`` and
+            ``edge_style``.
+
+        Each iteration solves the linearized least-squares problem for a
+        correction to all the poses, which are updated in place.  Iteration
+        stops early if the total error does not decrease.
+
+        :seealso: :meth:`linearize_and_solve` :meth:`plot`
+        """
+        if any(v.type == "landmark" for v in self.graph):
+            raise NotImplementedError("optimize does not support landmark vertices")
+
+        for old, new in (("vopt", "vertex_style"), ("eopt", "edge_style")):
+            if old in kwargs:
+                warnings.warn(
+                    f"{old} is deprecated, use {new} instead",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                value = kwargs.pop(old)
+                if new == "vertex_style" and vertex_style is None:
+                    vertex_style = value
+                elif new == "edge_style" and edge_style is None:
+                    edge_style = value
 
         eprev = math.inf
-        eo = {}
+        eo = edge_style or {}
 
         if animate and retain:
             colors = plt.cm.Greys(np.linspace(0.3, 1, iterations))
-            if "eopt" in kwargs:
-                eo = kwargs["eopt"]
-                kwargs = {k: v for (k, v) in kwargs.items() if k != "eopt"}
-            # else:
-            #     eo = {}
 
         for i in range(iterations):
             if animate:
@@ -480,6 +664,8 @@ class PoseGraph:
                     eopt = eo
                 else:
                     eopt = {**eo, **dict(color=tuple(colors[i, :]), label=i)}
+                if vertex_style is not None:
+                    kwargs["vopt"] = vertex_style
                 self.graph.plot(
                     eopt=eopt, force2d=True, colorcomponents=False, ax=ax, **kwargs
                 )
@@ -492,6 +678,16 @@ class PoseGraph:
             eprev = energy
 
     def linearize_and_solve(self) -> float:
+        """
+        One iteration of pose graph optimization
+
+        :return: total cost, the sum of squared errors of all the edges, before
+            the poses are updated
+
+        The first vertex is anchored, since the measurements are all relative.
+
+        :seealso: :meth:`optimize`
+        """
         t0 = time.time()
 
         g = self.graph
@@ -522,19 +718,13 @@ class PoseGraph:
             jslice = slice(j * 3, (j + 1) * 3)
 
             # accumulate the blocks in H and b
-            try:
-                H[islice, islice] += Hii
-                H[jslice, jslice] += Hjj
-                H[islice, jslice] += Hij
-                H[jslice, islice] += Hij.T
+            H[islice, islice] += Hii
+            H[jslice, jslice] += Hjj
+            H[islice, jslice] += Hij
+            H[jslice, islice] += Hij.T
 
-                b[islice, 0] += bi
-                b[jslice, 0] += bj
-            except ValueError:
-                print("linearize_and_solve failed")
-                print(v)
-                print(H.shape, b.shape, Hii.shape, Hjj.shape, Hij.shape)
-                print(islice, jslice)
+            b[islice, 0] += bi
+            b[jslice, 0] += bj
 
             etotal += np.inner(e, e)
 
@@ -548,8 +738,8 @@ class PoseGraph:
 
         H[0:3, 0:3] += np.eye(3)
 
-        SH = sp.sparse.csr_matrix(H)
-        deltax = sp.sparse.linalg.spsolve(SH, b)  # SH \ b
+        SH = scipy.sparse.csr_matrix(H)
+        deltax = scipy.sparse.linalg.spsolve(SH, b)  # SH \ b
 
         # split the increments in nice 3x1 vectors and sum them up to the original matrix
         for vertex in g:
