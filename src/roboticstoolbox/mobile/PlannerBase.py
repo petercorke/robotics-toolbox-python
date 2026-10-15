@@ -87,6 +87,26 @@ def _layers(
     return tuple(style)
 
 
+def _warn_unused(unused: dict[str, Any], stacklevel: int = 3) -> None:
+    """
+    Warn about keyword arguments that are accepted and ignored
+
+    RTB 1.4.4 and earlier silently ignored unknown keyword arguments of the
+    planners, and code in the book relies on that, for example
+    ``dx.plot(labelvalues=True)``.  They are ignored with a warning so that a
+    mistyped option is not silent.
+
+    :param unused: the unknown keyword arguments
+    :param stacklevel: of the warning, relative to the caller of this function
+    """
+    for name in unused:
+        warnings.warn(
+            f"unknown argument {name!r} is ignored",
+            DeprecationWarning,
+            stacklevel=stacklevel,
+        )
+
+
 class NoPathError(RuntimeError):
     """
     A valid planning problem has no solution
@@ -190,7 +210,10 @@ class PlannerBase:
         seed: int | None = None,
         animate: bool = False,
         movie: str | tuple[str, float] | None = None,
+        **unused: Any,
     ) -> None:
+        # called by the constructor of a subclass, so the caller is 3 above
+        _warn_unused(unused, stacklevel=4)
 
         self._occgrid: BinaryOccupancyGrid | None = None
         self._occgrid0: BinaryOccupancyGrid | None = None
@@ -636,6 +659,7 @@ class PlannerBase:
         goal_marker: dict[str, Any] | None = None,
         start_vehicle: dict[str, Any] | None = None,
         goal_vehicle: dict[str, Any] | None = None,
+        **unused: Any,
     ) -> Axes:
         r"""
         Plot vehicle path (superclass)
@@ -751,7 +775,13 @@ class PlannerBase:
             no effect.
 
         :seealso: :meth:`plot_bg` :func:`base.plot_poly`
+
+        .. note:: Unknown keyword arguments are ignored, with a
+            ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
+            earlier.
+
         """
+        _warn_unused(unused)
         # deprecated names, mapped to the new ones
         for old, new, value in (
             ("line", "path_style", line),
@@ -980,6 +1010,7 @@ class PlannerBase:
         colorbar: bool | dict[str, Any] = True,
         block: bool | None = None,
         colorbar_style: dict[str, Any] | None = None,
+        **unused: Any,
     ) -> None:
         """
         Plot background (superclass)
@@ -1013,7 +1044,13 @@ class PlannerBase:
         If distance is provided, or the planner has a distancemap attribute
         the distance field will be used as the background and obstacle cells
         (actual or inflated) will be shown in red. A colorbar is added.
+
+        .. note:: Unknown keyword arguments are ignored, with a
+            ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
+            earlier.
+
         """
+        _warn_unused(unused)
         occgrid = self._occgrid
         if occgrid is None:
             return

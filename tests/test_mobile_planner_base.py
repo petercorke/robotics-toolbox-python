@@ -50,9 +50,13 @@ class TestConstruction(unittest.TestCase):
         self.assertIsNotNone(Planner(occgrid=np.zeros((3, 3)), ndims=2).occgrid)
         self.assertIsNone(Planner(ndims=2).occgrid)
 
-    def test_unknown_argument_is_an_error(self):
-        with self.assertRaises(TypeError):
-            Planner(ndims=2, sead=1)
+    def test_unknown_argument_is_ignored_with_a_warning(self):
+        # a mistyped seed is not silent, but code printed in the book passes
+        # arguments that were always ignored, so it is not an error either
+        with self.assertWarns(DeprecationWarning) as cm:
+            planner = Planner(ndims=2, sead=1)
+        self.assertIn("sead", str(cm.warning))
+        self.assertIsNone(planner._seed)
 
     @unittest.skipUnless(_progress, "progress package not installed")
     def test_progress_false_is_honoured(self):
