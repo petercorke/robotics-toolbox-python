@@ -13,6 +13,7 @@ import numpy as np
 
 # import scipy as sp
 from spatialmath import SE3, base
+from spatialmath.base.graphics import axes_logic
 
 
 class ShapePlot:
@@ -40,12 +41,8 @@ class ShapePlot:
         :param ax: 3D axes to draw into, defaults to the axes used before or a
             new figure
         """
-        if ax is None:
-            ax = self.ax
-
-        if ax is None:
-            plt.figure()
-            ax = plt.axes(projection="3d")
+        # reuse the axes given, or those used before, or the current 3D axes
+        ax = axes_logic(ax if ax is not None else self.ax, 3)
 
         self.draw(ax)
 
@@ -162,23 +159,14 @@ class EllipsePlot:
             self.ell = self.ax.plot(self.x, self.y, color="#2980b9")
 
     def plot(self, ax: Any = None) -> None:
-        if ax is None:
-            ax = self.ax
-
-        if ax is None:
-            plt.figure()
-            ax = plt.axes(projection="3d")
-            self.ax = ax
+        ax = axes_logic(ax if ax is not None else self.ax, 3)
+        self.ax = ax
 
         self.draw()
 
     def plot2(self, ax: Any = None) -> None:
-        if ax is None:
-            ax = self.ax
-
-        if ax is None:
-            ax = plt.axes()
-            self.ax = ax
+        ax = axes_logic(ax if ax is not None else self.ax, 2)
+        self.ax = ax
 
         self.draw2()
 
