@@ -587,10 +587,11 @@ class RangeBearingSensor(SensorBase):
         """
         # get the landmarks, one per row
 
-        vectorized = isinstance(x, np.ndarray) and x.ndim == 2
-        if vectorized:
+        vectorized = False
+        if isinstance(x, np.ndarray) and x.ndim == 2:
             # x is Nx3 set of vehicle states, do vectorized form
             # used by particle filter
+            vectorized = True
             xp, y, t = x.T
         else:
             xp, y, t = x
