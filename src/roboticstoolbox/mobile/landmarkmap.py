@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
 
+from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
 from roboticstoolbox.tools.types import NDArray
 
 
@@ -63,15 +64,15 @@ class LandmarkMap:
     def __init__(
         self,
         map: NDArray | int,
-        workspace: Any = 10,
+        workspace: WorkspaceLike = 10,
         verbose: bool = True,
         seed: int | None = 0,
     ) -> None:
 
-        try:
-            self._workspace = workspace.workspace
-        except AttributeError:
-            self._workspace = base.expand_dims(workspace)
+        resolved = resolve_workspace(workspace)
+        if resolved is None:
+            raise ValueError("a landmark map requires a workspace")
+        self._workspace: NDArray = resolved
 
         self._map: NDArray
         if isinstance(map, np.ndarray) and base.ismatrix(map, (2, None)):
