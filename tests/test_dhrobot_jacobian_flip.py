@@ -95,4 +95,6 @@ def test_flip_negates_exactly_the_flipped_columns() -> None:
     nt.assert_allclose(
         flipped.jacobe(q)[:, 1], -plain.jacobe(np.array([0.3, 0.4]))[:, 1], atol=1e-12
     )
-    nt.assert_allclose(flipped.jacobe(q)[:, 0], plain.jacobe(np.array([0.3, 0.4]))[:, 0])
+    nt.assert_allclose(
+        flipped.jacobe(q)[:, 0], plain.jacobe(np.array([0.3, 0.4]))[:, 0]
+    )
