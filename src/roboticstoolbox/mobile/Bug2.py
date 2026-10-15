@@ -108,8 +108,9 @@ class Bug2(PlannerBase):
         Compute the path from ``start`` to ``goal`` assuming the robot is capable
         of 8-way motion from its current cell to the next.
 
-        .. note:: ``start`` and ``goal`` are given as (x,y) coordinates in the
-              occupancy grid map, not as matrix row and column coordinates.
+        .. note:: ``start`` and ``goal`` are (x,y) world coordinates, rounded to
+              cell centres using the occupancy grid's origin and cell size.
+              The returned path and hit points use the same world coordinates.
 
         .. versionchanged:: 1.4.5
             The robot is considered to have crossed the m-line when it is within
@@ -135,9 +136,14 @@ class Bug2(PlannerBase):
         """
 
         # make sure start and goal are set and valid
-        self.validate_start_goal(start, goal, dtype=int)
+        self.validate_start_goal(start, goal)
         if self._start is None or self._goal is None:
             raise ValueError("start and goal must be specified")
+
+        if self.occgrid is not None:
+            # The automaton moves between cell centres, in world coordinates.
+            self._start = self.occgrid.g2w(self.occgrid.w2g(self._start))
+            self._goal = self.occgrid.g2w(self.occgrid.w2g(self._goal))
 
         self.H = []
         self._step = 1
@@ -227,26 +233,27 @@ class Bug2(PlannerBase):
             y = y / self._m_line[1]
             plt.plot([x_min, x_max], y, *args, **style)
 
-    def _m_line_move(self, position: NDArray) -> tuple[int, int]:
+    def _m_line_move(self, position: NDArray) -> tuple[float, float]:
         """
         Step along the m-line toward the goal
 
         :param position: current robot position
-        :return: step (dx, dy), each of -1, 0 or 1
+        :return: step (dx, dy) in world units, at most one cell along each axis
         """
         assert self._goal is not None and self._m_line is not None
         m_line = self._m_line
         d = self._goal - position
+        cellsize = self.occgrid.cellsize if self.occgrid is not None else 1
         if abs(d[0]) > abs(d[1]):
             # line slope less than 45 deg
-            dx = 1 if d[0] >= 0 else -1  # np.sign(d[0])
+            dx = cellsize if d[0] >= 0 else -cellsize
             y = -((position[0] + dx) * m_line[0] + m_line[2]) / m_line[1]
-            dy = int(round(y - position[1]))
+            dy = round((y - position[1]) / cellsize) * cellsize
         else:
             # line slope greater than 45 deg
-            dy = 1 if d[1] >= 0 else -1  # np.sign(d[1])
+            dy = cellsize if d[1] >= 0 else -cellsize
             x = -((position[1] + dy) * m_line[1] + m_line[2]) / m_line[0]
-            dx = int(round(x - position[0]))
+            dx = round((x - position[0]) / cellsize) * cellsize
         return dx, dy
 
     def next(self, position: NDArray) -> NDArray | None:
@@ -265,6 +272,9 @@ class Bug2(PlannerBase):
         m_line = self._m_line
         if goal is None or m_line is None:
             raise ValueError("no goal or m-line, call run() first")
+
+        if self.occgrid is not None:
+            position = self.occgrid.g2w(self.occgrid.w2g(position))
 
         if np.all(goal == position):
             return None  # we have arrived
@@ -289,12 +299,15 @@ class Bug2(PlannerBase):
 
                 # get a list of all the points around the obstacle
                 assert self.occgrid is not None
-                self._edge, _ = edgelist(self.occgrid.grid == 0, position)
+                edge, _ = edgelist(self.occgrid.grid == 0, self.occgrid.w2g(position))
+                self._edge = [self.occgrid.g2w(p) for p in edge]
                 # the first point of the edge list is the hit point, where the
                 # robot already is
                 self._k = 1
             else:
                 n = position + np.array([dx, dy])
+                if self.occgrid is not None:
+                    n = self.occgrid.g2w(self.occgrid.w2g(n))
 
         if self._step == 2:
             # Step 2.  Move around the obstacle until we reach a point
@@ -310,7 +323,11 @@ class Bug2(PlannerBase):
                 raise NoPathError("robot is trapped")
 
             # are we on the M-line now ?
-            if abs(np.inner(np.r_[position, 1], m_line)) <= _M_LINE_TOLERANCE:
+            assert self.occgrid is not None
+            if (
+                abs(np.inner(np.r_[position, 1], m_line))
+                <= _M_LINE_TOLERANCE * self.occgrid.cellsize
+            ):
                 self.message(f"  {position}: crossed the M-line")
 
                 # are we closer than when we encountered the obstacle, and can
