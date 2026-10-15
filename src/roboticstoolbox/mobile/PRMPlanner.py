@@ -315,7 +315,7 @@ class PRMPlanner(PlannerBase):
 
         return np.array(path)
 
-    def plot(
+    def plot(  # type: ignore[override]  # vertex and edge, see the PRM group in the findings
         self,
         *args: Any,
         vertex: dict[str, Any] = {},
