@@ -79,7 +79,7 @@ class TestClasses(unittest.TestCase):
         nt.assert_array_equal(veh.workspace, [-5, 5, -5, 5])
 
     def test_vehicle_accepts_object(self):
-        map = LandmarkMap(5, workspace=[0, 10, 2, 8], verbose=False)
+        map = LandmarkMap(5, workspace=[0, 10, 2, 8])
         veh = Bicycle(workspace=map)
         nt.assert_array_equal(veh.workspace, [0, 10, 2, 8])
 
@@ -91,7 +91,7 @@ class TestClasses(unittest.TestCase):
 
     def test_map_accepts_object(self):
         # occupancy grids and polygon maps accept an object with a workspace
-        map = LandmarkMap(5, workspace=[0, 10, 2, 8], verbose=False)
+        map = LandmarkMap(5, workspace=[0, 10, 2, 8])
         grid = BinaryOccupancyGrid(workspace=map, cellsize=1, value=False)
         nt.assert_array_equal(grid.workspace, [0, 10, 2, 8])
         polys = PolygonMap(workspace=map)
@@ -138,7 +138,7 @@ class TestEKFWorkspace(unittest.TestCase):
     def test_precedence(self):
         robot = self.robot()
         robot.workspace = 3
-        map = LandmarkMap(10, workspace=[0, 10, 2, 8], verbose=False)
+        map = LandmarkMap(10, workspace=[0, 10, 2, 8])
         sensor = RangeBearingSensor(robot, map, covar=W, range=4)
 
         # the map beats the vehicle
@@ -160,7 +160,7 @@ class TestEKFWorkspace(unittest.TestCase):
     def test_animation_gives_the_vehicle_the_map_workspace(self):
         # through the public property, not the private attribute
         robot = self.robot()
-        map = LandmarkMap(10, workspace=[0, 10, 2, 8], verbose=False)
+        map = LandmarkMap(10, workspace=[0, 10, 2, 8])
         sensor = RangeBearingSensor(robot, map, covar=W, range=4)
         EKF(robot=(robot, V), P0=P0, sensor=(sensor, W), animate=True)
         nt.assert_array_equal(robot.workspace, [0, 10, 2, 8])
