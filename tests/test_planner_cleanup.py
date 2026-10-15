@@ -174,13 +174,11 @@ class TestDistanceTransformQuery(unittest.TestCase):
         with self.assertRaises(ValueError):
             dx.query()
 
-    def test_next_and_movie_are_deprecated(self):
+    def test_next_is_deprecated(self):
         dx = DistanceTransformPlanner(np.zeros((10, 10), dtype=int))
         dx.plan((9, 5))
         with self.assertWarns(DeprecationWarning):
             dx.query((0, 5), next=True)
-        with self.assertWarns(DeprecationWarning):
-            dx.query((0, 5), movie="x.mp4")
 
     def test_query_before_plan(self):
         dx = DistanceTransformPlanner(np.zeros((10, 10), dtype=int))

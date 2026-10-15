@@ -10,7 +10,7 @@ from __future__ import annotations
 import copy
 import os
 import warnings
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
@@ -119,6 +119,12 @@ class PlannerBase:
         configurations when planning in :math:`\SE{2}`, defaults to a car
         shaped :class:`~roboticstoolbox.mobile.Animations.VehiclePolygon`
     :param seed: seed provided to private random number generator, defaults to None
+    :param animate: planners that can animate their operation do so, defaults
+        to False
+    :param movie: save the animation as a movie file, defaults to None.  Either
+        the name of the file or a tuple (filename, frame interval).  Implies
+        ``animate``.  Can be overridden by the ``movie`` argument of the
+        planner's methods.
     :raises ValueError: ``ndims`` is not given, ``occgrid`` is not a
         :class:`BinaryOccupancyGrid` or a 2D array, or ``start`` or ``goal``
         is not of length ``ndims`` or lies inside an obstacle
@@ -154,6 +160,8 @@ class PlannerBase:
         progress: bool = True,
         marker: Any = None,
         seed: int | None = None,
+        animate: bool = False,
+        movie: str | tuple[str, float] | None = None,
     ) -> None:
 
         self._occgrid: BinaryOccupancyGrid | None = None
@@ -170,6 +178,9 @@ class PlannerBase:
         self._progress = progress and _progress
 
         self.marker = marker
+        self._animate = animate
+        self._movie = movie
+        self._writer: MovieWriter | None = None
 
         if occgrid is not None:
             if isinstance(occgrid, np.ndarray) and occgrid.ndim == 2:
@@ -280,6 +291,103 @@ class PlannerBase:
         message channel.
         """
         self._verbose = v
+
+    @property
+    def animate(self) -> bool:
+        """
+        Get or set animation of the planner's operation
+
+        :getter: True if planners that can animate will do so
+        :setter: Set the default for methods that take an ``animate`` argument
+
+        A movie file given to the constructor also implies animation.
+
+        :seealso: :meth:`animation_start`
+        """
+        return self._animate or self._movie is not None
+
+    @animate.setter
+    def animate(self, animate: bool) -> None:
+        self._animate = animate
+
+    @property
+    def movie(self) -> str | tuple[str, float] | None:
+        """
+        Get or set the movie file for the animation
+
+        :getter: filename, or tuple (filename, frame interval), None for no movie
+        :setter: Set the default movie file, None for no movie
+        """
+        return self._movie
+
+    @movie.setter
+    def movie(self, movie: str | tuple[str, float] | None) -> None:
+        self._movie = movie
+
+    def animation_start(
+        self,
+        animate: bool | None = None,
+        movie: str | tuple[str, float] | None = None,
+        draw: Callable[[], Any] | None = None,
+    ) -> bool:
+        """
+        Begin an animation
+
+        :param animate: animate this call, defaults to the planner's :attr:`animate`
+        :param movie: movie file for this call, defaults to the planner's
+            :attr:`movie`
+        :param draw: function that draws the static background of the animation
+        :return: True if the caller should animate
+
+        The planner decides what is drawn and when, this helper owns the pacing
+        and recording.  If animating, ``draw`` is called, then the movie file if
+        any is opened on the current figure.  The caller then calls
+        :meth:`animation_frame` after updating its artists, and
+        :meth:`animation_end` when done.
+
+        A ``movie`` implies animation.
+
+        :seealso: :meth:`animation_frame` :meth:`animation_end`
+        """
+        if movie is None:
+            movie = self._movie
+        if animate is None:
+            animate = self._animate
+        if movie is not None:
+            animate = True
+
+        if not animate:
+            return False
+
+        if draw is not None:
+            draw()
+        self._writer = MovieWriter(movie)
+        return True
+
+    def animation_frame(self, pause: float = 0.05) -> None:
+        """
+        Show the current state of the animation
+
+        :param pause: time to pause for the display to update, defaults to 0.05 s
+
+        Updates the display and adds a frame to the movie, if there is one.
+
+        :seealso: :meth:`animation_start`
+        """
+        if pause > 0:
+            plt.pause(pause)
+        if self._writer is not None:
+            self._writer.add()
+
+    def animation_end(self) -> None:
+        """
+        End an animation, closing the movie file if there is one
+
+        :seealso: :meth:`animation_start`
+        """
+        if self._writer is not None:
+            self._writer.done()
+            self._writer = None
 
     @property
     def random(self) -> np.random.Generator:

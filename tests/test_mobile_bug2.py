@@ -17,7 +17,7 @@ import numpy.testing as nt
 from roboticstoolbox.mobile.Bug2 import Bug2, adjacent_point, edgelist, hom_line
 
 # the package exports the class Bug2, which hides the module of the same name
-bug2_module = importlib.import_module("roboticstoolbox.mobile.Bug2")
+bug2_module = importlib.import_module("roboticstoolbox.mobile.PlannerBase")
 
 
 def block_map():

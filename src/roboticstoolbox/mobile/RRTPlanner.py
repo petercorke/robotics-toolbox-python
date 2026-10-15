@@ -149,8 +149,9 @@ class RRTPlanner(PlannerBase):
         goal: ArrayLike,
         showsamples: bool = True,
         showvalid: bool = True,
-        animate: bool = False,
+        animate: bool | None = None,
         block: bool | None = None,
+        movie: str | tuple[str, float] | None = None,
     ) -> None:
         r"""
         Plan paths to goal using RRT
@@ -161,8 +162,13 @@ class RRTPlanner(PlannerBase):
         :type showsamples: bool, optional
         :param showvalid: display valid configurations as vehicle polygons overlaid on the map, defaults to False
         :type showvalid: bool, optional
-        :param animate: update the display as configurations are tested, defaults to False
-        :type animate: bool, optional
+        :param animate: update the display as configurations are tested,
+            defaults to the planner's :attr:`animate`
+        :param block: block until the figure is closed when not animating,
+            defaults to None which does not show the figure
+        :param movie: save the animation as a movie file, filename or tuple
+            (filename, frame interval), defaults to the planner's :attr:`movie`.
+            Implies ``animate``.
 
         Compute a rapidly exploring random tree with its root at the ``goal``.
         The tree will have ``npoints`` vertices spread uniformly randomly over
@@ -191,8 +197,9 @@ class RRTPlanner(PlannerBase):
         v = self.g.add_vertex(coord=goal)
         v.path = None
 
-        if showsamples or showvalid:
-            self.map.plot()
+        animating = self.animation_start(
+            animate, movie, draw=self.map.plot if (showsamples or showvalid) else None
+        )
 
         self.progress_start(self.npoints)
         count = 0
@@ -201,8 +208,8 @@ class RRTPlanner(PlannerBase):
 
             if showsamples:
                 plt.plot(random_point[0], random_point[1], "ok", markersize=2)
-                if animate:
-                    plt.pause(0.02)
+                if animating:
+                    self.animation_frame(0.02)
 
             vnearest, d = self.g.closest(random_point)
 
@@ -236,10 +243,12 @@ class RRTPlanner(PlannerBase):
 
             if showvalid:
                 vehicle.polygon(random_point).plot(color="b", alpha=0.1)
-                if animate:
-                    plt.pause(0.02)
+                if animating:
+                    self.animation_frame(0.02)
 
-        if (showvalid or showsamples) and not animate:
+        self.animation_end()
+
+        if (showvalid or showsamples) and not animating:
             if block is not None:
                 plt.show(block=block)
 

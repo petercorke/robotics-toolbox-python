@@ -14,7 +14,7 @@ import numpy as np
 from spatialmath import base
 from spatialmath.base.types import R3, ArrayLike2
 
-from roboticstoolbox.mobile.PlannerBase import MovieWriter, NoPathError, PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
 # The robot has crossed the m-line when it is within this distance of it, in
@@ -76,7 +76,7 @@ class Bug2(PlannerBase):
         self,
         start: ArrayLike2 | None = None,
         goal: ArrayLike2 | None = None,
-        animate: bool = False,
+        animate: bool | None = None,
         pause: float = 0.001,
         trail: bool = True,
         movie: str | tuple[str, float] | None = None,
@@ -88,7 +88,7 @@ class Bug2(PlannerBase):
         :param start: starting position, defaults to the planner's start
         :param goal: goal position, defaults to the planner's goal
         :param animate: show animation of robot moving over the map,
-            defaults to False
+            defaults to the planner's :attr:`animate`
         :param pause: time to pause between frames of the animation, defaults to
             0.001 seconds
         :param trail: show the path followed by the robot, defaults to True
@@ -140,49 +140,44 @@ class Bug2(PlannerBase):
         #  line*[x y 1]' = 0
         self._m_line = hom_line(self._start, self._goal)
 
-        if movie is not None:
-            animate = True
-
-        if animate:
+        def draw() -> None:
             self.plot()
             self.plot_m_line()
             plt.pause(0.05)
 
-        writer = MovieWriter(movie)
+        animating = self.animation_start(animate, movie, draw=draw)
 
         robot: NDArray | None = self._start
         path: NDArray = self._start
 
         trail_line = trail_head = None
-        if animate:
+        if animating:
             (trail_line,) = plt.plot(0, 0, "y.", label=label)
             (trail_head,) = plt.plot(0, 0, "ko", zorder=10)
 
         # iterate using the next() method until we reach the goal
-        while True:
-            assert robot is not None
-            if animate:
-                assert trail_head is not None and trail_line is not None
-                trail_head.set_data([robot[0]], [robot[1]])
-                if trail:
-                    x, y = np.atleast_2d(path).T
-                    trail_line.set_data(x, y)
+        try:
+            while True:
+                assert robot is not None
+                if animating:
+                    assert trail_head is not None and trail_line is not None
+                    trail_head.set_data([robot[0]], [robot[1]])
+                    if trail:
+                        x, y = np.atleast_2d(path).T
+                        trail_line.set_data(x, y)
 
-                if pause > 0:
-                    plt.pause(pause)
+                    self.animation_frame(pause)
 
-                writer.add()
+                # move to next point on path
+                robot = self.next(robot)
 
-            # move to next point on path
-            robot = self.next(robot)
-
-            # are we there yet?
-            if robot is None:
-                break
-            else:
-                path = np.vstack((path, robot))
-
-        writer.done()
+                # are we there yet?
+                if robot is None:
+                    break
+                else:
+                    path = np.vstack((path, robot))
+        finally:
+            self.animation_end()
         if trail_head is not None:
             trail_head.remove()
 
