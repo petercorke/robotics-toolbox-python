@@ -10,15 +10,17 @@ from __future__ import annotations
 
 import heapq
 import math
+import warnings
 from enum import IntEnum, auto
 from typing import Any, Callable, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from spatialmath.base.types import ArrayLike2
 from roboticstoolbox.mobile.OccGrid import OccupancyGrid
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.tools.types import NDArray
 
 show_animation = True
 
@@ -386,8 +388,8 @@ class DstarPlanner(PlannerBase):
 
     def plan(
         self,
-        goal: ArrayLike | None = None,
-        animate: bool = False,
+        goal: ArrayLike2 | None = None,
+        animate: bool | None = None,
         progress: bool = True,
         summary: bool = False,
     ) -> None:
@@ -395,15 +397,24 @@ class DstarPlanner(PlannerBase):
         Plan D* path
 
         :param goal: goal position :math:`(x, y)`, defaults to previously set value
-        :type goal: array_like(2), optional
-        :param animate: animate the planning algorithm iterations, defaults to False
-        :type animate: bool, optional
-        :param progress: show progress bar, defaults to True
-        :type progress: bool, optional
+        :param animate: deprecated, animating the planning is not implemented
+        :param progress: deprecated, has no effect
+        :param summary: print the number of insertions, defaults to False
+
+        .. deprecated:: 1.4.5
+            ``animate`` and ``progress`` were accepted but had no effect.
 
         Compute the minimum-cost obstacle-free distance to the goal from all
         points in the grid.
         """
+        for name, value in (("animate", animate), ("progress", progress is not True)):
+            if value:
+                warnings.warn(
+                    f"{name} is deprecated and has no effect",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+
         if goal is not None:
             self.goal = goal
 
@@ -434,31 +445,31 @@ class DstarPlanner(PlannerBase):
         Number of node expansions
 
         :return: number of expansions
-        :rtype: int
 
         This number will increase during initial planning, and also if
         replanning is invoked during the :meth:`query`.
         """
         return self._Dstar.nexpand
 
-    def query(  # type: ignore[override]
+    def query(
         self,
-        start: ArrayLike,
+        start: ArrayLike2,
         sensor: Callable[..., Any] | None = None,
-        animate: bool = False,
+        animate: bool | None = None,
         verbose: bool = False,
+        movie: str | tuple[str, float] | None = None,
     ) -> tuple[NDArray, DstarStatus]:
         """
         Find path with replanning
 
         :param start: start position :math:`(x,y)`
-        :type start: array_like(2)
         :param sensor: sensor function, defaults to None
-        :type sensor: callable, optional
-        :param animate: animate the motion of the robot, defaults to False
-        :type animate: bool, optional
+        :param animate: animate the motion of the robot, defaults to the
+            planner's :attr:`animate`
+        :param movie: save the animation as a movie file, filename or tuple
+            (filename, frame interval), defaults to the planner's :attr:`movie`.
+            Implies ``animate``.
         :param verbose: display detailed diagnostic information about D* operations, defaults to False
-        :type verbose: bool, optional
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
 
@@ -479,7 +490,7 @@ class DstarPlanner(PlannerBase):
 
         :seealso: :meth:`plan`
         """
-        self.start = start
+        self.validate_start_goal(start)
         start_State = self._Map._Map[int(start[1])][int(start[0])]
         tmp = start_State
 
@@ -489,9 +500,14 @@ class DstarPlanner(PlannerBase):
         cost = tmp.h
         self.goal_State.h = 0
 
+        animating = self.animation_start(animate, movie, draw=self.plot)
+
         path = []
         while True:
             path.append((tmp.x, tmp.y))
+            if animating:
+                plt.plot(tmp.x, tmp.y, "y.", markersize=12)
+                self.animation_frame()
             if tmp == self.goal_State:
                 break
 
@@ -506,7 +522,7 @@ class DstarPlanner(PlannerBase):
                         # print(f"change cost at ({x}, {y}) to {newcost}")
                         val = self._Dstar.modify_cost(X, newcost)
                     # propagate the changes to plan
-                    print("propagate")
+                    self.message("propagate the cost changes")
                     # self._Dstar.showparents()
                     while val != -1 and val < tmp.h:
                         val = self._Dstar.process__State(verbose=verbose)
@@ -516,6 +532,8 @@ class DstarPlanner(PlannerBase):
             assert tmp.parent is not None
             tmp = tmp.parent
             # print('move to ', tmp)
+
+        self.animation_end()
 
         return np.array(path), DstarStatus(cost)
 

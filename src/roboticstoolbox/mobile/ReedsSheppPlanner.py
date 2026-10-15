@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
 
+from spatialmath.base.types import ArrayLike3
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.tools.types import NDArray
 
 # (found, t, u, v) of a candidate path
 _Segments = tuple[bool, float, float, float]
@@ -258,11 +259,8 @@ def generate_path(
     Return a set of feasible paths
 
     :param q0: initial configuration
-    :type q0: array_like(3)
     :param q1: final configuration
-    :type q1: array_like(3)
     :param max_curvature: maximum path curvature
-    :type max_curvature: float
     :return: set of paths
     :rtype: list of _Path
     """
@@ -429,7 +427,7 @@ def calc_paths(
 
 
 def reeds_shepp_path_planning(
-    start: ArrayLike, goal: ArrayLike, maxc: float, step_size: float
+    start: ArrayLike3, goal: ArrayLike3, maxc: float, step_size: float
 ) -> _Path | None:
 
     s_x, s_y, s_yaw = start
@@ -471,9 +469,7 @@ class ReedsSheppPlanner(PlannerBase):
     Reeds-Shepp path planner
 
     :param curvature: maximum path curvature, defaults to 1.0
-    :type curvature: float, optional
     :param stepsize: spacing between points on the path, defaults to 0.1
-    :type stepsize: float, optional
     :param Planner: Reeds-Shepp path planner
     :type Planner: ReedsSheppPlanner instance
 
@@ -523,16 +519,14 @@ class ReedsSheppPlanner(PlannerBase):
             + f"\n  curvature={self._curvature}, stepsize={self._stepsize}"
         )
 
-    def query(  # type: ignore[override]
-        self, start: ArrayLike, goal: ArrayLike, **kwargs: Any
+    def query(
+        self, start: ArrayLike3, goal: ArrayLike3
     ) -> tuple[NDArray, ReedsSheppStatus]:
         r"""
         Find a path between two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
-        :type start: array_like(3), optional
         :param goal: goal configuration :math:`(x, y, \theta)`
-        :type goal: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
@@ -559,7 +553,7 @@ class ReedsSheppPlanner(PlannerBase):
             backwards.
 
         """
-        super().query(start=start, goal=goal, next=False, **kwargs)
+        self.validate_start_goal(start, goal)
 
         assert self.start is not None and self.goal is not None
         bpath = reeds_shepp_path_planning(

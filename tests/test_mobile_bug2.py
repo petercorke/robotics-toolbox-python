@@ -17,7 +17,7 @@ import numpy.testing as nt
 from roboticstoolbox.mobile.Bug2 import Bug2, adjacent_point, edgelist, hom_line
 
 # the package exports the class Bug2, which hides the module of the same name
-bug2_module = importlib.import_module("roboticstoolbox.mobile.Bug2")
+bug2_module = importlib.import_module("roboticstoolbox.mobile.PlannerBase")
 
 
 def block_map():
@@ -74,13 +74,24 @@ class TestRun(unittest.TestCase):
         nt.assert_array_equal(path[-1], [17, 17])
 
     def test_house_path_length(self):
-        # the example in the book, Fig 5.5: 1306 points since 1.4.5, 1307 before
+        # the example in the book, Fig 5.5: 1302 points since 1.4.5, 1307 before
         from roboticstoolbox import rtb_load_matfile
 
         house = rtb_load_matfile("data/house.mat")
         places = house["places"]
         path = Bug2(occgrid=house["floorplan"]).run(places.br3, places.kitchen)
-        self.assertEqual(path.shape, (1306, 2))
+        self.assertEqual(path.shape, (1302, 2))
+
+    def test_path_has_no_repeated_points(self):
+        # a point used to be repeated where the obstacle was first hit, and
+        # where the robot left it and found the next step blocked
+        from roboticstoolbox import rtb_load_matfile
+
+        house = rtb_load_matfile("data/house.mat")
+        places = house["places"]
+        path = Bug2(occgrid=house["floorplan"]).run(places.br3, places.kitchen)
+        repeats = np.all(np.diff(path, axis=0) == 0, axis=1)
+        self.assertEqual(int(repeats.sum()), 0)
 
     def test_trapped_does_not_block(self):
         # plt.show(block=True) used to be called before the exception
@@ -101,9 +112,9 @@ class TestRun(unittest.TestCase):
 
     def test_query_and_plan_are_not_provided(self):
         bug = Bug2(occgrid=block_map())
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(AttributeError):
             bug.query()
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(AttributeError):
             bug.plan()
 
 

@@ -197,6 +197,10 @@ class TestRRTQuery(unittest.TestCase):
         vertices = [root, vertex]
 
         planner = object.__new__(RRTPlanner)
+        planner._ndims = 3
+        planner._occgrid = None
+        planner._start = None
+        planner._goal = None
         planner.g = MagicMock()
         planner.g.closest.return_value = (vertex, 0.25)
         planner.g.__getitem__.return_value = root
@@ -210,7 +214,7 @@ class TestRRTQuery(unittest.TestCase):
         self.assertEqual(status.length, 1.5)
         self.assertEqual(status.initial_d, 0.25)
         self.assertIs(status.vertices, vertices)
-        self.assertEqual(planner._start, start)
+        np.testing.assert_array_equal(planner.start, start)
         self.assertEqual(captured.getvalue(), "")
 
 

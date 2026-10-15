@@ -21,8 +21,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import SE2
 
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from spatialmath.base.types import ArrayLike3
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
+from roboticstoolbox.tools.types import NDArray
 
 
 def make_arc(dir: str, radius: float = 1, npoints: int = 20) -> NDArray:
@@ -73,9 +74,7 @@ class LatticeVertex(DVertex):
 
 
 class LatticeEdge(Edge):
-    def __init__(
-        self, v1: Any, v2: Any, cost: float, pose: SE2, move: str
-    ) -> None:
+    def __init__(self, v1: Any, v2: Any, cost: float, pose: SE2, move: str) -> None:
         super().__init__(v1, v2, cost)
         self.pose = pose
         self.move = move
@@ -117,9 +116,7 @@ class LatticePlanner(PlannerBase):
     Lattice planner
 
     :param costs: cost for straight, left-turn, right-turn, defaults to :math:`(1, \pi/2, \pi/2)`
-    :type costs: array_like(3), optional
     :param root: configuration of root node, defaults to (0,0,0)
-    :type root: array_like(3), optional
     :param kwargs: arguments passed to ``PlannerBase`` constructor
 
     ==================   ========================
@@ -172,8 +169,8 @@ class LatticePlanner(PlannerBase):
 
     def __init__(
         self,
-        costs: ArrayLike | None = None,
-        root: ArrayLike = (0, 0, 0),
+        costs: ArrayLike3 | None = None,
+        root: ArrayLike3 = (0, 0, 0),
         **kwargs: Any,
     ) -> None:
 
@@ -197,7 +194,7 @@ class LatticePlanner(PlannerBase):
         # here, and no return statement
         return super().__str__()
 
-    def _icoord(self, xyt: ArrayLike) -> str:
+    def _icoord(self, xyt: ArrayLike3) -> str:
         ix = int(round(xyt[0]))
         iy = int(round(xyt[1]))
         it = int(round(xyt[2] * 2 / np.pi))
@@ -213,9 +210,7 @@ class LatticePlanner(PlannerBase):
         Create a lattice plan
 
         :param iterations: number of iterations, defaults to None
-        :type iterations: int, optional
         :param verbose: show frontier and added vertices/edges at each iteration, defaults to False
-        :type verbose: bool, optional
 
         If an occupancy grid exists the if ``iterations`` is None the area of the
         grid will be completely filled.
@@ -299,16 +294,14 @@ class LatticePlanner(PlannerBase):
         if summary:
             print(f"{self.graph.n} vertices and {self.graph.ne} edges created")
 
-    def query(  # type: ignore[override]
-        self, start: ArrayLike, goal: ArrayLike
+    def query(
+        self, start: ArrayLike3, goal: ArrayLike3
     ) -> tuple[NDArray, LatticeStatus]:
         r"""
         Find a path through the lattice
 
         :param start: start configuration :math:`(x, y, \theta)`
-        :type start: array_like(3), optional
         :param goal: goal configuration :math:`(x, y, \theta)`
-        :type goal: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
@@ -339,7 +332,7 @@ class LatticePlanner(PlannerBase):
         try:
             path, cost, _ = self.graph.path_Astar(vs, vg, verbose=False)
         except TypeError:
-            raise RuntimeError("no path found") from None
+            raise NoPathError("no path found through the lattice") from None
 
         segments = []
         edges = []
@@ -348,9 +341,7 @@ class LatticePlanner(PlannerBase):
             edges.append(e)
             segments.append(e.move)
 
-        return np.array([p.coord for p in path]), LatticeStatus(
-            cost, segments, edges
-        )
+        return np.array([p.coord for p in path]), LatticeStatus(cost, segments, edges)
 
     def plot(  # type: ignore[override]
         self, path: NDArray | None = None, **kwargs: Any

@@ -10,7 +10,7 @@ from typing import NamedTuple
 import numpy as np
 from spatialmath.base.types import ArrayLike3
 
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
 # ======================================================================== #
@@ -129,7 +129,7 @@ def quintic_polynomials_planner(
     :param dt: time step [s]
     :param MIN_T: minimum path time, also the step in the time searched [s]
     :param MAX_T: maximum path time [s]
-    :raises RuntimeError: no path time in the range meets the acceleration
+    :raises NoPathError: no path time in the range meets the acceleration
         and jerk limits
     :return: time, path, velocity, acceleration and jerk
     :rtype: tuple(list, ndarray(N,3), list, list, list)
@@ -196,7 +196,7 @@ def quintic_polynomials_planner(
         ):
             break
     else:
-        raise RuntimeError(
+        raise NoPathError(
             "no path time between MIN_T and MAX_T meets the acceleration and jerk limits"
         )
 
@@ -300,7 +300,7 @@ class QuinticPolyPlanner(PlannerBase):
         self.min_t = min_t
         self.max_t = max_t
 
-    def query(  # type: ignore[override]
+    def query(
         self, start: ArrayLike3, goal: ArrayLike3
     ) -> tuple[NDArray, QuinticPolyStatus]:
         r"""
@@ -308,7 +308,7 @@ class QuinticPolyPlanner(PlannerBase):
 
         :param start: start configuration :math:`(x, y, \theta)`
         :param goal: goal configuration :math:`(x, y, \theta)`
-        :raises RuntimeError: no path time in the range ``min_t`` to ``max_t``
+        :raises NoPathError: no path time in the range ``min_t`` to ``max_t``
             meets the acceleration and jerk limits
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
@@ -324,11 +324,10 @@ class QuinticPolyPlanner(PlannerBase):
         ``jerk``    jerk profile along the path
         ==========  ===================================================
 
-        :seealso: :meth:`PlannerBase.query`
+
         """
         # stored as arrays, as for the other planners
-        self.start = start
-        self.goal = goal
+        self.validate_start_goal(start, goal)
         start_ = self.start
         goal_ = self.goal
         assert start_ is not None and goal_ is not None

@@ -17,11 +17,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import Polygon2
 
+from spatialmath.base.types import ArrayLike3
 from roboticstoolbox.mobile.DubinsPlanner import DubinsPlanner
 from roboticstoolbox.mobile.OccGrid import PolygonMap
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.mobile.Vehicle import VehicleBase
-from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.tools.types import NDArray
 
 # from roboticstoolbox.mobile.OccupancyGrid import OccupancyGrid
 try:
@@ -53,11 +54,8 @@ class RRTPlanner(PlannerBase):
     :param vehicle: vehicle kinematic model
     :type vehicle: :class:`VehicleBase` subclass
     :param curvature: maximum path curvature, defaults to 1.0
-    :type curvature: float, optional
     :param stepsize: spacing between points on the path, defaults to 0.2
-    :type stepsize: float, optional
     :param npoints: number of vertices in random tree, defaults to 50
-    :type npoints: int, optional
 
     ==================   ========================
     Feature              Capability
@@ -146,23 +144,26 @@ class RRTPlanner(PlannerBase):
 
     def plan(
         self,
-        goal: ArrayLike,
+        goal: ArrayLike3,
         showsamples: bool = True,
         showvalid: bool = True,
-        animate: bool = False,
+        animate: bool | None = None,
         block: bool | None = None,
+        movie: str | tuple[str, float] | None = None,
     ) -> None:
         r"""
         Plan paths to goal using RRT
 
         :param goal: goal pose :math:`(x, y, \theta)`, defaults to previously set value
-        :type goal: array_like(3), optional
         :param showsamples: display position part of configurations overlaid on the map, defaults to True
-        :type showsamples: bool, optional
         :param showvalid: display valid configurations as vehicle polygons overlaid on the map, defaults to False
-        :type showvalid: bool, optional
-        :param animate: update the display as configurations are tested, defaults to False
-        :type animate: bool, optional
+        :param animate: update the display as configurations are tested,
+            defaults to the planner's :attr:`animate`
+        :param block: block until the figure is closed when not animating,
+            defaults to None which does not show the figure
+        :param movie: save the animation as a movie file, filename or tuple
+            (filename, frame interval), defaults to the planner's :attr:`movie`.
+            Implies ``animate``.
 
         Compute a rapidly exploring random tree with its root at the ``goal``.
         The tree will have ``npoints`` vertices spread uniformly randomly over
@@ -191,8 +192,9 @@ class RRTPlanner(PlannerBase):
         v = self.g.add_vertex(coord=goal)
         v.path = None
 
-        if showsamples or showvalid:
-            self.map.plot()
+        animating = self.animation_start(
+            animate, movie, draw=self.map.plot if (showsamples or showvalid) else None
+        )
 
         self.progress_start(self.npoints)
         count = 0
@@ -201,8 +203,8 @@ class RRTPlanner(PlannerBase):
 
             if showsamples:
                 plt.plot(random_point[0], random_point[1], "ok", markersize=2)
-                if animate:
-                    plt.pause(0.02)
+                if animating:
+                    self.animation_frame(0.02)
 
             vnearest, d = self.g.closest(random_point)
 
@@ -236,23 +238,22 @@ class RRTPlanner(PlannerBase):
 
             if showvalid:
                 vehicle.polygon(random_point).plot(color="b", alpha=0.1)
-                if animate:
-                    plt.pause(0.02)
+                if animating:
+                    self.animation_frame(0.02)
 
-        if (showvalid or showsamples) and not animate:
+        self.animation_end()
+
+        if (showvalid or showsamples) and not animating:
             if block is not None:
                 plt.show(block=block)
 
         self.progress_end()
 
-    def query(  # type: ignore[override]
-        self, start: ArrayLike
-    ) -> tuple[NDArray, RRTStatus]:
+    def query(self, start: ArrayLike3) -> tuple[NDArray, RRTStatus]:
         r"""
         Find a path from start configuration
 
         :param start: start configuration :math:`(x, y, \theta)`
-        :type start: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
@@ -271,8 +272,9 @@ class RRTPlanner(PlannerBase):
         +---------------+---------------------------------------------------+
 
         """
-        self._start = start  # type: ignore[assignment]  # kept as given
-        vstart, d = self.g.closest(start)
+        self.validate_start_goal(start)
+        assert self.start is not None
+        vstart, d = self.g.closest(self.start)
 
         vpath, cost, _ = self.g.path_UCS(vstart, self.g[0])
 
@@ -340,14 +342,12 @@ class RRTPlanner(PlannerBase):
             if not self.iscollision(q):
                 return q
 
-    def iscollision(self, q: ArrayLike) -> bool:
+    def iscollision(self, q: ArrayLike3) -> bool:
         r"""
         Test if configuration is collision
 
         :param q: vehicle configuration :math:`(x, y, \theta)`
-        :type q: array_like(3)
         :return: collision status
-        :rtype: bool
 
         Transforms the vehicle polygon and tests for intersection against
         the polygonal obstacle map.

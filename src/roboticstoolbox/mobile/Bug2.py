@@ -14,7 +14,7 @@ import numpy as np
 from spatialmath import base
 from spatialmath.base.types import R3, ArrayLike2
 
-from roboticstoolbox.mobile.PlannerBase import MovieWriter, PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
 # The robot has crossed the m-line when it is within this distance of it, in
@@ -76,7 +76,7 @@ class Bug2(PlannerBase):
         self,
         start: ArrayLike2 | None = None,
         goal: ArrayLike2 | None = None,
-        animate: bool = False,
+        animate: bool | None = None,
         pause: float = 0.001,
         trail: bool = True,
         movie: str | tuple[str, float] | None = None,
@@ -88,7 +88,7 @@ class Bug2(PlannerBase):
         :param start: starting position, defaults to the planner's start
         :param goal: goal position, defaults to the planner's goal
         :param animate: show animation of robot moving over the map,
-            defaults to False
+            defaults to the planner's :attr:`animate`
         :param pause: time to pause between frames of the animation, defaults to
             0.001 seconds
         :param trail: show the path followed by the robot, defaults to True
@@ -100,7 +100,8 @@ class Bug2(PlannerBase):
             to "robot path"
         :raises ValueError: ``start`` and ``goal`` are not both given, or lie
             inside an obstacle
-        :raises RuntimeError: the robot is trapped
+        :raises NoPathError: the robot is trapped, or the goal is enclosed by
+            an obstacle
         :return: path from ``start`` to ``goal``, one point per row
         :rtype: ndarray(N,2)
 
@@ -115,16 +116,26 @@ class Bug2(PlannerBase):
             :math:`\\sqrt{2}/2` cells of it, previously half a cell.  A line at
             45 degrees to the grid passes between two diagonal neighbours at that
             distance from each, and could be stepped over without being seen, so
-            that the robot was reported as trapped.  Paths can differ by a cell
-            from earlier versions: the house floorplan example from the bedroom
-            to the kitchen has 1306 points rather than 1307.
+            that the robot was reported as trapped.  This shortens the house
+            floorplan example, from the bedroom to the kitchen, by one point.
+
+        .. versionchanged:: 1.4.5
+            The robot leaves an obstacle only where the next step along the
+            m-line is free.  Previously it could leave, find the obstacle in
+            the way, and hit it again from the same cell, so that cell appeared
+            twice in the path, and a goal enclosed by an obstacle was never
+            given up on.  The cell where an obstacle is first hit is also no
+            longer repeated in the path.  Together these remove two repeated
+            points at the places the robot left an obstacle blocked, and two at
+            the first hits, so that the house floorplan example from the bedroom
+            to the kitchen has 1302 points rather than the 1307 of earlier
+            versions.
 
         :seealso: :meth:`Bug2.plot`
         """
 
         # make sure start and goal are set and valid
-        self.start = self.validate_endpoint(start, dtype=int)
-        self.goal = self.validate_endpoint(goal, dtype=int)
+        self.validate_start_goal(start, goal, dtype=int)
         if self._start is None or self._goal is None:
             raise ValueError("start and goal must be specified")
 
@@ -141,49 +152,44 @@ class Bug2(PlannerBase):
         #  line*[x y 1]' = 0
         self._m_line = hom_line(self._start, self._goal)
 
-        if movie is not None:
-            animate = True
-
-        if animate:
+        def draw() -> None:
             self.plot()
             self.plot_m_line()
             plt.pause(0.05)
 
-        writer = MovieWriter(movie)
+        animating = self.animation_start(animate, movie, draw=draw)
 
         robot: NDArray | None = self._start
         path: NDArray = self._start
 
         trail_line = trail_head = None
-        if animate:
+        if animating:
             (trail_line,) = plt.plot(0, 0, "y.", label=label)
             (trail_head,) = plt.plot(0, 0, "ko", zorder=10)
 
         # iterate using the next() method until we reach the goal
-        while True:
-            assert robot is not None
-            if animate:
-                assert trail_head is not None and trail_line is not None
-                trail_head.set_data([robot[0]], [robot[1]])
-                if trail:
-                    x, y = np.atleast_2d(path).T
-                    trail_line.set_data(x, y)
+        try:
+            while True:
+                assert robot is not None
+                if animating:
+                    assert trail_head is not None and trail_line is not None
+                    trail_head.set_data([robot[0]], [robot[1]])
+                    if trail:
+                        x, y = np.atleast_2d(path).T
+                        trail_line.set_data(x, y)
 
-                if pause > 0:
-                    plt.pause(pause)
+                    self.animation_frame(pause)
 
-                writer.add()
+                # move to next point on path
+                robot = self.next(robot)
 
-            # move to next point on path
-            robot = self.next(robot)
-
-            # are we there yet?
-            if robot is None:
-                break
-            else:
-                path = np.vstack((path, robot))
-
-        writer.done()
+                # are we there yet?
+                if robot is None:
+                    break
+                else:
+                    path = np.vstack((path, robot))
+        finally:
+            self.animation_end()
         if trail_head is not None:
             trail_head.remove()
 
@@ -221,6 +227,28 @@ class Bug2(PlannerBase):
             y = y / self._m_line[1]
             plt.plot([x_min, x_max], y, *args, **style)
 
+    def _m_line_move(self, position: NDArray) -> tuple[int, int]:
+        """
+        Step along the m-line toward the goal
+
+        :param position: current robot position
+        :return: step (dx, dy), each of -1, 0 or 1
+        """
+        assert self._goal is not None and self._m_line is not None
+        m_line = self._m_line
+        d = self._goal - position
+        if abs(d[0]) > abs(d[1]):
+            # line slope less than 45 deg
+            dx = 1 if d[0] >= 0 else -1  # np.sign(d[0])
+            y = -((position[0] + dx) * m_line[0] + m_line[2]) / m_line[1]
+            dy = int(round(y - position[1]))
+        else:
+            # line slope greater than 45 deg
+            dy = 1 if d[1] >= 0 else -1  # np.sign(d[1])
+            x = -((position[1] + dy) * m_line[1] + m_line[2]) / m_line[0]
+            dx = int(round(x - position[0]))
+        return dx, dy
+
     def next(self, position: NDArray) -> NDArray | None:
         """
         One step of the finite state automaton
@@ -229,7 +257,7 @@ class Bug2(PlannerBase):
         :type position: ndarray(2)
         :raises ValueError: there is no goal or m-line, :meth:`run` has not been
             called
-        :raises RuntimeError: robot is trapped
+        :raises NoPathError: robot is trapped
         :return: next robot position, None if the goal has been reached
         :rtype: ndarray(2)
         """
@@ -245,21 +273,16 @@ class Bug2(PlannerBase):
             # Step 1.  Move along the M-line toward the goal
             self.message(f"{position}: moving along the M-line (step 1)")
             # motion on line toward goal
-            d = goal - position
-            if abs(d[0]) > abs(d[1]):
-                # line slope less than 45 deg
-                dx = 1 if d[0] >= 0 else -1  # np.sign(d[0])
-                y = -((position[0] + dx) * m_line[0] + m_line[2]) / m_line[1]
-                dy = int(round(y - position[1]))
-            else:
-                # line slope greater than 45 deg
-                dy = 1 if d[1] >= 0 else -1  # np.sign(d[1])
-                x = -((position[1] + dy) * m_line[1] + m_line[2]) / m_line[0]
-                dx = int(round(x - position[0]))
+            dx, dy = self._m_line_move(position)
 
             # detect if next step is an obstacle
             if self.isoccupied(position + np.r_[dx, dy]):
                 self.message(f"  {position}: obstacle at {position + np.r_[dx, dy]}")
+                # each hit point is closer to the goal than the one before, so
+                # meeting the same one again means no progress is being made
+                # and the goal is enclosed by the obstacle
+                if any(np.all(position == h) for h in self.H):
+                    raise NoPathError("robot is trapped")
                 self.H.append(position)  # save hit point
                 self._step = 2  # transition to step 2
                 self.message(f"  {position}: change to step 2")
@@ -267,7 +290,9 @@ class Bug2(PlannerBase):
                 # get a list of all the points around the obstacle
                 assert self.occgrid is not None
                 self._edge, _ = edgelist(self.occgrid.grid == 0, position)
-                self._k = 0
+                # the first point of the edge list is the hit point, where the
+                # robot already is
+                self._k = 1
             else:
                 n = position + np.array([dx, dy])
 
@@ -282,14 +307,21 @@ class Bug2(PlannerBase):
             else:
                 # we are at the end of the list of edge points, we
                 # are back where we started.  Step 2.c test.
-                raise RuntimeError("robot is trapped")
+                raise NoPathError("robot is trapped")
 
             # are we on the M-line now ?
             if abs(np.inner(np.r_[position, 1], m_line)) <= _M_LINE_TOLERANCE:
                 self.message(f"  {position}: crossed the M-line")
 
-                # are we closer than when we encountered the obstacle?
-                if base.norm(position - goal) < base.norm(self.H[-1] - goal):
+                # are we closer than when we encountered the obstacle, and can
+                # we move toward the goal from here?  Leaving where the next
+                # step along the m-line is an obstacle would only hit it again
+                # at once, and for a goal enclosed by the obstacle would never
+                # end.
+                dx, dy = self._m_line_move(position)
+                if base.norm(position - goal) < base.norm(
+                    self.H[-1] - goal
+                ) and not self.isoccupied(position + np.r_[dx, dy]):
                     self._step = 1  # transition to step 1
                     self.message(f"  {position}: change to step 1")
                     return n
@@ -298,12 +330,6 @@ class Bug2(PlannerBase):
             self._k += 1
 
         return n
-
-    def query(self) -> None:  # type: ignore[override]
-        raise NotImplementedError("This class has no query method")
-
-    def plan(self) -> None:
-        raise NotImplementedError("This class has no plan method")
 
 
 # Ported from Peter Corke's edgelist function found:

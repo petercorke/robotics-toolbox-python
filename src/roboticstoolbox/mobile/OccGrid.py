@@ -235,6 +235,15 @@ class BaseOccupancyGrid(BaseMap):
         return max(self.grid.shape) * self._cellsize
 
     @property
+    def cellsize(self) -> float:
+        """
+        Cell size in world units (superclass)
+
+        :return: side length of a grid cell
+        """
+        return self._cellsize
+
+    @property
     def workspace(self) -> R4:
         """
         Bounds of the occupancy grid in world coordinates (superclass)

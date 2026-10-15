@@ -123,7 +123,7 @@ class CurvaturePolyPlanner(PlannerBase):
         super().__init__(ndims=3)
         self.curvature = curvature
 
-    def query(  # type: ignore[override]
+    def query(
         self, start: ArrayLike3, goal: ArrayLike3
     ) -> tuple[NDArray, CurvaturePolyStatus]:
         r"""
@@ -151,10 +151,9 @@ class CurvaturePolyPlanner(PlannerBase):
         +-------------------+-----------------------------------------------+
 
         """
-        goal_: NDArray = np.r_[goal]
-        start_: NDArray = np.r_[start]
-        self._start = start_
-        self._goal = goal_
+        self.validate_start_goal(start, goal)
+        start_, goal_ = self.start, self.goal
+        assert start_ is not None and goal_ is not None
 
         # initial estimate of path length is Euclidean distance
         d = np.linalg.norm(goal_[:2] - start_[:2])

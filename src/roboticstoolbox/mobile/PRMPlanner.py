@@ -7,6 +7,7 @@ Probabilistic roadmap (PRM) path planner
 
 from __future__ import annotations
 
+import math
 import warnings
 from typing import TYPE_CHECKING, Any
 
@@ -14,7 +15,7 @@ import numpy as np
 from spatialmath.base.types import ArrayLike2
 
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
 if TYPE_CHECKING:
@@ -48,8 +49,12 @@ class PRMPlanner(PlannerBase):
     :param dist_thresh: distance threshold, an edge is only added to the
         roadmap between two vertices that are closer than this distance,
         defaults to 0.3 times the largest dimension of the occupancy grid
+    :param collision_step: spacing in cells of the points tested along a
+        candidate edge, defaults to None for the approximate test described
+        below
     :param kwargs: common planner options, see :class:`PlannerBase`
-    :raises ValueError: there is no occupancy grid
+    :raises ValueError: there is no occupancy grid, or ``collision_step`` is
+        not positive
 
     ==================   ========================
     Feature              Capability
@@ -62,6 +67,16 @@ class PRMPlanner(PlannerBase):
 
     Creates a planner that finds the path between two points in the
     plane using omnidirectional motion.  The path comprises a set of way points.
+
+    A candidate edge is added to the roadmap if it is shorter than
+    ``dist_thresh`` and a test finds it free of obstacles.  By default the test
+    samples the edge once per world unit, with only the endpoints tested for
+    edges shorter than about 2.5 units, so a wall one cell thick can be stepped
+    over.  If ``collision_step`` is given the edge is instead sampled at
+    intervals of at most ``collision_step`` cells, and both endpoints are
+    always tested.  A value of 0.5 or less cannot step over a wall one cell
+    thick, and smaller values give no gain for the increased cost.  Larger
+    values are allowed, and are the user's responsibility.
 
     Example:
 
@@ -85,9 +100,14 @@ class PRMPlanner(PlannerBase):
         occgrid: BinaryOccupancyGrid | NDArray | None = None,
         npoints: int = 100,
         dist_thresh: float | None = None,
+        collision_step: float | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(occgrid, ndims=2, **kwargs)
+
+        if collision_step is not None and collision_step <= 0:
+            raise ValueError("collision_step must be positive")
+        self._collision_step = collision_step
 
         if self.occgrid is None:
             raise ValueError("PRMPlanner requires an occupancy grid")
@@ -118,6 +138,15 @@ class PRMPlanner(PlannerBase):
         :return: Number of points
         """
         return self._npoints
+
+    @property
+    def collision_step(self) -> float | None:
+        """
+        Spacing of the points tested along an edge
+
+        :return: spacing in cells, None for the default approximate test
+        """
+        return self._collision_step
 
     @property
     def dist_thresh(self) -> float:
@@ -198,7 +227,13 @@ class PRMPlanner(PlannerBase):
         # TODO: should delegate this test to the OccGrid object and do it
         # world units
         if npoints is None:
-            npoints = int(round(np.linalg.norm(direction)))
+            length = float(np.linalg.norm(direction))
+            if self._collision_step is None:
+                npoints = int(round(length))
+            else:
+                assert self.occgrid is not None
+                step = self._collision_step * self.occgrid.cellsize
+                npoints = max(2, math.ceil(length / step) + 1)
 
         # test each point along the line from v1 to v2
         assert self.occgrid is not None
@@ -254,22 +289,20 @@ class PRMPlanner(PlannerBase):
         self.random_init()  # reset the random number generator
         self._create_roadmap(npoints, dist_thresh)
 
-    def query(  # type: ignore[override]
+    def query(
         self,
         start: ArrayLike2 | None = None,
         goal: ArrayLike2 | None = None,
-        **kwargs: Any,
     ) -> NDArray:
         """
         Find a path from start to goal using planner
 
         :param start: start position :math:`(x, y)`, defaults to previously set value
         :param goal: goal position :math:`(x, y)`, defaults to previously set value
-        :param kwargs: options passed to :meth:`PlannerBase.query`
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
-        :raises RuntimeError: if :meth:`plan` has not been called, or no path
-            exists through the roadmap
+        :raises RuntimeError: :meth:`plan` has not been called
+        :raises NoPathError: no path exists through the roadmap
         :raises ValueError: there is no start or goal
 
         The path is a sparse sequence of waypoints, with variable distance
@@ -281,9 +314,9 @@ class PRMPlanner(PlannerBase):
 
         """
         if self.graph is None or self.graph.n == 0:
-            raise RuntimeError("no plan computed")
+            raise RuntimeError("no plan computed, call plan() first")
 
-        super().query(start=start, goal=goal, next=False, **kwargs)
+        self.validate_start_goal(start, goal)
 
         # find roadmap vertices closest to start and goal
         vstart, _ = self.graph.closest(self.start)
@@ -292,7 +325,7 @@ class PRMPlanner(PlannerBase):
         # find A* path through the roadmap
         out = self.graph.path_Astar(vstart, vgoal)
         if out is None:
-            raise RuntimeError("no path found")
+            raise NoPathError("no path found through the roadmap")
         path = [v.coord for v in out[0]]
 
         path.insert(0, self.start)  # insert start at head of path
@@ -352,7 +385,7 @@ class PRMPlanner(PlannerBase):
                 edge_style = value
 
         if self._graph is None:
-            raise RuntimeError("no plan computed")
+            raise RuntimeError("no plan computed, call plan() first")
 
         # plot the obstacles and path
         ax = super().plot(*args, **kwargs)
