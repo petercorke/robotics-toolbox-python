@@ -37,7 +37,7 @@ def test_qp_step_matches_contiguous_chain(gain: float, indices: list[int]) -> No
     expected_error, expected_q = solver.step(contiguous, target, q_active.copy())
     actual_error, actual_q = solver.step(sparse, target, q_global)
 
-    assert actual_q.shape == (6,)
+    nt.assert_equal(actual_q.shape, (6,))
     nt.assert_allclose(actual_q, expected_q, atol=1e-10)
     nt.assert_allclose(actual_error, expected_error, atol=1e-12)
     nt.assert_array_equal(q_global[inactive], inactive_before)
@@ -56,7 +56,7 @@ def test_qp_solves_sparse_chain_after_iterations() -> None:
         tol=1e-12,
     )
 
-    assert result.success, result.reason
-    assert result.iterations > 0
-    assert result.q.shape == (6,)
+    nt.assert_equal(result.success, True, err_msg=result.reason)
+    nt.assert_array_less(0, result.iterations)
+    nt.assert_equal(result.q.shape, (6,))
     nt.assert_allclose(ets.fkine(result.q).A, target.A, atol=2e-6)
