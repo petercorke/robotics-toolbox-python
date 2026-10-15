@@ -1,29 +1,29 @@
 from __future__ import annotations
 
+import numbers
+import warnings
 from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import base
+from spatialmath.base.types import R2, R4, Points2
 
 from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
 from roboticstoolbox.tools.types import NDArray
+
+#: default Matplotlib style of the landmarks, a user's options are merged over this
+LANDMARK_STYLE: dict[str, Any] = {
+    "linewidth": 0,
+    "marker": "x",
+    "color": "black",
+    "linestyle": "None",
+}
 
 
 class LandmarkMap:
     """
     Map of planar point landmarks
-
-    :param map: map or number of landmarks
-    :type map: ndarray(2, N) or int
-    :param workspace: workspace or map bounds, defaults to 10
-    :type workspace: scalar, array_like(2), array_like(4), optional
-    :param verbose: display debug information, defaults to True
-    :type verbose: bool, optional
-    :param seed: random number seed, defaults to 0
-    :type seed: int, optional
-    :return: a landmark map object
-    :rtype: LandmarkMap
 
     A LandmarkMap object represents a rectangular 2D environment with a number
     of point landmarks.
@@ -39,7 +39,7 @@ class LandmarkMap:
     [A, B, C, D]     A:B      C:D
     ==============  =======  =======
 
-    or any object that has a ``workspace`` attribute.
+    or any object that has a ``workspace`` attribute, see :ref:`mobile-workspace`.
 
     Example:
 
@@ -54,20 +54,54 @@ class LandmarkMap:
 
     :Reference:
 
-        Robotics, Vision & Control, Chap 6,
+        Robotics, Vision & Control in Python, 3rd edition, Chap 6,
         Peter Corke,
-        Springer 2011
+        Springer 2023
 
-    See also :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF`
+    :seealso: :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF.EKF`
     """
 
     def __init__(
         self,
-        map: NDArray | int,
+        landmarks: Points2 | int | None = None,
         workspace: WorkspaceLike = 10,
-        verbose: bool = True,
         seed: int | None = 0,
+        verbose: bool | None = None,
+        map: Points2 | None = None,
     ) -> None:
+        """
+        Create a landmark map
+
+        :param landmarks: the landmark coordinates, one column per landmark, or the
+            number of landmarks to place at random in the workspace
+        :type landmarks: ndarray(2, N) or int
+        :param workspace: workspace or map bounds, defaults to 10
+        :param seed: random number seed used when placing landmarks at random,
+            defaults to 0
+        :param verbose: deprecated, it had no effect
+        :param map: deprecated, use ``landmarks``
+        :raises ValueError: ``landmarks`` is not given, or is not a 2xN array or
+            an integer
+
+        .. deprecated:: 1.4.5
+            ``verbose`` has no effect and ``map`` is renamed ``landmarks``.
+        """
+        if map is not None:
+            warnings.warn(
+                "map is deprecated, use landmarks instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if landmarks is None:
+                landmarks = map
+        if verbose is not None:
+            warnings.warn(
+                "verbose is deprecated and has no effect",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        if landmarks is None:
+            raise ValueError("landmarks must be an array of coordinates or a count")
 
         resolved = resolve_workspace(workspace)
         if resolved is None:
@@ -75,11 +109,13 @@ class LandmarkMap:
         self._workspace: NDArray = resolved
 
         self._map: NDArray
-        if isinstance(map, np.ndarray) and base.ismatrix(map, (2, None)):
-            self._map = map
-            self._nlandmarks = map.shape[1]
-        elif isinstance(map, int):
-            self._nlandmarks = map
+        if isinstance(landmarks, np.ndarray) and base.ismatrix(landmarks, (2, None)):
+            self._map = landmarks
+            self._nlandmarks = landmarks.shape[1]
+        elif isinstance(landmarks, numbers.Integral) and not isinstance(
+            landmarks, bool
+        ):
+            self._nlandmarks = int(landmarks)
 
             random = np.random.default_rng(seed)
             x = random.uniform(self._workspace[0], self._workspace[1], self._nlandmarks)
@@ -87,19 +123,23 @@ class LandmarkMap:
             self._map = np.c_[x, y].T
 
         else:
-            raise ValueError("bad type for map")
-
-        self._verbose = verbose
+            raise ValueError("landmarks must be a 2xN array or an integer")
 
     def __str__(self) -> str:
-        # s = M.char() is a string showing map parameters in
-        # a compact human readable format.
+        """
+        Compact string description of the map
+
+        :return: number of landmarks and the workspace
+        """
         ws = self._workspace
         s = f"LandmarkMap object with {self._nlandmarks} landmarks, workspace="
         s += f"({ws[0]}: {ws[1]}, {ws[2]}: {ws[3]})"
         return s
 
     def __repr__(self) -> str:
+        """
+        Compact string description of the map, same as :meth:`__str__`
+        """
         return str(self)
 
     def __len__(self) -> int:
@@ -107,41 +147,37 @@ class LandmarkMap:
         Number of landmarks in map
 
         :return: number of landmarks in the map
-        :rtype: int
         """
         return self._nlandmarks
 
     @property
-    def landmarks(self) -> NDArray:
+    def landmarks(self) -> Points2:
         """
         xy-coordinates of all landmarks
 
-        :return: xy-coordinates for landmark points
+        :return: xy-coordinates for landmark points, one column per landmark
         :rtype: ndarray(2, n)
         """
         return self._map
 
     @property
-    def workspace(self) -> NDArray:
+    def workspace(self) -> R4:
         """
         Size of map workspace
 
         :return: workspace bounds [xmin, xmax, ymin, ymax]
-        :rtype: ndarray(4)
 
         Returns the bounds of the workspace as specified by constructor
         option ``workspace``.
         """
         return self._workspace
 
-    def __getitem__(self, k: int) -> NDArray:
+    def __getitem__(self, k: int) -> R2:
         """
         Get landmark coordinates from map
 
         :param k: landmark index
-        :type k: int
         :return: coordinate :math:`(x,y)` of k'th landmark
-        :rtype: ndarray(2)
         """
         return self._map[:, k]
 
@@ -152,13 +188,12 @@ class LandmarkMap:
         Plot landmark map
 
         :param labels: number the points on the plot, defaults to False
-        :type labels: bool, optional
-        :param block: block until figure is closed, defaults to False
-        :type block: bool, optional
-        :param kwargs: :meth:`~matplotlib.axes.Axes.plot` options
+        :param block: block until figure is closed, defaults to None
+        :param kwargs: :meth:`~matplotlib.axes.Axes.plot` options, merged over
+            :data:`LANDMARK_STYLE`
 
         Plot landmark points using Matplotlib options.  Default style is black
-        crosses.
+        crosses, and any options given override the corresponding default.
         """
 
         ax = base.plotvol2(self._workspace)
@@ -167,24 +202,10 @@ class LandmarkMap:
         ax.set_xlabel("x")
         ax.set_ylabel("y")
 
-        if len(kwargs) == 0:
-            kwargs = {
-                "linewidth": 0,
-                "marker": "x",
-                "color": "black",
-                "linestyle": "None",
-            }
+        kwargs = {"label": "landmark"} | LANDMARK_STYLE | kwargs
 
-        if "label" not in kwargs:
-            kwargs["label"] = "landmark"
-
-        # plt.plot(self._map[0,:], self._map[1,:], , **kwargs)
         text = "#{}" if labels else None
         base.plot_point(self._map, text=text, **kwargs)
         plt.grid(True)
         if block is not None:
             plt.show(block=block)
-
-
-if __name__ == "__main__":
-    pass

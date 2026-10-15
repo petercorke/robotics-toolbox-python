@@ -152,15 +152,15 @@ class TestStateTransition(unittest.TestCase):
 
 class TestLandmarkMap(unittest.TestCase):
     def test_random_map_is_seeded(self) -> None:
-        a = LandmarkMap(10, workspace=10, seed=3, verbose=False)
-        b = LandmarkMap(10, workspace=10, seed=3, verbose=False)
-        c = LandmarkMap(10, workspace=10, seed=4, verbose=False)
+        a = LandmarkMap(10, workspace=10, seed=3)
+        b = LandmarkMap(10, workspace=10, seed=3)
+        c = LandmarkMap(10, workspace=10, seed=4)
         self.assertEqual(len(a), 10)
         nt.assert_array_equal(np.array(list(a)), np.array(list(b)))
         self.assertFalse(np.allclose(np.array(list(a)), np.array(list(c))))
 
     def test_landmarks_inside_workspace(self) -> None:
-        m = LandmarkMap(50, workspace=[-3, 5, 1, 4], verbose=False)
+        m = LandmarkMap(50, workspace=[-3, 5, 1, 4])
         xy = np.array(list(m))
         self.assertEqual(xy.shape, (50, 2))
         self.assertTrue(np.all((xy[:, 0] >= -3) & (xy[:, 0] <= 5)))
@@ -168,20 +168,20 @@ class TestLandmarkMap(unittest.TestCase):
 
     def test_explicit_map(self) -> None:
         coords = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
-        m = LandmarkMap(coords, workspace=10, verbose=False)
+        m = LandmarkMap(coords, workspace=10)
         self.assertEqual(len(m), 3)
         nt.assert_array_equal(m[1], [2, 5])
         nt.assert_array_equal(np.array(list(m)), coords.T)
 
     def test_bad_map(self) -> None:
         with self.assertRaises(ValueError):
-            LandmarkMap("twenty", verbose=False)
+            LandmarkMap("twenty")
 
 
 class TestRangeBearingSensor(unittest.TestCase):
     def setUp(self) -> None:
         self.robot = Bicycle(x0=[1, 2, 0.5])
-        self.map = LandmarkMap(5, workspace=10, seed=0, verbose=False)
+        self.map = LandmarkMap(5, workspace=10, seed=0)
 
     def test_h_matches_geometry(self) -> None:
         sensor = RangeBearingSensor(self.robot, self.map, covar=W)
@@ -224,7 +224,7 @@ class TestEKF(unittest.TestCase):
 
     @staticmethod
     def map() -> LandmarkMap:
-        return LandmarkMap(20, workspace=10, seed=0, verbose=False)
+        return LandmarkMap(20, workspace=10, seed=0)
 
     def sensor(self, robot: Bicycle, map: LandmarkMap) -> RangeBearingSensor:
         return RangeBearingSensor(
@@ -440,7 +440,7 @@ class TestParticleFilter(unittest.TestCase):
     def run_filter(self, nparticles: int = 500, T: float = 6, seed: int = 0):
         robot = Bicycle(covar=V, seed=seed)
         robot.control = RandomPath(workspace=10, seed=seed)
-        map = LandmarkMap(20, workspace=10, seed=0, verbose=False)
+        map = LandmarkMap(20, workspace=10, seed=0)
         sensor = RangeBearingSensor(robot, map, covar=W)
         pf = ParticleFilter(
             robot, sensor, self.R, self.L, nparticles=nparticles, seed=seed, animate=False
