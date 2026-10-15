@@ -6,10 +6,6 @@ These pin down what each style argument does today, so that the planned renaming
 of the arguments (to ``<thing>_style``, with the old names deprecated) and the
 merging of user styles over defaults can be made safely.  Each test draws into
 an Agg figure and examines the Matplotlib artists, so they are headless.
-
-Two tests are expected failures (``xfail``, strict) and record defects found
-while writing the tests; each will start to pass, and so fail the run, when the
-defect is fixed, which is the cue to remove the marker.
 """
 
 import contextlib
@@ -201,27 +197,26 @@ class TestEKFPlot(unittest.TestCase):
         self.assertEqual(len(self.ax.patches), 0)
 
     def test_plot_map_marker_argument(self):
-        self.ekf.plot_map(marker=dict(marker="x", markersize=5, linewidth=0))
+        self.ekf.plot_map(marker_style=dict(marker="x", markersize=5, linewidth=0))
         (line,) = self.ax.lines
         self.assertEqual(line.get_marker(), "x")
         self.assertEqual(line.get_markersize(), 5)
 
     def test_plot_map_ellipse_argument(self):
         # an ellipse for every landmark is drawn only if ``ellipse`` is given
-        self.ekf.plot_map(ellipse=dict(color="g"))
+        self.ekf.plot_map(ellipse_style=dict(color="g"))
         nlandmarks = len(self.ekf.landmarks)
         self.assertGreater(nlandmarks, 0)
         # plot_ellipse draws a line per ellipse
         green = lines_with(self.ax, color="g")
         self.assertEqual(len(green), nlandmarks)
 
-    @unittest.expectedFailure
     def test_plot_map_ellipse_uses_landmark_covariance(self):
         # The covariance for landmark i is the 2x2 block at rows and columns
-        # 3+2i.. (after the vehicle state), but plot_map takes the block at
-        # rows and columns i.., so ellipses after the first are wrong.
+        # 3+2i.. (after the vehicle state).  plot_map used to take the block
+        # at rows and columns i.., so ellipses after the first were wrong.
         with mock.patch("roboticstoolbox.mobile.EKF.base.plot_ellipse") as plot_ellipse:
-            self.ekf.plot_map(ellipse=dict(color="g"))
+            self.ekf.plot_map(ellipse_style=dict(color="g"))
         P = self.ekf.P_est
         for i, call in enumerate(plot_ellipse.call_args_list):
             expected = P[3 + 2 * i : 5 + 2 * i, 3 + 2 * i : 5 + 2 * i]

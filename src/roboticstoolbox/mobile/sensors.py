@@ -180,7 +180,6 @@ class SensorBase(ABC):
         Plot sensor observation
 
         :param id: landmark id
-        :type id: int
 
         Draws a line from the robot to landmark ``id``.
 
@@ -254,9 +253,7 @@ class RangeBearingSensor(SensorBase):
             defaults to None
         :type angle: float or array_like(2), optional
         :param plot: plot the map and a line to each observed landmark, defaults to False
-        :type plot: bool, optional
         :param seed: random number seed, defaults to 0
-        :type seed: int, optional
         :param kwargs: arguments passed to :class:`SensorBase`
 
         Sensor object that returns the range and bearing angle :math:`(r,
@@ -527,7 +524,6 @@ class RangeBearingSensor(SensorBase):
         Test if landmark is visible
 
         :param id: landmark id
-        :type id: int
         :return: visibility
         :rtype: bool
 
