@@ -114,15 +114,15 @@ class TestPlannerPlot(PlannerPlotTestCase):
         (goal,) = lines_with(self.ax, marker="^")
         self.assertEqual(start.get_markersize(), 7)
         self.assertEqual(goal.get_markersize(), 9)
-        # the user's dict replaces the defaults, it is not yet merged over them
+        # the user's dict is merged over the defaults: its marker replaces the
+        # default marker, the other defaults remain
         self.assertEqual(len(lines_with(self.ax, marker="o")), 0)
         self.assertEqual(len(lines_with(self.ax, marker="*")), 0)
 
-    @unittest.expectedFailure
-    def test_path_marker_is_used(self):
-        # ``path_marker`` is in the signature and the book's figure scripts pass
-        # it, but it is never read: the path is drawn from ``line``.  The same is
-        # true of ``path_marker_reverse``.
+    def test_path_marker_is_a_deprecated_alias(self):
+        # ``path_marker`` was in the signature, and the book's figure scripts pass
+        # it, but it was never read: the path was drawn from ``line``.  It is now
+        # a deprecated alias of ``path_style``.
         self.plot(path_marker=(dict(color="m", linewidth=5),))
         self.assertEqual(len(lines_with(self.ax, color="m", linewidth=5)), 1)
 
