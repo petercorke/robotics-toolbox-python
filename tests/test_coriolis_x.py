@@ -51,7 +51,7 @@ def test_operational_coriolis_satisfies_equations_of_motion(
 
     coriolis = robot.coriolis_x(q, qd, representation=representation)
 
-    assert coriolis.shape == (6, 6)
+    npt.assert_equal(coriolis.shape, (6, 6))
     npt.assert_allclose(
         inertia @ acceleration + coriolis @ velocity, wrench, atol=2e-6, rtol=2e-5
     )
