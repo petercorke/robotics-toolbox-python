@@ -67,6 +67,21 @@ class TestRun(unittest.TestCase):
             Bug2(occgrid=block_map()).run((2, 10), (17, 10), animate=True, label="mine")
         self.assertIn("mine", [line.get_label() for line in plt.gca().lines])
 
+    def test_diagonal_m_line_through_corners(self):
+        # a 45 degree m-line passes between two diagonal neighbours, 0.707 from
+        # each, and was missed: the robot was reported as trapped
+        path = Bug2(occgrid=block_map()).run((2, 2), (17, 17))
+        nt.assert_array_equal(path[-1], [17, 17])
+
+    def test_house_path_length(self):
+        # the example in the book, Fig 5.5: 1306 points since 1.4.5, 1307 before
+        from roboticstoolbox import rtb_load_matfile
+
+        house = rtb_load_matfile("data/house.mat")
+        places = house["places"]
+        path = Bug2(occgrid=house["floorplan"]).run(places.br3, places.kitchen)
+        self.assertEqual(path.shape, (1306, 2))
+
     def test_trapped_does_not_block(self):
         # plt.show(block=True) used to be called before the exception
         with mock.patch.object(plt, "show") as show:

@@ -17,6 +17,14 @@ from spatialmath.base.types import R3, ArrayLike2
 from roboticstoolbox.mobile.PlannerBase import MovieWriter, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
+# The robot has crossed the m-line when it is within this distance of it, in
+# cells.  Half a cell is not enough: a line at 45 degrees to the grid passes
+# between two diagonal neighbours at sqrt(2)/2 from each, so the robot could step
+# over it without being within half a cell of it at any point on its path.  The
+# small addition absorbs rounding, since a diagonal neighbour is exactly
+# sqrt(2)/2 away.
+_M_LINE_TOLERANCE = np.sqrt(2) / 2 + 1e-9
+
 
 class Bug2(PlannerBase):
     """
@@ -101,6 +109,15 @@ class Bug2(PlannerBase):
 
         .. note:: ``start`` and ``goal`` are given as (x,y) coordinates in the
               occupancy grid map, not as matrix row and column coordinates.
+
+        .. versionchanged:: 1.4.5
+            The robot is considered to have crossed the m-line when it is within
+            :math:`\\sqrt{2}/2` cells of it, previously half a cell.  A line at
+            45 degrees to the grid passes between two diagonal neighbours at that
+            distance from each, and could be stepped over without being seen, so
+            that the robot was reported as trapped.  Paths can differ by a cell
+            from earlier versions: the house floorplan example from the bedroom
+            to the kitchen has 1306 points rather than 1307.
 
         :seealso: :meth:`Bug2.plot`
         """
@@ -268,7 +285,7 @@ class Bug2(PlannerBase):
                 raise RuntimeError("robot is trapped")
 
             # are we on the M-line now ?
-            if abs(np.inner(np.r_[position, 1], m_line)) <= 0.5:
+            if abs(np.inner(np.r_[position, 1], m_line)) <= _M_LINE_TOLERANCE:
                 self.message(f"  {position}: crossed the M-line")
 
                 # are we closer than when we encountered the obstacle?
