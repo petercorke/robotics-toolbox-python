@@ -16,7 +16,7 @@ import spatialgeometry as sg
 import roboticstoolbox as rtb
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
-from roboticstoolbox.backends.PyPlot.window import set_window_title
+from roboticstoolbox.tools.plot import set_window_title
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 
 
@@ -68,6 +68,19 @@ class TestWindowTitle(unittest.TestCase):
                 ):
                     cls().launch()
                 plt.close("all")
+
+
+class TestVehicleWindow(unittest.TestCase):
+    def tearDown(self):
+        plt.close("all")
+
+    def test_animation_without_a_window_manager(self):
+        # the title used to be set by reaching into canvas.manager directly
+        veh = rtb.Bicycle(workspace=10, animation="car")
+        with mock.patch("roboticstoolbox.mobile.Vehicle.set_window_title") as title:
+            veh.init(animate=True)
+        title.assert_called_once()
+        self.assertIn("Robotics Toolbox", title.call_args.args[1])
 
 
 class TestConnectorProtocol(unittest.TestCase):

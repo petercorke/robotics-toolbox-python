@@ -26,6 +26,7 @@ from spatialmath import SE2, Polygon2, base
 from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehiclePolygon
 from roboticstoolbox.mobile.drivers import VehicleDriverBase
 from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
+from roboticstoolbox.tools.plot import set_window_title
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # what can be given as the control for a vehicle, see VehicleBase.control
@@ -763,13 +764,10 @@ class VehicleBase(ABC):
             self._ax.set_xlabel("x")
             self._ax.set_ylabel("y")
             self._ax.set_aspect("equal")
-            try:
-                # AttributeError is handled, for a backend without a manager
-                self._ax.figure.canvas.manager.set_window_title(  # type: ignore[union-attr]
-                    f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"  # type: ignore[union-attr]
-                )
-            except AttributeError:
-                pass
+            set_window_title(
+                self._ax.figure,
+                f"Robotics Toolbox for Python (Figure {self._ax.figure.number})",  # type: ignore[union-attr]
+            )
 
             self._animation.add(ax=self._ax)  # add vehicle animation to axis
             self._timer = plt.figtext(0.85, 0.95, "")  # display time counter

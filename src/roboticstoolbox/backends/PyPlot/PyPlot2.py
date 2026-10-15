@@ -17,7 +17,7 @@ import roboticstoolbox as rp
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
-from roboticstoolbox.backends.PyPlot.window import set_window_title
+from roboticstoolbox.tools.plot import set_window_title
 
 _mpl = False
 _ipy_display: Any = None

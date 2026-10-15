@@ -18,7 +18,7 @@ import roboticstoolbox as rp
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
-from roboticstoolbox.backends.PyPlot.window import set_window_title
+from roboticstoolbox.tools.plot import set_window_title
 from roboticstoolbox.tools.types import ArrayLike
 
 # from roboticstoolbox.tools import Ticker
