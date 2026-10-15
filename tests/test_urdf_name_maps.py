@@ -1,5 +1,6 @@
 """Parsed URDF names must be available to callers and transmission validation."""
 
+import numpy.testing as nt
 import pytest
 
 from roboticstoolbox.tools.urdf import URDF, URDFError
@@ -33,18 +34,18 @@ def test_name_maps_preserve_parsed_object_identity_and_return_copies():
     ):
         mapping = getattr(robot, mapping_name)
         objects = getattr(robot, sequence_name)
-        assert set(mapping) == {item.name for item in objects}
+        nt.assert_equal(set(mapping) == {item.name for item in objects}, True)
         for item in objects:
-            assert mapping[item.name] is item
+            nt.assert_equal(mapping[item.name] is item, True)
         mapping.clear()
-        assert len(getattr(robot, mapping_name)) == len(objects)
+        nt.assert_equal(len(getattr(robot, mapping_name)), len(objects))
 
 
 def test_no_joints_or_transmissions_have_empty_name_maps():
     robot = URDF.loadstr('<robot name="fixed"><link name="base"/></robot>', None)
-    assert robot.link_map["base"] is robot.links[0]
-    assert robot.joint_map == {}
-    assert robot.transmission_map == {}
+    nt.assert_equal(robot.link_map["base"] is robot.links[0], True)
+    nt.assert_equal(robot.joint_map, {})
+    nt.assert_equal(robot.transmission_map, {})
 
 
 def test_transmission_must_reference_an_existing_joint():
