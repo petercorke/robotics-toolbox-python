@@ -411,6 +411,90 @@ class DriversTest(unittest.TestCase):
         plt.close(fig)
 
 
+class TestVehicleBase(unittest.TestCase):
+    def test_constructor_control_constant(self):
+        veh = rtb.Bicycle(control=(1.0, 0.1))
+        self.assertEqual(veh.control, (1.0, 0.1))
+        u = veh.eval_control(veh.control, veh.x)
+        nt.assert_allclose(u, [1.0, 0.1])
+
+    def test_constructor_control_function(self):
+        veh = rtb.Bicycle(control=lambda v, t, x: (2.0, 0.0))
+        nt.assert_allclose(veh.eval_control(veh.control, veh.x), [2.0, 0.0])
+
+    def test_constructor_control_driver(self):
+        # a driver is connected without the deprecation warning
+        import warnings
+
+        rp = rtb.RandomPath(workspace=10)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            veh = rtb.Bicycle(control=rp)
+        self.assertIs(veh.control, rp)
+        self.assertIs(rp.vehicle, veh)
+
+    def test_init_control_driver(self):
+        # a driver given to init/run is connected to the vehicle
+        veh = rtb.Bicycle()
+        rp = rtb.RandomPath(workspace=10)
+        veh.init(control=rp, animate=False)
+        self.assertIs(rp.vehicle, veh)
+        self.assertEqual(veh.run(1, control=rp, animate=False).shape[1], 3)
+
+    def test_bad_control(self):
+        veh = rtb.Bicycle()
+        with self.assertRaises(ValueError):
+            veh.eval_control("bad", veh.x)
+
+    def test_polygon(self):
+        veh = rtb.Bicycle()
+        with self.assertRaises(ValueError):
+            veh.polygon([0, 0, 0])
+
+    def test_run_animation_file_required(self):
+        veh = rtb.Bicycle(control=(1.0, 0.0))
+        for fmt in ("gif", "mp4"):
+            with self.assertRaises(ValueError):
+                veh.run_animation(T=1, format=fmt)
+        with self.assertRaises(ValueError):
+            veh.run_animation(T=1, format="bad")
+
+    def test_plot_xyt(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        veh = rtb.Bicycle(control=(1.0, 0.1), dt=0.1)
+        veh.run(2, animate=False)
+        n = veh.x_hist.shape[0]
+
+        fig = plt.figure()
+        veh.plot_xyt()
+        lines = plt.gca().lines
+        self.assertEqual(len(lines), 3)
+        t = lines[0].get_xdata()
+        self.assertEqual(len(t), n)
+        nt.assert_allclose(t, np.arange(n) * 0.1)
+        # the y-data are x, y, theta
+        nt.assert_allclose(lines[2].get_ydata(), veh.x_hist[:, 2])
+        plt.close(fig)
+
+    def test_plot_xy(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        veh = rtb.Bicycle(control=(1.0, 0.1))
+        veh.run(1, animate=False)
+        fig = plt.figure()
+        veh.plot_xy()
+        veh.plot_xy("r--", label="path")
+        self.assertEqual(len(plt.gca().lines), 2)
+        plt.close(fig)
+
+
 class TestBicycle(unittest.TestCase):
     # def test_deriv(self):
     #     xv = np.r_[1, 2, pi/4]
