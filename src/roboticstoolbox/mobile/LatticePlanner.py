@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import SE2
 
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
@@ -335,7 +335,7 @@ class LatticePlanner(PlannerBase):
         try:
             path, cost, _ = self.graph.path_Astar(vs, vg, verbose=False)
         except TypeError:
-            raise RuntimeError("no path found") from None
+            raise NoPathError("no path found through the lattice") from None
 
         segments = []
         edges = []

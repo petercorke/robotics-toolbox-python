@@ -14,7 +14,7 @@ import numpy as np
 from spatialmath.base.types import ArrayLike2
 
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
 if TYPE_CHECKING:
@@ -266,8 +266,8 @@ class PRMPlanner(PlannerBase):
         :param goal: goal position :math:`(x, y)`, defaults to previously set value
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
-        :raises RuntimeError: if :meth:`plan` has not been called, or no path
-            exists through the roadmap
+        :raises RuntimeError: :meth:`plan` has not been called
+        :raises NoPathError: no path exists through the roadmap
         :raises ValueError: there is no start or goal
 
         The path is a sparse sequence of waypoints, with variable distance
@@ -279,7 +279,7 @@ class PRMPlanner(PlannerBase):
 
         """
         if self.graph is None or self.graph.n == 0:
-            raise RuntimeError("no plan computed")
+            raise RuntimeError("no plan computed, call plan() first")
 
         self.validate_start_goal(start, goal)
 
@@ -290,7 +290,7 @@ class PRMPlanner(PlannerBase):
         # find A* path through the roadmap
         out = self.graph.path_Astar(vstart, vgoal)
         if out is None:
-            raise RuntimeError("no path found")
+            raise NoPathError("no path found through the roadmap")
         path = [v.coord for v in out[0]]
 
         path.insert(0, self.start)  # insert start at head of path
@@ -350,7 +350,7 @@ class PRMPlanner(PlannerBase):
                 edge_style = value
 
         if self._graph is None:
-            raise RuntimeError("no plan computed")
+            raise RuntimeError("no plan computed, call plan() first")
 
         # plot the obstacles and path
         ax = super().plot(*args, **kwargs)

@@ -94,6 +94,7 @@ __all__ = [
     "BinaryOccupancyGrid",
     "OccupancyGrid",
     "PlannerBase",
+    "NoPathError",
     "RRTPlanner",
     "EKF",
     "ParticleFilter",

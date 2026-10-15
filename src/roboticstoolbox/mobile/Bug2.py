@@ -14,7 +14,7 @@ import numpy as np
 from spatialmath import base
 from spatialmath.base.types import R3, ArrayLike2
 
-from roboticstoolbox.mobile.PlannerBase import MovieWriter, PlannerBase
+from roboticstoolbox.mobile.PlannerBase import MovieWriter, NoPathError, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
 # The robot has crossed the m-line when it is within this distance of it, in
@@ -100,7 +100,7 @@ class Bug2(PlannerBase):
             to "robot path"
         :raises ValueError: ``start`` and ``goal`` are not both given, or lie
             inside an obstacle
-        :raises RuntimeError: the robot is trapped
+        :raises NoPathError: the robot is trapped
         :return: path from ``start`` to ``goal``, one point per row
         :rtype: ndarray(N,2)
 
@@ -228,7 +228,7 @@ class Bug2(PlannerBase):
         :type position: ndarray(2)
         :raises ValueError: there is no goal or m-line, :meth:`run` has not been
             called
-        :raises RuntimeError: robot is trapped
+        :raises NoPathError: robot is trapped
         :return: next robot position, None if the goal has been reached
         :rtype: ndarray(2)
         """
@@ -281,7 +281,7 @@ class Bug2(PlannerBase):
             else:
                 # we are at the end of the list of edge points, we
                 # are back where we started.  Step 2.c test.
-                raise RuntimeError("robot is trapped")
+                raise NoPathError("robot is trapped")
 
             # are we on the M-line now ?
             if abs(np.inner(np.r_[position, 1], m_line)) <= _M_LINE_TOLERANCE:

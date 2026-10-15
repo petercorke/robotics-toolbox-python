@@ -87,6 +87,17 @@ def _layers(
     return tuple(style)
 
 
+class NoPathError(RuntimeError):
+    """
+    A valid planning problem has no solution
+
+    Raised by a planner when the start, goal and environment are valid but there
+    is no path between them, for example the goal is unreachable or the robot is
+    trapped.  Invalid input raises :class:`ValueError` instead.  This is a
+    :class:`RuntimeError`, so code that catches that continues to work.
+    """
+
+
 class PlannerBase:
     r"""
     Mobile robot motion planner (superclass)

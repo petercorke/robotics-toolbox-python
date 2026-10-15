@@ -11,6 +11,7 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 try:
     import pgraph
 except ImportError:
+
     class _PGraphMissing:  # pragma: no cover
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             raise ImportError(

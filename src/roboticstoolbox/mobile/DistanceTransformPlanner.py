@@ -17,7 +17,7 @@ from spatialmath import base
 from spatialmath.base.types import ArrayLike2
 
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
 #: the names of the distance metrics, as accepted by :func:`distancexform`
@@ -189,8 +189,9 @@ class DistanceTransformPlanner(PlannerBase):
         :param animate: show the vehicle path, defaults to False
         :param next: deprecated, has no effect
         :param movie: deprecated, has no effect
-        :raises ValueError: there is no start point, or no plan has been computed
-        :raises RuntimeError: the goal cannot be reached from ``start``
+        :raises ValueError: there is no start point
+        :raises RuntimeError: no plan has been computed
+        :raises NoPathError: the goal cannot be reached from ``start``
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
 
@@ -215,7 +216,7 @@ class DistanceTransformPlanner(PlannerBase):
             raise ValueError("no start point")
 
         if self.distancemap is None:
-            raise ValueError("No distance map computed, you need to plan.")
+            raise RuntimeError("no plan computed, call plan() first")
 
         if animate:
             self.plot()
@@ -245,8 +246,8 @@ class DistanceTransformPlanner(PlannerBase):
         Find next point on the path
 
         :param position: current robot position
-        :raises ValueError: no plan has been computed
-        :raises RuntimeError: there is no neighbouring cell with a finite distance
+        :raises RuntimeError: no plan has been computed
+        :raises NoPathError: there is no neighbouring cell with a finite distance
         :return: next robot position, None if the next point is the goal
         :rtype: ndarray(2)
 
@@ -256,7 +257,7 @@ class DistanceTransformPlanner(PlannerBase):
         :seealso: :meth:`plan` :meth:`query`
         """
         if self.distancemap is None:
-            raise ValueError("No distance map computed, you need to plan.")
+            raise RuntimeError("no plan computed, call plan() first")
 
         directions = np.array(
             [
@@ -290,7 +291,7 @@ class DistanceTransformPlanner(PlannerBase):
                 min_dist = distancemap[r, c]
 
         if min_dir is None or np.isinf(min_dist):
-            raise RuntimeError("no minimum found, shouldn't happen")
+            raise NoPathError("the goal is not reachable from this position")
 
         x = x + min_dir[1]
         y = y + min_dir[0]
