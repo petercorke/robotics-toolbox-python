@@ -17,7 +17,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from colored import attr, fg
-from matplotlib import animation, cm
+from matplotlib import animation, cm, patheffects
 from spatialmath.base.argcheck import getvector
 from spatialmath.base.graphics import axes_get_scale, axes_logic, plotvol2
 from spatialmath.base.types import R2, R3, ArrayLike2, ArrayLike3
@@ -85,6 +85,11 @@ def _layers(
     if isinstance(style, dict):
         return (style,)
     return tuple(style)
+
+
+#: outline of the cell value labels, so that the red text is legible on any
+#: gray of the distance field
+LABEL_OUTLINE = patheffects.withStroke(linewidth=2, foreground="white")
 
 
 def _warn_unused(unused: dict[str, Any], stacklevel: int = 3) -> None:
@@ -1064,8 +1069,9 @@ class PlannerBase:
             defaults to False
         :param labelvalues: a synonym of ``labels``, the name used in the book
         :param label_style: Matplotlib text options for the values, merged over
-            a red, centered ``fontsize`` 8 label, as in the book.  The axes
-            are set to show every cell whole.
+            red, centered ``fontsize`` 8 text, as in the book, with a thin
+            white outline (``path_effects``) so that it is legible on any gray.
+            The axes are set to show every cell whole.
 
         .. deprecated:: 1.4.5
             Giving a dict as ``colorbar`` is deprecated, use ``colorbar=True``
@@ -1226,6 +1232,7 @@ class PlannerBase:
                 "va": "center",
                 "fontsize": 8,
                 "color": "red",
+                "path_effects": [LABEL_OUTLINE],
                 "zorder": 5,
             } | (label_style or {})
             ax.text(c, r, f"{value:.0f}" if integral else f"{value:.1f}", **style)

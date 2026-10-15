@@ -150,6 +150,19 @@ class TestLabelValues(unittest.TestCase):
         self.dx.plot(labelvalues=True)
         self.assertEqual({t.get_color() for t in plt.gca().texts}, {"red"})
 
+    def test_default_labels_have_a_white_outline(self):
+        from matplotlib import patheffects
+
+        self.dx.plot(labels=True)
+        for text in plt.gca().texts:
+            (effect,) = text.get_path_effects()
+            self.assertIsInstance(effect, patheffects.withStroke)
+            self.assertEqual(effect._gc["foreground"], "white")
+
+    def test_label_style_can_remove_the_outline(self):
+        self.dx.plot(labels=True, label_style=dict(path_effects=[]))
+        self.assertEqual(plt.gca().texts[0].get_path_effects(), [])
+
     def test_label_style(self):
         self.dx.plot(labelvalues=True, label_style=dict(fontsize=14, color="m"))
         text = plt.gca().texts[0]
