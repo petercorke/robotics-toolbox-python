@@ -77,6 +77,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     # set when the links are processed in the constructor
     _base_link: LinkType
 
+    #: default graphical backend for every robot of this class, used when the
+    #: robot has not been given its own, see :meth:`set_default_backend`
+    _class_default_backend: Any = None
+
     def __init__(
         self,
         links: list[LinkType],
@@ -156,15 +160,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
             if link.hasdynamics:
                 self._hasdynamics = True
-            if link.geometry:
-                # an empty list, not True (replaced just below if it has geometry)
-                self._hasgeometry = []  # type: ignore[assignment]
+            if len(link.geometry) > 0:
+                self._hasgeometry = True
             if link.collision:
                 self._hascollision = True
-
-            if isinstance(link, Link):
-                if len(link.geometry) > 0:
-                    self._hasgeometry = True
 
             # Detect symbolic (e.g. SymPy) model parameters regardless of
             # whether the caller remembered to pass symbolic=True -- see
@@ -838,18 +837,38 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Get default graphical backend
 
         - ``robot.default_backend`` Get the default graphical backend, used when
-            no explicit backend is passed to ``Robot.plot``.
+            no explicit backend is passed to ``Robot.plot``.  This is the value set
+            for the robot, otherwise the value set for all robots by
+            :meth:`set_default_backend`, otherwise ``None``.
         - ``robot.default_backend = ...`` Set the default graphical backend, used when
             no explicit backend is passed to ``Robot.plot``.  The default set here will
             be overridden if the particular ``Robot`` subclass cannot support it.
 
         :returns: backend name
         """
-        return self._default_backend
+        if self._default_backend is not None:
+            return self._default_backend
+        return self._class_default_backend
 
     @default_backend.setter
     def default_backend(self, be: Any) -> None:
         self._default_backend = be
+
+    @classmethod
+    def set_default_backend(cls, be: Any) -> None:
+        """
+        Set the default graphical backend for all robots
+
+        :param be: backend name, for example ``"swift"``, or ``None`` to clear
+
+        ``Robot.set_default_backend("swift")`` sets the backend used by
+        :meth:`plot` for every robot, existing or created later, that has not
+        been given one of its own by ``robot.default_backend = ...``.  The robot's
+        own value takes precedence.
+
+        :seealso: :attr:`default_backend`
+        """
+        cls._class_default_backend = be
 
     @property
     def gravity(self) -> NDArray:

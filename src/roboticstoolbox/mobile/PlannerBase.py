@@ -7,23 +7,21 @@ Superclass for mobile robot motion planners, and a movie writer
 
 from __future__ import annotations
 
-import copy
 import os
 import warnings
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from colored import attr, fg
-from matplotlib import animation, cm, patheffects
+from matplotlib import animation
 from spatialmath.base.argcheck import getvector
-from spatialmath.base.graphics import axes_get_scale, axes_logic, plotvol2
+from spatialmath.base.graphics import axes_get_scale, axes_logic
 from spatialmath.base.types import R2, R3, ArrayLike2, ArrayLike3
 
 from roboticstoolbox.mobile.Animations import VehiclePolygon
-from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid, BinaryOccupancyGrid
+from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:
@@ -85,11 +83,6 @@ def _layers(
     if isinstance(style, dict):
         return (style,)
     return tuple(style)
-
-
-#: outline of the cell value labels, so that the red text is legible on any
-#: gray of the distance field
-LABEL_OUTLINE = patheffects.withStroke(linewidth=2, foreground="white")
 
 
 def _warn_unused(unused: dict[str, Any], stacklevel: int = 3) -> None:
@@ -162,6 +155,11 @@ class PlannerBase:
     - encapsulates a private random number generator with specifiable seed
     - encapsulates state such as start, goal, and the plan
     - provides a message channel for diagnostic output
+
+    Positions, returned paths and plot axes use world coordinates. Grid-based
+    planners convert positions to the nearest cell centre internally, using the
+    occupancy grid's origin and cell size. A raw array has unit cells and origin
+    (0, 0). Angles are in radians.
 
     The start and goal can be specified in various ways:
 
@@ -1122,142 +1120,22 @@ class PlannerBase:
         if occgrid is None:
             return
 
-        if isinstance(self._occgrid, BaseOccupancyGrid):
-            ax = plotvol2(dim=self._occgrid.workspace, ax=ax)
-        else:
-            ax = axes_logic(ax, 2)
-
-        # create color map for free space + obstacle:
-        #   free space, color index = 1, white, alpha=0 to allow background and grid lines to show
-        #   obstacle, color index = 2, red, alpha=1
-
-        if self._inflate > 0 and inflated:
-            # 0 background (white, transparent)
-            # 1 inflated obstacle (pink)
-            # 2 original obstacle (red)
-            colors = [(1, 1, 1, 0), (1, 0.75, 0.8, 1), (1, 0, 0, 1)]
-            assert self._occgrid0 is not None
-            image = occgrid.grid.astype(int) + self._occgrid0.grid.astype(int)
-        else:
-            # 0 background
-            # 1 obstacle
-            colors = [(1, 1, 1, 0), (1, 0, 0, 1)]
-            image = occgrid.grid
-
         if distance is None and hasattr(self, "distancemap"):
             distance = self.distancemap
 
-        if distance is not None:
-            # distance field with obstacles
-
-            # find largest finite value
-
-            # work on a copy, the caller's array is not modified
-            distance = np.array(distance, dtype=float)
-            v = distance.ravel()
-            vmax = max(v[np.isfinite(v)])
-
-            # create a copy of greyscale color map
-            c_map = copy.copy(mpl.colormaps.get_cmap(cmap))
-            # c_map.set_bad(color=(1,0,0,1))  # nan and inf are red
-
-            # change all inf to large value, so they are not 'bad' ie. red
-            distance[np.isinf(distance)] = 2 * vmax
-            c_map = c_map.with_extremes(over=(0, 0, 1))  # ex-infs are now blue
-
-            # display image
-            norm = mpl.colors.Normalize(vmin=0, vmax=vmax, clip=False)
-            ax.imshow(
-                distance,
-                origin="lower",
-                interpolation=None,
-                cmap=c_map,
-                norm=norm,
-            )
-            ax.grid(True, alpha=0.1, color=(1, 1, 1))
-
-            # add colorbar
-            scalar_mappable_c_map = cm.ScalarMappable(cmap=c_map, norm=norm)
-            if isinstance(colorbar, dict):
-                warnings.warn(
-                    "a dict as colorbar is deprecated, use colorbar_style instead",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-                colorbar_style = colorbar if colorbar_style is None else colorbar_style
-                colorbar = True
-            if colorbar:
-                cb_kwargs: dict[str, Any] = {"ax": ax, "label": "Distance"} | (
-                    colorbar_style or {}
-                )
-                ax.figure.colorbar(scalar_mappable_c_map, **cb_kwargs)
-            # overlay obstacles
-            c_map = mpl.colors.ListedColormap(colors)
-            occgrid.plot(image, cmap=c_map, zorder=1)
-
-            if labels:
-                self._label_values(ax, distance, norm, vmax, label_style)
-
-        else:
-            # occupancy grid only
-            if labels:
-                warnings.warn(
-                    "labels has no effect, there is no distance field",
-                    UserWarning,
-                    stacklevel=2,
-                )
-
-            # overlay obstacles
-            c_map = mpl.colors.ListedColormap(colors)
-            # self.occgrid.plot(image, cmap=c_map, zorder=1)
-            occgrid.plot(cmap=c_map, zorder=1, ax=ax)
-
-        ax.set_facecolor((1, 1, 1))  # create white background
-        ax.set_xlabel("x (cells)")
-        ax.set_ylabel("y (cells)")
-        ax.grid(True, zorder=0)
-
-        # lock axis limits to current value
-        # ax.set_xlim(ax.get_xlim())
-        # ax.set_ylim(ax.get_ylim())
-
-        # plt.draw()
-        if block is not None:
-            plt.show(block=block)
-
-    @staticmethod
-    def _label_values(
-        ax: Axes,
-        distance: NDArray,
-        norm: mpl.colors.Normalize,
-        vmax: float,
-        label_style: dict[str, Any] | None,
-    ) -> None:
-        """
-        Write the value of each free cell of a distance field into the cell
-
-        :param distance: distance field, nan for obstacles and a large value
-            for cells that cannot be reached
-        """
-        # show every cell whole, so that the values on the edge are legible
-        rows, columns = distance.shape
-        ax.set_xlim(-0.5, columns - 0.5)
-        ax.set_ylim(-0.5, rows - 0.5)
-
-        free = np.isfinite(distance) & (distance <= vmax)
-        values = distance[free]
-        integral = bool(np.all(values == np.round(values)))
-        for r, c in np.argwhere(free):
-            value = distance[r, c]
-            style: dict[str, Any] = {
-                "ha": "center",
-                "va": "center",
-                "fontsize": 8,
-                "color": "red",
-                "path_effects": [LABEL_OUTLINE],
-                "zorder": 5,
-            } | (label_style or {})
-            ax.text(c, r, f"{value:.0f}" if integral else f"{value:.1f}", **style)
+        # The original map owns the geometry; the planner supplies its overlays.
+        assert self._occgrid0 is not None
+        self._occgrid0.plot(
+            field=distance,
+            inflated=occgrid.grid if self._inflate > 0 and inflated else None,
+            cmap=cmap if distance is not None else None,
+            ax=ax,
+            colorbar=colorbar,
+            colorbar_style=colorbar_style,
+            labels=labels,
+            label_style=label_style,
+            block=block,
+        )
 
     def message(self, s: str, color: str | None = None) -> None:
         """
