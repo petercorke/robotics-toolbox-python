@@ -183,7 +183,6 @@ def rtb_path_to_datafile(*filename: Any, local: bool = True) -> Any:
 
 if __name__ == "__main__":
     house = rtb_load_matfile("data/house.mat")
-    a = rtb_loadmat("map1.mat")  # type: ignore[name-defined]
-    print(a)
-    a = rtb_loadmat("data/map1.mat")  # type: ignore[name-defined]
+    print(house.keys())
+    a = rtb_load_matfile("data/map1.mat")
     print(a)
