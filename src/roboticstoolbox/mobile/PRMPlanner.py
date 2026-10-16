@@ -213,12 +213,12 @@ class PRMPlanner(PlannerBase):
         direction = v2.coord - v1.coord
 
         # figure the number of points, essentially the line length
-        # TODO: should delegate this test to the OccGrid object and do it
-        # world units
+        # The sampling density is in cells, while graph edges are in world units.
         if npoints is None:
             length = float(np.linalg.norm(direction))
             if self._collision_step is None:
-                npoints = int(round(length))
+                assert self.occgrid is not None
+                npoints = round(length / self.occgrid.cellsize)
             else:
                 assert self.occgrid is not None
                 step = self._collision_step * self.occgrid.cellsize

@@ -8,6 +8,7 @@ import numpy as np
 import roboticstoolbox as rtb
 from roboticstoolbox import Link, ETS, ET, Robot
 from spatialmath import SE3
+import spatialgeometry as sg
 import unittest
 from copy import deepcopy
 
@@ -98,6 +99,17 @@ class TestBaseRobot(unittest.TestCase):
         self.assertTrue(robot2._hasdynamics)
         self.assertTrue(robot._hasgeometry)
         self.assertTrue(robot._hascollision)
+
+    def test_hasgeometry_planar(self):
+        # Link2 is a BaseLink, not a Link: a planar robot whose links have
+        # geometry must still report it, as a bool
+        geom = [sg.Cuboid([1, 1, 1])]
+        robot = rtb.Robot2([rtb.Link2(rtb.ETS2(rtb.ET2.R()), geometry=geom)])
+        self.assertIs(robot._hasgeometry, True)
+        self.assertTrue(robot.hasgeometry)
+
+        bare = rtb.Robot2(rtb.ETS2(rtb.ET2.R()))
+        self.assertIs(bare._hasgeometry, False)
 
     def test_init10(self):
 
