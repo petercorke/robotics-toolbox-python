@@ -16,7 +16,13 @@ from warnings import warn
 
 import numpy as np
 import spatialmath.base as smb
-from spatialgeometry import CollisionShape, Cylinder, Shape
+from spatialgeometry import (
+    CollisionShape,
+    CollisionShapeGroup,
+    Cylinder,
+    SceneNode,
+    Shape,
+)
 from spatialmath import (
     SE2,
     SE3,
@@ -1383,20 +1389,117 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return d, p1, p2
 
-    def iscollided(self, q: Any, shape: Shape, skip: bool = False) -> bool:
+    def isselfcollided(self, q: ArrayLike | None = None, skip: bool = False) -> bool:
+        """
+        Check for collisions between non-adjacent links of this robot
+
+        :param q: joint configuration, defaults to the robot's current ``q``
+        :type q: array_like(n)
+        :param skip: use the existing world transforms instead of updating them
+            from ``q``, defaults to False
+        :returns: True if any non-adjacent link pair is in collision
+        :raises ValueError: the model has no collision geometry, or ``q`` is
+            not a single finite joint configuration
+
+        Checks the collision geometry of the robot and all its grippers.
+        Shapes attached to the same link, and links connected directly by a
+        parent-child relationship, are not tested against each other. Links
+        in separate branches are tested, including siblings and gripper links.
+        Touching counts as a collision, as in :meth:`iscollided`.
+
+        Each gripper uses its own current joint configuration. The robot's
+        stored joint configuration is not changed. With ``skip=True``, ``q``
+        is ignored and the caller must have updated all world transforms.
+
+        Collision checking requires the optional ``coal`` dependency. A model
+        with only visual geometry cannot be checked; collision geometry must
+        be supplied explicitly. Only pairs with geometry are checked, so a
+        False result does not establish clearance for links without geometry.
+
+        :seealso: :meth:`iscollided` :meth:`closest_point`
+        """
+
+        def collision_shapes(node: SceneNode) -> list[CollisionShape]:
+            # Groups may be nested or empty; only concrete collision shapes
+            # provide geometry that the collision engine can test.
+            if isinstance(node, CollisionShape) and not isinstance(
+                node, CollisionShapeGroup
+            ):
+                return [node]
+            return [
+                shape
+                for child in node.scene_children
+                for shape in collision_shapes(child)
+            ]
+
+        # Gripper links are stored separately from the main kinematic chain.
+        links = [*self.links, *(link for g in self.grippers for link in g.links)]
+        geometries = [(link, collision_shapes(link.collision)) for link in links]
+        geometries = [(link, shapes) for link, shapes in geometries if shapes]
+        if not geometries:
+            raise ValueError(f"Robot {self.name!r} has no collision geometry")
+
+        if not skip:
+            configuration = self.q if q is None else getvector(q, self.n)
+            if configuration.ndim != 1 or not np.all(np.isfinite(configuration)):
+                raise ValueError("q must be a single finite joint configuration")
+            # The scene update path relies on the optional C extension. Use FK
+            # directly so collision checking also works with the Python facade,
+            # and keep each collision group's local placement intact.
+            frames = self.fkine_all(configuration)
+
+            def update_collision(node: SceneNode, parent: SE3) -> None:
+                pose = parent * SE3(node.T)
+                # Coal reads the cached world pose. Keep the local transform
+                # unchanged so repeated queries do not accumulate transforms.
+                node._wT[:] = pose.A
+                node._wq[:] = smb.r2q(pose.R, order="xyzs")
+                for child in node.scene_children:
+                    update_collision(child, pose)
+
+            for link, _ in geometries:
+                update_collision(link.collision, frames[link.number])
+
+        for i, (link, shapes) in enumerate(geometries):
+            # Visit each unordered pair once. Adjacency is determined by the
+            # link tree, since consecutive list entries can belong to branches.
+            for other, other_shapes in geometries[i + 1 :]:
+                if link.parent is other or other.parent is link:
+                    continue
+                for shape in shapes:
+                    for other_shape in other_shapes:
+                        if shape.iscollided(other_shape):
+                            return True
+        return False
+
+    def iscollided(
+        self, q: ArrayLike | None, shape: Shape | Robot, skip: bool = False
+    ) -> bool:
         """
         Check if the robot is in collision with a shape
 
-        :param shape: The shape to compare distance to
+        :param q: joint configuration, or None for the current configuration
+        :param shape: the external shape to check, or this robot itself for
+            self-collision checking
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: True if shapes have collided
 
-        ``iscollided(shape)`` checks if this robot and shape have collided
+        ``robot.iscollided(q, shape)`` checks for collision with an external
+        shape. ``robot.iscollided(q, robot)`` calls :meth:`isselfcollided`.
 
+        :seealso: :meth:`isselfcollided` :meth:`closest_point`
         """
 
+        if isinstance(shape, Robot):
+            if shape is not self:
+                raise TypeError("shape must be an external Shape or this robot itself")
+            return self.isselfcollided(q, skip=skip)
+
         if not skip:
+            # The compiled scene update requires a floating-point joint vector.
+            if q is not None:
+                q = getvector(q, self.n)
             self._update_link_tf(q)
             self.update()
             shape.update()
@@ -1413,17 +1516,23 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return False
 
-    def collided(self, q: Any, shape: Shape, skip: bool = False) -> bool:
+    def collided(
+        self, q: ArrayLike | None, shape: Shape | Robot, skip: bool = False
+    ) -> bool:
         """
-        Check if the robot is in collision with a shape
+        Deprecated alias for :meth:`iscollided`
 
-        :param shape: The shape to compare distance to
+        :param q: joint configuration, or None for the current configuration
+        :param shape: the external shape to check, or this robot itself for
+            self-collision checking
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: True if shapes have collided
 
-        ``collided(shape)`` checks if this robot and shape have collided
+        ``robot.collided(q, shape)`` issues a warning and returns the result
+        of :meth:`iscollided`.
 
+        :seealso: :meth:`iscollided` :meth:`isselfcollided`
         """
 
         warn("method collided is deprecated, use iscollided instead", FutureWarning)
