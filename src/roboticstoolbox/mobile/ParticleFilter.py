@@ -490,7 +490,16 @@ class ParticleFilter:
         #     # anim.add()
         # # anim.close()
 
-    def _step(self):
+    def _step(self) -> None:
+        """Advance the simulation and estimate the current particle cloud.
+
+        Heading uses the circular mean and circular standard deviation.
+        The moments describe the equally weighted cloud after resampling,
+        when an observation is available.  A zero mean resultant does not
+        define a unique heading; SpatialMath's angular mean then selects a
+        representative.
+        Heading dispersion is unbounded as the mean resultant tends to zero.
+        """
 
         # fprintf('---- step\n')
         odo = self.robot.step(animate=self._animate)  # move the robot
@@ -507,14 +516,13 @@ class ParticleFilter:
 
             self._select()
 
-        # our estimate is simply the mean of the particles
-        x_est = self.x.mean(axis=0)
-        std_est = self.x.std(axis=0)
-
-        # std is more complex for angles, need to account for 2pi wrap
-        std_est[2] = np.sqrt(np.sum(smb.angdiff(self.x[:, 2], x_est[2]) ** 2)) / (
-            self.nparticles - 1
-        )
+        # Cartesian moments are linear; heading moments are circular.
+        x_est = np.r_[self.x[:, :2].mean(axis=0), smb.angle_mean(self.x[:, 2])]
+        # Centre headings before computing their spread to reduce roundoff.
+        std_est = np.r_[
+            self.x[:, :2].std(axis=0),
+            smb.angle_std(smb.angdiff(self.x[:, 2], x_est[2])),
+        ]
 
         # display the updated particles
         # set(self.h, 'Xdata', self.x(:,1), 'Ydata', self.x(:,2), 'Zdata', self.x(:,3))
@@ -663,15 +671,18 @@ class ParticleFilter:
         """
         return np.array([h.xest[:3] for h in self._history])
 
-    def get_std(self):
+    def get_std(self) -> np.ndarray:
         r"""
         Get standard deviation of particles
 
-        :return: standard deviation of vehicle position estimate
-        :rtype: ndarray(n,2)
+        :return: dispersion of position and heading estimates, shape (n, 3)
+        :rtype: ndarray(n,3)
 
-        Return the standard deviation :math:`(\sigma_x, \sigma_y)` of the
-        particle cloud at each time step.
+        Return the population standard deviation of position and circular
+        standard deviation of heading
+        :math:`(\sigma_x, \sigma_y, \sigma_\theta)` of the equally weighted
+        particle cloud at each time step.  Heading dispersion is in radians
+        and is unbounded as the mean resultant tends to zero.
 
         :seealso: :meth:`get_xyt`
         """
