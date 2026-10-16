@@ -385,10 +385,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             # Jindex set on all, check they are unique and contiguous
             if check_jindex:
                 jset = set(range(n))
+                jindices = {link.jindex for link in links if link.isjoint}
                 for link in links:
                     if link.isjoint and link.jindex not in jset:
+                        hint = ""
+                        if jindices == set(range(1, n + 1)):
+                            hint = (
+                                f"; joint indices count from zero, but these are"
+                                f" 1 to {n}.  Joint names that count from one,"
+                                " such as 'A1', need a trailing underscore,"
+                                " 'A1_', to be numbered from zero"
+                            )
                         raise ValueError(
-                            f"joint index {link.jindex} was repeated or out of range"
+                            f"joint index {link.jindex} was repeated or out of"
+                            f" range{hint}"
                         )
                     jset -= set([link.jindex])
                 if len(jset) > 0:  # pragma nocover  # is impossible
