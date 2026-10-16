@@ -1,7 +1,8 @@
 import math
 import warnings
 from collections import namedtuple
-
+from collections.abc import Callable
+from typing import Literal
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
@@ -336,6 +337,11 @@ def quintic(
         time scaling is based on the first and last element. The returned
         trajectory retains the supplied time vector.
 
+    .. versionchanged:: 1.5.0
+        Accurate for long and short durations, see :func:`quintic_func`.  A time
+        vector, or an integer, giving fewer than two samples raises
+        ``ValueError``; it previously returned the mean of ``q0`` and ``qf``.
+
     :References:
 
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
@@ -351,6 +357,8 @@ def quintic(
         istime = True
     else:
         raise TypeError("bad argument for time, must be int or vector")
+    if len(t) < 2:
+        raise ValueError("a trajectory needs at least two time samples")
     tf = t[-1] - t[0]
 
     polyfunc = quintic_func(q0, qf, tf, qd0, qdf)
@@ -364,63 +372,168 @@ def quintic(
     return Trajectory("quintic", t, p, pd, pdd, istime)
 
 
-def quintic_func(q0, qf, T, qd0=0, qdf=0):
+def quintic_func(
+    q0: float,
+    qf: float,
+    T: float,
+    qd0: float = 0,
+    qdf: float = 0,
+    method: Literal["lstsq", "hermite"] = "lstsq",
+) -> Callable[[ArrayLike], tuple[ArrayLike, ArrayLike, ArrayLike]]:
     r"""
     Quintic scalar polynomial as a function
 
     :param q0: initial value
-    :type q0: float
     :param qf: final value
-    :type qf: float
-    :param T: trajectory time
-    :type T: float
+    :param T: trajectory duration, a finite non-zero value
     :param qd0: initial velocity, defaults to 0
-    :type q0: float, optional
     :param qdf: final velocity, defaults to 0
-    :type q0: float, optional
-    :return: polynomial function :math:`f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))`
-    :rtype: callable
+    :param method: how the polynomial is found, ``"lstsq"`` (default) solves the
+        linear system, ``"hermite"`` uses the closed-form Hermite basis
+    :returns: polynomial function :math:`f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))`
+    :raises ValueError: ``T`` is zero or not finite, ``method`` is unknown, or an
+        endpoint value is not a scalar
 
     Returns a function which computes the specific quintic polynomial, and its
-    derivatives, as described by the parameters.
+    derivatives, as described by the parameters.  Velocity and acceleration are
+    with respect to the units of ``T``, and the acceleration is zero at both ends.
+
+    The polynomial :math:`q(t) = a_5 t^5 + a_4 t^4 + a_3 t^3 + a_2 t^2 + a_1 t + a_0`
+    is found from the position, velocity and acceleration at the start and end
+
+    .. math::
+
+        \begin{pmatrix}
+            0 & 0 & 0 & 0 & 0 & 1 \\
+            T^5 & T^4 & T^3 & T^2 & T & 1 \\
+            0 & 0 & 0 & 0 & 1 & 0 \\
+            5T^4 & 4T^3 & 3T^2 & 2T & 1 & 0 \\
+            0 & 0 & 0 & 2 & 0 & 0 \\
+            20T^3 & 12T^2 & 6T & 2 & 0 & 0
+        \end{pmatrix}
+        \begin{pmatrix} a_5 \\ a_4 \\ a_3 \\ a_2 \\ a_1 \\ a_0 \end{pmatrix}
+        =
+        \begin{pmatrix} q_0 \\ q_f \\ \dot{q}_0 \\ \dot{q}_f \\ 0 \\ 0 \end{pmatrix}
+
+    This matrix is badly scaled, since its entries range from 1 to :math:`T^5`.
+    Its condition number is about 10\ :sup:`3` for :math:`T=1` but 10\ :sup:`15`
+    for :math:`T=1000` and 10\ :sup:`16` for :math:`T=0.001`, at which point a
+    least-squares solver silently discards a boundary condition: the initial
+    position of ``quintic(1, 2, 1000)`` came out near zero rather than one.
+
+    For ``method="lstsq"`` the system is therefore solved in normalized time
+    :math:`\tau = t/T`, for which the matrix above is used with :math:`T=1`.  It
+    is the same for every trajectory, with a condition number of 762, and the
+    velocity boundary values are multiplied by :math:`T`.  The derivatives are
+    divided by :math:`T` and :math:`T^2` to return to the units of ``t``.
+
+    For ``method="hermite"`` the solution of the same system is written down
+    directly, as a sum of Hermite basis polynomials in :math:`\tau`.  It is
+    equivalent, and is useful as an independent check.
 
     Example:
 
     .. runblock:: pycon
 
         >>> from roboticstoolbox import quintic_func
-        >>> f = quintic_func(1, 2, 5)
+        >>> f = quintic_func(1, 2, 1000)
         >>> f(0)
-        >>> f(5)
-        >>> f(2.5)
+        >>> f(1000)
+        >>> f(500)
+
+    .. note:: The Hermite form is due to Afloat16, who found the loss of
+        accuracy for long and short durations in PR #736.
+
+    .. versionchanged:: 1.5.0
+        The system is solved in normalized time.  Previously the result was
+        silently wrong for long and short durations, for example the initial
+        value of ``quintic_func(1, 2, 1000)`` was close to zero.  Added
+        ``method``.  A zero or non-finite ``T`` raises ``ValueError``, where it
+        previously gave a degenerate result.
 
     :seealso: :func:`quintic` :func:`trapezoidal_func`
     """
+    if method not in ("lstsq", "hermite"):
+        raise ValueError(f"unknown method {method!r}, must be 'lstsq' or 'hermite'")
+    if not np.isfinite(T) or T == 0:
+        raise ValueError("trajectory duration must be finite and non-zero")
+    boundary = np.r_[q0, qf, qd0, qdf]
+    if boundary.shape != (4,):
+        raise ValueError("q0, qf, qd0 and qdf must be scalars")
 
-    # solve for the polynomial coefficients using least squares
+    if method == "hermite":
+        return _quintic_hermite_func(q0, qf, T, qd0, qdf)
+
+    # solve for the polynomial coefficients in normalized time, tau = t / T,
+    # where the matrix is that of the docstring with T = 1
     # fmt: off
-    X = [
-        [ 0.0,          0.0,         0.0,        0.0,     0.0,  1.0],
-        [ T**5,         T**4,        T**3,       T**2,    T,    1.0],
-        [ 0.0,          0.0,         0.0,        0.0,     1.0,  0.0],
-        [ 5.0 * T**4,   4.0 * T**3,  3.0 * T**2, 2.0 * T, 1.0,  0.0],
-        [ 0.0,          0.0,         0.0,        2.0,     0.0,  0.0],
-        [20.0 * T**3,  12.0 * T**2,  6.0 * T,    2.0,     0.0,  0.0],
-    ]
+    X = np.array([
+        [ 0.0,   0.0,   0.0,  0.0,  0.0,  1.0],
+        [ 1.0,   1.0,   1.0,  1.0,  1.0,  1.0],
+        [ 0.0,   0.0,   0.0,  0.0,  1.0,  0.0],
+        [ 5.0,   4.0,   3.0,  2.0,  1.0,  0.0],
+        [ 0.0,   0.0,   0.0,  2.0,  0.0,  0.0],
+        [20.0,  12.0,   6.0,  2.0,  0.0,  0.0],
+    ])
     # fmt: on
-    coeffs, resid, rank, s = np.linalg.lstsq(
-        X, np.r_[q0, qf, qd0, qdf, 0, 0], rcond=None
-    )
+    # velocities with respect to tau are T times those with respect to t
+    coeffs = np.linalg.solve(X, np.r_[q0, qf, qd0 * T, qdf * T, 0, 0])
 
     # coefficients of derivatives
     coeffs_d = coeffs[0:5] * np.arange(5, 0, -1)
     coeffs_dd = coeffs_d[0:4] * np.arange(4, 0, -1)
 
-    return lambda x: (
-        np.polyval(coeffs, x),
-        np.polyval(coeffs_d, x),
-        np.polyval(coeffs_dd, x),
-    )
+    def polynomial(x: ArrayLike) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+        tau = np.asarray(x) / T
+        return (
+            np.polyval(coeffs, tau),
+            np.polyval(coeffs_d, tau) / T,
+            np.polyval(coeffs_dd, tau) / T**2,
+        )
+
+    return polynomial
+
+
+def _quintic_hermite_func(
+    q0: float, qf: float, T: float, qd0: float, qdf: float
+) -> Callable[[ArrayLike], tuple[ArrayLike, ArrayLike, ArrayLike]]:
+    """
+    Quintic scalar polynomial using a Hermite basis
+
+    The polynomial is constructed and evaluated in normalized time to avoid
+    ill-conditioning for short or long durations.  The derivatives are factored
+    so that zero endpoint acceleration is not lost through polynomial
+    cancellation.  Contributed by Afloat16 in PR #736.
+    """
+    # velocities with respect to normalized time
+    v0 = qd0 * T
+    vf = qdf * T
+    delta = qf - q0
+
+    def polynomial(x: ArrayLike) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+        tau = np.asarray(x, dtype=float) / T
+        remaining = 1 - tau
+        blend = tau**3 * (10 + tau * (-15 + 6 * tau))
+        return (
+            q0 * (1 - blend)
+            + qf * blend
+            + v0 * tau * remaining**3 * (1 + 3 * tau)
+            - vf * tau**3 * remaining * (4 - 3 * tau),
+            (
+                30 * delta * tau**2 * remaining**2
+                + v0 * remaining**2 * (1 + 2 * tau - 15 * tau**2)
+                + vf * tau**2 * (1 + 2 * remaining - 15 * remaining**2)
+            )
+            / T,
+            12
+            * tau
+            * remaining
+            * (5 * delta * (1 - 2 * tau) - v0 * (3 - 5 * tau) - vf * (2 - 5 * tau))
+            / T
+            / T,
+        )
+
+    return polynomial
 
 
 # -------------------------------------------------------------------------- #

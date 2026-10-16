@@ -114,7 +114,10 @@ class TestPlanners(unittest.TestCase):
         path, status = rs.query(start, goal)
 
         self.assertIsInstance(path, np.ndarray)
-        self.assertEqual(path.shape, (65, 3))
+        # Keep the terminal pose, whose x coordinate is zero in the local frame.
+        self.assertEqual(path.shape, (66, 3))
+        nt.assert_allclose(path[0], start, atol=1e-12)
+        nt.assert_allclose(path[-1], goal, atol=1e-12)
         self.assertEqual(status.__class__.__name__, "ReedsSheppStatus")
         self.assertTrue(hasattr(status, "segments"))
         self.assertTrue(hasattr(status, "length"))
