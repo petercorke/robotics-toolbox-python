@@ -19,8 +19,13 @@ import numpy as np
 
 
 def jsingu(J: Any) -> None:
+    """Print dependencies using the original Jacobian column indices.
+
+    :param J: Jacobian matrix to analyse
+    """
 
     indep_columns = np.empty((J.shape[0], 0))
+    indep_indices: list[int] = []
     rank = 0
     for j in range(J.shape[1]):
         temp = np.column_stack((indep_columns, J[:, j]))
@@ -29,6 +34,7 @@ def jsingu(J: Any) -> None:
             # this column is independent
             rank = temp_rank
             indep_columns = temp
+            indep_indices.append(j)
 
         else:
             s = f"column {j} ="
@@ -39,7 +45,7 @@ def jsingu(J: Any) -> None:
                         s += " - "
                     elif i > 0:
                         s += " + "
-                    s += f"{abs(ci):.3g} column_{i}"
+                    s += f"{abs(ci):.3g} column_{indep_indices[i]}"
             print(s)
 
 

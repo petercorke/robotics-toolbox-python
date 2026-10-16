@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Tuple, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 from spatialmath import SE3
@@ -472,7 +472,7 @@ class IKSolver(ABC):
             reason=reason,
         )
 
-    def error(self, Te: NDArray, Tep: NDArray) -> Tuple[NDArray, float]:
+    def error(self, Te: NDArray, Tep: NDArray) -> tuple[NDArray, float]:
         r"""
         Calculates the error between Te and Tep
 
@@ -498,9 +498,7 @@ class IKSolver(ABC):
         return e, E
 
     @abstractmethod
-    def step(
-        self, ets: ETS, Tep: NDArray, q: NDArray
-    ) -> Tuple[float, NDArray]:
+    def step(self, ets: ETS, Tep: NDArray, q: NDArray) -> tuple[float, NDArray]:
         """
         Abstract step method
 
@@ -850,9 +848,7 @@ class IK_NR(IKSolver):
         if self.km > 0.0:
             self.name += " Jm"
 
-    def step(
-        self, ets: ETS, Tep: NDArray, q: NDArray
-    ) -> Tuple[float, NDArray]:
+    def step(self, ets: ETS, Tep: NDArray, q: NDArray) -> tuple[float, NDArray]:
         r"""
         Performs a single iteration of the Newton-Raphson optimisation method
 
@@ -1248,9 +1244,7 @@ class IK_GN(IKSolver):
         if self.km > 0.0:
             self.name += " Jm"
 
-    def step(
-        self, ets: ETS, Tep: NDArray, q: NDArray
-    ) -> Tuple[float, NDArray]:
+    def step(self, ets: ETS, Tep: NDArray, q: NDArray) -> tuple[float, NDArray]:
         r"""
         Performs a single iteration of the Gauss-Newton optimisation method
 
@@ -1430,9 +1424,7 @@ class IK_QP(IKSolver):
         if self.km > 0.0:
             self.name += " Jm"
 
-    def step(
-        self, ets: ETS, Tep: NDArray, q: NDArray
-    ) -> Tuple[float, NDArray]:
+    def step(self, ets: ETS, Tep: NDArray, q: NDArray) -> tuple[float, NDArray]:
         r"""
         Performs a single iteration of the QP optimisation method
 
@@ -1535,16 +1527,17 @@ class IK_QP(IKSolver):
             Ain_l = np.zeros((ets.n, ets.n))
             Bin_l = np.zeros(ets.n)
 
-            for i in range(ets.n):
+            for i, jindex in enumerate(ets.jindices):
                 ql0 = ets.qlim[0, i]
                 ql1 = ets.qlim[1, i]
+                qi = q[jindex]
 
-                if ql1 - q[i] <= self.pi[i]:
-                    Bin_l[i] = ((ql1 - q[i]) - self.ps) / (self.pi[i] - self.ps)
+                if ql1 - qi <= self.pi[i]:
+                    Bin_l[i] = ((ql1 - qi) - self.ps) / (self.pi[i] - self.ps)
                     Ain_l[i, i] = 1
 
-                if q[i] - ql0 <= self.pi[i]:
-                    Bin_l[i] = -(((ql0 - q[i]) + self.ps) / (self.pi[i] - self.ps))
+                if qi - ql0 <= self.pi[i]:
+                    Bin_l[i] = -(((ql0 - qi) + self.ps) / (self.pi[i] - self.ps))
                     Ain_l[i, i] = -1
 
             Ain[: ets.n, : ets.n] = Ain_l
@@ -1565,10 +1558,10 @@ class IK_QP(IKSolver):
         if xd is None:  # pragma: nocover
             raise np.linalg.LinAlgError("QP Unsolvable")
 
-        q += xd[: ets.n]
+        q[ets.jindices] += xd[: ets.n]
 
         _, E = self.error(ets.eval(q), Tep)
-        return E, q
+        return E, q[ets.jindices]
 
 
 if __name__ == "__main__":  # pragma nocover
