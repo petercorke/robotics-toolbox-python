@@ -160,15 +160,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
             if link.hasdynamics:
                 self._hasdynamics = True
-            if link.geometry:
-                # an empty list, not True (replaced just below if it has geometry)
-                self._hasgeometry = []  # type: ignore[assignment]
+            if len(link.geometry) > 0:
+                self._hasgeometry = True
             if link.collision:
                 self._hascollision = True
-
-            if isinstance(link, Link):
-                if len(link.geometry) > 0:
-                    self._hasgeometry = True
 
             # Detect symbolic (e.g. SymPy) model parameters regardless of
             # whether the caller remembered to pass symbolic=True -- see

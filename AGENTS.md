@@ -40,3 +40,24 @@ Part of the RVC ecosystem. **Read [rvc-ecosystem/AGENTS.md](https://github.com/p
   have errors; when you annotate a module, delete its entry and keep it at zero errors. Do not add
   new entries. `backends/Dynamixel` and `backends/ROS` are unmaintained sketches with no tests and
   are excluded for good: do not spend a PR annotating them.
+
+## If you are an AI assistant preparing a contribution
+
+- Read `.github/CONTRIBUTING.md`, in particular "What the checks mean". Codacy is advisory:
+  it reports `assert` in tests as high-severity security issues, and you should not rewrite
+  tests or code to satisfy it. The required checks are `All tests passed` and the PR title.
+- Do not add files at the repository root. Documentation goes under `docs/source/` and the
+  design principles are in `desiderata.md`.
+- A file name mentioned in an Issue or comment may be a maintainer's private working file that
+  is not in the repository. Do not create a file of that name, ask in the Issue instead.
+- **Say so in the PR.** If an AI assistant wrote or substantially helped with the change,
+  state that in the PR description, and which tool, so the reviewer knows what to look for. You,
+  the human, remain responsible for what you submit and should have read the diff.
+- **Sign the commits.** An AI-assisted commit ends with a `Co-Authored-By:` trailer naming the
+  tool and model, as Claude Code does by default, and the PR description ends with the tool's
+  attribution line. The repository squash-merges, so the PR description is what survives; keep
+  the disclosure there as well as in the commits.
+- Branch names are `type/short-description`, using the same types as the commit and PR title
+  (`fix/`, `feat/`, `docs/`, `chore/`, `refactor/`, `test/`).
+- Keep the PR to the one Issue or fix, and say in the description what you ran and what you
+  could not run.

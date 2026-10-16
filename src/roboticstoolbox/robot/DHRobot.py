@@ -1130,6 +1130,10 @@ class DHRobot(Robot):
 
             J[:, j] = np.r_[d, delta]
 
+            if L[j].isflip:
+                # the joint variable is -q, so the velocity is reversed
+                J[:, j] = -J[:, j]
+
             if self.mdh != 0:
                 # modified DH convention
                 U = L[j].A(q[j]).A @ U
