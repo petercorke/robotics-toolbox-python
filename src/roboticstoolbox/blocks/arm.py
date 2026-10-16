@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # import matplotlib.pyplot as plt
 from math import cos, pi, sin
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -673,6 +674,7 @@ class CTraj(SourceBlock):
             self.trapezoidalfunc = trapezoidal_func(0.0, 1.0, self.T)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
+        s: Any
         if self.trapezoidal:
             s = self.trapezoidalfunc(t)[0]  # get the position from the trapezoidal function
         else:
@@ -818,6 +820,11 @@ class Trapezoidal(SourceBlock):
     Scalar trapezoidal trajectory that varies from ``q0`` to ``qf`` over the
     simulation period.
 
+    .. versionchanged:: 1.5.0
+        The outputs are scalars, as the table says.  They were arrays with one
+        element, because :func:`trapezoidal_func` returned arrays for a scalar
+        time.
+
     :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
     """
 
@@ -904,6 +911,11 @@ class Traj(FunctionBlock):
     - a linear function from 0 to ``T`` or maximum simulation time if `time` is True, or
     - the value [0, 1] given on inport port if `time` is False
 
+    .. versionchanged:: 1.5.0
+        An unknown ``traj`` raises ``ValueError`` when the block is created.  It
+        previously failed with an ``UnboundLocalError`` when the simulation
+        started.  The outputs are unchanged.
+
     :seealso: :func:`spatialmath.base.mtraj`
     """
 
@@ -957,6 +969,10 @@ class Traj(FunctionBlock):
         self.yf = yfv
         self.time = time
         self.T = T
+        if traj not in ("trapezoidal", "quintic"):
+            raise ValueError(
+                f"unknown traj {traj!r}, must be 'trapezoidal' or 'quintic'"
+            )
         self.traj = traj
 
         self.outport_names(("y", "yd", "ydd"))
@@ -966,12 +982,7 @@ class Traj(FunctionBlock):
         #     assert self.x[0] <= 0, "interpolation not defined for t=0"
         #     assert self.x[-1] >= simstate.T, "interpolation not defined for t=T"
 
-        if self.traj == "trapezoidal":
-            trajfunc = trapezoidal_func
-        elif self.traj == "quintic":
-            trajfunc = quintic_func
-
-        self.trajfuncs = []
+        self.trajfuncs: list[Callable[[Any], tuple[Any, Any, Any]]] = []
 
         if self.time:
             # time based
@@ -985,7 +996,10 @@ class Traj(FunctionBlock):
         self.xmax = xmax
 
         for i in range(len(self.y0)):
-            self.trajfuncs.append(trajfunc(self.y0[i], self.yf[i], xmax))
+            if self.traj == "trapezoidal":
+                self.trajfuncs.append(trapezoidal_func(self.y0[i], self.yf[i], xmax))
+            else:
+                self.trajfuncs.append(quintic_func(self.y0[i], self.yf[i], xmax))
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         if not self.time:
