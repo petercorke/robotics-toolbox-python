@@ -2,7 +2,7 @@ import math
 import warnings
 from collections import namedtuple
 from collections.abc import Callable
-from typing import Any, Literal, Protocol, cast
+from typing import Any, Literal, overload
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -674,24 +674,108 @@ def trapezoidal(
     return traj
 
 
-class TrapezoidalFunc(Protocol):
-    """
-    A trapezoidal profile function, as returned by :func:`trapezoidal_func`
+class TrapezoidalProfile:
+    r"""
+    Trapezoidal scalar profile
 
-    Called with a time, or a vector of times, it returns position, velocity and
-    acceleration.  It also has the attributes ``tb``, the blend duration, and
-    ``V``, the velocity of the linear segment.
+    :param q0: initial value
+    :param qf: final value
+    :param T: duration
+    :param V: velocity of the linear segment, defaults to 1.5 times the average
+        velocity :math:`(q_f - q_0) / T`
+    :raises ValueError: ``V`` is too small or too big for a solution to exist
+
+    An object that is called with a time, or an array of times, and returns the
+    position, velocity and acceleration :math:`(q(t), \dot{q}(t), \ddot{q}(t))`
+    of a trapezoidal velocity profile: a parabolic blend, a linear segment, and
+    a parabolic blend.  A scalar time gives scalar values, an array of times
+    gives arrays of the same shape.
+
+    The object has attributes:
+
+    - ``tb``, the duration of each blend
+    - ``V``, the velocity of the linear segment, signed
+
+    Instances are created by :func:`trapezoidal_func`.
     """
 
     tb: float
     V: float
 
+    def __init__(self, q0: float, qf: float, T: float, V: float | None = None) -> None:
+        if V is None:
+            # if velocity not specified, compute it
+            vel = (qf - q0) / T * 1.5
+        else:
+            vel = abs(V) * float(np.sign(qf - q0))
+            if abs(vel) < (abs(qf - q0) / T):
+                raise ValueError("V too small")
+            elif abs(vel) > (2 * abs(qf - q0) / T):
+                raise ValueError("V too big")
+
+        if vel == 0:
+            self.tb = np.inf
+            self._a = 0.0
+        else:
+            self.tb = (q0 - qf + vel * T) / vel
+            self._a = vel / self.tb
+
+        self.V = vel
+        self._q0 = q0
+        self._qf = qf
+        self._T = T
+
+    @overload
+    def __call__(self, t: float) -> tuple[float, float, float]: ...
+
+    @overload
     def __call__(self, t: ArrayLike) -> tuple[NDArray, NDArray, NDArray]: ...
+
+    def __call__(self, t: Any) -> Any:
+        """
+        Evaluate the profile
+
+        :param t: time, or array of times
+        :return: position, velocity and acceleration, each with the shape of ``t``
+        """
+        q0, qf, T, V, tb, a = self._q0, self._qf, self._T, self.V, self.tb, self._a
+
+        times = np.asarray(t, dtype=float)
+        p = np.empty(times.shape)
+        pd = np.empty(times.shape)
+        pdd = np.empty(times.shape)
+        for k, tk in enumerate(times.flat):
+            if tk < 0:
+                pk, pdk, pddk = q0, 0.0, 0.0
+            elif tk <= tb:
+                # initial blend
+                pk = q0 + a / 2 * tk**2
+                pdk = a * tk
+                pddk = a
+            elif tk <= (T - tb):
+                # linear motion
+                pk = (qf + q0 - V * T) / 2 + V * tk
+                pdk = V
+                pddk = 0.0
+            elif tk <= T:
+                # final blend
+                pk = qf - a / 2 * T**2 + a * T * tk - a / 2 * tk**2
+                pdk = a * T - a * tk
+                pddk = -a
+            else:
+                pk, pdk, pddk = qf, 0.0, 0.0
+            p.flat[k] = pk
+            pd.flat[k] = pdk
+            pdd.flat[k] = pddk
+
+        if times.ndim == 0:
+            return p[()], pd[()], pdd[()]
+        return p, pd, pdd
 
 
 def trapezoidal_func(
     q0: float, qf: float, T: float, V: float | None = None
-) -> TrapezoidalFunc:
+) -> TrapezoidalProfile:
     r"""
     Trapezoidal scalar profile as a function
 
@@ -700,10 +784,21 @@ def trapezoidal_func(
     :param T: maximum time
     :param V: velocity of linear segment, defaults to 1.5 times the average
     :return: trapezoidal profile function :math:`f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))`
+    :rtype: :class:`TrapezoidalProfile`
     :raises ValueError: ``V`` is too small or too big for a solution to exist
 
     Returns a function which computes the specific trapezoidal profile, and its
-    derivatives, as described by the parameters.
+    derivatives, as described by the parameters.  The result is called with a
+    time, or an array of times, and has the attributes ``tb``, the blend
+    duration, and ``V``, the velocity of the linear segment.
+
+    A scalar time gives scalar values and an array of times gives arrays of the
+    same shape, as for :func:`quintic_func`.
+
+    .. versionchanged:: 1.5.0
+        A scalar time gives scalar values, it previously gave arrays with one
+        element.  The result is a :class:`TrapezoidalProfile` object, which is
+        called in the same way as the function it replaces.
 
     Example:
 
@@ -714,72 +809,9 @@ def trapezoidal_func(
         >>> f(0)
         >>> f(5)
         >>> f(2.5)
+        >>> f.tb
     """
-
-    if V is None:
-        # if velocity not specified, compute it
-        vel = (qf - q0) / T * 1.5
-    else:
-        vel = abs(V) * float(np.sign(qf - q0))
-        if abs(vel) < (abs(qf - q0) / T):
-            raise ValueError("V too small")
-        elif abs(vel) > (2 * abs(qf - q0) / T):
-            raise ValueError("V too big")
-
-    tb: float
-    a: float
-    if vel == 0:
-        tb = np.inf
-        a = 0.0
-    else:
-        tb = (q0 - qf + vel * T) / vel
-        a = vel / tb
-
-    def trapezoidalfunc(t: ArrayLike) -> tuple[NDArray, NDArray, NDArray]:
-
-        p: list[float] = []
-        pd: list[float] = []
-        pdd: list[float] = []
-
-        for tk in np.atleast_1d(np.asarray(t, dtype=float)):
-            pk: float
-            pdk: float
-            pddk: float
-            if tk < 0:
-                pk = q0
-                pdk = 0
-                pddk = 0
-            elif tk <= tb:
-                # initial blend
-                pk = q0 + a / 2 * tk**2
-                pdk = a * tk
-                pddk = a
-            elif tk <= (T - tb):
-                # linear motion
-                pk = (qf + q0 - vel * T) / 2 + vel * tk
-                pdk = vel
-                pddk = 0
-            elif tk <= T:
-                # final blend
-                pk = qf - a / 2 * T**2 + a * T * tk - a / 2 * tk**2
-                pdk = a * T - a * tk
-                pddk = -a
-            else:
-                pk = qf
-                pdk = 0
-                pddk = 0
-            p.append(pk)
-            pd.append(pdk)
-            pdd.append(pddk)
-        return (np.array(p), np.array(pd), np.array(pdd))
-
-    # return the function, but add some computed parameters as attributes
-    # as a way of returning extra values without a tuple return
-    func = cast(TrapezoidalFunc, trapezoidalfunc)
-    func.tb = tb
-    func.V = vel
-
-    return func
+    return TrapezoidalProfile(q0, qf, T, V)
 
 
 # -------------------------------------------------------------------------- #

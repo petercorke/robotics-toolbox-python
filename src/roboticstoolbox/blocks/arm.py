@@ -959,6 +959,10 @@ class Traj(FunctionBlock):
         self.yf = yfv
         self.time = time
         self.T = T
+        if traj not in ("trapezoidal", "quintic"):
+            raise ValueError(
+                f"unknown traj {traj!r}, must be 'trapezoidal' or 'quintic'"
+            )
         self.traj = traj
 
         self.outport_names(("y", "yd", "ydd"))
@@ -968,13 +972,7 @@ class Traj(FunctionBlock):
         #     assert self.x[0] <= 0, "interpolation not defined for t=0"
         #     assert self.x[-1] >= simstate.T, "interpolation not defined for t=T"
 
-        trajfunc: Callable[..., Any]
-        if self.traj == "trapezoidal":
-            trajfunc = trapezoidal_func
-        elif self.traj == "quintic":
-            trajfunc = quintic_func
-
-        self.trajfuncs = []
+        self.trajfuncs: list[Callable[[Any], tuple[Any, Any, Any]]] = []
 
         if self.time:
             # time based
@@ -988,7 +986,10 @@ class Traj(FunctionBlock):
         self.xmax = xmax
 
         for i in range(len(self.y0)):
-            self.trajfuncs.append(trajfunc(self.y0[i], self.yf[i], xmax))
+            if self.traj == "trapezoidal":
+                self.trajfuncs.append(trapezoidal_func(self.y0[i], self.yf[i], xmax))
+            else:
+                self.trajfuncs.append(quintic_func(self.y0[i], self.yf[i], xmax))
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         if not self.time:
