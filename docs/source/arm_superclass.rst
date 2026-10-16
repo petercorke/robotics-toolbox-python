@@ -11,6 +11,26 @@ Robot
 
 The various models :ref:`E Models` all subclass this class.
 
+Collision checking
+^^^^^^^^^^^^^^^^^^
+
+``robot.iscollided(q, shape)`` checks the robot against an external shape.
+``robot.isselfcollided(q)`` checks its own non-adjacent links, including gripper
+links; ``robot.iscollided(q, robot)`` is equivalent. Shapes on the same link and
+direct parent-child link pairs are excluded. Links in separate branches are
+checked, and touching counts as a collision.
+
+The checks use collision geometry, not visual geometry, and require the optional
+``coal`` dependency. A model without collision geometry raises ``ValueError``
+for self-collision checking. Links without collision geometry are omitted, so
+ensure the model represents all the parts that need checking. Many DH models
+provide kinematics and dynamics without collision geometry.
+
+Omitting ``q`` from ``isselfcollided`` uses the robot's current configuration.
+Grippers use their own current ``q``. The stored joint configurations are not
+changed. ``skip=True`` reuses existing world transforms and should only be used
+when the caller has already updated them.
+
 .. automodule:: roboticstoolbox.robot.Robot
    :members:
    :undoc-members:
