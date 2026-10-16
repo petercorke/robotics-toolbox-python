@@ -18,6 +18,8 @@ Only the first item below is checked automatically — the rest are a self-check
 - [ ] New/changed code is type-hinted with modern syntax (`X | Y`, `list[X]`, not `Union`/`Optional`/`List`)
 - [ ] Docstrings updated (reST style: `:param:`, `:returns:`; type hints in the signature cover types now, `:type:`/`:rtype:` are rarely needed)
 - [ ] PR is as small/focused as practical — if it tackles several unrelated things, consider splitting it so each can be reviewed and accepted independently
+- [ ] I understand that the Codacy check is advisory (it reports `assert` in tests as "high" security), only `All tests passed` and the PR title check are required — see [CONTRIBUTING](CONTRIBUTING.md)
+- [ ] If an AI assistant wrote or helped with this change, I have said so in the summary above, and I have read the diff myself
 - [ ] No test files, data files, or notebooks specific to your own project — PyPI has strict package size limits, and RTB is already split into a toolbox and a data package. Notebooks, if of general interest, should have output cleared before committing.
 
 <!-- Target branch is `main`. -->
