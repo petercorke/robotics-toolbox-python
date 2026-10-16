@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # import matplotlib.pyplot as plt
 from math import cos, pi, sin
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -673,6 +674,7 @@ class CTraj(SourceBlock):
             self.trapezoidalfunc = trapezoidal_func(0.0, 1.0, self.T)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
+        s: Any
         if self.trapezoidal:
             s = self.trapezoidalfunc(t)[0]  # get the position from the trapezoidal function
         else:
@@ -966,6 +968,7 @@ class Traj(FunctionBlock):
         #     assert self.x[0] <= 0, "interpolation not defined for t=0"
         #     assert self.x[-1] >= simstate.T, "interpolation not defined for t=T"
 
+        trajfunc: Callable[..., Any]
         if self.traj == "trapezoidal":
             trajfunc = trapezoidal_func
         elif self.traj == "quintic":

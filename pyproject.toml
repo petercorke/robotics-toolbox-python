@@ -372,7 +372,6 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.tools.trajectory",
     "roboticstoolbox.tools.urdf.tests.test_urdf",
     "roboticstoolbox.tools.DHFactor",
     "roboticstoolbox.robot.DHFactor",
