@@ -820,6 +820,11 @@ class Trapezoidal(SourceBlock):
     Scalar trapezoidal trajectory that varies from ``q0`` to ``qf`` over the
     simulation period.
 
+    .. versionchanged:: 1.5.0
+        The outputs are scalars, as the table says.  They were arrays with one
+        element, because :func:`trapezoidal_func` returned arrays for a scalar
+        time.
+
     :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
     """
 
@@ -905,6 +910,11 @@ class Traj(FunctionBlock):
 
     - a linear function from 0 to ``T`` or maximum simulation time if `time` is True, or
     - the value [0, 1] given on inport port if `time` is False
+
+    .. versionchanged:: 1.5.0
+        An unknown ``traj`` raises ``ValueError`` when the block is created.  It
+        previously failed with an ``UnboundLocalError`` when the simulation
+        started.  The outputs are unchanged.
 
     :seealso: :func:`spatialmath.base.mtraj`
     """
