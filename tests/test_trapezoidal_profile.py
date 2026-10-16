@@ -8,7 +8,6 @@ import pytest
 
 from roboticstoolbox import quintic_func, trapezoidal_func
 from roboticstoolbox.blocks.arm import Traj
-from roboticstoolbox.tools.trajectory import TrapezoidalProfile
 
 
 @pytest.mark.parametrize("builder", [quintic_func, trapezoidal_func])
@@ -25,6 +24,8 @@ def test_array_time_keeps_its_shape(builder, times) -> None:
 
 
 def test_trapezoidal_func_is_a_callable_object_with_attributes() -> None:
+    from roboticstoolbox.tools.trajectory import TrapezoidalProfile
+
     f = trapezoidal_func(0, 1, 2)
     nt.assert_equal(isinstance(f, TrapezoidalProfile), True)
     nt.assert_allclose(f.V, 0.75)  # 1.5 times the average velocity
