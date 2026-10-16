@@ -203,6 +203,11 @@ class RRTPlanner(PlannerBase):
             if path is None:
                 continue
 
+            # Reject overlong connections before transforming the vehicle at
+            # every path sample and testing its polygon against the map.
+            if pstatus.length > 6:
+                continue
+
             collision = False
             for config in path:
                 if self.map.iscollision(vehicle.polygon(config)):
@@ -210,10 +215,6 @@ class RRTPlanner(PlannerBase):
                     break
             if collision:
                 # print('collision')
-                continue
-
-            if pstatus.length > 6:
-                # print('too long')
                 continue
 
             # we have a valid configuration to add to the graph
