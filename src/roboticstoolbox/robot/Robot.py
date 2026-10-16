@@ -1497,6 +1497,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             return self.isselfcollided(q, skip=skip)
 
         if not skip:
+            # The compiled scene update requires a floating-point joint vector.
+            if q is not None:
+                q = getvector(q, self.n)
             self._update_link_tf(q)
             self.update()
             shape.update()

@@ -212,10 +212,24 @@ def test_default_configuration_and_repeated_queries() -> None:
 
 
 @skip_no_collision_checking
-def test_external_shape_queries_and_deprecated_alias() -> None:
+@pytest.mark.parametrize(
+    "q",
+    [
+        [0, 0],
+        (0, 0),
+        np.zeros(2, dtype=int),
+        np.zeros(2, dtype=np.float32),
+        np.zeros((2, 1)),
+        None,
+    ],
+    ids=["list", "tuple", "integer-array", "float32-array", "column-vector", "current"],
+)
+def test_external_shape_queries_and_deprecated_alias(q: ArrayLike | None) -> None:
     robot = chain()
-    assert robot.iscollided([0, 0], Sphere(0.1)) is True
-    assert robot.iscollided([0, 0], Sphere(0.1, pose=SE3.Tx(5))) is False
+    assert robot.iscollided(q, Sphere(0.1)) is True
+    assert robot.iscollided(q, Sphere(0.1, pose=SE3.Tx(5))) is False
+    with pytest.warns(FutureWarning, match="deprecated"):
+        assert robot.collided(q, Sphere(0.1)) is True
     assert robot.iscollided([0, np.pi], robot) is True
     with pytest.warns(FutureWarning, match="deprecated"):
         assert robot.collided([0, np.pi], robot) is True
