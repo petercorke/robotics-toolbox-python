@@ -299,17 +299,13 @@ def generate_local_course(
             directions,
         )
 
-    if len(path_x) <= 1:
-        return [], [], [], []
-
-    # remove unused data
-    while len(path_x) >= 1 and path_x[-1] == 0.0:
-        path_x.pop()
-        path_y.pop()
-        path_yaw.pop()
-        directions.pop()
-
-    return path_x, path_y, path_yaw, directions
+    # Zero is a valid coordinate, so trim by the last written sample index.
+    return (
+        path_x[: index + 1],
+        path_y[: index + 1],
+        path_yaw[: index + 1],
+        directions[: index + 1],
+    )
 
 
 def path_planning(

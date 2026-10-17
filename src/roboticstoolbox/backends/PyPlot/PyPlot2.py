@@ -17,6 +17,7 @@ import roboticstoolbox as rp
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
+from roboticstoolbox.tools.plot import set_window_title
 
 _mpl = False
 _ipy_display: Any = None
@@ -130,8 +131,9 @@ class PyPlot2(Connector):
         # Create a 2D axes
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_facecolor("white")
-        plt.get_current_fig_manager().set_window_title(  # type: ignore[union-attr]
-            f"Robotics Toolbox for Python (Figure {self.ax.figure.number})"  # type: ignore[union-attr]
+        set_window_title(
+            self.fig,
+            f"Robotics Toolbox for Python (Figure {self.ax.figure.number})",  # type: ignore[union-attr]
         )
 
         self.ax.set_xbound(-0.5, 0.5)

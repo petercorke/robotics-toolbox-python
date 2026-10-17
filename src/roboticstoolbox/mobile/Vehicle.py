@@ -13,6 +13,7 @@ from math import cos, pi, sin, tan
 from typing import Any, Callable, TypeAlias
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from matplotlib import animation
 from matplotlib.axes import Axes
@@ -26,6 +27,7 @@ from spatialmath import SE2, Polygon2, base
 from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehiclePolygon
 from roboticstoolbox.mobile.drivers import VehicleDriverBase
 from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
+from roboticstoolbox.tools.plot import set_window_title
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # what can be given as the control for a vehicle, see VehicleBase.control
@@ -56,7 +58,7 @@ def _isnotebook() -> bool:
 
 
 def _refresh_animation_frame(
-    fig: Figure | SubFigure | None, dt: float, pause: bool | None
+    fig: Figure | SubFigure | None, dt: float, pause: bool
 ) -> None:
     """
     Refresh animation for desktop and notebook backends.
@@ -763,13 +765,10 @@ class VehicleBase(ABC):
             self._ax.set_xlabel("x")
             self._ax.set_ylabel("y")
             self._ax.set_aspect("equal")
-            try:
-                # AttributeError is handled, for a backend without a manager
-                self._ax.figure.canvas.manager.set_window_title(  # type: ignore[union-attr]
-                    f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"  # type: ignore[union-attr]
-                )
-            except AttributeError:
-                pass
+            set_window_title(
+                self._ax.figure,
+                f"Robotics Toolbox for Python (Figure {self._ax.figure.number})",  # type: ignore[union-attr]
+            )
 
             self._animation.add(ax=self._ax)  # add vehicle animation to axis
             self._timer = plt.figtext(0.85, 0.95, "")  # display time counter
@@ -786,7 +785,7 @@ class VehicleBase(ABC):
         self,
         u: ControlLike | None = None,
         animate: bool = True,
-        pause: bool | None = True,
+        pause: bool = True,
     ) -> NDArray:
         r"""
         Step simulator by one time step (superclass)
@@ -1061,7 +1060,10 @@ class VehicleBase(ABC):
         """
         Plot xy-path from history
 
-        :param block: block until plot dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param args: positional arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
 
@@ -1072,14 +1074,16 @@ class VehicleBase(ABC):
         """
         xyt = self.x_hist
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_xyt(self, block: bool | None = None, **kwargs: Any) -> None:
         """
         Plot configuration vs time from history
 
-        :param block: block until plot dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
 
         The :math:`(x,y, \theta)` trajectory from the simulation history is plotted
@@ -1092,8 +1096,7 @@ class VehicleBase(ABC):
         plt.plot(t, xyt, **kwargs)
         plt.xlabel("time (s)")
         plt.legend(["x", "y", "$\\theta$"])
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
 
 # ========================================================================= #
@@ -1764,7 +1767,7 @@ class VehicleTrailer(VehicleBase):
         self,
         u: ControlLike | None = None,
         animate: bool = True,
-        pause: bool | None = True,
+        pause: bool = True,
     ) -> None:
         r"""
         Step simulator by one time step

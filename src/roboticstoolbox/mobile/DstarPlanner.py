@@ -11,14 +11,15 @@ from __future__ import annotations
 import heapq
 import math
 import warnings
+from collections.abc import Callable
 from enum import IntEnum, auto
-from typing import Any, Callable, NamedTuple
+from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from spatialmath.base.types import ArrayLike2
-from roboticstoolbox.mobile.OccGrid import OccupancyGrid
+
+from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
@@ -347,9 +348,10 @@ class DstarPlanner(PlannerBase):
     connected points in adjacent cells.
 
     The map is described by a 2D ``costmap`` whose elements indicate the cost
-    of traversing that cell.  The cost of diagonal traverse is :math:`\sqrt{2}`
-    the value of the cell.  An infinite cost indicates an untraversable cell
-    or obstacle.
+    per world unit. The cost of a step is the mean of the two cell costs
+    multiplied by the distance between their centres. An infinite cost indicates
+    an untraversable cell or obstacle. Endpoints and returned paths are in world
+    coordinates; endpoints are rounded to cell centres.
 
     Example:
 
@@ -382,8 +384,28 @@ class DstarPlanner(PlannerBase):
             self.costmap = np.where(self.occgrid.grid > 0, np.inf, 1)
         else:
             raise ValueError("unknown type of map")
+        # Keep the cost grid's geometry instead of treating world positions as indices.
+        geometry = costmap if isinstance(costmap, OccupancyGrid) else self.occgrid
+        if geometry is None:
+            geometry = OccupancyGrid(self.costmap)
+        if geometry.shape != self.costmap.shape:
+            raise ValueError("costmap and occupancy grid must have the same shape")
+        if self.occgrid is not None and (
+            geometry.cellsize != self.occgrid.cellsize
+            or not np.array_equal(geometry.workspace, self.occgrid.workspace)
+        ):
+            raise ValueError("costmap and occupancy grid must have the same geometry")
+        self._costgrid = geometry
+        if self.occgrid is None:
+            self._occgrid = BinaryOccupancyGrid(
+                np.isinf(self.costmap),
+                origin=geometry.g2w((0, 0)),
+                cellsize=geometry.cellsize,
+            )
+            self._occgrid0 = self._occgrid
+            self.validate_start_goal(self._start, self._goal)
         self._Map = _Map(self.costmap.shape[0], self.costmap.shape[1])
-        self._Map.costmap = self.costmap
+        self._Map.costmap = self.costmap * geometry.cellsize
         self._Dstar = _Dstar(self._Map)  # , tol=0)
 
     def plan(
@@ -421,9 +443,8 @@ class DstarPlanner(PlannerBase):
         if self._goal is None:
             raise ValueError("No goal specified here or in constructor")
 
-        self._goal = self._goal.astype(int)
-
-        goal_State = self._Map._Map[self._goal[1]][self._goal[0]]
+        c, r = self._costgrid.w2g(self._goal)
+        goal_State = self._Map._Map[r][c]
         self.goal_State = goal_State
 
         # self._Dstar.open_list.add(goal_State)
@@ -477,21 +498,22 @@ class DstarPlanner(PlannerBase):
         is used unaltered.
 
         If ``sensor`` is not None it must be callable, and is called at each
-        step of the path with the current robot coordintes:
+        step of the path with the current robot coordinates in world units:
 
             sensor((x, y))
 
         and mimics the behaviour of a simple sensor onboard the robot which can
         dynamically change the costmap. The function return a list (0 or more)
-        of 3-tuples (x, y, newcost) which are the coordinates of cells and their
-        cost.  If the cost has changed this will trigger D* incremental
+        of 3-tuples (x, y, newcost) which are world coordinates of cells and their
+        cost per world unit. If the cost has changed this will trigger D* incremental
         replanning.  In this case the value returned by :meth:`nexpand` will
         increase, according to the severity of the replanning.
 
         :seealso: :meth:`plan`
         """
         self.validate_start_goal(start)
-        start_State = self._Map._Map[int(start[1])][int(start[0])]
+        c, r = self._costgrid.w2g(start)
+        start_State = self._Map._Map[r][c]
         tmp = start_State
 
         if sensor is not None and not callable(sensor):
@@ -504,9 +526,10 @@ class DstarPlanner(PlannerBase):
 
         path = []
         while True:
-            path.append((tmp.x, tmp.y))
+            position = self._costgrid.g2w((tmp.x, tmp.y))
+            path.append(position)
             if animating:
-                plt.plot(tmp.x, tmp.y, "y.", markersize=12)
+                plt.plot(*position, "y.", markersize=12)
                 self.animation_frame()
             if tmp == self.goal_State:
                 break
@@ -514,13 +537,23 @@ class DstarPlanner(PlannerBase):
             # x, y = tmp.parent.x, tmp.parent.y
 
             if sensor is not None:
-                changes = sensor((tmp.x, tmp.y))
+                changes = sensor(tuple(position))
                 if changes is not None:
                     # make changes to the plan
+                    val = -1.0
                     for x, y, newcost in changes:
-                        X = self._Dstar._Map._Map[y][x]
+                        c, r = self._costgrid.w2g((x, y))
+                        if not (
+                            0 <= r < self.costmap.shape[0]
+                            and 0 <= c < self.costmap.shape[1]
+                        ):
+                            raise ValueError("sensor cell is outside the costmap")
+                        X = self._Dstar._Map._Map[r][c]
+                        self.costmap[r, c] = newcost
                         # print(f"change cost at ({x}, {y}) to {newcost}")
-                        val = self._Dstar.modify_cost(X, newcost)
+                        val = self._Dstar.modify_cost(
+                            X, newcost * self._costgrid.cellsize
+                        )
                     # propagate the changes to plan
                     self.message("propagate the cost changes")
                     # self._Dstar.showparents()

@@ -13,28 +13,49 @@ import numpy as np
 
 # import scipy as sp
 from spatialmath import SE3, base
+from spatialmath.base.graphics import axes_logic
 
 
 class ShapePlot:
+    """
+    Draw a :mod:`spatialgeometry` shape in a Matplotlib 3D axes
+
+    :param shape: the shape, a cuboid or a sphere
+    :param wireframe: draw as a wireframe, defaults to True
+    :param kwargs: options saved for the drawing
+
+    Cylinders are not drawn yet.
+    """
+
     def __init__(self, shape: Any, wireframe: bool = True, **kwargs: Any) -> None:
         self.shape = shape  # reference to the spatialgeom shape
         self.wireframe = wireframe
         self.args = kwargs
         self.mpl: Any = None
+        self.ax: Any = None
 
-    def plot(self) -> None:
-        # `ax` is not a parameter or defined here: NameError, see findings
-        if ax is None:  # type: ignore[used-before-def,has-type]
-            ax = self.ax  # type: ignore[has-type]
+    def plot(self, ax: Any = None) -> None:
+        """
+        Draw the shape, creating a figure and 3D axes if there are none
 
-        if ax is None:
-            plt.figure()
-            ax = plt.axes(projection="3d")
-            self.ax = ax
+        :param ax: 3D axes to draw into, defaults to the axes used before or a
+            new figure
+        """
+        # reuse the axes given, or those used before, or the current 3D axes
+        ax = axes_logic(ax if ax is not None else self.ax, 3)
 
-        self.draw()
+        self.draw(ax)
 
     def draw(self, ax: Any = None) -> None:
+        """
+        Draw the shape, replacing the previous drawing
+
+        :param ax: 3D axes to draw into, defaults to the axes used before
+        """
+        if ax is None:
+            ax = self.ax
+        self.ax = ax
+
         # TODO only remove and redraw if base has changed
         if self.mpl is not None:
             self.mpl.remove()
@@ -66,7 +87,7 @@ class EllipsePlot:
         q: Any,
         etype: Any,
         opt: str = "trans",
-        centre: Any = [0, 0, 0],
+        centre: Any = (0, 0, 0),
         scale: float = 1.0,
     ) -> None:
         super(EllipsePlot, self).__init__()
@@ -108,6 +129,8 @@ class EllipsePlot:
         elif etype == "f":
             self.vell = False
             self.name = "Force Ellipse"
+        else:
+            raise ValueError(f"etype must be 'v' or 'f', not {etype!r}")
 
     def draw(self) -> None:
         ok = self.make_ellipsoid()
@@ -136,23 +159,14 @@ class EllipsePlot:
             self.ell = self.ax.plot(self.x, self.y, color="#2980b9")
 
     def plot(self, ax: Any = None) -> None:
-        if ax is None:
-            ax = self.ax
-
-        if ax is None:
-            plt.figure()
-            ax = plt.axes(projection="3d")
-            self.ax = ax
+        ax = axes_logic(ax if ax is not None else self.ax, 3)
+        self.ax = ax
 
         self.draw()
 
     def plot2(self, ax: Any = None) -> None:
-        if ax is None:
-            ax = self.ax
-
-        if ax is None:
-            ax = plt.axes()
-            self.ax = ax
+        ax = axes_logic(ax if ax is not None else self.ax, 2)
+        self.ax = ax
 
         self.draw2()
 

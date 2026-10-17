@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import warnings
 from abc import ABC
 from typing import TYPE_CHECKING, Any
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy.ndimage as sp
 import spatialmath.base as smb
+from matplotlib import patheffects
 from spatialmath.base.types import R2, R4, ArrayLike2, ArrayLike4
 from spatialmath.geom2d import Polygon2
 from typing_extensions import Self
@@ -329,6 +333,14 @@ class BaseOccupancyGrid(BaseMap):
         map: NDArray | None = None,
         ax: Axes | None = None,
         block: bool | None = None,
+        *,
+        field: NDArray | None = None,
+        colorbar: bool | dict[str, Any] = True,
+        colorbar_style: dict[str, Any] | None = None,
+        labels: bool = False,
+        label_style: dict[str, Any] | None = None,
+        cmap: str | mpl.colors.Colormap | None = None,
+        inflated: NDArray | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -338,28 +350,161 @@ class BaseOccupancyGrid(BaseMap):
             size as the occupancy grid, defaults to None
         :type map: ndarray(N,M)
         :param ax: Matplotlib axes to plot into, defaults to None (the current axes)
-        :param block: block until plot is dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
+        :param field: optional scalar field, with the same shape as the grid;
+            obstacles are drawn over it, defaults to None
+        :param colorbar: show a colorbar for the field, defaults to True
+        :param colorbar_style: colorbar options, with label "Distance" by default
+        :param labels: label finite field values at cell centres, defaults to False
+        :param label_style: Matplotlib text options, merged over red centred text
+            with a white outline
+        :param cmap: colormap for the field or replacement ``map``. Fields default
+            to gray; replacement images use Matplotlib's default colormap
+        :param inflated: inflated obstacle mask, with the same shape as the grid;
+            additional occupied cells are drawn in pink, defaults to None
         :param kwargs: arguments passed to ``imshow``
+        :raises ValueError: an array has the wrong shape, or both ``map`` and
+            ``field`` are supplied
 
         The grid is plotted as an image but with axes in world coordinates.
 
-        The grid is a NumPy boolean array which has values 0 (false=unoccupied)
-        and 1 (true=occupied).  Passing a `cmap` option to imshow can be used
-        to control the displayed color of free space and obstacles.
+        Binary grids show free space in white, obstacles in red and inflated
+        obstacles in pink. A field is drawn beneath the obstacles, with
+        unreachable (infinite) values in blue. General grids and replacement
+        images are drawn using their numeric values. Passing ``cmap`` without a
+        field overrides the grid's colormap.
 
+        Cell centres use the grid's origin and cell size; image edges extend
+        half a cell beyond the outer centres. ``labels`` shows the edge cells
+        whole. The field and supplied style dictionaries are not modified.
+
+        :seealso: :meth:`world_to_grid` :meth:`grid_to_world`
         """
 
+        if map is not None and field is not None:
+            raise ValueError("map and field cannot both be supplied")
+        for name, array in (("map", map), ("field", field), ("inflated", inflated)):
+            if array is not None and np.shape(array) != self.shape:
+                raise ValueError(f"{name} must have the same shape as the grid")
+
         ax = smb.axes_logic(ax, 2)
+        # imshow expects the outer edges, whereas workspace gives cell centres.
+        extent = self.workspace + self.cellsize * np.array([-0.5, 0.5, -0.5, 0.5])
+        image_options: dict[str, Any] = {
+            "origin": "lower",
+            "interpolation": None,
+            "extent": extent,
+        } | kwargs
+        if field is not None:
+            # Work on a copy so that plotting cannot change a planner's distances.
+            distance = np.array(field, dtype=float)
+            finite = distance[np.isfinite(distance)]
+            vmax = float(finite.max()) if finite.size else 0.0
+            # A positive scale also distinguishes unreachable cells from a zero goal.
+            scale = vmax if vmax > 0 else 1.0
+            distance[np.isinf(distance)] = 2 * scale
+            c_map = mpl.colormaps.get_cmap(cmap or "gray").with_extremes(over="blue")
+            norm = mpl.colors.Normalize(vmin=0, vmax=scale, clip=False)
+            field_options: dict[str, Any] = {
+                "cmap": c_map,
+                "norm": norm,
+            } | image_options
+            if "norm" not in kwargs and ("vmin" in kwargs or "vmax" in kwargs):
+                # Matplotlib accepts either a Normalize instance or limits.
+                field_options.pop("norm")
+            artist = ax.imshow(distance, **field_options)
+            ax.grid(True, alpha=0.1, color="white")
+            if isinstance(colorbar, dict):
+                warnings.warn(
+                    "a dict as colorbar is deprecated, use colorbar_style instead",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                colorbar_style = colorbar if colorbar_style is None else colorbar_style
+                colorbar = True
+            if colorbar:
+                cb_options: dict[str, Any] = {"ax": ax, "label": "Distance"} | (
+                    colorbar_style or {}
+                )
+                ax.figure.colorbar(artist, **cb_options)
+            if labels:
+                label_field = np.array(field, dtype=float)
+                if inflated is not None:
+                    label_field[np.asarray(inflated, dtype=bool)] = np.nan
+                self._label_values(ax, label_field, label_style)
+        elif labels:
+            warnings.warn(
+                "labels has no effect, there is no distance field",
+                UserWarning,
+                stacklevel=2,
+            )
 
-        if map is None:
-            map = self._grid
-            kwargs["extent"] = self.workspace
+        if map is not None or (
+            field is None
+            and inflated is None
+            and (not isinstance(self, BinaryOccupancyGrid) or cmap is not None)
+        ):
+            ax.imshow(self.grid if map is None else map, cmap=cmap, **image_options)
+        else:
+            # Use fixed color indices even when one class is absent from the map.
+            colors: list[tuple[float, float, float, float]] = [
+                (1, 1, 1, 0),
+                (1, 0, 0, 1),
+            ]
+            image = self.grid.astype(bool).astype(int)
+            if inflated is not None:
+                colors.insert(1, (1, 0.75, 0.8, 1))
+                image = np.logical_or(inflated, image).astype(int) + image
+            obstacle_options = image_options | {
+                "zorder": 1,
+                "cmap": mpl.colors.ListedColormap(colors),
+                "norm": mpl.colors.Normalize(vmin=0, vmax=len(colors) - 1),
+            }
+            obstacle_options.pop("vmin", None)
+            obstacle_options.pop("vmax", None)
+            ax.imshow(image, **obstacle_options)
 
-        ax.imshow(map, origin="lower", interpolation=None, **kwargs)
+        ax.set_facecolor("white")
+        ax.grid(True, zorder=0)
+        bounds = (
+            extent
+            if labels or self.shape[0] == 1 or self.shape[1] == 1
+            else self.workspace
+        )
+        ax.set_xlim(bounds[:2])
+        ax.set_ylim(bounds[2:])
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
+
+    def _label_values(
+        self, ax: Axes, field: NDArray, label_style: dict[str, Any] | None
+    ) -> None:
+        """
+        Write finite field values at the corresponding world cell centres
+
+        :param ax: axes to label
+        :param field: field values, with non-finite or occupied cells omitted
+        :param label_style: text options merged over the default label style
+        """
+        free = np.isfinite(field) & ~self.grid.astype(bool)
+        values = field[free]
+        integral = bool(np.all(values == np.round(values)))
+        style: dict[str, Any] = {
+            "ha": "center",
+            "va": "center",
+            "fontsize": 8,
+            "color": "red",
+            "path_effects": [patheffects.withStroke(linewidth=2, foreground="white")],
+            "zorder": 5,
+        } | (label_style or {})
+        for r, c in np.argwhere(free):
+            x, y = self.g2w((c, r))
+            value = field[r, c]
+            ax.text(x, y, f"{value:.0f}" if integral else f"{value:.1f}", **style)
 
     def line_world(self, p1: ArrayLike2, p2: ArrayLike2) -> NDArray:
         """
@@ -494,6 +639,9 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         :seealso: :meth:`w2g`
         """
         c, r = self.w2g(p)
+        # NumPy accepts negative indices by wrapping around to the opposite edge.
+        if c < 0 or r < 0:
+            return True
         try:
             return self._grid[r, c]
         except IndexError:
@@ -626,7 +774,10 @@ class PolygonMap(BaseMap):
         """
         Plot the polygonal obstacles
 
-        :param block: block until plot is dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         The obstacles are plotted in red, in axes that have the limits of the
         workspace.
@@ -636,8 +787,7 @@ class PolygonMap(BaseMap):
         for polygon in self.polygons:
             polygon.plot(color="r")
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def isoccupied(self, p: ArrayLike2) -> bool:
         """

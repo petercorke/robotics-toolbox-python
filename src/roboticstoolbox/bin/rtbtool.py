@@ -321,8 +321,7 @@ def main() -> None:
 
     # set default backend for Robot.plot
     if args.swift:
-        # an attribute that shadows the class method, see findings
-        Robot.default_backend = "swift"  # type: ignore[method-assign,assignment]
+        Robot.set_default_backend("swift")
 
     # set matrix printing mode for spatialmath
     SE3._ansimatrix = args.ansi  # type: ignore[name-defined]  # from the star import

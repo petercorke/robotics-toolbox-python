@@ -7,23 +7,22 @@ Superclass for mobile robot motion planners, and a movie writer
 
 from __future__ import annotations
 
-import copy
 import os
 import warnings
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from colored import attr, fg
-from matplotlib import animation, cm
+from matplotlib import animation
 from spatialmath.base.argcheck import getvector
-from spatialmath.base.graphics import axes_get_scale, axes_logic, plotvol2
+from spatialmath.base.graphics import axes_get_scale, axes_logic
 from spatialmath.base.types import R2, R3, ArrayLike2, ArrayLike3
 
 from roboticstoolbox.mobile.Animations import VehiclePolygon
-from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid, BinaryOccupancyGrid
+from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:
@@ -87,6 +86,26 @@ def _layers(
     return tuple(style)
 
 
+def _warn_unused(unused: dict[str, Any], stacklevel: int = 3) -> None:
+    """
+    Warn about keyword arguments that are accepted and ignored
+
+    RTB 1.4.4 and earlier silently ignored unknown keyword arguments of the
+    planners, and code in the book relies on that, for example
+    ``dx.plot(labelvalues=True)``.  They are ignored with a warning so that a
+    mistyped option is not silent.
+
+    :param unused: the unknown keyword arguments
+    :param stacklevel: of the warning, relative to the caller of this function
+    """
+    for name in unused:
+        warnings.warn(
+            f"unknown argument {name!r} is ignored",
+            DeprecationWarning,
+            stacklevel=stacklevel,
+        )
+
+
 class NoPathError(RuntimeError):
     """
     A valid planning problem has no solution
@@ -137,6 +156,11 @@ class PlannerBase:
     - encapsulates a private random number generator with specifiable seed
     - encapsulates state such as start, goal, and the plan
     - provides a message channel for diagnostic output
+
+    Positions, returned paths and plot axes use world coordinates. Grid-based
+    planners convert positions to the nearest cell centre internally, using the
+    occupancy grid's origin and cell size. A raw array has unit cells and origin
+    (0, 0). Angles are in radians.
 
     The start and goal can be specified in various ways:
 
@@ -190,7 +214,10 @@ class PlannerBase:
         seed: int | None = None,
         animate: bool = False,
         movie: str | tuple[str, float] | None = None,
+        **unused: Any,
     ) -> None:
+        # called by the constructor of a subclass, so the caller is 3 above
+        _warn_unused(unused, stacklevel=4)
 
         self._occgrid: BinaryOccupancyGrid | None = None
         self._occgrid0: BinaryOccupancyGrid | None = None
@@ -636,6 +663,14 @@ class PlannerBase:
         goal_marker: dict[str, Any] | None = None,
         start_vehicle: dict[str, Any] | None = None,
         goal_vehicle: dict[str, Any] | None = None,
+        labels: bool = False,
+        label_style: dict[str, Any] | None = None,
+        labelvalues: bool = False,
+        inflated: bool | None = None,
+        colorbar: bool | dict[str, Any] | None = None,
+        colorbar_style: dict[str, Any] | None = None,
+        cmap: str | None = None,
+        **unused: Any,
     ) -> Axes:
         r"""
         Plot vehicle path (superclass)
@@ -665,8 +700,22 @@ class PlannerBase:
         :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value previously set
         :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value previously set.  The planner's own goal is not changed.
         :param ax: axes to plot into, defaults to a new axes
-        :param block: block after displaying the plot, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param bgargs: arguments passed to :meth:`plot_bg`, defaults to None
+        :param labels: write the distance value in each cell of the distance
+            field, defaults to False.  Useful for small grids, see
+            :meth:`plot_bg`.
+        :param label_style: Matplotlib text options for ``labels``
+        :param labelvalues: deprecated, use ``labels``
+        :param inflated: show the inflated obstacles, passed to :meth:`plot_bg`
+        :param colorbar: show a colorbar for the distance field, passed to
+            :meth:`plot_bg`
+        :param colorbar_style: options for the colorbar, passed to
+            :meth:`plot_bg`
+        :param cmap: colormap for the distance field, passed to :meth:`plot_bg`
         :param path_marker: deprecated, use ``path_style``
         :param path_marker_reverse: deprecated, use ``path_reverse_style``
         :param line: deprecated, use ``path_style``
@@ -751,7 +800,20 @@ class PlannerBase:
             no effect.
 
         :seealso: :meth:`plot_bg` :func:`base.plot_poly`
+
+        .. note:: Unknown keyword arguments are ignored, with a
+            ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
+            earlier.
+
+        .. deprecated:: 1.4.5
+            ``labelvalues`` is deprecated, use ``labels``.  It is the name used
+            in the book, where it had no effect.
+
+        .. versionchanged:: 1.5.0
+            ``block=False`` shows the figure without waiting, as documented. It used to do nothing,
+            the same as ``None``.
         """
+        _warn_unused(unused)
         # deprecated names, mapped to the new ones
         for old, new, value in (
             ("line", "path_style", line),
@@ -793,6 +855,25 @@ class PlannerBase:
         start_vehicle_options = START_VEHICLE_STYLE | (start_vehicle_style or {})
         goal_vehicle_options = GOAL_VEHICLE_STYLE | (goal_vehicle_style or {})
         bgargs = dict(bgargs or {})
+        if labelvalues:
+            warnings.warn(
+                "labelvalues is deprecated, use labels instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            labels = True
+        if labels:
+            bgargs["labels"] = True
+            bgargs.setdefault("label_style", label_style)
+        # arguments of the background that are given here rather than in bgargs
+        for bg_name, bg_value in (
+            ("inflated", inflated),
+            ("colorbar", colorbar),
+            ("colorbar_style", colorbar_style),
+            ("cmap", cmap),
+        ):
+            if bg_value is not None:
+                bgargs.setdefault(bg_name, bg_value)
 
         ndims = self._ndims
 
@@ -940,8 +1021,7 @@ class PlannerBase:
         else:
             ax.set_zlabel(r"$\theta$")  # type: ignore[union-attr]
 
-        if block:
-            plt.show(block=block)
+        apply_block(block)
 
         return ax
 
@@ -980,6 +1060,10 @@ class PlannerBase:
         colorbar: bool | dict[str, Any] = True,
         block: bool | None = None,
         colorbar_style: dict[str, Any] | None = None,
+        labels: bool = False,
+        label_style: dict[str, Any] | None = None,
+        labelvalues: bool = False,
+        **unused: Any,
     ) -> None:
         """
         Plot background (superclass)
@@ -992,10 +1076,20 @@ class PlannerBase:
         :param ax: axes to plot into, defaults to the current axes
         :param inflated: show the inflated obstacles, defaults to True
         :param colorbar: show a colorbar for the distance field, defaults to True
-        :param block: block after displaying the plot, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param colorbar_style: options for the colorbar, passed to
             :meth:`matplotlib.figure.Figure.colorbar`, defaults to None.  The
             label defaults to "Distance".
+        :param labels: write the value in each cell of the distance field,
+            defaults to False
+        :param labelvalues: deprecated, use ``labels``
+        :param label_style: Matplotlib text options for the values, merged over
+            red, centered ``fontsize`` 8 text, as in the book, with a thin
+            white outline (``path_effects``) so that it is legible on any gray.
+            The axes are set to show every cell whole.
 
         .. deprecated:: 1.4.5
             Giving a dict as ``colorbar`` is deprecated, use ``colorbar=True``
@@ -1013,104 +1107,44 @@ class PlannerBase:
         If distance is provided, or the planner has a distancemap attribute
         the distance field will be used as the background and obstacle cells
         (actual or inflated) will be shown in red. A colorbar is added.
+
+        .. note:: Unknown keyword arguments are ignored, with a
+            ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
+            earlier.
+
+        .. deprecated:: 1.4.5
+            ``labelvalues`` is deprecated, use ``labels``.  It is the name used
+            in the book, where it had no effect.
+
         """
+        _warn_unused(unused)
+        if labelvalues:
+            warnings.warn(
+                "labelvalues is deprecated, use labels instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            labels = True
         occgrid = self._occgrid
         if occgrid is None:
             return
 
-        if isinstance(self._occgrid, BaseOccupancyGrid):
-            ax = plotvol2(dim=self._occgrid.workspace, ax=ax)
-        else:
-            ax = axes_logic(ax, 2)
-
-        # create color map for free space + obstacle:
-        #   free space, color index = 1, white, alpha=0 to allow background and grid lines to show
-        #   obstacle, color index = 2, red, alpha=1
-
-        if self._inflate > 0 and inflated:
-            # 0 background (white, transparent)
-            # 1 inflated obstacle (pink)
-            # 2 original obstacle (red)
-            colors = [(1, 1, 1, 0), (1, 0.75, 0.8, 1), (1, 0, 0, 1)]
-            assert self._occgrid0 is not None
-            image = occgrid.grid.astype(int) + self._occgrid0.grid.astype(int)
-        else:
-            # 0 background
-            # 1 obstacle
-            colors = [(1, 1, 1, 0), (1, 0, 0, 1)]
-            image = occgrid.grid
-
         if distance is None and hasattr(self, "distancemap"):
             distance = self.distancemap
 
-        if distance is not None:
-            # distance field with obstacles
-
-            # find largest finite value
-
-            # work on a copy, the caller's array is not modified
-            distance = np.array(distance, dtype=float)
-            v = distance.ravel()
-            vmax = max(v[np.isfinite(v)])
-
-            # create a copy of greyscale color map
-            c_map = copy.copy(mpl.colormaps.get_cmap(cmap))
-            # c_map.set_bad(color=(1,0,0,1))  # nan and inf are red
-
-            # change all inf to large value, so they are not 'bad' ie. red
-            distance[np.isinf(distance)] = 2 * vmax
-            c_map.set_over(color=(0, 0, 1))  # ex-infs are now blue
-
-            # display image
-            norm = mpl.colors.Normalize(vmin=0, vmax=vmax, clip=False)
-            ax.imshow(
-                distance,
-                origin="lower",
-                interpolation=None,
-                cmap=c_map,
-                norm=norm,
-            )
-            ax.grid(True, alpha=0.1, color=(1, 1, 1))
-
-            # add colorbar
-            scalar_mappable_c_map = cm.ScalarMappable(cmap=c_map, norm=norm)
-            if isinstance(colorbar, dict):
-                warnings.warn(
-                    "a dict as colorbar is deprecated, use colorbar_style instead",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-                colorbar_style = colorbar if colorbar_style is None else colorbar_style
-                colorbar = True
-            if colorbar:
-                cb_kwargs: dict[str, Any] = {"ax": ax, "label": "Distance"} | (
-                    colorbar_style or {}
-                )
-                ax.figure.colorbar(scalar_mappable_c_map, **cb_kwargs)
-            # overlay obstacles
-            c_map = mpl.colors.ListedColormap(colors)
-            occgrid.plot(image, cmap=c_map, zorder=1)
-
-        else:
-            # occupancy grid only
-
-            # overlay obstacles
-            c_map = mpl.colors.ListedColormap(colors)
-            # self.occgrid.plot(image, cmap=c_map, zorder=1)
-            occgrid.plot(cmap=c_map, zorder=1, ax=ax)
-
-        ax.set_facecolor((1, 1, 1))  # create white background
-        ax.set_xlabel("x (cells)")
-        ax.set_ylabel("y (cells)")
-        ax.grid(True, zorder=0)
-
-        # lock axis limits to current value
-        # ax.set_xlim(ax.get_xlim())
-        # ax.set_ylim(ax.get_ylim())
-
-        # plt.draw()
-        if block is not None:
-            plt.show(block=block)
+        # The original map owns the geometry; the planner supplies its overlays.
+        assert self._occgrid0 is not None
+        self._occgrid0.plot(
+            field=distance,
+            inflated=occgrid.grid if self._inflate > 0 and inflated else None,
+            cmap=cmap if distance is not None else None,
+            ax=ax,
+            colorbar=colorbar,
+            colorbar_style=colorbar_style,
+            labels=labels,
+            label_style=label_style,
+            block=block,
+        )
 
     def message(self, s: str, color: str | None = None) -> None:
         """

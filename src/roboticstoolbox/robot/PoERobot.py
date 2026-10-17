@@ -99,6 +99,9 @@ class PoELink(Link):
             t_vec = v
 
         o_vec = np.cross(a_vec, n_vec)
+        if np.isclose(np.linalg.norm(o_vec), 0.0):
+            # The default x direction can be parallel to the screw axis.
+            o_vec = np.cross(a_vec, base.o)
 
         # construct transform from obtained vectors
         twist_as_SE3 = SE3.OA(o_vec, a_vec)

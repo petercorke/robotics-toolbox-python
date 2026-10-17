@@ -15,7 +15,7 @@ dependencies = [
     "numpy",
     "spatialmath-python>=1.1.18",
     "spatialgeometry>=1.4.0",
-    "pgraph-python",
+    "pgraph-python>=1.0.0",
     "scipy",
     "matplotlib",
     "ansitable",
@@ -372,8 +372,6 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.tools.trajectory",
-    "roboticstoolbox.tools.urdf.tests.test_urdf",
     "roboticstoolbox.tools.DHFactor",
     "roboticstoolbox.robot.DHFactor",
 ]

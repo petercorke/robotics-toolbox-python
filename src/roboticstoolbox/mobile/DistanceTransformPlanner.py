@@ -11,6 +11,7 @@ import warnings
 from typing import Any
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from matplotlib import colormaps
 from spatialmath import base
@@ -32,8 +33,14 @@ class DistanceTransformPlanner(PlannerBase):
     :type occgrid: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid` or ndarray(h,w)
     :param metric: distance metric, one of: "euclidean" [default], "manhattan"
         ("cityblock" is a synonym)
+    :param distance: deprecated, use ``metric``
     :param kwargs: common planner options, see :class:`PlannerBase`
-    :raises ValueError: ``metric`` is not recognised
+    :raises ValueError: ``metric`` is not recognised, or ``metric`` and
+        ``distance`` are both given and are different
+
+    .. deprecated:: 1.4.5
+        ``distance`` is deprecated, use ``metric``.  It was never an argument
+        (it was silently ignored), but code printed in the book uses it.
 
     ==================   ========================
     Feature              Capability
@@ -52,9 +59,9 @@ class DistanceTransformPlanner(PlannerBase):
     The map is described by a 2D occupancy ``occgrid`` whose elements are zero
     if traversable or nonzero if untraversable, ie. an obstacle.
 
-    The cells are assumed to be unit squares. Crossing the cell horizontally or
-    vertically is a travel distance of 1, and for the Euclidean distance
-    measure, crossing the cell diagonally is a distance of :math:`\sqrt{2}`.
+    Positions, paths and distances are in world units. Crossing a cell
+    horizontally or vertically travels one ``cellsize``; a diagonal travels
+    :math:`\sqrt{2}` times that distance. Endpoints are rounded to cell centres.
 
     Example:
 
@@ -81,8 +88,21 @@ class DistanceTransformPlanner(PlannerBase):
         self,
         occgrid: BinaryOccupancyGrid | NDArray | None = None,
         metric: str = "euclidean",
+        *,
+        distance: str | None = None,
         **kwargs: Any,
     ) -> None:
+        if distance is not None:
+            warnings.warn(
+                "distance is deprecated, use metric instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if metric != "euclidean" and metric.lower() != distance.lower():
+                raise ValueError(
+                    f"metric {metric!r} and distance {distance!r} are different"
+                )
+            metric = distance
         if metric.lower() not in METRICS:
             raise ValueError(f"unknown metric {metric!r}, must be one of {METRICS}")
 
@@ -164,12 +184,15 @@ class DistanceTransformPlanner(PlannerBase):
         if animate is None:
             animate = self._animate
 
-        self._distancemap = distancexform(
-            self.occgrid.grid,
-            goal=self._goal,
-            metric=self._metric,
-            animate=animate,
-            summary=summary,
+        self._distancemap = (
+            distancexform(
+                self.occgrid.grid,
+                goal=self.occgrid.w2g(self._goal),
+                metric=self._metric,
+                animate=animate,
+                summary=summary,
+            )
+            * self.occgrid.cellsize
         )
 
     def query(
@@ -189,7 +212,8 @@ class DistanceTransformPlanner(PlannerBase):
             to constructor
         :param goal: goal position :math:`(x, y)`, defaults to value specified
             to constructor
-        :param dtype: data type of the returned path, defaults to int
+        :param dtype: data type of the returned path, defaults to int for unit
+            cells at (0, 0), otherwise float
         :param animate: show the vehicle path, defaults to the planner's
             :attr:`animate`
         :param movie: save the animation as a movie file, filename or tuple
@@ -217,7 +241,7 @@ class DistanceTransformPlanner(PlannerBase):
                 stacklevel=2,
             )
 
-        self.validate_start_goal(start, goal, dtype=dtype)
+        self.validate_start_goal(start, goal)
         if self._start is None:
             raise ValueError("no start point")
 
@@ -226,7 +250,8 @@ class DistanceTransformPlanner(PlannerBase):
 
         animating = self.animation_start(animate, movie, draw=self.plot)
 
-        robot = self._start
+        assert self.occgrid is not None
+        robot = self.occgrid.g2w(self.occgrid.w2g(self._start))
         path: list[NDArray] = [robot]
 
         try:
@@ -248,14 +273,22 @@ class DistanceTransformPlanner(PlannerBase):
             self.animation_end()
 
         assert self._goal is not None
-        path.append(self._goal)
-        return np.array(path).astype(dtype if dtype is not None else int)
+        endpoint = self.occgrid.g2w(self.occgrid.w2g(self._goal))
+        if not np.array_equal(path[-1], endpoint):
+            path.append(endpoint)
+        if dtype is None:
+            dtype = (
+                int
+                if self.occgrid.cellsize == 1 and np.all(self.occgrid.g2w((0, 0)) == 0)
+                else float
+            )
+        return np.array(path).astype(dtype)
 
     def next(self, position: ArrayLike2) -> NDArray | None:
         """
         Find next point on the path
 
-        :param position: current robot position
+        :param position: current robot position in world coordinates
         :raises RuntimeError: no plan has been computed
         :raises NoPathError: there is no neighbouring cell with a finite distance
         :return: next robot position, None if the next point is the goal
@@ -284,12 +317,16 @@ class DistanceTransformPlanner(PlannerBase):
             dtype=int,
         )
 
-        x = int(position[0])
-        y = int(position[1])
+        assert self.occgrid is not None and self._goal is not None
+        self.validate_endpoint(position)
+        x, y = self.occgrid.w2g(position)
+        goal = self.occgrid.w2g(self._goal)
+        if np.array_equal((x, y), goal):
+            return None
 
         distancemap = self.distancemap
         rows, columns = distancemap.shape
-        min_dist = np.inf
+        min_dist = distancemap[y, x]
         min_dir = None
         for d in directions:
             r = y + d[0]
@@ -307,10 +344,10 @@ class DistanceTransformPlanner(PlannerBase):
         y = y + min_dir[0]
 
         next = np.r_[x, y]
-        if all(next == self._goal):
+        if all(next == goal):
             return None
         else:
-            return next
+            return self.occgrid.g2w(next)
 
     def plot_3d(
         self,
@@ -327,8 +364,10 @@ class DistanceTransformPlanner(PlannerBase):
         :type path: ndarray(N,2)
         :param path_style: dictionary of Matplotlib line options for the path,
             defaults to None
-        :param block: block until the figure is closed, defaults to True; None
-            returns without showing the figure
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to True
         :param ls: deprecated, use ``path_style``
         :raises ValueError: no plan has been computed
         :return: Matplotlib 3D axes
@@ -358,7 +397,11 @@ class DistanceTransformPlanner(PlannerBase):
         distance = self._distancemap
         if distance is None:
             raise ValueError("no distance map computed, you need to plan")
-        X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
+        assert self.occgrid is not None
+        X, Y = np.meshgrid(
+            self.occgrid.xmin + np.arange(distance.shape[1]) * self.occgrid.cellsize,
+            self.occgrid.ymin + np.arange(distance.shape[0]) * self.occgrid.cellsize,
+        )
         ax.plot_surface(
             X,
             Y,
@@ -369,14 +412,14 @@ class DistanceTransformPlanner(PlannerBase):
 
         if path is not None:
             # k = sub2ind(np.shape(self._distancemap), p[:, 1], p[:, 0])
-            height = distance[path[:, 1], path[:, 0]]
+            cells = np.array([self.occgrid.w2g(p) for p in path])
+            height = distance[cells[:, 1], cells[:, 0]]
             ax.plot(path[:, 0], path[:, 1], height, **(path_style or {}))
 
         plt.xlabel("x")
         plt.ylabel("y")
         ax.set_zlabel("z")
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
         return ax
 
 

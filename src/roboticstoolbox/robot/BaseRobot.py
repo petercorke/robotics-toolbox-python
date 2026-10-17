@@ -77,6 +77,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     # set when the links are processed in the constructor
     _base_link: LinkType
 
+    #: default graphical backend for every robot of this class, used when the
+    #: robot has not been given its own, see :meth:`set_default_backend`
+    _class_default_backend: Any = None
+
     def __init__(
         self,
         links: list[LinkType],
@@ -156,15 +160,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
             if link.hasdynamics:
                 self._hasdynamics = True
-            if link.geometry:
-                # an empty list, not True (replaced just below if it has geometry)
-                self._hasgeometry = []  # type: ignore[assignment]
+            if len(link.geometry) > 0:
+                self._hasgeometry = True
             if link.collision:
                 self._hascollision = True
-
-            if isinstance(link, Link):
-                if len(link.geometry) > 0:
-                    self._hasgeometry = True
 
             # Detect symbolic (e.g. SymPy) model parameters regardless of
             # whether the caller remembered to pass symbolic=True -- see
@@ -386,10 +385,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             # Jindex set on all, check they are unique and contiguous
             if check_jindex:
                 jset = set(range(n))
+                jindices = {link.jindex for link in links if link.isjoint}
                 for link in links:
                     if link.isjoint and link.jindex not in jset:
+                        hint = ""
+                        if jindices == set(range(1, n + 1)):
+                            hint = (
+                                f"; joint indices count from zero, but these are"
+                                f" 1 to {n}.  Joint names that count from one,"
+                                " such as 'A1', need a trailing underscore,"
+                                " 'A1_', to be numbered from zero"
+                            )
                         raise ValueError(
-                            f"joint index {link.jindex} was repeated or out of range"
+                            f"joint index {link.jindex} was repeated or out of"
+                            f" range{hint}"
                         )
                     jset -= set([link.jindex])
                 if len(jset) > 0:  # pragma nocover  # is impossible
@@ -828,18 +837,38 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Get default graphical backend
 
         - ``robot.default_backend`` Get the default graphical backend, used when
-            no explicit backend is passed to ``Robot.plot``.
+            no explicit backend is passed to ``Robot.plot``.  This is the value set
+            for the robot, otherwise the value set for all robots by
+            :meth:`set_default_backend`, otherwise ``None``.
         - ``robot.default_backend = ...`` Set the default graphical backend, used when
             no explicit backend is passed to ``Robot.plot``.  The default set here will
             be overridden if the particular ``Robot`` subclass cannot support it.
 
         :returns: backend name
         """
-        return self._default_backend
+        if self._default_backend is not None:
+            return self._default_backend
+        return self._class_default_backend
 
     @default_backend.setter
     def default_backend(self, be: Any) -> None:
         self._default_backend = be
+
+    @classmethod
+    def set_default_backend(cls, be: Any) -> None:
+        """
+        Set the default graphical backend for all robots
+
+        :param be: backend name, for example ``"swift"``, or ``None`` to clear
+
+        ``Robot.set_default_backend("swift")`` sets the backend used by
+        :meth:`plot` for every robot, existing or created later, that has not
+        been given one of its own by ``robot.default_backend = ...``.  The robot's
+        own value takes precedence.
+
+        :seealso: :attr:`default_backend`
+        """
+        cls._class_default_backend = be
 
     @property
     def gravity(self) -> NDArray:
@@ -1908,15 +1937,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             segs = [link.parent]
             while True:
                 segs.append(link)
-                if link.nchildren == 0:
+                children = link.children or []
+                if len(children) == 0:
                     return [segs]
-                elif link.nchildren == 1:
-                    link = link.children[0]  # type: ignore
+                elif len(children) == 1:
+                    link = children[0]
                     continue
-                elif link.nchildren > 1:
+                elif len(children) > 1:
                     segs = [segs]  # type: ignore[list-item]
 
-                    for child in link.children:  # type: ignore
+                    for child in children:
                         segs.extend(recurse(child))
 
                     return segs
@@ -2028,7 +2058,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param q: The joint configuration of the robot.
         :param backend: The graphical backend to use, currently 'swift' and 'pyplot' are implemented. Defaults to 'swift' of a ``Robot`` and 'pyplot` for a ``DHRobot``
-        :param block: Block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to False
         :param dt: if q is a trajectory, this describes the delay in seconds between frames
         :param limits: Custom view limits for the plot. If not supplied will autoscale, [x1, x2, y1, y2, z1, z2] (this option is for 'pyplot' only)
         :param vellipse: (Plot Option) Plot the velocity ellipse at the end-effector (this option is for 'pyplot' only)
@@ -2163,7 +2195,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :param block: Block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param limits: Custom view limits for the plot. If not supplied will
             autoscale, [x1, x2, y1, y2, z1, z2] (this option is for
             'pyplot'/'pyplot2' only)
@@ -2236,12 +2270,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         if vellipse:
             vell = self.vellipse(q, centre="ee", add=False)
-            env._teach_vellipse = vell
+            # the ellipsoid shown by the teach pendant, read back by the
+            # backend; not part of the backend interface
+            setattr(env, "_teach_vellipse", vell)
             env.add(vell)
 
         if fellipse:
             fell = self.fellipse(q, centre="ee", add=False)
-            env._teach_fellipse = fell
+            setattr(env, "_teach_fellipse", fell)
             env.add(fell)
 
         # Keep the plot open -- skipped if the backend already blocked

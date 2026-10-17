@@ -52,28 +52,91 @@ def _resolve_param(
     return param
 
 
+#: characters that negate the joint variable when they start a joint descriptor
+_MINUS_SIGNS = ("-", "\u2212")  # hyphen-minus and the Unicode minus sign
+
+
 def _parse_joint_descriptor(s: str) -> tuple[int | None, bool]:
     """
     Parse a joint descriptor string into (jindex, flip).
 
-    A leading '-' sets flip (and is stripped); a leading '+' is stripped and
-    ignored. The first run of digits found anywhere in what remains becomes
-    the joint index - this treats 'theta2', 'q2', 'q(3)' and 'θ_3' the same
-    regardless of how the index is set off from the rest of the name. If no
-    digit is found, jindex is None, so the joint falls through to ETS's
-    existing auto-numbering for unassigned joints.
+    A leading '-' (or the Unicode minus sign) sets flip, and a leading '+' is
+    ignored; the sign is then stripped. The first run of digits found anywhere
+    in what remains becomes the joint index - this treats 'theta2', 'q2', 'q(3)'
+    and 'θ_3' the same regardless of how the index is set off from the rest of
+    the name. If no digit is found, jindex is None, so the joint falls through
+    to ETS's existing auto-numbering for unassigned joints.
+
+    Joint indices count from zero.  A name that ends with an underscore, such as
+    'A1_' or 'θ2_', counts from one: the index is one less than the digits.
+
+    :raises ValueError: the name counts from one and the number is zero
     """
-    flip = s.startswith("-")
-    if s[:1] in "+-":
+    flip = s[:1] in _MINUS_SIGNS
+    if s[:1] in _MINUS_SIGNS or s[:1] == "+":
         s = s[1:]
 
     match = re.search(r"\d+", s)
     jindex = int(match.group()) if match else None
 
+    if jindex is not None and s.endswith("_"):
+        if jindex == 0:
+            raise ValueError(
+                f"joint name {s!r} ends with an underscore, so the number must "
+                "count from one, but it is zero"
+            )
+        jindex -= 1
+
     return jindex, flip
 
 
+def _joint_display_name(s: str) -> str:
+    """
+    The name of a joint, as displayed, from its descriptor
+
+    The underscore that says the number counts from one is an instruction and is
+    not part of the name, so 'A1_' is displayed as 'A1'.  A name without a number
+    is shown as given.
+    """
+    body = s[1:] if s[:1] in _MINUS_SIGNS or s[:1] == "+" else s
+    if s.endswith("_") and re.search(r"\d", body):
+        return s[:-1]
+    return s
+
+
 class BaseET:
+    r"""
+    Elementary transform, the base class of :class:`ET` and :class:`ET2`
+
+    **Joint descriptors**
+
+    The parameter ``param`` of a transform may be a string naming a variable
+    joint, such as ``"q2"`` or ``"theta2"``, instead of a number.  The rules are:
+
+    - the first number in the string is the joint index, so ``"q0"`` is joint 0
+      and ``"theta2"`` is joint 2; ``"q(3)"`` and ``"θ_3"`` are joint 3
+    - a leading ``-`` (or the Unicode minus sign ``−``) negates the joint
+      variable, ``flip``, so ``"-q1"`` is joint 1, flipped.  A leading ``+`` is
+      ignored
+    - joint indices count from zero.  If the names count from one, as ``"A1"`` to
+      ``"A6"`` of a Kuka arm do, end the name with an underscore: ``"A1_"`` is
+      joint 0, and ``"-A1_"`` is joint 0, flipped.  The underscore is not part of
+      the name that is displayed
+    - a string with no number, such as ``"joint"``, is a variable joint that is
+      numbered automatically
+    - a string that is a number, such as ``"1.5"``, is a constant
+    - ``jindex`` and ``flip`` must not also be given
+
+    The name is shown when the transform is displayed, ``Rz(A1)``.
+
+    .. note:: A robot built from names ``"A1"`` to ``"A6"``, without the
+        underscores, has joint indices 1 to 6, and is rejected as the index 6 is
+        out of range for 6 joints.
+
+    .. versionchanged:: 1.5.0
+        A trailing underscore, and the Unicode minus sign, are accepted.
+    """
+
     def __init__(
         self,
         axis: str,
@@ -113,7 +176,7 @@ class BaseET:
                         "joint descriptor for `param`"
                     )
                 jindex, flip = _parse_joint_descriptor(descriptor)
-                self._joint_name = descriptor
+                self._joint_name = _joint_display_name(descriptor)
                 param = None
 
         flip = bool(flip)  # None (not given, and not set above) -> False

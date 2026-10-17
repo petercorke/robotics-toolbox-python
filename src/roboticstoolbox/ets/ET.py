@@ -182,7 +182,7 @@ class ET(BaseET):
         """
         Pure rotation about the x-axis
 
-        :param param: rotation about the x-axis
+        :param param: rotation about the x-axis, or a joint name such as ``"q2"``, see :class:`~roboticstoolbox.ets._ET.BaseET`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -217,7 +217,7 @@ class ET(BaseET):
         """
         Pure rotation about the y-axis
 
-        :param param: rotation about the y-axis
+        :param param: rotation about the y-axis, or a joint name such as ``"q2"``, see :class:`~roboticstoolbox.ets._ET.BaseET`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -252,7 +252,7 @@ class ET(BaseET):
         """
         Pure rotation about the z-axis
 
-        :param param: rotation about the z-axis
+        :param param: rotation about the z-axis, or a joint name such as ``"q2"``, see :class:`~roboticstoolbox.ets._ET.BaseET`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -286,7 +286,7 @@ class ET(BaseET):
         """
         Pure translation along the x-axis
 
-        :param param: translation distance along the x-axis
+        :param param: translation distance along the x-axis, or a joint name such as ``"q2"``, see :class:`~roboticstoolbox.ets._ET.BaseET`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
@@ -331,7 +331,7 @@ class ET(BaseET):
         """
         Pure translation along the y-axis
 
-        :param param: translation distance along the y-axis
+        :param param: translation distance along the y-axis, or a joint name such as ``"q2"``, see :class:`~roboticstoolbox.ets._ET.BaseET`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform

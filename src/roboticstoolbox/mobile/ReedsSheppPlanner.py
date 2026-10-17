@@ -374,14 +374,8 @@ def generate_local_course(
             ind, l, m, max_curvature, ox, oy, oyaw, px, py, pyaw, directions
         )
 
-    # remove unused data
-    while abs(px[-1]) < 1e-10:
-        px.pop()
-        py.pop()
-        pyaw.pop()
-        directions.pop()
-
-    return px, py, pyaw, directions
+    # Zero is a valid coordinate, so trim by the last written sample index.
+    return px[: ind + 1], py[: ind + 1], pyaw[: ind + 1], directions[: ind + 1]
 
 
 def pi_2_pi(angle: float) -> float:

@@ -384,7 +384,7 @@ class ETS2(BaseETS[ET2]):
             # append
             if l > 1:
                 T[k, :, :] = Tk
-                # ret.append(SE2(Tk, check=False))  # type: ignore
+                # ret.append(SE2(Tk, check=False))
             else:
                 T = Tk
                 # ret = SE2(Tk, check=False)
@@ -401,7 +401,7 @@ class ETS2(BaseETS[ET2]):
         J = np.zeros((3, self.n))
         etjoints = self.joint_idx()
 
-        if not np.all(np.array([self[i].jindex for i in etjoints])):
+        if any(self[i].jindex is None for i in etjoints):
             # not all joints have a jindex it is required, set them
             for j in range(self.n):
                 i = etjoints[j]
@@ -431,6 +431,9 @@ class ETS2(BaseETS[ET2]):
                 dTdq = np.array([[0, 0, 0], [0, 0, 1], [0, 0, 0]])
             else:  # pragma: nocover
                 raise TypeError("Invalid axes")
+
+            if self[i].isflip:
+                dTdq = -dTdq
 
             E0 = ETS2(self[:i])
             if len(E0) > 0:

@@ -2,23 +2,9 @@ from __future__ import annotations
 
 from typing import Any, NamedTuple
 
-try:
-    from pgraph import DGraph, DVertex, Edge
-except ImportError:
-
-    class _PGraphMissing:  # pragma: no cover
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
-            raise ImportError(
-                "LatticePlanner requires optional dependency 'pgraph'. "
-                "Install it with: pip install pgraph-python"
-            )
-
-    DGraph = _PGraphMissing
-    DVertex = _PGraphMissing
-    Edge = _PGraphMissing
-
 import matplotlib.pyplot as plt
 import numpy as np
+from pgraph import DGraph, Edge, Vertex
 from spatialmath import SE2
 
 from spatialmath.base.types import ArrayLike3
@@ -51,7 +37,7 @@ def make_arc(dir: str, radius: float = 1, npoints: int = 20) -> NDArray:
 arcs: dict[str, NDArray] = {}
 
 
-class LatticeVertex(DVertex):
+class LatticeVertex(Vertex):
     def __init__(
         self,
         move: str | None = None,

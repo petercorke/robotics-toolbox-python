@@ -18,6 +18,7 @@ import roboticstoolbox as rp
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
+from roboticstoolbox.tools.plot import set_window_title
 from roboticstoolbox.tools.types import ArrayLike
 
 # from roboticstoolbox.tools import Ticker
@@ -90,11 +91,11 @@ class PyPlot(Connector):
     fig: Any  # the Matplotlib figure, set by launch()
     timer: Any  # time display, set by launch()
     limits: ArrayLike | None
-    sim_time: float
 
     def __init__(self) -> None:
 
         super(PyPlot, self).__init__()
+        self.sim_time: float = 0
         self.robots: list[RobotPlot] = []
         self.ellipses: list[EllipsePlot] = []
         self.shapes: list[ShapePlot] = []
@@ -192,9 +193,7 @@ class PyPlot(Connector):
                 self.fig = plt.figure(name)
             else:
                 self.fig = fig
-                manager = getattr(self.fig.canvas, "manager", None)
-                if manager is not None and hasattr(manager, "set_window_title"):
-                    manager.set_window_title(name)
+                set_window_title(self.fig, name)
 
             # Create a 3D axes
             self.ax = self.fig.add_subplot(111, projection="3d", proj_type=projection)
@@ -206,11 +205,10 @@ class PyPlot(Connector):
             self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
 
         self.ax.set_facecolor("white")
-        manager = getattr(self.ax.figure.canvas, "manager", None)
-        if manager is not None and hasattr(manager, "set_window_title"):
-            manager.set_window_title(
-                f"Robotics Toolbox for Python (Figure {self.ax.figure.number})"
-            )
+        set_window_title(
+            self.ax.figure,
+            f"Robotics Toolbox for Python (Figure {self.ax.figure.number})",
+        )
 
         self.ax.set_xbound(-0.5, 0.5)
         self.ax.set_ybound(-0.5, 0.5)
