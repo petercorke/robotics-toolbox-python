@@ -38,7 +38,7 @@ class ETS2(BaseETS[ET2]):
     - ``ET2.XY(η, 'deg')`` as above but the angle is expressed in degrees
     - ``ET2.XY()`` is a joint variable, the value is left free until evaluation
       time
-    - ``ET2.XY(j=J)`` as above but the joint index is explicitly given, this
+    - ``ET2.XY(jindex=J)`` as above but the joint index is explicitly given, this
       might correspond to the joint number of a multi-joint robot.
     - ``ET2.XY(flip=True)`` as above but the joint moves in the opposite sense
 
@@ -48,12 +48,10 @@ class ETS2(BaseETS[ET2]):
 
         .. runblock:: pycon
 
-            >>> from roboticstoolbox import ETS2 as ET2
-            >>> e = ET2.R(0.3)  # a single ET, rotation about z
-            >>> len(e)
-            >>> e = ET2.R(0.3) * ET2.tx(2)  # an ETS
+            >>> from roboticstoolbox import ET2
+            >>> e = ET2.R(0.3) * ET2.tx(2)  # an ETS2
             >>> len(e)                      # of length 2
-            >>> e[1]                        # an ET sliced from the ETS
+            >>> e[1]                        # an ET2 indexed from the ETS2
 
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
@@ -349,6 +347,15 @@ class ETS2(BaseETS[ET2]):
         self,
         q: ArrayLike,
     ) -> NDArray:
+        """
+        Manipulator Jacobian in the base frame
+
+        :param q: the joint coordinates
+        :returns: the Jacobian, rows are :math:`(v_x, v_y, \\omega)`, one column
+            per joint
+
+        .. note:: This is a simple, not efficient, implementation.
+        """
         # very inefficient implementation, just put a 1 in last row
         # if its a rotation joint
         j = 0

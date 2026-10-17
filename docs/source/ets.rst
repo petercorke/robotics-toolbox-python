@@ -1,11 +1,36 @@
-Elementary transform sequence (ETS) models
-==========================================
+Elementary transform sequences
+==============================
 
 .. codeauthor:: Jesse Haviland
 
 Elementary transforms are canonic rotations or translations about, or along,
 the x-, y- or z-axes.  The amount of rotation or translation can be a constant
-or a variable.  A variable amount corresponds to a joint.
+or a variable.  A variable amount corresponds to a joint.  A sequence of them
+is an *elementary transform sequence* (ETS), and describes the kinematics of a
+serial-link robot arm, or of one link of a branched manipulator.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 22 30 30
+
+   * - 
+     - Class
+     - Element
+     - Sequence
+   * - 3D
+     - :doc:`ets_3d`
+     - :class:`~roboticstoolbox.ets.ET.ET`, an :math:`\SE{3}` transform
+     - :class:`~roboticstoolbox.ets.ETS.ETS`
+   * - 2D
+     - :doc:`ets_2d`
+     - :class:`~roboticstoolbox.ets.ET2.ET2`, an :math:`\SE{2}` transform
+     - :class:`~roboticstoolbox.ets.ETS2.ETS2`
+
+.. toctree::
+   :maxdepth: 2
+
+   ets_3d
+   ets_2d
 
 Consider the example:
 
@@ -19,18 +44,17 @@ Consider the example:
    >>> print(e)
    >>> e.fkine([])
 
-In lines 2-5 we defined two elementary transforms.  Line 2 defines a rotation
-of 45° about the x-axis, and line 4 defines a translation of 0.75m along the z-axis.
-Compounding them in line 6, the result is the two elementary transforms in a
-sequence - an elementary transform sequence (ETS).  An ETS can be arbitrarily
-long.
+Lines 2 and 3 each define one elementary transform: a rotation of 45° about the
+x-axis, and a translation of 0.75m along the z-axis.  Multiplying two
+elementary transforms, as in line 4, gives an elementary transform sequence (an
+:class:`~roboticstoolbox.ets.ETS.ETS`) of length two.  An ETS can be
+arbitrarily long.
 
-Line 8 *evaluates* the forward kinematics of the sequence, substituting in values,
-and the result is an SE(3) matrix encapsulated in an ``4x4`` numpy array.
+Line 6 *evaluates* the forward kinematics of the sequence, substituting in
+values, and the result is an :class:`~spatialmath.pose3d.SE3` object.
 
 The real power comes from having variable arguments to the elementary transforms
 as shown in this example where we define a simple two link planar manipulator.
-
 
 .. runblock:: pycon
    :linenos:
@@ -46,20 +70,28 @@ as shown in this example where we define a simple two link planar manipulator.
 Line 2 succinctly describes the kinematics in terms of elementary transforms: a
 rotation around the z-axis by the first joint angle, then a translation in the
 x-direction, then a rotation around the z-axis by the second joint angle, and
-finally a translation in the x-direction.
+finally a translation in the x-direction.  A transform created without an
+argument, like ``ET.Rz()``, is *variable*: it is a joint.
 
-Line 3 creates the elementary transform sequence, with variable transforms.
-``e`` is a single object that encapsulates a list of elementary transforms, and list like 
-methods such as ``len`` as well as indexing and slicing as shown in lines 5-8.
+``e`` is a single object that encapsulates a list of elementary transforms, and
+it has list-like methods such as ``len`` as well as indexing and slicing, as
+shown in lines 4 and 5.  Lines 6 and 7 *evaluate* the sequence, substituting
+elements from the passed array as the joint variables.
 
-Lines 9-18 *evaluate* the sequence, and substitutes elements from the passed
-arrays as the joint variables.
+This approach is general enough to describe any serial-link robot manipulator.
+For a branched manipulator we can use an ETS to describe the connection between
+every parent and child link pair.
 
-This approach is general enough to be able to describe any serial-link robot
-manipulator.  For a branched manipulator we can use ETS to describe the
-connections between every parent and child link pair.
+A joint is a variable transform, and the number of joints in the sequence is its
+``n``.  Joint values are passed to the sequence as a vector, and a joint can
+also be *flipped* (its sign reversed) and have *joint limits*.  The ETS joint
+index rules, including the descriptor strings such as ``"q2"`` or ``"-theta3"``,
+are described with :ref:`ets-descriptors`.
 
-The ETS inherits list-like properties and has methods like ``reverse`` and ``pop``.
+A sequence converts to a robot with :class:`~roboticstoolbox.robot.Robot.Robot`,
+and a robot returns the sequence between two of its links with its ``ets``
+method.  The inverse kinematics of a sequence are described on the
+:ref:`IK <IK>` page.
 
 **Reference:**
 
@@ -132,20 +164,3 @@ Joint values and named constants can be symbolic.
 .. autofunction:: roboticstoolbox.tools.trchain.trchain
 
 .. autofunction:: roboticstoolbox.tools.trchain.trchain2
-
-ETS - 3D
---------
-
-.. autoclass:: roboticstoolbox.ets.ETS.ETS
-   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jindex_set, split, inv, compile, insert, fkine, jacob0, jacobe, hessian0, hessiane
-   :undoc-members:
-   :show-inheritance:
-   :member-order: bysource
-
-ETS - 2D
---------
-
-.. autoclass:: roboticstoolbox.ets.ETS2.ETS2
-   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jindex_set, split, inv, compile, insert, fkine, jacob0, jacobe
-   :undoc-members:
-   :show-inheritance:

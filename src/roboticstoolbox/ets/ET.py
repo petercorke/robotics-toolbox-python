@@ -154,6 +154,12 @@ class ET(BaseET):
 
     @property
     def s(self) -> ndarray:  # pragma: nocover
+        """
+        Motion subspace of the joint
+
+        :returns: the 6-vector :math:`(v, \\omega)` that is the unit twist of
+            the transform: a unit translation or a unit rotation about the axis
+        """
         if self.kind[1] == "x":
             if self.kind[0] == "R":
                 return array([0, 0, 0, 1, 0, 0])

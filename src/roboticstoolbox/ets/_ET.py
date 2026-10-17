@@ -548,9 +548,9 @@ class BaseET:
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx()
-            >>> e.T(1)
+            >>> e.A(1)
             >>> eflip = ET.tx(flip=True)
-            >>> eflip.T(1)
+            >>> eflip.A(1)
 
         """
 
@@ -572,7 +572,7 @@ class BaseET:
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.isrotation
-            >>> e = ET.rx()
+            >>> e = ET.Rx()
             >>> e.isrotation
 
         """
@@ -595,7 +595,7 @@ class BaseET:
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.istranslation
-            >>> e = ET.rx()
+            >>> e = ET.Rx()
             >>> e.istranslation
 
         """
@@ -604,6 +604,12 @@ class BaseET:
 
     @property
     def qlim(self) -> ndarray | None:
+        """
+        Joint limits
+
+        :returns: the joint limits as a 2-vector ``[lower, upper]``, or None if
+            the transform has no limits
+        """
         return self._qlim
 
     @qlim.setter
@@ -631,7 +637,7 @@ class BaseET:
             >>> from roboticstoolbox import ET
             >>> e = ET.tx()
             >>> print(e)
-            >>> e = ET.tx(j=3)
+            >>> e = ET.tx(jindex=3)
             >>> print(e)
             >>> print(e.jindex)
 

@@ -35,6 +35,12 @@ class ET2(BaseET):
 
     @property
     def s(self) -> ndarray:  # pragma: nocover
+        """
+        Motion subspace of the joint
+
+        :returns: the unit twist of the transform, a unit translation or a unit
+            rotation
+        """
         if self.kind[0] == "R":
             return array([0, 0, 0, 1])
         if self.kind[1] == "x":
