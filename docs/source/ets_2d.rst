@@ -25,7 +25,7 @@ Creating an elementary transform
 The constructors ``R``, ``tx`` and ``ty`` take the same arguments as their
 3D equivalents on the :doc:`ets_3d` page: no argument for a joint, a number for
 a constant, ``'deg'`` for a rotation in degrees, ``flip``, ``jindex`` and
-``qlim``.  The amount can also be a joint descriptor string, with the same
+``qlim``.  The angle or distance can also be a joint descriptor string, with the same
 rules, see :ref:`ets-descriptors`.
 
 .. runblock:: pycon

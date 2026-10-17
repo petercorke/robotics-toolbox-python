@@ -2,9 +2,9 @@ ET and ETS: 3D
 ==============
 
 An :class:`~roboticstoolbox.ets.ET.ET` is one elementary :math:`\SE{3}`
-transform: a rotation about, or a translation along, the x-, y- or z-axis.  Its
-amount is either a constant or, if it is left out, a variable, which makes the
-transform a joint.  An :class:`~roboticstoolbox.ets.ETS.ETS` is a sequence of
+transform: a rotation about, or a translation along, the x-, y- or z-axis.  The
+angle or distance is either a constant or, if it is left out, a variable, which
+makes the transform a joint.  An :class:`~roboticstoolbox.ets.ETS.ETS` is a sequence of
 them.  The two-dimensional equivalents are on the :doc:`ets_2d` page.
 
 .. runblock:: pycon
@@ -108,7 +108,7 @@ Kinematics
 Joint descriptors
 ^^^^^^^^^^^^^^^^^
 
-The amount of a transform can also be a *string* that names a joint.  This is
+The angle or distance of a transform can also be a *string* that names a joint.  This is
 convenient when a robot is written down from a datasheet or a URDF, where joints
 have names such as ``q1``, ``theta2`` or ``A3``.  The string is parsed once, when
 the transform is created, into the joint index, whether the joint is flipped,
