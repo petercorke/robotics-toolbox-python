@@ -13,6 +13,7 @@ from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from colored import attr, fg
 from matplotlib import animation
@@ -699,7 +700,10 @@ class PlannerBase:
         :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value previously set
         :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value previously set.  The planner's own goal is not changed.
         :param ax: axes to plot into, defaults to a new axes
-        :param block: block after displaying the plot, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param bgargs: arguments passed to :meth:`plot_bg`, defaults to None
         :param labels: write the distance value in each cell of the distance
             field, defaults to False.  Useful for small grids, see
@@ -805,6 +809,9 @@ class PlannerBase:
             ``labelvalues`` is deprecated, use ``labels``.  It is the name used
             in the book, where it had no effect.
 
+        .. versionchanged:: 1.5.0
+            ``block=False`` shows the figure without waiting, as documented. It used to do nothing,
+            the same as ``None``.
         """
         _warn_unused(unused)
         # deprecated names, mapped to the new ones
@@ -1014,8 +1021,7 @@ class PlannerBase:
         else:
             ax.set_zlabel(r"$\theta$")  # type: ignore[union-attr]
 
-        if block:
-            plt.show(block=block)
+        apply_block(block)
 
         return ax
 
@@ -1070,7 +1076,10 @@ class PlannerBase:
         :param ax: axes to plot into, defaults to the current axes
         :param inflated: show the inflated obstacles, defaults to True
         :param colorbar: show a colorbar for the distance field, defaults to True
-        :param block: block after displaying the plot, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param colorbar_style: options for the colorbar, passed to
             :meth:`matplotlib.figure.Figure.colorbar`, defaults to None.  The
             label defaults to "Distance".
