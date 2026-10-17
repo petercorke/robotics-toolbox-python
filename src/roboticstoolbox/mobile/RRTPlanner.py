@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 
 # import rvcprint
 import numpy as np
@@ -148,8 +149,10 @@ class RRTPlanner(PlannerBase):
         :param showvalid: display valid configurations as vehicle polygons overlaid on the map, defaults to False
         :param animate: update the display as configurations are tested,
             defaults to the planner's :attr:`animate`
-        :param block: block until the figure is closed when not animating,
-            defaults to None which does not show the figure
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed (only when not animating); ignored by notebook backends,
+            defaults to None
         :param movie: save the animation as a movie file, filename or tuple
             (filename, frame interval), defaults to the planner's :attr:`movie`.
             Implies ``animate``.
@@ -233,8 +236,7 @@ class RRTPlanner(PlannerBase):
         self.animation_end()
 
         if (showvalid or showsamples) and not animating:
-            if block is not None:
-                plt.show(block=block)
+            apply_block(block)
 
         self.progress_end()
 

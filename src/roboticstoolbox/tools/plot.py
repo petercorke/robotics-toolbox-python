@@ -33,6 +33,35 @@ except ImportError:  # pragma: no cover
         return False
 
 
+def apply_block(block: bool | None) -> None:
+    """
+    Apply the ``block`` argument of a plot method: whether to show the figure and wait
+
+    :param block: ``None`` does nothing, ``False`` shows the figures and returns at
+        once, ``True`` shows them and waits until the windows are closed
+
+    This is the one place that turns ``block`` into a Matplotlib call, so that every
+    plot method in the toolbox treats it the same way:
+
+    =========  ===========================  ====================================
+    ``block``  call                         use
+    =========  ===========================  ====================================
+    ``None``   none                         leave showing the figure to the
+                                            environment, eg. a notebook
+    ``False``  ``plt.show(block=False)``    show the figure, carry on
+    ``True``   ``plt.show(block=True)``     show the figure, wait until closed
+    =========  ===========================  ====================================
+
+    ``None`` is not Matplotlib's ``block=None``, which shows the figure and decides
+    for itself whether to wait.  Notebook backends (``inline``, ``ipympl``) ignore
+    the argument.  See the RVC ecosystem ``notebooks.md``.
+
+    .. versionadded:: 1.5.0
+    """
+    if block is not None:
+        plt.show(block=block)
+
+
 def xplot(
     x: Any,
     y: Any = None,
@@ -57,8 +86,10 @@ def xplot(
     :param unwrap: unwrap joint angles so that they smoothly increase or
         decrease when they pass through :math:`\pm \pi`
     :type unwrap: bool
-    :param block: block until the plot is closed
-    :type block: bool
+    :param block: ``None`` leaves showing the figure to the environment (no
+        ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+        it and waits until it is closed; ignored by notebook backends,
+        defaults to False
     :param labels: legend labels
     :type labels: list of str, or single string with space separated labels
     :param kwargs: options passed to pyplot.plot
@@ -80,6 +111,10 @@ def xplot(
         >>> qplot(q, x, labels='x y z')
 
     :seealso: :func:`jtraj`, :func:`numpy.unwrap`
+
+    .. versionchanged:: 1.5.0
+        ``block=None`` does not call ``plt.show``, as documented. It used to call
+        ``plt.show(block=None)``, which waits in a script. The default, ``False``, is unchanged.
     """
     if y is None:
         q = x
@@ -135,6 +170,6 @@ def xplot(
         ax.set_ylabel("Joint coordinates (rad,m)")
         # ax.set_xlim(t[0], t[-1])  fails with RVC3 Sec 3.3.3
 
-    plt.show(block=block)
+    apply_block(block)
 
     return fig.get_axes()
