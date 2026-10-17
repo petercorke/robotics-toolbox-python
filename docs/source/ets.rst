@@ -9,20 +9,17 @@ serial-link robot arm, or of one link of a branched manipulator.
 
 .. list-table::
    :header-rows: 1
-   :widths: 18 22 30 30
+   :widths: 30 35 35
 
-   * - 
-     - Class
-     - Element
+   * - Page
      - Sequence
-   * - 3D
-     - :doc:`ets_3d`
-     - :class:`~roboticstoolbox.ets.ET.ET`, an :math:`\SE{3}` transform
+     - Element
+   * - :doc:`3D <ets_3d>`
      - :class:`~roboticstoolbox.ets.ETS.ETS`
-   * - 2D
-     - :doc:`ets_2d`
-     - :class:`~roboticstoolbox.ets.ET2.ET2`, an :math:`\SE{2}` transform
+     - :class:`~roboticstoolbox.ets.ET.ET`, an :math:`\SE{3}` transform
+   * - :doc:`2D <ets_2d>`
      - :class:`~roboticstoolbox.ets.ETS2.ETS2`
+     - :class:`~roboticstoolbox.ets.ET2.ET2`, an :math:`\SE{2}` transform
 
 .. toctree::
    :maxdepth: 2
