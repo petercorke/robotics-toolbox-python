@@ -5,6 +5,7 @@ from collections.abc import Callable
 from typing import Any, Literal, overload
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import (
@@ -182,7 +183,10 @@ class Trajectory:
         """
         Plot trajectory
 
-        :param block: wait till plot is dismissed
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to False
         :param plotargs: Matplotlib options for the plotted lines
         :param textargs: Matplotlib options for the axis labels
 
@@ -194,6 +198,10 @@ class Trajectory:
         - ``jtraj`` general m-axis trajectory, show legend
 
         :seealso: :func:`~quintic`, :func:`~trapezoidal`
+
+        .. versionchanged:: 1.5.0
+            ``block=None`` does not call ``plt.show``, as documented. It used to call
+            ``plt.show(block=None)``, which waits in a script. The default, ``False``, is unchanged.
         """
 
         plotopts: dict[str, Any] = {"marker": "o", "markersize": 3}
@@ -285,7 +293,7 @@ class Trajectory:
                 ax.set_ylabel("$d^2q/dk^2$", **textopts)
                 ax.set_xlabel("k (step)")
 
-        plt.show(block=block)
+        apply_block(block)
 
     def qplot(self, **kwargs: Any) -> None:
         """

@@ -11,6 +11,7 @@ import warnings
 from typing import Any
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from matplotlib import colormaps
 from spatialmath import base
@@ -363,8 +364,10 @@ class DistanceTransformPlanner(PlannerBase):
         :type path: ndarray(N,2)
         :param path_style: dictionary of Matplotlib line options for the path,
             defaults to None
-        :param block: block until the figure is closed, defaults to True; None
-            returns without showing the figure
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to True
         :param ls: deprecated, use ``path_style``
         :raises ValueError: no plan has been computed
         :return: Matplotlib 3D axes
@@ -416,8 +419,7 @@ class DistanceTransformPlanner(PlannerBase):
         plt.xlabel("x")
         plt.ylabel("y")
         ax.set_zlabel("z")
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
         return ax
 
 

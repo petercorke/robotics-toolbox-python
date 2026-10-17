@@ -13,6 +13,7 @@ from math import cos, pi, sin, tan
 from typing import Any, Callable, TypeAlias
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from matplotlib import animation
 from matplotlib.axes import Axes
@@ -1059,7 +1060,10 @@ class VehicleBase(ABC):
         """
         Plot xy-path from history
 
-        :param block: block until plot dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param args: positional arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
 
@@ -1070,14 +1074,16 @@ class VehicleBase(ABC):
         """
         xyt = self.x_hist
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_xyt(self, block: bool | None = None, **kwargs: Any) -> None:
         """
         Plot configuration vs time from history
 
-        :param block: block until plot dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
 
         The :math:`(x,y, \theta)` trajectory from the simulation history is plotted
@@ -1090,8 +1096,7 @@ class VehicleBase(ABC):
         plt.plot(t, xyt, **kwargs)
         plt.xlabel("time (s)")
         plt.legend(["x", "y", "$\\theta$"])
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
 
 # ========================================================================= #
