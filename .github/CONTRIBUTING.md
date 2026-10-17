@@ -13,6 +13,15 @@ Please use the issue template and include:
 
 Issues labelled [`good first issue`](https://github.com/petercorke/robotics-toolbox-python/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or [`help wanted`](https://github.com/petercorke/robotics-toolbox-python/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) are a good place to start.
 
+## Before you open a pull request
+
+Several people (and AI coding agents) often pick up the same issue at about the same time, which wastes everyone's effort. To avoid duplicates:
+
+1. **Check for existing work.** Look at the linked pull requests on the issue page, and search open PRs, for example `gh pr list --state open --search "#123"`. If a PR for the same issue already exists, review it or suggest improvements there instead of opening a competing one.
+2. **Claim the issue.** Comment on the issue to say you are working on it. For larger items, the maintainer may assign the issue to you as an "in progress" marker; if you stop working on it, please say so, so someone else can take it.
+3. **Say if you used AI assistance.** AI-assisted contributions are welcome, but please state it in the PR description, and make sure you have read, run and understood the change yourself.
+4. **Flag behaviour changes.** If a change alters numerical results or public behaviour, say so explicitly in the PR description, even if it is a bug fix.
+
 ## Contributing code
 
 - Keep pull requests scoped to a single feature or fix. If you have several unrelated changes, open separate PRs so each can be reviewed and merged independently.
