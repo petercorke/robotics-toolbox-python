@@ -204,7 +204,7 @@ class ETS2(BaseETS[ET2]):
 
     def fkine(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE2 | None = None,
         tool: NDArray | SE2 | None = None,
         include_base: bool = True,
@@ -212,7 +212,7 @@ class ETS2(BaseETS[ET2]):
         """
         Forward kinematics
 
-        :param q: joint coordinates
+        :param q: joint coordinates, optional for a sequence with no joints
         :param base: base transform, optional
         :param tool: tool transform, optional
         :returns: transformation matrix representing the end-effector pose
@@ -252,7 +252,7 @@ class ETS2(BaseETS[ET2]):
 
     def eval(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE2 | None = None,
         tool: NDArray | SE2 | None = None,
         include_base: bool = True,
@@ -260,7 +260,7 @@ class ETS2(BaseETS[ET2]):
         """
         Forward kinematics (returns raw ndarray)
 
-        :param q: joint coordinates
+        :param q: joint coordinates, optional for a sequence with no joints
         :param base: base transform, optional
         :param tool: tool transform, optional
         :returns: transformation matrix representing the end-effector pose
@@ -282,6 +282,9 @@ class ETS2(BaseETS[ET2]):
 
         - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
         """
+
+        if q is None:
+            q = []
 
         q = self._resolve_q(q, allow_trajectory=True)
         l, _ = q.shape
