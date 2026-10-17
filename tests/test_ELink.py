@@ -135,6 +135,189 @@ class TestLink(unittest.TestCase):
         with self.assertRaises(ValueError):
             link.closest_point(shape)
 
+    def test_rejected_scene_group_preserves_ownership(self) -> None:
+        for attribute in ("geometry", "collision"):
+            with self.subTest(attribute=attribute):
+                shape = gm.Cuboid([1, 1, 1], pose=sm.SE3(1, 2, 3))
+                link = rtb.Link(geometry=[shape])
+                ancestor = gm.SceneGroup([link])
+                root = gm.SceneGroup([ancestor])
+                root.T = sm.SE3(10, 0, 0)
+                root.update()
+                geometry, collision = link.geometry, link.collision
+                nodes = (root, ancestor, link, geometry, collision, shape)
+                states = [
+                    (
+                        node.scene_parent,
+                        tuple(node.scene_children),
+                        node._T.copy(),
+                        node._wT.copy(),
+                    )
+                    for node in nodes
+                ]
+
+                with self.assertRaises(ValueError):
+                    setattr(link, attribute, ancestor)
+
+                self.assertIs(link.geometry, geometry)
+                self.assertIs(link.collision, collision)
+                for node, (parent, children, local, world) in zip(nodes, states):
+                    self.assertIs(node.scene_parent, parent)
+                    self.assertEqual(len(node.scene_children), len(children))
+                    for actual, expected in zip(node.scene_children, children):
+                        self.assertIs(actual, expected)
+                    nt.assert_array_equal(node._T, local)
+                    nt.assert_array_equal(node._wT, world)
+                root.update()
+                for node, (_, _, _, world) in zip(nodes, states):
+                    nt.assert_array_equal(node._wT, world)
+
+    def test_replace_empty_scene_groups(self) -> None:
+        link = rtb.Link()
+        geometry = link.geometry
+        collision = gm.SceneGroup()
+        link.collision = collision
+        self.assertIs(link.scene_children[0], geometry)
+        self.assertIs(link.scene_children[1], collision)
+        self.assertIs(geometry.scene_parent, link)
+        self.assertIs(collision.scene_parent, link)
+
+    def test_transfer_scene_group_between_links(self) -> None:
+        for attribute in ("geometry", "collision"):
+            with self.subTest(attribute=attribute):
+                previous = rtb.Link()
+                link = rtb.Link()
+                shape = gm.Cuboid([1, 1, 1])
+                group = gm.SceneGroup([shape])
+                setattr(previous, attribute, group)
+                setattr(link, attribute, group)
+                self.assertIs(group.scene_parent, link)
+                self.assertFalse(
+                    any(child is group for child in previous.scene_children)
+                )
+                self.assertEqual(
+                    sum(child is group for child in link.scene_children), 1
+                )
+                link.T = sm.SE3(10, 0, 0)
+                link.update()
+                nt.assert_allclose(shape._wT[:3, 3], [10, 0, 0])
+                previous.T = sm.SE3(20, 0, 0)
+                previous.update()
+                nt.assert_allclose(shape._wT[:3, 3], [10, 0, 0])
+
+    def test_assign_other_scene_group(self) -> None:
+        for target, source in (("geometry", "collision"), ("collision", "geometry")):
+            with self.subTest(target=target):
+                link = rtb.Link()
+                old_group = getattr(link, target)
+                group = getattr(link, source)
+                setattr(link, target, group)
+                self.assertIs(getattr(link, target), group)
+                self.assertIs(group.scene_parent, link)
+                self.assertIsNone(old_group.scene_parent)
+                self.assertEqual(len(link.scene_children), 1)
+                self.assertEqual(
+                    len({id(child) for child in link.scene_children}),
+                    len(link.scene_children),
+                )
+                self.assertIs(link.scene_children[0], group)
+
+    def test_replace_shared_scene_group(self) -> None:
+        for target, source in (("geometry", "collision"), ("collision", "geometry")):
+            with self.subTest(target=target):
+                link = rtb.Link()
+                shape = gm.Cuboid([1, 1, 1], pose=sm.SE3(1, 2, 3))
+                group = gm.SceneGroup([shape])
+                setattr(link, source, group)
+                setattr(link, target, group)
+                setattr(link, target, gm.SceneGroup())
+                self.assertIs(getattr(link, source), group)
+                self.assertIs(group.scene_parent, link)
+                self.assertEqual(
+                    sum(child is group for child in link.scene_children), 1
+                )
+                link.T = sm.SE3(10, 0, 0)
+                link.update()
+                nt.assert_allclose(shape._wT[:3, 3], [11, 2, 3])
+
+    def test_replace_transferred_scene_group_on_former_owner(self) -> None:
+        for attribute in ("geometry", "collision"):
+            with self.subTest(attribute=attribute):
+                previous = rtb.Link()
+                link = rtb.Link()
+                shape = gm.Cuboid([1, 1, 1], pose=sm.SE3(1, 2, 3))
+                group = gm.SceneGroup([shape])
+                setattr(previous, attribute, group)
+                setattr(link, attribute, group)
+                setattr(previous, attribute, gm.SceneGroup())
+                self.assertIs(group.scene_parent, link)
+                self.assertFalse(
+                    any(child is group for child in previous.scene_children)
+                )
+                self.assertEqual(
+                    sum(child is group for child in link.scene_children), 1
+                )
+                link.T = sm.SE3(10, 0, 0)
+                link.update()
+                previous.T = sm.SE3(20, 0, 0)
+                previous.update()
+                group.update()
+                nt.assert_allclose(shape._wT[:3, 3], [11, 2, 3])
+
+    @skip_no_collision_checking
+    def test_standalone_collision_tracks_pose(self) -> None:
+        for replace_groups in (False, True):
+            with self.subTest(replace_groups=replace_groups):
+                col = gm.Cuboid([1, 1, 1])
+                geom = gm.Cuboid([1, 1, 1])
+                link = rtb.Link(
+                    rtb.ETS(rtb.ET.Rz()), geometry=[geom], collision=[col]
+                )
+                if replace_groups:
+                    old_geometry = link.geometry
+                    old_collision = link.collision
+                    link.geometry = gm.SceneGroup([geom])
+                    link.collision = gm.SceneGroup([col])
+                    self.assertIsNone(old_geometry.scene_parent)
+                    self.assertIsNone(old_collision.scene_parent)
+                    self.assertFalse(
+                        any(child is old_geometry for child in link.scene_children)
+                    )
+                    self.assertFalse(
+                        any(child is old_collision for child in link.scene_children)
+                    )
+                    link.geometry = link.geometry
+                    link.collision = link.collision
+                self.assertEqual(len(link.scene_children), 2)
+                self.assertIs(link.geometry.scene_parent, link)
+                self.assertIs(link.collision.scene_parent, link)
+                probe = gm.Cuboid([1, 1, 1], pose=sm.SE3(10, 0, 0))
+
+                for x, collided in ((0, False), (10, True), (0, False)):
+                    link.T = sm.SE3(x, 0, 0)
+                    link.update()
+                    probe.update()
+                    self.assertEqual(link.iscollided(probe, skip=True), collided)
+                    distance, _, _ = link.closest_point(probe, skip=True)
+                    if collided:
+                        self.assertIsNotNone(distance)
+                        self.assertLess(distance, 0)
+                    else:
+                        self.assertIsNone(distance)
+                    nt.assert_allclose(col._wT[:3, 3], [x, 0, 0])
+                    nt.assert_allclose(geom._wT[:3, 3], [x, 0, 0])
+
+                robot = rtb.Robot([link])
+                robot.q = [0.0]
+                for x, collided in ((10, True), (0, False)):
+                    robot.base = sm.SE3(x, 0, 0)
+                    self.assertEqual(link.iscollided(probe), collided)
+                    distance, _, _ = link.closest_point(probe)
+                    if collided:
+                        self.assertLess(distance, 0)
+                    else:
+                        self.assertIsNone(distance)
+
     def test_friction(self):
         l0 = rtb.Link(Tc=[2, -1], B=3, G=2)
 

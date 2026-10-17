@@ -164,11 +164,11 @@ class BaseLink(SceneNode, ABC):
 
         # Link geometry
         self._geometry = SceneGroup(geometry)
-        self._scene_children.append(self._geometry)
+        self._geometry.scene_parent = self
 
         # Collision Geometry
         self._collision = SceneGroup(collision)
-        self._scene_children.append(self._collision)
+        self._collision.scene_parent = self
 
         # Link dynamic Parameters
         def dynpar(self: Any, name: Any, value: Any, default: Any) -> Any:
@@ -908,7 +908,34 @@ class BaseLink(SceneNode, ABC):
         elif isinstance(geom, Shape):
             self.geometry.scene_children.append(geom)
         elif isinstance(geom, SceneGroup):
+            self._replace_scene_group(self._geometry, geom, self._collision)
             self._geometry = geom
+
+    def _replace_scene_group(
+        self, old_group: SceneGroup, new_group: SceneGroup, other_group: SceneGroup
+    ) -> None:
+        """Replace a group attachment while preserving shared or transferred groups."""
+        # Validate before detaching either group: rejection must preserve ownership.
+        if not isinstance(new_group, SceneGroup):
+            raise TypeError("Expected a SceneGroup")
+        ancestor: SceneNode | None = self
+        while ancestor is not None:
+            if ancestor is new_group:
+                raise ValueError("Replacing this group would create a scene graph cycle")
+            ancestor = ancestor.scene_parent
+
+        if old_group.scene_parent is self and old_group is not other_group:
+            self.scene_children = [
+                child for child in self.scene_children if child is not old_group
+            ]
+            old_group._update_scene_parent(None)
+        parent = new_group.scene_parent
+        if parent is not None and parent is not self:
+            parent.scene_children = [
+                child for child in parent.scene_children if child is not new_group
+            ]
+        if not any(child is new_group for child in self.scene_children):
+            new_group.scene_parent = self
 
     @property
     def collision(self) -> SceneGroup:
@@ -935,6 +962,7 @@ class BaseLink(SceneNode, ABC):
         elif isinstance(coll, Shape):
             self.collision.scene_children.append(coll)
         elif isinstance(coll, SceneGroup):
+            self._replace_scene_group(self._collision, coll, self._geometry)
             self._collision = coll
 
     # -------------------------------------------------------------------------- #
