@@ -2057,7 +2057,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param q: The joint configuration of the robot.
         :param backend: The graphical backend to use, currently 'swift' and 'pyplot' are implemented. Defaults to 'swift' of a ``Robot`` and 'pyplot` for a ``DHRobot``
-        :param block: Block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to False
         :param dt: if q is a trajectory, this describes the delay in seconds between frames
         :param limits: Custom view limits for the plot. If not supplied will autoscale, [x1, x2, y1, y2, z1, z2] (this option is for 'pyplot' only)
         :param vellipse: (Plot Option) Plot the velocity ellipse at the end-effector (this option is for 'pyplot' only)
@@ -2192,7 +2194,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :param block: Block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param limits: Custom view limits for the plot. If not supplied will
             autoscale, [x1, x2, y1, y2, z1, z2] (this option is for
             'pyplot'/'pyplot2' only)

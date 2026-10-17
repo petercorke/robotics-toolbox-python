@@ -204,7 +204,9 @@ class RobotPlottingMPLMixin:
         Plot an ellipsoid.
 
         :param ellipse: the ellipsoid to plot
-        :param block: block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
         :param jointaxes: plot an arrow indicating the joint axis
         :param eeframe: plot the end-effector coordinate frame
@@ -250,7 +252,9 @@ class RobotPlottingMPLMixin:
         Plot the force ellipsoid for a manipulator.
 
         :param q: the joint configuration of the robot
-        :param block: block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param fellipse: a pre-built force ellipsoid to plot
         :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
         :param opt: ``'trans'`` or ``'rot'`` — plot the translational or rotational force ellipsoid
@@ -312,7 +316,9 @@ class RobotPlottingMPLMixin:
         Plot the velocity ellipsoid for a manipulator.
 
         :param q: the joint configuration of the robot
-        :param block: block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param vellipse: a pre-built velocity ellipsoid to plot
         :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
         :param opt: ``'trans'`` or ``'rot'`` — plot the translational or rotational velocity ellipsoid

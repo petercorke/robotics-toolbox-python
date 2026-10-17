@@ -10,6 +10,7 @@ import warnings
 from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from matplotlib import animation
 from scipy.linalg import block_diag
@@ -1126,7 +1127,10 @@ class EKF:
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         Plot the estimated vehicle path in the xy-plane.
 
@@ -1137,8 +1141,7 @@ class EKF:
         if xyt is None:
             raise ValueError("the vehicle pose is not part of the estimated state")
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_ellipse(
         self,
@@ -1152,7 +1155,10 @@ class EKF:
 
         :param confidence: ellipse confidence interval, defaults to 0.95
         :param N: number of ellipses to plot, defaults to 10
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param kwargs: arguments passed to :meth:`spatialmath.base.graphics.plot_ellipse`
 
         Plot ``N`` uncertainty ellipses spaced evenly along the trajectory.
@@ -1187,8 +1193,7 @@ class EKF:
                     inverted=True,
                     **kwargs,
                 )
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_error(
         self,
@@ -1206,7 +1211,10 @@ class EKF:
         :param ax: axes to plot into, one for each of :math:`(x, y, \theta)`,
             defaults to a new figure with three stacked axes
         :type ax: array_like(3) of Axes, optional
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :raises ValueError: if the vehicle pose is not part of the estimated state
 
         Plot the error between actual and estimated vehicle
@@ -1287,8 +1295,7 @@ class EKF:
             ax.set_ylabel(labels[k] + " error")
             ax.set_xlim(0, t[-1])
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def get_map(self) -> NDArray:
         """
@@ -1324,7 +1331,10 @@ class EKF:
             :func:`~spatialmath.base.graphics.plot_ellipse`, ellipses are drawn
             only if this is given
         :param confidence: ellipse confidence interval, defaults to 0.95
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param marker: deprecated, use ``marker_style``
         :param ellipse: deprecated, use ``ellipse_style``
 
@@ -1394,8 +1404,7 @@ class EKF:
                     **ellipse_style,
                 )
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def get_P(self, k: int | None = None) -> NDArray | list[NDArray]:
         """
