@@ -110,6 +110,31 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(l1.I, I1)
         nt.assert_array_almost_equal(l2.I, I2)
 
+    def test_I_from_lists(self):
+        # a 3x3 matrix, and a 9-vector, given as lists rather than arrays
+        I0 = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3]])
+
+        l0 = rtb.Link(I=[[1, 0, 0], [0, 2, 0], [0, 0, 3]])
+        l1 = rtb.Link(I=[1, 0, 0, 0, 2, 0, 0, 0, 3])
+
+        nt.assert_array_almost_equal(l0.I, I0)
+        nt.assert_array_almost_equal(l1.I, I0)
+
+        with self.assertRaises(ValueError):
+            rtb.Link(I=[[1, 2, 0], [0, 2, 0], [0, 0, 3]])  # not symmetric
+
+    @skip_no_collision_checking
+    def test_collision_checks_need_a_robot(self):
+        # a link that is not part of a robot cannot update its transform
+        link = rtb.Link()
+        shape = gm.Cuboid([1, 1, 1])
+
+        with self.assertRaises(ValueError):
+            link.iscollided(shape)
+
+        with self.assertRaises(ValueError):
+            link.closest_point(shape)
+
     def test_friction(self):
         l0 = rtb.Link(Tc=[2, -1], B=3, G=2)
 

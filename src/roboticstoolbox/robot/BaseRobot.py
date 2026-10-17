@@ -1937,15 +1937,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             segs = [link.parent]
             while True:
                 segs.append(link)
-                if link.nchildren == 0:
+                children = link.children or []
+                if len(children) == 0:
                     return [segs]
-                elif link.nchildren == 1:
-                    link = link.children[0]  # type: ignore
+                elif len(children) == 1:
+                    link = children[0]
                     continue
-                elif link.nchildren > 1:
+                elif len(children) > 1:
                     segs = [segs]  # type: ignore[list-item]
 
-                    for child in link.children:  # type: ignore
+                    for child in children:
                         segs.extend(recurse(child))
 
                     return segs
