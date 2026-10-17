@@ -146,6 +146,6 @@ ETS - 2D
 --------
 
 .. autoclass:: roboticstoolbox.ets.ETS2.ETS2
-   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jindex_set, split, inv, compile, insert, fkine, jacob0, jacobe
+   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jindex_set, split, inv, compile, insert, fkine, jacob0, jacobe, ikine_LM
    :undoc-members:
    :show-inheritance:
