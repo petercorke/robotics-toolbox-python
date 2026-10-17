@@ -338,7 +338,7 @@ class ETS2(BaseETS[ET2]):
             # append
             if l > 1:
                 T[k, :, :] = Tk
-                # ret.append(SE2(Tk, check=False))  # type: ignore
+                # ret.append(SE2(Tk, check=False))
             else:
                 T = Tk
                 # ret = SE2(Tk, check=False)

@@ -721,14 +721,15 @@ class BaseLink(SceneNode, ABC):
     @I.setter
     @_dirties_frne
     def I(self, I_new: ArrayLike) -> None:
+        I_new = np.asarray(I_new)
         if ismatrix(I_new, (3, 3)):
             # 3x3 matrix passed
-            if np.any(np.abs(I_new - I_new.T) > 1e-8):  # type: ignore
+            if np.any(np.abs(I_new - I_new.T) > 1e-8):
                 raise ValueError("3x3 matrix is not symmetric")
 
         elif isvector(I_new, 9):
             # 3x3 matrix passed as a 1d vector
-            I_new = I_new.reshape(3, 3)  # type: ignore
+            I_new = I_new.reshape(3, 3)
             if np.any(np.abs(I_new - I_new.T) > 1e-8):
                 raise ValueError("3x3 matrix is not symmetric")
 
@@ -1100,7 +1101,13 @@ class BaseLink(SceneNode, ABC):
         """
 
         if not skip:
-            self.robot._update_link_tf(self.robot.q)  # type: ignore
+            robot = self.robot
+            if robot is None:
+                raise ValueError(
+                    "the link does not belong to a robot, use skip=True to use "
+                    "its current transform"
+                )
+            robot._update_link_tf(robot.q)
             self.update()
             shape.update()
 
@@ -1133,7 +1140,13 @@ class BaseLink(SceneNode, ABC):
         """
 
         if not skip:
-            self.robot._update_link_tf(self.robot.q)  # type: ignore
+            robot = self.robot
+            if robot is None:
+                raise ValueError(
+                    "the link does not belong to a robot, use skip=True to use "
+                    "its current transform"
+                )
+            robot._update_link_tf(robot.q)
             self.update()
             shape.update()
 
