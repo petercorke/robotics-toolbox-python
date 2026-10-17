@@ -126,8 +126,12 @@ jobs:
         # version-pinning section for the full story before bumping this.
         # Once Safari (and Firefox out-of-flag) ship JSPI, revisit this pin
         # across RTB/MVTB/bdsim together.
+        # ipympl is installed here, in the build environment, so that the
+        # jupyter-matplotlib extension is bundled into the site: the notebooks
+        # use %matplotlib ipympl, and without the extension a figure is blank.
+        # (The notebooks install ipympl itself into the in-browser kernel.)
         run: |
-          pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server
+          pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server ipympl
           cd docs/lite && jupyter lite build --output-dir ../build/html/lite
 
       - name: Upload Pages artifact
