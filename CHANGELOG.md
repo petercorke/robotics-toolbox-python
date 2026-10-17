@@ -42,6 +42,93 @@ Figures regenerated with this version, for example Figure 6.10 in *Robotics,
 Vision & Control* (3rd ed.), have narrower shaded bounds than the printed ones.
 
 
+## [1.5.0](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.4...v1.5.0) (2026-10-17)
+
+
+### Features
+
+* **ets:** a trailing underscore numbers a joint name from one; document joint descriptors ([#811](https://github.com/petercorke/robotics-toolbox-python/issues/811)) ([68f525a](https://github.com/petercorke/robotics-toolbox-python/commit/68f525ab0eb597f7e962413192a174536f2a1a16))
+* **mobile:** planners ignore unknown keywords with a warning; plot(labels=True); distance= for metric ([#786](https://github.com/petercorke/robotics-toolbox-python/issues/786)) ([1a3a19f](https://github.com/petercorke/robotics-toolbox-python/commit/1a3a19f2a5206ef6bb16b735a709331da7d8dc76))
+* **typing:** ship a py.typed marker so type checkers use RTB's annotations ([#823](https://github.com/petercorke/robotics-toolbox-python/issues/823)) ([ea8b978](https://github.com/petercorke/robotics-toolbox-python/commit/ea8b978a38337216e65dfdf202947349ac949089))
+
+
+### Bug Fixes
+
+* add the payload to the end-effector link instead of overwriting it ([#699](https://github.com/petercorke/robotics-toolbox-python/issues/699)) ([79b169c](https://github.com/petercorke/robotics-toolbox-python/commit/79b169cd66f224a232165bd96755ed6e99626ecd))
+* **backends:** PyPlot backend fixes, Connector as a Protocol, one window-title helper ([#788](https://github.com/petercorke/robotics-toolbox-python/issues/788)) ([dcb7982](https://github.com/petercorke/robotics-toolbox-python/commit/dcb79824e825510364301c8ef23dc74f26638f14))
+* **blocks:** DiffSteer NameError and VehiclePlot shared defaults, with types and docstrings ([#775](https://github.com/petercorke/robotics-toolbox-python/issues/775)) ([f59eee8](https://github.com/petercorke/robotics-toolbox-python/commit/f59eee81bfbd18eabacf165c2d228060178c6dc4))
+* **dh:** DHRobot.jacobe applies the flip of a joint ([#806](https://github.com/petercorke/robotics-toolbox-python/issues/806)) ([d312bc8](https://github.com/petercorke/robotics-toolbox-python/commit/d312bc8320e1f55c90e6fb77de7abebbc0d55af6))
+* **dhrobot:** format prismatic joint limits in string output ([#718](https://github.com/petercorke/robotics-toolbox-python/issues/718)) ([71d07a7](https://github.com/petercorke/robotics-toolbox-python/commit/71d07a7aff0e22a13e3ff315953c97ee39482358))
+* **docs:** drop the obsolete cross-repo spatialgeometry wheel fetch ([#703](https://github.com/petercorke/robotics-toolbox-python/issues/703)) ([477b6e3](https://github.com/petercorke/robotics-toolbox-python/commit/477b6e360c8263be49b771190564335fc2607ac9))
+* **dynamics:** apply prismatic offsets in Python RNE ([#800](https://github.com/petercorke/robotics-toolbox-python/issues/800)) ([544e574](https://github.com/petercorke/robotics-toolbox-python/commit/544e57471223315e7969555ef7a36d5da2ebaa5c))
+* **dynamics:** preserve operational gravity overrides and output shape ([#797](https://github.com/petercorke/robotics-toolbox-python/issues/797)) ([b9e71a5](https://github.com/petercorke/robotics-toolbox-python/commit/b9e71a57d4ea6b0295852641b779a6c23fa150a0))
+* **dynamics:** support arbitrary joint counts in paycap ([#731](https://github.com/petercorke/robotics-toolbox-python/issues/731)) ([6a45f73](https://github.com/petercorke/robotics-toolbox-python/commit/6a45f732d66c38edbf4e8638b635d52f2602edb3))
+* **dynamics:** transform operational Coriolis terms consistently ([#796](https://github.com/petercorke/robotics-toolbox-python/issues/796)) ([c93afaf](https://github.com/petercorke/robotics-toolbox-python/commit/c93afaf6bb36586968511b9e2ffcb5ffe513cd65))
+* **ekf:** plot_error in SLAM, against time, honouring bgcolor, with correct bounds ([#749](https://github.com/petercorke/robotics-toolbox-python/issues/749)) ([0119d66](https://github.com/petercorke/robotics-toolbox-python/commit/0119d66719d7b74200e7c76354523afb676aa636))
+* **ets2:** preserve joint indices and flipped Jacobian signs ([#792](https://github.com/petercorke/robotics-toolbox-python/issues/792)) ([8df90ac](https://github.com/petercorke/robotics-toolbox-python/commit/8df90ac3eb27a0b20a0d44d1226adbe3f45e2dfc))
+* **ik:** apply QP updates at active joint indices ([#794](https://github.com/petercorke/robotics-toolbox-python/issues/794)) ([38909d2](https://github.com/petercorke/robotics-toolbox-python/commit/38909d2a16af83eb0e4ee60b055ed962b82188c6))
+* **ik:** IKSolution is a sequence of the rows of q, true if successful ([#717](https://github.com/petercorke/robotics-toolbox-python/issues/717)) ([be4ad92](https://github.com/petercorke/robotics-toolbox-python/commit/be4ad92ecebe3488147c6dfaebcaefb041907f2c))
+* **ik:** preserve arbitrary half-turn pose error magnitude ([#793](https://github.com/petercorke/robotics-toolbox-python/issues/793)) ([fe51972](https://github.com/petercorke/robotics-toolbox-python/commit/fe519723d16e9a799e1406745faa53247e25b1d9))
+* **ik:** Robot.ikine_* accept an (N, 4, 4) array of poses ([#714](https://github.com/petercorke/robotics-toolbox-python/issues/714)) ([385747b](https://github.com/petercorke/robotics-toolbox-python/commit/385747b89d9cb97bad2b6d5a5b8b9854860be22b))
+* **ik:** trajectory residual is the maximum, and document trajectory behaviour ([#712](https://github.com/petercorke/robotics-toolbox-python/issues/712)) ([aee6fb2](https://github.com/petercorke/robotics-toolbox-python/commit/aee6fb25ebdb15a2ff138ee6753d5c0266913804))
+* **mobile:** align grid planners and backgrounds in world coordinates ([#791](https://github.com/petercorke/robotics-toolbox-python/issues/791)) ([b4e05b4](https://github.com/petercorke/robotics-toolbox-python/commit/b4e05b4a9babb40d6d5318441bb65a2b37295053))
+* **mobile:** Bug2 animation, trapped, border handling, and docstrings ([#780](https://github.com/petercorke/robotics-toolbox-python/issues/780)) ([44ce707](https://github.com/petercorke/robotics-toolbox-python/commit/44ce7075b70492eb61678eb8ca73f1cc1ff4e185))
+* **mobile:** DistanceTransform, PRM, QuinticPoly and CurvaturePoly planners ([#781](https://github.com/petercorke/robotics-toolbox-python/issues/781)) ([53becb4](https://github.com/petercorke/robotics-toolbox-python/commit/53becb4cd76e42482fa6aff2720d284f63e8e7dd))
+* **mobile:** EKF map coordinates and range-bearing observation rows ([#784](https://github.com/petercorke/robotics-toolbox-python/issues/784)) ([4a93c88](https://github.com/petercorke/robotics-toolbox-python/commit/4a93c8893c190ceb6fa5ef86026cbf7d5853fee8))
+* **mobile:** EKF map ellipses use each landmark's covariance; description, state copy, sensor type ([#787](https://github.com/petercorke/robotics-toolbox-python/issues/787)) ([d909d7c](https://github.com/petercorke/robotics-toolbox-python/commit/d909d7c4d116938f94728c5cdca8286ed0505cca))
+* **mobile:** make PurePursuit usable; rst docstrings and shaped types in drivers.py ([#772](https://github.com/petercorke/robotics-toolbox-python/issues/772)) ([3a3a1d8](https://github.com/petercorke/robotics-toolbox-python/commit/3a3a1d8ece30513d227472e7484fdec4a879cce7))
+* **mobile:** maps: stricter arguments, clearer names, docstrings and types ([#779](https://github.com/petercorke/robotics-toolbox-python/issues/779)) ([ec1e3fe](https://github.com/petercorke/robotics-toolbox-python/commit/ec1e3fe5ee9c6df39246c39a8e417583505b44dc))
+* **mobile:** PlannerBase argument checks, plot without side effects, and &lt;thing&gt;_style arguments ([#778](https://github.com/petercorke/robotics-toolbox-python/issues/778)) ([84a07d2](https://github.com/petercorke/robotics-toolbox-python/commit/84a07d27201c2abefff0ef1988354f2113b1d28d))
+* **mobile:** PoseGraph access and errors, verbose output, style arguments, pgraph 1.0 names ([#783](https://github.com/petercorke/robotics-toolbox-python/issues/783)) ([7def8fa](https://github.com/petercorke/robotics-toolbox-python/commit/7def8faf372bf8ee0dcd3ff5f3c7eeba5cb37bd3))
+* **mobile:** preserve angular turn-rate units for Unicycle ([#719](https://github.com/petercorke/robotics-toolbox-python/issues/719)) ([606223f](https://github.com/petercorke/robotics-toolbox-python/commit/606223f542f0420ec66b40c7d6e8763fccdc1157))
+* **mobile:** reject negative occupancy grid indices ([#790](https://github.com/petercorke/robotics-toolbox-python/issues/790)) ([be029bd](https://github.com/petercorke/robotics-toolbox-python/commit/be029bd1b8c4f0bc0de4f5aacbd9cda7b0b934b0))
+* **mobile:** remove debug output from RRT query ([#751](https://github.com/petercorke/robotics-toolbox-python/issues/751)) ([c7c9b58](https://github.com/petercorke/robotics-toolbox-python/commit/c7c9b58f3ff003d75eba486a6c741c8ebcd9d809))
+* **mobile:** resolve the workspace in one place, with a documented precedence ([#776](https://github.com/petercorke/robotics-toolbox-python/issues/776)) ([07090ed](https://github.com/petercorke/robotics-toolbox-python/commit/07090ed6ee6d85b3542b30d36fcc790532b5b9f2))
+* **mobile:** VehicleBase control handling and plot_xyt, tests and docstrings ([#774](https://github.com/petercorke/robotics-toolbox-python/issues/774)) ([2ee9fa9](https://github.com/petercorke/robotics-toolbox-python/commit/2ee9fa9527e399078a67fd4bc4d92f776c4a2616))
+* **particlefilter:** do not pause between steps unless animating ([#748](https://github.com/petercorke/robotics-toolbox-python/issues/748)) ([ea7b4d6](https://github.com/petercorke/robotics-toolbox-python/commit/ea7b4d68d0318b9b2267459ba8427704047a9cb8))
+* **particlefilter:** get_xyt returns (x, y, theta) as documented ([#752](https://github.com/petercorke/robotics-toolbox-python/issues/752)) ([14775a7](https://github.com/petercorke/robotics-toolbox-python/commit/14775a7a1973bf623f061f9b14c44b5a66c5cfd2))
+* **planning:** retain zero-coordinate path endpoints ([#798](https://github.com/petercorke/robotics-toolbox-python/issues/798)) ([72169ae](https://github.com/petercorke/robotics-toolbox-python/commit/72169ae042ccf21dd3654fe47bc25e774a164ef0))
+* **plot:** one implementation of the block= contract for every plot method ([#820](https://github.com/petercorke/robotics-toolbox-python/issues/820)) ([2881ee1](https://github.com/petercorke/robotics-toolbox-python/commit/2881ee1ed1daa581609e575e380ba17596d749f0))
+* **poe:** construct frames for x-aligned screw axes ([#799](https://github.com/petercorke/robotics-toolbox-python/issues/799)) ([7334f2e](https://github.com/petercorke/robotics-toolbox-python/commit/7334f2e9b866615dbb699b14e0f2917db26fc3aa))
+* populate mstraj velocity and acceleration ([#706](https://github.com/petercorke/robotics-toolbox-python/issues/706)) ([8007e33](https://github.com/petercorke/robotics-toolbox-python/commit/8007e33ea836b01c2c4dcf379a91f253ed092cec))
+* **posegraph:** ignore blank lines in g2o and toro files ([#745](https://github.com/petercorke/robotics-toolbox-python/issues/745)) ([c66d855](https://github.com/petercorke/robotics-toolbox-python/commit/c66d8553efa77d997db0ed46d90b6ee397ab4e05))
+* **prm:** honour explicit constructor distance threshold ([#754](https://github.com/petercorke/robotics-toolbox-python/issues/754)) ([788eaf3](https://github.com/petercorke/robotics-toolbox-python/commit/788eaf36089c72fa91de37034b1e60310fff0521))
+* **prm:** query before plan raises RuntimeError rather than AttributeError ([#744](https://github.com/petercorke/robotics-toolbox-python/issues/744)) ([e094f89](https://github.com/petercorke/robotics-toolbox-python/commit/e094f89ea5f5214ed4e113a6ce885092042f2213))
+* **puma:** self-contained ikine_a with trajectory and failure handling; deprecate ikine_6s ([#715](https://github.com/petercorke/robotics-toolbox-python/issues/715)) ([1a609c3](https://github.com/petercorke/robotics-toolbox-python/commit/1a609c36c3fd5bde87763b1ebd5de79e429e1dfb))
+* **robot:** hasgeometry is true for planar robots whose links have geometry ([#814](https://github.com/petercorke/robotics-toolbox-python/issues/814)) ([4543500](https://github.com/petercorke/robotics-toolbox-python/commit/45435001e5fef22c6157a58fbaf7aff726090d5d))
+* **robot:** improve jacob0_dot docstring, typing overloads, and representation error handling ([#737](https://github.com/petercorke/robotics-toolbox-python/issues/737)) ([b83b469](https://github.com/petercorke/robotics-toolbox-python/commit/b83b469a93359d0fbd1b2722fcf1fcce9f2abf82))
+* **robot:** jtraj takes joint coordinates only, SE3 arguments raise ([#716](https://github.com/petercorke/robotics-toolbox-python/issues/716)) ([68185fc](https://github.com/petercorke/robotics-toolbox-python/commit/68185fc3c53f172189e2b7f02d5249213335b950))
+* **robot:** Robot.set_default_backend replaces rtbtool's monkey-patch; URDFRobot drops a dead guard ([#810](https://github.com/petercorke/robotics-toolbox-python/issues/810)) ([681c725](https://github.com/petercorke/robotics-toolbox-python/commit/681c7250da406adc0f8ebb627d8b3bbcaf09067c))
+* **slam:** report missing PoseGraph vertices with file context ([#760](https://github.com/petercorke/robotics-toolbox-python/issues/760)) ([dba2bfc](https://github.com/petercorke/robotics-toolbox-python/commit/dba2bfcd34a4c3ac9cf6693f6ee317cb8d23c127))
+* **tests:** expect forward-slash filename from spatialgeometry &gt;= 1.4.1 ([#702](https://github.com/petercorke/robotics-toolbox-python/issues/702)) ([c070066](https://github.com/petercorke/robotics-toolbox-python/commit/c07006666f810c74f89865a15849afeea3b57189))
+* **tools:** report original Jacobian column indices ([#795](https://github.com/petercorke/robotics-toolbox-python/issues/795)) ([cb4b591](https://github.com/petercorke/robotics-toolbox-python/commit/cb4b591775ded0fd5d899c27e3b9834ad39ff107))
+* **tools:** the data.py demo block called a function that does not exist ([#809](https://github.com/petercorke/robotics-toolbox-python/issues/809)) ([27fd83a](https://github.com/petercorke/robotics-toolbox-python/commit/27fd83ada6112520675a6f00810b6df35fde9129))
+* **trajectory:** honour non-zero time origins in scalar profiles ([#698](https://github.com/petercorke/robotics-toolbox-python/issues/698)) ([06b8716](https://github.com/petercorke/robotics-toolbox-python/commit/06b8716877b97bd28fb3ab09d5e24178315a2cba))
+* **trajectory:** solve the quintic in normalized time, Hermite form behind method= ([#805](https://github.com/petercorke/robotics-toolbox-python/issues/805)) ([97c6c0f](https://github.com/petercorke/robotics-toolbox-python/commit/97c6c0fe15038069c366e5474b3a7fb1cd215fa2))
+* **urdf:** initialise name maps before transmission validation ([#801](https://github.com/petercorke/robotics-toolbox-python/issues/801)) ([057751f](https://github.com/petercorke/robotics-toolbox-python/commit/057751f22688ed898b273410cfabf1d5fa639472))
+* **urdf:** report stage, element and line when a URDF/xacro fails to load ([848114b](https://github.com/petercorke/robotics-toolbox-python/commit/848114b3a50518cf8d020239fc8d86a8dece82b0))
+* **urdf:** report stage, element and line when URDF/xacro loading fails ([#701](https://github.com/petercorke/robotics-toolbox-python/issues/701)) ([848114b](https://github.com/petercorke/robotics-toolbox-python/commit/848114b3a50518cf8d020239fc8d86a8dece82b0))
+* **urdf:** rotate inertia tensors from the inertial frame into the link frame ([#707](https://github.com/petercorke/robotics-toolbox-python/issues/707)) ([566cf70](https://github.com/petercorke/robotics-toolbox-python/commit/566cf70a04ee68d9f2d21ee98b5c0ad33d43b268))
+
+
+### Documentation
+
+* add Codacy grade badge to README ([0372615](https://github.com/petercorke/robotics-toolbox-python/commit/03726154a0e99c389d45442645b51d4f2012ff3a))
+* **agents:** say where the array type aliases are ([#757](https://github.com/petercorke/robotics-toolbox-python/issues/757)) ([5c7d3d4](https://github.com/petercorke/robotics-toolbox-python/commit/5c7d3d4e1dc39def66a768691364386c16ab26c7))
+* **lite:** keep JupyterLite contents in memory so republished notebooks are never stale ([#819](https://github.com/petercorke/robotics-toolbox-python/issues/819)) ([4e8073d](https://github.com/petercorke/robotics-toolbox-python/commit/4e8073d9930d51abf3223e0c69d71fd02d99dbae))
+* **mobile:** correct docstrings for the estimators, sensor, drivers and animations ([#750](https://github.com/petercorke/robotics-toolbox-python/issues/750)) ([b6e86e8](https://github.com/petercorke/robotics-toolbox-python/commit/b6e86e8212127a712c31ca20073526c54bf1813a))
+* **notebooks:** drop the deprecated path_marker argument ([#815](https://github.com/petercorke/robotics-toolbox-python/issues/815)) ([689ae2a](https://github.com/petercorke/robotics-toolbox-python/commit/689ae2a4048780260e7a950b057d59ae9313cb35))
+* **notebooks:** drop the path_marker argument, which is deprecated ([689ae2a](https://github.com/petercorke/robotics-toolbox-python/commit/689ae2a4048780260e7a950b057d59ae9313cb35))
+* **notebooks:** follow the notebook plotting recipe, and fix a broken qplot call ([#821](https://github.com/petercorke/robotics-toolbox-python/issues/821)) ([7690e80](https://github.com/petercorke/robotics-toolbox-python/commit/7690e80f04676f6eca9e0b225dfa10fadd1a184a))
+* say which checks are required, and that Codacy is advisory ([#802](https://github.com/petercorke/robotics-toolbox-python/issues/802)) ([1ec699a](https://github.com/petercorke/robotics-toolbox-python/commit/1ec699a76f154a4b4253b83984bdb64bd4529802))
+* update copyright information in LICENSE file ([#710](https://github.com/petercorke/robotics-toolbox-python/issues/710)) ([fc969a3](https://github.com/petercorke/robotics-toolbox-python/commit/fc969a3f914474d28c8bdaeca57285253d6f1a4b))
+
+
+### Build System
+
+* **deps:** bump pypa/cibuildwheel from 4.2.0 to 4.2.1 ([968ed04](https://github.com/petercorke/robotics-toolbox-python/commit/968ed048639c01c9032e256565731e2703de77fe))
+* **deps:** bump pypa/cibuildwheel from 4.2.0 to 4.2.1 ([acc6842](https://github.com/petercorke/robotics-toolbox-python/commit/acc6842d47b36cc6c9eef97373ed7e3d45f27491))
+
 ## [1.4.4](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.3...v1.4.4) (2026-09-20)
 
 
