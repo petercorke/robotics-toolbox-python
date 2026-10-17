@@ -4508,6 +4508,22 @@ class TestETS(unittest.TestCase):
         T = panda.eval(qt)
         self.assertEqual(T.shape, (5, 4, 4))
 
+    def test_fkine_no_argument(self):
+        # a sequence with no joints needs no q
+        e = ET.Rx(0.3) * ET.tz(0.75)
+        nt.assert_array_almost_equal(e.fkine().A, e.fkine([]).A)
+        nt.assert_array_almost_equal(e.eval(), e.eval([]))
+
+    def test_fkine_missing_or_short_q(self):
+        # a sequence with joints gives a ValueError that names the lengths,
+        # not a low-level index error
+        e = ET.Rz() * ET.tx(1) * ET.Ry()
+        for call in (e.fkine, e.eval):
+            with self.assertRaisesRegex(ValueError, "q has length 0, expected 2"):
+                call()
+            with self.assertRaisesRegex(ValueError, "q has length 1, expected 2"):
+                call([0.1])
+
 
 if __name__ == "__main__":
     unittest.main()
