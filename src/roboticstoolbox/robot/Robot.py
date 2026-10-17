@@ -1799,6 +1799,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             see https://github.com/petercorke/robotics-toolbox-python/issues/571.
         """
 
+        self._require_dynamics()
+
         # Checked via the `mdh` attribute rather than isinstance/class name:
         # joint-last compliance tracks the DH convention actually in use
         # (DHLink._to_ets() puts the joint last for mdh=True, not for

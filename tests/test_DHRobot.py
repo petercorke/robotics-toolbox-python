@@ -738,7 +738,7 @@ class TestDHRobot(unittest.TestCase):
             panda.pay(wT)
 
     def test_friction(self):
-        l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1])
+        l0 = rp.RevoluteDH(d=2, m=1, B=3, G=2, Tc=[2, -1])
         qd = [1, 2, 3, 4]
 
         r0 = rp.DHRobot([l0, l0.copy(), l0.copy(), l0.copy()])

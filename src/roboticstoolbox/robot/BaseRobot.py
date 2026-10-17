@@ -781,6 +781,28 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._hasdynamics
 
     @property
+    def has_dynamics(self) -> bool:
+        """Whether the model has mass data for dynamics computations.
+
+        :returns: True if at least one link has non-zero mass. Individual
+            massless links are allowed.
+
+        Unlike :attr:`hasdynamics`, explicitly supplied zero parameters do
+        not make a model suitable for dynamics computations. Link parameter
+        changes are reflected immediately.
+        """
+        return any(link.m != 0 for link in self.links)
+
+    def _require_dynamics(self) -> None:
+        """Reject dynamics computations on a model without mass data."""
+        if not self.has_dynamics:
+            raise ValueError(
+                f"model '{self.name}' has no dynamic parameters; "
+                "use a model with dynamics, such as rtb.models.DH.Panda(), "
+                "or set m, r, I on the links"
+            )
+
+    @property
     def hasgeometry(self) -> Any:
         """
         Robot has geometry model

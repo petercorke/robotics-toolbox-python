@@ -109,6 +109,8 @@ class RobotProto(Protocol):
 
     def dynchanged(self) -> None: ...
 
+    def _require_dynamics(self) -> None: ...
+
     def rne(
         self,
         q: NDArray,
