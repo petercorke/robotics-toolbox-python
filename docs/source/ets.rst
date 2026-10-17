@@ -1,8 +1,6 @@
 Elementary transform sequences
 ==============================
 
-.. codeauthor:: Jesse Haviland
-
 Elementary transforms are canonic rotations or translations about, or along,
 the x-, y- or z-axes.  The amount of rotation or translation can be a constant
 or a variable.  A variable amount corresponds to a joint.  A sequence of them

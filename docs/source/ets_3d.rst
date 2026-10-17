@@ -1,8 +1,6 @@
 ET and ETS: 3D
 ==============
 
-.. codeauthor:: Jesse Haviland
-
 An :class:`~roboticstoolbox.ets.ET.ET` is one elementary :math:`\SE{3}`
 transform: a rotation about, or a translation along, the x-, y- or z-axis.  Its
 amount is either a constant or, if it is left out, a variable, which makes the

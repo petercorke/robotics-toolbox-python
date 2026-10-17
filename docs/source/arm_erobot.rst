@@ -1,8 +1,6 @@
 ERobot models
 =============
 
-.. codeauthor:: Jesse Haviland
-
 
 ERobot
 ------
