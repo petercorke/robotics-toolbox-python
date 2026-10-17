@@ -124,7 +124,7 @@ class TestOneImplementation(unittest.TestCase):
                 continue
             if "Dynamixel" in path.parts:
                 continue
-            for n, line in enumerate(path.read_text().splitlines(), start=1):
+            for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
                 code = line.split("#")[0]
                 if re.search(r"plt\.show\(block=block\)", code):
                     offenders.append(f"{path.relative_to(SRC)}:{n}")
