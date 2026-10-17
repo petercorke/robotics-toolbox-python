@@ -15,6 +15,9 @@ class _DummyRobot:
         self.q = np.zeros(n)
         self.calls = []
 
+    def _require_dynamics(self) -> None:
+        pass
+
     def gravload(self, q):
         return np.zeros(self.n)
 

@@ -33,8 +33,9 @@ class Panda(URDFRobot):
         xacro (the default, ``False``). The bundled model has real collision
         geometry (a hand-built capsule approximation) but no inertial
         (mass/CoM/inertia) data at all -- ``rne()``/``inertia()``/``coriolis()``/
-        ``gravload()`` are all silently zero. The ``robot_descriptions`` model
-        has real inertial data, but its collision geometry is plain meshes,
+        ``gravload()`` all raise a ``ValueError`` naming the model. For
+        dynamics, use ``models.DH.Panda`` or the ``robot_descriptions`` model,
+        which has real inertial data, but its collision geometry is plain meshes,
         which are roughly an order of magnitude slower to collision-check
         against than the bundled model's capsules -- noticeable in a
         real-time reactive-avoidance loop (see ``examples/neo.py``). See the

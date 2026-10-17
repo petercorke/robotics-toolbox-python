@@ -151,6 +151,8 @@ class DynamicsMixin:
 
         """
 
+        self._require_dynamics()
+
         qd = np.array(getvector(qd, self.n))
         tau = np.zeros(self.n)
 
@@ -299,6 +301,8 @@ class DynamicsMixin:
         :func:`DHRobot.rne`.
 
         """
+
+        self._require_dynamics()
 
         n = self.n
 
@@ -470,6 +474,8 @@ class DynamicsMixin:
             104, no. 3, pp. 205-211, 1982.
 
         """
+
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -689,6 +695,8 @@ class DynamicsMixin:
 
         """
 
+        self._require_dynamics()
+
         tf = []
         for j, link in enumerate(self.links):
             # compute inertia for this joint
@@ -760,6 +768,9 @@ class DynamicsMixin:
         :func:`cinertia`
 
         """
+
+        self._require_dynamics()
+
         q = getmatrix(q, (None, self.n))
 
         In = np.zeros((q.shape[0], self.n, self.n))
@@ -821,6 +832,8 @@ class DynamicsMixin:
         - Computationally slow, involves :math:`n^2/2` invocations of RNE.
 
         """
+
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -912,6 +925,8 @@ class DynamicsMixin:
 
         """
 
+        self._require_dynamics()
+
         q = np.asarray(getmatrix(q, (None, self.n)))
 
         if gravity is None:
@@ -998,6 +1013,8 @@ class DynamicsMixin:
         :func:`inertia`
 
         """
+
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         if q.shape[1] != 6:
@@ -1125,6 +1142,8 @@ class DynamicsMixin:
 
         """
 
+        self._require_dynamics()
+
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
         if q.shape[0] != qd.shape[0]:
@@ -1233,6 +1252,8 @@ class DynamicsMixin:
 
         """
 
+        self._require_dynamics()
+
         q = getmatrix(q, (None, self.n))
         if q.shape[1] != 6:
             pinv = True
@@ -1313,6 +1334,8 @@ class DynamicsMixin:
         :func:`accel`
 
         """
+
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         xd = getmatrix(xd, (None, 6))
@@ -1399,6 +1422,8 @@ class DynamicsMixin:
 
         """
 
+        self._require_dynamics()
+
         q = getmatrix(q, (None, self.n))
         qdd = getmatrix(qdd, (None, self.n))
         if q.shape[0] != qdd.shape[0]:
@@ -1442,6 +1467,9 @@ class DynamicsMixin:
         - Tool transforms are taken into consideration for ``frame=1``.
         - Gravity compensation requires a robot model with valid dynamics.
         """
+
+        self._require_dynamics()
+
         q = np.asarray(getmatrix(self.q if q is None else q, (None, self.n)))
         w = np.asarray(getmatrix(w, (None, 6)))
         if q.shape[0] != w.shape[0]:
