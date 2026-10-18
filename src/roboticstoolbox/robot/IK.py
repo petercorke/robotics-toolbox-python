@@ -28,6 +28,73 @@ except ImportError:  # pragma nocover
     _qp = False
 
 
+def check_q0(q0: ArrayLike | None, n: int, slimit: int | None = None) -> NDArray | None:
+    """
+    Check the initial joint coordinates given to a numerical IK solver
+
+    :param q0: initial joint coordinates, or None
+    :param n: the number of joints
+    :param slimit: if given, ``q0`` may also be a matrix (m, n), one row per search,
+        with at most ``slimit`` rows
+    :raises ValueError: if ``q0`` does not have the length ``n`` expected of it
+    :returns: ``q0`` as an array, or None
+
+    A wrong length used to be accepted without comment by the solvers that are
+    written in C++, which then ignored ``q0`` and started from a random vector,
+    and to give an unhelpful NumPy error from the ones written in Python.
+    """
+    if q0 is None:
+        return None
+
+    q0a = np.asarray(q0, dtype=float)
+
+    if q0a.ndim == 1:
+        if q0a.shape[0] != n:
+            raise ValueError(
+                f"q0 has length {q0a.shape[0]}, expected {n}, the number of joints"
+            )
+    elif q0a.ndim == 2 and slimit is not None:
+        if q0a.shape[1] != n:
+            raise ValueError(
+                f"q0 has {q0a.shape[1]} columns, expected {n}, the number of joints"
+            )
+        if q0a.shape[0] > slimit:
+            raise ValueError(f"q0 has {q0a.shape[0]} rows, but slimit is {slimit}")
+    else:
+        shape = (
+            "a vector (n,) or a matrix (m, n)"
+            if slimit is not None
+            else "a vector (n,)"
+        )
+        raise ValueError(f"q0 must be {shape}, not an array with shape {q0a.shape}")
+
+    return q0a
+
+
+def check_mask(mask: ArrayLike | None) -> NDArray | None:
+    """
+    Check the Cartesian weighting mask given to a numerical IK solver
+
+    :param mask: weights of the six Cartesian degrees of freedom, or None
+    :raises ValueError: if ``mask`` is not a vector of 6 elements
+    :returns: ``mask`` as an array, or None
+
+    The solvers written in C++ read six elements from the mask, so a shorter one
+    was read past its end.
+    """
+    if mask is None:
+        return None
+
+    maska = np.asarray(mask, dtype=float)
+
+    if maska.shape != (6,):
+        raise ValueError(
+            f"mask must be a vector of 6 elements, not shape {maska.shape}"
+        )
+
+    return maska
+
+
 @dataclass
 class IKSolution:
     """
@@ -166,7 +233,9 @@ class IKSolution:
 
         def text(a: NDArray) -> str:
             return np.array2string(
-                a, separator=", ", formatter=fmt  # type: ignore[arg-type]
+                a,
+                separator=", ",
+                formatter=fmt,  # type: ignore[arg-type]
             )
 
         if self.q.ndim == 1 or len(self) <= 6:
@@ -268,6 +337,8 @@ class IKSolver(ABC):
         # Random number generator
         self._private_random = np.random.default_rng(seed=seed)
 
+        mask = check_mask(mask)
+
         if mask is None:
             mask = np.ones(6)
 
@@ -325,7 +396,7 @@ class IKSolver(ABC):
         if q0 is None:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
 
-        q0a: NDArray | None = None if q0 is None else np.asarray(q0)
+        q0a = check_q0(q0, ets.n, self.slimit)
 
         if q0a is not None and q0a.ndim == 1:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
@@ -648,6 +719,7 @@ def within_limits(q: ArrayLike, qlim: ArrayLike) -> bool:
     q = np.asarray(q, dtype=float)
     qlim = np.asarray(qlim, dtype=float)
     return not bool(np.any((q < qlim[0]) | (q > qlim[1])))
+
 
 def _null_Σ(ets: ETS, q: NDArray, ps: float, pi: ArrayLike | float) -> Any:
     """
