@@ -302,6 +302,8 @@ class IKSolver(ABC):
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
 
     .. seealso::
 
@@ -327,9 +329,11 @@ class IKSolver(ABC):
         mask: ArrayLike | None = None,
         joint_limits: bool = True,
         seed: int | None = None,
+        verbose: bool = False,
     ) -> None:
         # Solver parameters
         self.name = name
+        self.verbose = verbose
         self.slimit = slimit
         self.ilimit = ilimit
         self.tol = tol
@@ -440,6 +444,8 @@ class IKSolver(ABC):
             reason = ""
 
             for i, T in enumerate(methTep):
+                if self.verbose:
+                    print(f"Pose {i + 1} of {len(methTep)}")
                 sol = self._solve(ets, T, q0)
                 q[i] = sol.q
                 if not sol.success:
@@ -480,6 +486,8 @@ class IKSolver(ABC):
 
         for search in range(self.slimit):
             q = q0[search].copy()
+            if self.verbose:
+                print(f"Search {search + 1}")
             i = 0
 
             # Check the initial configuration before attempting an update.
@@ -488,6 +496,9 @@ class IKSolver(ABC):
             _, E = self.error(ets.eval(q), Tep)
 
             while True:
+                if self.verbose:
+                    self._log("Iteration", E, f"q={self._fmt_q(q[ets.jindices])}", i)
+
                 # Check convergence for the current q before another update.
                 if E < self.tol:
                     self._normalise_q(ets, q)
@@ -496,10 +507,19 @@ class IKSolver(ABC):
                     jl_valid = self._check_jl(ets, q[ets.jindices])
 
                     if not jl_valid and self.joint_limits:
+                        if self.verbose:
+                            self._log(
+                                "Converged",
+                                E,
+                                "rejected: "
+                                + self._limit_violations(ets, q[ets.jindices]),
+                            )
                         # Abandon search and try again
                         found_with_limits = True
                         break
                     else:
+                        if self.verbose:
+                            self._log("Converged", E, "accepted")
                         return IKSolution(
                             q=q[ets.jindices],
                             success=True,
@@ -510,6 +530,8 @@ class IKSolver(ABC):
                         )
 
                 if i >= self.ilimit:
+                    if self.verbose:
+                        self._log("Abandoned", E, "iteration limit reached")
                     break
 
                 i += 1
@@ -521,6 +543,8 @@ class IKSolver(ABC):
                 except np.linalg.LinAlgError:
                     # Abandon search and try again
                     linalg_error += 1
+                    if self.verbose:
+                        self._log("Abandoned", E, "numpy.linalg.LinAlgError")
                     break
 
             total_i += i
@@ -655,6 +679,51 @@ class IKSolver(ABC):
         A thin wrapper around ``within_limits``.
         """
         return within_limits(q[: ets.n], ets.qlim)
+
+    @staticmethod
+    def _fmt_q(q: NDArray) -> str:
+        """Joint coordinates formatted for verbose output, fixed width fields"""
+        return np.array2string(
+            np.asarray(q),
+            separator=" ",
+            formatter={"float_kind": lambda x: f"{x:9.4f}"},
+        )
+
+    @staticmethod
+    def _log(label: str, E: float, text: str, n: int | None = None) -> None:
+        """
+        Print one line of verbose output
+
+        :param label: what happened, for example ``Iteration``
+        :param E: the error at this point
+        :param text: the rest of the line
+        :param n: the iteration number, or None
+
+        The columns line up from one line to the next: the label and number are
+        in fixed width fields, and so is the error.
+        """
+        number = "" if n is None else str(n)
+        print(f"  {label:<10}{number:>4}  E={E:9.3e}  {text}")
+
+    def _limit_violations(self, ets: ETS, q: NDArray) -> str:
+        """
+        Describe the joints that are outside their limits, for verbose output
+
+        :param ets: the ETS
+        :param q: joint coordinates, shape (n,), after normalisation
+        :returns: for example ``q[2]=-3.177 outside [-2.356, 2.356]``, one entry for
+            each joint outside its limits, separated by ``;``
+
+        The revolute coordinates have already been shifted by whole turns towards
+        their limits, so a violation here is a violation of every equivalent angle.
+        """
+        lower, upper = ets.qlim
+        bad = [
+            f"q[{j}]={q[j]:.4g} outside [{lower[j]:.4g}, {upper[j]:.4g}]"
+            for j in range(ets.n)
+            if not lower[j] <= q[j] <= upper[j]
+        ]
+        return "; ".join(bad) if bad else "joint limits violated"
 
 
 def normalise_q(q: ArrayLike, qlim: ArrayLike, revolute: ArrayLike) -> NDArray:
@@ -822,6 +891,8 @@ class IK_NR(IKSolver):
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
     :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
         the normal inverse
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
@@ -982,6 +1053,8 @@ class IK_LM(IKSolver):
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
     :param k: Sets the gain value for the damping matrix Wn in the ``step`` method. See
         notes
     :param method: One of "chan", "sugihara" or "wampler". Defines which method is used
@@ -1219,6 +1292,8 @@ class IK_GN(IKSolver):
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
     :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
         the normal inverse
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
@@ -1395,6 +1470,8 @@ class IK_QP(IKSolver):
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
     :param kj: A gain for joint velocity norm minimisation
     :param ks: A gain which adjusts the cost of slack (intentional error)
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
