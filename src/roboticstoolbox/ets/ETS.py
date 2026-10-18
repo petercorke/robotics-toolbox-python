@@ -293,7 +293,7 @@ class ETS(BaseETS[ET]):
 
     def fkine(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE3 | None = None,
         tool: NDArray | SE3 | None = None,
         include_base: bool = True,
@@ -301,7 +301,7 @@ class ETS(BaseETS[ET]):
         """
         Forward kinematics
 
-        :param q: Joint coordinates
+        :param q: Joint coordinates, optional for a sequence with no joints
         :param base: a base transform applied before the ETS
         :param tool: tool transform, optional
         :param include_base: set to True if the base transform should be considered
@@ -355,7 +355,7 @@ class ETS(BaseETS[ET]):
 
     def eval(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE3 | None = None,
         tool: NDArray | SE3 | None = None,
         include_base: bool = True,
@@ -404,6 +404,9 @@ class ETS(BaseETS[ET]):
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
         """
+
+        if q is None:
+            q = []
 
         q = self._resolve_q(q, allow_trajectory=True)
         return ETS_fkine(self._fknm, q, base, tool, include_base, _data=self.data)
