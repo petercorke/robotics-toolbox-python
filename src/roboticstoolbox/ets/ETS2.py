@@ -147,7 +147,12 @@ class ETS2(BaseETS[ET2]):
         :returns: ETS2 with one fewer joint
         :raises ValueError: for an invalid joint position or angular unit
         """
-        if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
+        # bool subclasses int, but must not select joint 0 or 1.
+        if (
+            isinstance(j, bool)
+            or not isinstance(j, (int, np.integer))
+            or not 0 <= j < self.n
+        ):
             raise ValueError(f"joint index {j} out of range for {self.n} joints")
         if unit not in ("rad", "deg"):
             raise ValueError("unit must be 'rad' or 'deg'")
