@@ -54,7 +54,8 @@ solved by the general 6R method of :mod:`symbolic_ik_rr`, which also chooses
 between the two methods, see :func:`symbolic_ik_rr.make_solver`.
 
 Speed: the polynomial arithmetic is done by FLINT, via ``python-flint``, if it is
-installed, which is much faster than SymPy (for the elimination step more than
+installed (it is imported when first needed, and a warning says so if it is not),
+which is much faster than SymPy (for the elimination step more than
 100 times on the Jaco).  Without it SymPy is used and the results are the same.
 Irrational constants such as ``sqrt(3)/2`` are replaced by symbols while solving
 so that every equation is a polynomial with rational coefficients.
@@ -87,6 +88,7 @@ import re
 import signal
 import threading
 import time
+import warnings
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
@@ -102,10 +104,36 @@ from sympy.printing.rust import RustCodePrinter
 
 from roboticstoolbox.robot.DHRobot import DHRobot
 
-try:  # optional, makes the elimination step much faster
-    from flint import fmpq, fmpq_mpoly_ctx
-except ImportError:  # pragma: no cover
-    fmpq = fmpq_mpoly_ctx = None
+# python-flint is optional, and makes the elimination step much faster.  It is
+# imported the first time it is needed, and if it is missing a warning says what is
+# lost.  ``None`` means not yet tried, ``False`` means not to be used, otherwise
+# the pair ``(fmpq, fmpq_mpoly_ctx)``.
+_flint: tuple | bool | None = None
+
+
+def _get_flint() -> tuple | None:
+    """
+    The FLINT classes used for the polynomial steps, or ``None`` to use SymPy
+
+    Warns, once, if python-flint is not installed.
+    """
+    global _flint
+    if _flint is None:
+        try:
+            from flint import fmpq, fmpq_mpoly_ctx
+
+            _flint = (fmpq, fmpq_mpoly_ctx)
+        except ImportError:
+            _flint = False
+            warnings.warn(
+                "python-flint is not installed, so the symbolic derivation uses "
+                "SymPy for the polynomial steps, which gives the same results but "
+                "can be 100 times slower for some arms.  Install it with "
+                "'pip install python-flint'.",
+                RuntimeWarning,
+                stacklevel=3,
+            )
+    return _flint or None
 
 # symbolic elements of the homogeneous transform
 #      nx ox ax tx
@@ -391,6 +419,9 @@ def _linear_form_flint(eq: sp.Expr, j: int) -> tuple | None:
     sj, cj = _sin_cos_symbols(j)
     others = sorted(eq.free_symbols - {sj, cj}, key=lambda s: s.name)
     gens = [sj, cj, *others]
+    flint = _get_flint()
+    assert flint is not None
+    fmpq, fmpq_mpoly_ctx = flint
     ctx = fmpq_mpoly_ctx.get(tuple(g.name for g in gens), "lex")
 
     poly = sp.Poly(eq, *gens, domain="QQ")
@@ -420,7 +451,7 @@ def _linear_form(eq: sp.Expr, j: int, revolute: bool) -> tuple | None:
         that it is :math:`a q_j + k = 0`, or ``None`` if the equation has any
         other form
     """
-    if revolute and fmpq_mpoly_ctx is not None:
+    if revolute and _get_flint() is not None:
         try:
             return _linear_form_flint(eq, j)
         except sp.polys.polyerrors.PolynomialError:
@@ -606,6 +637,9 @@ def _eliminate_flint(f1: tuple, f2: tuple) -> list[sp.Expr] | None:
     """
     coeffs = [sp.sympify(c) for c in (*f1, *f2)]
     gens = sorted(set().union(*(c.free_symbols for c in coeffs)), key=lambda s: s.name)
+    flint = _get_flint()
+    assert flint is not None
+    fmpq, fmpq_mpoly_ctx = flint
     ctx = fmpq_mpoly_ctx.get(tuple(g.name for g in gens), "deglex")
 
     def to_flint(expr: sp.Expr):
@@ -668,7 +702,7 @@ def _eliminate(
     if f1 is None or f2 is None:
         return None
 
-    if revolute and fmpq_mpoly_ctx is not None:
+    if revolute and _get_flint() is not None:
         try:
             return _eliminate_flint(f1, f2)
         except sp.polys.polyerrors.PolynomialError:
@@ -2693,7 +2727,7 @@ def test_flint_matches_sympy():
     """The FLINT and SymPy implementations of the polynomial steps agree."""
     import roboticstoolbox as rtb
 
-    if fmpq_mpoly_ctx is None:
+    if _get_flint() is None:
         return
     symrobot, values = _symbolize(rtb.models.DH.Puma560())
     A, _ = _abstract_constants(_link_matrices(symrobot))
@@ -2705,12 +2739,12 @@ def test_flint_matches_sympy():
             _linear_form.cache_clear()
             fast = _linear_form(eq, j, True)
             _linear_form.cache_clear()
-            saved = globals()["fmpq_mpoly_ctx"]
-            globals()["fmpq_mpoly_ctx"] = None  # force the SymPy implementation
+            saved = _get_flint()
+            globals()["_flint"] = False  # force the SymPy implementation
             try:
                 slow = _linear_form(eq, j, True)
             finally:
-                globals()["fmpq_mpoly_ctx"] = saved
+                globals()["_flint"] = saved
                 _linear_form.cache_clear()
             assert (fast is None) == (slow is None)
             if fast is not None:
@@ -2723,15 +2757,39 @@ def test_without_flint():
     """Solving works without python-flint, using SymPy."""
     import roboticstoolbox as rtb
 
-    saved = globals()["fmpq_mpoly_ctx"]
-    globals()["fmpq_mpoly_ctx"] = None
+    saved = globals()["_flint"]
+    globals()["_flint"] = False
     _linear_form.cache_clear()
     try:
         Q = ikine_sym(rtb.models.DH.Planar2(symbolic=True))
         assert Q is not None and len(Q) == 2
     finally:
-        globals()["fmpq_mpoly_ctx"] = saved
+        globals()["_flint"] = saved
         _linear_form.cache_clear()
+
+
+def test_missing_flint_warns_once():
+    """Without python-flint there is one warning, which says how to install it."""
+    import sys
+
+    saved = globals()["_flint"]
+    globals()["_flint"] = None
+    real = sys.modules.get("flint")
+    sys.modules["flint"] = None  # makes ``import flint`` raise ImportError
+    try:
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            assert _get_flint() is None
+            assert _get_flint() is None
+        messages = [str(w.message) for w in caught]
+        assert len(messages) == 1
+        assert "pip install python-flint" in messages[0]
+    finally:
+        globals()["_flint"] = saved
+        if real is None:
+            del sys.modules["flint"]
+        else:
+            sys.modules["flint"] = real
 
 
 def test_polynomial_mode():
