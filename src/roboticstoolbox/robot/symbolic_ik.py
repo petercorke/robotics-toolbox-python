@@ -103,6 +103,7 @@ from sympy.printing.pycode import PythonCodePrinter
 from sympy.printing.rust import RustCodePrinter
 
 from roboticstoolbox.robot.DHRobot import DHRobot
+from roboticstoolbox.tools.types import ArrayLike
 
 # python-flint is optional, and makes the elimination step much faster.  It is
 # imported the first time it is needed, and if it is missing a warning says what is
@@ -133,7 +134,7 @@ def _get_flint() -> tuple | None:
                 RuntimeWarning,
                 stacklevel=3,
             )
-    return _flint or None
+    return _flint if isinstance(_flint, tuple) else None
 
 # symbolic elements of the homogeneous transform
 #      nx ox ax tx
@@ -771,6 +772,7 @@ def _time_limit(seconds: float | None) -> Iterator[None]:
         raise _Timeout()
 
     old = signal.signal(signal.SIGALRM, handler)
+    assert seconds is not None
     signal.setitimer(signal.ITIMER_REAL, seconds)
     try:
         yield
@@ -879,7 +881,7 @@ def _ikine_sym(
     tried: set[tuple[sp.Expr, sp.Expr, int]] = set()  # eliminations done
 
     def unknown(e: sp.Expr) -> set[int]:
-        return _joints_in(e) - Q.keys()
+        return set(_joints_in(e) - Q.keys())
 
     while len(Q) < n:
         # tier 1: an equation with a single unknown joint
@@ -918,7 +920,7 @@ def _ikine_sym(
                 eqs = [
                     (frozenset(u), e)
                     for u, g in groups.items()
-                    for e in sorted(g, key=cost.get)[:_PER_GROUP]
+                    for e in sorted(g, key=lambda e: cost[e])[:_PER_GROUP]
                 ]
                 for i1, (u1, e1) in enumerate(eqs):
                     for u2, e2 in eqs[i1 + 1 :]:
@@ -1001,7 +1003,7 @@ class IKSolutions:
         self.q = np.asarray(self.q, dtype=float).reshape(-1, len(self.revolute))
 
     @classmethod
-    def from_generated(cls, result, revolute: list[bool]) -> IKSolutions:
+    def from_generated(cls, result, revolute: ArrayLike) -> IKSolutions:
         """
         Wrap the result of generated Python code
 
@@ -1428,9 +1430,15 @@ class _Emitter:
     def loop_close(self) -> None: ...
     def select(self, q: str, k: str, alts: list[str]) -> None: ...
     def skip_if_nan(self, q: str) -> None: ...
-    def sin(self, q: str) -> str: ...
-    def cos(self, q: str) -> str: ...
-    def atan2(self, y: str, x: str) -> str: ...
+    def sin(self, q: str) -> str:
+        raise NotImplementedError
+
+    def cos(self, q: str) -> str:
+        raise NotImplementedError
+
+    def atan2(self, y: str, x: str) -> str:
+        raise NotImplementedError
+
     def error_start(self) -> None: ...
     def error_update(self, e: str, pose: str) -> None: ...
     def check(self, e: str) -> None: ...
@@ -2407,7 +2415,7 @@ def _dh_models_6() -> list[str]:
     names = []
     for name, cls in inspect.getmembers(rtb.models.DH, inspect.isclass):
         if issubclass(cls, DHRobot):
-            robot = cls()
+            robot = cls()  # type: ignore[call-arg]  # the models take no arguments
             if robot.n == 6 and not any(link.mdh for link in robot.links):
                 names.append(name)
     return names
@@ -2525,8 +2533,8 @@ def _run_generated(
     from pathlib import Path
 
     names = {"0": "OK", "1": "SINGULAR", "2": "UNREACHABLE"}
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp = Path(tmp)
+    with tempfile.TemporaryDirectory() as tmp_name:
+        tmp = Path(tmp_name)
         if language == "c":
             (tmp / "ik.c").write_text(code)
             (tmp / "main.c").write_text(
@@ -2659,7 +2667,8 @@ def test_pruning():
         plan = _make_plan(robot, verify=True)
         checks = {st.joint: len(st.checks) for st in plan.steps}
 
-        verified, unverified = {}, {}
+        verified: dict = {}
+        unverified: dict = {}
         exec(_emit(plan, "python", "ikine"), verified)  # noqa: S102
         exec(_emit(replace(plan, verify=False), "python", "ikine"), unverified)  # noqa: S102
 
@@ -2679,30 +2688,38 @@ def test_pruning():
         print(f"{name:9s} equations checked per joint {checks}, extra solutions {extra}")
 
 
+def _nearest(sols: IKSolutions, q0, weights=None) -> np.ndarray:
+    best = sols.nearest(q0, weights)
+    assert best is not None
+    return best
+
+
 def test_ik_solutions():
     sols = IKSolutions(
-        [[0.1, 0.5, 0.2], [-3.1, 0.5, 0.2], [0.1, 2.0, 0.2]],
+        np.array([[0.1, 0.5, 0.2], [-3.1, 0.5, 0.2], [0.1, 2.0, 0.2]]),
         IKStatus.OK,
-        [True, True, False],
+        np.array([True, True, False]),
     )
     assert len(sols) == 3
 
     # angles wrap: 3.1 is close to -3.1 (0.083 rad apart) but not to 0.1
-    np.testing.assert_allclose(sols.nearest([3.1, 0.5, 0.2]), [-3.1, 0.5, 0.2])
+    np.testing.assert_allclose(_nearest(sols, [3.1, 0.5, 0.2]), [-3.1, 0.5, 0.2])
     np.testing.assert_allclose(sols.distance([3.1, 0.5, 0.2])[1], 2 * np.pi - 6.2)
 
     # a prismatic joint is not wrapped
-    sols = IKSolutions([[0.0, 0.0], [0.0, 2 * np.pi]], IKStatus.OK, [True, False])
+    sols = IKSolutions(
+        np.array([[0.0, 0.0], [0.0, 2 * np.pi]]), IKStatus.OK, np.array([True, False])
+    )
     np.testing.assert_allclose(sols.distance([0.0, 0.0]), [0.0, 2 * np.pi])
 
     # a weight of zero ignores a joint, and a weight scales its difference
-    sols = IKSolutions([[0.0, 1.0], [0.5, 0.0]], IKStatus.OK, [True, True])
-    np.testing.assert_allclose(sols.nearest([0.0, 0.0]), [0.5, 0.0])
-    np.testing.assert_allclose(sols.nearest([0.0, 0.0], weights=[1, 0]), [0.0, 1.0])
+    sols = IKSolutions(np.array([[0.0, 1.0], [0.5, 0.0]]), IKStatus.OK, np.array([True, True]))
+    np.testing.assert_allclose(_nearest(sols, [0.0, 0.0]), [0.5, 0.0])
+    np.testing.assert_allclose(_nearest(sols, [0.0, 0.0], weights=[1, 0]), [0.0, 1.0])
     np.testing.assert_allclose(sols.distance([0, 0], weights=[2, 1]), [1.0, 1.0])
 
     # no solutions, and why
-    empty = IKSolutions(np.empty((0, 2)), IKStatus.UNREACHABLE, [True, True])
+    empty = IKSolutions(np.empty((0, 2)), IKStatus.UNREACHABLE, np.array([True, True]))
     assert len(empty) == 0 and empty.nearest([0, 0]) is None
     assert empty.status is IKStatus.UNREACHABLE
 
@@ -2720,7 +2737,7 @@ def test_from_generated():
         namespace["ikine"](robot.fkine(q0).A), [True] * 6
     )
     assert sols.status is IKStatus.OK and len(sols) == 8
-    np.testing.assert_allclose(sols.nearest(q0), q0, atol=1e-6)
+    np.testing.assert_allclose(_nearest(sols, q0), q0, atol=1e-6)
 
 
 def test_flint_matches_sympy():
@@ -2749,6 +2766,7 @@ def test_flint_matches_sympy():
             assert (fast is None) == (slow is None)
             if fast is not None:
                 compared += 1
+                assert slow is not None
                 assert all(sp.expand(f - s) == 0 for f, s in zip(fast, slow))
     assert compared > 10
 
@@ -2775,7 +2793,7 @@ def test_missing_flint_warns_once():
     saved = globals()["_flint"]
     globals()["_flint"] = None
     real = sys.modules.get("flint")
-    sys.modules["flint"] = None  # makes ``import flint`` raise ImportError
+    sys.modules["flint"] = None  # type: ignore[assignment]  # makes the import fail
     try:
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
@@ -2801,8 +2819,11 @@ def test_polynomial_mode():
 
     for name in ("Puma560", "IRB140", "Stanford", "UR5"):
         robot = getattr(rtb.models.DH, name)()
-        closed = _numeric_check(robot, ikine_sym(robot), trials=3)
+        Q0 = ikine_sym(robot)
+        assert Q0 is not None
+        closed = _numeric_check(robot, Q0, trials=3)
         Q = ikine_sym(robot, polynomial=True)
+        assert Q is not None
         assert any(isinstance(s[0], PolyRoots) for s in Q)
         assert _numeric_check(robot, Q, trials=3) == closed, name
 

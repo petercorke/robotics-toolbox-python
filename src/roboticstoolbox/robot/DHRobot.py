@@ -15,7 +15,7 @@ import spatialmath.base.symbolic as sym
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
 from numpy import any
-from numpy.typing import ArrayLike, NDArray
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 from spatialmath import SE3, Twist3
 
 # from spatialmath import base
@@ -2140,7 +2140,7 @@ class DHRobot(Robot):
 
         .. seealso:: :meth:`ikine_LM` (:class:`~roboticstoolbox.ETS`)
         """
-        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)  # type: ignore[arg-type]
+        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)
 
 
 class SerialLink(DHRobot):
@@ -2170,7 +2170,7 @@ if __name__ == "__main__":  # pragma nocover
     # tw, T0 = puma.twists(puma.qz)
     # print(planar)
 
-    puma = rtb.models.DH.Puma560()  # type: ignore[operator]  # class, not module
+    puma = rtb.models.DH.Puma560()
     print(puma)
     # print(puma.jacob0(puma.qn, analytical="eul"))
     # puma.base = None
