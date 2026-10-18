@@ -62,7 +62,7 @@ class EKF:
         :param sensor: vehicle mounted sensor model, defaults to None
         :type sensor: 2-tuple, optional
         :param map: landmark map, defaults to None
-        :type map: :class:`LandmarkMap`, optional
+        :type map: ``LandmarkMap``, optional
         :param P0: initial covariance matrix, defaults to None
         :type P0: ndarray(n,n), optional
         :param x_est: initial state estimate, defaults to None
@@ -489,7 +489,7 @@ class EKF:
         Get map object
 
         :return: map used in simulation
-        :rtype: :class:`LandmarkMap` subclass
+        :rtype: ``LandmarkMap`` subclass
         """
         return self._ekf_map
 
@@ -1134,7 +1134,7 @@ class EKF:
 
         Plot the estimated vehicle path in the xy-plane.
 
-        :seealso: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` :meth:`plot_P`
+        :seealso: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` ``plot_P``
             :meth:`run` :meth:`history`
         """
         xyt = self.get_xyt()
@@ -1453,7 +1453,7 @@ class EKF:
         :type: bool or dict
 
         Plot the elements of the covariance matrix as an image. If ``colorbar``
-        is True add a color bar, if `colorbar` is a dict add a color bar with
+        is True add a color bar, if ``colorbar`` is a dict add a color bar with
         these options passed to colorbar.
 
         .. note:: A log scale is used.
@@ -1478,7 +1478,7 @@ class EKF:
         Transformation from estimated map to true map frame
 
         :param map: known landmark positions
-        :type map: :class:`LandmarkMap`
+        :type map: ``LandmarkMap``
         :return: transform from ``map`` to estimated map frame
         :rtype: SE2 instance
 

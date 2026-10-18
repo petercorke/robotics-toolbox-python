@@ -253,12 +253,12 @@ class Puma560(DHRobot):
 
         .. versionchanged:: 1.4.5
             Accepts an array as well as an :class:`SE3`, returns a single
-            :class:`IKSolution` for a trajectory like the numerical solvers (it
+            ``IKSolution`` for a trajectory like the numerical solvers (it
             was garbled, and failed for an unreachable pose), reports a pose
             closer to the waist axis than the shoulder offset as out of reach
             (it returned ``success=True`` with NaN joint coordinates), and checks
             the solution by forward kinematics.  It no longer uses
-            :meth:`DHRobot.ikine_6s`, which is deprecated.
+            ``ikine_6s``, which is deprecated.
 
         :reference:
             - Inverse kinematics for a PUMA 560,

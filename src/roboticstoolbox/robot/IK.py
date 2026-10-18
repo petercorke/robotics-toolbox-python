@@ -124,7 +124,7 @@ class IKSolution:
     .. versionchanged:: 1.4.2
         Added ``__getitem__`` (positional indexing matching ``__iter__``'s
         order) and a ``__repr__`` matching ``__str__``, so ``ik_LM``/``ik_NR``/
-        ``ik_GN`` (which now also return ``IKSolution``, see :meth:`ETS.ik_LM`)
+        ``ik_GN`` (which now also return ``IKSolution``, see :meth:`~roboticstoolbox.ETS.ik_LM`)
         remain compatible with code that indexed the old bare tuple return
 
     .. versionchanged:: 1.4.5
@@ -132,7 +132,7 @@ class IKSolution:
         ``len(sol)`` is the number of poses (1 for a single pose), and
         ``for q in sol`` and ``sol[i]`` give the joint vector of each pose.  This
         replaces iterating over the fields, so ``q, success, ... = sol`` and
-        ``sol[1]`` no longer work, use the attributes or :meth:`astuple`.  An
+        ``sol[1]`` no longer work, use the attributes or ``astuple``.  An
         ``IKSolution`` is true if ``success`` is true.  Printing a trajectory
         shows the number of poses and abbreviates a long ``q``, and the
         residual of a failed solution is no longer rounded to zero.
@@ -281,7 +281,7 @@ class IKSolver(ABC):
     An abstract super class for numerical inverse kinematics (IK)
 
     This class provides basic functionality to perform numerical IK. Superclasses
-    can inherit this class and implement the `solve` method and redefine any other
+    can inherit this class and implement the ``solve`` method and redefine any other
     methods necessary.
 
     :param name: The name of the IK algorithm
@@ -291,11 +291,11 @@ class IKSolver(ABC):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
@@ -365,11 +365,11 @@ class IKSolver(ABC):
         :rtype: IKSolution
 
         This method will attempt to solve the IK problem and obtain joint coordinates
-        which result the the end-effector pose `Tep`.
+        which result the the end-effector pose ``Tep``.
 
-        If `Tep` is an :class:`SE3` containing more than one pose, or an array with
+        If ``Tep`` is an :class:`SE3` containing more than one pose, or an array with
         shape (N, 4, 4), it is treated as a trajectory of N poses.  Each pose is
-        solved independently, using the same initial coordinates `q0` (and the same
+        solved independently, using the same initial coordinates ``q0`` (and the same
         random restarts) for every pose, so consecutive solutions are not guaranteed
         to lie on the same IK branch.  The returned :class:`IKSolution` has:
 
@@ -576,7 +576,7 @@ class IKSolver(ABC):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
@@ -652,7 +652,7 @@ class IKSolver(ABC):
         :returns: True if joints within feasible limits otherwise False
         :rtype: bool
 
-        A thin wrapper around :func:`within_limits`.
+        A thin wrapper around ``within_limits``.
         """
         return within_limits(q[: ets.n], ets.qlim)
 
@@ -671,7 +671,7 @@ def normalise_q(q: ArrayLike, qlim: ArrayLike, revolute: ArrayLike) -> NDArray:
     joints outside the principal interval :math:`[-\\pi, \\pi)`. Otherwise the
     principal angle is preferred, shifted by whole turns towards the limits if
     necessary. If no equivalent angle lies within the limits the coordinate is
-    left as the nearest candidate, and a subsequent :func:`within_limits` check
+    left as the nearest candidate, and a subsequent ``within_limits`` check
     will reject it.
 
     This is the joint coordinate convention used by the numerical IK solvers.
@@ -767,7 +767,7 @@ def _calc_qnull(
 ) -> Any:
     """
     Calculates the desired null-space motion according to the gains λΣ and λm.
-    This is a helper method that is used within the `step` method of an IK solver
+    This is a helper method that is used within the ``step`` method of an IK solver
 
     :return: qnull - the desired null-space motion
     """
@@ -798,11 +798,11 @@ class IK_NR(IKSolver):
     Newton-Raphson Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
-    using the Newton-Raphson method. See `step` method for mathematical description.
+    using the Newton-Raphson method. See ``step`` method for mathematical description.
 
     .. note::
 
-        When using this class with redundant robots (>6 DoF), `pinv` must be set to `True`
+        When using this class with redundant robots (>6 DoF), ``pinv`` must be set to `True`
 
     :param name: The name of the IK algorithm
     :param ilimit: How many iterations are allowed within a search before a new search
@@ -811,18 +811,18 @@ class IK_NR(IKSolver):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
-    :param pinv: If True, will use the pseudoinverse in the `step` method instead of
+    :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
         the normal inverse
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
         completely from the solution
@@ -927,7 +927,7 @@ class IK_NR(IKSolver):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
@@ -971,11 +971,11 @@ class IK_LM(IKSolver):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
@@ -1000,7 +1000,7 @@ class IK_LM(IKSolver):
         The following example gets the ``ets`` of a ``panda`` robot object, instantiates
         the IK_LM solver class using default parameters, makes a goal pose ``Tep``,
         and then solves for the joint coordinates which result in the pose ``Tep``
-        using the `solve` method.
+        using the ``solve`` method.
 
     .. runblock:: pycon
     >>> import roboticstoolbox as rtb
@@ -1102,12 +1102,12 @@ class IK_LM(IKSolver):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
 
-        The operation is defined by the choice of `method` when instantiating the class.
+        The operation is defined by the choice of ``method`` when instantiating the class.
 
         The next step is defined as
 
@@ -1143,7 +1143,7 @@ class IK_LM(IKSolver):
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         **Sugihara's Method**
 
@@ -1156,11 +1156,11 @@ class IK_LM(IKSolver):
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         **Wampler's Method**
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
         """
 
         Te = ets.eval(q)
@@ -1195,7 +1195,7 @@ class IK_GN(IKSolver):
     Gauss-Newton Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
-    using the Gauss-Newton method. See `step` method for mathematical description.
+    using the Gauss-Newton method. See ``step`` method for mathematical description.
 
     .. note::
 
@@ -1208,18 +1208,18 @@ class IK_GN(IKSolver):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
-    :param pinv: If True, will use the pseudoinverse in the `step` method instead of
+    :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
         the normal inverse
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
         completely from the solution
@@ -1235,7 +1235,7 @@ class IK_GN(IKSolver):
         The following example gets the ``ets`` of a ``panda`` robot object, instantiates
         the `IK_GN` solver class using default parameters, makes a goal pose ``Tep``,
         and then solves for the joint coordinates which result in the pose ``Tep``
-        using the `solve` method.
+        using the ``solve`` method.
 
     .. runblock:: pycon
     >>> import roboticstoolbox as rtb
@@ -1323,7 +1323,7 @@ class IK_GN(IKSolver):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
@@ -1374,7 +1374,7 @@ class IK_QP(IKSolver):
     Quadratic Programming Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
-    using a quadratic programming approach. See `step` method for mathematical
+    using a quadratic programming approach. See ``step`` method for mathematical
     description.
 
     :param name: The name of the IK algorithm
@@ -1384,11 +1384,11 @@ class IK_QP(IKSolver):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
@@ -1412,7 +1412,7 @@ class IK_QP(IKSolver):
         The following example gets the ``ets`` of a ``panda`` robot object, instantiates
         the `IK_QP` solver class using default parameters, makes a goal pose ``Tep``,
         and then solves for the joint coordinates which result in the pose ``Tep``
-        using the `solve` method.
+        using the ``solve`` method.
 
     .. runblock:: pycon
     >>> import roboticstoolbox as rtb
@@ -1503,7 +1503,7 @@ class IK_QP(IKSolver):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]

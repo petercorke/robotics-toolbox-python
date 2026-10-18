@@ -52,7 +52,7 @@ inertia, viscous friction, Coulomb friction, and joint limits can also be
 specified using additional keyword arguments.
 
 The toolbox provides some such robot models wrapped as class definitions, for example the 
-core logic of `models.DH.Puma560` is::
+core logic of ``models.DH.Puma560`` is::
 
     class Puma560(DHRobot):
 
@@ -243,7 +243,7 @@ To load an arbitrary URDF or xacro file we can use::
 
 which will preprocess and parse the file, and loads any associated mesh assets.
 
-If `filename` is a plain name with no suffix, like `"ur5"`, the Toolbox will attempt to dynamically load
+If ``filename`` is a plain name with no suffix, like ``"ur5"``, the Toolbox will attempt to dynamically load
 the model from the `robot_descriptions <https://github.com/robot-descriptions/robot_descriptions.py>`_ package, which is a collection of URDF and xacro files for many robots.
 This package is installed automatically with RTB-P.
 

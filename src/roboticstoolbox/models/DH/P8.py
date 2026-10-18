@@ -48,7 +48,7 @@ class P8(DHRobot):
 
     .. codeauthor:: Peter Corke
 
-    :seealso: :func:`models.DH.Puma560`
+    :seealso: ``Puma560``
     """
 
     def __init__(self) -> None:

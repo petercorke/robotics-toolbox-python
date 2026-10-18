@@ -11,6 +11,7 @@ IK_QP - Numerical IK with Quadratic Programming
 
 .. autosummary::
    :toctree: stubs
+   :template: method_indexed.rst
 
    ~IK_QP.step
    ~IK_QP.solve
@@ -20,6 +21,7 @@ IK_QP - Numerical IK with Quadratic Programming
 
 .. autosummary::
    :toctree: stubs
+   :template: method_indexed.rst
 
    ~IK_QP._random_q
    ~IK_QP._check_jl

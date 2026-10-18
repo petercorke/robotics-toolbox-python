@@ -36,7 +36,7 @@ class FrankieOmni(Robot):
     inertial data), spliced by hand onto a separately-loaded
     ``clearpath_ridgeback_description`` mobile base -- it has no
     ``use_robot_descriptions``-style option, since the base+arm splice is
-    done manually rather than through :class:`URDFRobot`'s own loader. See
+    done manually rather than through ``URDFRobot``'s own loader. See
     the wiki's `Panda models
     <https://github.com/petercorke/robotics-toolbox-python/wiki/Panda-models>`_
     page for the full picture.

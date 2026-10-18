@@ -3,7 +3,7 @@ Path planning
 
 A set of path planners for robots operating in planar environments with
 configuration :math:`\vec{q} \in \mathbb{R}^2` or :math:`\vec{q} \in \mathbb{R}^2 \times S^1 \sim \SE{2}`.
-All inherit from :class:`PlannerBase`.
+All inherit from :class:`~roboticstoolbox.mobile.PlannerBase`.
 
 Some planners are based on code from the PathPlanning category of
 `PythonRobotics <https://github.com/AtsushiSakai/PythonRobotics>`_ by Atsushi Sakai.

@@ -146,8 +146,8 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`Robot.nofriction`
-        :func:`Link.friction`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.nofriction`
+        :meth:`~roboticstoolbox.robot.Link.Link.friction`
 
         """
 
@@ -175,8 +175,8 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`Robot.friction`
-        :func:`Link.nofriction`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.friction`
+        :meth:`~roboticstoolbox.robot.Link.Link.nofriction`
 
         """
 
@@ -294,9 +294,9 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`DHRobot.accel`
-        :func:`DHRobot.nofriction`,
-        :func:`DHRobot.rne`.
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.accel`
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.nofriction`,
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.rne`.
 
         """
 

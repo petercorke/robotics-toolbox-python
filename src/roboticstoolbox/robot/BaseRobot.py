@@ -1077,7 +1077,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Link.isprismatic`
+        :meth:`~roboticstoolbox.robot.Link.Link.isprismatic`
         :func:`revolutejoints`
 
         """
@@ -1109,7 +1109,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Link.isrevolute`
+        :meth:`~roboticstoolbox.robot.Link.Link.isrevolute`
         :func:`prismaticjoints`
 
         """
@@ -1688,7 +1688,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Link.isrevolute`
+        :meth:`~roboticstoolbox.robot.Link.Link.isrevolute`
         :func:`revolutejoints`
 
         """
@@ -1713,7 +1713,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Link.isprismatic`
+        :meth:`~roboticstoolbox.robot.Link.Link.isprismatic`
         :func:`prismaticjoints`
 
         """
@@ -1869,8 +1869,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Robot.qlim`
-        :func:`Link.qlim`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.qlim`
+        :meth:`~roboticstoolbox.robot.Link.Link.qlim`
 
         """
 
@@ -2311,10 +2311,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             - ETS transforms are indicated by rounded boxes
 
         The edges are:
-            - an arrow if `jtype` is False or the joint is fixed
-            - an arrow with a round head if `jtype` is True and the joint is
+            - an arrow if ``jtype`` is False or the joint is fixed
+            - an arrow with a round head if ``jtype`` is True and the joint is
               revolute
-            - an arrow with a box head if `jtype` is True and the joint is
+            - an arrow with a box head if ``jtype`` is True and the joint is
               prismatic
 
         Edge labels or nodes in blue have a fixed transformation to the
@@ -2387,10 +2387,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         The edges are:
 
-        - an arrow if `jtype` is False or the joint is fixed
-        - an arrow with a round head if `jtype` is True and the joint is
+        - an arrow if ``jtype`` is False or the joint is fixed
+        - an arrow with a round head if ``jtype`` is True and the joint is
           revolute
-        - an arrow with a box head if `jtype` is True and the joint is
+        - an arrow with a box head if ``jtype`` is True and the joint is
           prismatic
 
         Edge labels or nodes in blue have a fixed transformation to the

@@ -189,7 +189,7 @@ can be set with the ``q0`` argument, and can be used to bias the solution toward
 In 2D
 -------
 
-Our examples have been in 3D, even though the robots are planar.  The :class:`ET` subclasses can express all elementary
+Our examples have been in 3D, even though the robots are planar.  The :class:`~roboticstoolbox.ET` subclasses can express all elementary
 translations and rotation in 3D space, and the result of the forward kinematics is a 3D pose. The 3D ET and ETS are described on the :doc:`ets_3d` page.
 
 A similar approach works in 2D.  There are fewer elementary transforms, just translation along the x- andy y-axes and rotation about

@@ -100,11 +100,11 @@ These solvers handle a single pose only, ``Tep`` must not be a trajectory.  To s
 .. rubric:: ETS C++ IK Methods
 
 .. autosummary::
-    :toctree: stubs
-    
-    ~roboticstoolbox.ets.ETS.ETS.ik_LM
-    ~roboticstoolbox.ets.ETS.ETS.ik_GN
-    ~roboticstoolbox.ets.ETS.ETS.ik_NR
+    :nosignatures:
+
+    ~roboticstoolbox.ETS.ik_LM
+    ~roboticstoolbox.ETS.ik_GN
+    ~roboticstoolbox.ETS.ik_NR
 
 .. rubric:: Robot C++ IK Methods
 
@@ -166,7 +166,7 @@ The :py:class:`~roboticstoolbox.robot.IK.IKSolver` provides basic functionality 
 
     iksolution
 
-The :py:class:`~roboticstoolbox.robot.IK.IKSolution` is a :py:class:`dataclasses.dataclass` instance with the following members.  It is also a sequence of the rows of ``q``, one per pose: ``len(sol)`` is the number of poses, ``for q in sol`` and ``sol[i]`` give the joint coordinates of each pose, and ``bool(sol)`` is ``success``.  Iterating over the six members was removed in 1.4.5, use the attributes or ``sol.astuple()``.
+The :py:class:`~roboticstoolbox.robot.IK.IKSolution` is a :py:func:`dataclasses.dataclass` instance with the following members.  It is also a sequence of the rows of ``q``, one per pose: ``len(sol)`` is the number of poses, ``for q in sol`` and ``sol[i]`` give the joint coordinates of each pose, and ``bool(sol)`` is ``success``.  Iterating over the six members was removed in 1.4.5, use the attributes or ``sol.astuple()``.
 
 ==============   =========   =====================================================================================================
 Element          Type        Description                                                                                                    
@@ -231,12 +231,12 @@ Additionally, these class-based solvers have been implemented as methods within 
 
 
 .. autosummary::
-    :toctree: stubs
-    
-    ~roboticstoolbox.ets.ETS.ETS.ikine_LM
-    ~roboticstoolbox.ets.ETS.ETS.ikine_QP
-    ~roboticstoolbox.ets.ETS.ETS.ikine_GN
-    ~roboticstoolbox.ets.ETS.ETS.ikine_NR
+    :nosignatures:
+
+    ~roboticstoolbox.ETS.ikine_LM
+    ~roboticstoolbox.ETS.ikine_QP
+    ~roboticstoolbox.ETS.ikine_GN
+    ~roboticstoolbox.ETS.ikine_NR
 
 
 .. rubric:: Robot Python IK Methods

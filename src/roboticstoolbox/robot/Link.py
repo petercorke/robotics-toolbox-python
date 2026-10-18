@@ -874,7 +874,7 @@ class BaseLink(SceneNode, ABC):
         - The ratio of motor motion : link motion
         - The gear ratio can be negative, see also the ``flip`` attribute.
 
-        :seealso: :func:`flip`
+        :seealso: ``flip``
         """
 
         return self._G
@@ -1190,7 +1190,7 @@ class BaseLink(SceneNode, ABC):
             >>> print(robot.links[2])        # kinematic parameters
             >>> print(robot.links[2].dyn())  # dynamic parameters
 
-        :seealso: :func:`~dyntable`
+        :seealso: ``dyntable``
         """
 
         qlim = [0, 0] if self.qlim is None else self.qlim
@@ -1467,7 +1467,7 @@ class Link(BaseLink):
     - ``Ts`` the constant part as a NumPy array, or None
     - ``v`` a pointer to an ETS object representing the joint variable, or None
 
-    :seealso: :class:`Link2`, :class:`DHLink`
+    :seealso: :class:`Link2`, ``DHLink``
     """
 
     def __init__(

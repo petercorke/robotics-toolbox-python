@@ -11,6 +11,7 @@ IKSolver - IK Solver Abstract Base Class
 
 .. autosummary::
    :toctree: stubs
+   :template: method_indexed.rst
 
    ~IKSolver.step
    ~IKSolver.solve
@@ -20,6 +21,7 @@ IKSolver - IK Solver Abstract Base Class
 
 .. autosummary::
    :toctree: stubs
+   :template: method_indexed.rst
 
    ~IKSolver._random_q
    ~IKSolver._check_jl

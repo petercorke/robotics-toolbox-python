@@ -76,12 +76,12 @@ class ETS(BaseETS[ET]):
 
     See Also
     --------
-    :func:`rx`
-    :func:`ry`
-    :func:`rz`
-    :func:`tx`
-    :func:`ty`
-    :func:`tz`
+    ``rx``
+    ``ry``
+    ``rz``
+    ``tx``
+    ``ty``
+    ``tz``
 
     """
 
@@ -230,7 +230,7 @@ class ETS(BaseETS[ET]):
 
         See Also
         --------
-        :func:`isconstant`
+        ``isconstant``
         """
         const = None
         ets = ETS()
@@ -889,9 +889,11 @@ class ETS(BaseETS[ET]):
         joint angle configuration
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda().ets()
-        >>> panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
+
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.Panda().ets()
+            >>> dT = panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
+            >>> dT.shape
 
         .. rubric:: References
 
@@ -1129,7 +1131,7 @@ class ETS(BaseETS[ET]):
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -1143,11 +1145,11 @@ class ETS(BaseETS[ET]):
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1474,7 +1476,7 @@ class ETS(BaseETS[ET]):
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1524,7 +1526,7 @@ class ETS(BaseETS[ET]):
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -1538,11 +1540,11 @@ class ETS(BaseETS[ET]):
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1648,7 +1650,7 @@ class ETS(BaseETS[ET]):
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1767,7 +1769,7 @@ class ETS(BaseETS[ET]):
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1903,7 +1905,7 @@ class ETS(BaseETS[ET]):
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was

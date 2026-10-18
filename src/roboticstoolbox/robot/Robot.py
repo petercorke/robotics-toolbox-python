@@ -338,7 +338,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     @classmethod
     def URDF(cls, file: Any, gripper: Any = None, manufacturer: Any = None) -> Any:
-        """Deprecated. Use :class:`~roboticstoolbox.models.URDF.URDFRobot` as a
+        """Deprecated. Use ``URDFRobot`` as a
         base class, or call ``URDF_read()`` from
         ``roboticstoolbox.models.URDF.URDFRobot`` and construct ``Robot``
         directly."""
@@ -389,10 +389,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #             - ETS transforms are indicated by rounded boxes
 
     #         The edges are:
-    #             - an arrow if `jtype` is False or the joint is fixed
-    #             - an arrow with a round head if `jtype` is True and the joint is
+    #             - an arrow if ``jtype`` is False or the joint is fixed
+    #             - an arrow with a round head if ``jtype`` is True and the joint is
     #               revolute
-    #             - an arrow with a box head if `jtype` is True and the joint is
+    #             - an arrow with a box head if ``jtype`` is True and the joint is
     #               prismatic
 
     #         Edge labels or nodes in blue have a fixed transformation to the
@@ -466,10 +466,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #             - ETS transforms are indicated by rounded boxes
 
     #         The edges are:
-    #             - an arrow if `jtype` is False or the joint is fixed
-    #             - an arrow with a round head if `jtype` is True and the joint is
+    #             - an arrow if ``jtype`` is False or the joint is fixed
+    #             - an arrow with a round head if ``jtype`` is True and the joint is
     #               revolute
-    #             - an arrow with a box head if `jtype` is True and the joint is
+    #             - an arrow with a box head if ``jtype`` is True and the joint is
     #               prismatic
 
     #         Edge labels or nodes in blue have a fixed transformation to the
@@ -1181,7 +1181,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         - Kinematic Derivatives using the Elementary Transform
           Sequence, J. Haviland and P. Corke
 
-        .. seealso:: :func:`jacob0`, :func:`hessian0`
+        .. seealso:: :func:`jacob0`, ``hessian0``
 
         .. rubric:: Examples
 
