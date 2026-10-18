@@ -36,9 +36,14 @@ example
 
     A_k A_{k+1} A_{k+2} = A_{k-1}^{-1} \cdots A_0^{-1} \, T \, A_5^{-1} \cdots A_{k+3}^{-1}
 
-with joints numbered from 0.  The last matrix on the right postmultiplies, so
-the two columns used, the :math:`z` axis :math:`l` and the translation :math:`p`,
-do not depend on joint :math:`k+3`.  Fourteen equations come from them, those of
+with joints numbered from 0.  For :math:`k=2` this is Eq. 3 of Raghavan and Roth,
+which moves the three joints that are not in the product to the right.  Writing
+each link matrix as :math:`A_i = A_{i,v} A_{i,s}`, the first being the joint
+variable alone and the second the constant link parameters, lets the variable of
+joint :math:`k-1` be isolated, so that it appears only as a rotation about
+:math:`z`.  The last matrix on the right postmultiplies, so the two columns used,
+the :math:`z` axis :math:`l` and the translation :math:`p`, do not depend on joint
+:math:`k+3`.  Fourteen equations come from them, those of
 :math:`l`, :math:`p`, :math:`l \times p`, :math:`p \cdot p`, :math:`l \cdot p` and
 :math:`(p \cdot p) l - 2 (l \cdot p) p`.  They are bilinear in
 :math:`(\sin q_k, \cos q_k, 1)` times the monomials of the two other joints of
@@ -48,12 +53,20 @@ The unknown monomials of the right joints are eliminated using the null space of
 the 14x8 matrix that multiplies them, leaving six equations.  With
 :math:`x = \tan(q_k/2)` and the half angle of the two left joints, and the
 equations multiplied by one of those half angles, this is a 12x12 matrix
-polynomial that is quadratic in :math:`x`.  Its eigenvalues are the 16 candidates
-for :math:`x`, and the other joints follow by back substitution.
+polynomial that is quadratic in :math:`x`, Eq. 14 of the paper.  The determinant is
+the *characteristic polynomial* of degree 16, so a general 6R arm has up to 16
+solutions, of which in general only some are real.  A quadratic matrix polynomial
+of size 12 has 24 eigenvalues, though, not 16, and the 8 that are not roots of
+the characteristic polynomial are candidates that do not correspond to a
+solution.  They are discarded by the check of each candidate against the forward
+kinematics.  The other joints follow from the real roots by back substitution.
 
 Which joint is :math:`k` makes a great difference to the conditioning, and for
 some arms the wrong choice gives no solutions at all, so it is chosen
-numerically.  Every solution is checked against the forward kinematics.
+numerically.  The paper obtains the three choices as the cyclic rearrangements of
+its Eq. 4 (the section "Alternative Equations": joints 2, 3 and 6 have nothing
+special about them), here ``_SPLITS``.  Every solution is checked against the
+forward kinematics.
 
 :func:`classify` finds the structure of an arm, and :func:`make_solver` uses it to
 choose between this method and the closed form solutions of :mod:`symbolic_ik`.
@@ -96,7 +109,18 @@ Limits
   against a few microseconds for the generated closed form code in C.  Polishing
   the candidates doubled the time of the Python.  The symbolic derivation takes a
   few seconds for each split, and is cached only in the running process.
-- **Only standard DH robots with six revolute joints** are handled.
+- **Only standard DH robots with six revolute joints** are handled.  The paper
+  also covers prismatic joints, by using the link offset :math:`d_i` and
+  :math:`d_i^2` as the variables in place of :math:`\sin q_i` and
+  :math:`\cos q_i`.  One prismatic joint (5R,P) keeps the degree at 16, but two
+  or more lower the degree of the characteristic polynomial, which needs a
+  different, smaller elimination (the paper's Appendix 1 is the case of 4R,2P
+  for which it is 8).  Neither is implemented.
+- **Special geometry loses constraint equations.**  The paper explains the
+  failure for a spherical wrist: the number of power products falls, the
+  characteristic polynomial drops to degree 4, and some joints become
+  double-valued for each root.  That is the reason arms with a spherical wrist
+  are given to the closed form method and not to this one.
 - **Code is generated in Python, C and C++**, by :meth:`General6R.generate`, but
   not Rust.  The Python needs NumPy, and uses SciPy if it is installed.  The C and
   C++ need no library, they contain a small linear algebra kernel, see below.  It
