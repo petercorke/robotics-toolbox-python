@@ -1258,6 +1258,22 @@ class AnalyticIK(ABC):
         self.robot = robot
         self.revolute = np.array([link.isrevolute for link in robot.links])
 
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({self.robot.name!r})"
+
+    def __str__(self) -> str:
+        structure = classify(self.robot)
+
+        def joints(first: tuple[int, ...]) -> str:
+            # the joints of each triple, for example "4-6"
+            return ", ".join(f"{i}-{i + 2}" for i in first) or "none"
+
+        return (
+            f"{type(self).__name__} for {self.robot.name}: {self.method}\n"
+            f"  joints meeting at a point: {joints(structure.spherical)}\n"
+            f"  joints with parallel axes: {joints(structure.parallel)}"
+        )
+
     def _dh_pose(self, T: np.ndarray) -> np.ndarray:
         # the pose of the last DH frame, with the base and tool transforms removed
         return np.linalg.inv(self.robot.base.A) @ T @ np.linalg.inv(self.robot.tool.A)
@@ -1787,7 +1803,9 @@ def test_general_6r():
         assert sols.status is IKStatus.OK and len(sols) >= 2
         for q in sols.q:
             assert np.abs(robot.fkine(q).A - T).max() < 1e-6
-        np.testing.assert_allclose(sols.nearest(q0), q0, atol=1e-5)
+        best = sols.nearest(q0)
+        assert best is not None
+        np.testing.assert_allclose(best, q0, atol=1e-5)
 
 
 def test_unreachable():
@@ -1946,8 +1964,8 @@ int main(void) {
     return 0;
 }
 """
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp = Path(tmp)
+    with tempfile.TemporaryDirectory() as tmp_name:
+        tmp = Path(tmp_name)
         source = tmp / ("kernel.c" if language == "c" else "kernel.cpp")
         source.write_text(driver)
         command = (
@@ -2102,8 +2120,8 @@ int main() {
 """
         source, command = "ik.cpp", ["c++", "-std=c++17", "-O2", "-Wall", "-Wextra", "-o", "ik", "ik.cpp"]
 
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp = Path(tmp)
+    with tempfile.TemporaryDirectory() as tmp_name:
+        tmp = Path(tmp_name)
         (tmp / source).write_text(code + main)
         build = subprocess.run(command, cwd=tmp, capture_output=True, text=True)
         assert build.returncode == 0 and build.stderr == "", build.stderr
@@ -2197,7 +2215,9 @@ def test_make_solver():
         )
         sols = solver._solve_pose(robot.fkine(q0).A)
         assert sols.status is IKStatus.OK
-        np.testing.assert_allclose(sols.nearest(q0), q0, atol=1e-5)
+        best = sols.nearest(q0)
+        assert best is not None
+        np.testing.assert_allclose(best, q0, atol=1e-5)
 
     with pytest.raises(ValueError, match="recovered"):
         make_solver(models.Jaco(), trials=10, min_success=1.01)
