@@ -89,7 +89,7 @@ class PyPlot2(Connector):
 
     def launch(self, name: Any = None, limits: Any = None, **kwargs: Any) -> None:
         """
-        env = launch() launchs a blank 2D matplotlib figure
+        env = launch() launches a blank 2D matplotlib figure
 
         Optional keyword arguments
         --------------------------
@@ -236,7 +236,7 @@ class PyPlot2(Connector):
         plt.close(self.fig)
 
     #
-    #  Methods to interface with the robots created in other environemnts
+    #  Methods to interface with the robots created in other environments
     #
 
     def add(
@@ -373,7 +373,7 @@ class PyPlot2(Connector):
 
         :param robot: Robot being taught
         :type robot: ERobot class
-        :param q: inital joint angles in radians
+        :param q: initial joint angles in radians
         :type q: array_like(n)
         :param handle: unused here -- PyPlot2 has no AssemblyHandle
             concept, it drives the panel by mutating robot.q directly

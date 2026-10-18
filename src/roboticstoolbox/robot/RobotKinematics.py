@@ -651,7 +651,7 @@ class RobotKinematicsMixin:
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -665,11 +665,11 @@ class RobotKinematicsMixin:
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1048,7 +1048,7 @@ class RobotKinematicsMixin:
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1098,7 +1098,7 @@ class RobotKinematicsMixin:
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -1112,11 +1112,11 @@ class RobotKinematicsMixin:
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1224,7 +1224,7 @@ class RobotKinematicsMixin:
         :param joint_limits: Reject solutions with joint limit violations
         :param seed: A seed for the private RNG used to generate random joint coordinate
             vectors
-        :param pinv: If True, will use the pseudoinverse in the `step` method instead of
+        :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
             the normal inverse
         :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
             completely from the solution
@@ -1246,7 +1246,7 @@ class RobotKinematicsMixin:
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1300,11 +1300,11 @@ class RobotKinematicsMixin:
         :py:class:`~roboticstoolbox.robot.IK.IK_NR`
             An IK Solver class which implements the Newton-Raphson optimisation technique
         ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         :meth:`ik_NR`
             The fast, C++-backed equivalent of this method (requires the compiled extension)
 
@@ -1369,7 +1369,7 @@ class RobotKinematicsMixin:
         :param joint_limits: Reject solutions with joint limit violations
         :param seed: A seed for the private RNG used to generate random joint coordinate
             vectors
-        :param pinv: If True, will use the pseudoinverse in the `step` method instead of
+        :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
             the normal inverse
         :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
             completely from the solution
@@ -1391,7 +1391,7 @@ class RobotKinematicsMixin:
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1460,11 +1460,11 @@ class RobotKinematicsMixin:
         :py:class:`~roboticstoolbox.robot.IK.IK_GN`
             An IK Solver class which implements the Gauss-Newton optimisation technique
         ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         :meth:`ik_GN`
             The fast, C++-backed equivalent of this method (requires the compiled extension)
 
@@ -1553,7 +1553,7 @@ class RobotKinematicsMixin:
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1657,11 +1657,11 @@ class RobotKinematicsMixin:
         :py:class:`~roboticstoolbox.robot.IK.IK_QP`
             An IK Solver class which implements a quadratic programming approach
         ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`~roboticstoolbox.ETS` class
 
 
         .. versionchanged:: 1.0.4

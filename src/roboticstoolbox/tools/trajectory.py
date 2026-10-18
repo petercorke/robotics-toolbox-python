@@ -296,14 +296,14 @@ class Trajectory:
         apply_block(block)
 
     def qplot(self, **kwargs: Any) -> None:
-        """
+        r"""
         Plot multi-axis trajectory
 
-        :param \*\*kwargs: optional arguments passed to :func:`~roboticstoolbox.tools.plot.xplot`
+        :param \*\*kwargs: optional arguments passed to ``xplot``
 
         Plots a multi-axis trajectory, held within the object, as position against time.
 
-        :seealso: :func:`~roboticstoolbox.tools.plot.xplot`
+        :seealso: ``xplot``
         """
         # deferred, the plot module is imported after this one by the package
         from roboticstoolbox.tools.plot import xplot
@@ -361,7 +361,6 @@ def quintic(
         >>> tg
         >>> len(tg)
         >>> tg.q
-        >>> tg.plot()
 
     .. plot::
 
@@ -933,7 +932,7 @@ def jtraj(
 
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`ctraj`, :func:`qplot`, :func:`~roboticstoolbox.tools.trajectory.jtraj`
+    :seealso: :func:`ctraj`, ``qplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
     # print(f"  --- jtraj: {q0} --> {q1} in {tv}")
     if isinstance(t, int):
@@ -1041,8 +1040,8 @@ def ctraj(
     :References:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`~roboticstoolbox.trajectory.trapezoidal`,
-        :func:`~spatialmath.unitquaternion.interp`
+    :seealso: ``trapezoidal``,
+        ``interp``
     """
 
     if isinstance(t, int):

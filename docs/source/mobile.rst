@@ -3,7 +3,7 @@ Mobile robots
 *************
 
 
-The Robotics Toolbox supports kino-dynamic vehicle models, animation, planning
+The Robotics Toolbox supports kinematic vehicle models, animation, planning
 and state estimation.
 
 .. toctree::
