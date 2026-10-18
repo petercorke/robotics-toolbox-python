@@ -780,10 +780,19 @@ class BaseETS(MutableSequence[ETT]):
         Swap two transforms in the ETS
 
         :param i: index of first transform
+        :raises ValueError: if the two transforms do not commute
 
         Swaps the two transforms at indices ``i`` and ``i+1``.  This is useful for
-        changing the order of commutative transforms in an ETS.  The two transforms
-        must be of the same kind, otherwise ``ValueError`` is raised.
+        changing the order of commutative transforms in an ETS, and the kinematics
+        of the sequence are unchanged.  Two transforms commute if they are
+
+        - of the same kind, for example two translations along x
+        - both translations, along any axes
+        - a rotation and a translation along the axis of that rotation, for
+          example ``Rz`` and ``tz``
+
+        Anything else, such as a rotation and a translation along a different axis,
+        does not commute and raises ``ValueError``.
 
         Examples
         --------
@@ -791,23 +800,41 @@ class BaseETS(MutableSequence[ETT]):
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.tx(2) * ET.Rz(1)
+            >>> e = ET.Rz() * ET.tx(1) * ET.ty(2) * ET.Rz(1)
             >>> print(e)
             >>> e.swap(1)
+            >>> print(e)
+            >>> e = ET.Rz() * ET.tz(1) * ET.Rx() * ET.Rz(1)
+            >>> e.swap(0)
             >>> print(e)
 
         """
         if i < 0 or i >= len(self._data) - 1:
             raise IndexError("Index out of range")  # pragma: nocover
-        
+
         e1 = self._data[i]
         e2 = self._data[i + 1]
+        if not self._commute(e1, e2):
+            raise ValueError(
+                f"transforms {e1.kind} and {e2.kind} do not commute, so they cannot be swapped"
+            )
+
+        self._data[i], self._data[i + 1] = e2, e1
+        self._fknm_stale = True
+
+    @staticmethod
+    def _commute(e1: Any, e2: Any) -> bool:
+        """Do the two elementary transforms commute, in either order?"""
+        if not (e1.iselementary and e2.iselementary):
+            return False
         if e1.kind == e2.kind:
-            self._data[i], self._data[i + 1] = self._data[i + 1], self._data[i]
-            self._fknm_stale = True
-        else:
-            raise ValueError("Transforms are not commutative")  # pragma: nocover
-        
+            return True
+        if e1.istranslation and e2.istranslation:
+            return True
+        # a rotation and a translation along the axis of the rotation, there is no
+        # such axis for a rotation in the plane, which is about z, out of the plane
+        return e1.ax is not None and e1.ax == e2.ax
+
     def merge(self, i: int) -> None:
         """
         Merge two transforms in the ETS
@@ -844,8 +871,10 @@ class BaseETS(MutableSequence[ETT]):
         if e1.kind != e2.kind:
             raise ValueError("Transforms are not the same type")  # pragma: nocover
 
-        elif  (e1.isjoint + e2.isjoint) == 2:
-            raise ValueError("Transforms are both joints")  # pragma: nocover
+        elif e1.isjoint or e2.isjoint:
+            # a joint with an offset, Rz(q) then Rz(a), is not an elementary
+            # transform: the constant of a joint is the value of its variable
+            raise ValueError("Transforms include a joint, it cannot be merged")
 
         else:
             self._data[i].param = e1.param + e2.param  # type: ignore[operator]
