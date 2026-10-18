@@ -558,6 +558,25 @@ class TestETS2(unittest.TestCase):
         r = t_x + t_y + rz + a
         r.teach(q=q2, block=False)
 
+    def test_swap_and_merge(self):
+        e = ET2.tx(1) * ET2.ty(2)
+        before = e.fkine([]).A
+        e.swap(0)
+        nt.assert_array_almost_equal(e.fkine([]).A, before)
+
+        e = ET2.R() * ET2.tx(1)
+        with self.assertRaisesRegex(ValueError, "do not commute"):
+            e.swap(0)
+
+        e = ET2.tx(1) * ET2.tx()
+        with self.assertRaisesRegex(ValueError, "joint"):
+            e.merge(0)
+
+    def test_motion_subspace(self):
+        nt.assert_array_equal(ET2.R().s, [0, 0, 1])
+        nt.assert_array_equal(ET2.tx().s, [1, 0, 0])
+        nt.assert_array_equal(ET2.ty().s, [0, 1, 0])
+
     def test_fkine_no_argument(self):
         # a sequence with no joints needs no q
         e = ET2.R(0.3) * ET2.tx(0.75)

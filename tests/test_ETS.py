@@ -4595,6 +4595,33 @@ class TestETS(unittest.TestCase):
         T = panda.eval(qt)
         self.assertEqual(T.shape, (5, 4, 4))
 
+    def test_swap_commuting_transforms(self):
+        # translations along different axes, and a rotation with a translation
+        # along its axis, commute: the kinematics are unchanged by the swap
+        q = [0.3, -0.4]
+        for e, i in (
+            (ET.Rz() * ET.tx(1) * ET.ty(2) * ET.Rz(), 1),
+            (ET.Rz() * ET.tz(1) * ET.Rz(0.2) * ET.Rx(), 0),
+            (ET.tx(1) * ET.tx(2) * ET.Rz() * ET.Ry(), 0),
+        ):
+            before = e.fkine(q).A
+            e.swap(i)
+            nt.assert_array_almost_equal(e.fkine(q).A, before)
+
+    def test_swap_not_commuting(self):
+        e = ET.Rz() * ET.tx(1)
+        with self.assertRaisesRegex(ValueError, "do not commute"):
+            e.swap(0)
+
+    def test_merge_joint_is_an_error(self):
+        e = ET.tx(1) * ET.tx()
+        with self.assertRaisesRegex(ValueError, "joint"):
+            e.merge(0)
+        e = ET.tx(1) * ET.tx(2)
+        e.merge(0)
+        self.assertEqual(len(e), 1)
+        nt.assert_almost_equal(e[0].param, 3)
+
     def test_fkine_no_argument(self):
         # a sequence with no joints needs no q
         e = ET.Rx(0.3) * ET.tz(0.75)
