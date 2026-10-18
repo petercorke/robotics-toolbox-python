@@ -194,7 +194,7 @@ class Puma560(DHRobot):
         self.qz = np.zeros(6)
 
         # nominal table top picking pose
-        self.qn = np.array([0, pi / 4, pi, 0, pi / 4, 0])
+        self.qn = np.array([0, pi / 4, -pi, 0, pi / 4, 0])
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
