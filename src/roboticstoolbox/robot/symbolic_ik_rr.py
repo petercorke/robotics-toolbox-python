@@ -1543,6 +1543,8 @@ def make_solver(
     :param max_time: give up looking for a closed form solution after this long
     :returns: a :class:`ClosedForm` solver for an arm with a spherical wrist or
         three parallel axes, otherwise a :class:`General6R` solver
+    :raises NotImplementedError: if the arm needs the general method but has a
+        prismatic joint
     :raises ValueError: if the method does not recover enough of the poses
 
     Each method is only good for its own kind of arm, for example the general
@@ -1551,6 +1553,14 @@ def make_solver(
     """
     solver: IKSolver
     if classify(robot).general:
+        prismatic = [i + 1 for i, link in enumerate(robot.links) if link.isprismatic]
+        if prismatic:
+            joints = ", ".join(str(j) for j in prismatic)
+            raise NotImplementedError(
+                "this arm has neither a spherical wrist nor three parallel axes, "
+                "so it needs the general 6R method, which handles revolute joints "
+                f"only, and the arm has prismatic joint(s) {joints}"
+            )
         solver = General6R(robot)
     else:
         solver = ClosedForm(robot, max_time)
@@ -1660,6 +1670,28 @@ def test_bad_robot():
         General6R(rtb.models.DH.Planar2())
     with pytest.raises(ValueError):
         General6R(rtb.models.DH.Stanford())  # a prismatic joint
+
+
+def test_make_solver_prismatic():
+    """An arm with a prismatic joint and no wrist structure is refused clearly."""
+    import pytest
+    from roboticstoolbox import DHRobot, PrismaticDH, RevoluteDH
+
+    # the RPRRPR arm of Raghavan and Roth, 1993, numerical example of Appendix 1
+    deg = np.pi / 180
+    robot = DHRobot(
+        [
+            RevoluteDH(d=0.21, a=1.46, alpha=135 * deg),
+            PrismaticDH(theta=65 * deg, a=0.56, alpha=78 * deg, qlim=[0, 1]),
+            RevoluteDH(d=0.29, a=0.38, alpha=23 * deg),
+            RevoluteDH(d=-0.54, a=0.56, alpha=46 * deg),
+            PrismaticDH(theta=54 * deg, a=1.08, alpha=35 * deg, qlim=[0, 1]),
+            RevoluteDH(d=0.48, a=0.67, alpha=47 * deg),
+        ]
+    )
+    assert classify(robot).general
+    with pytest.raises(NotImplementedError, match=r"prismatic joint\(s\) 2, 5"):
+        make_solver(robot)
 
 
 def test_generated_general_6r():
