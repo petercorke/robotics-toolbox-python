@@ -79,7 +79,7 @@ C++ Solvers
 
 These solvers are written in high performance C++ and wrapped in Python methods. The methods are made available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` and :py:class:`~roboticstoolbox.robot.Robot.Robot` classes. Being written in C++, these solvers are extraordinarily fast and typically take 30 to 90 µs. However, these solvers are hard to extend or modify.
 
-These methods have been written purely for speed so they do not contain the niceties of the Python alternative. For example, if you give the incorrect length for the ``q0`` vector, you could end up with a ``seg-fault`` or other undetermined behaviour. Therefore, when using these methods it is very important that you understand each of the parameters and the parameters passed are of the correct type and length.
+These methods have been written purely for speed so they do not contain the niceties of the Python alternative. For example, they do not check the length of the ``q0`` vector: a vector of the wrong length is not reported as an error, and the result is not meaningful. Therefore, when using these methods it is very important that you understand each of the parameters and that the parameters passed are of the correct type and length.
 
 The C++ solvers return an :py:class:`~roboticstoolbox.robot.IK.IKSolution` with the following members (``reason`` is always empty, these solvers do not produce a failure reason string):
 
@@ -115,7 +115,7 @@ These solvers handle a single pose only, ``Tep`` must not be a trajectory.  To s
     ~roboticstoolbox.robot.Robot.Robot.ik_GN
     ~roboticstoolbox.robot.Robot.Robot.ik_NR
 
-In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and one of the fast IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class.
+In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and use one of the fast IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class.
 
 .. runblock:: pycon
 
@@ -127,7 +127,7 @@ In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Pa
     >>> # Solve the IK problem
     >>> panda.ik_LM(Tep)
 
-In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and and then get the :py:class:`~roboticstoolbox.ets.ETS.ETS` representation. Subsequently, we use one of the fast IK solvers available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` class.
+In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and then get the :py:class:`~roboticstoolbox.ets.ETS.ETS` representation. Subsequently, we use one of the fast IK solvers available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` class.
 
 .. runblock:: pycon
 
@@ -157,7 +157,7 @@ These solvers are Python classes which extend the abstract base class :py:class:
 
     iksolver
 
-The :py:class:`~roboticstoolbox.robot.IK.IKSolver` provides basic functionality for performing numerical IK. Superclasses can inherit this class and must implement the :py:meth:`~roboticstoolbox.robot.IK.IKSolver.solve` method. Additionally a superclass redefine any other methods necessary such as :py:meth:`~roboticstoolbox.robot.IK.IKSolver.error` to provide a custom error function.
+The :py:class:`~roboticstoolbox.robot.IK.IKSolver` provides basic functionality for performing numerical IK. Subclasses inherit from this class and must implement the :py:meth:`~roboticstoolbox.robot.IK.IKSolver.solve` method. Additionally a subclass can redefine any other methods necessary such as :py:meth:`~roboticstoolbox.robot.IK.IKSolver.error` to provide a custom error function.
 
 .. rubric:: The Solution DataClass
 
@@ -194,7 +194,7 @@ If ``Tep`` is a trajectory of N poses, each pose is solved independently, starti
 
 .. rubric:: The Implemented IK Solvers
 
-These solvers can be identified as a :py:class:`Class` starting with ``IK_``.
+These solvers can be identified as classes with a name starting with ``IK_``.
 
 .. toctree::
     :maxdepth: 1
@@ -224,14 +224,7 @@ In the following example, we create an IK Solver class and pass an :py:class:`~r
 
 
 
-.. IK Solvers Available with an ETS
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Additionally, these :py:class:`Class` based solvers have been implemented as methods within the :py:class:`~roboticstoolbox.ets.ETS.ETS` and :py:class:`~roboticstoolbox.robot.Robot.Robot` classes. The method names start with ``ikine_``.
-
-
-.. toctree:
-   :caption: IK Solvers from an ETS
+Additionally, these class-based solvers have been implemented as methods within the :py:class:`~roboticstoolbox.ets.ETS.ETS` and :py:class:`~roboticstoolbox.robot.Robot.Robot` classes. The method names start with ``ikine_``.
 
 
 .. rubric:: ETS Python IK Methods
@@ -259,7 +252,7 @@ Additionally, these :py:class:`Class` based solvers have been implemented as met
 
 .. rubric:: Example 
 
-In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and one of the IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class. This style is far more convenient than the above example.
+In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and use one of the IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class. This style is far more convenient than the above example.
 
 .. runblock:: pycon
 
@@ -271,7 +264,7 @@ In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Pa
     >>> # Solve the IK problem
     >>> panda.ikine_LM(Tep)
 
-In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and and then get the :py:class:`~roboticstoolbox.ets.ETS.ETS` representation. Subsequently, we use one of the IK solvers available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` class.
+In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and then get the :py:class:`~roboticstoolbox.ets.ETS.ETS` representation. Subsequently, we use one of the IK solvers available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` class.
 
 .. runblock:: pycon
 

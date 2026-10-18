@@ -57,8 +57,7 @@ They can be listed by:
 Defined from URDF
 ^^^^^^^^^^^^^^^^^
 
-A number of models are defined in terms of Denavit-Hartenberg parameters, either
-standard or modified.  They can be listed by:
+A number of models are defined by a URDF or xacro file.  They can be listed by:
 
 .. runblock:: pycon
 
