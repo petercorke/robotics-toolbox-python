@@ -194,7 +194,7 @@ class PlannerBase:
          - Bug2
          - ``run(start, goal)``
 
-    A planner raises ``ValueError`` for invalid arguments and :class:`NoPathError`
+    A planner raises ``ValueError`` for invalid arguments and ``NoPathError``
     when a valid problem has no solution.
 
     :seealso: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid`
@@ -495,7 +495,7 @@ class PlannerBase:
 
         Returns the occupancy grid that was optionally inflated at constructor time.
 
-        :seealso: :meth:`validate_endpoint` :meth:`isoccupied`
+        :seealso: :meth:`validate_endpoint` :meth:`~roboticstoolbox.mobile.PlannerBase.isoccupied`
         """
         return self._occgrid
 
@@ -512,7 +512,7 @@ class PlannerBase:
 
         If there is no occupancy grid this function always returns False (free).
 
-        :seealso:  :meth:`occgrid` :meth:`validate_endpoint` :meth:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid.isoccupied`
+        :seealso:  :meth:`occgrid` :meth:`validate_endpoint` ``isoccupied``
         """
         if self.occgrid is None:
             return False
@@ -532,7 +532,7 @@ class PlannerBase:
 
         The coordinate is tested to be a free cell in the occupancy grid.
 
-        :seealso: :meth:`isoccupied` :meth:`occgrid`
+        :seealso: :meth:`~roboticstoolbox.mobile.PlannerBase.isoccupied` :meth:`occgrid`
         """
         if p is not None:
             pv = getvector(p, self._ndims, dtype=dtype)
@@ -704,18 +704,18 @@ class PlannerBase:
             ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
             it and waits until it is closed; ignored by notebook backends,
             defaults to None
-        :param bgargs: arguments passed to :meth:`plot_bg`, defaults to None
+        :param bgargs: arguments passed to :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg`, defaults to None
         :param labels: write the distance value in each cell of the distance
             field, defaults to False.  Useful for small grids, see
-            :meth:`plot_bg`.
+            :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg`.
         :param label_style: Matplotlib text options for ``labels``
         :param labelvalues: deprecated, use ``labels``
-        :param inflated: show the inflated obstacles, passed to :meth:`plot_bg`
+        :param inflated: show the inflated obstacles, passed to :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg`
         :param colorbar: show a colorbar for the distance field, passed to
-            :meth:`plot_bg`
+            :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg`
         :param colorbar_style: options for the colorbar, passed to
-            :meth:`plot_bg`
-        :param cmap: colormap for the distance field, passed to :meth:`plot_bg`
+            :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg`
+        :param cmap: colormap for the distance field, passed to :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg`
         :param path_marker: deprecated, use ``path_style``
         :param path_marker_reverse: deprecated, use ``path_reverse_style``
         :param line: deprecated, use ``path_style``
@@ -762,7 +762,7 @@ class PlannerBase:
         - the occupancy grid
         - the distance field of the planner
 
-        Additional arguments ``bgargs`` can be passed through to :meth:`plot_bg`
+        Additional arguments ``bgargs`` can be passed through to :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg`
 
         If ``path`` is specified it has one column per point and either 2 or 3 rows:
 
@@ -799,7 +799,7 @@ class PlannerBase:
             ``path_marker`` and ``path_marker_reverse`` were accepted but had
             no effect.
 
-        :seealso: :meth:`plot_bg` :func:`base.plot_poly`
+        :seealso: :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg` ``plot_poly``
 
         .. note:: Unknown keyword arguments are ignored, with a
             ``DeprecationWarning``, as they were silently by RTB 1.4.4 and

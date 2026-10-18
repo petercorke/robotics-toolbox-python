@@ -146,8 +146,8 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`Robot.nofriction`
-        :func:`Link.friction`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.nofriction`
+        :meth:`~roboticstoolbox.robot.Link.Link.friction`
 
         """
 
@@ -175,8 +175,8 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`Robot.friction`
-        :func:`Link.nofriction`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.friction`
+        :meth:`~roboticstoolbox.robot.Link.Link.nofriction`
 
         """
 
@@ -294,9 +294,9 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`DHRobot.accel`
-        :func:`DHRobot.nofriction`,
-        :func:`DHRobot.rne`.
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.accel`
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.nofriction`,
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.rne`.
 
         """
 
@@ -732,7 +732,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` is a matrix (m,n), each row is interpretted as a joint state
+        If ``q`` is a matrix (m,n), each row is interpreted as a joint state
         vector, and the result is a 3d-matrix (nxnxk) where each plane
         corresponds to the inertia for the corresponding row of q.
 
@@ -801,7 +801,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and `qd` are matrices (m,n), each row is interpretted as a
+        If ``q`` and `qd` are matrices (m,n), each row is interpreted as a
         joint configuration, and the result (n,n,m) is a 3d-matrix where
         each plane corresponds to a row of ``q`` and ``qd``.
 
@@ -972,7 +972,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` is a matrix (m,n), each row is interpretted as a joint state
+        If ``q`` is a matrix (m,n), each row is interpreted as a joint state
         vector, and the result is a 3d-matrix (m,n,n) where each plane
         corresponds to the Cartesian inertia for the corresponding
         row of ``q``.
@@ -1094,7 +1094,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and `qd` are matrices (m,n), each row is interpretted as a
+        If ``q`` and `qd` are matrices (m,n), each row is interpreted as a
         joint configuration, and the result is an array (m,6,6) where
         each matrix corresponds to a row of ``q`` and ``qd``.
 
@@ -1121,7 +1121,7 @@ class DynamicsMixin:
         --------
         :func:`coriolis`
         :func:`inertia_x`
-        :func:`hessian0`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.hessian0`
 
         """
 
@@ -1375,7 +1375,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and ``qdd`` are matrices (m,n), each row is interpretted as a
+        If ``q`` and ``qdd`` are matrices (m,n), each row is interpreted as a
         joint configuration, and the result is a matrix (m,n) where each row is
         the corresponding joint torques.
 

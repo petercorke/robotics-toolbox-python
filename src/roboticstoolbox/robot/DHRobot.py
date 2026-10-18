@@ -1344,7 +1344,7 @@ class DHRobot(Robot):
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
 
-        :seealso: :func:`jacob0`, :func:`jacob_dot`
+        :seealso: :func:`jacob0`, ``jacob_dot``
         """
 
         return self.ets().hessian0(q, J0)
@@ -1903,7 +1903,7 @@ class DHRobot(Robot):
             the wrist, the user supplied ``ikfunc`` must solve the first three
             joints, and that is specific to one robot geometry.  It also
             mishandles trajectories and unreachable poses.  It is no longer used by
-            :meth:`Puma560.ikine_a`, which is self-contained.  A hand-written
+            ``ikine_a``, which is self-contained.  A hand-written
             solution belongs in the class of the robot it is written for.
 
         :param T: end-effector pose
@@ -2050,7 +2050,7 @@ class DHRobot(Robot):
         Numerical inverse kinematics by Levenberg-Marquadt optimization
 
         :param Tep: The desired end-effector pose or pose trajectory, see
-            :meth:`ETS.ikine_LM` for how a trajectory is handled
+            :meth:`~roboticstoolbox.ETS.ikine_LM` for how a trajectory is handled
         :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
             whose rows are the starting points of the first m searches (any
             further searches start from random valid coordinates)
@@ -2058,7 +2058,7 @@ class DHRobot(Robot):
         :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
         :rtype: IKSolution
 
-        This is a thin wrapper around :meth:`ETS.ikine_LM` -- see that
+        This is a thin wrapper around :meth:`~roboticstoolbox.ETS.ikine_LM` -- see that
         method for the full description of the Levenberg-Marquadt solver
         and its ``method``/``kq``/``km`` variants.
 

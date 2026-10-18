@@ -1,7 +1,7 @@
 # MDL_QUADCOPTER Dynamic parameters for a quadrotor.
 #
 # MDL_QUADCOPTER is a script creates the workspace variable quad which
-# describes the dynamic characterstics of a quadrotor flying robot.
+# describes the dynamic characteristics of a quadrotor flying robot.
 #
 # Properties::
 #

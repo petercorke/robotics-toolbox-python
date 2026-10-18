@@ -326,8 +326,9 @@ class BaseETS(MutableSequence[ETT]):
           There are no base ET, they are included in the first link segment.
 
         .. runblock:: pycon
-            >>> from roboticstoolbox.ets.ETS import *
-            >>> e = tz(1) * Rx("q1") * tx(2) * Ry("q2") * ty(3) * Rz("q3") * tz(4)
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tz(1) * ET.Rx("q1") * ET.tx(2) * ET.Ry("q2") * ET.ty(3) * ET.Rz("q3") * ET.tz(4)
             >>> base, *segments, gripper = e.split("first")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
             >>> base, *segments, gripper = e.split("last")
@@ -698,6 +699,13 @@ class BaseETS(MutableSequence[ETT]):
         return result
 
     def plot(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Plot the sequence as a robot
+
+        The sequence is wrapped in a :class:`~roboticstoolbox.robot.Robot.Robot`
+        (:class:`~roboticstoolbox.robot.Robot.Robot2` for a planar sequence) and
+        its ``plot`` method is called, which see for the arguments.
+        """
         # Deferred (like Robot/Robot2 above): BaseETS can't import the
         # concrete ETS without a cycle (ETS.py imports BaseETS from here).
         from roboticstoolbox.ets.ETS import ETS
@@ -711,6 +719,13 @@ class BaseETS(MutableSequence[ETT]):
         robot.plot(*args, **kwargs)
 
     def teach(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Interactively explore the sequence as a robot
+
+        The sequence is wrapped in a :class:`~roboticstoolbox.robot.Robot.Robot`
+        (:class:`~roboticstoolbox.robot.Robot.Robot2` for a planar sequence) and
+        its ``teach`` method is called, which see for the arguments.
+        """
         from roboticstoolbox.ets.ETS import ETS
         from roboticstoolbox.robot.Robot import Robot, Robot2
 
@@ -840,10 +855,13 @@ class BaseETS(MutableSequence[ETT]):
             >>> print(e)
             >>> e.merge(1)
             >>> print(e)
-            >>> e = ET.tx(1) * ET.Rx() * ET.Rx(pi/2) * ET.tx(2)
+            >>> e = ET.tx(1) * ET.Rx(0.1) * ET.Rx(pi/2) * ET.tx(2)
             >>> print(e)
             >>> e.merge(1)
             >>> print(e)
+
+        Both transforms must be of the same kind, and at most one of them can be
+        a joint.
 
         """
         if i < 0 or i >= len(self._data) - 1:

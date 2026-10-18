@@ -11,6 +11,7 @@ IK_NR - Newton-Raphson Numerical IK
 
 .. autosummary::
    :toctree: stubs
+   :template: method_indexed.rst
 
    ~IK_NR.step
    ~IK_NR.solve
@@ -20,6 +21,7 @@ IK_NR - Newton-Raphson Numerical IK
 
 .. autosummary::
    :toctree: stubs
+   :template: method_indexed.rst
    
    ~IK_NR._random_q
    ~IK_NR._check_jl

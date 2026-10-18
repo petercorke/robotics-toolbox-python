@@ -472,7 +472,7 @@ class JTraj(SourceBlock):
     with default zero boundary conditions for velocity and acceleration.
 
     :seealso: :func:`~roboticstoolbox.tools.trajectory.ctraj`
-        :func:`~roboticstoolbox.tools.trajectory.xplot`
+        ``xplot``
         :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
 
@@ -634,7 +634,7 @@ class CTraj(SourceBlock):
 
     :seealso: :meth:`~spatialmath.pose3d.SE3.interp`
         :func:`~roboticstoolbox.tools.trajectory.ctraj`
-        :func:`~roboticstoolbox.tools.trajectory.xplot`
+        ``xplot``
         :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
 
@@ -822,10 +822,10 @@ class Trapezoidal(SourceBlock):
 
     .. versionchanged:: 1.5.0
         The outputs are scalars, as the table says.  They were arrays with one
-        element, because :func:`trapezoidal_func` returned arrays for a scalar
+        element, because ``trapezoidal_func`` returned arrays for a scalar
         time.
 
-    :seealso: :func:`ctraj`, :func:`qplot`, :func:`~roboticstoolbox.tools.trajectory.jtraj`
+    :seealso: ``ctraj``, ``qplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
 
     nin = 0
@@ -1523,7 +1523,7 @@ class FDyn_X(ContinuousBlock):
     acceleration for the input end-effector pose and applied end-effector wrench.  The
     acceleration is integrated to obtain task-space velocity and task-space pose.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.fdyn_x`
+    :seealso: ``fdyn_x``
     """
 
     nin = 1

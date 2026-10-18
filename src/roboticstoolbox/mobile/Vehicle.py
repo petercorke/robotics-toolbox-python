@@ -425,7 +425,7 @@ class VehicleBase(ABC):
             * a constant tuple as the control inputs to the vehicle
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as f(t) that returns a tuple
-            * a driver agent, subclass of :class:`VehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         Vehicle steering, speed and acceleration limits are applied to the
         result before being input to the vehicle model.
@@ -530,7 +530,7 @@ class VehicleBase(ABC):
 
         .. warning:: Deprecated.  Use ``vehicle.control = driver`` instead.
 
-        :seealso: :class:`VehicleDriverBase` :meth:`control`
+        :seealso: :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase` :meth:`control`
         """
 
         warnings.warn("add_driver is deprecated, use veh.control=driver instead")
@@ -567,7 +567,7 @@ class VehicleBase(ABC):
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as ``f(t)`` that returns a tuple, see
               SciPy interp1d
-            * a driver agent, subclass of :class:`VehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         This is evaluated by :meth:`eval_control` which applies velocity,
         acceleration and steering limits.
@@ -646,7 +646,7 @@ class VehicleBase(ABC):
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as ``f(t)`` that returns a tuple, see
               SciPy interp1d
-            * a driver agent, subclass of :class:`VehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         This is evaluated by :meth:`eval_control` which applies velocity,
         acceleration and steering limits.
@@ -818,7 +818,7 @@ class VehicleBase(ABC):
 
         .. note:: Vehicle control input limits are applied.
 
-        :seealso: :func:`control`, :func:`update`, :func:`run`
+        :seealso: :func:`control`, ``update``, :func:`run`
         """
         # determine vehicle control
         if u is not None:
@@ -988,7 +988,7 @@ class VehicleBase(ABC):
 
         Set by :meth:`VehicleBase` subclass constructor.
 
-        :seealso: :meth:`accel_max` :meth:`steer_max` :meth:`u_limited`
+        :seealso: :meth:`accel_max` ``steer_max`` :meth:`u_limited`
         """
         return self._speed_max
 
@@ -1002,7 +1002,7 @@ class VehicleBase(ABC):
 
         Set by :meth:`VehicleBase` subclass constructor.
 
-        :seealso: :meth:`speed_max` :meth:`steer_max` :meth:`u_limited`
+        :seealso: :meth:`speed_max` ``steer_max`` :meth:`u_limited`
         """
         return self._accel_max
 
@@ -1049,7 +1049,7 @@ class VehicleBase(ABC):
         """
         Stop the simulation (superclass)
 
-        A control function can stop the simulation initated by the ``run``
+        A control function can stop the simulation initiated by the ``run``
         method.
 
         :seealso: :meth:`run`
@@ -1735,7 +1735,7 @@ class VehicleTrailer(VehicleBase):
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as ``f(t)`` that returns a tuple, see
               SciPy interp1d
-            * a driver agent, subclass of :class:`VehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         This is evaluated by :meth:`eval_control` which applies velocity,
         acceleration and steering limits.
@@ -1785,11 +1785,11 @@ class VehicleTrailer(VehicleBase):
             >>> vt = VehicleTrailer(Bicycle(), Trailer())  # default bicycle model
             >>> vt.step((1, 0.2))  # one step: v=1, γ=0.2
             >>> vt.x
-            >>> vt.run(5)  # run simulatin for 5 seconds
+            >>> vt.run(5)  # run simulation for 5 seconds
 
         .. note:: Vehicle control input limits are applied.
 
-        :seealso: :func:`control`, :func:`update`, :func:`run`
+        :seealso: :func:`control`, ``update``, :func:`run`
         """
         # determine vehicle control
         if u is not None:

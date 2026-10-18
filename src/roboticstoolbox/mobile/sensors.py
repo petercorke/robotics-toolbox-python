@@ -138,7 +138,7 @@ class SensorBase(ABC):
         Landmark map associated with sensor (superclass)
 
         :return: robot
-        :rtype: :class:`LandmarkMap`
+        :rtype: ``LandmarkMap``
         """
         return self._map
 
@@ -238,7 +238,7 @@ class RangeBearingSensor(SensorBase):
         :param robot: model of robot carrying the sensor
         :type robot: :class:`VehicleBase` subclass
         :param map: map of landmarks
-        :type map: :class:`LandmarkMap` instance
+        :type map: ``LandmarkMap`` instance
         :param line_style: style of the line to the observed landmark, defaults to None
         :type line_style: dict, optional
         :param poly_style: style for the sensing region polygon, defaults to None
@@ -280,7 +280,7 @@ class RangeBearingSensor(SensorBase):
             >>> sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)
             >>> print(sensor)
 
-        :seealso: :class:`~roboticstoolbox.mobile.LandmarkMap` :class:`~roboticstoolbox.mobile.EKF`
+        :seealso: ``LandmarkMap`` :class:`~roboticstoolbox.mobile.EKF`
 
         .. deprecated:: 1.4.0
             The ``animate`` keyword, use ``plot`` instead.
@@ -350,7 +350,7 @@ class RangeBearingSensor(SensorBase):
         - reseed the random number generator
         - reset the counter for handling the ``every`` and ``fail`` options
         - reset the landmark log
-        - initalize plots
+        - initialize plots
 
         :seealso: :meth:`SensorBase.init`
         """
@@ -549,7 +549,7 @@ class RangeBearingSensor(SensorBase):
         :type x: array_like(3), array_like(N,3)
         :param landmark: landmark id or position, defaults to None
         :type landmark: int or array_like(2), optional
-        :return: range and bearing angle to landmark math:`(r,\beta)`
+        :return: range and bearing angle to landmark :math:`(r,\beta)`
         :rtype: ndarray(2) or ndarray(N,2)
 
         Return the range and bearing to a landmark:

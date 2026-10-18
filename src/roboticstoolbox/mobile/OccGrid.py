@@ -171,7 +171,7 @@ class BaseOccupancyGrid(BaseMap):
         :return: binary occupancy grid
         :rtype: ndarray(N,M) of bool
 
-        If :meth:`inflate` has been called, this will return the inflated
+        If ``inflate`` has been called, this will return the inflated
         occupancy grid.
         """
         return self._grid

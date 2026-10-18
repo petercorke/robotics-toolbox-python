@@ -10,7 +10,7 @@ import spatialmath as sm
 
 def parse_origin(node: Any) -> Any:
     """Find the ``origin`` subelement of an XML node and convert it
-    into a 4x4 homogenous transformation matrix.
+    into a 4x4 homogeneous transformation matrix.
     Parameters
     ----------
     node : :class`lxml.etree.Element`

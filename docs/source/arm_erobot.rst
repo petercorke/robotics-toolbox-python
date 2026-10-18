@@ -1,8 +1,6 @@
 ERobot models
 =============
 
-.. codeauthor:: Jesse Haviland
-
 
 ERobot
 ------
@@ -59,8 +57,15 @@ They can be listed by:
 Defined from URDF
 ^^^^^^^^^^^^^^^^^
 
-A number of models are defined in terms of Denavit-Hartenberg parameters, either
-standard or modified.  They can be listed by:
+Any URDF or xacro file can be loaded with the class below, which is also the
+superclass of the models.
+
+.. autoclass:: roboticstoolbox.models.URDF.URDFRobot.URDFRobot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+A number of models are defined by a URDF or xacro file.  They can be listed by:
 
 .. runblock:: pycon
 

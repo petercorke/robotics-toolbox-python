@@ -180,7 +180,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         self._symbolic = self._symbolic or auto_symbolic
 
-        # Current joint configuraiton, velocity, acceleration
+        # Current joint configuration, velocity, acceleration
         self.q = np.zeros(self.n)
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
@@ -1077,7 +1077,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Link.isprismatic`
+        :meth:`~roboticstoolbox.robot.Link.Link.isprismatic`
         :func:`revolutejoints`
 
         """
@@ -1109,7 +1109,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Link.isrevolute`
+        :meth:`~roboticstoolbox.robot.Link.Link.isrevolute`
         :func:`prismaticjoints`
 
         """
@@ -1491,7 +1491,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
-        # ets to stand and end incase of grippers
+        # ets to stand and end in case of grippers
         ets_init = None
         ets_end = None
 
@@ -1688,7 +1688,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Link.isrevolute`
+        :meth:`~roboticstoolbox.robot.Link.Link.isrevolute`
         :func:`revolutejoints`
 
         """
@@ -1713,7 +1713,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Link.isprismatic`
+        :meth:`~roboticstoolbox.robot.Link.Link.isprismatic`
         :func:`prismaticjoints`
 
         """
@@ -1869,8 +1869,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         See Also
         --------
-        :func:`Robot.qlim`
-        :func:`Link.qlim`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.qlim`
+        :meth:`~roboticstoolbox.robot.Link.Link.qlim`
 
         """
 
@@ -1881,14 +1881,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def hierarchy(self) -> None:
         """
-        Pretty print the robot link hierachy
+        Pretty print the robot link hierarchy
 
         :returns: Pretty print of the robot model
 
         Examples
         --------
 
-        Makes a robot and prints the heirachy
+        Makes a robot and prints the hierarchy
 
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
@@ -2084,7 +2084,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             To avoid this set ``block=False``.
         - For PyPlot, the polyline joins the origins of the link frames,
             but for some Denavit-Hartenberg models those frames may not
-            actually be on the robot, ie. the lines to not neccessarily
+            actually be on the robot, ie. the lines to not necessarily
             represent the links of the robot.
 
         See Also
@@ -2187,7 +2187,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         ``robot.teach(q)`` opens a graphical view (PyPlot or Swift --
         see ``backend``) which allows the user to "drive" a graphical
-        robot using a graphical slider panel. The robot's inital joint
+        robot using a graphical slider panel. The robot's initial joint
         configuration is ``q``.
 
         ``robot.teach()`` as above except the robot's stored value of ``q``
@@ -2311,10 +2311,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             - ETS transforms are indicated by rounded boxes
 
         The edges are:
-            - an arrow if `jtype` is False or the joint is fixed
-            - an arrow with a round head if `jtype` is True and the joint is
+            - an arrow if ``jtype`` is False or the joint is fixed
+            - an arrow with a round head if ``jtype`` is True and the joint is
               revolute
-            - an arrow with a box head if `jtype` is True and the joint is
+            - an arrow with a box head if ``jtype`` is True and the joint is
               prismatic
 
         Edge labels or nodes in blue have a fixed transformation to the
@@ -2387,10 +2387,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         The edges are:
 
-        - an arrow if `jtype` is False or the joint is fixed
-        - an arrow with a round head if `jtype` is True and the joint is
+        - an arrow if ``jtype`` is False or the joint is fixed
+        - an arrow with a round head if ``jtype`` is True and the joint is
           revolute
-        - an arrow with a box head if `jtype` is True and the joint is
+        - an arrow with a box head if ``jtype`` is True and the joint is
           prismatic
 
         Edge labels or nodes in blue have a fixed transformation to the
