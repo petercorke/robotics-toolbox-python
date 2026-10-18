@@ -96,6 +96,9 @@ ANSITable._color = False
 
 html_theme = "sphinx_rtd_theme"
 
+# show ``ET.Rz``, not ``roboticstoolbox.ets.ET.ET.Rz``, in signatures
+add_module_names = False
+
 html_theme_options = {
     "logo_only": False,
     "prev_next_buttons_location": "None",
@@ -177,7 +180,36 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "spatialmath": ("https://spatialmath-python.rai-inst.com/", None),
     "pgraph": ("https://petercorke.github.io/pgraph-python/", None),
+    "sympy": ("https://docs.sympy.org/latest/", None),
 }
+
+# -------- Nitpicky cross-reference checking ---------------------------------------#
+#
+# ``sphinx-build -n`` reports every cross-reference that does not resolve.  Real
+# ones are fixed at the source.  What is listed here can never resolve, and
+# is ignored so that the remainder is a short list worth reading:
+#
+# - the descriptive words of a type in a docstring (``ndarray(6,n)``, ``array_like``,
+#   ``2-tuple``, ``optional``, the dimensions 3, 4, ``N``), which read as classes
+# - names in single backticks that are a parameter or a variable, not an object
+# - classes of other packages that publish no object inventory (spatialgeometry,
+#   bdsim) and the internal mixin and status classes that are shown as a base
+#   class but not documented
+nitpicky = False  # set True, or use ``sphinx-build -n``, to check cross-references
+
+nitpick_ignore_regex = [
+    (r"py:(class|obj)", r"(ndarray|array_like|optional|callable|float np\.ndarray|\d+-tuple|\d+|[A-Z]|[a-z]|tol=.*|tol|Tep|q0|E|jtype|SE3|SO3|SE2|SO2)"),
+    (r"py:(class|data|obj)", r"typing\..*"),
+    (r"py:class", r"(spatialgeometry|bdsim|sympy\.core)\..*"),
+    (r"py:(class|func|meth)", r"(spatialmath\.(SE3|base\..*)|scipy\.interpolate\.interp1d|interp1d|SceneNode|dataclasses\..*)"),
+    # module constants and private helpers named in a docstring, not documented
+    (r"py:(data|meth|func)", r"([A-Z_]+_STYLE|_[a-z_]+|Link\.\w+|roboticstoolbox\.Link\..*)"),
+    # a description of a type, or of an instance, rather than a class
+    (r"py:class", r".* (instance|np\.ndarray)|namedtuples|scalar|Sym|etb\..*|:param"),
+    (r"py:exc", r"NoPathError"),
+    (r"py:(class|obj)", r"Robot|VehicleDriver|VehicleAnimation|Block|Plug|LandmarkMap|EKFLog|roboticstoolbox\.mobile\.EKF\.EKFLog|roboticstoolbox\.ets\._ET\.BaseET|numpy\._typing\..*"),
+    (r"py:class", r"roboticstoolbox\.[A-Za-z.]*(Mixin|Status|HasWorkspace|Connector|EllipsePlot|LinkType|Gripper|BaseRobot|TrChainToken)"),
+]
 
 
 # -------- Options Napoleon ----------------------------------------------------------#

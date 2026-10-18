@@ -338,7 +338,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     @classmethod
     def URDF(cls, file: Any, gripper: Any = None, manufacturer: Any = None) -> Any:
-        """Deprecated. Use :class:`~roboticstoolbox.models.URDF.URDFRobot` as a
+        """Deprecated. Use ``URDFRobot`` as a
         base class, or call ``URDF_read()`` from
         ``roboticstoolbox.models.URDF.URDFRobot`` and construct ``Robot``
         directly."""
@@ -389,10 +389,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #             - ETS transforms are indicated by rounded boxes
 
     #         The edges are:
-    #             - an arrow if `jtype` is False or the joint is fixed
-    #             - an arrow with a round head if `jtype` is True and the joint is
+    #             - an arrow if ``jtype`` is False or the joint is fixed
+    #             - an arrow with a round head if ``jtype`` is True and the joint is
     #               revolute
-    #             - an arrow with a box head if `jtype` is True and the joint is
+    #             - an arrow with a box head if ``jtype`` is True and the joint is
     #               prismatic
 
     #         Edge labels or nodes in blue have a fixed transformation to the
@@ -466,10 +466,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #             - ETS transforms are indicated by rounded boxes
 
     #         The edges are:
-    #             - an arrow if `jtype` is False or the joint is fixed
-    #             - an arrow with a round head if `jtype` is True and the joint is
+    #             - an arrow if ``jtype`` is False or the joint is fixed
+    #             - an arrow with a round head if ``jtype`` is True and the joint is
     #               revolute
-    #             - an arrow with a box head if `jtype` is True and the joint is
+    #             - an arrow with a box head if ``jtype`` is True and the joint is
     #               prismatic
 
     #         Edge labels or nodes in blue have a fixed transformation to the
@@ -965,7 +965,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             d = np.where(axes_list)[0]
             Mx = Mx[d]
             Mx = Mx[:, d.tolist()]
-            e, _ = np.linalg.eig(Mx)
+            # Mx = J^+T M J^+ is symmetric (and positive semi-definite) in theory,
+            # but floating point rounding leaves it symmetric to only ~1e-16.
+            # np.linalg.eig makes no use of the symmetry, and for a matrix that is
+            # not exactly symmetric it can return a complex array (tiny imaginary
+            # parts) which then raises a ComplexWarning when the ratio is stored
+            # as a float.  Symmetrising and using eigvalsh guarantees real
+            # eigenvalues, and is also faster and more accurate for this case.
+            e = np.linalg.eigvalsh((Mx + Mx.T) / 2)
             return np.min(e) / np.max(e)
 
         # choose the handler function
@@ -1174,7 +1181,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         - Kinematic Derivatives using the Elementary Transform
           Sequence, J. Haviland and P. Corke
 
-        .. seealso:: :func:`jacob0`, :func:`hessian0`
+        .. seealso:: :func:`jacob0`, ``hessian0``
 
         .. rubric:: Examples
 
@@ -1350,7 +1357,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param shape: The shape to compare distance to
         :param inf_dist: The minimum distance within which to consider the shape
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: tuple of (distance, point on robot, point on shape)
 
         ``closest_point(shape, inf_dist)`` returns the minimum euclidean
@@ -1389,7 +1396,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: True if shapes have collided
 
         ``iscollided(shape)`` checks if this robot and shape have collided
@@ -1419,7 +1426,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: True if shapes have collided
 
         ``collided(shape)`` checks if this robot and shape have collided
@@ -1452,7 +1459,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param gain: The gain for the velocity damper
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into joint limits. Requires
         the joint limits of the robot to be specified. See examples/mmc.py
         for use case.
@@ -1502,7 +1509,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param collision_list: A list of shapes to consider for collision
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into a collision. Requires
         See examples/neo.py for use case.
 
@@ -1613,7 +1620,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param collision_list: A list of shapes to consider for collision
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into a line of sight.
         See examples/fetch_vision.py for use case.
 

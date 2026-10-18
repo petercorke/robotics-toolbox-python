@@ -315,7 +315,7 @@ class MultiRotor(ContinuousBlock):
         v = x[6:9]  # velocity in {W}
         o = x[9:12]  # angular velocity in {W}
 
-        # PREPROCESS ROTATION AND WRONSKIAN MATRICIES
+        # PREPROCESS ROTATION AND WRONSKIAN MATRICES
         phi = n[0]  # yaw
         the = n[1]  # pitch
         psi = n[2]  # roll
@@ -611,7 +611,7 @@ class MultiRotorPlot(GraphicsBlock):
 
     Animate a multi-rotor flying vehicle using Matplotlib graphics.  The
     rotors are shown as circles and their orientation includes rotor
-    flapping which can be exagerated by ``flapscale``.
+    flapping which can be exaggerated by ``flapscale``.
 
     .. figure:: ../figs/multirotorplot.png
         :width: 500px
@@ -680,7 +680,7 @@ class MultiRotorPlot(GraphicsBlock):
         :type model: dict
         :param scale: dimensions of workspace: xmin, xmax, ymin, ymax, zmin, zmax, defaults to [-2,2,-2,2,10]
         :type scale: array_like, optional
-        :param flapscale: exagerate flapping angle by this factor, defaults to 1
+        :param flapscale: exaggerate flapping angle by this factor, defaults to 1
         :type flapscale: float
         :param projection: 3D projection, one of: 'ortho' [default], 'perspective'
         :type projection: str
@@ -710,7 +710,7 @@ class MultiRotorPlot(GraphicsBlock):
 
         quad = self.model
 
-        # vehicle dimensons
+        # vehicle dimensions
         d = quad["d"]
         # Hub displacement from COG
         r = quad["r"]
@@ -805,7 +805,7 @@ class MultiRotorPlot(GraphicsBlock):
 
         quad = self.model
 
-        # vehicle dimensons
+        # vehicle dimensions
         d = quad["d"]  # Hub displacement from COG
         r = quad["r"]  # Rotor radius
 
@@ -835,7 +835,7 @@ class MultiRotorPlot(GraphicsBlock):
         # Q1 = [1 0 0;0 cos(phi) -sin(phi);0 sin(phi) cos(phi)];
         # R = Q3*Q2*Q1;    %Rotation matrix
 
-        # CALCULATE FLYER TIP POSITONS USING COORDINATE FRAME ROTATION
+        # CALCULATE FLYER TIP POSITIONS USING COORDINATE FRAME ROTATION
         F = np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]])
 
         # Draw flyer rotors

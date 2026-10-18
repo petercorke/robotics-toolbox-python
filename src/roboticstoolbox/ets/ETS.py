@@ -76,12 +76,12 @@ class ETS(BaseETS[ET]):
 
     See Also
     --------
-    :func:`rx`
-    :func:`ry`
-    :func:`rz`
-    :func:`tx`
-    :func:`ty`
-    :func:`tz`
+    ``rx``
+    ``ry``
+    ``rz``
+    ``tx``
+    ``ty``
+    ``tz``
 
     """
 
@@ -230,7 +230,7 @@ class ETS(BaseETS[ET]):
 
         See Also
         --------
-        :func:`isconstant`
+        ``isconstant``
         """
         const = None
         ets = ETS()
@@ -664,17 +664,19 @@ class ETS(BaseETS[ET]):
         :returns: Manipulator Jacobian in the base frame
         :rtype: ndarray(6,n)
 
-        ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
+        ``ets.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
         joint velocity to end-effector spatial velocity expressed in the base frame.
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        |``representation``   |       Rotational representation     |
-        |---------------------|-------------------------------------|
-        |``'rpy/xyz'``        |   RPY angular rates in XYZ order    |
-        |``'rpy/zyx'``        |   RPY angular rates in XYZ order    |
-        |``'eul'``            |   Euler angular rates in ZYZ order  |
-        |``'exp'``            |   exponential coordinate rates      |
+        ==================  ====================================
+        ``representation``  rotational representation
+        ==================  ====================================
+        ``'rpy/xyz'``       RPY angular rates in XYZ order
+        ``'rpy/zyx'``       RPY angular rates in ZYX order
+        ``'eul'``           Euler angular rates in ZYZ order
+        ``'exp'``           exponential coordinate rates
+        ==================  ====================================
 
         Examples
         --------
@@ -683,9 +685,10 @@ class ETS(BaseETS[ET]):
         joint configuration
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.ETS.Puma560().ets()
-        >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560().ets()
+            >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
 
         """
 
@@ -766,14 +769,16 @@ class ETS(BaseETS[ET]):
 
         Various measures are supported:
 
-        | Measure           |       Description                               |
-        |-------------------|-------------------------------------------------|
-        | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
-        |                   | from singularity [Yoshikawa85]_                 |
-        | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
-        |                   | of the velocity ellipsoid [Klein87]_            |
-        | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
-        |                   | *distance*  from singularity [Klein87]_         |
+        ===================  ===============================================
+        Measure              Description
+        ===================  ===============================================
+        ``"yoshikawa"``      volume of the velocity ellipsoid, *distance*
+                             from singularity [Yoshikawa85]_
+        ``"invcondition"``   inverse condition number of Jacobian, isotropy
+                             of the velocity ellipsoid [Klein87]_
+        ``"minsingular"``    minimum singular value of the Jacobian,
+                             *distance* from singularity [Klein87]_
+        ===================  ===============================================
 
         **Trajectory operation**:
 
@@ -790,8 +795,6 @@ class ETS(BaseETS[ET]):
           manipulability separately.
         - Examples in the RVC book (1st edition) can be replicated by
           using the "all" option
-        - Asada's measure requires inertial a robot model with inertial
-          parameters.
 
         .. rubric:: References
 
@@ -802,6 +805,7 @@ class ETS(BaseETS[ET]):
                 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
                 The International Journal of Robotics Research.
                 1987;6(2):72-83. doi:10.1177/027836498700600206
+
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
 
@@ -885,9 +889,11 @@ class ETS(BaseETS[ET]):
         joint angle configuration
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda().ets()
-        >>> panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
+
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.Panda().ets()
+            >>> dT = panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
+            >>> dT.shape
 
         .. rubric:: References
 
@@ -964,7 +970,7 @@ class ETS(BaseETS[ET]):
         # the are the pd indices used in the cross products
         pdi = [[0, 0]]
 
-        # The length of dT correspods to the number of derivatives we have calculated
+        # The length of dT corresponds to the number of derivatives we have calculated
         while len(dT) != n:
             # Add to the start of the tensor size list
             size.insert(0, self.n)
@@ -979,7 +985,7 @@ class ETS(BaseETS[ET]):
             # Although, our partial derivatives have the order:
             # pd[..., o, n, m, l, k, cartesian DoF, j]
             # For example, consider the Hessian Tensor H[n, 6, n],
-            # the index H[k, :, j]. This corrsponds
+            # the index H[k, :, j]. This corresponds
             # to the second partial derivative of the kinematics of joint j with
             # respect to joint k.
             indices = add_indices(indices, c)
@@ -1125,7 +1131,7 @@ class ETS(BaseETS[ET]):
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -1139,11 +1145,11 @@ class ETS(BaseETS[ET]):
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1470,7 +1476,7 @@ class ETS(BaseETS[ET]):
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1520,7 +1526,7 @@ class ETS(BaseETS[ET]):
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -1534,11 +1540,11 @@ class ETS(BaseETS[ET]):
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1644,7 +1650,7 @@ class ETS(BaseETS[ET]):
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1763,7 +1769,7 @@ class ETS(BaseETS[ET]):
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1899,11 +1905,12 @@ class ETS(BaseETS[ET]):
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
+
         :raises ImportError: if the package ``qpsolvers`` is not installed
 
         A method that provides functionality to perform numerical inverse kinematics
@@ -2154,13 +2161,14 @@ class ETS(BaseETS[ET]):
           is folded into the first segment.
 
         .. runblock:: pycon
-            >>> from roboticstoolbox.ets.ETS import *
-            >>> e = tz(1) * Rx("q1") * tx(2) * Ry("q2") * ty(3) * Rz("q3") * tz(4)
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tz(1) * ET.Rx("q1") * ET.tx(2) * ET.Ry("q2") * ET.ty(3) * ET.Rz("q3") * ET.tz(4)
             >>> base, *segments, gripper = e.split("first")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
             >>> base, *segments, gripper = e.split("last")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
-            >>> e = tz(1) * Rz("q1") * tx(2) * Rx(90, 'deg') * Rz("q2") * tz(4) * Rz(180, 'deg') * tz("q3") * Rz(270, 'deg') * tz(4)
+            >>> e = ET.tz(1) * ET.Rz("q1") * ET.tx(2) * ET.Rx(90, 'deg') * ET.Rz("q2") * ET.tz(4) * ET.Rz(180, 'deg') * ET.tz("q3") * ET.Rz(270, 'deg') * ET.tz(4)
             >>> base, *segments, gripper = e.split("dh")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
             >>> base, *segments, gripper = e.split("mdh")

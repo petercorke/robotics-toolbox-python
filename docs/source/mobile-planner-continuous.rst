@@ -5,6 +5,7 @@ Continuous configuration-space planners
 =========================================================   ====================   ===================   ===================
 Planner                                                     Plans in               Discrete/Continuous   Obstacle avoidance
 =========================================================   ====================   ===================   ===================
+:class:`~roboticstoolbox.mobile.PRMPlanner`                 :math:`\mathbb{R}^2`   continuous            yes
 :class:`~roboticstoolbox.mobile.DubinsPlanner`              :math:`\SE{2}`         continuous            no
 :class:`~roboticstoolbox.mobile.ReedsSheppPlanner`          :math:`\SE{2}`         continuous            no
 :class:`~roboticstoolbox.mobile.CurvaturePolyPlanner`       :math:`\SE{2}`         continuous            no
@@ -13,8 +14,8 @@ Planner                                                     Plans in            
 =========================================================   ====================   ===================   ===================
 
 
-These planners do not support planning around obstacles, but allow for the
-start and goal configuration :math:`(x, y, \theta)` to be specified.
+The PRM and RRT planners plan around obstacles.  The others do not, but allow
+for the start and goal configuration :math:`(x, y, \theta)` to be specified.
 
 PRM planner
 -----------

@@ -108,30 +108,10 @@ class BaseET:
     r"""
     Elementary transform, the base class of :class:`ET` and :class:`ET2`
 
-    **Joint descriptors**
-
     The parameter ``param`` of a transform may be a string naming a variable
-    joint, such as ``"q2"`` or ``"theta2"``, instead of a number.  The rules are:
-
-    - the first number in the string is the joint index, so ``"q0"`` is joint 0
-      and ``"theta2"`` is joint 2; ``"q(3)"`` and ``"θ_3"`` are joint 3
-    - a leading ``-`` (or the Unicode minus sign ``−``) negates the joint
-      variable, ``flip``, so ``"-q1"`` is joint 1, flipped.  A leading ``+`` is
-      ignored
-    - joint indices count from zero.  If the names count from one, as ``"A1"`` to
-      ``"A6"`` of a Kuka arm do, end the name with an underscore: ``"A1_"`` is
-      joint 0, and ``"-A1_"`` is joint 0, flipped.  The underscore is not part of
-      the name that is displayed
-    - a string with no number, such as ``"joint"``, is a variable joint that is
-      numbered automatically
-    - a string that is a number, such as ``"1.5"``, is a constant
-    - ``jindex`` and ``flip`` must not also be given
-
-    The name is shown when the transform is displayed, ``Rz(A1)``.
-
-    .. note:: A robot built from names ``"A1"`` to ``"A6"``, without the
-        underscores, has joint indices 1 to 6, and is rejected as the index 6 is
-        out of range for 6 joints.
+    joint, such as ``"q2"`` or ``"-theta3"``, instead of a number.  The rules for
+    these *joint descriptors* are in the ETS documentation, section "Joint
+    descriptors".
 
     .. versionchanged:: 1.5.0
         A trailing underscore, and the Unicode minus sign, are accepted.
@@ -548,9 +528,9 @@ class BaseET:
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx()
-            >>> e.T(1)
+            >>> e.A(1)
             >>> eflip = ET.tx(flip=True)
-            >>> eflip.T(1)
+            >>> eflip.A(1)
 
         """
 
@@ -572,7 +552,7 @@ class BaseET:
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.isrotation
-            >>> e = ET.rx()
+            >>> e = ET.Rx()
             >>> e.isrotation
 
         """
@@ -595,7 +575,7 @@ class BaseET:
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.istranslation
-            >>> e = ET.rx()
+            >>> e = ET.Rx()
             >>> e.istranslation
 
         """
@@ -604,6 +584,12 @@ class BaseET:
 
     @property
     def qlim(self) -> ndarray | None:
+        """
+        Joint limits
+
+        :returns: the joint limits as a 2-vector ``[lower, upper]``, or None if
+            the transform has no limits
+        """
         return self._qlim
 
     @qlim.setter
@@ -631,7 +617,7 @@ class BaseET:
             >>> from roboticstoolbox import ET
             >>> e = ET.tx()
             >>> print(e)
-            >>> e = ET.tx(j=3)
+            >>> e = ET.tx(jindex=3)
             >>> print(e)
             >>> print(e.jindex)
 

@@ -13,7 +13,7 @@ from math import pi
 # 29/1/91 to agree with data from Armstrong etal.  Due to their use
 #  of modified D&H params, some of the offsets Ai, Di are
 #  offset, and for links 3-5 swap Y and Z axes.
-# 14/2/91 to use Paul's value of link twist (alpha) to be consistant
+# 14/2/91 to use Paul's value of link twist (alpha) to be consistent
 #  with ARCL.  This is the -ve of Lee's values, which means the
 #  zero angle position is a righty for Paul, and lefty for Lee.
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
@@ -48,7 +48,7 @@ class P8(DHRobot):
 
     .. codeauthor:: Peter Corke
 
-    :seealso: :func:`models.DH.Puma560`
+    :seealso: ``Puma560``
     """
 
     def __init__(self) -> None:

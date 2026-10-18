@@ -37,7 +37,7 @@ def _check_rne(func: Any) -> Any:
     If this is the case, then the parameters are re-serialized prior to
     invoking inverse dynamics.
 
-    :seealso: :func:`Link._listen_dyn`
+    :seealso: :meth:`~roboticstoolbox.robot.Link.Link._listen_dyn`
     """
 
     @wraps(func)
