@@ -3,6 +3,8 @@
 """
 
 # import numpy.testing as nt
+import contextlib
+import io
 import roboticstoolbox as rtb
 import numpy as np
 import unittest
@@ -1190,6 +1192,66 @@ class TestIKInitialCoordinates(unittest.TestCase):
             self.ets.ik_LM(self.Tep),
         ):
             self.assertTrue(sol.success)
+
+
+class TestIKVerbose(unittest.TestCase):
+    """verbose=True prints the progress of each search, from the Python solvers."""
+
+    def setUp(self):
+        self.puma = rtb.models.DH.Puma560()
+        self.panda = rtb.models.Panda()
+
+    def test_silent_by_default(self):
+        Tep = self.panda.fkine(self.panda.qr)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.panda.ikine_LM(Tep, q0=self.panda.qr)
+        self.assertEqual(out.getvalue(), "")
+
+    def test_each_solver(self):
+        # an exact q0 converges at iteration 0, whichever solver
+        Tep = self.panda.fkine(self.panda.qr)
+        for method in ("ikine_LM", "ikine_NR", "ikine_GN"):
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                sol = getattr(self.panda, method)(Tep, q0=self.panda.qr, verbose=True)
+            self.assertTrue(sol.success, msg=method)
+            text = out.getvalue()
+            self.assertIn("Search 1", text, msg=method)
+            self.assertIn("Iteration 0", text, msg=method)
+            self.assertIn("Converged", text, msg=method)
+            self.assertIn("accepted", text, msg=method)
+
+    @skip_no_qp
+    def test_qp(self):
+        Tep = self.panda.fkine(self.panda.qr)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.panda.ikine_QP(Tep, q0=self.panda.qr, verbose=True)
+        self.assertIn("Search 1", out.getvalue())
+
+    def test_rejected_by_joint_limits(self):
+        # this solution of the Puma560 has q[2] and q[4] outside their limits for
+        # every equivalent angle, so the search is rejected and another is made
+        q = np.array([0.2528, 0.7041, 3.106, 0.0, 2.473, -0.2528])
+        Tep = self.puma.fkine(q)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            sol = self.puma.ikine_LM(Tep, q0=self.puma.qn, verbose=True, seed=0)
+        text = out.getvalue()
+        self.assertTrue(sol.success)
+        self.assertIn("rejected", text)
+        self.assertIn("q[2]=", text)
+        self.assertIn("outside [-2.356, 2.356]", text)
+        self.assertIn("Search 2", text)
+
+    def test_trajectory(self):
+        Ts = self.panda.fkine(np.array([self.panda.qr, self.panda.qr]))
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.panda.ikine_LM(Ts, q0=self.panda.qr, verbose=True)
+        self.assertIn("Pose 1 of 2", out.getvalue())
+        self.assertIn("Pose 2 of 2", out.getvalue())
+
+    def test_not_for_the_cpp_solvers(self):
+        Tep = self.panda.fkine(self.panda.qr)
+        with self.assertRaises(TypeError):
+            self.panda.ik_LM(Tep, verbose=True)
 
 
 if __name__ == "__main__":
