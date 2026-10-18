@@ -1168,6 +1168,18 @@ class TestIKInitialCoordinates(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "rows, but slimit is"):
             self.ets.ikine_LM(self.Tep, q0=np.zeros((5, 7)), slimit=2)
 
+    def test_mask_wrong_length(self):
+        for method in (
+            self.ets.ik_LM,
+            self.ets.ik_NR,
+            self.ets.ik_GN,
+            self.ets.ikine_LM,
+            self.ets.ikine_NR,
+            self.ets.ikine_GN,
+        ):
+            with self.assertRaisesRegex(ValueError, "mask must be a vector of 6"):
+                method(self.Tep, mask=np.ones(3))
+
     def test_right_length_still_works(self):
         q = np.array([0, -0.3, 0, -2.2, 0, 2, 0.7854])
         for sol in (

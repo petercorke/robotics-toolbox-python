@@ -71,6 +71,30 @@ def check_q0(q0: ArrayLike | None, n: int, slimit: int | None = None) -> NDArray
     return q0a
 
 
+def check_mask(mask: ArrayLike | None) -> NDArray | None:
+    """
+    Check the Cartesian weighting mask given to a numerical IK solver
+
+    :param mask: weights of the six Cartesian degrees of freedom, or None
+    :raises ValueError: if ``mask`` is not a vector of 6 elements
+    :returns: ``mask`` as an array, or None
+
+    The solvers written in C++ read six elements from the mask, so a shorter one
+    was read past its end.
+    """
+    if mask is None:
+        return None
+
+    maska = np.asarray(mask, dtype=float)
+
+    if maska.shape != (6,):
+        raise ValueError(
+            f"mask must be a vector of 6 elements, not shape {maska.shape}"
+        )
+
+    return maska
+
+
 @dataclass
 class IKSolution:
     """
@@ -312,6 +336,8 @@ class IKSolver(ABC):
 
         # Random number generator
         self._private_random = np.random.default_rng(seed=seed)
+
+        mask = check_mask(mask)
 
         if mask is None:
             mask = np.ones(6)
