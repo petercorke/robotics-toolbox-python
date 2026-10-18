@@ -4,16 +4,24 @@
 @author: Jesse Haviland
 """
 
-import roboticstoolbox as rtb
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from numpy import array, ndarray, pi
-from spatialmath.base import trotx, troty, trotz
+
 # Aliased: the bottom of this module rebinds the bare name `SE3` to the
 # ET.SE3 classmethod (the free-function alias), so the spatialmath class
 # needs its own name here.
 from spatialmath import SE3 as SE3T
+from spatialmath.base import trotx, troty, trotz
 
-from roboticstoolbox.ets._ET import BaseET, Sym, _AXIS_TO_INT, _resolve_param
+import roboticstoolbox as rtb
+from roboticstoolbox.ets._ET import _AXIS_TO_INT, BaseET, Sym, _resolve_param
 from roboticstoolbox.ets.fknm import ET_T, ET_init, ET_update
+
+if TYPE_CHECKING:  # pragma: nocover
+    from roboticstoolbox.ets.ETS import ETS
 
 
 class ET(BaseET):
@@ -21,7 +29,7 @@ class ET(BaseET):
     # rebuilt by _accel_init() rather than deep-copied.
     _deepcopy_skip = ("_ET__fknm",)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         # Set before super().__init__() runs: BaseET.__init__ may invoke
         # the `param` setter (for a static ET), which calls _accel_update()
         # below. `None` here tells _accel_update() the compiled struct
@@ -33,10 +41,10 @@ class ET(BaseET):
         # all final), do the one real build of the compiled struct.
         self._accel_init()
 
-    def __mul__(self, other: "ET") -> "rtb.ETS":
-        return rtb.ETS([self, other])
+    def __mul__(self, other: ET) -> ETS:
+        return rtb.ETS([self, other])  # type: ignore[operator]
 
-    def __add__(self, other: "ET") -> "rtb.ETS":
+    def __add__(self, other: ET) -> ETS:
         return self.__mul__(other)
 
     # ------------------------------------------------------------------
@@ -113,7 +121,7 @@ class ET(BaseET):
         )
 
     @property
-    def fknm(self):
+    def fknm(self) -> Any:
         return self.__fknm
 
     def A(self, q: float | Sym = 0.0) -> ndarray:
@@ -146,6 +154,12 @@ class ET(BaseET):
 
     @property
     def s(self) -> ndarray:  # pragma: nocover
+        """
+        Motion subspace of the joint
+
+        :returns: the 6-vector :math:`(v, \\omega)` that is the unit twist of
+            the transform: a unit translation or a unit rotation about the axis
+        """
         if self.kind[1] == "x":
             if self.kind[0] == "R":
                 return array([0, 0, 0, 1, 0, 0])
@@ -169,12 +183,12 @@ class ET(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET":
+        **kwargs: Any,
+    ) -> ET:
         """
         Pure rotation about the x-axis
 
-        :param param: rotation about the x-axis
+        :param param: rotation about the x-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -204,12 +218,12 @@ class ET(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET":
+        **kwargs: Any,
+    ) -> ET:
         """
         Pure rotation about the y-axis
 
-        :param param: rotation about the y-axis
+        :param param: rotation about the y-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -239,12 +253,12 @@ class ET(BaseET):
         unit: str = "rad",
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET":
+        **kwargs: Any,
+    ) -> ET:
         """
         Pure rotation about the z-axis
 
-        :param param: rotation about the z-axis
+        :param param: rotation about the z-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -273,12 +287,12 @@ class ET(BaseET):
         param: float | Sym | str | None = None,
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET":
+        **kwargs: Any,
+    ) -> ET:
         """
         Pure translation along the x-axis
 
-        :param param: translation distance along the x-axis
+        :param param: translation distance along the x-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
@@ -300,7 +314,7 @@ class ET(BaseET):
         param = _resolve_param(param, eta)
 
         # this method is 3x faster than using lambda x: transl(x, 0, 0)
-        def axis_func(param):
+        def axis_func(param: Any) -> Any:
             # fmt: off
             return array([
                 [1, 0, 0, param],
@@ -318,12 +332,12 @@ class ET(BaseET):
         param: float | Sym | str | None = None,
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET":
+        **kwargs: Any,
+    ) -> ET:
         """
         Pure translation along the y-axis
 
-        :param param: translation distance along the y-axis
+        :param param: translation distance along the y-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
@@ -344,7 +358,7 @@ class ET(BaseET):
         """
         param = _resolve_param(param, eta)
 
-        def axis_func(param):
+        def axis_func(param: Any) -> Any:
             # fmt: off
             return array([
                 [1, 0, 0, 0],
@@ -362,8 +376,8 @@ class ET(BaseET):
         param: float | Sym | str | None = None,
         *,
         eta: float | None = None,
-        **kwargs,
-    ) -> "ET":
+        **kwargs: Any,
+    ) -> ET:
         """
         Pure translation along the z-axis
 
@@ -388,7 +402,7 @@ class ET(BaseET):
         """
         param = _resolve_param(param, eta)
 
-        def axis_func(param):
+        def axis_func(param: Any) -> Any:
             # fmt: off
             return array([
                 [1, 0, 0, 0],
@@ -401,7 +415,7 @@ class ET(BaseET):
         return cls(axis="tz", axis_func=axis_func, param=param, **kwargs)
 
     @classmethod
-    def SE3(cls, T: ndarray | SE3T, **kwargs) -> "ET":
+    def SE3(cls, T: ndarray | SE3T, **kwargs: Any) -> ET:
         """
         A static SE3
 

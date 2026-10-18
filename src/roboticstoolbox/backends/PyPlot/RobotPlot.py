@@ -3,25 +3,30 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
-import roboticstoolbox as rp
 from spatialmath import SE3
+
+import roboticstoolbox as rp
 
 
 class RobotPlot:
     def __init__(
         self,
-        robot,
-        env,
-        readonly,
-        display=True,
-        jointaxes=True,
-        jointlabels=False,
-        eeframe=True,
-        shadow=True,
-        name=True,
-        options=None,
-    ):
+        robot: Any,
+        env: Any,
+        readonly: Any,
+        display: bool = True,
+        jointaxes: bool = True,
+        jointlabels: bool = False,
+        eeframe: bool = True,
+        shadow: bool = True,
+        name: bool = True,
+        options: Any = None,
+    ) -> None:
         super(RobotPlot, self).__init__()
 
         # Readonly - True for this robot is for displaying only
@@ -36,19 +41,20 @@ class RobotPlot:
         self.ax = env.ax
 
         # Line plot of robot links
-        self.links = None
+        self.links: Any = None
 
         # Z-axis Coordinate frame (quiver) of joints
-        self.joints = []
+        self.joints: list[Any] = []
 
         # Text of the robots name
         self.name = None
 
         # Shadow of the the line plot on the x-y axis
-        self.sh_links = None
+        self.sh_links: Any = None
 
         # Coordinate frame of the ee (three quivers)
-        self.ee_axes = []
+        self.ee_axes: list[Any] = []
+        self.eeframes: list[Any] = []
 
         # Robot has been drawn
         self.drawn = False
@@ -60,7 +66,7 @@ class RobotPlot:
         self.shadow = shadow
         self.showname = name
 
-        defaults = {
+        defaults: dict[str, Any] = {
             "robot": {"color": "#E16F6D", "linewidth": 5},
             "shadow": {"color": "lightgrey", "linewidth": 3},
             "jointaxes": {"color": "#8FC1E2", "linewidth": 2},
@@ -85,7 +91,7 @@ class RobotPlot:
                     defaults[key] = value
         self.options = defaults
 
-    def draw(self):
+    def draw(self) -> None:
         if not self.display:
             return
 
@@ -188,7 +194,7 @@ class RobotPlot:
                     arrow = self._plot_quiver2(Tj.t, direction, link.jindex)
                     self.joints.extend(arrow)
 
-    def init(self):
+    def init(self) -> None:
         self.drawn = True
 
         if self.env.limits is None:
@@ -225,13 +231,13 @@ class RobotPlot:
         self.eeframes = []
         self.joints = []
 
-    def _plot_quiver(self, p0, p1, options):
+    def _plot_quiver(self, p0: Any, p1: Any, options: Any) -> Any:
         qv = self.ax.quiver(
             p0[0], p0[1], p0[2], p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2], **options
         )
         return qv
 
-    def _plot_quiver2(self, p0, dir, j):
+    def _plot_quiver2(self, p0: Any, dir: Any, j: Any) -> Any:
         vec = dir * self.options["jointaxislength"]
         start = p0 - vec / 2
         qv = self.ax.quiver(

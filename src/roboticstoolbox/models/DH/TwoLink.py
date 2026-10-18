@@ -2,11 +2,16 @@
 @author: Peter Corke
 """
 
-from roboticstoolbox import DHRobot, RevoluteDH, RevoluteMDH
+from __future__ import annotations
+
+from typing import Any
+
+import numpy as np
 
 # from math import pi
 from spatialmath import SE3
-import numpy as np
+
+from roboticstoolbox import DHRobot, RevoluteDH, RevoluteMDH
 
 
 class TwoLink(DHRobot):
@@ -59,19 +64,21 @@ class TwoLink(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self, symbolic:bool=False, mdh:bool=False, inertia:bool=False):
+    def __init__(
+        self, symbolic: bool = False, mdh: bool = False, inertia: bool = False
+    ) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym
 
             zero = sym.zero()
             pi = sym.pi()
-            a1, a2 = sym.symbol("a1 a2")  # link lengths # type: ignore
-            m1, m2 = sym.symbol("m1 m2")  # link masses # type: ignore
-            c1, c2 = sym.symbol("c1 c2")  # link CoMs location relative to link frames# type: ignore
+            a1, a2 = sym.symbol("a1 a2")  # link lengths
+            m1, m2 = sym.symbol("m1 m2")  # link masses
+            c1, c2 = sym.symbol("c1 c2")  # link CoMs location relative to link frames
             if inertia:
-                r = sym.symbol("r") # link radius, assumed tubular, for inertia calculation # type: ignore
-                I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM # type: ignore
+                r = sym.symbol("r") # link radius, assumed tubular, for inertia calculation
+                I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM
             else:
                 I1, I2 = None, None
             g = sym.symbol("g")
@@ -91,7 +98,7 @@ class TwoLink(DHRobot):
                 c2 = 0.5 # CoM location of second link relative to second link frame
                 r = 0.1 # radius of links, assumed tubular, for inertia calculation
                 if inertia:
-                    I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM # type: ignore
+                    I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM
                 else:
                     I1, I2 = None, None
                 g = 9.8
@@ -113,7 +120,7 @@ class TwoLink(DHRobot):
                 c2 = -0.5 # CoM location of second link relative to second link frame
                 r = 0.1 # radius of links, assumed tubular, for inertia calculation
                 if inertia:
-                    I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM # type: ignore
+                    I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM
                 else:
                     I1, I2 = None, None
                 g = 9.8
@@ -142,7 +149,7 @@ class TwoLink(DHRobot):
         self.gravity = [0, 0, g]
 
 
-def _cylinder_inertia_x(m, r, L):
+def _cylinder_inertia_x(m: Any, r: Any, L: Any) -> Any:
     ixx = 0.5 * m * r**2
     iyy = (1.0 / 12.0) * m * (3 * r**2 + L**2)
     izz = iyy

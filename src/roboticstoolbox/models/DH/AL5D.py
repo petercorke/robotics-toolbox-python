@@ -2,9 +2,12 @@
 @author: Tassos Natsakis
 """
 
+from __future__ import annotations
+
 import numpy as np
-from roboticstoolbox import DHRobot, RevoluteMDH
 from spatialmath import SE3
+
+from roboticstoolbox import DHRobot, RevoluteMDH
 
 
 class AL5D(DHRobot):
@@ -36,9 +39,9 @@ class AL5D(DHRobot):
         - `Reference of the robot <http://www.lynxmotion.com/c-130-al5d.aspx>`_
 
     .. codeauthor:: Tassos Natsakis
-    """  # noqa
+    """
 
-    def __init__(self, symbolic=False):
+    def __init__(self, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym

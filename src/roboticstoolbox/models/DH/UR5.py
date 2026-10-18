@@ -1,6 +1,9 @@
+
+from __future__ import annotations
+
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class UR5(DHRobot):
@@ -32,13 +35,13 @@ class UR5(DHRobot):
 
         - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
 
-    :sealso: :func:`UR4`, :func:`UR10`
+    :sealso: ``UR4``, :func:`UR10`
 
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
-    def __init__(self, symbolic=False):
+    def __init__(self, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym

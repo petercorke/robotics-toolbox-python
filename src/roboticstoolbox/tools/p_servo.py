@@ -1,15 +1,18 @@
-#!/usr/bin/env python
+from __future__ import annotations
 
+import math
+from typing import Any
+
+#!/usr/bin/env python
 import numpy as np
 from spatialmath import SE3, base
-import math
-from typing import Union
-from roboticstoolbox.tools.types import NDArray, ArrayLike
+
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
-def angle_axis(T, Td) -> NDArray:
+def angle_axis(T: Any, Td: Any) -> NDArray:
     # deferred: roboticstoolbox.ets.fknm imports the ets package, which
     # depends on roboticstoolbox.tools being fully initialised first
     from roboticstoolbox.ets.fknm import Angle_Axis
@@ -22,19 +25,15 @@ def angle_axis(T, Td) -> NDArray:
     return e
 
 
-def angle_axis_python(T, Td):
+def angle_axis_python(T: Any, Td: Any) -> Any:
     e = np.empty(6)
     e[:3] = Td[:3, -1] - T[:3, -1]
     R = Td[:3, :3] @ T[:3, :3].T
     li = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]])
 
     if base.iszerovec(li):
-        # diagonal matrix case
-        if np.trace(R) > 0:
-            # (1,1,1) case
-            a = np.zeros((3,))
-        else:
-            a = np.pi / 2 * (np.diag(R) + 1)
+        # The skew part also vanishes for a half-turn about an arbitrary axis.
+        a = base.trlog(R, check=False, twist=True)
     else:
         # non-diagonal matrix case
         ln = base.norm(li)
@@ -46,8 +45,12 @@ def angle_axis_python(T, Td):
 
 
 def p_servo(
-    wTe, wTep, gain: Union[float, ArrayLike] = 1.0, threshold=0.1, method="rpy"
-):
+    wTe: Any,
+    wTep: Any,
+    gain: float | ArrayLike = 1.0,
+    threshold: float = 0.1,
+    method: str = "rpy",
+) -> Any:
     """
     Position-based servoing.
 
@@ -69,7 +72,7 @@ def p_servo(
         using angle-axis method.
     :type method: string: 'rpy' or 'angle-axis'
 
-    :returns v: The velocity of the end-effecotr which will casue the robot
+    :returns v: The velocity of the end-effector which will cause the robot
         to approach wTep
     :rtype v: ndarray(6)
     :returns arrived: True if the robot is within the threshold of the final

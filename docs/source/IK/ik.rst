@@ -17,12 +17,14 @@ Within the Toolbox, we have two sets of solvers: solvers written in C++ and solv
 
 A note on the semantics of the above variable:
 
-* **T** represents an SE(3) (a homogeneous tranformation matrix in 3 dimensions, a 4x4 matrix) 
+* **T** represents an SE(3) (a homogeneous transformation matrix in 3 dimensions, a 4x4 matrix) 
 * *e* is short for end-effector referring to the end of the kinematic chain
 * *p* is short for prime or desired
 * Since there is no letter to the left of the **T**, the world or base reference frame is implied
 
 Therefore, ``Tep`` refers to the desired end-effector pose in the base robot frame represented as an SE(3).
+
+The Python solvers (the methods starting with ``ikine_``) also accept a **trajectory** of poses: an :py:class:`~spatialmath.pose3d.SE3` object containing N poses, or an array with shape (N, 4, 4).  The C++ solvers (the methods starting with ``ik_``) accept a single pose only.
 
 .. rubric:: ilimit
 
@@ -34,7 +36,7 @@ The ``slimit`` specifies how many searches are allowed before the problem is dee
 
 .. rubric:: q0
 
-``q0`` is the inital joint coordinate vector. If ``q0`` is 1 dimensional (, ``n``), then ``q0`` is only used for the first attempt, after which a new random valid initial joint coordinate vector will be generated. If ``q0`` is 2 dimensional (``slimit``, ``n``), then the next vector within ``q0`` will be used for the next search.
+``q0`` is the initial joint coordinate vector. If ``q0`` is 1 dimensional (, ``n``), then ``q0`` is only used for the first attempt, after which a new random valid initial joint coordinate vector will be generated. If ``q0`` is 2 dimensional (``slimit``, ``n``), then the next vector within ``q0`` will be used for the next search.
 
 .. rubric:: tol
 
@@ -77,9 +79,9 @@ C++ Solvers
 
 These solvers are written in high performance C++ and wrapped in Python methods. The methods are made available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` and :py:class:`~roboticstoolbox.robot.Robot.Robot` classes. Being written in C++, these solvers are extraordinarily fast and typically take 30 to 90 µs. However, these solvers are hard to extend or modify.
 
-These methods have been written purely for speed so they do not contain the niceties of the Python alternative. For example, if you give the incorrect length for the ``q0`` vector, you could end up with a ``seg-fault`` or other undetermined behaviour. Therefore, when using these methods it is very important that you understand each of the parameters and the parameters passed are of the correct type and length.
+These methods have been written purely for speed so they do not contain the niceties of the Python alternative, such as a failure ``reason`` or trajectory handling. The lengths of ``q0`` (``n``) and of ``mask`` (6) are checked, and a wrong length raises ``ValueError``, but the other arguments are passed to the C++ code as they are, so it is important that you understand each of the parameters and that they are of the correct type.
 
-The C++ solvers return a tuple with the following members:
+The C++ solvers return an :py:class:`~roboticstoolbox.robot.IK.IKSolution` with the following members (``reason`` is always empty, these solvers do not produce a failure reason string):
 
 ==============   =========   =====================================================================================================
 Element          Type        Description                                                                                                    
@@ -93,14 +95,16 @@ Element          Type        Description
 
 The C++ solvers can be identified as methods which start with ``ik_``.
 
+These solvers handle a single pose only, ``Tep`` must not be a trajectory.  To solve for a trajectory use the Python solvers.
+
 .. rubric:: ETS C++ IK Methods
 
 .. autosummary::
-    :toctree: stubs
-    
-    ~roboticstoolbox.ets.ETS.ETS.ik_LM
-    ~roboticstoolbox.ets.ETS.ETS.ik_GN
-    ~roboticstoolbox.ets.ETS.ETS.ik_NR
+    :nosignatures:
+
+    ~roboticstoolbox.ETS.ik_LM
+    ~roboticstoolbox.ETS.ik_GN
+    ~roboticstoolbox.ETS.ik_NR
 
 .. rubric:: Robot C++ IK Methods
 
@@ -111,7 +115,7 @@ The C++ solvers can be identified as methods which start with ``ik_``.
     ~roboticstoolbox.robot.Robot.Robot.ik_GN
     ~roboticstoolbox.robot.Robot.Robot.ik_NR
 
-In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and one of the fast IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class.
+In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and use one of the fast IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class.
 
 .. runblock:: pycon
 
@@ -123,7 +127,7 @@ In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Pa
     >>> # Solve the IK problem
     >>> panda.ik_LM(Tep)
 
-In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and and then get the :py:class:`~roboticstoolbox.ets.ETS.ETS` representation. Subsequently, we use one of the fast IK solvers available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` class.
+In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and then get the :py:class:`~roboticstoolbox.ets.ETS.ETS` representation. Subsequently, we use one of the fast IK solvers available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` class.
 
 .. runblock:: pycon
 
@@ -153,7 +157,7 @@ These solvers are Python classes which extend the abstract base class :py:class:
 
     iksolver
 
-The :py:class:`~roboticstoolbox.robot.IK.IKSolver` provides basic functionality for performing numerical IK. Superclasses can inherit this class and must implement the :py:meth:`~roboticstoolbox.robot.IK.IKSolver.solve` method. Additionally a superclass redefine any other methods necessary such as :py:meth:`~roboticstoolbox.robot.IK.IKSolver.error` to provide a custom error function.
+The :py:class:`~roboticstoolbox.robot.IK.IKSolver` provides basic functionality for performing numerical IK. Subclasses inherit from this class and must implement the :py:meth:`~roboticstoolbox.robot.IK.IKSolver.solve` method. Additionally a subclass can redefine any other methods necessary such as :py:meth:`~roboticstoolbox.robot.IK.IKSolver.error` to provide a custom error function.
 
 .. rubric:: The Solution DataClass
 
@@ -162,7 +166,7 @@ The :py:class:`~roboticstoolbox.robot.IK.IKSolver` provides basic functionality 
 
     iksolution
 
-The :py:class:`~roboticstoolbox.robot.IK.IKSolution` is a :py:class:`dataclasses.dataclass` instance with the following members.
+The :py:class:`~roboticstoolbox.robot.IK.IKSolution` is a :py:func:`dataclasses.dataclass` instance with the following members.  It is also a sequence of the rows of ``q``, one per pose: ``len(sol)`` is the number of poses, ``for q in sol`` and ``sol[i]`` give the joint coordinates of each pose, and ``bool(sol)`` is ``success``.  Iterating over the six members was removed in 1.4.5, use the attributes or ``sol.astuple()``.
 
 ==============   =========   =====================================================================================================
 Element          Type        Description                                                                                                    
@@ -175,9 +179,22 @@ Element          Type        Description
 ``reason``       `str`       The reason the IK problem failed if applicable   
 ==============   =========   =====================================================================================================
 
+.. rubric:: Solving for a trajectory
+
+If ``Tep`` is a trajectory of N poses, each pose is solved independently, starting from the same ``q0`` (and the same random restarts) for every pose.  Consecutive solutions are therefore not guaranteed to be on the same IK branch.  The members of the returned :py:class:`~roboticstoolbox.robot.IK.IKSolution` are:
+
+* ``q`` has shape (N, n), one row per pose
+* ``success`` is True only if every pose was solved
+* ``iterations`` and ``searches`` are summed over all poses
+* ``residual`` is the maximum over all poses, the worst case
+* ``reason`` is the reason given by the last pose that failed, if any
+
+.. versionchanged:: 1.4.5
+    For a trajectory, ``residual`` is the maximum over the poses, it was the minimum.
+
 .. rubric:: The Implemented IK Solvers
 
-These solvers can be identified as a :py:class:`Class` starting with ``IK_``.
+These solvers can be identified as classes with a name starting with ``IK_``.
 
 .. toctree::
     :maxdepth: 1
@@ -207,26 +224,19 @@ In the following example, we create an IK Solver class and pass an :py:class:`~r
 
 
 
-.. IK Solvers Available with an ETS
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Additionally, these :py:class:`Class` based solvers have been implemented as methods within the :py:class:`~roboticstoolbox.ets.ETS.ETS` and :py:class:`~roboticstoolbox.robot.Robot.Robot` classes. The method names start with ``ikine_``.
-
-
-.. toctree:
-   :caption: IK Solvers from an ETS
+Additionally, these class-based solvers have been implemented as methods within the :py:class:`~roboticstoolbox.ets.ETS.ETS` and :py:class:`~roboticstoolbox.robot.Robot.Robot` classes. The method names start with ``ikine_``.
 
 
 .. rubric:: ETS Python IK Methods
 
 
 .. autosummary::
-    :toctree: stubs
-    
-    ~roboticstoolbox.ets.ETS.ETS.ikine_LM
-    ~roboticstoolbox.ets.ETS.ETS.ikine_QP
-    ~roboticstoolbox.ets.ETS.ETS.ikine_GN
-    ~roboticstoolbox.ets.ETS.ETS.ikine_NR
+    :nosignatures:
+
+    ~roboticstoolbox.ETS.ikine_LM
+    ~roboticstoolbox.ETS.ikine_QP
+    ~roboticstoolbox.ETS.ikine_GN
+    ~roboticstoolbox.ETS.ikine_NR
 
 
 .. rubric:: Robot Python IK Methods
@@ -242,7 +252,7 @@ Additionally, these :py:class:`Class` based solvers have been implemented as met
 
 .. rubric:: Example 
 
-In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and one of the IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class. This style is far more convenient than the above example.
+In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and use one of the IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class. This style is far more convenient than the above example.
 
 .. runblock:: pycon
 
@@ -254,7 +264,7 @@ In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Pa
     >>> # Solve the IK problem
     >>> panda.ikine_LM(Tep)
 
-In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and and then get the :py:class:`~roboticstoolbox.ets.ETS.ETS` representation. Subsequently, we use one of the IK solvers available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` class.
+In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and then get the :py:class:`~roboticstoolbox.ets.ETS.ETS` representation. Subsequently, we use one of the IK solvers available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` class.
 
 .. runblock:: pycon
 

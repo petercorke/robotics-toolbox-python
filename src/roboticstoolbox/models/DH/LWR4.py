@@ -1,7 +1,10 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import numpy as np
-from spatialmath.base import trotz, transl
+from spatialmath.base import transl, trotz
+
 from roboticstoolbox import DHRobot, RevoluteDH
 
 
@@ -30,9 +33,9 @@ class LWR4(DHRobot):
         - http://www.diag.uniroma1.it/~deluca/rob1_en/09_Exercise_DH_KukaLWR4.pdf
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # deg = np.pi/180
         mm = 1e-3

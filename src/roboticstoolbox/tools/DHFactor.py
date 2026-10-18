@@ -333,9 +333,9 @@ class Element:  # pragma nocover
             # constants always displayed with a sign character
             if self.constant != 0.0:
                 if self.constant >= 0.0:
-                    s = s + "+" + "{0:.3f}".format(self.constant)
+                    s = s + "+" + f"{self.constant:.3f}"
                 else:
-                    s = s + "{0:.3f}".format(self.constant)
+                    s = s + f"{self.constant:.3f}"
         elif self.eltype == Element.DH_STANDARD or Element.DH_MODIFIED:
             # theta, d, a, alpha
             # theta
@@ -343,12 +343,12 @@ class Element:  # pragma nocover
                 # revolute joint
                 s = s + self.var
                 if self.offset >= 0:
-                    s = s + "+" + "{0:.3f}".format(self.offset)
+                    s = s + "+" + f"{self.offset:.3f}"
                 elif self.offset < 0:
-                    s = s + "{0:.3f}".format(self.offset)
+                    s = s + f"{self.offset:.3f}"
             else:
                 # prismatic joint
-                s = s + "{0:.3f}".format(self.theta)
+                s = s + f"{self.theta:.3f}"
             s = s + ", "
 
             # d
@@ -363,7 +363,7 @@ class Element:  # pragma nocover
             s = s + ", "
 
             # alpha
-            s = s + "{0:.3f}".format(self.alpha)
+            s = s + f"{self.alpha:.3f}"
         else:
             raise ValueError("bad Element type")
         return s

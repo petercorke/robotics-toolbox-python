@@ -19,11 +19,11 @@ def test_distance_transform_plot_colorbar_without_explicit_axes():
 def test_distance_transform_next_before_plan_raises():
     # Regression test: next() used to call the undefined name Error(...)
     # instead of raising, so calling it before plan() crashed with
-    # NameError rather than the intended ValueError.
+    # NameError rather than the intended error, now a RuntimeError.
     floorplan = np.zeros((10, 10), dtype=int)
     planner = rtb.DistanceTransformPlanner(floorplan, inflate=1)
 
-    with pytest.raises(ValueError, match="No distance map computed"):
+    with pytest.raises(RuntimeError, match="no plan computed"):
         planner.next((0, 0))
 
 

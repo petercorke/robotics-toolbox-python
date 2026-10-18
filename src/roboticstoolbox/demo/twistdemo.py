@@ -4,16 +4,21 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
 import sys
-import swift
 from math import pi
-import roboticstoolbox as rtb
-from spatialgeometry import Mesh, Cylinder
-from spatialmath import SO3, SE3, Twist3
+from typing import Any
+
 import numpy as np
+import swift
+from spatialgeometry import Cylinder, Mesh
+from spatialmath import SE3, SO3, Twist3
+
+import roboticstoolbox as rtb
 
 
-def demo(test: bool = False):
+def demo(test: bool = False) -> None:
     # TODO
     #  rotate the rings according to the rotation axis, so that the axles
     #  point the right way
@@ -41,14 +46,14 @@ def demo(test: bool = False):
     twist_params = {"x": 0, "y": 0, "R": 0, "P": 0, "p": 0.1}
     twist = Twist3()
 
-    def update_twist_param(value, key):
+    def update_twist_param(value: Any, key: Any) -> None:
         nonlocal twist_params
 
         twist_params[key] = value
 
         update_twist()
 
-    def update_twist():
+    def update_twist() -> None:
         nonlocal twist
 
         axis = SO3.Rx(twist_params["R"]) @ SO3.Ry(twist_params["P"])
@@ -59,7 +64,7 @@ def demo(test: bool = False):
         update_plane()
 
     # button to reset twist
-    def reset_twist(e):
+    def reset_twist(e: Any) -> None:
         nonlocal twist_params
 
         twist_params["x"] = 0
@@ -73,15 +78,15 @@ def demo(test: bool = False):
         update_plane()
         # env.step(0)
 
-    def update_plane(*args):
+    def update_plane(*args: Any) -> None:
 
         T = twist.SE3(twist_theta.value) * BASE
         plane.T = T
 
-    def update_screw_axis(axis, point):
+    def update_screw_axis(axis: Any, point: Any) -> None:
         screw.T = SE3.Rt(axis, point)
 
-    def update_all_sliders():
+    def update_all_sliders() -> None:
         twist_x.value = twist_params["x"]
         twist_y.value = twist_params["y"]
         twist_rollangle.value = twist_params["R"]
@@ -167,7 +172,7 @@ def demo(test: bool = False):
     env.run(duration=0.5 if test else None)
 
 
-def main():
+def main() -> None:
     demo(test="--test" in sys.argv[1:])
 
 

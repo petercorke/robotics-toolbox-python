@@ -3,34 +3,59 @@
 @author Jesse Haviland
 """
 
-import numpy as np
+from __future__ import annotations
+
 import warnings
+from typing import Any
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 # import scipy as sp
-from spatialmath import base
-from spatialmath import SE3
-import matplotlib.pyplot as plt
+from spatialmath import SE3, base
+from spatialmath.base.graphics import axes_logic
 
 
 class ShapePlot:
-    def __init__(self, shape, wireframe=True, **kwargs):
+    """
+    Draw a :mod:`spatialgeometry` shape in a Matplotlib 3D axes
+
+    :param shape: the shape, a cuboid or a sphere
+    :param wireframe: draw as a wireframe, defaults to True
+    :param kwargs: options saved for the drawing
+
+    Cylinders are not drawn yet.
+    """
+
+    def __init__(self, shape: Any, wireframe: bool = True, **kwargs: Any) -> None:
         self.shape = shape  # reference to the spatialgeom shape
         self.wireframe = wireframe
         self.args = kwargs
-        self.mpl = None
+        self.mpl: Any = None
+        self.ax: Any = None
 
-    def plot(self):
+    def plot(self, ax: Any = None) -> None:
+        """
+        Draw the shape, creating a figure and 3D axes if there are none
+
+        :param ax: 3D axes to draw into, defaults to the axes used before or a
+            new figure
+        """
+        # reuse the axes given, or those used before, or the current 3D axes
+        ax = axes_logic(ax if ax is not None else self.ax, 3)
+
+        self.draw(ax)
+
+    def draw(self, ax: Any = None) -> None:
+        """
+        Draw the shape, replacing the previous drawing
+
+        :param ax: 3D axes to draw into, defaults to the axes used before
+        """
         if ax is None:
             ax = self.ax
+        self.ax = ax
 
-        if ax is None:
-            plt.figure()
-            ax = plt.axes(projection="3d")
-            self.ax = ax
-
-        self.draw()
-
-    def draw(self, ax=None):
         # TODO only remove and redraw if base has changed
         if self.mpl is not None:
             self.mpl.remove()
@@ -51,12 +76,20 @@ class ShapePlot:
             # radius, length
             pass
 
-    def make(self):
+    def make(self) -> None:
         pass
 
 
 class EllipsePlot:
-    def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1.0):
+    def __init__(
+        self,
+        robot: Any,
+        q: Any,
+        etype: Any,
+        opt: str = "trans",
+        centre: Any = (0, 0, 0),
+        scale: float = 1.0,
+    ) -> None:
         super(EllipsePlot, self).__init__()
 
         try:
@@ -70,11 +103,11 @@ class EllipsePlot:
                     "Centre must be a three vector or 'ee' meaningend-effector"
                 )
 
-        self.ell = None
+        self.ell: Any = None
         self.robot = robot
         self.opt = str(opt).lower()
         self.centre = centre
-        self.ax = None
+        self.ax: Any = None
         self.scale = scale
         self._valid_opt = self.opt in ("trans", "rot")
 
@@ -96,8 +129,10 @@ class EllipsePlot:
         elif etype == "f":
             self.vell = False
             self.name = "Force Ellipse"
+        else:
+            raise ValueError(f"etype must be 'v' or 'f', not {etype!r}")
 
-    def draw(self):
+    def draw(self) -> None:
         ok = self.make_ellipsoid()
         if not ok:
             return
@@ -113,7 +148,7 @@ class EllipsePlot:
             self.x, self.y, self.z, rstride=6, cstride=6, color="#2980b9", alpha=0.2
         )
 
-    def draw2(self):
+    def draw2(self) -> None:
         ok = self.make_ellipsoid2()
         if not ok:
             return
@@ -123,28 +158,19 @@ class EllipsePlot:
         else:
             self.ell = self.ax.plot(self.x, self.y, color="#2980b9")
 
-    def plot(self, ax=None):
-        if ax is None:
-            ax = self.ax
-
-        if ax is None:
-            plt.figure()
-            ax = plt.axes(projection="3d")
-            self.ax = ax
+    def plot(self, ax: Any = None) -> None:
+        ax = axes_logic(ax if ax is not None else self.ax, 3)
+        self.ax = ax
 
         self.draw()
 
-    def plot2(self, ax=None):
-        if ax is None:
-            ax = self.ax
-
-        if ax is None:
-            ax = plt.axes()
-            self.ax = ax
+    def plot2(self, ax: Any = None) -> None:
+        ax = axes_logic(ax if ax is not None else self.ax, 2)
+        self.ax = ax
 
         self.draw2()
 
-    def make_ellipsoid(self):
+    def make_ellipsoid(self) -> Any:
         """
         Plot the 3d Ellipsoid
 
@@ -207,7 +233,7 @@ class EllipsePlot:
         self.z = z * self.scale + centre[2]
         return True
 
-    def make_ellipsoid2(self):
+    def make_ellipsoid2(self) -> Any:
         """
         Plot the 2d Ellipsoid
 

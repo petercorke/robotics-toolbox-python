@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
 
-import time
-from pathlib import Path
-import dynamixel_sdk as sdk  # Uses Dynamixel SDK library
-
 # list of all models https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_workbench/
-
 # AX entry level
 # XL improved control
 # XM, XH better control, XH has Maxon motor
 import json
+import time
+from pathlib import Path
+
+import dynamixel_sdk as sdk  # Uses Dynamixel SDK library
 
 
 class DynamixelString:
@@ -118,12 +117,12 @@ class DynamixelString:
         try:
             return self.modeldict[mn]["model"]
         except KeyError:
-            return "?? mn={}".format(mn)
+            return f"?? mn={mn}"
 
     def list(self):
         for id in self.idlist:
             fw = self.get(id, "firmware")
-            print("{:2d} {:3d} {:s}".format(id, fw, self.modelname(id)))
+            print(f"{id:2d} {fw:3d} {self.modelname(id):s}")
 
     def enable(self, on, id="all"):
         # enable(True)  # all enabled
@@ -269,12 +268,12 @@ class DynamixelString:
         if dxl_comm_result != sdk.COMM_SUCCESS:
             raise RuntimeError(
                 self.packetHandler.getTxRxResult(dxl_comm_result)
-                + " id={}, register={}".format(id, regname)
+                + f" id={id}, register={regname}"
             )
         elif dxl_error != 0:
             raise RuntimeError(
                 self.packetHandler.getRxPacketError(dxl_error)
-                + " id={}, register={}".format(id, regname)
+                + f" id={id}, register={regname}"
             )
         return dxl_value
 
@@ -302,12 +301,12 @@ class DynamixelString:
         if dxl_comm_result != sdk.COMM_SUCCESS:
             raise RuntimeError(
                 self.packetHandler.getTxRxResult(dxl_comm_result)
-                + " id={}, register={}".format(id, regname)
+                + f" id={id}, register={regname}"
             )
         elif dxl_error != 0:
             raise RuntimeError(
                 self.packetHandler.getRxPacketError(dxl_error)
-                + " id={}, register={}".format(id, regname)
+                + f" id={id}, register={regname}"
             )
 
     def register_indirect_config(self, id, indirectbase, regnames):

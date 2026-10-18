@@ -15,7 +15,7 @@ dependencies = [
     "numpy",
     "spatialmath-python>=1.1.18",
     "spatialgeometry>=1.4.0",
-    "pgraph-python",
+    "pgraph-python>=1.0.0",
     "scipy",
     "matplotlib",
     "ansitable",
@@ -205,6 +205,177 @@ pythonpath = ["."]
 filterwarnings = [
     "ignore:FigureCanvasAgg is non-interactive:UserWarning",
 ]
+
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "src"
+files = ["src/roboticstoolbox"]
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+# Not annotated, and not going to be: unmaintained sketches that need hardware
+# and have no tests.  Annotating them would hide, not fix, their problems.
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.backends.Dynamixel.*",
+    "roboticstoolbox.backends.ROS.*",
+]
+ignore_errors = true
+
+# Modules that are fully annotated: every function needs its annotations.
+# Add a module here when it is done.
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.mobile.Animations",
+    "roboticstoolbox.mobile.drivers",
+    "roboticstoolbox.mobile.Vehicle",
+    "roboticstoolbox.mobile.OccGrid",
+    "roboticstoolbox.mobile.landmarkmap",
+    "roboticstoolbox.mobile.PlannerBase",
+    "roboticstoolbox.mobile.Bug2",
+    "roboticstoolbox.mobile.DistanceTransformPlanner",
+    "roboticstoolbox.mobile.PRMPlanner",
+    "roboticstoolbox.mobile.QuinticPolyPlanner",
+    "roboticstoolbox.mobile.CurvaturePolyPlanner",
+    "roboticstoolbox.mobile.RRTPlanner",
+    "roboticstoolbox.mobile.LatticePlanner",
+    "roboticstoolbox.mobile.DubinsPlanner",
+    "roboticstoolbox.mobile.ReedsSheppPlanner",
+    "roboticstoolbox.mobile.DstarPlanner",
+    "roboticstoolbox.mobile.PoseGraph",
+    "roboticstoolbox.mobile.EKF",
+    "roboticstoolbox.mobile.sensors",
+    "roboticstoolbox.backends",
+    "roboticstoolbox.backends.Connector",
+    "roboticstoolbox.backends.swift",
+    "roboticstoolbox.backends.PyPlot.PyPlot",
+    "roboticstoolbox.backends.PyPlot.PyPlot2",
+    "roboticstoolbox.backends.PyPlot.RobotPlot",
+    "roboticstoolbox.backends.PyPlot.RobotPlot2",
+    "roboticstoolbox.backends.PyPlot.EllipsePlot",
+    "roboticstoolbox.blocks.arm",
+    "roboticstoolbox.blocks.mobile",
+    "roboticstoolbox.blocks.spatial",
+    "roboticstoolbox.blocks.uav",
+    "roboticstoolbox.blocks.quad_model",
+    "roboticstoolbox.tools.Ticker",
+    "roboticstoolbox.tools.data",
+    "roboticstoolbox.tools.jsingu",
+    "roboticstoolbox.tools.null",
+    "roboticstoolbox.tools.numerical",
+    "roboticstoolbox.tools.p_servo",
+    "roboticstoolbox.tools.params",
+    "roboticstoolbox.tools.plot",
+    "roboticstoolbox.tools.trchain",
+    "roboticstoolbox.tools.urdf.urdf",
+    "roboticstoolbox.tools.urdf.utils",
+    "roboticstoolbox.demo.eigdemo",
+    "roboticstoolbox.demo.tripleangledemo",
+    "roboticstoolbox.demo.twistdemo",
+    "roboticstoolbox.bin._bintools",
+    "roboticstoolbox.bin.rtbtool",
+    "roboticstoolbox.models.DH.AL5D",
+    "roboticstoolbox.models.DH.Ball",
+    "roboticstoolbox.models.DH.Baxter",
+    "roboticstoolbox.models.DH.Cobra600",
+    "roboticstoolbox.models.DH.Coil",
+    "roboticstoolbox.models.DH.Hyper",
+    "roboticstoolbox.models.DH.Hyper3d",
+    "roboticstoolbox.models.DH.IRB140",
+    "roboticstoolbox.models.DH.Jaco",
+    "roboticstoolbox.models.DH.KR5",
+    "roboticstoolbox.models.DH.LWR4",
+    "roboticstoolbox.models.DH.Mico",
+    "roboticstoolbox.models.DH.Orion5",
+    "roboticstoolbox.models.DH.P8",
+    "roboticstoolbox.models.DH.Panda",
+    "roboticstoolbox.models.DH.Planar2",
+    "roboticstoolbox.models.DH.Planar3",
+    "roboticstoolbox.models.DH.Puma560",
+    "roboticstoolbox.models.DH.Sawyer",
+    "roboticstoolbox.models.DH.Stanford",
+    "roboticstoolbox.models.DH.TwoLink",
+    "roboticstoolbox.models.DH.UR10",
+    "roboticstoolbox.models.DH.UR3",
+    "roboticstoolbox.models.DH.UR5",
+    "roboticstoolbox.models.DH.Uprighttl",
+    "roboticstoolbox.models.ETS.GenericSeven",
+    "roboticstoolbox.models.ETS.Planar2",
+    "roboticstoolbox.models.ETS.Planar_Y",
+    "roboticstoolbox.models.URDF.AL5D",
+    "roboticstoolbox.models.URDF.Fetch",
+    "roboticstoolbox.models.URDF.Frankie",
+    "roboticstoolbox.models.URDF.FrankieOmni",
+    "roboticstoolbox.models.URDF.Jaco",
+    "roboticstoolbox.models.URDF.KinovaGen3",
+    "roboticstoolbox.models.URDF.LBR",
+    "roboticstoolbox.models.URDF.PR2",
+    "roboticstoolbox.models.URDF.Panda",
+    "roboticstoolbox.models.URDF.Puma560",
+    "roboticstoolbox.models.URDF.UR10",
+    "roboticstoolbox.models.URDF.UR3",
+    "roboticstoolbox.models.URDF.UR5",
+    "roboticstoolbox.models.URDF.URDFRobot",
+    "roboticstoolbox.models.URDF.Valkyrie",
+    "roboticstoolbox.models.URDF.YuMi",
+    "roboticstoolbox.models.URDF.px100",
+    "roboticstoolbox.models.URDF.px150",
+    "roboticstoolbox.models.URDF.rx150",
+    "roboticstoolbox.models.URDF.rx200",
+    "roboticstoolbox.models.URDF.vx300",
+    "roboticstoolbox.models.URDF.vx300s",
+    "roboticstoolbox.models.URDF.wx200",
+    "roboticstoolbox.models.URDF.wx250",
+    "roboticstoolbox.models.URDF.wx250s",
+    "roboticstoolbox.models.catalog",
+    "roboticstoolbox.ets.ET",
+    "roboticstoolbox.ets.ET2",
+    "roboticstoolbox.ets.ETS",
+    "roboticstoolbox.ets.ETS2",
+    "roboticstoolbox.ets._ET",
+    "roboticstoolbox.ets._ETS",
+    "roboticstoolbox.ets.fknm",
+    "roboticstoolbox.models.ETS.Frankie",
+    "roboticstoolbox.models.ETS.Omni",
+    "roboticstoolbox.models.ETS.Panda",
+    "roboticstoolbox.models.ETS.Puma560",
+    "roboticstoolbox.models.ETS.XYPanda",
+    "roboticstoolbox.robot.BaseRobot",
+    "roboticstoolbox.robot.DHLink",
+    "roboticstoolbox.robot.DHRobot",
+    "roboticstoolbox.robot.Dynamics",
+    "roboticstoolbox.robot.ELink",
+    "roboticstoolbox.robot.ERobot",
+    "roboticstoolbox.robot.Gripper",
+    "roboticstoolbox.robot.IK",
+    "roboticstoolbox.robot.Link",
+    "roboticstoolbox.robot.PoERobot",
+    "roboticstoolbox.robot.Robot",
+    "roboticstoolbox.robot.RobotKinematics",
+    "roboticstoolbox.robot.RobotPlottingMPL",
+    "roboticstoolbox.robot.RobotProto",
+    "roboticstoolbox.robot.frne",
+    "roboticstoolbox.robot",
+]
+disallow_untyped_defs = true
+
+# The to-do list for the typing pass.  A module is listed here because it still
+# has type errors; fix a module, delete its line, and mypy then holds it to
+# zero.  The list should only ever get shorter.  A module that is not listed
+# is checked, and must stay clean.
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.mobile.ParticleFilter",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "roboticstoolbox.tools.DHFactor",
+    "roboticstoolbox.robot.DHFactor",
+]
+ignore_errors = true
 
 [tool.coverage.run]
 omit = ["src/roboticstoolbox/demo/*", "test_*.py"]

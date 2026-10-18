@@ -9,26 +9,29 @@ Provides:
   - URDFRobot         — base class for simple URDF-loaded robot models
 """
 
-from pathlib import Path
+from __future__ import annotations
+
 import importlib
 import re
 import sys
 import tempfile
 import warnings
 import xml.parsers.expat
-from typing import Callable, TextIO
+from pathlib import Path
+from typing import Any, Callable, TextIO
 
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base import unitvec_norm, angvec2r, tr2rpy
-
+from spatialmath.base import angvec2r, tr2rpy, unitvec_norm
 from xacrodoc import XacroDoc, packages
+
+from roboticstoolbox.tools.types import NDArray
 
 try:
     from xacro import XacroException
 except ImportError:  # pragma nocover
 
-    class XacroException(Exception):
+    class XacroException(Exception):  # type: ignore[no-redef]
         pass
 
 
@@ -36,15 +39,15 @@ try:
     from xacrodoc.packages import PackageNotFoundError
 except ImportError:  # pragma nocover
 
-    class PackageNotFoundError(Exception):
+    class PackageNotFoundError(Exception):  # type: ignore[no-redef]
         pass
 
 
-from roboticstoolbox.tools.urdf import URDF, URDFError
-from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.tools.urdf import URDF, URDFError
 
 
 def _register_rd_packages(urdf_path: Path) -> None:
@@ -94,7 +97,7 @@ def _find_rd_rename(robot_name: str, tried: list[str]) -> str | None:
     return None
 
 
-def _load_rd_module(robot_name: str):
+def _load_rd_module(robot_name: str) -> Any:
     """Import the robot_descriptions submodule for ``robot_name``, trying the
     current name first and falling back to older/newer naming schemes.
 
@@ -161,7 +164,7 @@ def _load_rd_module(robot_name: str):
     ) from last_error
 
 
-def _load_urdf_from_RD(robot_name: str) -> "tuple[Path, dict | None]":
+def _load_urdf_from_RD(robot_name: str) -> tuple[Path, dict | None]:
     """Fetch the URDF/xacro path from robot_descriptions and register its packages.
 
     robot_descriptions models expose different path attributes depending on their
@@ -236,7 +239,7 @@ def _reset_xacro_stacks() -> None:
         pass
 
 
-def _package_not_found(e: BaseException) -> "PackageNotFoundError | None":
+def _package_not_found(e: BaseException) -> PackageNotFoundError | None:
     """Return the PackageNotFoundError at the root of a xacro error chain, if any.
 
     xacro wraps the exceptions raised while evaluating ``$(find pkg)`` in one
@@ -249,7 +252,7 @@ def _package_not_found(e: BaseException) -> "PackageNotFoundError | None":
     return cause if isinstance(cause, PackageNotFoundError) else None
 
 
-def _expand_xacro(source: str, expand: "Callable[[], XacroDoc]") -> XacroDoc:
+def _expand_xacro(source: str, expand: Callable[[], XacroDoc]) -> XacroDoc:
     """Run one of the XacroDoc constructors, converting its failures to URDFError."""
     _reset_xacro_stacks()
     try:
@@ -309,7 +312,7 @@ def _attach_expanded(err: URDFError, urdf_str: str, source: str) -> None:
             break
 
 
-def _parse_urdf(urdf_str: str, source: str = "<URDF text>"):
+def _parse_urdf(urdf_str: str, source: str = "<URDF text>") -> Any:
     """Parse a URDF string into (elinks, name).
 
     :raises URDFError: if the text is not well-formed XML or is not a valid
@@ -324,25 +327,45 @@ def _parse_urdf(urdf_str: str, source: str = "<URDF text>"):
         raise
 
 
-def _links_from_urdf(urdf: URDF):
+def _inertia_in_link_frame(
+    inertial: Any,
+) -> tuple[NDArray | None, NDArray | None]:
+    """Centre of mass and inertia tensor of a URDF link, in the link frame.
+
+    URDF gives the inertia tensor in the link's *inertial* frame, whose pose
+    relative to the link frame is ``<inertial><origin xyz rpy>``. The toolbox
+    wants the tensor about the centre of mass but with axes parallel to the
+    link frame (see :attr:`Link.I`), so rotate it: ``I_link = R I R^T``.
+    ``xyz`` is already the centre of mass in the link frame.
+
+    :param inertial: a parsed :class:`~roboticstoolbox.tools.urdf.Inertial`
+    :returns: ``(r, I)``, either of which is ``None`` when not given
+    """
+    origin = inertial.origin
+    r = None if origin is None else origin[:3, 3]
+
+    I = inertial.inertia
+    if I is not None and origin is not None:
+        R = origin[:3, :3]
+        I = R @ I @ R.T
+        I = 0.5 * (I + I.T)  # remove rounding asymmetry; Link.I checks to 1e-8
+    return r, I
+
+
+def _links_from_urdf(urdf: URDF) -> Any:
     """Convert a parsed :class:`URDF` into (elinks, name)."""
     elinks = []
     elinkdict = {}
 
     for link in urdf._links:
-        elink = Link(
-            name=link.name,
-            m=link.inertial.mass,
-            r=link.inertial.origin[:3, 3] if link.inertial.origin is not None else None,
-            I=link.inertial.inertia,
-        )
+        r, I = _inertia_in_link_frame(link.inertial)
+        elink = Link(name=link.name, m=link.inertial.mass, r=r, I=I)
         elinks.append(elink)
         elinkdict[link.name] = elink
 
-        try:
-            elink.geometry = [v.geometry.ob for v in link.visuals]
-        except AttributeError:
-            pass
+        # a visual without a shape, or with a mesh that cannot be found, is
+        # rejected when the URDF is parsed, so every visual here has an `ob`
+        elink.geometry = [v.geometry.ob for v in link.visuals]
 
         if link.collisions:
             shapes = []
@@ -378,6 +401,7 @@ def _links_from_urdf(urdf: URDF):
         trans = SE3(joint.origin).t
         rot = joint.rpy
 
+        ets: Any
         if np.count_nonzero(joint.axis) < 2:
             ets = ET.SE3(SE3(trans) * SE3.RPY(rot))
         else:
@@ -448,10 +472,10 @@ def _links_from_urdf(urdf: URDF):
 
 
 def URDF_file(
-    file: "str | Path | TextIO",
-    model: "str | None" = None,
-    patch: "Callable[[str], str] | None" = None,
-    extra_packages: "dict[str, str] | None" = None,
+    file: str | Path | TextIO,
+    model: str | None = None,
+    patch: Callable[[str], str] | None = None,
+    extra_packages: dict[str, str] | None = None,
 ) -> tuple:
     """Parse a URDF or xacro file, return (elinks, name).
 
@@ -537,7 +561,7 @@ def URDF_file(
 
 
 def URDF_read(
-    urdf_path: "str | Path", patch: "Callable[[str], str] | None" = None
+    urdf_path: str | Path, patch: Callable[[str], str] | None = None
 ) -> tuple:
     """Load a URDF/xacro file, return (elinks, name, filepath).
 
@@ -571,14 +595,14 @@ class URDFRobot(Robot):
 
     def __init__(
         self,
-        urdf_path: "str | Path",
+        urdf_path: str | Path,
         manufacturer: str = "",
-        gripper_link_index: "int | None" = None,
-        gripper_link_name: "str | list[str] | None" = None,
-        patch: "Callable[[str], str] | None" = None,
-        extra_packages: "dict[str, str] | None" = None,
-        **kwargs,
-    ):
+        gripper_link_index: int | None = None,
+        gripper_link_name: str | list[str] | None = None,
+        patch: Callable[[str], str] | None = None,
+        extra_packages: dict[str, str] | None = None,
+        **kwargs: Any,
+    ) -> None:
         elinks, name, filepath = URDF_file(
             urdf_path, patch=patch, extra_packages=extra_packages
         )

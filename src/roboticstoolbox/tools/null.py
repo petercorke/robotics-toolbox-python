@@ -3,10 +3,14 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 
 
-def null(A, atol=1e-13, rtol=0):
+def null(A: Any, atol: float = 1e-13, rtol: float = 0) -> Any:
     """
     Compute an approximate basis for the nullspace of A.
 
@@ -27,7 +31,7 @@ def null(A, atol=1e-13, rtol=0):
         - If both `atol` and `rtol` are positive, the combined tolerance is
           the maximum of the two; that is:
           tol = max(atol, rtol * smax)
-        - Singular values smaller than `tol` are considered to be zero.
+        - Singular values smaller than ``tol`` are considered to be zero.
 
     Return value
     ------------

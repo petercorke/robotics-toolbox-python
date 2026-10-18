@@ -9,11 +9,12 @@ matplotlib.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal as L
+from typing import TYPE_CHECKING, Any
+from typing import Literal as L
 
 if TYPE_CHECKING:  # pragma: nocover
-    from roboticstoolbox.backends.PyPlot import PyPlot
     from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+    from roboticstoolbox.backends.PyPlot.PyPlot import PyPlot
     from roboticstoolbox.tools.types import ArrayLike
 
 
@@ -24,7 +25,7 @@ class RobotPlottingMPLMixin:
     # Colour helpers
     # ------------------------------------------------------------------
 
-    def linkcolormap(self, linkcolors: list[Any] | str = "viridis"):
+    def linkcolormap(self, linkcolors: list[Any] | str = "viridis") -> Any:
         """
         Create a colormap for robot joints.
 
@@ -67,7 +68,7 @@ class RobotPlottingMPLMixin:
         if isinstance(linkcolors, list) and len(linkcolors) == self.n:  # type: ignore[attr-defined]
             return colors.ListedColormap(linkcolors)
         else:
-            return colormaps.get_cmap(linkcolors).resampled(6)
+            return colormaps.get_cmap(linkcolors).resampled(6)  # type: ignore[arg-type]
 
     # ------------------------------------------------------------------
     # Ellipse creation
@@ -105,14 +106,15 @@ class RobotPlottingMPLMixin:
           ``centre`` allows its origin to be set to the specified 3-vector,
           or the string ``"ee"`` ensures it is drawn at the end-effector position.
         """
+        from spatialmath.base.argcheck import getunit
+
         import roboticstoolbox as rtb
         from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-        from spatialmath.base.argcheck import getunit
 
         if isinstance(self, rtb.ERobot):  # pragma: nocover
             raise NotImplementedError("ERobot fellipse not implemented yet")
 
-        q = getunit(q, unit)  # type: ignore[assignment]
+        q = getunit(q, unit)
         ell = EllipsePlot(self, q, "f", opt, centre=centre)
 
         if add:
@@ -154,14 +156,15 @@ class RobotPlottingMPLMixin:
           ``centre`` allows its origin to be set to the specified 3-vector,
           or the string ``"ee"`` ensures it is drawn at the end-effector position.
         """
+        from spatialmath.base.argcheck import getunit
+
         import roboticstoolbox as rtb
         from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-        from spatialmath.base.argcheck import getunit
 
         if isinstance(self, rtb.ERobot):  # pragma: nocover
             raise NotImplementedError("ERobot vellipse not implemented yet")
 
-        q = getunit(q, unit)  # type: ignore[assignment]
+        q = getunit(q, unit)
         ell = EllipsePlot(self, q, "v", opt, centre=centre, scale=scale)
 
         if add:
@@ -201,7 +204,9 @@ class RobotPlottingMPLMixin:
         Plot an ellipsoid.
 
         :param ellipse: the ellipsoid to plot
-        :param block: block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
         :param jointaxes: plot an arrow indicating the joint axis
         :param eeframe: plot the end-effector coordinate frame
@@ -212,8 +217,8 @@ class RobotPlottingMPLMixin:
 
         ``robot.plot_ellipse(ellipsoid)`` displays the ellipsoid.
         """
-        from roboticstoolbox.backends.PyPlot import PyPlot
         from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+        from roboticstoolbox.backends.PyPlot.PyPlot import PyPlot
 
         if not isinstance(ellipse, EllipsePlot):  # pragma: nocover
             raise TypeError(
@@ -247,7 +252,9 @@ class RobotPlottingMPLMixin:
         Plot the force ellipsoid for a manipulator.
 
         :param q: the joint configuration of the robot
-        :param block: block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param fellipse: a pre-built force ellipsoid to plot
         :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
         :param opt: ``'trans'`` or ``'rot'`` — plot the translational or rotational force ellipsoid
@@ -309,7 +316,9 @@ class RobotPlottingMPLMixin:
         Plot the velocity ellipsoid for a manipulator.
 
         :param q: the joint configuration of the robot
-        :param block: block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param vellipse: a pre-built velocity ellipsoid to plot
         :param limits: custom view limits ``[x1, x2, y1, y2, z1, z2]``; autoscales if not supplied
         :param opt: ``'trans'`` or ``'rot'`` — plot the translational or rotational velocity ellipsoid

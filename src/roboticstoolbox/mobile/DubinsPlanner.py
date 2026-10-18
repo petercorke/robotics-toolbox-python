@@ -7,17 +7,24 @@
 # Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
 # Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 
+from __future__ import annotations
+
 import math
-from collections import namedtuple
-from roboticstoolbox.mobile import PlannerBase
+from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from spatialmath import *
 from spatialmath import base
 
+from spatialmath.base.types import ArrayLike3
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.tools.types import NDArray
 
-def left_straight_left(alpha, beta, d):
+# (t, p, q, mode) of a candidate path, None when it does not exist
+_Segments = tuple[float | None, float | None, float | None, list[str]]
+
+
+def left_straight_left(alpha: float, beta: float, d: float) -> _Segments:
     sa = math.sin(alpha)
     sb = math.sin(beta)
     ca = math.cos(alpha)
@@ -38,7 +45,7 @@ def left_straight_left(alpha, beta, d):
     return t, p, q, mode
 
 
-def right_straight_right(alpha, beta, d):
+def right_straight_right(alpha: float, beta: float, d: float) -> _Segments:
     sa = math.sin(alpha)
     sb = math.sin(beta)
     ca = math.cos(alpha)
@@ -58,7 +65,7 @@ def right_straight_right(alpha, beta, d):
     return t, p, q, mode
 
 
-def left_straight_right(alpha, beta, d):
+def left_straight_right(alpha: float, beta: float, d: float) -> _Segments:
     sa = math.sin(alpha)
     sb = math.sin(beta)
     ca = math.cos(alpha)
@@ -77,7 +84,7 @@ def left_straight_right(alpha, beta, d):
     return t, p, q, mode
 
 
-def right_straight_left(alpha, beta, d):
+def right_straight_left(alpha: float, beta: float, d: float) -> _Segments:
     sa = math.sin(alpha)
     sb = math.sin(beta)
     ca = math.cos(alpha)
@@ -96,7 +103,7 @@ def right_straight_left(alpha, beta, d):
     return t, p, q, mode
 
 
-def right_left_right(alpha, beta, d):
+def right_left_right(alpha: float, beta: float, d: float) -> _Segments:
     sa = math.sin(alpha)
     sb = math.sin(beta)
     ca = math.cos(alpha)
@@ -116,7 +123,7 @@ def right_left_right(alpha, beta, d):
     return t, p, q, mode
 
 
-def left_right_left(alpha, beta, d):
+def left_right_left(alpha: float, beta: float, d: float) -> _Segments:
     sa = math.sin(alpha)
     sb = math.sin(beta)
     ca = math.cos(alpha)
@@ -134,7 +141,9 @@ def left_right_left(alpha, beta, d):
     return t, p, q, mode
 
 
-def dubins_path_planning_from_origin(end_x, end_y, end_yaw, curvature, step_size):
+def dubins_path_planning_from_origin(
+    end_x: float, end_y: float, end_yaw: float, curvature: float, step_size: float
+) -> tuple[list[float], list[float], list[float], list[str], float, list[float]]:
     dx = end_x
     dy = end_y
     D = math.hypot(dx, dy)
@@ -154,17 +163,20 @@ def dubins_path_planning_from_origin(end_x, end_y, end_yaw, curvature, step_size
     ]
 
     best_cost = float("inf")
-    bt, bp, bq, best_mode = None, None, None, None
+    best: tuple[float, float, float, list[str]] | None = None
 
     for planner in planners:
         t, p, q, mode = planner(alpha, beta, d)
-        if t is None:
+        if t is None or p is None or q is None:
             continue
 
         cost = abs(t) + abs(p) + abs(q)
         if best_cost > cost:
-            bt, bp, bq, best_mode = t, p, q, mode
+            best = t, p, q, mode
             best_cost = cost
+    if best is None:
+        raise ValueError("no Dubins path found")
+    bt, bp, bq, best_mode = best
     lengths = [bt, bp, bq]
 
     x_list, y_list, yaw_list, directions = generate_local_course(
@@ -175,18 +187,18 @@ def dubins_path_planning_from_origin(end_x, end_y, end_yaw, curvature, step_size
 
 
 def interpolate(
-    ind,
-    length,
-    mode,
-    max_curvature,
-    origin_x,
-    origin_y,
-    origin_yaw,
-    path_x,
-    path_y,
-    path_yaw,
-    directions,
-):
+    ind: int,
+    length: float,
+    mode: str,
+    max_curvature: float,
+    origin_x: float,
+    origin_y: float,
+    origin_yaw: float,
+    path_x: list[float],
+    path_y: list[float],
+    path_yaw: list[float],
+    directions: list[float],
+) -> tuple[list[float], list[float], list[float], list[float]]:
     if mode == "S":
         path_x[ind] = origin_x + length / max_curvature * math.cos(origin_yaw)
         path_y[ind] = origin_y + length / max_curvature * math.sin(origin_yaw)
@@ -216,7 +228,13 @@ def interpolate(
     return path_x, path_y, path_yaw, directions
 
 
-def generate_local_course(total_length, lengths, mode, max_curvature, step_size):
+def generate_local_course(
+    total_length: float,
+    lengths: list[float],
+    mode: list[str],
+    max_curvature: float,
+    step_size: float,
+) -> tuple[list[float], list[float], list[float], list[float]]:
     n_point = math.trunc(total_length / step_size) + len(lengths) + 4
 
     path_x = [0.0 for _ in range(n_point)]
@@ -281,20 +299,18 @@ def generate_local_course(total_length, lengths, mode, max_curvature, step_size)
             directions,
         )
 
-    if len(path_x) <= 1:
-        return [], [], [], []
-
-    # remove unused data
-    while len(path_x) >= 1 and path_x[-1] == 0.0:
-        path_x.pop()
-        path_y.pop()
-        path_yaw.pop()
-        directions.pop()
-
-    return path_x, path_y, path_yaw, directions
+    # Zero is a valid coordinate, so trim by the last written sample index.
+    return (
+        path_x[: index + 1],
+        path_y[: index + 1],
+        path_yaw[: index + 1],
+        directions[: index + 1],
+    )
 
 
-def path_planning(start, goal, curvature, step_size=0.1):
+def path_planning(
+    start: ArrayLike3, goal: ArrayLike3, curvature: float, step_size: float = 0.1
+) -> tuple[NDArray, float, list[str], list[float]]:
     """
     Dubins path planner
 
@@ -337,16 +353,21 @@ def path_planning(start, goal, curvature, step_size=0.1):
 
 # Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
 # Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
+class DubinsStatus(NamedTuple):
+    """Segment types, total length and segment lengths of the path"""
+
+    segments: list[str]
+    length: float
+    seglengths: list[float]
+
+
 class DubinsPlanner(PlannerBase):
     r"""
     Dubins path planner
 
     :param curvature: maximum path curvature, defaults to 1.0
-    :type curvature: float, optional
     :param stepsize: spacing between points on the path, defaults to 0.1
-    :type stepsize: float, optional
     :return: Dubins path planner
-    :rtype: DubinsPlanner instance
 
     ==================   ========================
     Feature              Capability
@@ -381,13 +402,15 @@ class DubinsPlanner(PlannerBase):
     :seealso: :class:`ReedsSheppPlanner` :class:`PlannerBase`
     """
 
-    def __init__(self, curvature=1, stepsize=0.1, **kwargs):
+    def __init__(
+        self, curvature: float = 1, stepsize: float = 0.1, **kwargs: Any
+    ) -> None:
 
         super().__init__(ndims=3, **kwargs)
         self._curvature = curvature
         self._stepsize = stepsize
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = (
             super().__str__()
             + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
@@ -395,21 +418,21 @@ class DubinsPlanner(PlannerBase):
         return s
 
     @property
-    def curvature(self):
+    def curvature(self) -> float:
         return self._curvature
 
     @property
-    def stepsize(self):
+    def stepsize(self) -> float:
         return self._stepsize
 
-    def query(self, start, goal, **kwargs):
+    def query(
+        self, start: ArrayLike3, goal: ArrayLike3
+    ) -> tuple[NDArray, DubinsStatus]:
         r"""
         Find a path between two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
-        :type start: array_like(3), optional
         :param goal: goal configuration :math:`(x, y, \theta)`
-        :type goal: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
@@ -431,8 +454,9 @@ class DubinsPlanner(PlannerBase):
         +-------------+-----------------------------------------------------+
 
         """
-        super().query(start=start, goal=goal, next=False, **kwargs)
+        self.validate_start_goal(start, goal)
 
+        assert self.start is not None and self.goal is not None
         path, length, mode, lengths = path_planning(
             start=self.start,
             goal=self.goal,
@@ -440,9 +464,7 @@ class DubinsPlanner(PlannerBase):
             step_size=self._stepsize,
         )
 
-        status = namedtuple("DubinsStatus", ["segments", "length", "seglengths"])
-
-        return path, status(mode, sum(lengths), lengths)
+        return path, DubinsStatus(mode, sum(lengths), lengths)
 
 
 if __name__ == "__main__":

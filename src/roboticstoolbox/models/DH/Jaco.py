@@ -1,8 +1,13 @@
-#!/usr/bin/env python
 
-from math import sin, cos
+from __future__ import annotations
+
+#!/usr/bin/env python
+from math import sin
+
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
+
 # from spatialmath import SE3
 
 
@@ -39,7 +44,7 @@ class Jaco(DHRobot):
     :seealso: :func:`Mico`
     """
 
-    def __init__(self, symbolic=False):
+    def __init__(self, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym

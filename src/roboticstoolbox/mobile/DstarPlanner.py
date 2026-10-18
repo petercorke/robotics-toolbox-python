@@ -6,19 +6,22 @@ See Wikipedia article (https://en.wikipedia.org/wiki/D*)
 
 """
 
-import math
+from __future__ import annotations
 
-from sys import maxsize
-from collections import namedtuple
+import heapq
+import math
+import warnings
+from collections.abc import Callable
 from enum import IntEnum, auto
+from typing import Any, NamedTuple
+
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.cm as cm
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from spatialmath.base.types import ArrayLike2
+
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid
-import heapq
-import bisect
-import math
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.tools.types import NDArray
 
 show_animation = True
 
@@ -53,31 +56,33 @@ class _Tag(IntEnum):
 
 
 class _State:
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
-        self.parent = None  # 'back pointer' to next _State
+        self.parent: _State | None = None  # 'back pointer' to next _State
         self.t = _Tag.NEW  # open closed new
-        self.h = 0  # cost to goal
-        self.k = 0  # estimate of shortest path cost
+        self.h: float = 0  # cost to goal
+        self.k: float = 0  # estimate of shortest path cost
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.x}, {self.y})"  # [{self.h:.1f}, {self.k:.1f}]"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
         return True
 
 
 class _Map:
-    def __init__(self, row, col):
+    costmap: NDArray  # assigned by DstarPlanner
+
+    def __init__(self, row: int, col: int) -> None:
         self.row = row
         self.col = col
         self._Map = self.init__Map()
 
-    def init__Map(self):
+    def init__Map(self) -> list[list[_State]]:
         _Map_list = []  # list of rows
         for i in range(self.row):
             # for each row, make a list
@@ -89,7 +94,7 @@ class _Map:
 
     _neighbours = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
-    def get_neighbors(self, _State):
+    def get_neighbors(self, _State: _State) -> list[_State]:
         _State_list = []
 
         for i, j in self._neighbours:
@@ -102,7 +107,7 @@ class _Map:
 
     _root2 = np.sqrt(2)
 
-    def cost(self, _State1, _State2):
+    def cost(self, _State1: _State, _State2: _State) -> float:
         c = (
             self.costmap[_State1.y, _State1.x] + self.costmap[_State2.y, _State2.x]
         ) / 2
@@ -118,7 +123,7 @@ class _Map:
         # return c * math.sqrt(()**2 +
         #                  ()**2)
 
-    def show_h(self):
+    def show_h(self) -> None:
         h = np.empty((self.col, self.row))
 
         for x in range(self.col):
@@ -128,14 +133,14 @@ class _Map:
 
 
 class _Dstar:
-    def __init__(self, _Map, tol=1e-6):
+    def __init__(self, _Map: _Map, tol: float = 1e-6) -> None:
         self._Map = _Map
         # self.open_list = set()
-        self.open_list = []
+        self.open_list: list[tuple[float, _State]] = []
         self.nexpand = 0
         self.tol = tol
 
-    def process__State(self, verbose=False):
+    def process__State(self, verbose: bool = False) -> float:
         if verbose:
             print(
                 "FRONTIER ", " ".join([f"({x[1].x}, {x[1].y})" for x in self.open_list])
@@ -237,7 +242,7 @@ class _Dstar:
     ninsert = 0
     nin = 0
 
-    def insert(self, _State, h_new):
+    def insert(self, _State: _State, h_new: float) -> None:
         self.ninsert += 1
 
         if _State.t is _Tag.NEW:
@@ -280,9 +285,10 @@ class _Dstar:
         # self.open_list.add(_State)
         heapq.heappush(self.open_list, (_State.k, _State))
 
-    def modify_cost(self, x, newcost):
+    def modify_cost(self, x: _State, newcost: float) -> float:
         self._Map.costmap[x.y, x.x] = newcost
         if x.t is _Tag.CLOSED:
+            assert x.parent is not None
             self.insert(x, x.parent.h + self._Map.cost(x, x.parent))
         if len(self.open_list) == 0:
             return -1
@@ -290,7 +296,7 @@ class _Dstar:
             # lowest priority item is always at index 0 according to docs
             return self.open_list[0][0]
 
-    def showparents(self):
+    def showparents(self) -> None:
         for y in range(self._Map.row - 1, -1, -1):
             if y == self._Map.row - 1:
                 print("   ", end="")
@@ -299,8 +305,8 @@ class _Dstar:
                 print()
             print(f"{y}: ", end="")
             for x in range(self._Map.col):
-                x = self._Map._Map[y][x]
-                par = x.parent
+                state = self._Map._Map[y][x]
+                par = state.parent
                 if par is None:
                     print("  G   ", end="")
                 else:
@@ -314,6 +320,12 @@ class _Dstar:
 
 # Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
 # Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
+class DstarStatus(NamedTuple):
+    """Cost of the path"""
+
+    cost: float
+
+
 class DstarPlanner(PlannerBase):
     r"""
     D* path planner
@@ -336,9 +348,10 @@ class DstarPlanner(PlannerBase):
     connected points in adjacent cells.
 
     The map is described by a 2D ``costmap`` whose elements indicate the cost
-    of traversing that cell.  The cost of diagonal traverse is :math:`\sqrt{2}`
-    the value of the cell.  An infinite cost indicates an untraversable cell
-    or obstacle.
+    per world unit. The cost of a step is the mean of the two cell costs
+    multiplied by the distance between their centres. An infinite cost indicates
+    an untraversable cell or obstacle. Endpoints and returned paths are in world
+    coordinates; endpoints are rounded to cell centres.
 
     Example:
 
@@ -358,7 +371,9 @@ class DstarPlanner(PlannerBase):
     :seealso: :class:`PlannerBase`
     """
 
-    def __init__(self, costmap=None, **kwargs):
+    def __init__(
+        self, costmap: NDArray | OccupancyGrid | None = None, **kwargs: Any
+    ) -> None:
         super().__init__(ndims=2, **kwargs)
 
         if isinstance(costmap, np.ndarray):
@@ -369,33 +384,67 @@ class DstarPlanner(PlannerBase):
             self.costmap = np.where(self.occgrid.grid > 0, np.inf, 1)
         else:
             raise ValueError("unknown type of map")
+        # Keep the cost grid's geometry instead of treating world positions as indices.
+        geometry = costmap if isinstance(costmap, OccupancyGrid) else self.occgrid
+        if geometry is None:
+            geometry = OccupancyGrid(self.costmap)
+        if geometry.shape != self.costmap.shape:
+            raise ValueError("costmap and occupancy grid must have the same shape")
+        if self.occgrid is not None and (
+            geometry.cellsize != self.occgrid.cellsize
+            or not np.array_equal(geometry.workspace, self.occgrid.workspace)
+        ):
+            raise ValueError("costmap and occupancy grid must have the same geometry")
+        self._costgrid = geometry
+        if self.occgrid is None:
+            self._occgrid = BinaryOccupancyGrid(
+                np.isinf(self.costmap),
+                origin=geometry.g2w((0, 0)),
+                cellsize=geometry.cellsize,
+            )
+            self._occgrid0 = self._occgrid
+            self.validate_start_goal(self._start, self._goal)
         self._Map = _Map(self.costmap.shape[0], self.costmap.shape[1])
-        self._Map.costmap = self.costmap
+        self._Map.costmap = self.costmap * geometry.cellsize
         self._Dstar = _Dstar(self._Map)  # , tol=0)
 
-    def plan(self, goal=None, animate=False, progress=True, summary=False):
+    def plan(
+        self,
+        goal: ArrayLike2 | None = None,
+        animate: bool | None = None,
+        progress: bool = True,
+        summary: bool = False,
+    ) -> None:
         r"""
         Plan D* path
 
         :param goal: goal position :math:`(x, y)`, defaults to previously set value
-        :type goal: array_like(2), optional
-        :param animate: animate the planning algorithm iterations, defaults to False
-        :type animate: bool, optional
-        :param progress: show progress bar, defaults to True
-        :type progress: bool, optional
+        :param animate: deprecated, animating the planning is not implemented
+        :param progress: deprecated, has no effect
+        :param summary: print the number of insertions, defaults to False
+
+        .. deprecated:: 1.4.5
+            ``animate`` and ``progress`` were accepted but had no effect.
 
         Compute the minimum-cost obstacle-free distance to the goal from all
         points in the grid.
         """
+        for name, value in (("animate", animate), ("progress", progress is not True)):
+            if value:
+                warnings.warn(
+                    f"{name} is deprecated and has no effect",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+
         if goal is not None:
             self.goal = goal
 
         if self._goal is None:
             raise ValueError("No goal specified here or in constructor")
 
-        self._goal = self._goal.astype(int)
-
-        goal_State = self._Map._Map[self._goal[1]][self._goal[0]]
+        c, r = self._costgrid.w2g(self._goal)
+        goal_State = self._Map._Map[r][c]
         self.goal_State = goal_State
 
         # self._Dstar.open_list.add(goal_State)
@@ -412,30 +461,36 @@ class DstarPlanner(PlannerBase):
             print(self._Dstar.ninsert, self._Dstar.nin)
 
     @property
-    def nexpand(self):
+    def nexpand(self) -> int:
         """
         Number of node expansions
 
         :return: number of expansions
-        :rtype: int
 
         This number will increase during initial planning, and also if
         replanning is invoked during the :meth:`query`.
         """
         return self._Dstar.nexpand
 
-    def query(self, start, sensor=None, animate=False, verbose=False):
+    def query(
+        self,
+        start: ArrayLike2,
+        sensor: Callable[..., Any] | None = None,
+        animate: bool | None = None,
+        verbose: bool = False,
+        movie: str | tuple[str, float] | None = None,
+    ) -> tuple[NDArray, DstarStatus]:
         """
         Find path with replanning
 
         :param start: start position :math:`(x,y)`
-        :type start: array_like(2)
         :param sensor: sensor function, defaults to None
-        :type sensor: callable, optional
-        :param animate: animate the motion of the robot, defaults to False
-        :type animate: bool, optional
+        :param animate: animate the motion of the robot, defaults to the
+            planner's :attr:`animate`
+        :param movie: save the animation as a movie file, filename or tuple
+            (filename, frame interval), defaults to the planner's :attr:`movie`.
+            Implies ``animate``.
         :param verbose: display detailed diagnostic information about D* operations, defaults to False
-        :type verbose: bool, optional
         :return: path from start to goal, one point :math:`(x, y)` per row
         :rtype: ndarray(N,2)
 
@@ -443,23 +498,22 @@ class DstarPlanner(PlannerBase):
         is used unaltered.
 
         If ``sensor`` is not None it must be callable, and is called at each
-        step of the path with the current robot coordintes:
+        step of the path with the current robot coordinates in world units:
 
             sensor((x, y))
 
         and mimics the behaviour of a simple sensor onboard the robot which can
         dynamically change the costmap. The function return a list (0 or more)
-        of 3-tuples (x, y, newcost) which are the coordinates of cells and their
-        cost.  If the cost has changed this will trigger D* incremental
+        of 3-tuples (x, y, newcost) which are world coordinates of cells and their
+        cost per world unit. If the cost has changed this will trigger D* incremental
         replanning.  In this case the value returned by :meth:`nexpand` will
         increase, according to the severity of the replanning.
 
         :seealso: :meth:`plan`
         """
-        self.start = start
-        start_State = self._Map._Map[start[1]][start[0]]
-        s = start_State
-        s = s.parent
+        self.validate_start_goal(start)
+        c, r = self._costgrid.w2g(start)
+        start_State = self._Map._Map[r][c]
         tmp = start_State
 
         if sensor is not None and not callable(sensor):
@@ -468,41 +522,53 @@ class DstarPlanner(PlannerBase):
         cost = tmp.h
         self.goal_State.h = 0
 
+        animating = self.animation_start(animate, movie, draw=self.plot)
+
         path = []
         while True:
-            path.append((tmp.x, tmp.y))
+            position = self._costgrid.g2w((tmp.x, tmp.y))
+            path.append(position)
+            if animating:
+                plt.plot(*position, "y.", markersize=12)
+                self.animation_frame()
             if tmp == self.goal_State:
                 break
 
             # x, y = tmp.parent.x, tmp.parent.y
 
             if sensor is not None:
-                changes = sensor((tmp.x, tmp.y))
+                changes = sensor(tuple(position))
                 if changes is not None:
                     # make changes to the plan
+                    val = -1.0
                     for x, y, newcost in changes:
-                        X = self._Dstar._Map._Map[y][x]
+                        c, r = self._costgrid.w2g((x, y))
+                        if not (
+                            0 <= r < self.costmap.shape[0]
+                            and 0 <= c < self.costmap.shape[1]
+                        ):
+                            raise ValueError("sensor cell is outside the costmap")
+                        X = self._Dstar._Map._Map[r][c]
+                        self.costmap[r, c] = newcost
                         # print(f"change cost at ({x}, {y}) to {newcost}")
-                        val = self._Dstar.modify_cost(X, newcost)
+                        val = self._Dstar.modify_cost(
+                            X, newcost * self._costgrid.cellsize
+                        )
                     # propagate the changes to plan
-                    print("propagate")
+                    self.message("propagate the cost changes")
                     # self._Dstar.showparents()
                     while val != -1 and val < tmp.h:
                         val = self._Dstar.process__State(verbose=verbose)
                         # print('open set', len(self._Dstar.open_list))
                     # self._Dstar.showparents()
 
+            assert tmp.parent is not None
             tmp = tmp.parent
             # print('move to ', tmp)
 
-        status = namedtuple(
-            "_DstarStatus",
-            [
-                "cost",
-            ],
-        )
+        self.animation_end()
 
-        return np.array(path), status(cost)
+        return np.array(path), DstarStatus(cost)
 
     # # Just feed self._h into plot function from parent as p
 
@@ -541,13 +607,14 @@ if __name__ == "__main__":
 
     # ds.plot(path=path)
 
-    def sensorfunc(pos):
+    def sensorfunc(pos: tuple[int, int]) -> list[tuple[int, int, int]] | None:
         if pos == (3, 3):
             changes = []
             for x in range(3, 6):
                 for y in range(0, 4):
                     changes.append((x, y, 100))
             return changes
+        return None
 
     path2, status2 = ds.query(start=start, sensor=sensorfunc, verbose=False)
     print(ds._Map.costmap)

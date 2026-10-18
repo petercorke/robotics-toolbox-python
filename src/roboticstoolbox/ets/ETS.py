@@ -6,46 +6,39 @@
 """
 
 from __future__ import annotations
-from functools import cached_property
+
+from copy import deepcopy
+from typing import Any, Sequence
+from typing import Literal as L
+
 import numpy as np
-from numpy.random import uniform
-from numpy.linalg import inv, det, cond, svd
-from spatialmath import SE3, SE2
+from numpy.linalg import cond, det, inv, svd
+from spatialmath import SE3
 from spatialmath.base import (
-    getvector,
-    issymbol,
-    tr2jac,
-    verifymatrix,
-    tr2jac2,
-    t2r,
+    getmatrix,
     rotvelxform,
     simplify,
-    getmatrix,
+    t2r,
 )
-from roboticstoolbox.tools.params import rtb_get_param
-from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution
 
+from roboticstoolbox.ets._ET import BaseET
+from roboticstoolbox.ets._ETS import BaseETS
+from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.fknm import (
-    ETS_init,
     ETS_fkine,
-    ETS_jacob0,
-    ETS_jacobe,
     ETS_hessian0,
     ETS_hessiane,
-    IK_NR_c,
+    ETS_jacob0,
+    ETS_jacobe,
     IK_GN_c,
     IK_LM_c,
+    IK_NR_c,
 )
-from copy import deepcopy
-from roboticstoolbox.ets.ET import ET
-from roboticstoolbox.ets._ET import BaseET
-from roboticstoolbox.ets._ETS import BaseETS, T, _dirties_fknm
-from typing import overload, TypeVar
-from typing import Literal as L
+from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution, check_mask, check_q0
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
-class ETS(BaseETS):
+class ETS(BaseETS[ET]):
     """
     This class implements an elementary transform sequence (ETS) for 3D
 
@@ -83,19 +76,18 @@ class ETS(BaseETS):
 
     See Also
     --------
-    :func:`rx`
-    :func:`ry`
-    :func:`rz`
-    :func:`tx`
-    :func:`ty`
-    :func:`tz`
+    ``rx``
+    ``ry``
+    ``rz``
+    ``tx``
+    ``ty``
+    ``tz``
 
     """
 
     def __init__(
-        self,
-        arg: list[ETS | ET] | list[ET] | list[ETS] | ET | ETS | None = None,
-    ):
+        self, arg: list[ETS | ET] | list[ET] | list[ETS] | ET | ETS | None = None
+    ) -> None:
         super().__init__()
         if isinstance(arg, list):
             for item in arg:
@@ -153,22 +145,68 @@ class ETS(BaseETS):
 
             self._auto_jindex = True
 
-    def __mul__(self, other: ET | ETS) -> "ETS":
+    def __mul__(self, other: ET | ETS) -> ETS:
         if isinstance(other, ET):
             return ETS([*self._data, other])
         else:
             return ETS([*self._data, *other._data])  # pragma: nocover
 
-    def __rmul__(self, other: ET | ETS) -> "ETS":
+    def __rmul__(self, other: ET | ETS) -> ETS:
         return ETS([other, *self._data])  # pragma: nocover
 
-    def __imul__(self, rest: "ETS"):
+    def __imul__(self, rest: ET | ETS) -> ETS:
         return self + rest  # pragma: nocover
 
-    def __add__(self, rest) -> "ETS":
+    def __add__(self, rest: ET | ETS) -> ETS:
         return self.__mul__(rest)  # pragma: nocover
 
-    def compile(self) -> "ETS":
+    def fixjoint(self, j: int, value: float, unit: str = "rad") -> ETS:
+        """Return an independent ETS with the specified joint held constant.
+
+        j is the zero-based position among joint ETs, independent of their
+        jindex values. Remaining joints retain explicit global jindices;
+        automatically indexed joints are renumbered to fill the gap. Joint
+        limits and flip flags are preserved. The original is not modified.
+
+        :param j: index of the joint to fix
+        :param value: fixed joint coordinate, in radians/degrees or metres
+        :param unit: angular unit for rotational joints, "rad" [default] or "deg"
+        :returns: ETS with one fewer joint
+        :raises ValueError: for an invalid joint position or angular unit
+        """
+        if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
+            raise ValueError(f"joint index {j} out of range for {self.n} joints")
+        if unit not in ("rad", "deg"):
+            raise ValueError("unit must be 'rad' or 'deg'")
+
+        parts = []
+        joint_index = 0
+        for et in self:
+            if not et.isjoint:
+                parts.append(et)
+                continue
+
+            constructor = getattr(ET, et.kind)
+            if joint_index == j:
+                fixed = -value if et.isflip else value
+                if et.isrotation:
+                    parts.append(constructor(fixed, unit=unit))
+                else:
+                    if unit != "rad":
+                        raise ValueError("unit='deg' is only valid for rotational joints")
+                    parts.append(constructor(fixed))
+            else:
+                if self._auto_jindex:
+                    parts.append(constructor(flip=et.isflip, qlim=et.qlim))
+                else:
+                    parts.append(
+                        constructor(flip=et.isflip, qlim=et.qlim, jindex=et.jindex)
+                    )
+            joint_index += 1
+
+        return ETS(parts)
+
+    def compile(self) -> ETS:
         """
         Compile an ETS
 
@@ -192,7 +230,7 @@ class ETS(BaseETS):
 
         See Also
         --------
-        :func:`isconstant`
+        ``isconstant``
         """
         const = None
         ets = ETS()
@@ -219,7 +257,7 @@ class ETS(BaseETS):
                 ets *= ET.SE3(const)
         return ets
 
-    def insert(  # type: ignore[override]
+    def insert(
         self,
         index: int,
         value: ET | ETS,
@@ -255,7 +293,7 @@ class ETS(BaseETS):
 
     def fkine(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE3 | None = None,
         tool: NDArray | SE3 | None = None,
         include_base: bool = True,
@@ -263,7 +301,7 @@ class ETS(BaseETS):
         """
         Forward kinematics
 
-        :param q: Joint coordinates
+        :param q: Joint coordinates, optional for a sequence with no joints
         :param base: a base transform applied before the ETS
         :param tool: tool transform, optional
         :param include_base: set to True if the base transform should be considered
@@ -309,7 +347,7 @@ class ETS(BaseETS):
 
         if fk.ndim == 3:
             for T in fk:
-                ret.append(SE3(T, check=False))  # type: ignore
+                ret.append(SE3(T, check=False))
         else:
             ret = SE3(fk, check=False)
 
@@ -317,7 +355,7 @@ class ETS(BaseETS):
 
     def eval(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE3 | None = None,
         tool: NDArray | SE3 | None = None,
         include_base: bool = True,
@@ -366,6 +404,9 @@ class ETS(BaseETS):
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
         """
+
+        if q is None:
+            q = []
 
         q = self._resolve_q(q, allow_trajectory=True)
         return ETS_fkine(self._fknm, q, base, tool, include_base, _data=self.data)
@@ -613,7 +654,7 @@ class ETS(BaseETS):
         q: ArrayLike,
         representation: str = "rpy/xyz",
         tool: NDArray | SE3 | None = None,
-    ):
+    ) -> Any:
         r"""
         Manipulator analytical Jacobian in the base frame
 
@@ -623,17 +664,19 @@ class ETS(BaseETS):
         :returns: Manipulator Jacobian in the base frame
         :rtype: ndarray(6,n)
 
-        ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
+        ``ets.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
         joint velocity to end-effector spatial velocity expressed in the base frame.
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        |``representation``   |       Rotational representation     |
-        |---------------------|-------------------------------------|
-        |``'rpy/xyz'``        |   RPY angular rates in XYZ order    |
-        |``'rpy/zyx'``        |   RPY angular rates in XYZ order    |
-        |``'eul'``            |   Euler angular rates in ZYZ order  |
-        |``'exp'``            |   exponential coordinate rates      |
+        ==================  ====================================
+        ``representation``  rotational representation
+        ==================  ====================================
+        ``'rpy/xyz'``       RPY angular rates in XYZ order
+        ``'rpy/zyx'``       RPY angular rates in ZYX order
+        ``'eul'``           Euler angular rates in ZYZ order
+        ``'exp'``           exponential coordinate rates
+        ==================  ====================================
 
         Examples
         --------
@@ -642,9 +685,10 @@ class ETS(BaseETS):
         joint configuration
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.ETS.Puma560().ets()
-        >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560().ets()
+            >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
 
         """
 
@@ -704,10 +748,10 @@ class ETS(BaseETS):
 
     def manipulability(
         self,
-        q,
+        q: Any,
         method: L["yoshikawa", "minsingular", "invcondition"] = "yoshikawa",
         axes: L["all", "trans", "rot"] | list[bool] = "all",
-    ):
+    ) -> Any:
         """
         Manipulability measure
 
@@ -725,14 +769,16 @@ class ETS(BaseETS):
 
         Various measures are supported:
 
-        | Measure           |       Description                               |
-        |-------------------|-------------------------------------------------|
-        | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
-        |                   | from singularity [Yoshikawa85]_                 |
-        | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
-        |                   | of the velocity ellipsoid [Klein87]_            |
-        | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
-        |                   | *distance*  from singularity [Klein87]_         |
+        ===================  ===============================================
+        Measure              Description
+        ===================  ===============================================
+        ``"yoshikawa"``      volume of the velocity ellipsoid, *distance*
+                             from singularity [Yoshikawa85]_
+        ``"invcondition"``   inverse condition number of Jacobian, isotropy
+                             of the velocity ellipsoid [Klein87]_
+        ``"minsingular"``    minimum singular value of the Jacobian,
+                             *distance* from singularity [Klein87]_
+        ===================  ===============================================
 
         **Trajectory operation**:
 
@@ -749,8 +795,6 @@ class ETS(BaseETS):
           manipulability separately.
         - Examples in the RVC book (1st edition) can be replicated by
           using the "all" option
-        - Asada's measure requires inertial a robot model with inertial
-          parameters.
 
         .. rubric:: References
 
@@ -761,6 +805,7 @@ class ETS(BaseETS):
                 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
                 The International Journal of Robotics Research.
                 1987;6(2):72-83. doi:10.1177/027836498700600206
+
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
 
@@ -782,7 +827,7 @@ class ETS(BaseETS):
         else:
             raise ValueError("axes must be all, trans, rot or both")
 
-        def yoshikawa(robot, J, q, axes, **kwargs):
+        def yoshikawa(robot: Any, J: Any, q: Any, axes: Any, **kwargs: Any) -> Any:
             J = J[axes, :]
             if J.shape[0] == J.shape[1]:
                 # simplified case for square matrix
@@ -791,11 +836,11 @@ class ETS(BaseETS):
                 m2 = det(J @ J.T)
                 return np.sqrt(abs(m2))
 
-        def condition(robot, J, q, axes, **kwargs):
+        def condition(robot: Any, J: Any, q: Any, axes: Any, **kwargs: Any) -> Any:
             J = J[axes, :]
             return 1 / cond(J)
 
-        def minsingular(robot, J, q, axes, **kwargs):
+        def minsingular(robot: Any, J: Any, q: Any, axes: Any, **kwargs: Any) -> Any:
             J = J[axes, :]
             s = svd(J, compute_uv=False)
             return s[-1]  # return last/smallest singular value of J
@@ -844,9 +889,11 @@ class ETS(BaseETS):
         joint angle configuration
 
         .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda().ets()
-        >>> panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
+
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.Panda().ets()
+            >>> dT = panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
+            >>> dT.shape
 
         .. rubric:: References
 
@@ -878,9 +925,9 @@ class ETS(BaseETS):
         # The Hessian is the 2nd-order so we start with c = 2
         c = 2
 
-        def add_indices(indices, c):
+        def add_indices(indices: Any, c: Any) -> Any:
             total = len(indices * 2)
-            new_indices = []
+            new_indices: list[Any] = []
 
             for i in range(total):
                 j = i // 2
@@ -897,9 +944,9 @@ class ETS(BaseETS):
 
             return new_indices
 
-        def add_pdi(pdi):
+        def add_pdi(pdi: Any) -> Any:
             total = len(pdi * 2)
-            new_pdi = []
+            new_pdi: list[Any] = []
 
             for i in range(total):
                 j = i // 2
@@ -923,7 +970,7 @@ class ETS(BaseETS):
         # the are the pd indices used in the cross products
         pdi = [[0, 0]]
 
-        # The length of dT correspods to the number of derivatives we have calculated
+        # The length of dT corresponds to the number of derivatives we have calculated
         while len(dT) != n:
             # Add to the start of the tensor size list
             size.insert(0, self.n)
@@ -938,7 +985,7 @@ class ETS(BaseETS):
             # Although, our partial derivatives have the order:
             # pd[..., o, n, m, l, k, cartesian DoF, j]
             # For example, consider the Hessian Tensor H[n, 6, n],
-            # the index H[k, :, j]. This corrsponds
+            # the index H[k, :, j]. This corresponds
             # to the second partial derivative of the kinematics of joint j with
             # respect to joint k.
             indices = add_indices(indices, c)
@@ -979,18 +1026,18 @@ class ETS(BaseETS):
                     idx1_n = idx1[0]
 
                     # Use our indices to select the rotational column from pdr0 and pdr1
-                    col0_rot = pdr0[(*idx0_slices, slice(3, 6), idx0_n)]
-                    col1_rot = pdr1[(*idx1_slices, slice(3, 6), idx1_n)]
+                    col0_rot = pdr0[tuple(idx0_slices) + (slice(3, 6), idx0_n)]
+                    col1_rot = pdr1[tuple(idx1_slices) + (slice(3, 6), idx1_n)]
 
                     # Use our indices to select the translational column from pdr1
-                    col1_trn = pdr1[(*idx1_slices, slice(0, 3), idx1_n)]
+                    col1_trn = pdr1[tuple(idx1_slices) + (slice(0, 3), idx1_n)]
 
                     # Perform the cross product as described in the maths above
                     rot += np.cross(col0_rot, col1_rot)
                     trn += np.cross(col0_rot, col1_trn)
 
-                pd[(*np.flip(count[1:]), slice(0, 3), count[0])] = trn
-                pd[(*np.flip(count[1:]), slice(3, 6), count[0])] = rot
+                pd[tuple(np.flip(count[1:])) + (slice(0, 3), count[0])] = trn
+                pd[tuple(np.flip(count[1:])) + (slice(3, 6), count[0])] = rot
 
                 count[0] += 1
                 for j in range(len(count)):
@@ -1084,7 +1131,7 @@ class ETS(BaseETS):
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -1098,11 +1145,11 @@ class ETS(BaseETS):
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1143,6 +1190,9 @@ class ETS(BaseETS):
 
         """
 
+        q0 = check_q0(q0, self.n)
+        mask = check_mask(mask)
+
         q, success, iterations, searches, residual = IK_LM_c(
             self._fknm, Tep, q0, ilimit, slimit, tol, joint_limits, mask, k, method
         )
@@ -1169,7 +1219,7 @@ class ETS(BaseETS):
         r"""
         Fast numerical inverse kinematics using Newton-Raphson optimisation
 
-        :param Tep: the desired end-effector pose or pose trajectory
+        :param Tep: the desired end-effector pose (a single pose only, for a trajectory use :meth:`ikine_NR`)
         :param q0: initial joint configuration (random valid configuration if not supplied)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
@@ -1240,6 +1290,9 @@ class ETS(BaseETS):
 
         """
 
+        q0 = check_q0(q0, self.n)
+        mask = check_mask(mask)
+
         q, success, iterations, searches, residual = IK_NR_c(
             self._fknm,
             Tep,
@@ -1275,7 +1328,7 @@ class ETS(BaseETS):
         r"""
         Fast numerical inverse kinematics by Gauss-Newton optimisation
 
-        :param Tep: the desired end-effector pose or pose trajectory
+        :param Tep: the desired end-effector pose (a single pose only, for a trajectory use :meth:`ikine_GN`)
         :param q0: initial joint configuration (random valid configuration if not supplied)
         :param ilimit: maximum number of iterations per search
         :param slimit: maximum number of search attempts
@@ -1284,8 +1337,11 @@ class ETS(BaseETS):
         :param joint_limits: reject solutions with invalid joint configurations
         :param pinv: use the pseudo-inverse instead of the normal matrix inverse
         :param pinv_damping: damping factor for the pseudo-inverse
-        :returns: tuple (q, success, iterations, searches, residual)
-        :rtype: tuple
+        :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
+            ``iterations``, ``searches`` and ``residual`` error value (``reason`` is
+            always empty -- this fast C++ solver doesn't produce a granular failure
+            reason string, unlike :meth:`ikine_GN`)
+        :rtype: IKSolution
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -1351,6 +1407,9 @@ class ETS(BaseETS):
 
         """
 
+        q0 = check_q0(q0, self.n)
+        mask = check_mask(mask)
+
         q, success, iterations, searches, residual = IK_GN_c(
             self._fknm,
             Tep,
@@ -1387,13 +1446,15 @@ class ETS(BaseETS):
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Levenberg-Marquardt numerical inverse kinematics solver
 
-        :param Tep: the desired end-effector pose
-        :param q0: the initial joint coordinate vector
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1410,6 +1471,16 @@ class ETS(BaseETS):
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
+
+        .. versionchanged:: 1.4.5
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method.
@@ -1455,7 +1526,7 @@ class ETS(BaseETS):
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -1469,11 +1540,11 @@ class ETS(BaseETS):
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1550,13 +1621,15 @@ class ETS(BaseETS):
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Newton-Raphson numerical inverse kinematics solver
 
-        :param Tep: the desired end-effector pose
-        :param q0: the initial joint coordinate vector
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1572,6 +1645,16 @@ class ETS(BaseETS):
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
+
+        .. versionchanged:: 1.4.5
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Newton-Raphson method.
@@ -1657,13 +1740,15 @@ class ETS(BaseETS):
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Gauss-Newton numerical inverse kinematics solver
 
-        :param Tep: the desired end-effector pose
-        :param q0: the initial joint coordinate vector
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1679,6 +1764,16 @@ class ETS(BaseETS):
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
+
+        .. versionchanged:: 1.4.5
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Gauss-Newton method.
@@ -1774,19 +1869,21 @@ class ETS(BaseETS):
         mask: ArrayLike | None = None,
         joint_limits: bool = True,
         seed: int | None = None,
-        kj=1.0,
-        ks=1.0,
+        kj: float = 1.0,
+        ks: float = 1.0,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
         pi: NDArray | float = 0.3,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         r"""
         Quadratic programming numerical inverse kinematics solver
 
-        :param Tep: the desired end-effector pose
-        :param q0: the initial joint coordinate vector
+        :param Tep: the desired end-effector pose or pose trajectory
+        :param q0: the initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
         :param ilimit: maximum iterations allowed per search
         :param slimit: maximum search attempts before failure
         :param tol: maximum allowed residual error E
@@ -1803,6 +1900,17 @@ class ETS(BaseETS):
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
         :rtype: IKSolution
+
+        If ``Tep`` is a trajectory (an :class:`SE3` with N poses, or an array with
+        shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
+        consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
+        has shape (N, n), ``success`` is True only if every pose succeeded, and
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
+
+        .. versionchanged:: 1.4.5
+            For a trajectory, ``residual`` is the maximum over the poses, it was
+            the minimum.
+
         :raises ImportError: if the package ``qpsolvers`` is not installed
 
         A method that provides functionality to perform numerical inverse kinematics
@@ -1928,7 +2036,7 @@ class ETS(BaseETS):
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
     @staticmethod
-    def _template_consume(elements: list["BaseET"], template: list[str]) -> int:
+    def _template_consume(elements: Sequence[BaseET], template: list[str]) -> int:
         """
         Greedily match a run of ETs against an ordered template of ``kind``
         strings, where each template slot is optional but present slots must
@@ -1949,7 +2057,9 @@ class ETS(BaseETS):
                 break
         return consumed
 
-    def _split_convention(self, template: list[str], joint_slots: set[int], exposed: str):
+    def _split_convention(
+        self, template: list[str], joint_slots: set[int], exposed: str
+    ) -> Any:
         """
         Split according to a DH-like convention.
 
@@ -1965,7 +2075,7 @@ class ETS(BaseETS):
         if len(idx) == 0:
             raise ValueError("ETS has no joints")
 
-        def joint_slot(et: "ET") -> int:
+        def joint_slot(et: ET) -> int:
             if et.kind not in template or template.index(et.kind) not in joint_slots:
                 raise ValueError(
                     "ETS is not a valid DH/MDH parameterisation: "
@@ -1994,11 +2104,11 @@ class ETS(BaseETS):
             end[i] = k + 1 + consumed
 
             if i + 1 < len(idx):
-                gap = self[end[i] : idx[i + 1]]
+                gap_ets = self[end[i] : idx[i + 1]]
                 gap_consumed = self._template_consume(
-                    list(gap), template[0 : slots[i + 1]]
+                    list(gap_ets), template[0 : slots[i + 1]]
                 )
-                if gap_consumed != len(gap):
+                if gap_consumed != len(gap_ets):
                     raise ValueError(
                         "ETS is not a valid DH/MDH parameterisation: "
                         f"unexpected term at index {end[i] + gap_consumed}"
@@ -2014,7 +2124,7 @@ class ETS(BaseETS):
         segments = [self.__class__(self[start[i] : end[i]]) for i in range(len(idx))]
         return segments, head, tail
 
-    def split(self, method: str = "last") -> list["ETS"]:
+    def split(self, method: str = "last") -> list[ETS]:
         r"""
         Split ETS into link segments
 
@@ -2051,13 +2161,14 @@ class ETS(BaseETS):
           is folded into the first segment.
 
         .. runblock:: pycon
-            >>> from roboticstoolbox.ets.ETS import *
-            >>> e = tz(1) * Rx("q1") * tx(2) * Ry("q2") * ty(3) * Rz("q3") * tz(4)
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tz(1) * ET.Rx("q1") * ET.tx(2) * ET.Ry("q2") * ET.ty(3) * ET.Rz("q3") * ET.tz(4)
             >>> base, *segments, gripper = e.split("first")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
             >>> base, *segments, gripper = e.split("last")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
-            >>> e = tz(1) * Rz("q1") * tx(2) * Rx(90, 'deg') * Rz("q2") * tz(4) * Rz(180, 'deg') * tz("q3") * Rz(270, 'deg') * tz(4)
+            >>> e = ET.tz(1) * ET.Rz("q1") * ET.tx(2) * ET.Rx(90, 'deg') * ET.Rz("q2") * ET.tz(4) * ET.Rz(180, 'deg') * ET.tz("q3") * ET.Rz(270, 'deg') * ET.tz(4)
             >>> base, *segments, gripper = e.split("dh")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
             >>> base, *segments, gripper = e.split("mdh")
@@ -2074,7 +2185,7 @@ class ETS(BaseETS):
                     ["tx", "Rx", "Rz", "tz"], {2, 3}, exposed="tail"
                 )
             case _:
-                return super().split(method)  # type: ignore
+                return super().split(method)
 
-        return [head] + segments + [tail]  # type: ignore
+        return [head] + segments + [tail]
 

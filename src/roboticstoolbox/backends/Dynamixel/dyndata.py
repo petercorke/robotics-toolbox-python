@@ -1,8 +1,9 @@
-from bs4 import BeautifulSoup
-import urllib.request
-import re
-from collections import namedtuple
 import json
+import re
+import urllib.request
+from collections import namedtuple
+
+from bs4 import BeautifulSoup
 
 url = "https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_workbench/"
 

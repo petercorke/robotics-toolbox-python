@@ -9,11 +9,17 @@ without a WASM build, or CI testing the Python path) ``init`` returns
 
 from __future__ import annotations
 
+from typing import Any
+
 try:
-    from roboticstoolbox._frne_c import (  # type: ignore[import]
-        init as _c_init,
-        frne as _c_frne,
+    from roboticstoolbox._frne_c import (
         delete as _c_delete,
+    )
+    from roboticstoolbox._frne_c import (
+        frne as _c_frne,
+    )
+    from roboticstoolbox._frne_c import (
+        init as _c_init,
     )
 
     _C_AVAILABLE = True
@@ -21,14 +27,16 @@ except ImportError:
     _C_AVAILABLE = False
 
 
-def init(njoints, mdh, L):
+def init(njoints: Any, mdh: Any, L: Any) -> Any:
     """Create the C Robot struct handle; returns None when C extension is absent."""
     if _C_AVAILABLE:
         return _c_init(njoints, mdh, L)
     return None
 
 
-def frne(robot, q, qd, qdd, gravity, base_rot, fext):
+def frne(
+    robot: Any, q: Any, qd: Any, qdd: Any, gravity: Any, base_rot: Any, fext: Any
+) -> Any:
     """Run Newton-Euler via C over a whole trajectory in one call; caller
     must check that robot handle is not None.
 
@@ -45,7 +53,7 @@ def frne(robot, q, qd, qdd, gravity, base_rot, fext):
     return _c_frne(robot, q, qd, qdd, gravity, base_rot, fext)
 
 
-def delete(robot):
+def delete(robot: Any) -> None:
     """Free the C Robot struct; no-op when handle is None (C absent)."""
     if robot is not None:
         _c_delete(robot)
