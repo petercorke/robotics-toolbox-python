@@ -1,11 +1,13 @@
-ET and ETS: 3D
-==============
+ETS for 3D space
+=================
 
-An :class:`~roboticstoolbox.ets.ET.ET` is one elementary :math:`\SE{3}`
+An :class:`~roboticstoolbox.ET` is one elementary :math:`\SE{3}`
 transform: a rotation about, or a translation along, the x-, y- or z-axis.  The
 angle or distance is either a constant or, if it is left out, a variable, which
-makes the transform a joint.  An :class:`~roboticstoolbox.ets.ETS.ETS` is a sequence of
+makes the transform a joint.  An :class:`~roboticstoolbox.ETS` is a sequence of
 them.  The two-dimensional equivalents are on the :doc:`ets_2d` page.
+
+We can use :class:`~roboticstoolbox.ETS` to describes a planar arm that moves in 3D space.
 
 .. runblock:: pycon
 
@@ -18,8 +20,8 @@ them.  The two-dimensional equivalents are on the :doc:`ets_2d` page.
    >>> e.structure                  # the joint types
    >>> e.n, e.m                     # joints, and transforms
 
-ET
---
+ET: Elementary Transform
+-------------------------
 
 Creating an elementary transform
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -53,6 +55,22 @@ or a joint.
    * - ``ET.SE3(T)``
      - a constant, an arbitrary :math:`\SE{3}` transform
 
+The arguments are:
+
+``param``
+    the angle (radians) or distance of a constant transform, left out for a
+    joint, or a string that names a joint, see :ref:`ets-descriptors`
+``unit``
+    ``'rad'`` (default) or ``'deg'``, the unit of the angle of a constant
+    rotation
+``flip``
+    if True the joint moves in the opposite sense, ``q`` is negated
+``jindex``
+    the index of this joint in the joint vector of a robot, by default the
+    joints are numbered in the order they appear
+``qlim``
+    the joint limits, a 2-vector ``[lower, upper]``
+
 .. runblock:: pycon
 
    >>> from roboticstoolbox import ET
@@ -67,13 +85,13 @@ or a joint.
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ET.ET.Rx
-   ~roboticstoolbox.ets.ET.ET.Ry
-   ~roboticstoolbox.ets.ET.ET.Rz
-   ~roboticstoolbox.ets.ET.ET.tx
-   ~roboticstoolbox.ets.ET.ET.ty
-   ~roboticstoolbox.ets.ET.ET.tz
-   ~roboticstoolbox.ets.ET.ET.SE3
+   ~roboticstoolbox.ET.Rx
+   ~roboticstoolbox.ET.Ry
+   ~roboticstoolbox.ET.Rz
+   ~roboticstoolbox.ET.tx
+   ~roboticstoolbox.ET.ty
+   ~roboticstoolbox.ET.tz
+   ~roboticstoolbox.ET.SE3
 
 Information
 ^^^^^^^^^^^
@@ -81,17 +99,17 @@ Information
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ET.ET.kind
-   ~roboticstoolbox.ets.ET.ET.axis
-   ~roboticstoolbox.ets.ET.ET.ax
-   ~roboticstoolbox.ets.ET.ET.param
-   ~roboticstoolbox.ets.ET.ET.isjoint
-   ~roboticstoolbox.ets.ET.ET.isflip
-   ~roboticstoolbox.ets.ET.ET.isrotation
-   ~roboticstoolbox.ets.ET.ET.istranslation
-   ~roboticstoolbox.ets.ET.ET.iselementary
-   ~roboticstoolbox.ets.ET.ET.jindex
-   ~roboticstoolbox.ets.ET.ET.qlim
+   ~roboticstoolbox.ET.kind
+   ~roboticstoolbox.ET.axis
+   ~roboticstoolbox.ET.ax
+   ~roboticstoolbox.ET.param
+   ~roboticstoolbox.ET.isjoint
+   ~roboticstoolbox.ET.isflip
+   ~roboticstoolbox.ET.isrotation
+   ~roboticstoolbox.ET.istranslation
+   ~roboticstoolbox.ET.iselementary
+   ~roboticstoolbox.ET.jindex
+   ~roboticstoolbox.ET.qlim
 
 Kinematics
 ^^^^^^^^^^
@@ -99,16 +117,16 @@ Kinematics
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ET.ET.A
-   ~roboticstoolbox.ets.ET.ET.inv
-   ~roboticstoolbox.ets.ET.ET.s
+   ~roboticstoolbox.ET.A
+   ~roboticstoolbox.ET.inv
+   ~roboticstoolbox.ET.s
 
 .. _ets-descriptors:
 
 Joint descriptors
 ^^^^^^^^^^^^^^^^^
 
-The angle or distance of a transform can also be a *string* that names a joint.  This is
+The parameter of a transform can also be a *string* that names a joint.  This is
 convenient when a robot is written down from a datasheet or a URDF, where joints
 have names such as ``q1``, ``theta2`` or ``A3``.  The string is parsed once, when
 the transform is created, into the joint index, whether the joint is flipped,
@@ -138,23 +156,42 @@ A whole robot can be written with names that match its documentation.
    >>> e.jindices
    >>> e.structure
 
-A descriptor string must not be combined with ``jindex`` or ``flip``: ``ET.Rz("q1", jindex=2)`` raises ``ValueError``.  The complete rules are:
+The rules are:
 
-.. autoclass:: roboticstoolbox.ets._ET.BaseET
-   :noindex:
+- the first number in the string is the joint index, so ``"q0"`` is joint 0
+  and ``"theta2"`` is joint 2; ``"q(3)"`` and ``"θ_3"`` are joint 3
+- a leading ``-`` (or the Unicode minus sign ``−``) negates the joint
+  variable, ``flip``, so ``"-q1"`` is joint 1, flipped.  A leading ``+`` is
+  ignored
+- joint indices count from zero.  If the names count from one, as ``"A1"`` to
+  ``"A6"`` of a Kuka arm do, end the name with an underscore: ``"A1_"`` is
+  joint 0, and ``"-A1_"`` is joint 0, flipped.  The underscore is not part of
+  the name that is displayed
+- a string with no number, such as ``"joint"``, is a variable joint that is
+  numbered automatically
+- a string that is a number, such as ``"1.5"``, is a constant
+- ``jindex`` and ``flip`` must not also be given, ``ET.Rz("q1", jindex=2)`` raises ``ValueError``
+
+The name is shown when the transform is displayed, ``Rz(A1)``.
+
+.. note:: A robot built from names ``"A1"`` to ``"A6"``, without the
+    underscores, has joint indices 1 to 6, and is rejected as the index 6 is
+    out of range for 6 joints.
+
+.. versionchanged:: 1.5.0
+    A trailing underscore, and the Unicode minus sign, are accepted.
 
 Details
 ^^^^^^^
 
-.. autoclass:: roboticstoolbox.ets.ET.ET
+.. autoclass:: roboticstoolbox.ET
    :members: Rx, Ry, Rz, tx, ty, tz, SE3, kind, axis, ax, param, eta, isjoint, isflip, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
-   :show-inheritance:
    :member-order: bysource
 
-ETS
----
+ETS: Elementary Transform Sequence
+-------------------------------------
 
-An ETS is a list-like object.  It supports ``len``, indexing and slicing, and
+An ETS is a list-like object.  It supports ``len``, indexing and slicing, iteration, and
 the list methods ``append``, ``extend``, ``pop``, ``remove``, ``reverse``,
 ``index`` and ``count``.  Multiplying elementary transforms, or sequences,
 gives a new sequence.
@@ -165,15 +202,15 @@ Information
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ETS.ETS.n
-   ~roboticstoolbox.ets.ETS.ETS.m
-   ~roboticstoolbox.ets.ETS.ETS.structure
-   ~roboticstoolbox.ets.ETS.ETS.joints
-   ~roboticstoolbox.ets.ETS.ETS.joint_idx
-   ~roboticstoolbox.ets.ETS.ETS.jindices
-   ~roboticstoolbox.ets.ETS.ETS.jindex_set
-   ~roboticstoolbox.ets.ETS.ETS.qlim
-   ~roboticstoolbox.ets.ETS.ETS.random_q
+   ~roboticstoolbox.ETS.n
+   ~roboticstoolbox.ETS.m
+   ~roboticstoolbox.ETS.structure
+   ~roboticstoolbox.ETS.joints
+   ~roboticstoolbox.ETS.joint_idx
+   ~roboticstoolbox.ETS.jindices
+   ~roboticstoolbox.ETS.jindex_set
+   ~roboticstoolbox.ETS.qlim
+   ~roboticstoolbox.ETS.random_q
 
 Modification
 ^^^^^^^^^^^^
@@ -181,12 +218,13 @@ Modification
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ETS.ETS.insert
-   ~roboticstoolbox.ets.ETS.ETS.inv
-   ~roboticstoolbox.ets.ETS.ETS.split
-   ~roboticstoolbox.ets.ETS.ETS.swap
-   ~roboticstoolbox.ets.ETS.ETS.merge
-   ~roboticstoolbox.ets.ETS.ETS.compile
+   ~roboticstoolbox.ETS.insert
+   ~roboticstoolbox.ETS.inv
+   ~roboticstoolbox.ETS.fixjoint
+   ~roboticstoolbox.ETS.split
+   ~roboticstoolbox.ETS.swap
+   ~roboticstoolbox.ETS.merge
+   ~roboticstoolbox.ETS.compile
 
 Kinematics
 ^^^^^^^^^^
@@ -194,16 +232,16 @@ Kinematics
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ETS.ETS.fkine
-   ~roboticstoolbox.ets.ETS.ETS.eval
-   ~roboticstoolbox.ets.ETS.ETS.jacob0
-   ~roboticstoolbox.ets.ETS.ETS.jacobe
-   ~roboticstoolbox.ets.ETS.ETS.jacob0_analytical
-   ~roboticstoolbox.ets.ETS.ETS.hessian0
-   ~roboticstoolbox.ets.ETS.ETS.hessiane
-   ~roboticstoolbox.ets.ETS.ETS.partial_fkine0
-   ~roboticstoolbox.ets.ETS.ETS.manipulability
-   ~roboticstoolbox.ets.ETS.ETS.jacobm
+   ~roboticstoolbox.ETS.fkine
+   ~roboticstoolbox.ETS.eval
+   ~roboticstoolbox.ETS.jacob0
+   ~roboticstoolbox.ETS.jacobe
+   ~roboticstoolbox.ETS.jacob0_analytical
+   ~roboticstoolbox.ETS.hessian0
+   ~roboticstoolbox.ETS.hessiane
+   ~roboticstoolbox.ETS.partial_fkine0
+   ~roboticstoolbox.ETS.manipulability
+   ~roboticstoolbox.ETS.jacobm
 
 Inverse kinematics
 ^^^^^^^^^^^^^^^^^^
@@ -220,25 +258,26 @@ the same methods, which call them on its own sequence.
    * - Method
      - Poses
      - Notes
-   * - :meth:`~roboticstoolbox.ets.ETS.ETS.ik_LM`,
-       :meth:`~roboticstoolbox.ets.ETS.ETS.ik_NR`,
-       :meth:`~roboticstoolbox.ets.ETS.ETS.ik_GN`
+   * - :meth:`~roboticstoolbox.ETS.ik_LM`,
+       :meth:`~roboticstoolbox.ETS.ik_NR`,
+       :meth:`~roboticstoolbox.ETS.ik_GN`
      - one
      - fast, written in C++, not easy to extend
-   * - :meth:`~roboticstoolbox.ets.ETS.ETS.ikine_LM`,
-       :meth:`~roboticstoolbox.ets.ETS.ETS.ikine_NR`,
-       :meth:`~roboticstoolbox.ets.ETS.ETS.ikine_GN`,
-       :meth:`~roboticstoolbox.ets.ETS.ETS.ikine_QP`
+   * - :meth:`~roboticstoolbox.ETS.ikine_LM`,
+       :meth:`~roboticstoolbox.ETS.ikine_NR`,
+       :meth:`~roboticstoolbox.ETS.ikine_GN`,
+       :meth:`~roboticstoolbox.ETS.ikine_QP`
      - one, or a trajectory
-     - written in Python, so easy to extend, and has the quadratic
-       programming solver
+     - methods that use the solver objects in the next row, and add the
+       quadratic programming solver
    * - :class:`~roboticstoolbox.robot.IK.IK_LM`,
        :class:`~roboticstoolbox.robot.IK.IK_NR`,
        :class:`~roboticstoolbox.robot.IK.IK_GN`,
        :class:`~roboticstoolbox.robot.IK.IK_QP`
-     - one
-     - solver objects, ``IK_LM().solve(ets, Tep)``, that take an ETS rather
-       than a robot, convenient for comparing solvers on different robots
+     - one, or a trajectory
+     - solver objects, written in Python so easy to extend,
+       ``IK_LM().solve(ets, Tep)``, that take an ETS rather than a robot,
+       convenient for comparing solvers on different robots
 
 Each returns an :class:`~roboticstoolbox.robot.IK.IKSolution`.
 
@@ -248,13 +287,12 @@ Other
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ETS.ETS.plot
-   ~roboticstoolbox.ets.ETS.ETS.teach
+   ~roboticstoolbox.ETS.plot
+   ~roboticstoolbox.ETS.teach
 
 Details
 ^^^^^^^
 
-.. autoclass:: roboticstoolbox.ets.ETS.ETS
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, inv, split, swap, merge, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
-   :show-inheritance:
+.. autoclass:: roboticstoolbox.ETS
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
    :member-order: bysource

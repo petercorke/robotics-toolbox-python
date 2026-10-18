@@ -96,6 +96,9 @@ ANSITable._color = False
 
 html_theme = "sphinx_rtd_theme"
 
+# show ``ET.Rz``, not ``roboticstoolbox.ets.ET.ET.Rz``, in signatures
+add_module_names = False
+
 html_theme_options = {
     "logo_only": False,
     "prev_next_buttons_location": "None",

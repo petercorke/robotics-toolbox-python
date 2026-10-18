@@ -1,10 +1,13 @@
-ET2 and ETS2: 2D
-================
+ETS for 2D space
+=================
 
-The planar equivalents of :doc:`ets_3d`.  An :class:`~roboticstoolbox.ets.ET2.ET2`
-is one elementary :math:`\SE{2}` transform: a rotation, or a translation along
-the x- or y-axis.  An :class:`~roboticstoolbox.ets.ETS2.ETS2` is a sequence of
-them, and describes a planar arm.
+An :class:`~roboticstoolbox.ET2` is one elementary :math:`\SE{2}`
+transform: a rotation about, or a translation along, the x- or y-axis.  The
+angle or distance is either a constant or, if it is left out, a variable, which
+makes the transform a joint.  An :class:`~roboticstoolbox.ETS2` is a sequence of
+them.  The three-dimensional equivalents are on the :doc:`ets_3d` page.
+
+We can use :class:`~roboticstoolbox.ETS` to describes a planar arm that moves in 3D space.
 
 .. runblock:: pycon
 
@@ -16,8 +19,8 @@ them, and describes a planar arm.
 .. note:: ``ETS2`` has no inverse kinematics, Hessian or manipulability
    methods yet, see `Issue 824 <https://github.com/petercorke/robotics-toolbox-python/issues/824>`_.
 
-ET2
----
+ET2: Elementary Transform
+-------------------------
 
 Creating an elementary transform
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -40,10 +43,10 @@ rules, see :ref:`ets-descriptors`.
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ET2.ET2.R
-   ~roboticstoolbox.ets.ET2.ET2.tx
-   ~roboticstoolbox.ets.ET2.ET2.ty
-   ~roboticstoolbox.ets.ET2.ET2.SE2
+   ~roboticstoolbox.ET2.R
+   ~roboticstoolbox.ET2.tx
+   ~roboticstoolbox.ET2.ty
+   ~roboticstoolbox.ET2.SE2
 
 Information
 ^^^^^^^^^^^
@@ -51,17 +54,17 @@ Information
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ET2.ET2.kind
-   ~roboticstoolbox.ets.ET2.ET2.axis
-   ~roboticstoolbox.ets.ET2.ET2.ax
-   ~roboticstoolbox.ets.ET2.ET2.param
-   ~roboticstoolbox.ets.ET2.ET2.isjoint
-   ~roboticstoolbox.ets.ET2.ET2.isflip
-   ~roboticstoolbox.ets.ET2.ET2.isrotation
-   ~roboticstoolbox.ets.ET2.ET2.istranslation
-   ~roboticstoolbox.ets.ET2.ET2.iselementary
-   ~roboticstoolbox.ets.ET2.ET2.jindex
-   ~roboticstoolbox.ets.ET2.ET2.qlim
+   ~roboticstoolbox.ET2.kind
+   ~roboticstoolbox.ET2.axis
+   ~roboticstoolbox.ET2.ax
+   ~roboticstoolbox.ET2.param
+   ~roboticstoolbox.ET2.isjoint
+   ~roboticstoolbox.ET2.isflip
+   ~roboticstoolbox.ET2.isrotation
+   ~roboticstoolbox.ET2.istranslation
+   ~roboticstoolbox.ET2.iselementary
+   ~roboticstoolbox.ET2.jindex
+   ~roboticstoolbox.ET2.qlim
 
 Kinematics
 ^^^^^^^^^^
@@ -69,23 +72,22 @@ Kinematics
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ET2.ET2.A
-   ~roboticstoolbox.ets.ET2.ET2.inv
-   ~roboticstoolbox.ets.ET2.ET2.s
+   ~roboticstoolbox.ET2.A
+   ~roboticstoolbox.ET2.inv
+   ~roboticstoolbox.ET2.s
 
 Details
 ^^^^^^^
 
-.. autoclass:: roboticstoolbox.ets.ET2.ET2
+.. autoclass:: roboticstoolbox.ET2
    :members: R, tx, ty, SE2, kind, axis, ax, param, eta, isjoint, isflip, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
-   :show-inheritance:
    :member-order: bysource
 
-ETS2
-----
+ETS: Elementary Transform Sequence
+------------------------------------
 
 An ETS2 is a list-like object, with the same list methods as the
-:class:`~roboticstoolbox.ets.ETS.ETS`.  Joint descriptors are the same as for
+:class:`~roboticstoolbox.ETS`.  Joint descriptors are the same as for
 the 3D case, see :ref:`ets-descriptors`.
 
 Information
@@ -94,15 +96,15 @@ Information
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ETS2.ETS2.n
-   ~roboticstoolbox.ets.ETS2.ETS2.m
-   ~roboticstoolbox.ets.ETS2.ETS2.structure
-   ~roboticstoolbox.ets.ETS2.ETS2.joints
-   ~roboticstoolbox.ets.ETS2.ETS2.joint_idx
-   ~roboticstoolbox.ets.ETS2.ETS2.jindices
-   ~roboticstoolbox.ets.ETS2.ETS2.jindex_set
-   ~roboticstoolbox.ets.ETS2.ETS2.qlim
-   ~roboticstoolbox.ets.ETS2.ETS2.random_q
+   ~roboticstoolbox.ETS2.n
+   ~roboticstoolbox.ETS2.m
+   ~roboticstoolbox.ETS2.structure
+   ~roboticstoolbox.ETS2.joints
+   ~roboticstoolbox.ETS2.joint_idx
+   ~roboticstoolbox.ETS2.jindices
+   ~roboticstoolbox.ETS2.jindex_set
+   ~roboticstoolbox.ETS2.qlim
+   ~roboticstoolbox.ETS2.random_q
 
 Modification
 ^^^^^^^^^^^^
@@ -110,12 +112,13 @@ Modification
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ETS2.ETS2.insert
-   ~roboticstoolbox.ets.ETS2.ETS2.inv
-   ~roboticstoolbox.ets.ETS2.ETS2.split
-   ~roboticstoolbox.ets.ETS2.ETS2.swap
-   ~roboticstoolbox.ets.ETS2.ETS2.merge
-   ~roboticstoolbox.ets.ETS2.ETS2.compile
+   ~roboticstoolbox.ETS2.insert
+   ~roboticstoolbox.ETS2.inv
+   ~roboticstoolbox.ETS2.fixjoint
+   ~roboticstoolbox.ETS2.split
+   ~roboticstoolbox.ETS2.swap
+   ~roboticstoolbox.ETS2.merge
+   ~roboticstoolbox.ETS2.compile
 
 Kinematics
 ^^^^^^^^^^
@@ -123,10 +126,10 @@ Kinematics
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ETS2.ETS2.fkine
-   ~roboticstoolbox.ets.ETS2.ETS2.eval
-   ~roboticstoolbox.ets.ETS2.ETS2.jacob0
-   ~roboticstoolbox.ets.ETS2.ETS2.jacobe
+   ~roboticstoolbox.ETS2.fkine
+   ~roboticstoolbox.ETS2.eval
+   ~roboticstoolbox.ETS2.jacob0
+   ~roboticstoolbox.ETS2.jacobe
 
 Other
 ^^^^^
@@ -134,13 +137,12 @@ Other
 .. autosummary::
    :nosignatures:
 
-   ~roboticstoolbox.ets.ETS2.ETS2.plot
-   ~roboticstoolbox.ets.ETS2.ETS2.teach
+   ~roboticstoolbox.ETS2.plot
+   ~roboticstoolbox.ETS2.teach
 
 Details
 ^^^^^^^
 
-.. autoclass:: roboticstoolbox.ets.ETS2.ETS2
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, inv, split, swap, merge, compile, fkine, eval, jacob0, jacobe, plot, teach
-   :show-inheritance:
+.. autoclass:: roboticstoolbox.ETS2
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, plot, teach
    :member-order: bysource
