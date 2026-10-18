@@ -1229,17 +1229,22 @@ class TestIKVerbose(unittest.TestCase):
         self.assertIn("Search 1", out.getvalue())
 
     def test_rejected_by_joint_limits(self):
-        # this solution of the Puma560 has q[2] and q[4] outside their limits for
-        # every equivalent angle, so the search is rejected and another is made
+        # this solution of the Puma560 has q[4] outside its limits for every
+        # equivalent angle (q[2] = 3.106 is -3.177, inside [-225, 45] degrees), so
+        # the search is rejected and another is made.  None of the 22 distinct
+        # solutions of this pose is inside the limits of the Puma560 (each is
+        # outside at least one), so the solver fails after its searches
         q = np.array([0.2528, 0.7041, 3.106, 0.0, 2.473, -0.2528])
         Tep = self.puma.fkine(q)
         with contextlib.redirect_stdout(io.StringIO()) as out:
-            sol = self.puma.ikine_LM(Tep, q0=self.puma.qn, verbose=True, seed=0)
+            sol = self.puma.ikine_LM(
+                Tep, q0=self.puma.qn, verbose=True, seed=0, slimit=3
+            )
         text = out.getvalue()
-        self.assertTrue(sol.success)
+        self.assertFalse(sol.success)
         self.assertIn("rejected", text)
-        self.assertIn("q[2]=", text)
-        self.assertIn("outside [-2.356, 2.356]", text)
+        self.assertIn("q[4]=-3.81 outside [-1.745, 1.745]", text)
+        self.assertNotIn("q[2]=", text)
         self.assertIn("Search 2", text)
 
     def test_trajectory(self):
@@ -1272,12 +1277,12 @@ class TestIKVerboseAllSolvers(unittest.TestCase):
     of iterations allowed is zero.
     """
 
-    # a solution of the Puma560 with q[2] and q[4] outside their limits, for every
-    # equivalent angle
+    # a solution of the Puma560 with q[4] outside its limits, for every equivalent
+    # angle
     Q_BAD = np.array([0.2528, 0.7041, 3.106, 0.0, 2.473, -0.2528])
 
-    # a configuration inside the limits (Puma560.qn is not: its q[2] is pi)
-    Q_OK = np.array([0.2, -0.9, 0.1, 0.3, -0.5, 0.4])
+    # a configuration inside the limits
+    Q_OK = np.array([0.2, 0.9, 0.1, 0.3, -0.5, 0.4])
 
     def setUp(self):
         self.puma = rtb.models.DH.Puma560()
@@ -1326,8 +1331,10 @@ class TestIKVerboseAllSolvers(unittest.TestCase):
             )
             self.assertFalse(sol.success, msg=cls.__name__)
             self.assertIn("rejected", text, msg=cls.__name__)
-            self.assertIn("q[2]=-3.177 outside [-2.356, 2.356]", text, msg=cls.__name__)
+            # only q[4] is outside its limits: q[2] = 3.106 is -3.177 when wrapped,
+            # which is inside [-225, 45] degrees
             self.assertIn("q[4]=-3.81 outside [-1.745, 1.745]", text, msg=cls.__name__)
+            self.assertNotIn("q[2]", text, msg=cls.__name__)
             self.assertNotIn("q[0]", text, msg=cls.__name__)
 
     def test_joint_limits_off_accepts(self):
