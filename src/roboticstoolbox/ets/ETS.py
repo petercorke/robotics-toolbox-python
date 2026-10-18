@@ -34,7 +34,7 @@ from roboticstoolbox.ets.fknm import (
     IK_LM_c,
     IK_NR_c,
 )
-from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution
+from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution, check_mask, check_q0
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
@@ -293,7 +293,7 @@ class ETS(BaseETS[ET]):
 
     def fkine(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE3 | None = None,
         tool: NDArray | SE3 | None = None,
         include_base: bool = True,
@@ -301,7 +301,7 @@ class ETS(BaseETS[ET]):
         """
         Forward kinematics
 
-        :param q: Joint coordinates
+        :param q: Joint coordinates, optional for a sequence with no joints
         :param base: a base transform applied before the ETS
         :param tool: tool transform, optional
         :param include_base: set to True if the base transform should be considered
@@ -355,7 +355,7 @@ class ETS(BaseETS[ET]):
 
     def eval(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE3 | None = None,
         tool: NDArray | SE3 | None = None,
         include_base: bool = True,
@@ -404,6 +404,9 @@ class ETS(BaseETS[ET]):
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
         """
+
+        if q is None:
+            q = []
 
         q = self._resolve_q(q, allow_trajectory=True)
         return ETS_fkine(self._fknm, q, base, tool, include_base, _data=self.data)
@@ -1181,6 +1184,9 @@ class ETS(BaseETS[ET]):
 
         """
 
+        q0 = check_q0(q0, self.n)
+        mask = check_mask(mask)
+
         q, success, iterations, searches, residual = IK_LM_c(
             self._fknm, Tep, q0, ilimit, slimit, tol, joint_limits, mask, k, method
         )
@@ -1277,6 +1283,9 @@ class ETS(BaseETS[ET]):
         .. seealso:: :meth:`ik_LM` :meth:`ik_GN` :meth:`ikine_NR`
 
         """
+
+        q0 = check_q0(q0, self.n)
+        mask = check_mask(mask)
 
         q, success, iterations, searches, residual = IK_NR_c(
             self._fknm,
@@ -1391,6 +1400,9 @@ class ETS(BaseETS[ET]):
         .. seealso:: :meth:`ik_LM` :meth:`ik_NR` :meth:`ikine_GN`
 
         """
+
+        q0 = check_q0(q0, self.n)
+        mask = check_mask(mask)
 
         q, success, iterations, searches, residual = IK_GN_c(
             self._fknm,

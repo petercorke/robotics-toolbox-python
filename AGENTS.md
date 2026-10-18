@@ -43,6 +43,14 @@ Part of the RVC ecosystem. **Read [rvc-ecosystem/AGENTS.md](https://github.com/p
 
 ## If you are an AI assistant preparing a contribution
 
+- **Check for existing work before you write code.** Several agents often work on the same open
+  Issue at once, producing duplicate PRs. Search for a PR for it first:
+  `gh pr list --state open --search "#<issue>"`, and check the Issue's linked pull requests and
+  assignee. If a PR already exists, or the Issue is assigned to someone else, do not open a
+  competing PR: comment on the existing one instead. Then comment on the Issue to claim it before
+  you start.
+- State in the PR description whether the change alters numerical results or public behaviour.
+
 - Read `.github/CONTRIBUTING.md`, in particular "What the checks mean". Codacy is advisory:
   it reports `assert` in tests as high-severity security issues, and you should not rewrite
   tests or code to satisfy it. The required checks are `All tests passed` and the PR title.
