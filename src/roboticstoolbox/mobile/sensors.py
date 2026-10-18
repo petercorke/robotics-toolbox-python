@@ -549,7 +549,7 @@ class RangeBearingSensor(SensorBase):
         :type x: array_like(3), array_like(N,3)
         :param landmark: landmark id or position, defaults to None
         :type landmark: int or array_like(2), optional
-        :return: range and bearing angle to landmark math:`(r,\beta)`
+        :return: range and bearing angle to landmark :math:`(r,\beta)`
         :rtype: ndarray(2) or ndarray(N,2)
 
         Return the range and bearing to a landmark:

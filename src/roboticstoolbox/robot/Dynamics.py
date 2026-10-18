@@ -1121,7 +1121,7 @@ class DynamicsMixin:
         --------
         :func:`coriolis`
         :func:`inertia_x`
-        :func:`hessian0`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.hessian0`
 
         """
 
