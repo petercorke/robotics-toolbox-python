@@ -79,7 +79,7 @@ Limits
 
 - **The method degenerates for some geometries.**  A spherical wrist is the
   example found: the conditioning is fine but the solutions are not valid, and
-  :meth:`General6R.validate` recovers the original configuration for under half of
+  :meth:`General6RIK.validate` recovers the original configuration for under half of
   random poses of a Puma 560.  That is why such arms are not given to this method.
 - **Completeness is not proven.**  Each solution is checked, but nothing checks
   that all of them are found.  A general 6R arm has up to 16 solutions.  On 300
@@ -121,7 +121,7 @@ Limits
   characteristic polynomial drops to degree 4, and some joints become
   double-valued for each root.  That is the reason arms with a spherical wrist
   are given to the closed form method and not to this one.
-- **Code is generated in Python, C and C++**, by :meth:`General6R.generate`, but
+- **Code is generated in Python, C and C++**, by :meth:`General6RIK.generate`, but
   not Rust.  The Python needs NumPy, and uses SciPy if it is installed.  The C and
   C++ need no library, they contain a small linear algebra kernel, see below.  It
   has been tested against NumPy, but it is new code and has had much less use than
@@ -158,7 +158,12 @@ import sympy as sp
 from sympy.printing.c import C99CodePrinter
 from sympy.printing.pycode import PythonCodePrinter
 
+from spatialmath import SE3
+from spatialmath.base import tr2delta
+
 from roboticstoolbox.robot.DHRobot import DHRobot
+from roboticstoolbox.robot.IK import IKSolution, check_q0, normalise_q, within_limits
+from roboticstoolbox.tools.types import ArrayLike
 from roboticstoolbox.robot.symbolic_ik import (
     IKSolutions,
     IKStatus,
@@ -1211,17 +1216,39 @@ def _derive(alpha, a, d, k: int):
 _DERIVED: dict[tuple, tuple] = {}  # in-process cache, a derivation takes seconds
 
 
-class IKSolver(ABC):
-    """
-    The interface of an inverse kinematics solver for a robot
+def _poses(T: SE3 | np.ndarray) -> tuple[np.ndarray, bool]:
+    # poses as an array (N, 4, 4), and whether it was a single pose
+    if isinstance(T, SE3):
+        return np.asarray(T.A, dtype=float).reshape(-1, 4, 4), len(T) == 1
+    A = np.asarray(T, dtype=float)
+    if A.ndim == 2:
+        return A.reshape(1, 4, 4), True
+    if A.ndim == 3 and A.shape[1:] == (4, 4):
+        return A, False
+    raise ValueError("T must be an SE3, a 4x4 array or an array (N, 4, 4)")
+
+
+class AnalyticIK(ABC):
+    r"""
+    The interface of an analytic inverse kinematics solver for a robot
 
     :param robot: the robot, with standard DH links and six joints
 
-    A solver gives all the joint configurations that reach a pose, as
-    :class:`IKSolutions`, and can write the same solution as source code, which
-    has no dependency on the Toolbox.  The two methods are :class:`ClosedForm`,
-    for arms with a spherical wrist or three parallel axes, and
-    :class:`General6R`, for the others, and :func:`make_solver` chooses.
+    Made by :meth:`DHRobot.analytic_ik`, which chooses the method that suits the
+    arm: :class:`ClosedFormIK` for an arm with a spherical wrist or three parallel
+    axes, and :class:`General6RIK` for the others.  The equations are derived
+    symbolically when the solver is made, which takes seconds, and the solver can
+    then be used for any number of poses, or written out as source code that has
+    no dependency on the Toolbox, see :meth:`generate`.
+
+    Two methods solve a problem, and return an :class:`~roboticstoolbox.robot.IK.IKSolution`
+    as the numerical solvers do:
+
+    - :meth:`solve` gives *all* the solutions for one pose, as the rows of ``q``
+    - :meth:`ikine` gives *one* solution for each pose, the nearest to ``q0``, for
+      a pose or a trajectory, as :meth:`DHRobot.ikine_LM` does
+
+    .. versionadded:: 1.6.0
     """
 
     #: name of the method, for messages
@@ -1231,8 +1258,127 @@ class IKSolver(ABC):
         self.robot = robot
         self.revolute = np.array([link.isrevolute for link in robot.links])
 
+    def _dh_pose(self, T: np.ndarray) -> np.ndarray:
+        # the pose of the last DH frame, with the base and tool transforms removed
+        return np.linalg.inv(self.robot.base.A) @ T @ np.linalg.inv(self.robot.tool.A)
+
+    def _alternatives(self, T: np.ndarray, joint_limits: bool) -> tuple[np.ndarray, str]:
+        # all the solutions for one 4x4 pose, with revolute angles shifted by whole
+        # turns into the joint limits, and a reason if there are none
+        sols = self._solve_pose(self._dh_pose(T))
+        q = sols.q
+        if len(q) == 0:
+            reason = {
+                IKStatus.UNREACHABLE: "the pose is outside the workspace",
+                IKStatus.SINGULAR: "the pose is singular and no solution was found",
+            }.get(sols.status, "no solution")
+            return q, reason
+
+        qlim = self.robot.qlim
+        q = np.array([normalise_q(row, qlim, self.revolute) for row in q])
+        if joint_limits:
+            inside = np.array([within_limits(row, qlim) for row in q])
+            if not inside.any():
+                return q[:0], f"all {len(q)} solutions violate the joint limits"
+            q = q[inside]
+        return q, ""
+
+    def solve(self, T: SE3 | np.ndarray, joint_limits: bool = True) -> IKSolution:
+        """
+        All the solutions for one pose
+
+        :param T: end-effector pose, an SE3 or a 4x4 array
+        :param joint_limits: discard solutions that violate the joint limits.
+            Revolute angles are first shifted by whole turns to fit the limits,
+            as the numerical solvers do.
+        :returns: the solutions as the rows of ``q``, shape (m, n), with ``success``
+            true if there is at least one.  Otherwise ``q`` is empty and ``reason``
+            says why.
+        :raises ValueError: if ``T`` is more than one pose, use :meth:`ikine`
+
+        There can be several solutions for a pose, up to 8 for an arm with a
+        spherical wrist and 16 for the general case, and all are returned.
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> ik = puma.analytic_ik()
+            >>> sol = ik.solve(puma.fkine(puma.qn))
+            >>> len(sol)
+        """
+        poses, _ = _poses(T)
+        if len(poses) != 1:
+            raise ValueError("solve takes a single pose, use ikine for a trajectory")
+        q, reason = self._alternatives(poses[0], joint_limits)
+        return IKSolution(q, success=len(q) > 0, reason=reason)
+
+    def ikine(
+        self,
+        T: SE3 | np.ndarray,
+        q0: ArrayLike | None = None,
+        joint_limits: bool = True,
+        weights: ArrayLike | None = None,
+    ) -> IKSolution:
+        """
+        One solution for each pose, the nearest to a configuration
+
+        :param T: end-effector pose, an SE3 or a 4x4 array, or a trajectory of
+            poses, an SE3 with N poses or an array (N, 4, 4)
+        :param q0: configuration to be near, default all zeros.  For a trajectory
+            it is used for the first pose, and each later pose is solved nearest
+            to the solution of the one before, so the path stays on one branch
+            where it can.
+        :param joint_limits: reject solutions that violate the joint limits
+        :param weights: weight for each joint in the distance from ``q0``, default
+            1.  A weight of zero ignores that joint.
+        :returns: ``q`` of shape (n,) for a pose, or (N, n) for a trajectory.  If
+            any pose has no solution ``success`` is false, ``reason`` says why and
+            the rows for those poses are NaN.
+        :raises ValueError: if ``q0`` has the wrong length
+
+        The distance is the weighted norm of the joint differences, with revolute
+        differences wrapped to :math:`(-\\pi, \\pi]`, and the angles returned are
+        the equivalent ones nearest to ``q0``, if they are within the limits.
+        ``iterations`` and ``searches`` are zero, as there is no iteration, and
+        ``residual`` is the largest error of the forward kinematics of the
+        solutions, as the norm of the 6-vector of the error, see
+        :func:`~spatialmath.base.tr2delta`.
+        """
+        poses, single = _poses(T)
+        n = self.robot.n
+        q_prev = np.zeros(n) if q0 is None else check_q0(q0, n)
+        assert q_prev is not None
+        qlim = self.robot.qlim
+
+        Q = np.full((len(poses), n), np.nan)
+        reason = ""
+        residual = 0.0
+        for k, Tk in enumerate(poses):
+            rows, why = self._alternatives(Tk, joint_limits)
+            if len(rows) == 0:
+                if not reason:
+                    reason = why if single else f"pose {k}: {why}"
+                continue
+            best = IKSolutions(rows, IKStatus.OK, self.revolute).nearest(q_prev, weights)
+            assert best is not None
+            # the equivalent angles nearest to the previous configuration, if allowed
+            turns = 2 * np.pi * np.round((q_prev - best) / (2 * np.pi))
+            moved = np.where(self.revolute, best + turns, best)
+            if joint_limits:
+                ok = (moved >= qlim[0]) & (moved <= qlim[1])
+                moved = np.where(ok, moved, best)
+            Q[k] = q_prev = moved
+            error = tr2delta(self.robot.fkine(moved).A, Tk)
+            residual = max(residual, float(np.linalg.norm(error)))
+
+        success = not np.isnan(Q).any()
+        return IKSolution(
+            Q[0] if single else Q, success, residual=residual, reason=reason
+        )
+
     @abstractmethod
-    def solve(self, T: np.ndarray) -> IKSolutions:
+    def _solve_pose(self, T: np.ndarray) -> IKSolutions:
         """
         All the joint configurations that reach a pose
 
@@ -1267,7 +1413,7 @@ class IKSolver(ABC):
             q = np.where(
                 self.revolute, rng.uniform(-np.pi, np.pi, n), rng.uniform(0.2, 0.6, n)
             )
-            sols = self.solve(self.robot.fkine(q).A)
+            sols = self._solve_pose(self._dh_pose(self.robot.fkine(q).A))
             if len(sols):
                 d = sols.q - q
                 d[:, self.revolute] = np.arctan2(
@@ -1277,7 +1423,7 @@ class IKSolver(ABC):
         return hits / trials
 
 
-class General6R(IKSolver):
+class General6RIK(AnalyticIK):
     r"""
     Inverse kinematics of a general 6R arm
 
@@ -1359,7 +1505,7 @@ class General6R(IKSolver):
 
     # --- solving ---
 
-    def solve(self, T: np.ndarray) -> IKSolutions:
+    def _solve_pose(self, T: np.ndarray) -> IKSolutions:
         """
         All the joint configurations that reach a pose
 
@@ -1482,7 +1628,7 @@ class General6R(IKSolver):
         return text.replace("@@FRONT@@", front).replace("@@NAME@@", name)
 
 
-class ClosedForm(IKSolver):
+class ClosedFormIK(AnalyticIK):
     r"""
     Inverse kinematics from the closed form solution of :mod:`symbolic_ik`
 
@@ -1509,7 +1655,7 @@ class ClosedForm(IKSolver):
         exec(self.source, namespace)  # noqa: S102
         self._ikine = namespace["ikine"]
 
-    def solve(self, T: np.ndarray) -> IKSolutions:
+    def _solve_pose(self, T: np.ndarray) -> IKSolutions:
         """All the joint configurations that reach a pose, see :class:`IKSolutions`."""
         result = self._ikine(np.asarray(T, dtype=float))
         return IKSolutions.from_generated(result, self.revolute)
@@ -1532,7 +1678,7 @@ def make_solver(
     trials: int = 100,
     min_success: float = 0.99,
     max_time: float | None = 120.0,
-) -> IKSolver:
+) -> AnalyticIK:
     """
     Choose and build the inverse kinematics method for a robot
 
@@ -1541,8 +1687,8 @@ def make_solver(
     :param min_success: smallest acceptable fraction of those poses for which the
         original configuration is recovered
     :param max_time: give up looking for a closed form solution after this long
-    :returns: a :class:`ClosedForm` solver for an arm with a spherical wrist or
-        three parallel axes, otherwise a :class:`General6R` solver
+    :returns: a :class:`ClosedFormIK` solver for an arm with a spherical wrist or
+        three parallel axes, otherwise a :class:`General6RIK` solver
     :raises NotImplementedError: if the arm needs the general method but has a
         prismatic joint
     :raises ValueError: if the method does not recover enough of the poses
@@ -1551,7 +1697,7 @@ def make_solver(
     method fails for a spherical wrist, so there is no fallback from one to the
     other.  The method is checked on random poses before it is returned.
     """
-    solver: IKSolver
+    solver: AnalyticIK
     if classify(robot).general:
         prismatic = [i + 1 for i, link in enumerate(robot.links) if link.isprismatic]
         if prismatic:
@@ -1561,9 +1707,9 @@ def make_solver(
                 "so it needs the general 6R method, which handles revolute joints "
                 f"only, and the arm has prismatic joint(s) {joints}"
             )
-        solver = General6R(robot)
+        solver = General6RIK(robot)
     else:
-        solver = ClosedForm(robot, max_time)
+        solver = ClosedFormIK(robot, max_time)
     rate = solver.validate(trials)
     if rate < min_success:
         raise ValueError(
@@ -1620,7 +1766,7 @@ def test_choice_of_split():
     """The Jaco has pathological conditioning for two of the splits."""
     import roboticstoolbox as rtb
 
-    solver = General6R(rtb.models.DH.Jaco())
+    solver = General6RIK(rtb.models.DH.Jaco())
     assert solver.k == 1
     assert solver.condition[1] < 1e4 < solver.condition[0]
     assert solver.condition[1] < 1e4 < solver.condition[2]
@@ -1631,13 +1777,13 @@ def test_general_6r():
 
     for name in ("Jaco", "Mico", "UR5"):
         robot = getattr(rtb.models.DH, name)()
-        solver = General6R(robot)
+        solver = General6RIK(robot)
         assert solver.validate(100) >= 0.99, name
 
         # solutions reach the pose
         q0 = np.array([0.3, -0.8, 1.1, 0.4, -0.6, 0.9])
         T = robot.fkine(q0).A
-        sols = solver.solve(T)
+        sols = solver._solve_pose(T)
         assert sols.status is IKStatus.OK and len(sols) >= 2
         for q in sols.q:
             assert np.abs(robot.fkine(q).A - T).max() < 1e-6
@@ -1648,8 +1794,8 @@ def test_unreachable():
     import roboticstoolbox as rtb
     from spatialmath import SE3
 
-    solver = General6R(rtb.models.DH.Jaco())
-    sols = solver.solve((SE3(5, 5, 5) * SE3.RPY([0.3, 0.4, 0.5])).A)
+    solver = General6RIK(rtb.models.DH.Jaco())
+    sols = solver._solve_pose((SE3(5, 5, 5) * SE3.RPY([0.3, 0.4, 0.5])).A)
     assert sols.status is IKStatus.UNREACHABLE and len(sols) == 0
 
 
@@ -1659,7 +1805,7 @@ def test_not_applicable():
 
     robot = rtb.models.DH.Puma560()
     assert not classify(robot).general
-    assert General6R(robot, k=1).validate(30) < 0.5
+    assert General6RIK(robot, k=1).validate(30) < 0.5
 
 
 def test_bad_robot():
@@ -1667,9 +1813,9 @@ def test_bad_robot():
     import roboticstoolbox as rtb
 
     with pytest.raises(ValueError):
-        General6R(rtb.models.DH.Planar2())
+        General6RIK(rtb.models.DH.Planar2())
     with pytest.raises(ValueError):
-        General6R(rtb.models.DH.Stanford())  # a prismatic joint
+        General6RIK(rtb.models.DH.Stanford())  # a prismatic joint
 
 
 def test_make_solver_prismatic():
@@ -1701,7 +1847,7 @@ def test_generated_general_6r():
     rng = np.random.default_rng(5)
     for name in ("Jaco", "Mico"):
         robot = getattr(rtb.models.DH, name)()
-        solver = General6R(robot)
+        solver = General6RIK(robot)
         namespace: dict = {}
         exec(solver.generate("python", "ikine"), namespace)  # noqa: S102
 
@@ -1710,13 +1856,13 @@ def test_generated_general_6r():
             q0 = rng.uniform(-np.pi, np.pi, 6)
             T = robot.fkine(q0).A
             result = namespace["ikine"](T)
-            expected = solver.solve(T)
+            expected = solver._solve_pose(T)
             assert result.status.name == expected.status.name
             assert len(result.solutions) == len(expected)
             for q in result.solutions:
                 assert np.abs(robot.fkine(np.array(q)).A - T).max() < 1e-6
             hits += any(
-                General6R._same(np.array(q), q0) for q in result.solutions
+                General6RIK._same(np.array(q), q0) for q in result.solutions
             )
         assert hits >= 49, name
 
@@ -1730,7 +1876,7 @@ def test_generated_general_6r():
         namespace["scipy"] = None
         hits = sum(
             any(
-                General6R._same(np.array(q), q0)
+                General6RIK._same(np.array(q), q0)
                 for q in namespace["ikine"](robot.fkine(q0).A).solutions
             )
             for q0 in rng.uniform(-np.pi, np.pi, (50, 6))
@@ -1743,7 +1889,7 @@ def test_generate_other_languages():
     import roboticstoolbox as rtb
 
     with pytest.raises(NotImplementedError):
-        General6R(rtb.models.DH.Jaco()).generate("rust")
+        General6RIK(rtb.models.DH.Jaco()).generate("rust")
 
 
 def _run_kernel(cases: str, language: str = "c") -> list[str]:
@@ -1831,7 +1977,7 @@ def test_c_kernel_eigenvalues():
     import roboticstoolbox as rtb
 
     robot = rtb.models.DH.Jaco()
-    solver = General6R(robot)
+    solver = General6RIK(robot)
     module = solver._module(solver.k)
     for q, T in solver._random_poses(30, 3):
         *_, M0, M1, M2 = module["_polynomial"](T)
@@ -1985,10 +2131,10 @@ def test_generated_c_general_6r():
     languages = [lang for lang, cc in (("c", "cc"), ("c++", "c++")) if shutil.which(cc)]
     for name in ("Jaco", "Mico", "UR5"):
         robot = getattr(rtb.models.DH, name)()
-        solver = General6R(robot)
+        solver = General6RIK(robot)
         poses = [T for _, T in solver._random_poses(60, 21)]
         poses.append((SE3(5, 5, 5) * SE3.RPY([0.3, 0.4, 0.5])).A)  # unreachable
-        expected = [solver.solve(T) for T in poses]
+        expected = [solver._solve_pose(T) for T in poses]
 
         for language in languages:
             code = solver.generate(language, "ikine")
@@ -2000,7 +2146,7 @@ def test_generated_c_general_6r():
                 assert len(solutions) == len(want), (name, language)
                 for q in solutions:
                     assert np.abs(robot.fkine(q).A - T).max() < 1e-6
-                    assert any(General6R._same(q, other) for other in want.q), (name, language)
+                    assert any(General6RIK._same(q, other) for other in want.q), (name, language)
 
 
 def test_solver_interface():
@@ -2010,9 +2156,9 @@ def test_solver_interface():
 
     closed = make_solver(rtb.models.DH.Puma560(), trials=20)
     general = make_solver(rtb.models.DH.Jaco(), trials=20)
-    assert isinstance(closed, ClosedForm) and isinstance(general, General6R)
+    assert isinstance(closed, ClosedFormIK) and isinstance(general, General6RIK)
     assert closed.method == "closed form" and general.method == "general 6R"
-    assert all(isinstance(s, IKSolver) for s in (closed, general))
+    assert all(isinstance(s, AnalyticIK) for s in (closed, general))
 
     for language in ("python", "c", "c++", "rust"):
         code = closed.generate(language, "puma_ik")
@@ -2035,10 +2181,10 @@ def test_make_solver():
 
     models = rtb.models.DH
     for name, kind in (
-        ("Puma560", ClosedForm),
-        ("Stanford", ClosedForm),
-        ("UR5", ClosedForm),
-        ("Jaco", General6R),
+        ("Puma560", ClosedFormIK),
+        ("Stanford", ClosedFormIK),
+        ("UR5", ClosedFormIK),
+        ("Jaco", General6RIK),
     ):
         robot = getattr(models, name)()
         solver = make_solver(robot, trials=30)
@@ -2049,7 +2195,7 @@ def test_make_solver():
             [0.3, -0.8, 1.1, 0.4, -0.6, 0.9],
             [0.3, 0.5, 0.4, 0.2, 0.6, 0.5],
         )
-        sols = solver.solve(robot.fkine(q0).A)
+        sols = solver._solve_pose(robot.fkine(q0).A)
         assert sols.status is IKStatus.OK
         np.testing.assert_allclose(sols.nearest(q0), q0, atol=1e-5)
 

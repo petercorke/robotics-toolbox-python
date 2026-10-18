@@ -78,6 +78,9 @@ collision = ["coal; sys_platform != 'win32'", "trimesh"]
 
 qp = ["qpsolvers", "quadprog"]
 
+# analytic inverse kinematics: derive the equations (SymPy), much faster with FLINT
+ik = ["sympy", "python-flint"]
+
 tool = ["ipython", "pygments"]
 
 all = [
