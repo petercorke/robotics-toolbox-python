@@ -177,7 +177,7 @@ to solve many different problems. Line 20 is equivalent to lines 24-25.
 
 Note that for all numerical solvers, the solution is randomly seeded and could converge to any of the
 valid kinematic solutions. In general, IK has no unique solution, and there may be no solution
-if the pose is out of reach.  There are many differnet IK solvers available, and only the QP solver
+if the pose is out of reach.  There are many different IK solvers available, and only the QP solver
 can handle joint limits.  The initial guess for the solution,
 can be set with the ``q0`` argument, and can be used to bias the solution towards a particular kinematic configuration.
 

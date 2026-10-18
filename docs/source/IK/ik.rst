@@ -17,7 +17,7 @@ Within the Toolbox, we have two sets of solvers: solvers written in C++ and solv
 
 A note on the semantics of the above variable:
 
-* **T** represents an SE(3) (a homogeneous tranformation matrix in 3 dimensions, a 4x4 matrix) 
+* **T** represents an SE(3) (a homogeneous transformation matrix in 3 dimensions, a 4x4 matrix) 
 * *e* is short for end-effector referring to the end of the kinematic chain
 * *p* is short for prime or desired
 * Since there is no letter to the left of the **T**, the world or base reference frame is implied
@@ -36,7 +36,7 @@ The ``slimit`` specifies how many searches are allowed before the problem is dee
 
 .. rubric:: q0
 
-``q0`` is the inital joint coordinate vector. If ``q0`` is 1 dimensional (, ``n``), then ``q0`` is only used for the first attempt, after which a new random valid initial joint coordinate vector will be generated. If ``q0`` is 2 dimensional (``slimit``, ``n``), then the next vector within ``q0`` will be used for the next search.
+``q0`` is the initial joint coordinate vector. If ``q0`` is 1 dimensional (, ``n``), then ``q0`` is only used for the first attempt, after which a new random valid initial joint coordinate vector will be generated. If ``q0`` is 2 dimensional (``slimit``, ``n``), then the next vector within ``q0`` will be used for the next search.
 
 .. rubric:: tol
 

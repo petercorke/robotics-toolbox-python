@@ -296,7 +296,7 @@ class Trajectory:
         apply_block(block)
 
     def qplot(self, **kwargs: Any) -> None:
-        """
+        r"""
         Plot multi-axis trajectory
 
         :param \*\*kwargs: optional arguments passed to :func:`~roboticstoolbox.tools.plot.xplot`
@@ -361,7 +361,6 @@ def quintic(
         >>> tg
         >>> len(tg)
         >>> tg.q
-        >>> tg.plot()
 
     .. plot::
 

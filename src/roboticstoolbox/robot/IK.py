@@ -1299,7 +1299,7 @@ class IK_GN(IKSolver):
 
 class IK_QP(IKSolver):
     r"""
-    Quadratic Progamming Numerical Inverse Kinematics Solver
+    Quadratic Programming Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
     using a quadratic programming approach. See `step` method for mathematical
@@ -1514,7 +1514,7 @@ class IK_QP(IKSolver):
         # Slack component of Q
         Q[ets.n :, ets.n :] = self.ks * (1 / np.sum(np.abs(e))) * np.eye(6)
 
-        # The equality contraints
+        # The equality constraints
         Aeq = np.concatenate((J, np.eye(6)), axis=1)
         beq = e.reshape((6,))
 

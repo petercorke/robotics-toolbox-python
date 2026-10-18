@@ -1049,7 +1049,7 @@ class VehicleBase(ABC):
         """
         Stop the simulation (superclass)
 
-        A control function can stop the simulation initated by the ``run``
+        A control function can stop the simulation initiated by the ``run``
         method.
 
         :seealso: :meth:`run`
@@ -1785,7 +1785,7 @@ class VehicleTrailer(VehicleBase):
             >>> vt = VehicleTrailer(Bicycle(), Trailer())  # default bicycle model
             >>> vt.step((1, 0.2))  # one step: v=1, γ=0.2
             >>> vt.x
-            >>> vt.run(5)  # run simulatin for 5 seconds
+            >>> vt.run(5)  # run simulation for 5 seconds
 
         .. note:: Vehicle control input limits are applied.
 

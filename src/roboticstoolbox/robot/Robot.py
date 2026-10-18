@@ -965,7 +965,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             d = np.where(axes_list)[0]
             Mx = Mx[d]
             Mx = Mx[:, d.tolist()]
-            e, _ = np.linalg.eig(Mx)
+            # Mx is symmetric, eigvalsh gives real eigenvalues, eig can return a
+            # complex array for a matrix that is symmetric only to rounding error
+            e = np.linalg.eigvalsh((Mx + Mx.T) / 2)
             return np.min(e) / np.max(e)
 
         # choose the handler function
@@ -1350,7 +1352,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param shape: The shape to compare distance to
         :param inf_dist: The minimum distance within which to consider the shape
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: tuple of (distance, point on robot, point on shape)
 
         ``closest_point(shape, inf_dist)`` returns the minimum euclidean
@@ -1389,7 +1391,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: True if shapes have collided
 
         ``iscollided(shape)`` checks if this robot and shape have collided
@@ -1419,7 +1421,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: True if shapes have collided
 
         ``collided(shape)`` checks if this robot and shape have collided
@@ -1452,7 +1454,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param gain: The gain for the velocity damper
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into joint limits. Requires
         the joint limits of the robot to be specified. See examples/mmc.py
         for use case.
@@ -1502,7 +1504,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param collision_list: A list of shapes to consider for collision
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into a collision. Requires
         See examples/neo.py for use case.
 
@@ -1613,7 +1615,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param collision_list: A list of shapes to consider for collision
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into a line of sight.
         See examples/fetch_vision.py for use case.
 

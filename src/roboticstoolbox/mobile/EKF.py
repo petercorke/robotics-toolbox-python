@@ -1033,7 +1033,7 @@ class EKF:
     def _isseenbefore(self, lm_id: int) -> bool:
 
         # _landmarks[0, id] is the order in which seen
-        # _landmarks[1, id] is the occurence count
+        # _landmarks[1, id] is the occurrence count
 
         return lm_id in self._landmarks
 

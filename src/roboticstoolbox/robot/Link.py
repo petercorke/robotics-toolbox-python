@@ -1363,7 +1363,7 @@ class BaseLink(SceneNode, ABC):
 
         .. rubric:: Notes
 
-        - For simulation it can be useful to remove Couloumb friction
+        - For simulation it can be useful to remove Coulomb friction
             which can cause problems for numerical integration.
 
         """

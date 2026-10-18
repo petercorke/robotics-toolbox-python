@@ -968,7 +968,7 @@ class ETS(BaseETS[ET]):
         # the are the pd indices used in the cross products
         pdi = [[0, 0]]
 
-        # The length of dT correspods to the number of derivatives we have calculated
+        # The length of dT corresponds to the number of derivatives we have calculated
         while len(dT) != n:
             # Add to the start of the tensor size list
             size.insert(0, self.n)
@@ -983,7 +983,7 @@ class ETS(BaseETS[ET]):
             # Although, our partial derivatives have the order:
             # pd[..., o, n, m, l, k, cartesian DoF, j]
             # For example, consider the Hessian Tensor H[n, 6, n],
-            # the index H[k, :, j]. This corrsponds
+            # the index H[k, :, j]. This corresponds
             # to the second partial derivative of the kinematics of joint j with
             # respect to joint k.
             indices = add_indices(indices, c)

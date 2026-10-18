@@ -350,7 +350,7 @@ class RangeBearingSensor(SensorBase):
         - reseed the random number generator
         - reset the counter for handling the ``every`` and ``fail`` options
         - reset the landmark log
-        - initalize plots
+        - initialize plots
 
         :seealso: :meth:`SensorBase.init`
         """
