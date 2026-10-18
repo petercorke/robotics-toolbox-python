@@ -1216,7 +1216,7 @@ class TestIKVerbose(unittest.TestCase):
             self.assertTrue(sol.success, msg=method)
             text = out.getvalue()
             self.assertIn("Search 1", text, msg=method)
-            self.assertIn("Iteration 0", text, msg=method)
+            self.assertRegex(text, r"Iteration +0 ", msg=method)
             self.assertIn("Converged", text, msg=method)
             self.assertIn("accepted", text, msg=method)
 
