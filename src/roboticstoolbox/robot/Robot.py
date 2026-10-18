@@ -965,8 +965,13 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             d = np.where(axes_list)[0]
             Mx = Mx[d]
             Mx = Mx[:, d.tolist()]
-            # Mx is symmetric, eigvalsh gives real eigenvalues, eig can return a
-            # complex array for a matrix that is symmetric only to rounding error
+            # Mx = J^+T M J^+ is symmetric (and positive semi-definite) in theory,
+            # but floating point rounding leaves it symmetric to only ~1e-16.
+            # np.linalg.eig makes no use of the symmetry, and for a matrix that is
+            # not exactly symmetric it can return a complex array (tiny imaginary
+            # parts) which then raises a ComplexWarning when the ratio is stored
+            # as a float.  Symmetrising and using eigvalsh guarantees real
+            # eigenvalues, and is also faster and more accurate for this case.
             e = np.linalg.eigvalsh((Mx + Mx.T) / 2)
             return np.min(e) / np.max(e)
 

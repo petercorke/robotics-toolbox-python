@@ -79,7 +79,7 @@ C++ Solvers
 
 These solvers are written in high performance C++ and wrapped in Python methods. The methods are made available within the :py:class:`~roboticstoolbox.ets.ETS.ETS` and :py:class:`~roboticstoolbox.robot.Robot.Robot` classes. Being written in C++, these solvers are extraordinarily fast and typically take 30 to 90 µs. However, these solvers are hard to extend or modify.
 
-These methods have been written purely for speed so they do not contain the niceties of the Python alternative. For example, they do not check the length of the ``q0`` vector: a vector of the wrong length is not reported as an error, and the result is not meaningful. Therefore, when using these methods it is very important that you understand each of the parameters and that the parameters passed are of the correct type and length.
+These methods have been written purely for speed so they do not contain the niceties of the Python alternative, such as a failure ``reason`` or trajectory handling. The lengths of ``q0`` (``n``) and of ``mask`` (6) are checked, and a wrong length raises ``ValueError``, but the other arguments are passed to the C++ code as they are, so it is important that you understand each of the parameters and that they are of the correct type.
 
 The C++ solvers return an :py:class:`~roboticstoolbox.robot.IK.IKSolution` with the following members (``reason`` is always empty, these solvers do not produce a failure reason string):
 
