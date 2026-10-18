@@ -558,22 +558,6 @@ class TestETS2(unittest.TestCase):
         r = t_x + t_y + rz + a
         r.teach(q=q2, block=False)
 
-    def test_fkine_no_argument(self):
-        # a sequence with no joints needs no q
-        e = ET2.R(0.3) * ET2.tx(0.75)
-        nt.assert_array_almost_equal(e.fkine().A, e.fkine([]).A)
-        nt.assert_array_almost_equal(e.eval(), e.eval([]))
-
-    def test_fkine_missing_or_short_q(self):
-        # a sequence with joints gives a ValueError that names the lengths,
-        # not a low-level index error
-        e = ET2.R() * ET2.tx(1) * ET2.R()
-        for call in (e.fkine, e.eval):
-            with self.assertRaisesRegex(ValueError, "q has length 0, expected 2"):
-                call()
-            with self.assertRaisesRegex(ValueError, "q has length 1, expected 2"):
-                call([0.1])
-
     def test_swap_and_merge(self):
         e = ET2.tx(1) * ET2.ty(2)
         before = e.fkine([]).A
@@ -592,6 +576,22 @@ class TestETS2(unittest.TestCase):
         nt.assert_array_equal(ET2.R().s, [0, 0, 1])
         nt.assert_array_equal(ET2.tx().s, [1, 0, 0])
         nt.assert_array_equal(ET2.ty().s, [0, 1, 0])
+
+    def test_fkine_no_argument(self):
+        # a sequence with no joints needs no q
+        e = ET2.R(0.3) * ET2.tx(0.75)
+        nt.assert_array_almost_equal(e.fkine().A, e.fkine([]).A)
+        nt.assert_array_almost_equal(e.eval(), e.eval([]))
+
+    def test_fkine_missing_or_short_q(self):
+        # a sequence with joints gives a ValueError that names the lengths,
+        # not a low-level index error
+        e = ET2.R() * ET2.tx(1) * ET2.R()
+        for call in (e.fkine, e.eval):
+            with self.assertRaisesRegex(ValueError, "q has length 0, expected 2"):
+                call()
+            with self.assertRaisesRegex(ValueError, "q has length 1, expected 2"):
+                call([0.1])
 
 
 if __name__ == "__main__":
