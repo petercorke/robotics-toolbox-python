@@ -138,7 +138,7 @@ class Puma560(DHRobot):
                 G=-53.7063,
                 B=1.38e-3,
                 Tc=[0.132, -0.105],
-                qlim=[-135 * deg, 135 * deg],  # qlim=[-225*deg, 45*deg]
+                qlim=[-225 * deg, 45 * deg],
             ),
             RevoluteDH(
                 d=0.4318,
