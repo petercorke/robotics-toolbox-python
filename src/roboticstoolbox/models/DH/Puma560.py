@@ -125,7 +125,7 @@ class Puma560(DHRobot):
                 G=107.815,
                 B=0.817e-3,
                 Tc=[0.126, -0.071],
-                qlim=[-110 * deg, 110 * deg],  # qlim=[-45*deg, 225*deg]
+                qlim=[-45 * deg, 225 * deg],
             ),
             RevoluteDH(
                 d=0.15005,
@@ -138,7 +138,7 @@ class Puma560(DHRobot):
                 G=-53.7063,
                 B=1.38e-3,
                 Tc=[0.132, -0.105],
-                qlim=[-135 * deg, 135 * deg],  # qlim=[-225*deg, 45*deg]
+                qlim=[-225 * deg, 45 * deg],
             ),
             RevoluteDH(
                 d=0.4318,
@@ -151,7 +151,7 @@ class Puma560(DHRobot):
                 G=76.0364,
                 B=71.2e-6,
                 Tc=[11.2e-3, -16.9e-3],
-                qlim=[-266 * deg, 266 * deg],  # qlim=[-110*deg, 170*deg]
+                qlim=[-110 * deg, 170 * deg],
             ),
             RevoluteDH(
                 d=0,
@@ -194,7 +194,7 @@ class Puma560(DHRobot):
         self.qz = np.zeros(6)
 
         # nominal table top picking pose
-        self.qn = np.array([0, pi / 4, pi, 0, pi / 4, 0])
+        self.qn = np.array([0, pi / 4, -pi, 0, pi / 4, 0])
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
