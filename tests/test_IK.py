@@ -1139,5 +1139,46 @@ class TestIK(unittest.TestCase):
             ets.ik_LM(np.eye(4))
 
 
+class TestIKInitialCoordinates(unittest.TestCase):
+    """The length of q0 is checked, by the C++ and by the Python solvers."""
+
+    def setUp(self):
+        self.robot = rtb.models.Panda()
+        self.ets = self.robot.ets()
+        self.Tep = self.ets.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+    def test_cpp_wrong_length(self):
+        for method in (self.ets.ik_LM, self.ets.ik_NR, self.ets.ik_GN):
+            for q0 in (np.zeros(3), np.zeros(10)):
+                with self.assertRaisesRegex(ValueError, "q0 has length"):
+                    method(self.Tep, q0=q0)
+            with self.assertRaisesRegex(ValueError, "q0 must be a vector"):
+                method(self.Tep, q0=np.zeros((2, 7)))
+
+    def test_cpp_robot_wrapper(self):
+        with self.assertRaisesRegex(ValueError, "q0 has length 3"):
+            self.robot.ik_LM(self.Tep, q0=np.zeros(3))
+
+    def test_python_wrong_length(self):
+        for method in (self.ets.ikine_LM, self.ets.ikine_NR, self.ets.ikine_GN):
+            with self.assertRaisesRegex(ValueError, "q0 has length 3"):
+                method(self.Tep, q0=np.zeros(3))
+            with self.assertRaisesRegex(ValueError, "q0 has 3 columns"):
+                method(self.Tep, q0=np.zeros((2, 3)))
+        with self.assertRaisesRegex(ValueError, "rows, but slimit is"):
+            self.ets.ikine_LM(self.Tep, q0=np.zeros((5, 7)), slimit=2)
+
+    def test_right_length_still_works(self):
+        q = np.array([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        for sol in (
+            self.ets.ik_LM(self.Tep, q0=q),
+            self.ets.ikine_LM(self.Tep, q0=q),
+            self.ets.ikine_LM(self.Tep, q0=np.array([q, q])),
+            self.ets.ikine_LM(self.Tep),
+            self.ets.ik_LM(self.Tep),
+        ):
+            self.assertTrue(sol.success)
+
+
 if __name__ == "__main__":
     unittest.main()
