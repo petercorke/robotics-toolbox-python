@@ -4,27 +4,109 @@
 Inverse Kinematics
 ==================
 
+Inverse kinematics (IK) finds the joint coordinates :math:`\vec{q}` that put the end-effector at a desired pose :math:`\mat{T}`.  It is the reverse of forward kinematics, and is harder: there may be no solution, one, several or infinitely many, and which one you get can matter.
 
-The Robotics Toolbox supports an extensive set of numerical inverse kinematics (IK) tools and we will demonstrate the different ways these IK tools can be interacted with in this document.
+Every IK method in the Toolbox takes the same input and returns the same result.
+
+.. rubric:: The desired pose, ``Tep``
+
+``Tep`` is the desired end-effector pose in the robot's base frame, an :py:class:`~spatialmath.pose3d.SE3` (a homogeneous transformation, a 4x4 matrix).  The name follows the Toolbox convention: **T** is an SE(3) pose, *e* is the end-effector, *p* is "prime", the desired value, and with no frame to the left of the **T** the world or base frame is implied.  Most methods also accept a **trajectory** of poses, an ``SE3`` object containing N poses or an array with shape (N, 4, 4).
+
+.. rubric:: The result, ``IKSolution``
+
+The result is an :py:class:`~roboticstoolbox.robot.IK.IKSolution`.
+
+==============   =====================================================================================================
+Member           Meaning
+==============   =====================================================================================================
+``q``            the joint coordinates, shape (n,) for a pose or (N, n) for a trajectory; not valid if there was no solution
+``success``      true if a valid solution was found
+``iterations``   how many iterations were performed, zero for an analytic solution
+``searches``     how many searches were performed, zero for an analytic solution
+``residual``     the final error of the solution
+``reason``       why it failed, if it did
+==============   =====================================================================================================
+
+An ``IKSolution`` is a sequence of the rows of ``q``, so ``len(sol)`` is the number of poses and ``for q in sol`` visits them, and ``bool(sol)`` is ``success``.
+
+The Toolbox has three ways to find a solution, shown in the figure.  **Numerical** solvers start from a guess for :math:`\vec{q}` and iterate until the pose is reached.  They work for any robot, and are written in Python, or in C++ for speed.  **Analytic** solvers derive the equations of the inverse kinematics once, symbolically, and then solve them directly for any pose, with no guess and no iteration, giving all the solutions.  They work for six-axis arms, and can write the solution out as source code with no dependency on the Toolbox.
+
+.. graphviz:: ik_overview.dot
+    :alt: The ways to solve inverse kinematics in the Toolbox: analytic, numerical in Python, and numerical in C++.
+    :caption: The three mechanisms.  The numerical methods ``ikine_XX`` and ``ik_XX`` are methods of the :py:class:`~roboticstoolbox.ets.ETS.ETS` class, and a robot has methods of the same names that call its ETS.  The analytic methods belong to :py:class:`~roboticstoolbox.robot.DHRobot.DHRobot`.
 
 For a **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
-Within the Toolbox, we have two sets of solvers: solvers written in C++ and solvers written in Python. However, within all of our solvers there are several common arguments:
+.. list-table:: Which one to use
+    :header-rows: 1
+    :widths: 24 25 25 26
 
-.. rubric:: Tep
+    * -
+      - Analytic
+      - Numerical, Python
+      - Numerical, C++
+    * - Robots
+      - six-joint arms with standard DH parameters
+      - any, from an :py:class:`~roboticstoolbox.ets.ETS.ETS`
+      - any, from an :py:class:`~roboticstoolbox.ets.ETS.ETS`
+    * - Solutions
+      - all of them, or the one nearest ``q0``
+      - one, which depends on ``q0``
+      - one, which depends on ``q0``
+    * - Initial guess
+      - not needed
+      - needed
+      - needed
+    * - Trajectory
+      - yes
+      - yes
+      - one pose only
+    * - Time for one pose
+      - about 0.2 ms, or microseconds as generated C
+      - about 1 ms
+      - 30 to 90 µs
+    * - Methods
+      - ``ikine_analytic``, ``analytic_ik`` of a DH robot
+      - ``ikine_XX`` of an ``ETS`` and of a robot
+      - ``ik_XX`` of an ``ETS`` and of a robot
+    * - Extra to install
+      - ``ik``, see :ref:`analytic-ik`
+      - none
+      - none
 
-``Tep`` represent the desired end-effector pose. 
+The times are indicative, for a laptop and a six-axis arm.  Where an analytic solution exists it is the right choice: it is exact, finds every configuration, and can be generated as code for a controller.  Otherwise use a numerical solver, and the C++ one if you only need a single pose quickly.
 
-A note on the semantics of the above variable:
+.. toctree::
+    :maxdepth: 1
 
-* **T** represents an SE(3) (a homogeneous transformation matrix in 3 dimensions, a 4x4 matrix) 
-* *e* is short for end-effector referring to the end of the kinematic chain
-* *p* is short for prime or desired
-* Since there is no letter to the left of the **T**, the world or base reference frame is implied
+    analytic
 
-Therefore, ``Tep`` refers to the desired end-effector pose in the base robot frame represented as an SE(3).
 
-The Python solvers (the methods starting with ``ikine_``) also accept a **trajectory** of poses: an :py:class:`~spatialmath.pose3d.SE3` object containing N poses, or an array with shape (N, 4, 4).  The C++ solvers (the methods starting with ``ik_``) accept a single pose only.
+Numerical solvers
+-----------------
+
+The numerical solvers are methods of the :py:class:`~roboticstoolbox.ets.ETS.ETS` class, and a :py:class:`~roboticstoolbox.robot.Robot.Robot` has methods of the same names that call the ``ETS`` of the robot.  The ``ikine_XX`` methods are written in Python and the ``ik_XX`` methods in C++, where ``XX`` is the algorithm, for example ``LM``.  Besides ``Tep`` they share these arguments, and each solver adds some of its own, so check its documentation for the complete list.
+
+.. list-table:: Arguments common to the numerical solvers
+    :header-rows: 1
+    :widths: 18 82
+
+    * - Argument
+      - Meaning
+    * - ``q0``
+      - initial joint coordinates, a vector (``n``) for the first search or a matrix (``slimit``, ``n``) with one row for each search
+    * - ``ilimit``
+      - the number of iterations allowed in one search
+    * - ``slimit``
+      - the number of searches allowed before the problem is deemed unsolvable
+    * - ``tol``
+      - the error tolerance for a solution to count as successful
+    * - ``mask``
+      - six weights, for translation and rotation about X, Y and Z, of how much each Cartesian degree of freedom matters; 0 ignores it
+    * - ``joint_limits``
+      - if true, reject solutions that violate the joint limits
+
+The sections below describe each argument in detail.
 
 .. rubric:: ilimit
 
@@ -73,6 +155,7 @@ this rejection; it does not change a prismatic distance into an angle.
 .. rubric:: Others
 
 There are other arguments which may be unique to the solver, so check the documentation of the solver you wish to use for a complete list and explanation of arguments.
+
 
 C++ Solvers
 -----------

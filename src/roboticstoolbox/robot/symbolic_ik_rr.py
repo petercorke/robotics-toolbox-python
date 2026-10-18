@@ -1,7 +1,7 @@
 r"""
 Prototype: inverse kinematics of the general 6R manipulator
 
-This handles the arms that :mod:`symbolic_ik` cannot, those with neither a
+This handles the arms that ``symbolic_ik`` cannot, those with neither a
 spherical wrist nor three parallel axes, such as the Kinova Jaco and Mico.  It is
 the method of Raghavan and Roth,
 
@@ -68,8 +68,8 @@ its Eq. 4 (the section "Alternative Equations": joints 2, 3 and 6 have nothing
 special about them), here ``_SPLITS``.  Every solution is checked against the
 forward kinematics.
 
-:func:`classify` finds the structure of an arm, and :func:`make_solver` uses it to
-choose between this method and the closed form solutions of :mod:`symbolic_ik`.
+``classify`` finds the structure of an arm, and ``make_solver`` uses it to
+choose between this method and the closed form solutions of ``symbolic_ik``.
 Each is only good for its own kind of arm, so there is no fallback from one to the
 other: a spherical wrist or three parallel axes goes to the closed form, anything
 else to this method, and the choice is then checked on random poses.
@@ -219,7 +219,7 @@ def classify(robot: DHRobot, tol: float = 1e-8) -> Structure:
     - the axes are parallel if :math:`\alpha_i` and :math:`\alpha_{i+1}` are 0 or
       :math:`\pi`.
 
-    The wrist test of :meth:`DHRobot.isspherical` is the first with
+    The wrist test of :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.isspherical` is the first with
     :math:`i = n-2`, but uses exact comparison of floating point numbers.
     """
     links = robot.links
@@ -1234,19 +1234,19 @@ class AnalyticIK(ABC):
 
     :param robot: the robot, with standard DH links and six joints
 
-    Made by :meth:`DHRobot.analytic_ik`, which chooses the method that suits the
+    Made by :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.analytic_ik`, which chooses the method that suits the
     arm: :class:`ClosedFormIK` for an arm with a spherical wrist or three parallel
     axes, and :class:`General6RIK` for the others.  The equations are derived
     symbolically when the solver is made, which takes seconds, and the solver can
     then be used for any number of poses, or written out as source code that has
-    no dependency on the Toolbox, see :meth:`generate`.
+    no dependency on the Toolbox, see :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.generate`.
 
     Two methods solve a problem, and return an :class:`~roboticstoolbox.robot.IK.IKSolution`
     as the numerical solvers do:
 
     - :meth:`solve` gives *all* the solutions for one pose, as the rows of ``q``
     - :meth:`ikine` gives *one* solution for each pose, the nearest to ``q0``, for
-      a pose or a trajectory, as :meth:`DHRobot.ikine_LM` does
+      a pose or a trajectory, as :meth:`~roboticstoolbox.robot.Robot.Robot.ikine_LM` does
 
     .. versionadded:: 1.6.0
     """
@@ -1451,14 +1451,15 @@ class General6RIK(AnalyticIK):
 
     The first time a robot is used the equations are derived symbolically, which
     takes a few seconds per split.  The solver is Python code, which is generated
-    and then run, see :meth:`generate`.
+    and then run, see :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.generate`.
 
-    ``solve(T)`` returns all the solutions for a pose as :class:`IKSolutions`.
+    ``solve(T)`` returns all the solutions for a pose, and ``ikine(T, q0)`` one for each pose,
+    as an :class:`~roboticstoolbox.robot.IK.IKSolution`.
 
     .. note::
 
         The method degenerates for some geometries, for example a spherical
-        wrist.  Check with :meth:`validate`, or use :func:`classify`.
+        wrist.  Check with ``validate``, or use ``classify``.
     """
 
     method = "general 6R"
@@ -1646,7 +1647,7 @@ class General6RIK(AnalyticIK):
 
 class ClosedFormIK(AnalyticIK):
     r"""
-    Inverse kinematics from the closed form solution of :mod:`symbolic_ik`
+    Inverse kinematics from the closed form solution of ``symbolic_ik``
 
     :param robot: robot with standard DH links and six joints
     :param max_time: give up looking for the symbolic solution after this many
@@ -1656,7 +1657,7 @@ class ClosedFormIK(AnalyticIK):
 
     The symbolic solution is found once, when the solver is made.  The solution
     is then generated as Python code, which is run to solve, and the same plan
-    can be written in other languages by :meth:`generate`.
+    can be written in other languages by :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.generate`.
     """
 
     method = "closed form"

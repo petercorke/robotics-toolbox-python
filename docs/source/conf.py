@@ -43,6 +43,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.inheritance_diagram",
+    "sphinx.ext.graphviz",
     "sphinx.ext.autosummary",
     "blockname",
     "sphinx.ext.intersphinx",
@@ -59,6 +60,9 @@ extensions = [
 ]
 
 bibtex_bibfiles = ["refs.bib"]
+
+# diagrams written in the dot language, eg. IK/ik_overview.dot
+graphviz_output_format = "svg"
 
 autosummary_generate = True
 autodoc_member_order = "bysource"
