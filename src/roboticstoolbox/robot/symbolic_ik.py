@@ -2084,6 +2084,15 @@ pub fn {self.name}(t: &[f64; 16], tol: f64) -> IkResult {{
         self.depth = 0
         self.put("}")
 
+    def expr(self, e: sp.Expr) -> str:
+        """Source for an expression, in which every number is a float."""
+        text = super().expr(e)
+        # Rust does not multiply an integer by a float, so ``2*x`` is ``2.0*x``.
+        # The exponent of ``powi`` is an integer, and so is any in a number like 1e-9.
+        text = re.sub(r"\.powi\((-?\d+)\)", r".powi(@\1)", text)
+        text = re.sub(r"(?<![\w.@])(?<!e-)(?<!e\+)(\d+)(?![\w.])", r"\1.0", text)
+        return text.replace(".powi(@", ".powi(")
+
     def decl(self, name: str, value: str) -> None:
         self.put(f"let {name} = {value};")
 
@@ -2188,8 +2197,7 @@ def generate_code(
     configuration is also checked against the forward kinematics, and only those
     that reach the pose to within ``tol`` are returned.
 
-    The Python, C and C++ code is tested.  The Rust code is generated but has
-    not yet been compiled.
+    The Python, C, C++ and Rust code is tested, the last three if there is a compiler.
     """
     return _emit(_make_plan(robot, verify, polynomial, max_time), language, name)
 
@@ -2579,6 +2587,25 @@ int main(int argc, char **argv) {
                 % name
             )
             compile_cmd = ["c++", "-std=c++17", "-O1", "-Wall", "-o", "ik", "main.cpp"]
+        elif language == "rust":
+            (tmp / "ik_mod.rs").write_text(code)
+            (tmp / "main.rs").write_text(
+                """mod ik_mod;
+fn main() {
+    let a: Vec<f64> = std::env::args().skip(1).map(|s| s.parse().unwrap()).collect();
+    let mut t = [0.0f64; 16];
+    t.copy_from_slice(&a);
+    let r = ik_mod::%s(&t, 1e-6);
+    println!("{}", r.status as i32);
+    for q in &r.solutions {
+        let v: Vec<String> = q.iter().map(|x| format!("{:.17e}", x)).collect();
+        println!("{}", v.join(" "));
+    }
+}
+"""
+                % name
+            )
+            compile_cmd = ["rustc", "-O", "-o", "ik", "main.rs"]
         else:
             raise ValueError(language)
 
@@ -2604,7 +2631,11 @@ def test_generated_code():
 
     rng = np.random.default_rng(0)
     languages = ["python"]
-    languages += [lang for lang, cc in (("c", "cc"), ("c++", "c++")) if shutil.which(cc)]
+    languages += [
+        lang
+        for lang, cc in (("c", "cc"), ("c++", "c++"), ("rust", "rustc"))
+        if shutil.which(cc)
+    ]
 
     for name in ("Puma560", "Stanford", "UR5"):
         robot = getattr(rtb.models.DH, name)()
@@ -2887,7 +2918,8 @@ def test_header():
 
 
 def test_generated_rust_smoke():
-    """The Rust code is not compiled, so only check its overall form."""
+    """Check the overall form of the Rust code, which :func:`test_generated_code`
+    also compiles and runs if there is a Rust compiler."""
     import roboticstoolbox as rtb
 
     code = generate_code(rtb.models.DH.Puma560(), "rust", "ikine")

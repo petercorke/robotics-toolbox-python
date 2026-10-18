@@ -173,6 +173,24 @@ class TestAnalyticIK(unittest.TestCase):
                 self.assertIn("my_ik", text)
                 self.assertIn("Peter Corke", text)  # the provenance header
 
+    def test_generated_c_is_for_embedded_use(self):
+        # no dynamic memory, input or output, or jumps, and only these libraries
+        import re
+
+        banned = (
+            "malloc", "calloc", "realloc", "free", "alloca",
+            "printf", "scanf", "puts", "fopen",
+            "goto", "setjmp", "longjmp", "abort", "exit",
+        )  # fmt: skip
+        for robot in (self.puma, self.stanford, self.jaco):
+            source = robot.analytic_ik().generate("c", "my_ik")
+            code = re.sub(r"/\*.*?\*/", "", source, flags=re.S)  # not the comments
+            code = re.sub(r"//.*", "", code)
+            for word in banned:
+                self.assertIsNone(re.search(rf"\b{word}\b", code), (robot.name, word))
+            libraries = set(re.findall(r"#include\s*<([^>]+)>", code))
+            self.assertLessEqual(libraries, {"math.h", "string.h"}, robot.name)
+
     def test_generated_python_agrees(self):
         T = self.puma.fkine(self.q)
         namespace: dict = {}

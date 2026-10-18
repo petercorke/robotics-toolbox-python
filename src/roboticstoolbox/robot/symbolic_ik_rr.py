@@ -1680,8 +1680,7 @@ class ClosedFormIK(AnalyticIK):
         """
         Source code for the closed form solution
 
-        :param language: ``"python"``, ``"c"``, ``"c++"`` or ``"rust"``.  The
-            Rust is not tested.
+        :param language: ``"python"``, ``"c"``, ``"c++"`` or ``"rust"``
         :param name: name of the generated function
         :returns: source code, which needs no library
         :raises ValueError: for any other language
