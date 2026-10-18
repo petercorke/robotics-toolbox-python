@@ -34,7 +34,7 @@ from roboticstoolbox.ets.fknm import (
     IK_LM_c,
     IK_NR_c,
 )
-from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution
+from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP, IKSolution, check_q0
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
@@ -1188,6 +1188,8 @@ class ETS(BaseETS[ET]):
 
         """
 
+        q0 = check_q0(q0, self.n)
+
         q, success, iterations, searches, residual = IK_LM_c(
             self._fknm, Tep, q0, ilimit, slimit, tol, joint_limits, mask, k, method
         )
@@ -1284,6 +1286,8 @@ class ETS(BaseETS[ET]):
         .. seealso:: :meth:`ik_LM` :meth:`ik_GN` :meth:`ikine_NR`
 
         """
+
+        q0 = check_q0(q0, self.n)
 
         q, success, iterations, searches, residual = IK_NR_c(
             self._fknm,
@@ -1398,6 +1402,8 @@ class ETS(BaseETS[ET]):
         .. seealso:: :meth:`ik_LM` :meth:`ik_NR` :meth:`ikine_GN`
 
         """
+
+        q0 = check_q0(q0, self.n)
 
         q, success, iterations, searches, residual = IK_GN_c(
             self._fknm,
