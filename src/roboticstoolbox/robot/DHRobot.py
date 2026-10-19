@@ -303,7 +303,7 @@ class DHRobot(Robot):
 
         unicode = rtb_get_param("unicode")
         border = "thin" if unicode else "ascii"
-        s = f"DHRobot: {self.name}"
+        s = f"{self._class_label()}: {self.name}"
 
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"

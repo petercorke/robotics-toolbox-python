@@ -73,6 +73,10 @@ def _is_symbolic(value: Any) -> bool:
     return np.asarray(value).dtype == object
 
 
+# the modules of the robot classes themselves, as distinct from models built from them
+_FRAMEWORK_MODULES = ("roboticstoolbox.robot.", "roboticstoolbox.models.URDF.URDFRobot")
+
+
 class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[LinkType]):
     # set when the links are processed in the constructor
     _base_link: LinkType
@@ -531,9 +535,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 f"{s}",
             )
 
-        classname = "ERobot"
-
-        s = f"{classname}: {self.name}"
+        s = f"{self._class_label()}: {self.name}"
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
@@ -558,6 +560,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def __repr__(self) -> str:
         return str(self)
+
+    def _class_label(self) -> str:
+        """
+        The class of this robot, for the first line of its display
+
+        ``Robot``, ``Robot2``, ``DHRobot`` or ``URDFRobot`` for an instance of the class
+        itself, and ``X.Y`` for an instance of a subclass ``Y`` of one of them, for
+        example ``DHRobot.Puma560`` or ``URDFRobot.Panda``: the kind of robot, then the
+        model.
+        """
+        cls = type(self)
+        if cls.__module__.startswith(_FRAMEWORK_MODULES):
+            return cls.__name__
+        return f"{cls.__mro__[1].__name__}.{cls.__name__}"
 
     # --------------------------------------------------------------------- #
     # --------- Properties ------------------------------------------------ #
