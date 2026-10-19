@@ -12,6 +12,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 NOTEBOOKS_DIR = Path(__file__).resolve().parent.parent / "docs" / "notebooks"
 
 
@@ -265,3 +267,43 @@ def test_markdown_cells_get_ids_too(tmp_path):
     assert sync_bootstrap.process_notebook(nb_path, template="", fix=True)
 
     assert "id" in json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]
+
+
+def test_editor_metadata_is_normalised(tmp_path):
+    nb_path = tmp_path / "demo.ipynb"
+    nb = {
+        "cells": [_code_cell("x = 1\n")],
+        "metadata": {
+            "kernelspec": {"display_name": "dev", "language": "python", "name": "python3"},
+            "language_info": {"name": "python", "version": "3.12.14"},
+            "vscode": {"interpreter": {"hash": "abc"}},
+            "varInspector": {"window_display": False},
+            "rtb_bootstrap": {"extras": ["ik"]},
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    nb_path.write_text(json.dumps(nb), encoding="utf-8")
+
+    assert clear_outputs.process_notebook(nb_path, fix=False)  # reported, not written
+    assert clear_outputs.process_notebook(nb_path, fix=True)
+
+    out = json.loads(nb_path.read_text(encoding="utf-8"))
+    assert out["metadata"] == {
+        "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+        "language_info": {"name": "python"},
+        "rtb_bootstrap": {"extras": ["ik"]},  # ours, kept
+    }
+    assert not clear_outputs.process_notebook(nb_path, fix=True)
+
+
+def test_notebooks_are_written_as_nbformat_writes_them(tmp_path):
+    # so that opening and saving a notebook in VS Code or Jupyter changes nothing
+    nbformat = pytest.importorskip("nbformat")
+
+    nb_path = tmp_path / "demo.ipynb"
+    _write_notebook(nb_path, [_code_cell("x = 1\n")])
+    clear_outputs.process_notebook(nb_path, fix=True)
+
+    text = nb_path.read_text(encoding="utf-8")
+    assert text == nbformat.writes(nbformat.reads(text, as_version=4)) + "\n"

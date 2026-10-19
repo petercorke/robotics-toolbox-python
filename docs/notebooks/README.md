@@ -34,8 +34,11 @@ The second cell is the generated bootstrap cell, below.
 
 Edit it as you like, in VS Code or anywhere.  Before you commit:
 
-1. **Clear the outputs**, with *Clear All Outputs* in VS Code or
-   `python docs/notebooks/clear_outputs.py`.  Notebooks are committed without outputs.
+1. **Run `python docs/notebooks/clear_outputs.py`.**  Notebooks are committed without
+   outputs (clearing them in VS Code is not enough on its own).  The script also resets
+   the metadata an editor writes (the name and version of your Python environment, and
+   so on) to a canonical form, and writes the file as Jupyter does, so opening and
+   saving a notebook does not show up as a change.
 2. That is all for an ordinary edit.  `python docs/notebooks/sync_bootstrap.py` is only
    needed after you change `_rtb_nb_bootstrap.py` or a notebook's `rtb_bootstrap`
    metadata (it also adds cell ids, which VS Code would otherwise add whenever it

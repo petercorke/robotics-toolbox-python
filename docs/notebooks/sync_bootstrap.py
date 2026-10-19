@@ -139,7 +139,7 @@ def process_notebook(path: Path, template: str, fix: bool) -> bool:
 
     if changed and fix:
         with path.open("w", encoding="utf-8") as f:
-            json.dump(nb, f, indent=1, ensure_ascii=False)
+            json.dump(nb, f, indent=1, ensure_ascii=False, sort_keys=True)
             f.write("\n")
 
     return changed
