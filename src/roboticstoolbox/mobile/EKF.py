@@ -40,6 +40,10 @@ class EKFLog(NamedTuple):
 
 
 class EKF:
+    """
+    Extended Kalman filter for vehicle localization, map estimation and SLAM
+    """
+
     def __init__(
         self,
         robot: tuple[VehicleBase, NDArray | None],

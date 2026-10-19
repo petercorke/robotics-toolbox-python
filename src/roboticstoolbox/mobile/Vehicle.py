@@ -140,6 +140,10 @@ class Trailer:
 
 
 class VehicleBase(ABC):
+    """
+    Superclass for vehicle kinematic models
+    """
+
     def __init__(
         self,
         covar: NDArray | None = None,
@@ -1103,6 +1107,10 @@ class VehicleBase(ABC):
 
 
 class Bicycle(VehicleBase):
+    """
+    Bicycle kinematic model
+    """
+
     def __init__(
         self, L: float = 1, steer_max: float = 0.45 * pi, **kwargs: Any
     ) -> None:
@@ -1258,6 +1266,10 @@ class Bicycle(VehicleBase):
 
 
 class Unicycle(VehicleBase):
+    """
+    Unicycle kinematic model
+    """
+
     def __init__(self, W: float = 1, steer_max: float = np.inf, **kwargs: Any) -> None:
         r"""
         Create unicycle kinematic model
@@ -1361,6 +1373,10 @@ class Unicycle(VehicleBase):
 
 
 class DiffSteer(Unicycle):
+    """
+    Differential steering kinematic model
+    """
+
     def __init__(self, W: float = 1, **kwargs: Any) -> None:
         r"""
         Create differential steering kinematic model

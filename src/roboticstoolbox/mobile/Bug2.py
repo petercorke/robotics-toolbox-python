@@ -28,7 +28,7 @@ _M_LINE_TOLERANCE = np.sqrt(2) / 2 + 1e-9
 
 class Bug2(PlannerBase):
     """
-    Construct a Bug2 reactive navigator
+    Bug2 reactive navigator
 
     :param kwargs: common arguments for :class:`PlannerBase` superclass, in
         particular ``occgrid``
