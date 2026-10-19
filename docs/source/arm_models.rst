@@ -35,6 +35,14 @@ Some robots are available in more than one category, for example the Panda:
     ...     robot = kind.Panda()
     ...     print(kind.__name__.split(".")[-1], type(robot).__name__, robot.n)
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   arm_dh
+   arm_erobot
+   arm_superclass
+
 The classes and the models of each category are described on the pages below.  Models are in a sub-package named for the category, so ``rtb.models.DH.Puma560()`` and ``rtb.models.URDF.Panda()`` make a Puma 560 and a Panda.  The URDF models are also in the ``rtb.models`` namespace itself, so ``rtb.models.Panda`` is ``rtb.models.URDF.Panda``.
 
 Listing available models
@@ -42,10 +50,3 @@ Listing available models
 
 .. automodule:: roboticstoolbox.models.catalog
    :members:
-
-.. toctree::
-   :maxdepth: 2
-
-   arm_dh
-   arm_erobot
-   arm_superclass

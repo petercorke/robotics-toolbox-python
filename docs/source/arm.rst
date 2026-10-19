@@ -144,3 +144,5 @@ These are the most used.  The inverse kinematics methods, ``ikine_XX`` and ``ik_
     ~roboticstoolbox.robot.Robot.Robot.iscollided
     ~roboticstoolbox.robot.Robot.Robot.collided
     ~roboticstoolbox.robot.Robot.Robot.closest_point
+
+The ``Shape`` that these methods take is a class of the `spatialgeometry <https://github.com/jhavl/spatialgeometry>`_ package, such as ``Sphere``, ``Cuboid`` or ``Mesh``.  In the signatures it links to the documentation of that package.

@@ -71,19 +71,21 @@ def summary_without_banner(app, what, name, obj, options, lines):
 
 def no_sidebar_entries(app, doctree):
     """
-    Keep the objects of the blocks pages out of the sidebar
+    Keep the members of the blocks out of the sidebar
 
-    Each block is a class, and each class and its ``__init__`` would get an entry
-    in the table of contents, which the sidebar shows as something that can be
-    opened.  There is nothing below a block that is worth a link, so mark the
-    objects of these pages as not wanting an entry.  This has to run before the
-    table of contents is built from the page.
+    Each block is a class, and gets an entry in the table of contents, which the
+    sidebar shows.  Its ``__init__`` would get one too, and make the block look
+    as if it could be opened when there is nothing below it worth a link.  So the
+    members of the classes on these pages are marked as not wanting an entry, and
+    the blocks are the last level.  This has to run before the table of contents
+    is built from the page.
     """
     if app.env.docname.startswith("blocks-"):
         from sphinx import addnodes
 
         for node in doctree.findall(addnodes.desc):
-            node["no-contents-entry"] = node["nocontentsentry"] = True
+            if node.get("objtype") != "class":
+                node["no-contents-entry"] = node["nocontentsentry"] = True
 
 
 def setup(app):
