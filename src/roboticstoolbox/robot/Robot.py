@@ -20,6 +20,7 @@ from spatialgeometry import CollisionShape, Cylinder, Shape
 from spatialmath import (
     SE2,
     SE3,
+    SO3,
     SpatialAcceleration,
     SpatialForce,
     SpatialInertia,
@@ -49,6 +50,25 @@ LinkType = TypeVar("LinkType", bound=BaseLink)
 # -9.81] override apart from the unset default).
 _GRAVITY_DEFAULT: list[float] = [0, 0, -9.81]
 _KEYWORDS_DEFAULT: list[str] = []
+
+
+def _rotation_between_vectors(a: ArrayLike, b: ArrayLike) -> SE3:
+    """
+    Rotation that takes the direction of one vector to the direction of another
+
+    :param a: the vector to rotate, which need not be a unit vector
+    :param b: the vector to rotate it to, which need not be a unit vector
+    :returns: a pure rotation, as an SE3
+
+    The vectors can be parallel, in which case the result is the identity, or
+    antiparallel, in which case it is a half turn about an axis perpendicular to
+    both.  Computing the angle with ``arccos`` and the axis with a cross product
+    fails for both: the axis is the zero vector, which is rejected by recent
+    SpatialMath, and for a dot product of 1.0000000000000002 the angle is NaN.
+    """
+    return SE3(
+        SO3.RotatedVector(np.asarray(a, dtype=float), np.asarray(b, dtype=float))
+    )
 
 
 # ==================================================================================== #
@@ -1644,15 +1664,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = None
         bin = None
 
-        def rotation_between_vectors(a: Any, b: Any) -> Any:
-            a = a / np.linalg.norm(a)
-            b = b / np.linalg.norm(b)
-
-            angle = np.arccos(np.dot(a, b))
-            axis = np.cross(a, b)
-
-            return SE3.AngleAxis(angle, axis)
-
         if isinstance(camera, rtb.BaseRobot):
             wTcp = cast(NDArray, camera.fkine(camera.q).A)[:3, 3]
         elif isinstance(camera, SE3):
@@ -1664,7 +1675,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         # Create line of sight object
         los_mid = SE3((wTcp + wTtp) / 2)
-        los_orientation = rotation_between_vectors(
+        los_orientation = _rotation_between_vectors(
             np.array([0.0, 0.0, 1.0]),
             wTcp - wTtp,
         )
