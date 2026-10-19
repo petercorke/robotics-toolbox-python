@@ -195,3 +195,31 @@ def test_bootstrap_cell_is_found_wherever_it_is(tmp_path):
         assert "async def ensure_installed():" in text
         # the other cells are untouched
         assert sum(sync_bootstrap.is_bootstrap_cell(c) for c in nb["cells"]) == 1
+
+
+def test_extras_come_from_the_notebook_metadata(tmp_path):
+    template = "async def ensure_installed(extras=()):\n    return False\n"
+    nb_path = tmp_path / "demo.ipynb"
+    nb = {
+        "cells": [_code_cell(f"{sync_bootstrap.MARKER}\n# stale\n")],
+        "metadata": {"rtb_bootstrap": {"extras": ["ik"]}},
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    nb_path.write_text(json.dumps(nb), encoding="utf-8")
+
+    assert sync_bootstrap.process_notebook(nb_path, template=template, fix=True)
+
+    text = "".join(json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]["source"])
+    assert text.rstrip().endswith("COLAB = await ensure_installed(extras=['ik'])")
+    # a second pass finds nothing to do, and removing the metadata is noticed
+    assert not sync_bootstrap.process_notebook(nb_path, template=template, fix=True)
+    nb = json.loads(nb_path.read_text(encoding="utf-8"))
+    del nb["metadata"]["rtb_bootstrap"]
+    nb_path.write_text(json.dumps(nb), encoding="utf-8")
+    assert sync_bootstrap.process_notebook(nb_path, template=template, fix=False)
+
+
+def test_no_extras_gives_the_plain_call():
+    lines = sync_bootstrap.generated_source("async def ensure_installed(): ...\n")
+    assert "".join(lines).rstrip().endswith("COLAB = await ensure_installed()")

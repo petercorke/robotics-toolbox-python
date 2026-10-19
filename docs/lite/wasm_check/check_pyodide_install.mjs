@@ -72,10 +72,22 @@ async def _redirect_wheel_install(requirements, **kwargs):
     return await _real_install(requirements, **kwargs)
 micropip.install = _redirect_wheel_install
 
-await bootstrap.ensure_installed()
+await bootstrap.ensure_installed(extras=['ik'])
 
 import roboticstoolbox as rtb  # noqa: F401
 rtb.models.DH.Panda().fkine([0, 0, 0, 0, 0, 0, 0])
+
+# the notebook ik-symbolic.ipynb: SymPy only, since python-flint is not usable in
+# Pyodide 0.27.  A closed-form arm and a general 6R arm (the slow one, about 10 s).
+import time, warnings
+warnings.simplefilter("ignore")
+for name in ("Puma560", "Jaco"):
+    robot = getattr(rtb.models.DH, name)()
+    t = time.time()
+    ik = robot.analytic_ik()
+    sol = ik.solve(robot.fkine([0.1] * robot.n))
+    assert len(sol.q) > 0, name
+    print(f"analytic_ik {name}: {type(ik).__name__}, {time.time() - t:.1f}s")
 print("import roboticstoolbox: OK")
 `;
 

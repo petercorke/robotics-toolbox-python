@@ -34,11 +34,21 @@ HERE = Path(__file__).resolve().parent
 TEMPLATE_PATH = HERE / "_rtb_nb_bootstrap.py"
 
 
-def generated_source(template: str) -> list[str]:
-    """Build the full source (as nbformat-style lines) for the bootstrap cell."""
-    body = f"{GENERATED_HEADER}\n{template.rstrip()}\n\nCOLAB = await ensure_installed()\n"
+def generated_source(template: str, extras: list[str] | tuple[str, ...] = ()) -> list[str]:
+    """Build the full source (as nbformat-style lines) for the bootstrap cell.
+
+    :param extras: names of the toolbox extras the notebook needs, for example
+        ``["ik"]``; passed on to ``ensure_installed``.
+    """
+    call = f"ensure_installed(extras={list(extras)!r})" if extras else "ensure_installed()"
+    body = f"{GENERATED_HEADER}\n{template.rstrip()}\n\nCOLAB = await {call}\n"
     lines = body.splitlines(keepends=True)
     return lines
+
+
+def notebook_extras(nb: dict) -> list[str]:
+    """The extras a notebook asks for, from ``metadata["rtb_bootstrap"]["extras"]``."""
+    return list(nb.get("metadata", {}).get("rtb_bootstrap", {}).get("extras", []))
 
 
 def cell_source_text(cell: dict) -> str:
@@ -67,7 +77,7 @@ def process_notebook(path: Path, template: str, fix: bool) -> bool:
         if not is_bootstrap_cell(cell):
             continue
 
-        desired_source = generated_source(template)
+        desired_source = generated_source(template, notebook_extras(nb))
         current_source = cell.get("source", [])
         if not isinstance(current_source, list):
             current_source = [current_source]
