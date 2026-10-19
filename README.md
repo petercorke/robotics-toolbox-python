@@ -118,7 +118,8 @@ Available options are:
 - `qp` install quadratic-programming IK dependencies (`qpsolvers`, `quadprog`)
 - `collision` install collision checking with [coal](https://github.com/coal-library/coal) and `trimesh`
 - `tool` install `IPython` and `pygments`, needed to run the `rtbtool` interactive shell
-- `all` install `swift`, `qp`, `collision`, and `tool`
+- `ik` install SymPy and `python-flint`, to derive analytic inverse kinematics (`robot.analytic_ik()`)
+- `all` install `swift`, `qp`, `collision`, and `tool`.  It does **not** include `ik`, since SymPy is large and only needed to derive an analytic solver
 
 > **Windows note:** `coal` does not publish Windows wheels on PyPI, so the
 > `collision`/`all` extras skip it there and collision checking is
@@ -166,7 +167,13 @@ pip install roboticstoolbox-python[collision]
 pip install roboticstoolbox-python[tool]
 ```
 
-- Everything (swift + qp + collision + tool)
+- Analytic inverse kinematics dependencies only (SymPy, `python-flint`)
+
+```shell script
+pip install roboticstoolbox-python[ik]
+```
+
+- Everything except `ik` (swift + qp + collision + tool)
 
 ```shell script
 pip install roboticstoolbox-python[all]

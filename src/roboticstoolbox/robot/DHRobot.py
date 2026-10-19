@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import copy
 import warnings
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import spatialmath.base.symbolic as sym
@@ -15,7 +15,7 @@ import spatialmath.base.symbolic as sym
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
 from numpy import any
-from numpy.typing import ArrayLike, NDArray
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 from spatialmath import SE3, Twist3
 
 # from spatialmath import base
@@ -37,6 +37,9 @@ from roboticstoolbox.robot.IK import IKSolution
 from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.tools.data import rtb_path_to_datafile
 from roboticstoolbox.tools.params import rtb_get_param
+
+if TYPE_CHECKING:
+    from roboticstoolbox.robot.symbolic_ik_rr import AnalyticIK
 
 # iksol = namedtuple("IKsolution", "q, success, reason")
 
@@ -1086,6 +1089,79 @@ class DHRobot(Robot):
     # Inverse kinematics
     # -------------------------------------------------------------------------- #
 
+    def analytic_ik(self) -> AnalyticIK:
+        """
+        Analytic inverse kinematics solver for this robot
+
+        :returns: a solver, which solves for one pose with
+            :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.solve` or
+            :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.ikine`, and
+            writes source code with
+            :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.generate`
+        :raises ImportError: if SymPy is not installed
+        :raises NotImplementedError: if the arm needs the general 6R method but has
+            a prismatic joint
+        :raises ValueError: if no analytic solution is found for this arm
+
+        The equations are derived symbolically, which takes seconds, and the solver
+        is kept, so the cost is paid once for each robot.  An arm with a spherical
+        wrist or three parallel axes has a closed form solution, any other 6R arm
+        is solved by the method of Raghavan and Roth.  The robot must have six
+        joints and standard DH links.
+
+        .. note:: This needs SymPy, which is not installed with the Toolbox by
+            default: ``pip install roboticstoolbox-python[ik]``.  The extra also
+            installs ``python-flint``, which makes the derivation much faster.
+
+        .. versionadded:: 1.6.0
+        """
+        key = tuple(
+            (link.isrevolute, link.a, link.d, link.alpha, link.theta, link.offset)
+            for link in self.links
+        )
+        cached = getattr(self, "_analytic_ik", None)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+
+        try:
+            from roboticstoolbox.robot.symbolic_ik_rr import make_solver
+        except ModuleNotFoundError as err:
+            if err.name is not None and err.name.split(".")[0] == "sympy":
+                raise ImportError(
+                    "analytic inverse kinematics needs SymPy, install it with "
+                    "'pip install roboticstoolbox-python[ik]'"
+                ) from err
+            raise
+
+        solver = make_solver(self)
+        self._analytic_ik = (key, solver)
+        return solver
+
+    def ikine_analytic(
+        self,
+        T: SE3 | NDArray,
+        q0: ArrayLike | None = None,
+        joint_limits: bool = True,
+        weights: ArrayLike | None = None,
+    ) -> IKSolution:
+        """
+        Analytic inverse kinematics
+
+        :param T: end-effector pose, or a trajectory of poses
+        :param q0: configuration to be near, default zeros
+        :param joint_limits: reject solutions that violate the joint limits
+        :param weights: weight of each joint in the distance from ``q0``
+        :returns: the solution, nearest to ``q0``, see
+            :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.ikine`
+
+        This is ``self.analytic_ik().ikine(...)``.  The first call for a robot
+        derives the equations, see :meth:`analytic_ik`, and the solver is kept for
+        the calls that follow.
+
+        .. versionadded:: 1.6.0
+        """
+        return self.analytic_ik().ikine(T, q0, joint_limits, weights)
+
     def ikine_LM(  # type: ignore[override]
         self, Tep: np.ndarray | SE3, q0: ArrayLike | None = None, **ikargs: Any
     ) -> Any:
@@ -1107,7 +1183,7 @@ class DHRobot(Robot):
 
         .. seealso:: :meth:`ikine_LM` (:class:`~roboticstoolbox.ETS`)
         """
-        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)  # type: ignore[arg-type]
+        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)
 
     def ikine_6s(self, T: Any, config: Any, ikfunc: Any) -> Any:
         """
@@ -2113,7 +2189,7 @@ if __name__ == "__main__":  # pragma nocover
     # tw, T0 = puma.twists(puma.qz)
     # print(planar)
 
-    puma = rtb.models.DH.Puma560()  # type: ignore[operator]  # class, not module
+    puma = rtb.models.DH.Puma560()
     print(puma)
     # print(puma.jacob0(puma.qn, analytical="eul"))
     # puma.base = None
