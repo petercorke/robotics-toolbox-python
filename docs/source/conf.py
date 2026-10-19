@@ -124,6 +124,9 @@ html_static_path = ["_static", "../../src/roboticstoolbox/blocks/Icons"]
 html_css_files = [
     "css/custom.css",
 ]
+
+# click on a Graphviz diagram to open it full size in a new tab
+html_js_files = ["graphviz-zoom.js"]
 default_role = "py:obj"
 
 # -------- Options for LaTeX/PDF output ----------------------------------------------#

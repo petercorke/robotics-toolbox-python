@@ -17,6 +17,8 @@ The same solution can be written out as source code in Python, C, C++ or Rust, f
 
 .. versionadded:: 1.6.0
 
+The notebook `ik-symbolic.ipynb <https://github.com/petercorke/robotics-toolbox-python/blob/main/docs/notebooks/ik-symbolic.ipynb>`_ works through the examples on this page, and more.
+
 Setting up
 ----------
 
