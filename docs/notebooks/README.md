@@ -32,5 +32,17 @@ run in the `docs.yml` workflow, and `tests/test_notebook_bootstrap.py` tests the
 `docs/lite/wasm_check/` runs the bootstrap in Pyodide under Node.js against the wheel
 just built, in CI.  See its README.
 
-`ik-symbolic.ipynb` has no bootstrap cell yet: it needs the `ik` extra (SymPy and
-python-flint), and is not part of the JupyterLite site.
+## Extras
+
+A notebook that needs a toolbox extra says so in its own metadata, not in the cell:
+
+```json
+"metadata": {"rtb_bootstrap": {"extras": ["ik"]}}
+```
+
+`sync_bootstrap.py` then generates `ensure_installed(extras=['ik'])`.  For `ik`, Colab
+installs `roboticstoolbox-python[ik]`, a local install is told what to install if SymPy
+is missing, and in the browser SymPy comes from Pyodide's own packages.  python-flint is
+not installed in the browser: the one bundled with Pyodide 0.27 is too old, and the
+toolbox then uses SymPy alone (about 2x slower; 10 s for a general 6R arm).
+`ik-symbolic.ipynb` is the one notebook that does this.

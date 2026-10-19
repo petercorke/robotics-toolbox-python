@@ -14,9 +14,12 @@ import sys
 from pathlib import Path
 
 
-async def ensure_installed() -> bool:
+async def ensure_installed(extras: tuple[str, ...] | list[str] = ()) -> bool:
     """Install roboticstoolbox-python if needed, and report the environment.
 
+    :param extras: toolbox extras the notebook needs, for example ``["ik"]``.  They
+        are set per notebook in its metadata (``rtb_bootstrap.extras``) and
+        passed here by the generated cell.
     :returns: True if running on Google Colab, False otherwise.
     """
     if sys.platform == "emscripten":
@@ -31,6 +34,12 @@ async def ensure_installed() -> bool:
         # (rai-opensource/spatialmath-python#250).
         await micropip.install("spatialmath-python", deps=False)
         await micropip.install("ipympl")
+        if "ik" in extras:
+            # SymPy is one of Pyodide's own packages.  python-flint is not installed:
+            # the one bundled with Pyodide 0.27 is too old for the toolbox, which
+            # then uses SymPy for the polynomial steps, about 2x slower for a
+            # general 6R arm (10 s to derive a Kinova Jaco).
+            await micropip.install("sympy")
 
         wheels = sorted(Path("/pypi").glob("roboticstoolbox_python-*.whl"))
         if wheels:
@@ -47,17 +56,21 @@ async def ensure_installed() -> bool:
             import google.colab  # noqa: F401
         except ImportError:
             where, colab = "locally", False
+            if "ik" in extras:
+                try:
+                    import sympy  # noqa: F401
+                except ImportError:
+                    print(
+                        "This notebook needs SymPy: "
+                        "pip install 'roboticstoolbox-python[ik]'"
+                    )
         else:
             print("Installing roboticstoolbox-python...")
+            requirement = "roboticstoolbox-python"
+            if extras:
+                requirement += "[" + ",".join(extras) + "]"
             subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "pip",
-                    "install",
-                    "-q",
-                    "roboticstoolbox-python",
-                ],
+                [sys.executable, "-m", "pip", "install", "-q", requirement],
                 check=True,
             )
             where, colab = "on Colab", True
