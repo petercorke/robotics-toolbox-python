@@ -37,8 +37,12 @@ def _write_notebook(path: Path, cells: list[dict]) -> None:
     path.write_text(json.dumps(nb, indent=1) + "\n", encoding="utf-8")
 
 
+_ids = iter(f"{n:08x}" for n in range(10**6))
+
+
 def _code_cell(source: str, outputs=None, execution_count=None) -> dict:
     return {
+        "id": next(_ids),
         "cell_type": "code",
         "metadata": {},
         "execution_count": execution_count,
@@ -225,44 +229,39 @@ def test_no_extras_gives_the_plain_call():
     assert "".join(lines).rstrip().endswith("COLAB = await ensure_installed()")
 
 
-def test_header_cell_is_generated_from_metadata(tmp_path):
+def test_cells_without_ids_get_unique_ids_and_nbformat_5(tmp_path):
+    nb_path = tmp_path / "demo.ipynb"
+    cells = [_code_cell("x = 1\n"), _code_cell("y = 2\n"), _code_cell("z = 3\n")]
+    for cell in cells[:2]:
+        del cell["id"]
+    nb = {"cells": cells, "metadata": {}, "nbformat": 4, "nbformat_minor": 4}
+    nb_path.write_text(json.dumps(nb), encoding="utf-8")
+    kept = cells[2]["id"]
+
+    # check mode reports the missing ids and does not write
+    assert sync_bootstrap.process_notebook(nb_path, template="", fix=False)
+    assert "id" not in json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]
+
+    assert sync_bootstrap.process_notebook(nb_path, template="", fix=True)
+    out = json.loads(nb_path.read_text(encoding="utf-8"))
+    ids = [c["id"] for c in out["cells"]]
+    assert len(set(ids)) == 3 and ids[2] == kept  # an existing id is kept
+    assert out["nbformat_minor"] == 5
+
+    # nothing more to do, and the check passes
+    assert not sync_bootstrap.process_notebook(nb_path, template="", fix=False)
+
+
+def test_markdown_cells_get_ids_too(tmp_path):
     nb_path = tmp_path / "demo.ipynb"
     nb = {
-        "cells": [_code_cell("x = 1\n")],
-        "metadata": {
-            "rtb_header": {
-                "title": "A title",
-                "paragraphs": ["About it."],
-                "modernised": "2026-10-19",
-            }
-        },
+        "cells": [{"cell_type": "markdown", "metadata": {}, "source": ["# Title\n"]}],
+        "metadata": {},
         "nbformat": 4,
         "nbformat_minor": 5,
     }
     nb_path.write_text(json.dumps(nb), encoding="utf-8")
 
-    # check mode reports the missing header and does not write
-    assert sync_bootstrap.process_notebook(nb_path, template="", fix=False)
-    assert json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]["cell_type"] == "code"
-
     assert sync_bootstrap.process_notebook(nb_path, template="", fix=True)
-    cells = json.loads(nb_path.read_text(encoding="utf-8"))["cells"]
-    assert sync_bootstrap.is_header_cell(cells[0])
-    text = "".join(cells[0]["source"])
-    assert "A title" in text and "About it." in text
-    assert "Modernised 2026-10-19" in text
-    assert len(cells) == 2  # inserted once, the original cell kept
 
-    # idempotent, and a change to the metadata is noticed
-    assert not sync_bootstrap.process_notebook(nb_path, template="", fix=True)
-    nb = json.loads(nb_path.read_text(encoding="utf-8"))
-    nb["metadata"]["rtb_header"]["title"] = "Another"
-    nb_path.write_text(json.dumps(nb), encoding="utf-8")
-    assert sync_bootstrap.process_notebook(nb_path, template="", fix=True)
-    assert "Another" in "".join(json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]["source"])
-
-
-def test_notebook_without_header_metadata_gets_no_header(tmp_path):
-    nb_path = tmp_path / "demo.ipynb"
-    _write_notebook(nb_path, [_code_cell("x = 1\n")])
-    assert not sync_bootstrap.process_notebook(nb_path, template="", fix=True)
+    assert "id" in json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]

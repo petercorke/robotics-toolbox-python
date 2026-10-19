@@ -18,6 +18,7 @@ import argparse
 import ast
 import json
 import sys
+import uuid
 from pathlib import Path
 
 MARKER = "# RTB_BOOTSTRAP_CELL"
@@ -71,46 +72,28 @@ def notebook_extras(nb: dict) -> list[str]:
     return list(nb.get("metadata", {}).get("rtb_bootstrap", {}).get("extras", []))
 
 
-HEADER_MARKER = "<!-- RTB_HEADER"
+def ensure_cell_ids(nb: dict) -> bool:
+    """Give every cell an ``id``, as nbformat 4.5 requires.
 
+    VS Code adds ids to a notebook that lacks them as soon as it is opened, which
+    shows as a change to the file, so they are committed instead.
 
-def header_source(header: dict) -> list[str]:
-    """Build the source (as nbformat-style lines) for the standard first cell.
-
-    :param header: the notebook's ``metadata["rtb_header"]``: ``title`` (the line
-        under the logo), optional ``paragraphs`` (a list of markdown paragraphs),
-        optional ``copyright`` (default ``Peter Corke 2026``) and optional
-        ``modernised`` (an ISO date, which adds a note about API drift).
+    :returns: True if any id was added.
     """
-    parts = [
-        f"{HEADER_MARKER} -- generated from the notebook metadata (rtb_header) by "
-        "sync_bootstrap.py, do not hand-edit -->\n"
-        "<table>\n"
-        "  <tr>\n"
-        '    <td><div align="left"><font size="30">Robotics Toolbox for Python</font></div></td>\n'
-        '    <td><img src="figs/RobToolBox_RoundLogoB.png" width="300"></td>\n'
-        "  </tr>\n"
-        "</table>\n\n"
-        "<p></p>\n"
-        f'<div align="center" style="font-size: 1.5em;">{header["title"]}</div>\n'
-        "<p></p>\n\n"
-        f'(c) {header.get("copyright", "Peter Corke 2026")}'
-    ]
-    parts.extend(header.get("paragraphs", []))
-    if "modernised" in header:
-        parts.append(
-            f"> **Modernised {header['modernised']}** to address API drift: this "
-            "notebook was written for an earlier release of the Toolbox, and has been "
-            "updated so that it runs with the current one."
-        )
-    return "\n\n".join(parts).splitlines(keepends=True)
-
-
-def is_header_cell(cell: dict) -> bool:
-    return (
-        cell.get("cell_type") == "markdown"
-        and cell_source_text(cell).lstrip().startswith(HEADER_MARKER)
-    )
+    cells = nb.get("cells", [])
+    used = {c["id"] for c in cells if "id" in c}
+    changed = False
+    for cell in cells:
+        if "id" not in cell:
+            new = uuid.uuid4().hex[:8]
+            while new in used:
+                new = uuid.uuid4().hex[:8]
+            cell["id"] = new
+            used.add(new)
+            changed = True
+    if changed and nb.get("nbformat_minor", 0) < 5:
+        nb["nbformat_minor"] = 5
+    return changed
 
 
 def cell_source_text(cell: dict) -> str:
@@ -127,30 +110,14 @@ def is_bootstrap_cell(cell: dict) -> bool:
 
 
 def process_notebook(path: Path, template: str, fix: bool) -> bool:
-    """Check (and optionally fix) one notebook's header and bootstrap cells.
+    """Check (and optionally fix) one notebook's bootstrap cell and cell ids.
 
-    :returns: True if the notebook's header or bootstrap cell was (or would be) changed.
+    :returns: True if the notebook's bootstrap cell or cell ids were (or would be) changed.
     """
     with path.open("r", encoding="utf-8") as f:
         nb = json.load(f)
 
-    changed = False
-    header = nb.get("metadata", {}).get("rtb_header")
-    if header is not None:
-        desired = header_source(header)
-        cells = nb.setdefault("cells", [])
-        existing = next((c for c in cells if is_header_cell(c)), None)
-        if existing is None:
-            changed = True
-            if fix:
-                cells.insert(
-                    0, {"cell_type": "markdown", "metadata": {}, "source": desired}
-                )
-        elif existing.get("source") != desired:
-            changed = True
-            if fix:
-                existing["source"] = desired
-
+    changed = ensure_cell_ids(nb) if fix else any("id" not in c for c in nb.get("cells", []))
     for cell in nb.get("cells", []):
         if not is_bootstrap_cell(cell):
             continue
@@ -204,9 +171,9 @@ def main() -> int:
             any_changed = True
             rel = nb_path.relative_to(HERE.parent.parent)
             if fix:
-                print(f"{rel}: header or bootstrap cell out of date, regenerating")
+                print(f"{rel}: bootstrap cell or cell ids out of date, regenerating")
             else:
-                print(f"{rel}: header or bootstrap cell out of date")
+                print(f"{rel}: bootstrap cell or cell ids out of date")
 
     if args.check and any_changed:
         return 1

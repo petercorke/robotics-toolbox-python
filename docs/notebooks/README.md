@@ -21,21 +21,27 @@ found by that line, not by its position) and is folded by default.
   Then it installs the toolbox with its dependencies, from the wheel bundled with the
   JupyterLite site if there is one, or else from PyPI.
 
-## The standard first cell
+## The first cell
 
-Every notebook starts with the same markdown cell: the logo and title, the copyright
-line, and a short description.  It is generated from the notebook's own metadata by
-`sync_bootstrap.py`, like the bootstrap cell, and the `<!-- RTB_HEADER` comment on its
-first line marks it:
+The first cell of a notebook is ordinary markdown, written by hand: the logo and title,
+the copyright line and a description.  The logo is an absolute GitHub URL, since Colab
+fetches only the one `.ipynb` file and cannot see `figs/`.  A notebook that was updated
+for API drift says so there ("Modernised <date>").
 
-```json
-"metadata": {"rtb_header": {"title": "Robot dynamics",
-                            "paragraphs": ["What this notebook shows."],
-                            "modernised": "2026-10-19"}}
-```
+The second cell is the generated bootstrap cell, below.
 
-`title` is required; `paragraphs`, `copyright` and `modernised` are optional.
-`modernised` adds a note that the notebook was updated to address API drift.
+## Editing a notebook
+
+Edit it as you like, in VS Code or anywhere.  Before you commit:
+
+1. **Clear the outputs**, with *Clear All Outputs* in VS Code or
+   `python docs/notebooks/clear_outputs.py`.  Notebooks are committed without outputs.
+2. That is all for an ordinary edit.  `python docs/notebooks/sync_bootstrap.py` is only
+   needed after you change `_rtb_nb_bootstrap.py` or a notebook's `rtb_bootstrap`
+   metadata (it also adds cell ids, which VS Code would otherwise add whenever it
+   opens a notebook that has none).
+
+`docs.yml` runs both scripts with `--check`, so CI tells you if you forgot.
 
 ## Outputs are not committed
 
