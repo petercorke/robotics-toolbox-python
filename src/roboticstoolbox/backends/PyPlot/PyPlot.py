@@ -147,6 +147,12 @@ class PyPlot(Connector):
             Existing Matplotlib 3D axes to render into.
         render_mode
             One of ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``.
+            If omitted it is chosen from the environment, see
+            :func:`_resolve_render_mode`.
+        animation
+            True if frames will be stepped through in a single running cell.  In a
+            notebook with the ``ipympl`` backend this selects the inline mode, since
+            an ``ipympl`` figure cannot update while the cell is running.
         inline_every_n
             Push one inline frame every N simulation steps (inline mode only).
         inline_format
@@ -156,7 +162,9 @@ class PyPlot(Connector):
         """
 
 
-        self.render_mode = _resolve_render_mode(kwargs.get("render_mode"))
+        self.render_mode = _resolve_render_mode(
+            kwargs.get("render_mode"), bool(kwargs.get("animation", False))
+        )
         self.inline_every_n = max(1, int(kwargs.get("inline_every_n", 1)))
         self.inline_format = kwargs.get("inline_format", "svg")
         if self.inline_format not in ["png", "svg"]:
@@ -774,7 +782,30 @@ def _isnotebook() -> bool:
         return False  # Probably standard Python interpreter
 
 
-def _resolve_render_mode(render_mode: str | None = None) -> str:
+def _resolve_render_mode(
+    render_mode: str | None = None, animation: bool = False
+) -> str:
+    """
+    Choose how a figure is rendered, from the environment
+
+    :param render_mode: an explicit choice, ``'window'``, ``'notebook-widget'`` or
+        ``'notebook-inline'``, which is used as it is
+    :param animation: True if the caller is going to animate by stepping through
+        frames inside a single running cell
+    :returns: the render mode
+
+    In a notebook the choice follows the matplotlib backend, so the same call works
+    whether the notebook says ``%matplotlib ipympl`` or ``%matplotlib inline``:
+
+    - ``'window'`` outside a notebook,
+    - ``'notebook-widget'`` for ``ipympl``, an interactive figure that can be rotated,
+    - ``'notebook-inline'`` otherwise, static images pushed into the cell output.
+
+    An ``ipympl`` figure updates only when the kernel handles a message from the
+    browser, which it cannot do while a cell is running.  So an animation with
+    ``animation=True`` would show the first and the last frame only, and the inline
+    mode, which does not depend on the browser, is chosen for it instead.
+    """
     if render_mode is not None:
         if render_mode not in ["window", "notebook-widget", "notebook-inline"]:
             raise ValueError(
@@ -788,6 +819,6 @@ def _resolve_render_mode(render_mode: str | None = None) -> str:
 
     backend = matplotlib.get_backend().lower()
     if "ipympl" in backend or "widget" in backend or "nbagg" in backend:
-        return "notebook-widget"
+        return "notebook-inline" if animation else "notebook-widget"
 
     return "notebook-inline"

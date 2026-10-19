@@ -2114,7 +2114,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param eeframe: (Plot Option) Plot the end-effector coordinate frame at the location of the end-effector. Uses three arrows, red, green and blue to indicate the x, y, and z-axes. (this option is for 'pyplot' only)
         :param shadow: (Plot Option) Plot a shadow of the robot in the x-y plane. (this option is for 'pyplot' only)
         :param name: (Plot Option) Plot the name of the robot near its base (this option is for 'pyplot' only)
-        :param render_mode: (Plot Option) Rendering mode for matplotlib backends: ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``. If omitted, an environment-appropriate mode is selected.
+        :param render_mode: (Plot Option) Rendering mode for matplotlib backends: ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``. If omitted, a mode is chosen from the environment, so the same call works for any ``%matplotlib`` setting: for the interactive ``ipympl`` backend a single pose is a widget that can be rotated, but a trajectory uses ``'notebook-inline'``, since a widget cannot update while the cell is running.
         :param inline_every_n: (Plot Option) In notebook-inline mode, push one rendered frame every N simulation steps. Larger N reduces output load.
         :param inline_format: (Plot Option) In notebook-inline mode, frame format: ``'svg'`` (default) or ``'png'``.
         :param inline_dpi: (Plot Option) DPI for PNG inline frames only; ignored when ``inline_format='svg'``.
@@ -2142,13 +2142,18 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         if movie is not None:
             from roboticstoolbox.backends.PyPlot import PyPlot
 
-        launch_kwargs = {}
+        launch_kwargs: dict[str, Any] = {}
         for key in ("render_mode", "inline_every_n", "inline_format", "inline_dpi"):
             if key in kwargs:
                 launch_kwargs[key] = kwargs.pop(key)
 
         q = np.array(getmatrix(q, (None, self.n)))
         self.q = q[0, :]
+
+        # a trajectory is an animation, which the PyPlot backends render differently
+        # in a notebook (the other backends have no render mode)
+        if q.shape[0] > 1 and hasattr(env, "render_mode"):
+            launch_kwargs.setdefault("animation", True)
 
         # Add the self to the figure in readonly mode
         if q.shape[0] == 1:
