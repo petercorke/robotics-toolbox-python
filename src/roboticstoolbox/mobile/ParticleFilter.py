@@ -29,6 +29,10 @@ odometry and observations of known landmarks.
 
 
 class ParticleFilter:
+    """
+    Particle filter for vehicle localization
+    """
+
     def __init__(
         self,
         robot,

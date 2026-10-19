@@ -226,6 +226,10 @@ class VehicleDriverBase(ABC):
 
 
 class RandomPath(VehicleDriverBase):
+    """
+    Driving agent for a random path
+    """
+
     def __init__(
         self, dthresh: float = 0.05, seed: int | None = 0, **kwargs: Any
     ) -> None:
@@ -393,6 +397,10 @@ class RandomPath(VehicleDriverBase):
 
 
 class PurePursuit(VehicleDriverBase):
+    """
+    Driving agent for pure pursuit
+    """
+
     def __init__(
         self,
         path: Points2,

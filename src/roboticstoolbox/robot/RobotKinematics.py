@@ -284,7 +284,7 @@ class RobotKinematicsMixin:
         tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
-        Manipulator Hessian
+        Manipulator Hessian in the start frame
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
@@ -384,7 +384,7 @@ class RobotKinematicsMixin:
         tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
-        Manipulator Hessian
+        Manipulator Hessian in the end-effector frame
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).

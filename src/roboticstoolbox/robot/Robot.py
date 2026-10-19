@@ -57,6 +57,15 @@ _KEYWORDS_DEFAULT: list[str] = []
 
 
 class Robot(BaseRobot[Link], RobotKinematicsMixin):
+    """
+    Robot manipulator defined by links or an elementary transform sequence
+
+    The robot is made from a list of links, an :class:`~roboticstoolbox.ets.ETS.ETS`
+    or another robot.  It can be a tree.  It is the superclass of the robots defined
+    by Denavit-Hartenberg parameters, :class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
+    and of those loaded from a URDF file.
+    """
+
     _color = True
 
     def __init__(
@@ -1422,7 +1431,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def collided(self, q: Any, shape: Shape, skip: bool = False) -> bool:
         """
-        Check if the robot is in collision with a shape
+        Check if the robot is in collision with a shape (deprecated)
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
@@ -2122,7 +2131,7 @@ class Robot2(BaseRobot[Link2]):
     @property
     def base(self) -> SE2:
         """
-        Get/set robot base transform (Robot superclass)
+        Get/set robot base transform
 
         :returns: robot tool transform
 
