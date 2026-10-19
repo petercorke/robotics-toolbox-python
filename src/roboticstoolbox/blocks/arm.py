@@ -825,7 +825,7 @@ class Trapezoidal(SourceBlock):
         element, because ``trapezoidal_func`` returned arrays for a scalar
         time.
 
-    :seealso: ``ctraj``, ``qplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
+    :seealso: ``ctraj``, ``xplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
 
     nin = 0

@@ -1543,7 +1543,7 @@ class RobotKinematicsMixin:
         :param tool: a static tool transformation matrix to apply to the
             end of ``end``; defaults to the robot's own ``self.tool`` if
             not given
-        :raises ImportError: If the package ``qpsolvers`` is not installed
+        :raises ImportError: If the package ``qpsolvers`` is not installed, see the note below
         :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
@@ -1561,6 +1561,12 @@ class RobotKinematicsMixin:
 
         A method that provides functionality to perform numerical inverse kinematics
         (IK) using a quadratic programming approach.
+
+        .. note::
+
+            This needs the packages ``qpsolvers`` and ``quadprog``, which are not
+            installed with the Toolbox by default.  Install them with the ``qp``
+            extra: ``pip install roboticstoolbox-python[qp]``.
 
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.

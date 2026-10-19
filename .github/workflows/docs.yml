@@ -31,7 +31,7 @@ jobs:
       - name: Install docs dependencies
         run: |
           pip install .[docs]
-          pip install sympy
+          pip install sympy python-flint  # for the analytic IK examples
           sudo apt-get install -y graphviz
 
       # See the "Cache robot_descriptions assets" step in ci.yml's test-core
@@ -76,11 +76,15 @@ jobs:
         # it benchmarks numeric IK solver performance and uses the
         # websocket-based Swift visualizer, neither of which is meaningful
         # or functional inside the Pyodide sandbox -- it stays Colab-only.
+        # ik-symbolic.ipynb is excluded until it has been tried in Pyodide: it
+        # needs SymPy, and deriving the equations without python-flint may be
+        # very slow in the browser.
         run: |
           mkdir -p docs/lite/files
           rsync -a --exclude '.ipynb_checkpoints' --exclude '__pycache__' \
             --exclude 'Untitled*.ipynb' --exclude '*.py' --exclude 'Makefile' \
             --exclude 'ik_benchmark.ipynb' \
+            --exclude 'ik-symbolic.ipynb' \
             docs/notebooks/ docs/lite/files/
 
       - name: Adapt staged notebooks for JupyterLite
