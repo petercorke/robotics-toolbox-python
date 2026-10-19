@@ -139,6 +139,18 @@ Some provided robot models have an analytical solution coded, for example:
 
 where we have specified a left-handed, elbow up and wrist no-flip configuration.
 
+The Toolbox can also derive an analytic solution itself, for any six-axis arm with a
+spherical wrist, three parallel axes, or no special structure at all, and gives every solution
+for a pose, see :doc:`IK/analytic`.
+
+.. runblock:: pycon
+
+    >>> from roboticstoolbox.models.DH import Puma560
+    >>> puma = Puma560()
+    >>> T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+    >>> sol = puma.analytic_ik().solve(T)   # all the solutions within the joint limits
+    >>> len(sol)
+
 
 ETS notation
 ^^^^^^^^^^^^
