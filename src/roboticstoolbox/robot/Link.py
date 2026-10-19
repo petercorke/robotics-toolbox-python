@@ -130,7 +130,7 @@ class BaseLink(SceneNode, ABC):
     :param Jm: dynamic - motor inertia
     :param B: dynamic - motor viscous friction
     :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
-    :param G: dynamic - gear ratio
+    :param G: dynamic - gear ratio, default 1 (motor directly coupled to the joint)
     :param qlim: joint variable limits [min, max]
     :param geometry: the visual geometry which represents the link. This is used
         to display the link in Swift
@@ -217,7 +217,7 @@ class BaseLink(SceneNode, ABC):
         dynpar(self, "Jm", Jm, 0.0)
         dynpar(self, "B", B, 0.0)
         dynpar(self, "Tc", Tc, np.zeros((2,)))
-        dynpar(self, "G", G, 0.0)
+        dynpar(self, "G", G, 1.0)
 
         # reference to more advanced actuator model
         self.actuator = None
@@ -939,6 +939,11 @@ class BaseLink(SceneNode, ABC):
 
         - The ratio of motor motion : link motion
         - The gear ratio can be negative, see also the ``flip`` attribute.
+        - The default is 1, the motor is coupled directly to the joint.
+
+        .. versionchanged:: 1.5.0
+            The default was 0, which silently discarded the motor inertia and
+            friction of a link that did not set ``G``.
 
         :seealso: ``flip``
         """
