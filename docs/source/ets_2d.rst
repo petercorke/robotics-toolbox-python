@@ -135,17 +135,17 @@ A sequence is a list of elementary transforms, so it has the methods of a list. 
      - adds an elementary transform to the end
    * - :meth:`~roboticstoolbox.ETS2.extend`
      - adds the transforms of another sequence to the end
-   * - :meth:`~roboticstoolbox.ETS2.pop`
+   * - ``pop``
      - removes and returns the transform at an index, by default the last
    * - :meth:`~roboticstoolbox.ETS2.remove`
      - removes the first transform that is equal to the given one
    * - :meth:`~roboticstoolbox.ETS2.reverse`
      - reverses the order of the transforms, which is not the inverse of the sequence, see :meth:`~roboticstoolbox.ETS2.inv`
-   * - :meth:`~roboticstoolbox.ETS2.clear`
+   * - ``clear``
      - removes all the transforms
-   * - :meth:`~roboticstoolbox.ETS2.count`
+   * - ``count``
      - the number of transforms equal to the given one
-   * - :meth:`~roboticstoolbox.ETS2.index`
+   * - ``index``
      - the index of the first transform equal to the given one
 
 Kinematics
@@ -172,5 +172,5 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ETS2
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, count, index, insert, append, extend, pop, remove, reverse, clear, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, plot, teach
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, plot, teach
    :member-order: bysource

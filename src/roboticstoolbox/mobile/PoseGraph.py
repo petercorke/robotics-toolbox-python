@@ -487,7 +487,7 @@ class PoseGraph:
             :data:`EDGE_STYLE`
         :param vopt: deprecated, use ``vertex_style``
         :param eopt: deprecated, use ``edge_style``
-        :param kwargs: options passed to :meth:`pgraph.UGraph.plot`
+        :param kwargs: options passed to ``pgraph.UGraph.plot``
 
         .. deprecated:: 1.4.5
             ``vopt`` and ``eopt`` are deprecated, use ``vertex_style`` and
@@ -630,7 +630,7 @@ class PoseGraph:
         :param vertex_style: Matplotlib options for the vertices when animating
         :param edge_style: Matplotlib options for the edges when animating, the
             color is set by ``retain``
-        :param kwargs: options passed to :meth:`pgraph.UGraph.plot` when animating
+        :param kwargs: options passed to ``pgraph.UGraph.plot`` when animating
         :raises NotImplementedError: the graph has landmark vertices
 
         .. deprecated:: 1.4.5

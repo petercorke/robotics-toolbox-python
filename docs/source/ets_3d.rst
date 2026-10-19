@@ -241,17 +241,17 @@ A sequence is a list of elementary transforms, so it has the methods of a list. 
      - adds an elementary transform to the end
    * - :meth:`~roboticstoolbox.ETS.extend`
      - adds the transforms of another sequence to the end
-   * - :meth:`~roboticstoolbox.ETS.pop`
+   * - ``pop``
      - removes and returns the transform at an index, by default the last
    * - :meth:`~roboticstoolbox.ETS.remove`
      - removes the first transform that is equal to the given one
    * - :meth:`~roboticstoolbox.ETS.reverse`
      - reverses the order of the transforms, which is not the inverse of the sequence, see :meth:`~roboticstoolbox.ETS.inv`
-   * - :meth:`~roboticstoolbox.ETS.clear`
+   * - ``clear``
      - removes all the transforms
-   * - :meth:`~roboticstoolbox.ETS.count`
+   * - ``count``
      - the number of transforms equal to the given one
-   * - :meth:`~roboticstoolbox.ETS.index`
+   * - ``index``
      - the index of the first transform equal to the given one
 
 Kinematics
@@ -322,5 +322,5 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ETS
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, count, index, insert, append, extend, pop, remove, reverse, clear, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
    :member-order: bysource
