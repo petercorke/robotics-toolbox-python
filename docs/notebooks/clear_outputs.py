@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Clear cell outputs and execution counts from every notebook in this folder.
+"""Clear cell outputs, execution counts and editor metadata from every notebook here.
 
 Pure stdlib (no dependency on jupyter/nbconvert being installed), so it can run as
 a commit hook on any machine with just Python. Equivalent to
@@ -20,6 +20,28 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+
+# What an editor writes into a notebook's metadata depends on who opened it last: the
+# name of their Python environment, its version, interpreter paths, widget state and
+# so on.  That is noise in every diff, so notebooks are committed with the same
+# kernel and language, and with only the metadata that belongs to this repository.
+KERNELSPEC = {"display_name": "Python 3", "language": "python", "name": "python3"}
+LANGUAGE_INFO = {"name": "python"}
+OWN_METADATA = ("rtb_bootstrap",)
+
+
+def normalize_metadata(nb: dict) -> bool:
+    """Set a notebook's metadata to its canonical form, in place.
+
+    :returns: True if it was (or would be) changed.
+    """
+    old = nb.get("metadata", {})
+    new = {"kernelspec": dict(KERNELSPEC), "language_info": dict(LANGUAGE_INFO)}
+    new.update({k: old[k] for k in OWN_METADATA if k in old})
+    if old == new:
+        return False
+    nb["metadata"] = new
+    return True
 
 
 def clear_cell(cell: dict) -> bool:
@@ -44,22 +66,29 @@ def clear_cell(cell: dict) -> bool:
     return changed
 
 
+def canonical_text(nb: dict) -> str:
+    """The notebook as nbformat (and so VS Code and Jupyter) writes it."""
+    return json.dumps(nb, indent=1, ensure_ascii=False, sort_keys=True) + "\n"
+
+
 def process_notebook(path: Path, fix: bool) -> bool:
-    """Check (and optionally clear) one notebook's outputs.
+    """Check (and optionally clear) one notebook's outputs and metadata.
 
     :returns: True if the notebook was (or would be) changed.
     """
-    with path.open("r", encoding="utf-8") as f:
-        nb = json.load(f)
+    raw = path.read_text(encoding="utf-8")
+    nb = json.loads(raw)
 
     # a list, not a generator: any() would stop at the first dirty cell and leave
     # the rest uncleared
     changed = any([clear_cell(cell) for cell in nb.get("cells", [])])
+    changed = normalize_metadata(nb) or changed
+    text = canonical_text(nb)
+    changed = changed or text != raw
 
     if changed and fix:
-        with path.open("w", encoding="utf-8") as f:
-            json.dump(nb, f, indent=1, ensure_ascii=False)
-            f.write("\n")
+        with path.open("w", encoding="utf-8", newline="\n") as f:
+            f.write(text)
 
     return changed
 
