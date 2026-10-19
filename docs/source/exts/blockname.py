@@ -69,8 +69,26 @@ def summary_without_banner(app, what, name, obj, options, lines):
             del lines[0]
 
 
+def no_sidebar_entries(app, doctree):
+    """
+    Keep the objects of the blocks pages out of the sidebar
+
+    Each block is a class, and each class and its ``__init__`` would get an entry
+    in the table of contents, which the sidebar shows as something that can be
+    opened.  There is nothing below a block that is worth a link, so mark the
+    objects of these pages as not wanting an entry.  This has to run before the
+    table of contents is built from the page.
+    """
+    if app.env.docname.startswith("blocks-"):
+        from sphinx import addnodes
+
+        for node in doctree.findall(addnodes.desc):
+            node["no-contents-entry"] = node["nocontentsentry"] = True
+
+
 def setup(app):
     app.connect("autodoc-process-docstring", summary_without_banner)
+    app.connect("doctree-read", no_sidebar_entries, priority=100)
     app.add_role("blockname", block_name)
     return {
         "version": "0.1",
