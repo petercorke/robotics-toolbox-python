@@ -27,9 +27,8 @@ The Toolbox makes trajectories as arrays, one row for each time step, so that th
     ~roboticstoolbox.tools.trajectory.quintic
     ~roboticstoolbox.tools.trajectory.trapezoidal_func
     ~roboticstoolbox.tools.trajectory.quintic_func
-    roboticstoolbox.robot.Robot.Robot.jtraj
 
-``jtraj`` is the joint-space trajectory between two configurations, and ``ctraj`` is the Cartesian trajectory between two poses.  ``mtraj`` makes a multi-axis trajectory by applying a scalar function, ``trapezoidal`` or ``quintic``, to each axis, and ``mstraj`` passes through a sequence of via points.  The ``_func`` versions return a function of time instead of an array.
+``jtraj`` is the joint-space trajectory between two configurations, which a robot also has as the method :meth:`~roboticstoolbox.robot.Robot.Robot.jtraj`, and ``ctraj`` is the Cartesian trajectory between two poses.  ``mtraj`` makes a multi-axis trajectory by applying a scalar function, ``trapezoidal`` or ``quintic``, to each axis, and ``mstraj`` passes through a sequence of via points.  The ``_func`` versions return a function of time instead of an array.
 
 .. rubric:: Functions and methods that use trajectories
 

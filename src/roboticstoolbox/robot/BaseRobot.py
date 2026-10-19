@@ -884,7 +884,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     @property
     def gravity(self) -> NDArray:
         """
-        Get/set default gravitational acceleration (Robot superclass)
+        Get/set default gravitational acceleration
 
         - ``robot.gravity`` is the default gravitational acceleration
         - ``robot.gravity = ...`` checks and sets default gravitational

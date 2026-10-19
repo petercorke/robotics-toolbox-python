@@ -56,7 +56,7 @@ class DynamicsMixin:
     # --------------------------------------------------------------------- #
     def dynamics(self: RobotProto) -> None:
         """
-        Pretty print the dynamic parameters (Robot superclass)
+        Pretty print the dynamic parameters
 
         The dynamic parameters (inertial and friction) are printed in a table,
         with one row per link.
@@ -90,7 +90,7 @@ class DynamicsMixin:
 
     def dynamics_list(self: RobotProto) -> None:
         """
-        Print dynamic parameters (Robot superclass)
+        Print dynamic parameters
 
         Display the kinematic and dynamic parameters to the console in
         reable format
@@ -104,7 +104,7 @@ class DynamicsMixin:
 
     def friction(self: RobotProto, qd: NDArray) -> NDArray:
         r"""
-        Manipulator joint friction (Robot superclass)
+        Manipulator joint friction
 
         :param qd: The joint velocities of the robot
         :type qd: ndarray(n,)

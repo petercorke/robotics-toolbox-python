@@ -1431,7 +1431,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def collided(self, q: Any, shape: Shape, skip: bool = False) -> bool:
         """
-        Check if the robot is in collision with a shape
+        Check if the robot is in collision with a shape (deprecated)
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
@@ -2131,7 +2131,7 @@ class Robot2(BaseRobot[Link2]):
     @property
     def base(self) -> SE2:
         """
-        Get/set robot base transform (Robot superclass)
+        Get/set robot base transform
 
         :returns: robot tool transform
 

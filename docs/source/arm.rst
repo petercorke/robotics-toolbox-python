@@ -117,7 +117,7 @@ The graphical :doc:`backends <arm_backend>` do the drawing.
     ~roboticstoolbox.robot.Robot.Robot.ikine_LM
     ~roboticstoolbox.robot.Robot.Robot.ik_LM
 
-These are the most used.  The inverse kinematics methods, ``ikine_XX`` and ``ik_XX``, and the analytic ones for a ``DHRobot`` are described under :doc:`Inverse Kinematics <IK/ik>`.
+``ikine_LM`` and ``ik_LM`` are two examples.  All the inverse kinematics methods, ``ikine_XX`` and ``ik_XX``, are described under :doc:`Inverse Kinematics <IK/ik>`.
 
 .. rubric:: Dynamics
 
@@ -142,7 +142,6 @@ These are the most used.  The inverse kinematics methods, ``ikine_XX`` and ``ik_
     :nosignatures:
 
     ~roboticstoolbox.robot.Robot.Robot.iscollided
-    ~roboticstoolbox.robot.Robot.Robot.collided
     ~roboticstoolbox.robot.Robot.Robot.closest_point
 
 The ``Shape`` that these methods take is a class of the `spatialgeometry <https://github.com/jhavl/spatialgeometry>`_ package, such as ``Sphere``, ``Cuboid`` or ``Mesh``.  In the signatures it links to the documentation of that package.
