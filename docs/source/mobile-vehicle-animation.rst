@@ -1,5 +1,5 @@
-Animations
-----------
+Vehicle animation
+-----------------
 
 These classes create a graphical object that can be animated to show vehicle
 position or pose.
