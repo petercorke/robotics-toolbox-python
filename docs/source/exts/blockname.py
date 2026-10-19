@@ -47,7 +47,30 @@ def block_name(name, rawtext, text, lineno, inliner, options={}, content=[]):
     return [html_node], []
 
 
+def summary_without_banner(app, what, name, obj, options, lines):
+    """
+    Give autosummary the description of a block, not its banner
+
+    Autosummary uses the first paragraph of the docstring of a class as its one
+    line summary.  For a block that is the ``:blockname:`` banner, which would
+    appear in a table as the block's name in capitals.  So when autosummary asks,
+    drop the banner and use the description that follows.  Autodoc passes the
+    options of its directive, and autosummary does not, which is how the two are
+    told apart: the pages of the blocks keep their banners.
+    """
+    if (
+        what == "class"
+        and options.members is None
+        and lines
+        and lines[0].lstrip().startswith(":blockname:")
+    ):
+        del lines[0]
+        while lines and not lines[0].strip():
+            del lines[0]
+
+
 def setup(app):
+    app.connect("autodoc-process-docstring", summary_without_banner)
     app.add_role("blockname", block_name)
     return {
         "version": "0.1",

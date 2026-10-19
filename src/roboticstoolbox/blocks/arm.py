@@ -1028,7 +1028,7 @@ class IDyn(FunctionBlock):
     r"""
     :blockname:`IDYN`
 
-    Robot arm forward dynamics model.
+    Robot arm inverse dynamics model.
 
     :inputs: 3
     :outputs: 1
