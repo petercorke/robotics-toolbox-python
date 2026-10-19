@@ -1017,14 +1017,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         for link in self.links:
             if link.isrevolute:
-                if (
-                    link.qlim is None
-                    or link.qlim[0] is None
-                    or np.any(np.isnan(link.qlim))
-                ):
+                # a symbolic model holds SymPy numbers, which np.isnan rejects
+                qlim = None if link.qlim is None else np.asarray(link.qlim, dtype=float)
+                if qlim is None or np.any(np.isnan(qlim)):
                     v = [-np.pi, np.pi]
                 else:
-                    v = link.qlim
+                    v = qlim
             elif link.isprismatic:
                 if link.qlim is None:
                     raise ValueError("Undefined prismatic joint limit")
