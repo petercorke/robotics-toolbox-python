@@ -76,6 +76,10 @@ class DHRobot(Robot):
 
     """
 
+    # -------------------------------------------------------------------------- #
+    # Construction, copying and display
+    # -------------------------------------------------------------------------- #
+
     def __init__(self, links: Any, meshdir: Any = None, **kwargs: Any) -> None:
         # Verify L
         if not isinstance(links, list):
@@ -142,9 +146,139 @@ class DHRobot(Robot):
         # frne parameters
         self._frne = None
 
-    @property
-    def links(self) -> list[DHLink]:
-        return self._links
+    def __add__(self, L: Any) -> Any:
+        nlinks = []
+
+        # TODO - Should I do a deep copy here a physically copy the DHLinks
+        # and not just the references?
+        # Copy DHLink references to new list
+        for i in range(self.n):
+            nlinks.append(self.links[i])
+
+        if isinstance(L, DHLink):
+            nlinks.append(L)
+        elif isinstance(L, DHRobot):
+            for j in range(L.n):
+                nlinks.append(L.links[j])
+        else:
+            raise TypeError("Can only combine DHRobots with other DHRobots or DHLinks")
+
+        return DHRobot(
+            nlinks,
+            name=self.name,
+            manufacturer=self.manufacturer,
+            base=self.base,
+            tool=self.tool,
+            gravity=self.gravity,
+        )
+
+    def __deepcopy__(self, memo: Any) -> Any:
+        links = []
+
+        for link in self.links:
+            links.append(copy.deepcopy(link))
+
+        name = copy.deepcopy(self.name)
+        manufacturer = copy.deepcopy(self.manufacturer)
+        comment = copy.deepcopy(self.comment)
+        base = copy.deepcopy(self.base)
+        tool = copy.deepcopy(self.tool)
+        gravity = copy.deepcopy(self.gravity)
+        keywords = copy.deepcopy(self.keywords)
+        symbolic = copy.deepcopy(self.symbolic)
+        configs = copy.deepcopy(self.configs)
+
+        try:
+            if self.meshdir:
+                meshdir = copy.deepcopy(self.meshdir)
+            else:
+                meshdir = None
+        except AttributeError:
+            meshdir = None
+
+        # cls = self.__class__
+        result = DHRobot(
+            links,
+            meshdir=meshdir,
+            name=name,
+            manufacturer=manufacturer,
+            comment=comment,
+            base=base,
+            tool=tool,
+            gravity=gravity,
+            keywords=keywords,
+            symbolic=symbolic,
+            configs=configs,
+        )
+
+        # if a configuration was an attribute of original robot, make it an
+        # attribute of the deep copy
+        for config in configs:
+            if hasattr(self, config):
+                setattr(result, config, configs[config])
+
+        try:
+            setattr(result, "ikine_a", getattr(self, "ikine_a"))
+        except AttributeError:
+            pass
+
+        memo[id(self)] = result
+        return result
+
+    # def copy(self):
+    #     """
+    #     Copy a robot
+
+    #     :return: A deepish copy of the robot
+    #     :rtype: Robot subclass instance
+    #     """
+
+    #     L = [link.copy() for link in self]
+
+    #     new = DHRobot(
+    #         L,
+    #         name=self.name,
+    #         manufacturer=self.manufacturer,
+    #         base=self.base,
+    #         tool=self.tool,
+    #         gravity=self.gravity)
+
+    #     new.q = self.q
+    #     new.qd = self.qd
+    #     new.qdd = self.qdd
+
+    #     return new
+
+
+    def _set_link_fk(self, q: Any) -> None:
+        """
+        robot._set_link_fk(q) evaluates fkine for each link within a
+        robot and stores that pose in a private variable within the link.
+
+        This method is not for general use.
+
+        :param q: The joint angles/configuration of the robot
+        :type q: float ndarray(n)
+
+        .. note::
+
+            - The robot's base transform, if present, are incorporated
+              into the result.
+        """
+
+        q = getvector(q, self.n)
+
+        # t = self.base
+
+        tall = self.fkine_all(q, old=True)
+
+        for i, link in enumerate(self.links):
+            # Update the link model transforms
+            for col in link.collision:
+                col.wT = tall[i]
+
+            for gi in link.geometry:
+                gi.wT = tall[i]
 
     def __str__(self) -> str:
         """
@@ -313,142 +447,13 @@ class DHRobot(Robot):
 
         return s
 
-    def __add__(self, L: Any) -> Any:
-        nlinks = []
+    # -------------------------------------------------------------------------- #
+    # Properties of the links
+    # -------------------------------------------------------------------------- #
 
-        # TODO - Should I do a deep copy here a physically copy the DHLinks
-        # and not just the references?
-        # Copy DHLink references to new list
-        for i in range(self.n):
-            nlinks.append(self.links[i])
-
-        if isinstance(L, DHLink):
-            nlinks.append(L)
-        elif isinstance(L, DHRobot):
-            for j in range(L.n):
-                nlinks.append(L.links[j])
-        else:
-            raise TypeError("Can only combine DHRobots with other DHRobots or DHLinks")
-
-        return DHRobot(
-            nlinks,
-            name=self.name,
-            manufacturer=self.manufacturer,
-            base=self.base,
-            tool=self.tool,
-            gravity=self.gravity,
-        )
-
-    def __deepcopy__(self, memo: Any) -> Any:
-        links = []
-
-        for link in self.links:
-            links.append(copy.deepcopy(link))
-
-        name = copy.deepcopy(self.name)
-        manufacturer = copy.deepcopy(self.manufacturer)
-        comment = copy.deepcopy(self.comment)
-        base = copy.deepcopy(self.base)
-        tool = copy.deepcopy(self.tool)
-        gravity = copy.deepcopy(self.gravity)
-        keywords = copy.deepcopy(self.keywords)
-        symbolic = copy.deepcopy(self.symbolic)
-        configs = copy.deepcopy(self.configs)
-
-        try:
-            if self.meshdir:
-                meshdir = copy.deepcopy(self.meshdir)
-            else:
-                meshdir = None
-        except AttributeError:
-            meshdir = None
-
-        # cls = self.__class__
-        result = DHRobot(
-            links,
-            meshdir=meshdir,
-            name=name,
-            manufacturer=manufacturer,
-            comment=comment,
-            base=base,
-            tool=tool,
-            gravity=gravity,
-            keywords=keywords,
-            symbolic=symbolic,
-            configs=configs,
-        )
-
-        # if a configuration was an attribute of original robot, make it an
-        # attribute of the deep copy
-        for config in configs:
-            if hasattr(self, config):
-                setattr(result, config, configs[config])
-
-        try:
-            setattr(result, "ikine_a", getattr(self, "ikine_a"))
-        except AttributeError:
-            pass
-
-        memo[id(self)] = result
-        return result
-
-    # def copy(self):
-    #     """
-    #     Copy a robot
-
-    #     :return: A deepish copy of the robot
-    #     :rtype: Robot subclass instance
-    #     """
-
-    #     L = [link.copy() for link in self]
-
-    #     new = DHRobot(
-    #         L,
-    #         name=self.name,
-    #         manufacturer=self.manufacturer,
-    #         base=self.base,
-    #         tool=self.tool,
-    #         gravity=self.gravity)
-
-    #     new.q = self.q
-    #     new.qd = self.qd
-    #     new.qdd = self.qdd
-
-    #     return new
-
-    # --------------------------------------------------------------------- #
-
-    def _set_link_fk(self, q: Any) -> None:
-        """
-        robot._set_link_fk(q) evaluates fkine for each link within a
-        robot and stores that pose in a private variable within the link.
-
-        This method is not for general use.
-
-        :param q: The joint angles/configuration of the robot
-        :type q: float ndarray(n)
-
-        .. note::
-
-            - The robot's base transform, if present, are incorporated
-              into the result.
-        """
-
-        q = getvector(q, self.n)
-
-        # t = self.base
-
-        tall = self.fkine_all(q, old=True)
-
-        for i, link in enumerate(self.links):
-            # Update the link model transforms
-            for col in link.collision:
-                col.wT = tall[i]
-
-            for gi in link.geometry:
-                gi.wT = tall[i]
-
-    # --------------------------------------------------------------------- #
+    @property
+    def links(self) -> list[DHLink]:
+        return self._links
 
     @property
     def mdh(self) -> Any:
@@ -673,48 +678,9 @@ class DHRobot(Robot):
         """
         return 1
 
-    def A(self, j: Any, q: Any = None) -> Any:
-        """
-        Link forward kinematics
-
-        :param j: Joints to compute link transform for
-        :type j: int, 2-tuple
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: float ndarray(1,n)
-        :return T: The transform between link frames
-        :rtype T: SE3
-
-        - ``robot.A(j, q)`` transform between link frames {0} and {j}.  ``q``
-          is a vector (n) of joint variables.
-        - ``robot.A([j1, j2], q)`` as above between link frames {j1} and {j2}.
-        - ``robot.A(j)`` as above except uses the stored q value of the
-          robot object.
-
-        .. note:: Base and tool transforms are not applied.
-
-        """
-
-        if isscalar(j):
-            j0 = 0
-            jn = int(j)
-        else:
-            j = getvector(j, 2)
-            j0 = int(j[0])
-            jn = int(j[1])
-
-        jn += 1
-
-        if jn > self.n:
-            raise ValueError("The joints value out of range")
-
-        q = getvector(q)
-
-        T = SE3()
-        for i in range(j0, jn):
-            T *= self.links[i].A(q[i])
-
-        return T
+    # -------------------------------------------------------------------------- #
+    # Information about the robot
+    # -------------------------------------------------------------------------- #
 
     def islimit(self, q: Any = None) -> Any:
         """
@@ -880,6 +846,11 @@ class DHRobot(Robot):
 
         return tw, T[-1]
 
+    def segments(self) -> Any:
+        segments: list[Any] = [None]
+        segments.extend(self.links)
+        return [segments]
+
     def ets(self, *args: Any, **kwargs: Any) -> ETS:  # type: ignore[override]
         """
         Robot kinematics as an elemenary transform sequence
@@ -922,6 +893,53 @@ class DHRobot(Robot):
             ets *= ET.SE3(tool)
 
         return ets
+
+    # -------------------------------------------------------------------------- #
+    # Forward kinematics
+    # -------------------------------------------------------------------------- #
+
+    def A(self, j: Any, q: Any = None) -> Any:
+        """
+        Link forward kinematics
+
+        :param j: Joints to compute link transform for
+        :type j: int, 2-tuple
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values)
+        :type q: float ndarray(1,n)
+        :return T: The transform between link frames
+        :rtype T: SE3
+
+        - ``robot.A(j, q)`` transform between link frames {0} and {j}.  ``q``
+          is a vector (n) of joint variables.
+        - ``robot.A([j1, j2], q)`` as above between link frames {j1} and {j2}.
+        - ``robot.A(j)`` as above except uses the stored q value of the
+          robot object.
+
+        .. note:: Base and tool transforms are not applied.
+
+        """
+
+        if isscalar(j):
+            j0 = 0
+            jn = int(j)
+        else:
+            j = getvector(j, 2)
+            j0 = int(j[0])
+            jn = int(j[1])
+
+        jn += 1
+
+        if jn > self.n:
+            raise ValueError("The joints value out of range")
+
+        q = getvector(q)
+
+        T = SE3()
+        for i in range(j0, jn):
+            T *= self.links[i].A(q[i])
+
+        return T
 
     def fkine(self, q: Any, **kwargs: Any) -> Any:  # type: ignore[override]
         """
@@ -1016,11 +1034,6 @@ class DHRobot(Robot):
 
         return T
 
-    def segments(self) -> Any:
-        segments: list[Any] = [None]
-        segments.extend(self.links)
-        return [segments]
-
     def fkine_all(self, q: Any = None, old: bool = True) -> Any:
         """
         Forward kinematics for all link frames
@@ -1068,6 +1081,184 @@ class DHRobot(Robot):
             Tj *= L.A(q)
             Tall.append(Tj)
         return Tall
+
+    # -------------------------------------------------------------------------- #
+    # Inverse kinematics
+    # -------------------------------------------------------------------------- #
+
+    def ikine_LM(  # type: ignore[override]
+        self, Tep: np.ndarray | SE3, q0: ArrayLike | None = None, **ikargs: Any
+    ) -> Any:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization
+
+        :param Tep: The desired end-effector pose or pose trajectory, see
+            :meth:`~roboticstoolbox.ETS.ikine_LM` for how a trajectory is handled
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
+        :param ikargs: |ikargs|
+        :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
+        :rtype: IKSolution
+
+        This is a thin wrapper around :meth:`~roboticstoolbox.ETS.ikine_LM` -- see that
+        method for the full description of the Levenberg-Marquadt solver
+        and its ``method``/``kq``/``km`` variants.
+
+        .. seealso:: :meth:`ikine_LM` (:class:`~roboticstoolbox.ETS`)
+        """
+        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)  # type: ignore[arg-type]
+
+    def ikine_6s(self, T: Any, config: Any, ikfunc: Any) -> Any:
+        """
+        Analytic inverse kinematics for a robot with a spherical wrist
+
+        .. deprecated:: 1.4.5
+            This came from the MATLAB Toolbox and is not general.  It only handles
+            the wrist, the user supplied ``ikfunc`` must solve the first three
+            joints, and that is specific to one robot geometry.  It also
+            mishandles trajectories and unreachable poses.  It is no longer used by
+            ``ikine_a``, which is self-contained.  A hand-written
+            solution belongs in the class of the robot it is written for.
+
+        :param T: end-effector pose
+        :param config: arm configuration string
+        :param ikfunc: function ``ikfunc(robot, T, config)`` which returns the
+            joint angles of the first three joints
+        :returns: an IKSolution
+        """
+        warnings.warn(
+            "ikine_6s is deprecated and will be removed in a future release, "
+            "write a hand-written solution for your robot, as Puma560.ikine_a does",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        # Undo base and tool transformations, but if they are not
+        # set, skip the operation.  Nicer for symbolics
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.array_equal(self.tool.A, np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
+        if base is not None:
+            T = base.inv() * T
+        if tool is not None:
+            T = T * tool.inv()
+
+        # q = np.zeros((6,))
+        solutions = []
+
+        for k, Tk in enumerate(T):
+            # get model specific solution for first 3 joints
+            theta = ikfunc(self, Tk, config)
+
+            if isinstance(theta, np.ndarray):
+                # Solve for the wrist rotation
+                # We need to account for some random translations between the
+                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
+                # final frame.
+
+                # Transform of first 3 joints
+                T13 = self.A([0, 2], theta)
+
+                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
+                Td4 = SE3(0, 0, self.links[3].d)  # Tz(d4)
+
+                # Tz(d6) Tx(a5) Rx(alpha6)
+                Tt = SE3(self.links[5].a, 0, self.links[5].d) * SE3.Rx(
+                    self.links[5].alpha
+                )
+
+                R = Td4.inv() * T13.inv() * Tk * Tt.inv()
+
+                # The spherical wrist implements Euler angles
+                if "f" in config:
+                    eul = R.eul(flip=True)
+                else:
+                    eul = R.eul()
+                theta = np.r_[theta, eul]
+                if self.links[3].alpha > 0:
+                    theta[4] = -theta[4]
+
+                # Remove the link offset angles
+                theta = theta - self.offset
+
+                # solution = iksol(theta, True, "")
+                solution = IKSolution(q=theta, success=True)
+
+            else:
+                # ikfunc can return None or a str reason
+                if theta is None:
+                    solution = IKSolution(q=None, success=False)  # type: ignore[arg-type]
+                else:
+                    solution = IKSolution(q=None, success=False, reason=theta)  # type: ignore[arg-type]
+
+            solutions.append(solution)
+
+        if len(T) == 1:
+            return solutions[0]
+        else:
+            # the 2nd and 3rd positional arguments are not what IKSolution
+            # takes (success, iterations): see findings
+            return IKSolution(
+                np.vstack([sol.q for sol in solutions]),
+                np.array([sol.success for sol in solutions]),  # type: ignore[arg-type]
+                [sol.reason for sol in solutions],  # type: ignore[arg-type]
+            )
+
+    def config_validate(self, config: Any, allowables: Any) -> Any:
+        """
+        Validate a configuration string
+
+        :param config: a configuration string
+        :type config: str
+        :param allowable: [description]
+        :type allowable: tuple of str
+        :raises ValueError: bad character in configuration string
+        :return: configuration string
+        :rtype: str
+
+        For analytic inverse kinematics the Toolbox uses a string whose
+        letters indicate particular solutions, eg. for the Puma 560
+
+            =========  ===================
+            Character  Meaning
+            =========  ===================
+            'l'        lefty
+            'r'        righty
+            'u'        elbow up
+            'd'        elbow down
+            'n'        wrist not flipped
+            'f'        wrist flipped
+            =========  ===================
+
+        This method checks that the configuration string is valid and adds
+        default values for missing characters.  For example:
+
+            config = self.config_validate(config, ('lr', 'ud', 'nf'))
+
+        indicates the valid characters, and the first character in each
+        string is the default, ie. if neither 'l' or 'r' is given then
+        'l' will be added to the string.
+
+        """
+        for c in config:
+            if not any([c in allowable for allowable in allowables]):
+                raise ValueError(f"bad config specifier <{c}>")
+        for allowable in allowables:
+            if all([a not in config for a in allowable]):
+                config += allowable[0]
+        return config
+
+    # -------------------------------------------------------------------------- #
+    # Jacobians and Hessian
+    # -------------------------------------------------------------------------- #
 
     def jacobe(self, q: Any, half: Any = None, **kwargs: Any) -> Any:  # type: ignore[override]
         r"""
@@ -1354,6 +1545,8 @@ class DHRobot(Robot):
 
         return None, None, None
 
+    # -------------------------------------------------------------------------- #
+    # Dynamics
     # -------------------------------------------------------------------------- #
 
     def _copy_to_cpp(self) -> None:
@@ -1891,180 +2084,6 @@ class DHRobot(Robot):
                 return tau.flatten()
             else:
                 return tau
-
-    # -------------------------------------------------------------------------- #
-
-    def ikine_6s(self, T: Any, config: Any, ikfunc: Any) -> Any:
-        """
-        Analytic inverse kinematics for a robot with a spherical wrist
-
-        .. deprecated:: 1.4.5
-            This came from the MATLAB Toolbox and is not general.  It only handles
-            the wrist, the user supplied ``ikfunc`` must solve the first three
-            joints, and that is specific to one robot geometry.  It also
-            mishandles trajectories and unreachable poses.  It is no longer used by
-            ``ikine_a``, which is self-contained.  A hand-written
-            solution belongs in the class of the robot it is written for.
-
-        :param T: end-effector pose
-        :param config: arm configuration string
-        :param ikfunc: function ``ikfunc(robot, T, config)`` which returns the
-            joint angles of the first three joints
-        :returns: an IKSolution
-        """
-        warnings.warn(
-            "ikine_6s is deprecated and will be removed in a future release, "
-            "write a hand-written solution for your robot, as Puma560.ikine_a does",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        # Undo base and tool transformations, but if they are not
-        # set, skip the operation.  Nicer for symbolics
-        if np.array_equal(self.base.A, np.eye(4)):
-            base = None
-        else:
-            base = self.base
-
-        if np.array_equal(self.tool.A, np.eye(4)):
-            tool = None
-        else:
-            tool = self.tool
-
-        if base is not None:
-            T = base.inv() * T
-        if tool is not None:
-            T = T * tool.inv()
-
-        # q = np.zeros((6,))
-        solutions = []
-
-        for k, Tk in enumerate(T):
-            # get model specific solution for first 3 joints
-            theta = ikfunc(self, Tk, config)
-
-            if isinstance(theta, np.ndarray):
-                # Solve for the wrist rotation
-                # We need to account for some random translations between the
-                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
-                # final frame.
-
-                # Transform of first 3 joints
-                T13 = self.A([0, 2], theta)
-
-                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
-                Td4 = SE3(0, 0, self.links[3].d)  # Tz(d4)
-
-                # Tz(d6) Tx(a5) Rx(alpha6)
-                Tt = SE3(self.links[5].a, 0, self.links[5].d) * SE3.Rx(
-                    self.links[5].alpha
-                )
-
-                R = Td4.inv() * T13.inv() * Tk * Tt.inv()
-
-                # The spherical wrist implements Euler angles
-                if "f" in config:
-                    eul = R.eul(flip=True)
-                else:
-                    eul = R.eul()
-                theta = np.r_[theta, eul]
-                if self.links[3].alpha > 0:
-                    theta[4] = -theta[4]
-
-                # Remove the link offset angles
-                theta = theta - self.offset
-
-                # solution = iksol(theta, True, "")
-                solution = IKSolution(q=theta, success=True)
-
-            else:
-                # ikfunc can return None or a str reason
-                if theta is None:
-                    solution = IKSolution(q=None, success=False)  # type: ignore[arg-type]
-                else:
-                    solution = IKSolution(q=None, success=False, reason=theta)  # type: ignore[arg-type]
-
-            solutions.append(solution)
-
-        if len(T) == 1:
-            return solutions[0]
-        else:
-            # the 2nd and 3rd positional arguments are not what IKSolution
-            # takes (success, iterations): see findings
-            return IKSolution(
-                np.vstack([sol.q for sol in solutions]),
-                np.array([sol.success for sol in solutions]),  # type: ignore[arg-type]
-                [sol.reason for sol in solutions],  # type: ignore[arg-type]
-            )
-
-    def config_validate(self, config: Any, allowables: Any) -> Any:
-        """
-        Validate a configuration string
-
-        :param config: a configuration string
-        :type config: str
-        :param allowable: [description]
-        :type allowable: tuple of str
-        :raises ValueError: bad character in configuration string
-        :return: configuration string
-        :rtype: str
-
-        For analytic inverse kinematics the Toolbox uses a string whose
-        letters indicate particular solutions, eg. for the Puma 560
-
-            =========  ===================
-            Character  Meaning
-            =========  ===================
-            'l'        lefty
-            'r'        righty
-            'u'        elbow up
-            'd'        elbow down
-            'n'        wrist not flipped
-            'f'        wrist flipped
-            =========  ===================
-
-        This method checks that the configuration string is valid and adds
-        default values for missing characters.  For example:
-
-            config = self.config_validate(config, ('lr', 'ud', 'nf'))
-
-        indicates the valid characters, and the first character in each
-        string is the default, ie. if neither 'l' or 'r' is given then
-        'l' will be added to the string.
-
-        """
-        for c in config:
-            if not any([c in allowable for allowable in allowables]):
-                raise ValueError(f"bad config specifier <{c}>")
-        for allowable in allowables:
-            if all([a not in config for a in allowable]):
-                config += allowable[0]
-        return config
-
-    # -------------------------------------------------------------------------- #
-
-    def ikine_LM(  # type: ignore[override]
-        self, Tep: np.ndarray | SE3, q0: ArrayLike | None = None, **ikargs: Any
-    ) -> Any:
-        """
-        Numerical inverse kinematics by Levenberg-Marquadt optimization
-
-        :param Tep: The desired end-effector pose or pose trajectory, see
-            :meth:`~roboticstoolbox.ETS.ikine_LM` for how a trajectory is handled
-        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
-            whose rows are the starting points of the first m searches (any
-            further searches start from random valid coordinates)
-        :param ikargs: |ikargs|
-        :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
-        :rtype: IKSolution
-
-        This is a thin wrapper around :meth:`~roboticstoolbox.ETS.ikine_LM` -- see that
-        method for the full description of the Levenberg-Marquadt solver
-        and its ``method``/``kq``/``km`` variants.
-
-        .. seealso:: :meth:`ikine_LM` (:class:`~roboticstoolbox.ETS`)
-        """
-        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)  # type: ignore[arg-type]
 
 
 class SerialLink(DHRobot):
