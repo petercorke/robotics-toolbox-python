@@ -749,10 +749,21 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     @property
     def configs(self) -> dict[str, NDArray]:
+        """
+        Named joint configurations
+
+        :returns: dictionary of joint configurations, such as ``qr`` and ``qz``,
+            indexed by name
+        """
         return self._configs
 
     @property
     def keywords(self) -> list[str]:
+        """
+        Keywords that describe the robot
+
+        :returns: the keywords, which the model catalog can filter on
+        """
         return self._keywords
 
     @property
@@ -1055,7 +1066,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     @property
     def prismaticjoints(self) -> list[bool]:
         """
-        Revolute joints as bool array
+        Prismatic joints as bool array
 
         :returns: array of joint type, True if prismatic
 
@@ -1548,6 +1559,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return ets
 
     def copy(self) -> Any:
+        """
+        Make a copy of the robot
+
+        :returns: a deep copy, which shares no state with the original
+        """
         return deepcopy(self)
 
     def __deepcopy__(self, memo: Any) -> Any:

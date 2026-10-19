@@ -57,6 +57,15 @@ _KEYWORDS_DEFAULT: list[str] = []
 
 
 class Robot(BaseRobot[Link], RobotKinematicsMixin):
+    """
+    Robot manipulator defined by links or an elementary transform sequence
+
+    The robot is made from a list of links, an :class:`~roboticstoolbox.ets.ETS.ETS`
+    or another robot.  It can be a tree.  It is the superclass of the robots defined
+    by Denavit-Hartenberg parameters, :class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
+    and of those loaded from a URDF file.
+    """
+
     _color = True
 
     def __init__(
