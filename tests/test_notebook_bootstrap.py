@@ -307,3 +307,41 @@ def test_notebooks_are_written_as_nbformat_writes_them(tmp_path):
 
     text = nb_path.read_text(encoding="utf-8")
     assert text == nbformat.writes(nbformat.reads(text, as_version=4)) + "\n"
+
+
+# --- pre_commit.py ------------------------------------------------------------
+
+pre_commit = _load_module("_pre_commit", NOTEBOOKS_DIR / "pre_commit.py")
+
+
+def test_hook_tidies_a_notebook(tmp_path):
+    nb_path = tmp_path / "demo.ipynb"
+    dirty = _code_cell("print(1)\n", outputs=[{"output_type": "stream", "text": "1\n"}], execution_count=3)
+    _write_notebook(nb_path, [dirty])
+
+    assert pre_commit.tidy([nb_path]) == [nb_path]
+
+    nb = json.loads(nb_path.read_text(encoding="utf-8"))
+    assert nb["cells"][0]["outputs"] == []
+    assert nb["metadata"]["kernelspec"]["name"] == "python3"
+    assert pre_commit.tidy([nb_path]) == []  # nothing left to do
+
+
+def test_hook_refuses_a_notebook_with_conflict_markers(tmp_path):
+    nb_path = tmp_path / "demo.ipynb"
+    nb_path.write_text('{\n<<<<<<< HEAD\n}\n=======\n}\n>>>>>>> main\n', encoding="utf-8")
+
+    with pytest.raises(SystemExit, match="merge conflict"):
+        pre_commit.tidy([nb_path])
+
+
+def test_install_writes_the_hook_and_leaves_another_alone(tmp_path):
+    hooks = tmp_path / "hooks"
+
+    assert "installed" in pre_commit.install(hooks)
+    assert (hooks / "pre-commit").read_text(encoding="utf-8") == pre_commit.STUB
+    assert "installed" in pre_commit.install(hooks)  # again is fine
+
+    (hooks / "pre-commit").write_text("#!/bin/sh\necho mine\n", encoding="utf-8")
+    assert "left alone" in pre_commit.install(hooks)
+    assert "mine" in (hooks / "pre-commit").read_text(encoding="utf-8")

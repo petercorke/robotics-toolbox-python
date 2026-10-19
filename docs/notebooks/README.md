@@ -32,19 +32,23 @@ The second cell is the generated bootstrap cell, below.
 
 ## Editing a notebook
 
-Edit it as you like, in VS Code or anywhere.  Before you commit:
+Edit it as you like, in VS Code or anywhere, and commit it.  That is all.
 
-1. **Run `python docs/notebooks/clear_outputs.py`.**  Notebooks are committed without
-   outputs (clearing them in VS Code is not enough on its own).  The script also resets
-   the metadata an editor writes (the name and version of your Python environment, and
-   so on) to a canonical form, and writes the file as Jupyter does, so opening and
-   saving a notebook does not show up as a change.
-2. That is all for an ordinary edit.  `python docs/notebooks/sync_bootstrap.py` is only
-   needed after you change `_rtb_nb_bootstrap.py` or a notebook's `rtb_bootstrap`
-   metadata (it also adds cell ids, which VS Code would otherwise add whenever it
-   opens a notebook that has none).
+Install the commit hook once, in any clone or worktree:
 
-`docs.yml` runs both scripts with `--check`, so CI tells you if you forgot.
+    python docs/notebooks/pre_commit.py --install
+
+and every commit that includes a notebook first tidies it: no outputs or execution
+counts, a cell id on every cell, the same kernel and language in the metadata (an editor
+writes the name and version of your Python environment, which is noise in every diff),
+and the file written as Jupyter writes it, so that opening and saving a notebook never
+shows up as a change.  It refuses the commit, with a message, if a notebook still has
+merge conflict markers.
+
+Without the hook, run `python docs/notebooks/clear_outputs.py` before committing, and
+`python docs/notebooks/sync_bootstrap.py` after changing `_rtb_nb_bootstrap.py` or a
+notebook's `rtb_bootstrap` metadata.  `docs.yml` runs both with `--check`, so CI tells you
+if you forgot.
 
 ## Outputs are not committed
 
