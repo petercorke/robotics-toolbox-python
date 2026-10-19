@@ -1911,10 +1911,16 @@ class ETS(BaseETS[ET]):
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
-        :raises ImportError: if the package ``qpsolvers`` is not installed
+        :raises ImportError: if the package ``qpsolvers`` is not installed, see the note below
 
         A method that provides functionality to perform numerical inverse kinematics
         (IK) using a quadratic programming approach.
+
+        .. note::
+
+            This needs the packages ``qpsolvers`` and ``quadprog``, which are not
+            installed with the Toolbox by default.  Install them with the ``qp``
+            extra: ``pip install roboticstoolbox-python[qp]``.
 
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.

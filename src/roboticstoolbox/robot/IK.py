@@ -1452,6 +1452,12 @@ class IK_QP(IKSolver):
     using a quadratic programming approach. See ``step`` method for mathematical
     description.
 
+    .. note::
+
+        This needs the packages ``qpsolvers`` and ``quadprog``, which are not
+        installed with the Toolbox by default.  Install them with the ``qp`` extra:
+        ``pip install roboticstoolbox-python[qp]``.
+
     :param name: The name of the IK algorithm
     :param ilimit: How many iterations are allowed within a search before a new search
         is started
@@ -1482,7 +1488,7 @@ class IK_QP(IKSolver):
         allowed to approach to its limit
     :param pi: The influence angle/distance (in radians or metres) in null space motion
         becomes active
-    :raises ImportError: If the package ``qpsolvers`` is not installed
+    :raises ImportError: If the package ``qpsolvers`` is not installed, see the note above
 
     Example::
 
@@ -1543,8 +1549,8 @@ class IK_QP(IKSolver):
     ) -> None:
         if not _qp:  # pragma: nocover
             raise ImportError(
-                "the package qpsolvers is required for this class. \nInstall using 'pip"
-                " install qpsolvers'"
+                "the packages qpsolvers and quadprog are required for this class. "
+                "\nInstall them using 'pip install roboticstoolbox-python[qp]'"
             )
 
         super().__init__(
