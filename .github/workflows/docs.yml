@@ -28,6 +28,11 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Check notebook bootstrap cells and outputs are in sync
+        run: |
+          python docs/notebooks/sync_bootstrap.py --check
+          python docs/notebooks/clear_outputs.py --check
+
       - name: Install docs dependencies
         run: |
           pip install .[docs]
@@ -68,6 +73,20 @@ jobs:
           pip install build
           RTB_PURE_WHEEL=1 python3 -m build --wheel --outdir docs/lite/pypi
 
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: docs/lite/wasm_check/package-lock.json
+
+      - name: Check the JupyterLite install path actually works (real Pyodide, real WASM)
+        # Runs the notebooks' bootstrap in Pyodide under Node against the wheel
+        # just built, so a dependency that cannot be installed in the browser
+        # fails here and not on the published site.
+        run: |
+          npm --prefix docs/lite/wasm_check ci
+          node docs/lite/wasm_check/check_pyodide_install.mjs docs/lite/pypi/*.whl
+
       - name: Sync notebooks into JupyterLite content
         # Copies *.ipynb plus any local asset directories (e.g.
         # docs/notebooks/figs/, referenced by relative path from markdown
@@ -82,7 +101,7 @@ jobs:
         run: |
           mkdir -p docs/lite/files
           rsync -a --exclude '.ipynb_checkpoints' --exclude '__pycache__' \
-            --exclude 'Untitled*.ipynb' --exclude '*.py' --exclude 'Makefile' \
+            --exclude 'Untitled*.ipynb' --exclude '*.py' --exclude 'Makefile' --exclude 'README.md' \
             --exclude 'ik_benchmark.ipynb' \
             --exclude 'ik-symbolic.ipynb' \
             docs/notebooks/ docs/lite/files/
