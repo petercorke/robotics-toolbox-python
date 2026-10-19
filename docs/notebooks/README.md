@@ -21,6 +21,22 @@ found by that line, not by its position) and is folded by default.
   Then it installs the toolbox with its dependencies, from the wheel bundled with the
   JupyterLite site if there is one, or else from PyPI.
 
+## The standard first cell
+
+Every notebook starts with the same markdown cell: the logo and title, the copyright
+line, and a short description.  It is generated from the notebook's own metadata by
+`sync_bootstrap.py`, like the bootstrap cell, and the `<!-- RTB_HEADER` comment on its
+first line marks it:
+
+```json
+"metadata": {"rtb_header": {"title": "Robot dynamics",
+                            "paragraphs": ["What this notebook shows."],
+                            "modernised": "2026-10-19"}}
+```
+
+`title` is required; `paragraphs`, `copyright` and `modernised` are optional.
+`modernised` adds a note that the notebook was updated to address API drift.
+
 ## Outputs are not committed
 
 Notebooks are committed without outputs or execution counts, so diffs show only what

@@ -223,3 +223,46 @@ def test_extras_come_from_the_notebook_metadata(tmp_path):
 def test_no_extras_gives_the_plain_call():
     lines = sync_bootstrap.generated_source("async def ensure_installed(): ...\n")
     assert "".join(lines).rstrip().endswith("COLAB = await ensure_installed()")
+
+
+def test_header_cell_is_generated_from_metadata(tmp_path):
+    nb_path = tmp_path / "demo.ipynb"
+    nb = {
+        "cells": [_code_cell("x = 1\n")],
+        "metadata": {
+            "rtb_header": {
+                "title": "A title",
+                "paragraphs": ["About it."],
+                "modernised": "2026-10-19",
+            }
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    nb_path.write_text(json.dumps(nb), encoding="utf-8")
+
+    # check mode reports the missing header and does not write
+    assert sync_bootstrap.process_notebook(nb_path, template="", fix=False)
+    assert json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]["cell_type"] == "code"
+
+    assert sync_bootstrap.process_notebook(nb_path, template="", fix=True)
+    cells = json.loads(nb_path.read_text(encoding="utf-8"))["cells"]
+    assert sync_bootstrap.is_header_cell(cells[0])
+    text = "".join(cells[0]["source"])
+    assert "A title" in text and "About it." in text
+    assert "Modernised 2026-10-19" in text
+    assert len(cells) == 2  # inserted once, the original cell kept
+
+    # idempotent, and a change to the metadata is noticed
+    assert not sync_bootstrap.process_notebook(nb_path, template="", fix=True)
+    nb = json.loads(nb_path.read_text(encoding="utf-8"))
+    nb["metadata"]["rtb_header"]["title"] = "Another"
+    nb_path.write_text(json.dumps(nb), encoding="utf-8")
+    assert sync_bootstrap.process_notebook(nb_path, template="", fix=True)
+    assert "Another" in "".join(json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]["source"])
+
+
+def test_notebook_without_header_metadata_gets_no_header(tmp_path):
+    nb_path = tmp_path / "demo.ipynb"
+    _write_notebook(nb_path, [_code_cell("x = 1\n")])
+    assert not sync_bootstrap.process_notebook(nb_path, template="", fix=True)
