@@ -6,7 +6,11 @@ from collections.abc import Iterable
 from math import cos, pi, sin
 from typing import Any
 
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
+from matplotlib.patches import Polygon
 from spatialmath import base
 
 from roboticstoolbox.tools.types import ArrayLike, NDArray
@@ -276,8 +280,9 @@ class RangeBearingSensor(SensorBase):
         from the robot to the landmark observed each time :meth:`reading` is
         called.
 
-        .. note:: ``line_style`` and ``poly_style`` are accepted but are not
-            currently used.
+        ``line_style`` styles the landmark beam and ``poly_style`` styles the
+        sensing region when ``plot=True``. The region is shown when both range
+        and angle limits are supplied.
 
         .. runblock:: pycon
 
@@ -339,6 +344,22 @@ class RangeBearingSensor(SensorBase):
         self._landmarklog: list[int] = []
 
         self._random = np.random.default_rng(seed)
+        self._plot_ax: Axes | None = None
+        self._plot_line: Line2D | None = None
+        self._plot_poly: Polygon | None = None
+        if self._animate:
+            self._init_plot()
+
+    def _init_plot(self) -> None:
+        """Create map axes and discard previous sensor artists."""
+        if self._plot_line is not None and self._plot_line.axes is not None:
+            self._plot_line.remove()
+        if self._plot_poly is not None and self._plot_poly.axes is not None:
+            self._plot_poly.remove()
+        self.map.plot()
+        self._plot_ax = plt.gca()
+        self._plot_line = None
+        self._plot_poly = None
 
     def __str__(self) -> str:
         s = super().__str__()
@@ -366,7 +387,7 @@ class RangeBearingSensor(SensorBase):
         self._landmarklog = []
 
         if self._animate:
-            self.map.plot()
+            self._init_plot()
 
     @property
     def W(self) -> NDArray:
@@ -432,6 +453,8 @@ class RangeBearingSensor(SensorBase):
         lm_id = -1
         # sample interval
         if self._count % self._every != 0:
+            if self._animate:
+                self.plot(None)
             self._landmarklog.append(lm_id)
             return (None, None)
 
@@ -439,30 +462,10 @@ class RangeBearingSensor(SensorBase):
         # for a sensor failure
         if self._fail is not None:
             if any([start <= self._count < end for start, end in self._fail]):
+                if self._animate:
+                    self.plot(None)
                 self._landmarklog.append(lm_id)
                 return (None, None)
-
-        # create a polygon to indicate the active sensing area based on range+angle limits
-        # if self.animate && ~isempty(self.theta_range) && ~isempty(self.r_range)
-        #     h = findobj(gca, 'tag', 'sensor-area')
-        #     if isempty(h)
-
-        #         th=linspace(self.theta_range[0], self.theta_range[1], 20)
-        #         x = self.r_range[1] * cos(th)
-        #         y = self.r_range[1] * sin(th)
-        #         if self.r_range[0] > 0
-        #             th = flip(th)
-        #             x = [x self.r_range[0] * cos(th)]
-        #             y = [y self.r_range[0] * sin(th)]
-        #         else
-        #             x = [x 0]
-        #             y = [y 0]
-        #         end
-        #         # no sensor zone, create one
-        #         plot_poly([x; y], 'fillcolor', 'r', 'alpha', 0.1, 'edgecolor', 'none', 'animate', 'tag', 'sensor-area')
-        #     else
-        #         hg = get(h, 'Parent')
-        #         plot_poly(h, self.robot.x)
 
         zk = self.visible()
         if len(zk) > 1:
@@ -481,6 +484,8 @@ class RangeBearingSensor(SensorBase):
         else:
             if self.verbose:
                 print("Sensor:: no features\n")
+            if self._animate:
+                self.plot(None)
             self._landmarklog.append(lm_id)
             return (None, None)
 
@@ -497,6 +502,56 @@ class RangeBearingSensor(SensorBase):
         z += self._random.multivariate_normal((0, 0), self._W)
 
         return z, lm_id
+
+    def plot(self, id: int | None) -> None:
+        """Update the sensing region and the beam to the observed landmark.
+
+        :param id: landmark index, or None if no landmark is observed
+        """
+        if self._plot_ax is None:
+            self._init_plot()
+        ax = self._plot_ax
+        if ax is None:
+            return  # pragma: no cover
+
+        pose = self.robot.x
+        if self._r_range is not None and self._theta_range is not None:
+            theta = np.linspace(
+                float(self._theta_range[0]), float(self._theta_range[1]), 40
+            ) + pose[2]
+            direction = np.column_stack((np.cos(theta), np.sin(theta)))
+            outer = self._r_range[1] * direction
+            if self._r_range[0] > 0:
+                inner = self._r_range[0] * direction[::-1]
+            else:
+                inner = np.zeros((1, 2))
+            vertices = np.vstack((outer, inner)) + pose[:2]
+            if self._plot_poly is None:
+                poly_style: dict[str, Any] = {
+                    "facecolor": "red",
+                    "alpha": 0.1,
+                    "edgecolor": "none",
+                }
+                poly_style.update(self._poly_style or {})
+                self._plot_poly = Polygon(vertices, closed=True, **poly_style)
+                ax.add_patch(self._plot_poly)
+            else:
+                self._plot_poly.set_xy(vertices)
+
+        if self._plot_line is None:
+            line_style: dict[str, Any] = {"color": "red", "linewidth": 1}
+            line_style.update(self._line_style or {})
+            (self._plot_line,) = ax.plot([], [], **line_style)
+
+        if id is None:
+            self._plot_line.set_visible(False)
+        else:
+            landmark = self.map[id]
+            self._plot_line.set_data(
+                [pose[0], landmark[0]], [pose[1], landmark[1]]
+            )
+            self._plot_line.set_visible(True)
+        ax.figure.canvas.draw_idle()
 
     def visible(self) -> list[tuple[NDArray, int]]:
         """
