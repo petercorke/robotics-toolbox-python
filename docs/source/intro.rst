@@ -24,8 +24,8 @@ Robot models
 The Toolbox provides seamless access to over 150 robot models, most of which are purely kinematic
 but some have inertial and frictional parameters. Kinematic models can be
 specified in a variety of ways:  standard or modified Denavit-Hartenberg (DH,
-MDH) notation, as an ETS string :cite:`Corke07`, as a rigid-body tree, or from a URDF
-file.
+MDH) notation, as an elementary transform sequence (ETS) :cite:`Corke07`, which can
+describe a branched robot, or from a URDF file.
 
 
 Denavit-Hartenberg parameters
