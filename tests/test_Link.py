@@ -175,7 +175,7 @@ qlim  =      -2.8 to      2.8""",  # noqa
         r = rp.DHRobot([l0])
         l1 = l0.copy()
         l0.m = 4
-        l0.r[1] = 5
+        l0.r = [0, 5, 0]  # not l0.r[1] = 5, the array is read-only
 
         self.assertEqual(l1.m, 0)
         self.assertEqual(l1.r[1], 0)

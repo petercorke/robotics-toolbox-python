@@ -66,7 +66,10 @@ def _dirties_frne(func: Any) -> Any:
     - invoking the ``.dynchanged()`` method of the robot that owns the link.
       This assumes that the Link object is owned by a robot, this happens
       when the Link object is passed to a robot constructor.
-    - setting the ``._hasdynamics`` attribute of the Link
+
+    It does not say whether the link has dynamics, since many of the parameters
+    that it decorates are kinematic.  That is the job of the setters of the mass
+    and the motor inertia, see :meth:`Link._update_hasdynamics`.
 
     Example::
 
@@ -82,10 +85,35 @@ def _dirties_frne(func: Any) -> Any:
     def wrapper_dirties_frne(*args: Any) -> Any:
         if args[0]._robot is not None:
             args[0]._robot.dynchanged()
-        args[0]._hasdynamics = True
         return func(*args)
 
     return wrapper_dirties_frne
+
+
+# Counts the changes to the mass or motor inertia of any link.  A robot caches the
+# answer to "does any link have dynamics?" and checks the counter to know whether the
+# answer can be stale.  A counter is used rather than a notification because a link
+# can be shared by several robots but only knows about one of them.
+_dynamics_version = 0
+
+
+def _dyn_version() -> int:
+    return _dynamics_version
+
+
+def _nonzero(x: Any) -> bool:
+    """True if a mass or inertia is not zero, or is symbolic"""
+    try:
+        return bool(np.any(np.asarray(x) != 0))
+    except Exception:
+        return True  # something we cannot compare with zero, such as a symbol
+
+
+def _readonly(a: NDArray) -> NDArray:
+    """A view of an array that cannot be written to"""
+    view = a.view()
+    view.flags.writeable = False
+    return view
 
 
 class BaseLink(SceneNode, ABC):
@@ -171,31 +199,28 @@ class BaseLink(SceneNode, ABC):
         self._scene_children.append(self._collision)
 
         # Link dynamic Parameters
-        def dynpar(self: Any, name: Any, value: Any, default: Any) -> Any:
-            if value is None:
-                value = default
-                setattr(self, name, value)
-                return 0
-            else:
-                setattr(self, name, value)
-                return 1
+        def dynpar(self: Any, name: Any, value: Any, default: Any) -> None:
+            setattr(self, name, default if value is None else value)
 
-        dynchange = 0
+        # the setters of the mass and motor inertia keep this up to date, and need
+        # both to exist
+        self._m = 0.0
+        self._Jm = 0.0
+        self._hasdynamics = False
 
         # link inertial parameters
-        dynchange += dynpar(self, "m", m, 0.0)
-        dynchange += dynpar(self, "r", r, np.zeros((3,)))
-        dynchange += dynpar(self, "I", I, np.zeros((3, 3)))
+        dynpar(self, "m", m, 0.0)
+        dynpar(self, "r", r, np.zeros((3,)))
+        dynpar(self, "I", I, np.zeros((3, 3)))
 
         # Motor inertial and frictional parameters
-        dynchange += dynpar(self, "Jm", Jm, 0.0)
-        dynchange += dynpar(self, "B", B, 0.0)
-        dynchange += dynpar(self, "Tc", Tc, np.zeros((2,)))
-        dynchange += dynpar(self, "G", G, 0.0)
+        dynpar(self, "Jm", Jm, 0.0)
+        dynpar(self, "B", B, 0.0)
+        dynpar(self, "Tc", Tc, np.zeros((2,)))
+        dynpar(self, "G", G, 0.0)
 
         # reference to more advanced actuator model
         self.actuator = None
-        self._hasdynamics = dynchange > 0
 
         # Check ETS argument
         if isinstance(ets, ET):
@@ -591,13 +616,17 @@ class BaseLink(SceneNode, ABC):
         """
         Link has dynamic parameters (Link superclass)
 
-        :returns: Link has dynamic parameters
+        :returns: True if the link has a non-zero mass or motor inertia
 
-        Link has some assigned (non-default) dynamic parameters.  These could
-        have been assigned:
+        These are the parameters that the inertial dynamics need.  The value is
+        kept up to date by the setters of ``m`` and ``Jm``, so it follows a
+        mass that is set, and set back to zero.
 
-        - at constructor time, eg. ``m=1.2``
-        - by invoking a setter method, eg. ``link.m = 1.2``
+        .. versionchanged:: 1.5.0
+            This was true if any dynamic parameter, or even a kinematic
+            parameter of a DH link, had been assigned, even to zero.  A link
+            with only friction parameters, or one made with ``m=0``, now
+            reports False.
 
         Examples
         --------
@@ -658,6 +687,13 @@ class BaseLink(SceneNode, ABC):
     @_dirties_frne
     def m(self, m_new: float) -> None:
         self._m = m_new
+        self._update_hasdynamics()
+
+    def _update_hasdynamics(self) -> None:
+        # whether the link has dynamics is a property of its mass and motor inertia
+        global _dynamics_version
+        self._hasdynamics = _nonzero(self._m) or _nonzero(self._Jm)
+        _dynamics_version += 1
 
     # -------------------------------------------------------------------------- #
 
@@ -674,14 +710,24 @@ class BaseLink(SceneNode, ABC):
 
         - ``link.r`` is the link centre of mass
         - ``link.r = ...`` checks and sets the link centre of mass
+
+        .. warning:: The array is read-only.  To change the centre of mass
+            assign a new value, ``link.r = [0, 0.1, 0]``, since editing the array
+            in place, ``link.r[1] = 0.1``, would bypass the setter and so the
+            dynamics of the robot would not know that it had changed.
+
+        .. versionchanged:: 1.5.0
+            The array is read-only, and ``link.r[1] = 0.1`` raises ``ValueError``.
+            It was writeable, and an edit was silently not seen by the dynamics
+            of the robot.
         """
 
-        return self._r
+        return _readonly(self._r)
 
     @r.setter
     @_dirties_frne
     def r(self, r_new: ArrayLike) -> None:
-        self._r = getvector(r_new, 3)
+        self._r = np.array(getvector(r_new, 3))  # a copy, the caller's is not shared
 
     # -------------------------------------------------------------------------- #
 
@@ -714,9 +760,19 @@ class BaseLink(SceneNode, ABC):
 
         - Referred to the link side of the gearbox.
 
+        .. warning:: The array is read-only.  To change the inertia assign a new
+            value, ``link.I = ...``, since editing the array in place,
+            ``link.I[0, 0] = 1``, would bypass the setter and so the dynamics
+            of the robot would not know that it had changed.
+
+        .. versionchanged:: 1.5.0
+            The array is read-only, and ``link.I[0, 0] = 1`` raises
+            ``ValueError``.  It was writeable, and an edit was silently not seen
+            by the dynamics of the robot.
+
         """
 
-        return self._I
+        return _readonly(self._I)
 
     @I.setter
     @_dirties_frne
@@ -751,7 +807,7 @@ class BaseLink(SceneNode, ABC):
         else:
             raise ValueError("invalid shape passed: must be (3,3), (6,), (3,)")
 
-        self._I = I_new
+        self._I = np.array(I_new)  # a copy, the caller's is not shared
 
     # -------------------------------------------------------------------------- #
 
@@ -777,6 +833,7 @@ class BaseLink(SceneNode, ABC):
     @_dirties_frne
     def Jm(self, Jm_new: float) -> None:
         self._Jm = Jm_new
+        self._update_hasdynamics()
 
     # -------------------------------------------------------------------------- #
 
@@ -836,9 +893,18 @@ class BaseLink(SceneNode, ABC):
         - :math:`\tau_C^+` must be :math:`> 0`, and :math:`\tau_C^-` must
             be :math:`< 0`.
 
+        .. warning:: The array is read-only.  To change the Coulomb friction
+            assign a new value, ``link.Tc = ...``, since editing the array in
+            place would bypass the setter and so the dynamics of the robot would
+            not know that it had changed.
+
+        .. versionchanged:: 1.5.0
+            The array is read-only, and an edit in place raises ``ValueError``.
+            It was writeable, and an edit was silently not seen by the dynamics
+            of the robot.
         """
 
-        return self._Tc
+        return _readonly(self._Tc)
 
     @Tc.setter
     @_dirties_frne

@@ -52,38 +52,15 @@ class fdyn(NamedTuple):
     qd: NDArray
 
 
-def _is_zero(x) -> bool:
-    try:
-        return bool(np.all(np.asarray(x) == 0))
-    except Exception:
-        return False
-
-
 class DynamicsMixin:
     # --------------------------------------------------------------------- #
-    @property
-    def has_dynamics(self: RobotProto) -> bool:
-        """
-        Robot has dynamic parameters (Robot superclass)
-
-        :returns: ``True`` if any link has a non-zero mass or motor inertia
-        :rtype: bool
-
-        Kinematics-only models, such as the default ``rtb.models.Panda``, have
-        no inertial data. The dynamics methods raise ``ValueError`` for such a
-        model rather than return an all-zero result.
-
-        .. note:: This is ``any`` and not ``all`` since the first link of the
-            DH Puma560 legitimately has a mass of zero.
-        """
-        return any(not (_is_zero(link.m) and _is_zero(link.Jm)) for link in self.links)
-
     def _require_dynamics(self: RobotProto) -> None:
-        if not self.has_dynamics:
+        # ``hasdynamics`` is a cached flag, so this costs nothing
+        if not self.hasdynamics:
             raise ValueError(
                 f"model '{self.name}' has no dynamic parameters (all link masses "
-                "are zero); use a model that defines them, for example "
-                "rtb.models.DH.Panda(), or set m, r and I on its links"
+                "and motor inertias are zero); use a model that defines them, for "
+                "example rtb.models.DH.Panda(), or set m, r and I on its links"
             )
 
     # --------------------------------------------------------------------- #

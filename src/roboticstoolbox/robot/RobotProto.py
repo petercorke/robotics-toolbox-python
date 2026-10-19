@@ -66,6 +66,11 @@ class RobotProto(Protocol):
     @property
     def gravity(self) -> NDArray: ...
 
+    @property
+    def hasdynamics(self) -> bool: ...
+
+    def _require_dynamics(self) -> None: ...
+
     # ------------------------------------------------------------------
     # Kinematics (called by dynamics methods)
     # ------------------------------------------------------------------

@@ -1806,7 +1806,7 @@ class TestRobot(unittest.TestCase):
         # a kinematics-only model must raise, not return zeros or a confusing error
         robot = rtb.models.Panda()
         q = np.zeros(robot.n)
-        self.assertFalse(robot.has_dynamics)
+        self.assertFalse(robot.hasdynamics)
         calls = [
             lambda: robot.gravload(q),
             lambda: robot.inertia(q),
@@ -1819,12 +1819,12 @@ class TestRobot(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "no dynamic parameters"):
                 call()
 
-    def test_has_dynamics(self):
-        self.assertTrue(rtb.models.DH.Panda().has_dynamics)
+    def test_hasdynamics(self):
+        self.assertTrue(rtb.models.DH.Panda().hasdynamics)
         # the first link of the DH Puma560 has zero mass, the others do not
         puma = rtb.models.DH.Puma560()
         self.assertEqual(puma.links[0].m, 0)
-        self.assertTrue(puma.has_dynamics)
+        self.assertTrue(puma.hasdynamics)
         q = np.zeros(puma.n)
         self.assertEqual(puma.gravload(q).shape, (puma.n,))
 

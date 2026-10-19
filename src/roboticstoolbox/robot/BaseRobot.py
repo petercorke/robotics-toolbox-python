@@ -40,7 +40,7 @@ from roboticstoolbox.ets.ETS import ETS
 from roboticstoolbox.ets.fknm import Robot_link_T
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.Link import BaseLink, Link
+from roboticstoolbox.robot.Link import BaseLink, Link, _dyn_version
 from roboticstoolbox.robot.RobotPlottingMPL import RobotPlottingMPLMixin
 from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.tools.types import ArrayLike, NDArray
@@ -146,7 +146,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self.comment = comment
         self._symbolic = symbolic
         self._reach: float | None = None
-        self._hasdynamics = False
+        self._dyn_cache: tuple[int, bool] | None = None
         self._hasgeometry = False
         self._hascollision = False
         self._urdf_string = ""
@@ -158,8 +158,6 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             # Add link back to robot object
             link._robot = self
 
-            if link.hasdynamics:
-                self._hasdynamics = True
             if len(link.geometry) > 0:
                 self._hasgeometry = True
             if link.collision:
@@ -430,8 +428,6 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
 
         self._frne_stale = True
-        if what != "gravity":
-            self._hasdynamics = True
 
     # --------------------------------------------------------------------- #
     # --------- Magic Methods --------------------------------------------- #
@@ -771,12 +767,33 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._symbolic
 
     @property
-    def hasdynamics(self) -> Any:
+    def hasdynamics(self) -> bool:
         """
         Robot has dynamic parameters
 
-        :returns: Robot has dynamic parameters
-        :returns: At least one link has associated dynamic parameters.
+        :returns: True if at least one link has a non-zero mass or motor inertia
+
+        These are the parameters that the inertial dynamics need.  It is false for
+        a model of the kinematics only, such as the default ``rtb.models.Panda``,
+        and the dynamics methods ``gravload``, ``inertia``, ``coriolis``,
+        ``accel``, ``fdyn``, ``itorque`` and ``rne`` raise ``ValueError`` for
+        such a model, rather than return zeros or a confusing error.  It is *any*
+        link and not all, since the first link of the DH Puma560 has a mass of
+        zero.
+
+        The answer is cached, and recomputed only when the mass or motor inertia
+        of a link has been changed, so it costs nothing to ask.
+
+        .. versionchanged:: 1.5.0
+            This was true if any dynamic parameter had been assigned, even to
+            zero, and was not reset when the parameters were set back to zero.
+            A robot made from DH links with no masses reported True.  The
+            dynamics methods now raise ``ValueError`` if it is False, where they
+            returned zeros or raised ``LinAlgError``.
+
+        .. warning:: **Behaviour change.**  Scripts that call the dynamics
+            methods on a kinematics-only model, and accept the zeros, now get a
+            ``ValueError``.
 
         Examples
         --------
@@ -789,7 +806,18 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
-        return self._hasdynamics
+        version = _dyn_version()
+        cache = self._dyn_cache
+        if cache is None or cache[0] != version:
+            # the mass or motor inertia of some link has changed since the last time
+            cache = (version, any(link.hasdynamics for link in self.links))
+            self._dyn_cache = cache
+        return cache[1]
+
+    @property
+    def _hasdynamics(self) -> bool:
+        # the name that the display and the catalog use
+        return self.hasdynamics
 
     @property
     def hasgeometry(self) -> Any:
