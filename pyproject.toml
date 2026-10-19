@@ -107,6 +107,7 @@ dev = [
     "coal; sys_platform != 'win32'",
     "trimesh",
     "nbmake",
+    "ipympl",
 ]
 
 # Backward-compatible alias; notebook tooling is included in "dev".
