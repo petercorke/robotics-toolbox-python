@@ -45,6 +45,10 @@ Some robots are available in more than one category, for example the Panda:
 
 The classes and the models of each category are described on the pages below.  Models are in a sub-package named for the category, so ``rtb.models.DH.Puma560()`` and ``rtb.models.URDF.Panda()`` make a Puma 560 and a Panda.  The URDF models are also in the ``rtb.models`` namespace itself, so ``rtb.models.Panda`` is ``rtb.models.URDF.Panda``.
 
+.. note::
+
+    The dynamics methods, such as ``gravload``, ``inertia`` and ``rne``, need link masses and inertias.  The ``DH`` models define them, but the ``URDF`` and ``ETS`` models do not, and for these the methods raise a ``ValueError``.  ``robot.hasdynamics`` tells you whether a model has them.
+
 Listing available models
 ------------------------
 
