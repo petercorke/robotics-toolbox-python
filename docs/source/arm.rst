@@ -20,11 +20,11 @@ A robot is made in one of three ways, and each has its own class.
 .. autosummary::
     :nosignatures:
 
-    ~roboticstoolbox.robot.DHRobot.DHRobot
     ~roboticstoolbox.robot.Robot.Robot
     ~roboticstoolbox.models.URDF.URDFRobot.URDFRobot
+    ~roboticstoolbox.robot.DHRobot.DHRobot
 
-A ``DHRobot`` is made from a list of links, each with its Denavit-Hartenberg parameters, standard or modified, and a prismatic or revolute joint.  A ``Robot`` is made from an :doc:`elementary transform sequence <ets>`, and can be a tree.  (``ERobot`` is a subclass with the same behaviour, kept for compatibility.)  A ``URDFRobot`` is made from a URDF or xacro file.
+A ``Robot`` is made from an :doc:`elementary transform sequence <ets>`, and can be a tree.  (``ERobot`` is a subclass with the same behaviour, kept for compatibility.)  A ``URDFRobot`` is made from a URDF or xacro file.  A ``DHRobot`` is made from a list of links, each with its Denavit-Hartenberg parameters, standard or modified, and a prismatic or revolute joint, using the link classes below.
 
 .. autosummary::
     :nosignatures:

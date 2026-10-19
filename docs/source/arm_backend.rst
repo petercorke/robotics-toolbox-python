@@ -107,4 +107,4 @@ Both use Matplotlib, which is a common and highly portable graphics library for 
 Swift
 ^^^^^
 
-`Swift <https://github.com/jhavl/swift>`_ is a separate package, which is installed by the ``swift`` extra.  It shows the robot in a web browser, with its meshes, and the teach pendant as a panel of sliders.  It does not draw ellipsoids.
+`Swift <https://github.com/jhavl/swift>`_ is a separate package which supports the backend contract, and is installed by the ``swift`` extra.  It shows the robot in a web browser, with its meshes, and the teach pendant as a panel of sliders.  It does not draw ellipsoids.
