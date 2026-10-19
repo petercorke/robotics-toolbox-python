@@ -123,6 +123,18 @@ every parent and child link pair.
    >>> from math import pi
    >>> e.fkine([pi/2, -pi/2])
 
+The sequence can be drawn, here for the second set of joint angles above.  The
+``plot`` method wraps the sequence in a robot, and plots that.
+
+.. plot::
+   :include-source:
+
+   from math import pi
+   from roboticstoolbox import ET
+
+   e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+   e.plot([pi/2, -pi/2], block=False)
+
 A joint is a variable transform, and the number of joints in the sequence is its
 ``n``.  Joint values are passed to the sequence as a vector, and a joint can
 also be *flipped* (its sign reversed) and have *joint limits*.  The ETS joint

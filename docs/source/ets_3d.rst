@@ -226,6 +226,34 @@ Modification
    ~roboticstoolbox.ETS.merge
    ~roboticstoolbox.ETS.compile
 
+List operations
+^^^^^^^^^^^^^^^
+
+A sequence is a list of elementary transforms, so it has the methods of a list.  Those that change it do so in place.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Method
+     - Does
+   * - :meth:`~roboticstoolbox.ETS.append`
+     - adds an elementary transform to the end
+   * - :meth:`~roboticstoolbox.ETS.extend`
+     - adds the transforms of another sequence to the end
+   * - :meth:`~roboticstoolbox.ETS.pop`
+     - removes and returns the transform at an index, by default the last
+   * - :meth:`~roboticstoolbox.ETS.remove`
+     - removes the first transform that is equal to the given one
+   * - :meth:`~roboticstoolbox.ETS.reverse`
+     - reverses the order of the transforms, which is not the inverse of the sequence, see :meth:`~roboticstoolbox.ETS.inv`
+   * - :meth:`~roboticstoolbox.ETS.clear`
+     - removes all the transforms
+   * - :meth:`~roboticstoolbox.ETS.count`
+     - the number of transforms equal to the given one
+   * - :meth:`~roboticstoolbox.ETS.index`
+     - the index of the first transform equal to the given one
+
 Kinematics
 ^^^^^^^^^^
 
@@ -294,5 +322,5 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ETS
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, count, index, insert, append, extend, pop, remove, reverse, clear, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
    :member-order: bysource
