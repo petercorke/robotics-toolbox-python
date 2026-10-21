@@ -9,8 +9,10 @@ robot moving, with the timer advancing, and no browser window opens.
 """
 
 import importlib
+import types
 from unittest import mock
 
+import numpy.testing as nt
 import pytest
 
 import roboticstoolbox as rtb
@@ -31,7 +33,9 @@ class Swift:
         self.launched_with = kwargs
 
     def add(self, robot, **kwargs):
-        return None
+        # what the real Swift returns: a handle that owns the joint state it shows
+        self.handle = types.SimpleNamespace(q=None)
+        return self.handle
 
     def step(self, dt=0.05):
         self.steps += 1
@@ -54,12 +58,17 @@ def _trajectory(robot):
 
 def test_notebook_shows_swift_in_the_cell_and_paces_an_animation(robot, monkeypatch):
     monkeypatch.setattr(pyplot_module, "_isnotebook", lambda: True)
+    trajectory = _trajectory(robot)
 
-    robot.plot(_trajectory(robot))
+    robot.plot(trajectory)
 
     assert robot.swift.launched_with["browser"] == "notebook"
     assert robot.swift.launched_with["realtime"] is True
     assert robot.swift.steps == 5
+    # the handle was driven, not robot.q (deprecated by Swift), and robot.q ends at the
+    # last pose as it does for the other backends
+    nt.assert_allclose(robot.swift.handle.q, trajectory[-1])
+    nt.assert_allclose(robot.q, trajectory[-1])
 
 
 def test_one_pose_is_not_paced(robot, monkeypatch):
@@ -101,3 +110,43 @@ def test_the_other_backends_are_not_given_swift_options(monkeypatch):
 
     assert "browser" not in launch.call_args.kwargs
     assert "realtime" not in launch.call_args.kwargs
+
+
+# --- the real Swift, with no browser (headless) -------------------------------------
+
+swift = pytest.importorskip("swift")
+
+
+def test_a_trajectory_takes_as_long_as_it_says(monkeypatch):
+    """Unpaced, Swift skips every step that comes less than 1/60 s after the last one
+    that it drew, so the whole trajectory ran in milliseconds and was never seen.
+    Headless Swift still paces its steps, so the time taken shows that plot() did."""
+    import time
+
+    monkeypatch.setenv("SWIFT_HEADLESS", "1")
+    monkeypatch.setattr(pyplot_module, "_isnotebook", lambda: False)
+    robot = rtb.models.URDF.Panda()
+    dt = 0.05
+    trajectory = rtb.jtraj(robot.qr, robot.qz, 10).q
+
+    start = time.monotonic()
+    env = robot.plot(trajectory, backend="swift", dt=dt)
+    elapsed = time.monotonic() - start
+    env.close()
+
+    assert elapsed >= 0.8 * 10 * dt, f"10 steps of {dt} s took only {elapsed:.3f} s"
+
+
+def test_one_pose_is_not_slowed_down(monkeypatch):
+    import time
+
+    monkeypatch.setenv("SWIFT_HEADLESS", "1")
+    monkeypatch.setattr(pyplot_module, "_isnotebook", lambda: False)
+    robot = rtb.models.URDF.Panda()
+
+    start = time.monotonic()
+    env = robot.plot(robot.qr, backend="swift")
+    elapsed = time.monotonic() - start
+    env.close()
+
+    assert elapsed < 3
