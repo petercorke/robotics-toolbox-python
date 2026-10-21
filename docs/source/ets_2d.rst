@@ -117,7 +117,9 @@ Modification
    ~roboticstoolbox.ETS2.fixjoint
    ~roboticstoolbox.ETS2.split
    ~roboticstoolbox.ETS2.swap
+   ~roboticstoolbox.ETS2.swapped
    ~roboticstoolbox.ETS2.merge
+   ~roboticstoolbox.ETS2.merged
    ~roboticstoolbox.ETS2.compile
 
 List operations
@@ -172,5 +174,5 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ETS2
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, plot, teach
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, swapped, merge, merged, compile, fkine, eval, jacob0, jacobe, plot, teach
    :member-order: bysource
