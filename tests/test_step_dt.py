@@ -51,6 +51,22 @@ def test_2d_step_needs_a_positive_dt(env2d, dt):
         env2d.step(dt)
 
 
+def inline_env(cls, robot):
+    env = cls()
+    env.launch(render_mode="notebook-inline")
+    env.add(robot, readonly=True)
+    return env
+
+
+@pytest.mark.parametrize("dt", [0, 0.0])
+def test_in_a_notebook_there_is_no_pause_and_zero_is_fine(dt):
+    # the notebook animation draws a frame for each step and does not pause
+    inline_env(PyPlot, rtb.models.DH.Puma560()).step(dt)
+    inline_env(
+        PyPlot2, rtb.Robot2(ET2.R() * ET2.tx(1) * ET2.R() * ET2.tx(1))
+    ).step(dt)
+
+
 def test_a_small_dt_is_fine(env3d, env2d):
     env3d.step(0.001)
     env2d.step(0.001)
