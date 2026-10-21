@@ -73,12 +73,12 @@ class TwoLink(DHRobot):
 
             zero = sym.zero()
             pi = sym.pi()
-            a1, a2 = sym.symbol("a1 a2")  # link lengths # type: ignore
-            m1, m2 = sym.symbol("m1 m2")  # link masses # type: ignore
-            c1, c2 = sym.symbol("c1 c2")  # link CoMs location relative to link frames# type: ignore
+            a1, a2 = sym.symbol("a1 a2")  # link lengths
+            m1, m2 = sym.symbol("m1 m2")  # link masses
+            c1, c2 = sym.symbol("c1 c2")  # link CoMs location relative to link frames
             if inertia:
-                r = sym.symbol("r") # link radius, assumed tubular, for inertia calculation # type: ignore
-                I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM # type: ignore
+                r = sym.symbol("r") # link radius, assumed tubular, for inertia calculation
+                I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM
             else:
                 I1, I2 = None, None
             g = sym.symbol("g")
@@ -98,7 +98,7 @@ class TwoLink(DHRobot):
                 c2 = 0.5 # CoM location of second link relative to second link frame
                 r = 0.1 # radius of links, assumed tubular, for inertia calculation
                 if inertia:
-                    I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM # type: ignore
+                    I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM
                 else:
                     I1, I2 = None, None
                 g = 9.8
@@ -120,7 +120,7 @@ class TwoLink(DHRobot):
                 c2 = -0.5 # CoM location of second link relative to second link frame
                 r = 0.1 # radius of links, assumed tubular, for inertia calculation
                 if inertia:
-                    I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM # type: ignore
+                    I1, I2 = _cylinder_inertia_x(m1, r, a1), _cylinder_inertia_x(m2, r, a2)  # moments of inertia about CoM
                 else:
                     I1, I2 = None, None
                 g = 9.8

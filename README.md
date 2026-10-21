@@ -8,7 +8,7 @@
   <strong>A high-productivity framework for robotics research and education.</strong>
   <br><br>
 
-[![JupyterLite](https://img.shields.io/badge/Try_it_Now-JupyterLite-orange?style=for-the-badge&logo=jupyter)](https://petercorke.github.io/robotics-toolbox-python/lite/lab?path=robotics.ipynb)
+[![JupyterLite](https://img.shields.io/badge/Try_it_Now-JupyterLite-orange?style=for-the-badge&logo=jupyter)](https://petercorke.github.io/robotics-toolbox-python/lite/lab?path=icra2026.ipynb)
   [![PyPI version](https://img.shields.io/pypi/v/roboticstoolbox-python?style=for-the-badge&color=blue)](https://pypi.org/project/roboticstoolbox-python/)
   [![Documentation](https://img.shields.io/badge/Docs-View_Online-blue?style=for-the-badge)](https://petercorke.github.io/robotics-toolbox-python)
 
@@ -118,7 +118,8 @@ Available options are:
 - `qp` install quadratic-programming IK dependencies (`qpsolvers`, `quadprog`)
 - `collision` install collision checking with [coal](https://github.com/coal-library/coal) and `trimesh`
 - `tool` install `IPython` and `pygments`, needed to run the `rtbtool` interactive shell
-- `all` install `swift`, `qp`, `collision`, and `tool`
+- `ik` install SymPy and `python-flint`, to derive analytic inverse kinematics (`robot.analytic_ik()`)
+- `all` install `swift`, `qp`, `collision`, and `tool`.  It does **not** include `ik`, since SymPy is large and only needed to derive an analytic solver
 
 > **Windows note:** `coal` does not publish Windows wheels on PyPI, so the
 > `collision`/`all` extras skip it there and collision checking is
@@ -166,7 +167,13 @@ pip install roboticstoolbox-python[collision]
 pip install roboticstoolbox-python[tool]
 ```
 
-- Everything (swift + qp + collision + tool)
+- Analytic inverse kinematics dependencies only (SymPy, `python-flint`)
+
+```shell script
+pip install roboticstoolbox-python[ik]
+```
+
+- Everything except `ik` (swift + qp + collision + tool)
 
 ```shell script
 pip install roboticstoolbox-python[all]
@@ -216,7 +223,7 @@ import roboticstoolbox as rtb
 robot = rtb.models.Panda()
 print(robot)
 
-	ERobot: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision
+	URDFRobot.Panda: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision
 	┌─────┬──────────────┬───────┬─────────────┬────────────────────────────────────────────────┐
 	│link │     link     │ joint │   parent    │              ETS: parent to link               │
 	├─────┼──────────────┼───────┼─────────────┼────────────────────────────────────────────────┤
@@ -261,7 +268,7 @@ orientation parallel to y-axis (O=+Y)).
 from spatialmath import SE3
 
 Tep = SE3.Trans(0.6, -0.3, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ik_LM(Tep)         # solve IK
+sol = robot.ik_LM(Tep)         # solve IK, with the fast C++ solver (ikine_LM is the Python one)
 print(sol)
 
 	IKSolution: q=[-2.709, -1.176, 1.961, -1.642, 1.173, 1.958, 2.876], success=True, iterations=6, searches=1, residual=1.06e-07

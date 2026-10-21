@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy.ndimage as sp
 import spatialmath.base as smb
@@ -170,7 +171,7 @@ class BaseOccupancyGrid(BaseMap):
         :return: binary occupancy grid
         :rtype: ndarray(N,M) of bool
 
-        If :meth:`inflate` has been called, this will return the inflated
+        If ``inflate`` has been called, this will return the inflated
         occupancy grid.
         """
         return self._grid
@@ -349,7 +350,10 @@ class BaseOccupancyGrid(BaseMap):
             size as the occupancy grid, defaults to None
         :type map: ndarray(N,M)
         :param ax: Matplotlib axes to plot into, defaults to None (the current axes)
-        :param block: block until plot is dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param field: optional scalar field, with the same shape as the grid;
             obstacles are drawn over it, defaults to None
         :param colorbar: show a colorbar for the field, defaults to True
@@ -474,8 +478,7 @@ class BaseOccupancyGrid(BaseMap):
         ax.set_ylim(bounds[2:])
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def _label_values(
         self, ax: Axes, field: NDArray, label_style: dict[str, Any] | None
@@ -546,6 +549,10 @@ class BaseOccupancyGrid(BaseMap):
 
 
 class BinaryOccupancyGrid(BaseOccupancyGrid):
+    """
+    Binary occupancy grid
+    """
+
     def __init__(
         self,
         grid: NDArray | BinaryOccupancyGrid | None = None,
@@ -703,6 +710,10 @@ class OccupancyGrid(BaseOccupancyGrid):
 
 
 class PolygonMap(BaseMap):
+    """
+    Polygonal obstacle map
+    """
+
     def __init__(
         self,
         workspace: WorkspaceLike | None = None,
@@ -771,7 +782,10 @@ class PolygonMap(BaseMap):
         """
         Plot the polygonal obstacles
 
-        :param block: block until plot is dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         The obstacles are plotted in red, in axes that have the limits of the
         workspace.
@@ -781,8 +795,7 @@ class PolygonMap(BaseMap):
         for polygon in self.polygons:
             polygon.plot(color="r")
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def isoccupied(self, p: ArrayLike2) -> bool:
         """

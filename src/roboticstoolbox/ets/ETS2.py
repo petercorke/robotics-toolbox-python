@@ -38,7 +38,7 @@ class ETS2(BaseETS[ET2]):
     - ``ET2.XY(η, 'deg')`` as above but the angle is expressed in degrees
     - ``ET2.XY()`` is a joint variable, the value is left free until evaluation
       time
-    - ``ET2.XY(j=J)`` as above but the joint index is explicitly given, this
+    - ``ET2.XY(jindex=J)`` as above but the joint index is explicitly given, this
       might correspond to the joint number of a multi-joint robot.
     - ``ET2.XY(flip=True)`` as above but the joint moves in the opposite sense
 
@@ -48,18 +48,16 @@ class ETS2(BaseETS[ET2]):
 
         .. runblock:: pycon
 
-            >>> from roboticstoolbox import ETS2 as ET2
-            >>> e = ET2.R(0.3)  # a single ET, rotation about z
-            >>> len(e)
-            >>> e = ET2.R(0.3) * ET2.tx(2)  # an ETS
+            >>> from roboticstoolbox import ET2
+            >>> e = ET2.R(0.3) * ET2.tx(2)  # an ETS2
             >>> len(e)                      # of length 2
-            >>> e[1]                        # an ET sliced from the ETS
+            >>> e[1]                        # an ET2 indexed from the ETS2
 
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
 
-    :seealso: :func:`r`, :func:`tx`, :func:`ty`
+    :seealso: ``r``, ``tx``, ``ty``
     """
 
     def __init__(
@@ -135,6 +133,56 @@ class ETS2(BaseETS[ET2]):
     def __add__(self, rest: ET2 | ETS2) -> ETS2:
         return self.__mul__(rest)  # pragma: nocover
 
+    def fixjoint(self, j: int, value: float, unit: str = "rad") -> ETS2:
+        """Return an independent ETS2 with the specified joint held constant.
+
+        j is the zero-based position among joint ETs, independent of their
+        jindex values. Remaining joints retain explicit global jindices;
+        automatically indexed joints are renumbered to fill the gap. Joint
+        limits and flip flags are preserved. The original is not modified.
+
+        :param j: index of the joint to fix
+        :param value: fixed joint coordinate, in radians/degrees or metres
+        :param unit: angular unit for rotational joints, "rad" [default] or "deg"
+        :returns: ETS2 with one fewer joint
+        :raises ValueError: for an invalid joint position or angular unit
+        """
+        if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
+            raise ValueError(f"joint index {j} out of range for {self.n} joints")
+        if unit not in ("rad", "deg"):
+            raise ValueError("unit must be 'rad' or 'deg'")
+
+        parts = []
+        joint_index = 0
+        for et in self:
+            if not et.isjoint:
+                parts.append(et)
+                continue
+
+            constructor = getattr(ET2, et.kind)
+            if joint_index == j:
+                fixed = -value if et.isflip else value
+                if et.isrotation:
+                    new = constructor(fixed, unit=unit)
+                else:
+                    if unit != "rad":
+                        raise ValueError("unit='deg' is only valid for rotational joints")
+                    new = constructor(fixed)
+                if et.offset != 0:
+                    # the joint transforms by +-q + offset
+                    new.param = new.param + et.offset
+            else:
+                if self._auto_jindex:
+                    new = constructor(flip=et.isflip, qlim=et.qlim)
+                else:
+                    new = constructor(flip=et.isflip, qlim=et.qlim, jindex=et.jindex)
+                if et.offset != 0:
+                    new.offset = et.offset
+            parts.append(new)
+            joint_index += 1
+
+        return ETS2(parts)
+
     def compile(self) -> ETS2:
         """
         Compile an ETS2
@@ -145,7 +193,7 @@ class ETS2(BaseETS[ET2]):
         ETs are compounded, leading to a constant ET which is denoted by
         ``SE3`` when displayed.
 
-        :seealso: :func:`isconstant`
+        :seealso: ``isconstant``
         """
         const = None
         ets = ETS2()
@@ -206,7 +254,7 @@ class ETS2(BaseETS[ET2]):
 
     def fkine(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE2 | None = None,
         tool: NDArray | SE2 | None = None,
         include_base: bool = True,
@@ -214,7 +262,7 @@ class ETS2(BaseETS[ET2]):
         """
         Forward kinematics
 
-        :param q: joint coordinates
+        :param q: joint coordinates, optional for a sequence with no joints
         :param base: base transform, optional
         :param tool: tool transform, optional
         :returns: transformation matrix representing the end-effector pose
@@ -254,7 +302,7 @@ class ETS2(BaseETS[ET2]):
 
     def eval(
         self,
-        q: ArrayLike,
+        q: ArrayLike | None = None,
         base: NDArray | SE2 | None = None,
         tool: NDArray | SE2 | None = None,
         include_base: bool = True,
@@ -262,7 +310,7 @@ class ETS2(BaseETS[ET2]):
         """
         Forward kinematics (returns raw ndarray)
 
-        :param q: joint coordinates
+        :param q: joint coordinates, optional for a sequence with no joints
         :param base: base transform, optional
         :param tool: tool transform, optional
         :returns: transformation matrix representing the end-effector pose
@@ -284,6 +332,9 @@ class ETS2(BaseETS[ET2]):
 
         - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
         """
+
+        if q is None:
+            q = []
 
         q = self._resolve_q(q, allow_trajectory=True)
         l, _ = q.shape
@@ -338,7 +389,7 @@ class ETS2(BaseETS[ET2]):
             # append
             if l > 1:
                 T[k, :, :] = Tk
-                # ret.append(SE2(Tk, check=False))  # type: ignore
+                # ret.append(SE2(Tk, check=False))
             else:
                 T = Tk
                 # ret = SE2(Tk, check=False)
@@ -349,6 +400,15 @@ class ETS2(BaseETS[ET2]):
         self,
         q: ArrayLike,
     ) -> NDArray:
+        """
+        Manipulator Jacobian in the base frame
+
+        :param q: the joint coordinates
+        :returns: the Jacobian, rows are :math:`(v_x, v_y, \\omega)`, one column
+            per joint
+
+        .. note:: This is a simple, not efficient, implementation.
+        """
         # very inefficient implementation, just put a 1 in last row
         # if its a rotation joint
         j = 0
@@ -419,7 +479,7 @@ class ETS2(BaseETS[ET2]):
         End-effector spatial velocity :math:`\nu = (v_x, v_y, \omega)^T`
         is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
 
-        :seealso: :func:`jacob0`, :func:`hessian0`
+        :seealso: :func:`jacob0`, ``hessian0``
         """
 
         T = self.fkine(q, include_base=False).A

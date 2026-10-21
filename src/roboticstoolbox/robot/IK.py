@@ -28,6 +28,73 @@ except ImportError:  # pragma nocover
     _qp = False
 
 
+def check_q0(q0: ArrayLike | None, n: int, slimit: int | None = None) -> NDArray | None:
+    """
+    Check the initial joint coordinates given to a numerical IK solver
+
+    :param q0: initial joint coordinates, or None
+    :param n: the number of joints
+    :param slimit: if given, ``q0`` may also be a matrix (m, n), one row per search,
+        with at most ``slimit`` rows
+    :raises ValueError: if ``q0`` does not have the length ``n`` expected of it
+    :returns: ``q0`` as an array, or None
+
+    A wrong length used to be accepted without comment by the solvers that are
+    written in C++, which then ignored ``q0`` and started from a random vector,
+    and to give an unhelpful NumPy error from the ones written in Python.
+    """
+    if q0 is None:
+        return None
+
+    q0a = np.asarray(q0, dtype=float)
+
+    if q0a.ndim == 1:
+        if q0a.shape[0] != n:
+            raise ValueError(
+                f"q0 has length {q0a.shape[0]}, expected {n}, the number of joints"
+            )
+    elif q0a.ndim == 2 and slimit is not None:
+        if q0a.shape[1] != n:
+            raise ValueError(
+                f"q0 has {q0a.shape[1]} columns, expected {n}, the number of joints"
+            )
+        if q0a.shape[0] > slimit:
+            raise ValueError(f"q0 has {q0a.shape[0]} rows, but slimit is {slimit}")
+    else:
+        shape = (
+            "a vector (n,) or a matrix (m, n)"
+            if slimit is not None
+            else "a vector (n,)"
+        )
+        raise ValueError(f"q0 must be {shape}, not an array with shape {q0a.shape}")
+
+    return q0a
+
+
+def check_mask(mask: ArrayLike | None) -> NDArray | None:
+    """
+    Check the Cartesian weighting mask given to a numerical IK solver
+
+    :param mask: weights of the six Cartesian degrees of freedom, or None
+    :raises ValueError: if ``mask`` is not a vector of 6 elements
+    :returns: ``mask`` as an array, or None
+
+    The solvers written in C++ read six elements from the mask, so a shorter one
+    was read past its end.
+    """
+    if mask is None:
+        return None
+
+    maska = np.asarray(mask, dtype=float)
+
+    if maska.shape != (6,):
+        raise ValueError(
+            f"mask must be a vector of 6 elements, not shape {maska.shape}"
+        )
+
+    return maska
+
+
 @dataclass
 class IKSolution:
     """
@@ -57,7 +124,7 @@ class IKSolution:
     .. versionchanged:: 1.4.2
         Added ``__getitem__`` (positional indexing matching ``__iter__``'s
         order) and a ``__repr__`` matching ``__str__``, so ``ik_LM``/``ik_NR``/
-        ``ik_GN`` (which now also return ``IKSolution``, see :meth:`ETS.ik_LM`)
+        ``ik_GN`` (which now also return ``IKSolution``, see :meth:`~roboticstoolbox.ETS.ik_LM`)
         remain compatible with code that indexed the old bare tuple return
 
     .. versionchanged:: 1.4.5
@@ -65,7 +132,7 @@ class IKSolution:
         ``len(sol)`` is the number of poses (1 for a single pose), and
         ``for q in sol`` and ``sol[i]`` give the joint vector of each pose.  This
         replaces iterating over the fields, so ``q, success, ... = sol`` and
-        ``sol[1]`` no longer work, use the attributes or :meth:`astuple`.  An
+        ``sol[1]`` no longer work, use the attributes or ``astuple``.  An
         ``IKSolution`` is true if ``success`` is true.  Printing a trajectory
         shows the number of poses and abbreviates a long ``q``, and the
         residual of a failed solution is no longer rounded to zero.
@@ -166,7 +233,9 @@ class IKSolution:
 
         def text(a: NDArray) -> str:
             return np.array2string(
-                a, separator=", ", formatter=fmt  # type: ignore[arg-type]
+                a,
+                separator=", ",
+                formatter=fmt,  # type: ignore[arg-type]
             )
 
         if self.q.ndim == 1 or len(self) <= 6:
@@ -212,7 +281,7 @@ class IKSolver(ABC):
     An abstract super class for numerical inverse kinematics (IK)
 
     This class provides basic functionality to perform numerical IK. Superclasses
-    can inherit this class and implement the `solve` method and redefine any other
+    can inherit this class and implement the ``solve`` method and redefine any other
     methods necessary.
 
     :param name: The name of the IK algorithm
@@ -222,17 +291,19 @@ class IKSolver(ABC):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
 
     .. seealso::
 
@@ -258,15 +329,19 @@ class IKSolver(ABC):
         mask: ArrayLike | None = None,
         joint_limits: bool = True,
         seed: int | None = None,
+        verbose: bool = False,
     ) -> None:
         # Solver parameters
         self.name = name
+        self.verbose = verbose
         self.slimit = slimit
         self.ilimit = ilimit
         self.tol = tol
 
         # Random number generator
         self._private_random = np.random.default_rng(seed=seed)
+
+        mask = check_mask(mask)
 
         if mask is None:
             mask = np.ones(6)
@@ -294,11 +369,11 @@ class IKSolver(ABC):
         :rtype: IKSolution
 
         This method will attempt to solve the IK problem and obtain joint coordinates
-        which result the the end-effector pose `Tep`.
+        which result the the end-effector pose ``Tep``.
 
-        If `Tep` is an :class:`SE3` containing more than one pose, or an array with
+        If ``Tep`` is an :class:`SE3` containing more than one pose, or an array with
         shape (N, 4, 4), it is treated as a trajectory of N poses.  Each pose is
-        solved independently, using the same initial coordinates `q0` (and the same
+        solved independently, using the same initial coordinates ``q0`` (and the same
         random restarts) for every pose, so consecutive solutions are not guaranteed
         to lie on the same IK branch.  The returned :class:`IKSolution` has:
 
@@ -325,7 +400,7 @@ class IKSolver(ABC):
         if q0 is None:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
 
-        q0a: NDArray | None = None if q0 is None else np.asarray(q0)
+        q0a = check_q0(q0, ets.n, self.slimit)
 
         if q0a is not None and q0a.ndim == 1:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
@@ -369,6 +444,8 @@ class IKSolver(ABC):
             reason = ""
 
             for i, T in enumerate(methTep):
+                if self.verbose:
+                    print(f"Pose {i + 1} of {len(methTep)}")
                 sol = self._solve(ets, T, q0)
                 q[i] = sol.q
                 if not sol.success:
@@ -409,6 +486,8 @@ class IKSolver(ABC):
 
         for search in range(self.slimit):
             q = q0[search].copy()
+            if self.verbose:
+                print(f"Search {search + 1}")
             i = 0
 
             # Check the initial configuration before attempting an update.
@@ -417,6 +496,9 @@ class IKSolver(ABC):
             _, E = self.error(ets.eval(q), Tep)
 
             while True:
+                if self.verbose:
+                    self._log("Iteration", E, f"q={self._fmt_q(q[ets.jindices])}", i)
+
                 # Check convergence for the current q before another update.
                 if E < self.tol:
                     self._normalise_q(ets, q)
@@ -425,10 +507,19 @@ class IKSolver(ABC):
                     jl_valid = self._check_jl(ets, q[ets.jindices])
 
                     if not jl_valid and self.joint_limits:
+                        if self.verbose:
+                            self._log(
+                                "Converged",
+                                E,
+                                "rejected: "
+                                + self._limit_violations(ets, q[ets.jindices]),
+                            )
                         # Abandon search and try again
                         found_with_limits = True
                         break
                     else:
+                        if self.verbose:
+                            self._log("Converged", E, "accepted")
                         return IKSolution(
                             q=q[ets.jindices],
                             success=True,
@@ -439,6 +530,8 @@ class IKSolver(ABC):
                         )
 
                 if i >= self.ilimit:
+                    if self.verbose:
+                        self._log("Abandoned", E, "iteration limit reached")
                     break
 
                 i += 1
@@ -450,6 +543,8 @@ class IKSolver(ABC):
                 except np.linalg.LinAlgError:
                     # Abandon search and try again
                     linalg_error += 1
+                    if self.verbose:
+                        self._log("Abandoned", E, "numpy.linalg.LinAlgError")
                     break
 
             total_i += i
@@ -505,7 +600,7 @@ class IKSolver(ABC):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
@@ -581,9 +676,54 @@ class IKSolver(ABC):
         :returns: True if joints within feasible limits otherwise False
         :rtype: bool
 
-        A thin wrapper around :func:`within_limits`.
+        A thin wrapper around ``within_limits``.
         """
         return within_limits(q[: ets.n], ets.qlim)
+
+    @staticmethod
+    def _fmt_q(q: NDArray) -> str:
+        """Joint coordinates formatted for verbose output, fixed width fields"""
+        return np.array2string(
+            np.asarray(q),
+            separator=" ",
+            formatter={"float_kind": lambda x: f"{x:9.4f}"},
+        )
+
+    @staticmethod
+    def _log(label: str, E: float, text: str, n: int | None = None) -> None:
+        """
+        Print one line of verbose output
+
+        :param label: what happened, for example ``Iteration``
+        :param E: the error at this point
+        :param text: the rest of the line
+        :param n: the iteration number, or None
+
+        The columns line up from one line to the next: the label and number are
+        in fixed width fields, and so is the error.
+        """
+        number = "" if n is None else str(n)
+        print(f"  {label:<10}{number:>4}  E={E:9.3e}  {text}")
+
+    def _limit_violations(self, ets: ETS, q: NDArray) -> str:
+        """
+        Describe the joints that are outside their limits, for verbose output
+
+        :param ets: the ETS
+        :param q: joint coordinates, shape (n,), after normalisation
+        :returns: for example ``q[2]=-3.177 outside [-2.356, 2.356]``, one entry for
+            each joint outside its limits, separated by ``;``
+
+        The revolute coordinates have already been shifted by whole turns towards
+        their limits, so a violation here is a violation of every equivalent angle.
+        """
+        lower, upper = ets.qlim
+        bad = [
+            f"q[{j}]={q[j]:.4g} outside [{lower[j]:.4g}, {upper[j]:.4g}]"
+            for j in range(ets.n)
+            if not lower[j] <= q[j] <= upper[j]
+        ]
+        return "; ".join(bad) if bad else "joint limits violated"
 
 
 def normalise_q(q: ArrayLike, qlim: ArrayLike, revolute: ArrayLike) -> NDArray:
@@ -600,7 +740,7 @@ def normalise_q(q: ArrayLike, qlim: ArrayLike, revolute: ArrayLike) -> NDArray:
     joints outside the principal interval :math:`[-\\pi, \\pi)`. Otherwise the
     principal angle is preferred, shifted by whole turns towards the limits if
     necessary. If no equivalent angle lies within the limits the coordinate is
-    left as the nearest candidate, and a subsequent :func:`within_limits` check
+    left as the nearest candidate, and a subsequent ``within_limits`` check
     will reject it.
 
     This is the joint coordinate convention used by the numerical IK solvers.
@@ -649,6 +789,7 @@ def within_limits(q: ArrayLike, qlim: ArrayLike) -> bool:
     qlim = np.asarray(qlim, dtype=float)
     return not bool(np.any((q < qlim[0]) | (q > qlim[1])))
 
+
 def _null_Σ(ets: ETS, q: NDArray, ps: float, pi: ArrayLike | float) -> Any:
     """
     Formulates a relationship between joint limits and the joint velocity.
@@ -695,7 +836,7 @@ def _calc_qnull(
 ) -> Any:
     """
     Calculates the desired null-space motion according to the gains λΣ and λm.
-    This is a helper method that is used within the `step` method of an IK solver
+    This is a helper method that is used within the ``step`` method of an IK solver
 
     :return: qnull - the desired null-space motion
     """
@@ -726,11 +867,11 @@ class IK_NR(IKSolver):
     Newton-Raphson Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
-    using the Newton-Raphson method. See `step` method for mathematical description.
+    using the Newton-Raphson method. See ``step`` method for mathematical description.
 
     .. note::
 
-        When using this class with redundant robots (>6 DoF), `pinv` must be set to `True`
+        When using this class with redundant robots (>6 DoF), ``pinv`` must be set to `True`
 
     :param name: The name of the IK algorithm
     :param ilimit: How many iterations are allowed within a search before a new search
@@ -739,18 +880,20 @@ class IK_NR(IKSolver):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
-    :param pinv: If True, will use the pseudoinverse in the `step` method instead of
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
+    :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
         the normal inverse
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
         completely from the solution
@@ -855,7 +998,7 @@ class IK_NR(IKSolver):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
@@ -899,17 +1042,19 @@ class IK_LM(IKSolver):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
     :param k: Sets the gain value for the damping matrix Wn in the ``step`` method. See
         notes
     :param method: One of "chan", "sugihara" or "wampler". Defines which method is used
@@ -928,7 +1073,7 @@ class IK_LM(IKSolver):
         The following example gets the ``ets`` of a ``panda`` robot object, instantiates
         the IK_LM solver class using default parameters, makes a goal pose ``Tep``,
         and then solves for the joint coordinates which result in the pose ``Tep``
-        using the `solve` method.
+        using the ``solve`` method.
 
     .. runblock:: pycon
     >>> import roboticstoolbox as rtb
@@ -1030,12 +1175,12 @@ class IK_LM(IKSolver):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
 
-        The operation is defined by the choice of `method` when instantiating the class.
+        The operation is defined by the choice of ``method`` when instantiating the class.
 
         The next step is defined as
 
@@ -1071,7 +1216,7 @@ class IK_LM(IKSolver):
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         **Sugihara's Method**
 
@@ -1084,11 +1229,11 @@ class IK_LM(IKSolver):
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         **Wampler's Method**
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
         """
 
         Te = ets.eval(q)
@@ -1123,7 +1268,7 @@ class IK_GN(IKSolver):
     Gauss-Newton Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
-    using the Gauss-Newton method. See `step` method for mathematical description.
+    using the Gauss-Newton method. See ``step`` method for mathematical description.
 
     .. note::
 
@@ -1136,18 +1281,20 @@ class IK_GN(IKSolver):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
-    :param pinv: If True, will use the pseudoinverse in the `step` method instead of
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
+    :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
         the normal inverse
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
         completely from the solution
@@ -1163,7 +1310,7 @@ class IK_GN(IKSolver):
         The following example gets the ``ets`` of a ``panda`` robot object, instantiates
         the `IK_GN` solver class using default parameters, makes a goal pose ``Tep``,
         and then solves for the joint coordinates which result in the pose ``Tep``
-        using the `solve` method.
+        using the ``solve`` method.
 
     .. runblock:: pycon
     >>> import roboticstoolbox as rtb
@@ -1251,7 +1398,7 @@ class IK_GN(IKSolver):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
@@ -1299,11 +1446,17 @@ class IK_GN(IKSolver):
 
 class IK_QP(IKSolver):
     r"""
-    Quadratic Progamming Numerical Inverse Kinematics Solver
+    Quadratic Programming Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
-    using a quadratic programming approach. See `step` method for mathematical
+    using a quadratic programming approach. See ``step`` method for mathematical
     description.
+
+    .. note::
+
+        This needs the packages ``qpsolvers`` and ``quadprog``, which are not
+        installed with the Toolbox by default.  Install them with the ``qp`` extra:
+        ``pip install roboticstoolbox-python[qp]``.
 
     :param name: The name of the IK algorithm
     :param ilimit: How many iterations are allowed within a search before a new search
@@ -1312,17 +1465,19 @@ class IK_QP(IKSolver):
     :param tol: Maximum allowed residual error E, where
         :math:`E = \tfrac{1}{2} \vec{e}^\top \mat{W}_e \vec{e}` is a *quadratic* form
         in the 6-vector angle-axis pose error :math:`\vec{e}` (see :meth:`error`).
-        Because `E` is quadratic, `tol` does not bound the linear-scale position/
+        Because ``E`` is quadratic, ``tol`` does not bound the linear-scale position/
         orientation error directly — with the default unit weighting, components of
         :math:`\vec{e}` are only guaranteed to be within roughly
         :math:`\sqrt{2 \cdot \text{tol}}` (e.g. `tol=1e-6` guarantees pose error on
-        the order of 1e-3, not 1e-6). Pick `tol` accordingly if you need a specific
+        the order of 1e-3, not 1e-6). Pick ``tol`` accordingly if you need a specific
         linear-scale accuracy
     :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         error priority
     :param joint_limits: Reject solutions with joint limit violations
     :param seed: A seed for the private RNG used to generate random joint coordinate
         vectors
+    :param verbose: If True, print the progress of each search: the error and joint
+        coordinates at each iteration, and why a converged solution was rejected
     :param kj: A gain for joint velocity norm minimisation
     :param ks: A gain which adjusts the cost of slack (intentional error)
     :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
@@ -1333,14 +1488,14 @@ class IK_QP(IKSolver):
         allowed to approach to its limit
     :param pi: The influence angle/distance (in radians or metres) in null space motion
         becomes active
-    :raises ImportError: If the package ``qpsolvers`` is not installed
+    :raises ImportError: If the package ``qpsolvers`` is not installed, see the note above
 
     Example::
 
         The following example gets the ``ets`` of a ``panda`` robot object, instantiates
         the `IK_QP` solver class using default parameters, makes a goal pose ``Tep``,
         and then solves for the joint coordinates which result in the pose ``Tep``
-        using the `solve` method.
+        using the ``solve`` method.
 
     .. runblock:: pycon
     >>> import roboticstoolbox as rtb
@@ -1394,8 +1549,8 @@ class IK_QP(IKSolver):
     ) -> None:
         if not _qp:  # pragma: nocover
             raise ImportError(
-                "the package qpsolvers is required for this class. \nInstall using 'pip"
-                " install qpsolvers'"
+                "the packages qpsolvers and quadprog are required for this class. "
+                "\nInstall them using 'pip install roboticstoolbox-python[qp]'"
             )
 
         super().__init__(
@@ -1431,7 +1586,7 @@ class IK_QP(IKSolver):
         :param ets: The ETS representing the manipulators kinematics
         :param Tep: The desired end-effector pose
         :param q: The current joint coordinate vector
-        :raises numpy.LinAlgError: If a step is impossible due to a linear algebra error
+        :raises numpy.linalg.LinAlgError: If a step is impossible due to a linear algebra error
         :returns: Tuple of ``(E, q)`` where ``E`` is the new error value and ``q`` is
             the new joint coordinate vector
         :rtype: tuple[float, numpy.ndarray]
@@ -1514,7 +1669,7 @@ class IK_QP(IKSolver):
         # Slack component of Q
         Q[ets.n :, ets.n :] = self.ks * (1 / np.sum(np.abs(e))) * np.eye(6)
 
-        # The equality contraints
+        # The equality constraints
         Aeq = np.concatenate((J, np.eye(6)), axis=1)
         beq = e.reshape((6,))
 

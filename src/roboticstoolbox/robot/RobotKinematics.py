@@ -284,7 +284,7 @@ class RobotKinematicsMixin:
         tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
-        Manipulator Hessian
+        Manipulator Hessian in the start frame
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
@@ -384,7 +384,7 @@ class RobotKinematicsMixin:
         tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
-        Manipulator Hessian
+        Manipulator Hessian in the end-effector frame
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
@@ -601,10 +601,13 @@ class RobotKinematicsMixin:
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_LM` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_LM`, which
+            has none of these limits.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method. This
@@ -651,7 +654,7 @@ class RobotKinematicsMixin:
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -665,11 +668,11 @@ class RobotKinematicsMixin:
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -766,10 +769,13 @@ class RobotKinematicsMixin:
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_NR` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_NR`, which
+            has none of these limits.
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -891,10 +897,13 @@ class RobotKinematicsMixin:
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_GN` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_GN`, which
+            has none of these limits.
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -1048,7 +1057,7 @@ class RobotKinematicsMixin:
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1098,7 +1107,7 @@ class RobotKinematicsMixin:
             λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
+        Use the kwarg ``k`` to adjust the weighting term λ.
 
         *Sugihara's Method*
 
@@ -1112,11 +1121,11 @@ class RobotKinematicsMixin:
 
         where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+        variable ``k`` as a kwarg to adjust the value of :math:`w_n`.
 
         *Wampler's Method*
 
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
         Examples
         --------
@@ -1224,7 +1233,7 @@ class RobotKinematicsMixin:
         :param joint_limits: Reject solutions with joint limit violations
         :param seed: A seed for the private RNG used to generate random joint coordinate
             vectors
-        :param pinv: If True, will use the pseudoinverse in the `step` method instead of
+        :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
             the normal inverse
         :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
             completely from the solution
@@ -1246,7 +1255,7 @@ class RobotKinematicsMixin:
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1300,11 +1309,11 @@ class RobotKinematicsMixin:
         :py:class:`~roboticstoolbox.robot.IK.IK_NR`
             An IK Solver class which implements the Newton-Raphson optimisation technique
         ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         :meth:`ik_NR`
             The fast, C++-backed equivalent of this method (requires the compiled extension)
 
@@ -1369,7 +1378,7 @@ class RobotKinematicsMixin:
         :param joint_limits: Reject solutions with joint limit violations
         :param seed: A seed for the private RNG used to generate random joint coordinate
             vectors
-        :param pinv: If True, will use the pseudoinverse in the `step` method instead of
+        :param pinv: If True, will use the pseudoinverse in the ``step`` method instead of
             the normal inverse
         :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
             completely from the solution
@@ -1391,7 +1400,7 @@ class RobotKinematicsMixin:
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1460,11 +1469,11 @@ class RobotKinematicsMixin:
         :py:class:`~roboticstoolbox.robot.IK.IK_GN`
             An IK Solver class which implements the Gauss-Newton optimisation technique
         ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         :meth:`ik_GN`
             The fast, C++-backed equivalent of this method (requires the compiled extension)
 
@@ -1543,7 +1552,7 @@ class RobotKinematicsMixin:
         :param tool: a static tool transformation matrix to apply to the
             end of ``end``; defaults to the robot's own ``self.tool`` if
             not given
-        :raises ImportError: If the package ``qpsolvers`` is not installed
+        :raises ImportError: If the package ``qpsolvers`` is not installed, see the note below
         :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
@@ -1553,7 +1562,7 @@ class RobotKinematicsMixin:
         shape (N, 4, 4)) each pose is solved independently from the same ``q0``, so
         consecutive solutions are not guaranteed to be on the same IK branch.  ``q``
         has shape (N, n), ``success`` is True only if every pose succeeded, and
-        ``residual`` is the maximum over the poses.  See :meth:`IKSolver.solve`.
+        ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
         .. versionchanged:: 1.4.5
             For a trajectory, ``residual`` is the maximum over the poses, it was
@@ -1561,6 +1570,12 @@ class RobotKinematicsMixin:
 
         A method that provides functionality to perform numerical inverse kinematics
         (IK) using a quadratic programming approach.
+
+        .. note::
+
+            This needs the packages ``qpsolvers`` and ``quadprog``, which are not
+            installed with the Toolbox by default.  Install them with the ``qp``
+            extra: ``pip install roboticstoolbox-python[qp]``.
 
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
@@ -1657,11 +1672,11 @@ class RobotKinematicsMixin:
         :py:class:`~roboticstoolbox.robot.IK.IK_QP`
             An IK Solver class which implements a quadratic programming approach
         ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`~roboticstoolbox.ETS` class
         ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`~roboticstoolbox.ETS` class
 
 
         .. versionchanged:: 1.0.4

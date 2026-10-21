@@ -12,6 +12,7 @@ http://www.robots.ox.ac.uk/~pnewman
 from collections import namedtuple
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy as sp
 import spatialmath.base as smb
@@ -28,6 +29,10 @@ odometry and observations of known landmarks.
 
 
 class ParticleFilter:
+    """
+    Particle filter for vehicle localization
+    """
+
     def __init__(
         self,
         robot,
@@ -683,8 +688,10 @@ class ParticleFilter:
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to None
-        :type block: bool, optional
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         Plot the estimated vehicle path in the xy-plane.
 
@@ -692,8 +699,7 @@ class ParticleFilter:
         """
         xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
 
 if __name__ == "__main__":

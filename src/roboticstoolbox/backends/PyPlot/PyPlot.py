@@ -147,6 +147,12 @@ class PyPlot(Connector):
             Existing Matplotlib 3D axes to render into.
         render_mode
             One of ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``.
+            If omitted it is chosen from the environment, see
+            :func:`_resolve_render_mode`.
+        animation
+            True if frames will be stepped through in a single running cell.  In a
+            notebook with the ``ipympl`` backend this selects the inline mode, since
+            an ``ipympl`` figure cannot update while the cell is running.
         inline_every_n
             Push one inline frame every N simulation steps (inline mode only).
         inline_format
@@ -156,7 +162,9 @@ class PyPlot(Connector):
         """
 
 
-        self.render_mode = _resolve_render_mode(kwargs.get("render_mode"))
+        self.render_mode = _resolve_render_mode(
+            kwargs.get("render_mode"), bool(kwargs.get("animation", False))
+        )
         self.inline_every_n = max(1, int(kwargs.get("inline_every_n", 1)))
         self.inline_format = kwargs.get("inline_format", "svg")
         if self.inline_format not in ["png", "svg"]:
@@ -381,7 +389,9 @@ class PyPlot(Connector):
         shadow: bool = True,
         name: bool = True,
         options: Any = None,
-    ) -> int:
+        q: ArrayLike | None = None,
+        color: Any = None,
+    ) -> Any:
         """
         Add a robot to the graphical scene
 
@@ -403,9 +413,26 @@ class PyPlot(Connector):
         :type shadow: bool, optional
         :param name: Display the name of the robot, defaults to True
         :type name: bool, optional
+        :param options: colors and line widths, a dict of dicts that is merged over the
+            defaults, for example ``{"robot": {"color": "r", "linewidth": 3}}``
+        :param q: the joint coordinates to draw, by default those of the robot
+        :param color: the color of the robot's line, shorthand for
+            ``options["robot"]["color"]`` which it overrides
+        :returns: for a robot, its :class:`~roboticstoolbox.backends.PyPlot.RobotPlot.RobotPlot`
+            handle, for anything else an integer id
 
-        ``id = env.add(robot)`` adds the ``robot`` to the graphical
+        ``handle = env.add(robot)`` adds the ``robot`` to the graphical
             environment.
+
+        The handle is the drawing of the robot in this scene, and its ``q`` is the pose
+        that it draws.  If ``q`` is given the drawing is pinned to that pose, and the
+        same robot can be added again in another pose, each drawn where it was put;
+        ``handle.q = q`` moves only that drawing.  If ``q`` is not given the drawing
+        follows ``robot.q``, as it has always done.
+
+        .. versionchanged:: 1.5.0
+            Added ``q`` and ``color``, and a robot now returns its plot handle, not an
+            integer id, which nothing could use.
 
         .. note::
 
@@ -415,6 +442,11 @@ class PyPlot(Connector):
 
         """
 
+
+        handle: Any
+        if color is not None:
+            options = dict(options or {})
+            options["robot"] = {**options.get("robot", {}), "color": color}
 
         if (
             isinstance(ob, rp.DHRobot)
@@ -433,22 +465,23 @@ class PyPlot(Connector):
                     shadow,
                     name,
                     options,
+                    q,
                 )
             )
             self.robots[-1].draw()
-            id = len(self.robots)
+            handle = self.robots[-1]
 
         elif isinstance(ob, EllipsePlot):
             ob.ax = self.ax
             self.ellipses.append(ob)
             self.ellipses[-1].draw()
-            id = len(self.ellipses)
+            handle = len(self.ellipses)
 
         elif isinstance(ob, Shape):
             # recreate the shape using matplotlib
             self.shapes.append(ShapePlot(ob))
             self.shapes[-1].draw(ax=self.ax)
-            id = len(self.shapes)
+            handle = len(self.shapes)
 
         self._set_axes_equal()
 
@@ -460,7 +493,7 @@ class PyPlot(Connector):
             plt.draw()  # matplotlib refresh
             plt.show(block=False)
 
-        return id
+        return handle
 
     def remove(self, id: int) -> None:
         """
@@ -583,6 +616,25 @@ class PyPlot(Connector):
         x_limits = self.ax.get_xlim3d()
         y_limits = self.ax.get_ylim3d()
         z_limits = self.ax.get_zlim3d()
+
+        # Matplotlib knows the data a 3D line was created with but not the data it
+        # was moved to, which is how every robot is drawn.  Take in the points of
+        # every robot in the scene, with the margin that autoscale leaves, so that
+        # the view shows all of them and not only the last.
+        points = [
+            np.c_[line.get_data_3d()]
+            for rpl in self.robots
+            if rpl.drawn and rpl.links is not None
+            for line in rpl.links
+        ]
+        if points:
+            pts = np.vstack([p.reshape(-1, 3) for p in points])
+            lo, hi = pts.min(axis=0), pts.max(axis=0)
+            pad = 0.05 * np.maximum(hi - lo, 1e-9)
+            lo, hi = lo - pad, hi + pad
+            x_limits = (min(x_limits[0], lo[0]), max(x_limits[1], hi[0]))
+            y_limits = (min(y_limits[0], lo[1]), max(y_limits[1], hi[1]))
+            z_limits = (min(z_limits[0], lo[2]), max(z_limits[1], hi[2]))
 
         x_range = abs(x_limits[1] - x_limits[0])
         x_middle = np.mean(x_limits)
@@ -774,7 +826,30 @@ def _isnotebook() -> bool:
         return False  # Probably standard Python interpreter
 
 
-def _resolve_render_mode(render_mode: str | None = None) -> str:
+def _resolve_render_mode(
+    render_mode: str | None = None, animation: bool = False
+) -> str:
+    """
+    Choose how a figure is rendered, from the environment
+
+    :param render_mode: an explicit choice, ``'window'``, ``'notebook-widget'`` or
+        ``'notebook-inline'``, which is used as it is
+    :param animation: True if the caller is going to animate by stepping through
+        frames inside a single running cell
+    :returns: the render mode
+
+    In a notebook the choice follows the matplotlib backend, so the same call works
+    whether the notebook says ``%matplotlib ipympl`` or ``%matplotlib inline``:
+
+    - ``'window'`` outside a notebook,
+    - ``'notebook-widget'`` for ``ipympl``, an interactive figure that can be rotated,
+    - ``'notebook-inline'`` otherwise, static images pushed into the cell output.
+
+    An ``ipympl`` figure updates only when the kernel handles a message from the
+    browser, which it cannot do while a cell is running.  So an animation with
+    ``animation=True`` would show the first and the last frame only, and the inline
+    mode, which does not depend on the browser, is chosen for it instead.
+    """
     if render_mode is not None:
         if render_mode not in ["window", "notebook-widget", "notebook-inline"]:
             raise ValueError(
@@ -788,6 +863,6 @@ def _resolve_render_mode(render_mode: str | None = None) -> str:
 
     backend = matplotlib.get_backend().lower()
     if "ipympl" in backend or "widget" in backend or "nbagg" in backend:
-        return "notebook-widget"
+        return "notebook-inline" if animation else "notebook-widget"
 
     return "notebook-inline"

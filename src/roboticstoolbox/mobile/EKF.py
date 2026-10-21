@@ -10,6 +10,7 @@ import warnings
 from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from matplotlib import animation
 from scipy.linalg import block_diag
@@ -39,6 +40,10 @@ class EKFLog(NamedTuple):
 
 
 class EKF:
+    """
+    Extended Kalman filter for vehicle localization, map estimation and SLAM
+    """
+
     def __init__(
         self,
         robot: tuple[VehicleBase, NDArray | None],
@@ -61,7 +66,7 @@ class EKF:
         :param sensor: vehicle mounted sensor model, defaults to None
         :type sensor: 2-tuple, optional
         :param map: landmark map, defaults to None
-        :type map: :class:`LandmarkMap`, optional
+        :type map: ``LandmarkMap``, optional
         :param P0: initial covariance matrix, defaults to None
         :type P0: ndarray(n,n), optional
         :param x_est: initial state estimate, defaults to None
@@ -488,7 +493,7 @@ class EKF:
         Get map object
 
         :return: map used in simulation
-        :rtype: :class:`LandmarkMap` subclass
+        :rtype: ``LandmarkMap`` subclass
         """
         return self._ekf_map
 
@@ -1032,7 +1037,7 @@ class EKF:
     def _isseenbefore(self, lm_id: int) -> bool:
 
         # _landmarks[0, id] is the order in which seen
-        # _landmarks[1, id] is the occurence count
+        # _landmarks[1, id] is the occurrence count
 
         return lm_id in self._landmarks
 
@@ -1126,19 +1131,21 @@ class EKF:
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         Plot the estimated vehicle path in the xy-plane.
 
-        :seealso: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` :meth:`plot_P`
+        :seealso: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` ``plot_P``
             :meth:`run` :meth:`history`
         """
         xyt = self.get_xyt()
         if xyt is None:
             raise ValueError("the vehicle pose is not part of the estimated state")
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_ellipse(
         self,
@@ -1152,7 +1159,10 @@ class EKF:
 
         :param confidence: ellipse confidence interval, defaults to 0.95
         :param N: number of ellipses to plot, defaults to 10
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param kwargs: arguments passed to :meth:`spatialmath.base.graphics.plot_ellipse`
 
         Plot ``N`` uncertainty ellipses spaced evenly along the trajectory.
@@ -1187,8 +1197,7 @@ class EKF:
                     inverted=True,
                     **kwargs,
                 )
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_error(
         self,
@@ -1206,7 +1215,10 @@ class EKF:
         :param ax: axes to plot into, one for each of :math:`(x, y, \theta)`,
             defaults to a new figure with three stacked axes
         :type ax: array_like(3) of Axes, optional
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :raises ValueError: if the vehicle pose is not part of the estimated state
 
         Plot the error between actual and estimated vehicle
@@ -1287,8 +1299,7 @@ class EKF:
             ax.set_ylabel(labels[k] + " error")
             ax.set_xlim(0, t[-1])
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def get_map(self) -> NDArray:
         """
@@ -1324,7 +1335,10 @@ class EKF:
             :func:`~spatialmath.base.graphics.plot_ellipse`, ellipses are drawn
             only if this is given
         :param confidence: ellipse confidence interval, defaults to 0.95
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param marker: deprecated, use ``marker_style``
         :param ellipse: deprecated, use ``ellipse_style``
 
@@ -1394,8 +1408,7 @@ class EKF:
                     **ellipse_style,
                 )
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def get_P(self, k: int | None = None) -> NDArray | list[NDArray]:
         """
@@ -1444,7 +1457,7 @@ class EKF:
         :type: bool or dict
 
         Plot the elements of the covariance matrix as an image. If ``colorbar``
-        is True add a color bar, if `colorbar` is a dict add a color bar with
+        is True add a color bar, if ``colorbar`` is a dict add a color bar with
         these options passed to colorbar.
 
         .. note:: A log scale is used.
@@ -1469,7 +1482,7 @@ class EKF:
         Transformation from estimated map to true map frame
 
         :param map: known landmark positions
-        :type map: :class:`LandmarkMap`
+        :type map: ``LandmarkMap``
         :return: transform from ``map`` to estimated map frame
         :rtype: SE2 instance
 

@@ -1,4 +1,4 @@
-Localization and Mapping
+Localization and mapping
 ========================
 
 These classes support simulation of vehicle and map estimation in a simple
@@ -56,4 +56,13 @@ Map models
    :inherited-members:
    :special-members: __init__
 
+Pose graph optimization
+-----------------------
 
+A pose graph is the other approach to SLAM: the poses of the vehicle are the vertices of a graph, and the measurements between them are the edges.  Optimizing the graph finds the poses that agree best with all of the measurements.
+
+.. autoclass:: roboticstoolbox.mobile.PoseGraph
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :special-members: __init__

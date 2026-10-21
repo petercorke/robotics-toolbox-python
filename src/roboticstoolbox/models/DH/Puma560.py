@@ -13,7 +13,7 @@ from typing import Any
 # 29/1/91 to agree with data from Armstrong etal.  Due to their use
 #  of modified D&H params, some of the offsets Ai, Di are
 #  offset, and for links 3-5 swap Y and Z axes.
-# 14/2/91 to use Paul's value of link twist (alpha) to be consistant
+# 14/2/91 to use Paul's value of link twist (alpha) to be consistent
 #  with ARCL.  This is the -ve of Lee's values, which means the
 #  zero angle position is a righty for Paul, and lefty for Lee.
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
@@ -54,7 +54,7 @@ class Puma560(DHRobot):
         - The model includes armature inertia and gear ratios.
         - The value of m1 is given as 0 here.  Armstrong found no value for it
           and it does not appear in the equation for tau1 after the
-          substituion is made to inertia about link frame rather than COG
+          substitution is made to inertia about link frame rather than COG
           frame.
         - Gravity load torque is the motor torque necessary to keep the joint
           static, and is thus -ve of the gravity caused torque.
@@ -125,7 +125,7 @@ class Puma560(DHRobot):
                 G=107.815,
                 B=0.817e-3,
                 Tc=[0.126, -0.071],
-                qlim=[-110 * deg, 110 * deg],  # qlim=[-45*deg, 225*deg]
+                qlim=[-45 * deg, 225 * deg],
             ),
             RevoluteDH(
                 d=0.15005,
@@ -138,7 +138,7 @@ class Puma560(DHRobot):
                 G=-53.7063,
                 B=1.38e-3,
                 Tc=[0.132, -0.105],
-                qlim=[-135 * deg, 135 * deg],  # qlim=[-225*deg, 45*deg]
+                qlim=[-225 * deg, 45 * deg],
             ),
             RevoluteDH(
                 d=0.4318,
@@ -151,7 +151,7 @@ class Puma560(DHRobot):
                 G=76.0364,
                 B=71.2e-6,
                 Tc=[11.2e-3, -16.9e-3],
-                qlim=[-266 * deg, 266 * deg],  # qlim=[-110*deg, 170*deg]
+                qlim=[-110 * deg, 170 * deg],
             ),
             RevoluteDH(
                 d=0,
@@ -194,7 +194,7 @@ class Puma560(DHRobot):
         self.qz = np.zeros(6)
 
         # nominal table top picking pose
-        self.qn = np.array([0, pi / 4, pi, 0, pi / 4, 0])
+        self.qn = np.array([0, pi / 4, -pi, 0, pi / 4, 0])
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
@@ -253,12 +253,12 @@ class Puma560(DHRobot):
 
         .. versionchanged:: 1.4.5
             Accepts an array as well as an :class:`SE3`, returns a single
-            :class:`IKSolution` for a trajectory like the numerical solvers (it
+            ``IKSolution`` for a trajectory like the numerical solvers (it
             was garbled, and failed for an unreachable pose), reports a pose
             closer to the waist axis than the shoulder offset as out of reach
             (it returned ``success=True`` with NaN joint coordinates), and checks
             the solution by forward kinematics.  It no longer uses
-            :meth:`DHRobot.ikine_6s`, which is deprecated.
+            ``ikine_6s``, which is deprecated.
 
         :reference:
             - Inverse kinematics for a PUMA 560,

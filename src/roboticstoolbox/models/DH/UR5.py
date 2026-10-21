@@ -35,7 +35,7 @@ class UR5(DHRobot):
 
         - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
 
-    :sealso: :func:`UR4`, :func:`UR10`
+    :sealso: ``UR4``, :func:`UR10`
 
 
     .. codeauthor:: Peter Corke

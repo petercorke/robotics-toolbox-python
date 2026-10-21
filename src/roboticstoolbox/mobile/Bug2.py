@@ -28,7 +28,7 @@ _M_LINE_TOLERANCE = np.sqrt(2) / 2 + 1e-9
 
 class Bug2(PlannerBase):
     """
-    Construct a Bug2 reactive navigator
+    Bug2 reactive navigator
 
     :param kwargs: common arguments for :class:`PlannerBase` superclass, in
         particular ``occgrid``
@@ -411,7 +411,7 @@ def edgelist(
     - The area outside the image is not part of the region, so a region that
       touches the border of the image has the border as part of its edge.
     - 8-direction chain coding can give incorrect results when used with
-      blobs founds using 4-way connectivty.
+      blobs founds using 4-way connectivity.
 
     :Reference:
 

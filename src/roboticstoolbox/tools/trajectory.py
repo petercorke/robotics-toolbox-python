@@ -2,10 +2,11 @@ import math
 import warnings
 from collections import namedtuple
 from collections.abc import Callable
-from typing import Literal
+from typing import Any, Literal, overload
+
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
-from numpy.typing import ArrayLike
 from spatialmath import SE3
 from spatialmath.base.argcheck import (
     # assertmatrix,
@@ -14,18 +15,37 @@ from spatialmath.base.argcheck import (
     isvector,
 )
 
+from roboticstoolbox.tools.types import ArrayLike, NDArray
+
 
 class Trajectory:
     """
     A container class for trajectory data.
     """
 
-    def __init__(self, name, t, s, sd=None, sdd=None, istime=False):
+    #: blend duration, set by :func:`trapezoidal` only
+    tblend: float
+    #: arrival time at each via point, set by :func:`mstraj` only
+    arrive: NDArray
+    #: one named tuple per segment (slowest axis, segment time, clock), set by
+    #: :func:`mstraj` only
+    info: list[Any]
+    #: the via points, set by :func:`mstraj` only
+    via: NDArray
+
+    def __init__(
+        self,
+        name: str,
+        t: NDArray,
+        s: NDArray,
+        sd: NDArray | None = None,
+        sdd: NDArray | None = None,
+        istime: bool = False,
+    ) -> None:
         """
         Construct a new trajectory instance
 
         :param name: name of the function that created the trajectory
-        :type name: str
         :param t: independent variable, eg. time or step
         :type t: ndarray(m)
         :param s: position
@@ -35,9 +55,6 @@ class Trajectory:
         :param sdd: acceleration
         :type sdd: ndarray(m) or ndarray(m,n)
         :param istime: ``t`` is time, otherwise step number
-        :type istime: bool
-        :param tblend: blend duration (``trapezoidal`` only)
-        :type istime: float
 
         The object has attributes:
 
@@ -45,6 +62,10 @@ class Trajectory:
         - ``s``  the position
         - ``sd``  the velocity
         - ``sdd``  the acceleration
+
+        and, set by the function that created it, ``tblend`` for
+        :func:`trapezoidal` and ``arrive``, ``info`` and ``via`` for
+        :func:`mstraj`.
 
         If ``t`` is time, ie. ``istime`` is True, then the units of ``sd`` and
         ``sdd`` are :math:`s^{-1}` and :math:`s^{-2}` respectively, otherwise
@@ -63,17 +84,17 @@ class Trajectory:
         self.sdd = sdd
         self.istime = istime
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = (
             f"Trajectory created by {self.name}: {len(self)} time steps x"
             f" {self.naxes} axes"
         )
         return s
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Length of trajectory
 
@@ -83,7 +104,7 @@ class Trajectory:
         return self.s.shape[0]
 
     @property
-    def q(self):
+    def q(self) -> NDArray:
         """
         Position trajectory
 
@@ -96,29 +117,35 @@ class Trajectory:
         return self.s
 
     @property
-    def qd(self):
+    def qd(self) -> NDArray:
         """
         Velocity trajectory
 
         :return: trajectory velocity with one row per timestep, one column per axis
         :rtype: ndarray(n,m)
+        :raises ValueError: the trajectory has no velocity data
 
         .. note:: This is a synonym for ``.sd``, for compatibility with other
             applications.
         """
+        if self.sd is None:
+            raise ValueError("trajectory has no velocity data")
         return self.sd
 
     @property
-    def qdd(self):
+    def qdd(self) -> NDArray:
         """
         Acceleration trajectory
 
         :return: trajectory acceleration with one row per timestep, one column per axis
         :rtype: ndarray(n,m)
+        :raises ValueError: the trajectory has no acceleration data
 
         .. note:: This is a synonym for ``.sdd``, for compatibility with other
             applications.
         """
+        if self.sdd is None:
+            raise ValueError("trajectory has no acceleration data")
         return self.sdd
 
     # @property
@@ -135,7 +162,7 @@ class Trajectory:
     #     return self.x
 
     @property
-    def naxes(self):
+    def naxes(self) -> int:
         """
         Number of axes in the trajectory
 
@@ -150,15 +177,18 @@ class Trajectory:
     def plot(
         self,
         block: bool = False,
-        plotargs: dict[str, object] | None = None,
-        textargs: dict[str, object] | None = None,
+        plotargs: dict[str, Any] | None = None,
+        textargs: dict[str, Any] | None = None,
     ) -> None:
         """
         Plot trajectory
 
-        :param block: wait till plot is dismissed
-        :type block: bool
-
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to False
+        :param plotargs: Matplotlib options for the plotted lines
+        :param textargs: Matplotlib options for the axis labels
 
         Plot the position, velocity and acceleration data.  The format of the
         plot depends on the function that created it.
@@ -168,12 +198,16 @@ class Trajectory:
         - ``jtraj`` general m-axis trajectory, show legend
 
         :seealso: :func:`~quintic`, :func:`~trapezoidal`
+
+        .. versionchanged:: 1.5.0
+            ``block=None`` does not call ``plt.show``, as documented. It used to call
+            ``plt.show(block=None)``, which waits in a script. The default, ``False``, is unchanged.
         """
 
-        plotopts = {"marker": "o", "markersize": 3}
+        plotopts: dict[str, Any] = {"marker": "o", "markersize": 3}
         if plotargs is not None:
             plotopts = {**plotopts, **plotargs}
-        textopts = {"fontsize": 12}
+        textopts: dict[str, Any] = {"fontsize": 12}
         if textargs is not None:
             textopts = {**textopts, **textargs}
 
@@ -259,18 +293,21 @@ class Trajectory:
                 ax.set_ylabel("$d^2q/dk^2$", **textopts)
                 ax.set_xlabel("k (step)")
 
-        plt.show(block=block)
+        apply_block(block)
 
-    def qplot(self, **kwargs):
-        """
+    def qplot(self, **kwargs: Any) -> None:
+        r"""
         Plot multi-axis trajectory
 
-        :param \*\*kwargs: optional arguments passed to ``qplot``
+        :param \*\*kwargs: optional arguments passed to ``xplot``
 
         Plots a multi-axis trajectory, held within the object, as position against time.
 
-        :seealso: :func:`qplot`
+        :seealso: ``xplot``
         """
+        # deferred, the plot module is imported after this one by the package
+        from roboticstoolbox.tools.plot import xplot
+
         xplot(self.t, self.q, **kwargs)
 
 
@@ -324,7 +361,6 @@ def quintic(
         >>> tg
         >>> len(tg)
         >>> tg.q
-        >>> tg.plot()
 
     .. plot::
 
@@ -349,27 +385,28 @@ def quintic(
 
     :seealso: :func:`trapezoidal`, :func:`mtraj`.
     """
+    tv: NDArray
     if isinstance(t, int):
-        t = np.arange(0, t)
+        tv = np.arange(0, t)
         istime = False
     elif isvector(t):
-        t = getvector(t)
+        tv = getvector(t)
         istime = True
     else:
         raise TypeError("bad argument for time, must be int or vector")
-    if len(t) < 2:
+    if len(tv) < 2:
         raise ValueError("a trajectory needs at least two time samples")
-    tf = t[-1] - t[0]
+    tf = tv[-1] - tv[0]
 
     polyfunc = quintic_func(q0, qf, tf, qd0, qdf)
 
     # evaluate the polynomials
-    traj = polyfunc(t - t[0])
+    traj = polyfunc(tv - tv[0])
     p = traj[0]
     pd = traj[1]
     pdd = traj[2]
 
-    return Trajectory("quintic", t, p, pd, pdd, istime)
+    return Trajectory("quintic", tv, p, pd, pdd, istime)
 
 
 def quintic_func(
@@ -379,7 +416,7 @@ def quintic_func(
     qd0: float = 0,
     qdf: float = 0,
     method: Literal["lstsq", "hermite"] = "lstsq",
-) -> Callable[[ArrayLike], tuple[ArrayLike, ArrayLike, ArrayLike]]:
+) -> Callable[[ArrayLike], tuple[NDArray, NDArray, NDArray]]:
     r"""
     Quintic scalar polynomial as a function
 
@@ -483,7 +520,7 @@ def quintic_func(
     coeffs_d = coeffs[0:5] * np.arange(5, 0, -1)
     coeffs_dd = coeffs_d[0:4] * np.arange(4, 0, -1)
 
-    def polynomial(x: ArrayLike) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+    def polynomial(x: ArrayLike) -> tuple[NDArray, NDArray, NDArray]:
         tau = np.asarray(x) / T
         return (
             np.polyval(coeffs, tau),
@@ -496,7 +533,7 @@ def quintic_func(
 
 def _quintic_hermite_func(
     q0: float, qf: float, T: float, qd0: float, qdf: float
-) -> Callable[[ArrayLike], tuple[ArrayLike, ArrayLike, ArrayLike]]:
+) -> Callable[[ArrayLike], tuple[NDArray, NDArray, NDArray]]:
     """
     Quintic scalar polynomial using a Hermite basis
 
@@ -510,7 +547,7 @@ def _quintic_hermite_func(
     vf = qdf * T
     delta = qf - q0
 
-    def polynomial(x: ArrayLike) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+    def polynomial(x: ArrayLike) -> tuple[NDArray, NDArray, NDArray]:
         tau = np.asarray(x, dtype=float) / T
         remaining = 1 - tau
         blend = tau**3 * (10 + tau * (-15 + 6 * tau))
@@ -539,7 +576,7 @@ def _quintic_hermite_func(
 # -------------------------------------------------------------------------- #
 
 
-def lspb(*args, **kwargs):
+def lspb(*args: Any, **kwargs: Any) -> Trajectory:
     """
     .. warning:: Deprecated, use ``trapezoidal`` instead.
     """
@@ -622,47 +659,153 @@ def trapezoidal(
     :seealso: :func:`quintic`, :func:`trapezoidal_func` :func:`mtraj`.
     """
 
+    tv: NDArray
     if isinstance(t, int):
-        t = np.arange(0, t)
+        tv = np.arange(0, t)
         istime = False
     elif isvector(t):
-        t = getvector(t)
+        tv = getvector(t)
         istime = True
     else:
         raise TypeError("bad argument for time, must be int or vector")
 
-    tf = t[-1] - t[0]
+    tf = tv[-1] - tv[0]
 
     trapezoidalfunc = trapezoidal_func(q0, qf, tf, V)
 
     # evaluate the polynomials
-    traj = trapezoidalfunc(t - t[0])
-    p = traj[0]
-    pd = traj[1]
-    pdd = traj[2]
+    p, pd, pdd = trapezoidalfunc(tv - tv[0])
 
-    traj = Trajectory("trapezoidal", t, p, pd, pdd, istime)
+    traj = Trajectory("trapezoidal", tv, p, pd, pdd, istime)
     traj.tblend = trapezoidalfunc.tb
     return traj
 
 
-def trapezoidal_func(q0, qf, T, V=None):
+class TrapezoidalProfile:
+    r"""
+    Trapezoidal scalar profile
+
+    :param q0: initial value
+    :param qf: final value
+    :param T: duration
+    :param V: velocity of the linear segment, defaults to 1.5 times the average
+        velocity :math:`(q_f - q_0) / T`
+    :raises ValueError: ``V`` is too small or too big for a solution to exist
+
+    An object that is called with a time, or an array of times, and returns the
+    position, velocity and acceleration :math:`(q(t), \dot{q}(t), \ddot{q}(t))`
+    of a trapezoidal velocity profile: a parabolic blend, a linear segment, and
+    a parabolic blend.  A scalar time gives scalar values, an array of times
+    gives arrays of the same shape.
+
+    The object has attributes:
+
+    - ``tb``, the duration of each blend
+    - ``V``, the velocity of the linear segment, signed
+
+    Instances are created by :func:`trapezoidal_func`.
+    """
+
+    tb: float
+    V: float
+
+    def __init__(self, q0: float, qf: float, T: float, V: float | None = None) -> None:
+        if V is None:
+            # if velocity not specified, compute it
+            vel = (qf - q0) / T * 1.5
+        else:
+            vel = abs(V) * float(np.sign(qf - q0))
+            if abs(vel) < (abs(qf - q0) / T):
+                raise ValueError("V too small")
+            elif abs(vel) > (2 * abs(qf - q0) / T):
+                raise ValueError("V too big")
+
+        if vel == 0:
+            self.tb = np.inf
+            self._a = 0.0
+        else:
+            self.tb = (q0 - qf + vel * T) / vel
+            self._a = vel / self.tb
+
+        self.V = vel
+        self._q0 = q0
+        self._qf = qf
+        self._T = T
+
+    @overload
+    def __call__(self, t: float) -> tuple[float, float, float]: ...
+
+    @overload
+    def __call__(self, t: ArrayLike) -> tuple[NDArray, NDArray, NDArray]: ...
+
+    def __call__(self, t: Any) -> Any:
+        """
+        Evaluate the profile
+
+        :param t: time, or array of times
+        :return: position, velocity and acceleration, each with the shape of ``t``
+        """
+        q0, qf, T, V, tb, a = self._q0, self._qf, self._T, self.V, self.tb, self._a
+
+        times = np.asarray(t, dtype=float)
+        p = np.empty(times.shape)
+        pd = np.empty(times.shape)
+        pdd = np.empty(times.shape)
+        for k, tk in enumerate(times.flat):
+            if tk < 0:
+                pk, pdk, pddk = q0, 0.0, 0.0
+            elif tk <= tb:
+                # initial blend
+                pk = q0 + a / 2 * tk**2
+                pdk = a * tk
+                pddk = a
+            elif tk <= (T - tb):
+                # linear motion
+                pk = (qf + q0 - V * T) / 2 + V * tk
+                pdk = V
+                pddk = 0.0
+            elif tk <= T:
+                # final blend
+                pk = qf - a / 2 * T**2 + a * T * tk - a / 2 * tk**2
+                pdk = a * T - a * tk
+                pddk = -a
+            else:
+                pk, pdk, pddk = qf, 0.0, 0.0
+            p.flat[k] = pk
+            pd.flat[k] = pdk
+            pdd.flat[k] = pddk
+
+        if times.ndim == 0:
+            return p[()], pd[()], pdd[()]
+        return p, pd, pdd
+
+
+def trapezoidal_func(
+    q0: float, qf: float, T: float, V: float | None = None
+) -> TrapezoidalProfile:
     r"""
     Trapezoidal scalar profile as a function
 
     :param q0: initial value
-    :type q0: float
     :param qf: final value
-    :type qf: float
     :param T: maximum time
-    :type T: float
-    :param V: velocity of linear segment
-    :type V: float, optional
+    :param V: velocity of linear segment, defaults to 1.5 times the average
     :return: trapezoidal profile function :math:`f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))`
-    :rtype: callable
+    :rtype: :class:`TrapezoidalProfile`
+    :raises ValueError: ``V`` is too small or too big for a solution to exist
 
     Returns a function which computes the specific trapezoidal profile, and its
-    derivatives, as described by the parameters.
+    derivatives, as described by the parameters.  The result is called with a
+    time, or an array of times, and has the attributes ``tb``, the blend
+    duration, and ``V``, the velocity of the linear segment.
+
+    A scalar time gives scalar values and an array of times gives arrays of the
+    same shape, as for :func:`quintic_func`.
+
+    .. versionchanged:: 1.5.0
+        A scalar time gives scalar values, it previously gave arrays with one
+        element.  The result is a :class:`TrapezoidalProfile` object, which is
+        called in the same way as the function it replaces.
 
     Example:
 
@@ -673,90 +816,29 @@ def trapezoidal_func(q0, qf, T, V=None):
         >>> f(0)
         >>> f(5)
         >>> f(2.5)
+        >>> f.tb
     """
-
-    if V is None:
-        # if velocity not specified, compute it
-        V = (qf - q0) / T * 1.5
-    else:
-        V = abs(V) * np.sign(qf - q0)
-        if abs(V) < (abs(qf - q0) / T):
-            raise ValueError("V too small")
-        elif abs(V) > (2 * abs(qf - q0) / T):
-            raise ValueError("V too big")
-
-    if V == 0:
-        tb = np.inf
-        a = 0
-    else:
-        tb = (q0 - qf + V * T) / V
-        a = V / tb
-
-    def trapezoidalfunc(t):
-
-        p = []
-        pd = []
-        pdd = []
-
-        if isscalar(t):
-            t = [t]
-        for tk in t:
-            if tk < 0:
-                pk = q0
-                pdk = 0
-                pddk = 0
-            elif tk <= tb:
-                # initial blend
-                pk = q0 + a / 2 * tk**2
-                pdk = a * tk
-                pddk = a
-            elif tk <= (T - tb):
-                # linear motion
-                pk = (qf + q0 - V * T) / 2 + V * tk
-                pdk = V
-                pddk = 0
-            elif tk <= T:
-                # final blend
-                pk = qf - a / 2 * T**2 + a * T * tk - a / 2 * tk**2
-                pdk = a * T - a * tk
-                pddk = -a
-            else:
-                pk = qf
-                pdk = 0
-                pddk = 0
-            p.append(pk)
-            pd.append(pdk)
-            pdd.append(pddk)
-        return (np.array(p), np.array(pd), np.array(pdd))
-
-    # return the function, but add some computed parameters as attributes
-    # as a way of returning extra values without a tuple return
-    func = trapezoidalfunc
-    func.tb = tb
-    func.V = V
-
-    return func
+    return TrapezoidalProfile(q0, qf, T, V)
 
 
 # -------------------------------------------------------------------------- #
 
 
-def mtraj(tfunc, q0, qf, t):
+def mtraj(
+    tfunc: Callable[..., Trajectory], q0: ArrayLike, qf: ArrayLike, t: int | ArrayLike
+) -> Trajectory:
     """
     Multi-axis trajectory
 
     :param tfunc: a 1D trajectory function, eg. :func:`quintic` or :func:`trapezoidal`
-    :type tfunc: callable
     :param q0: initial configuration
-    :type q0: ndarray(m)
+    :type q0: array_like(m)
     :param qf: final configuration
-    :type qf: ndarray(m)
+    :type qf: array_like(m)
     :param t: time vector or number of steps
-    :type t: array_like or int
     :raises TypeError: ``tfunc`` is not callable
     :raises ValueError: length of ``q0`` and ``qf`` are different
     :return: trajectory
-    :rtype: :class:`Trajectory` instance
 
     - ``tg = mtraj(func, q0, qf, n)`` is a multi-axis trajectory varying
       from configuration ``q0`` (M) to ``qf`` (M) according to the scalar trajectory
@@ -787,15 +869,15 @@ def mtraj(tfunc, q0, qf, t):
     if not callable(tfunc):
         raise TypeError("first argument must be a function reference")
 
-    q0 = getvector(q0)
-    qf = getvector(qf)
-    if len(q0) != len(qf):
+    q0_ = getvector(q0)
+    qf_ = getvector(qf)
+    if len(q0_) != len(qf_):
         raise ValueError("must be same number of elements in q0 and qf")
 
     traj = []
-    for i in range(len(q0)):
+    for i in range(len(q0_)):
         # for each axis
-        traj.append(tfunc(q0[i], qf[i], t))
+        traj.append(tfunc(q0_[i], qf_[i], t))
 
     x = traj[0].t
     y = np.array([tg.s for tg in traj]).T
@@ -810,7 +892,13 @@ def mtraj(tfunc, q0, qf, t):
 # -------------------------------------------------------------------------- #
 
 
-def jtraj(q0, qf, t, qd0=None, qd1=None):
+def jtraj(
+    q0: ArrayLike,
+    qf: ArrayLike,
+    t: int | ArrayLike,
+    qd0: ArrayLike | None = None,
+    qd1: ArrayLike | None = None,
+) -> Trajectory:
     """
     Compute a joint-space trajectory
 
@@ -819,13 +907,12 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
     :param qf: final joint coordinate
     :type qf: array_like(n)
     :param t: time vector or number of steps
-    :type t: array_like or int
     :param qd0: initial velocity, defaults to zero
     :type qd0: array_like(n), optional
     :param qd1: final velocity, defaults to zero
     :type qd1: array_like(n), optional
+    :raises ValueError: ``q0``, ``qf``, ``qd0`` and ``qd1`` are not the same size
     :return: trajectory
-    :rtype: :class:`Trajectory` instance
 
     - ``tg = jtraj(q0, qf, N)`` is a joint space trajectory where the joint
       coordinates vary from ``q0`` (M) to ``qf`` (M).  A quintic (5th order)
@@ -845,7 +932,7 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
 
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
+    :seealso: :func:`ctraj`, ``xplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
     # print(f"  --- jtraj: {q0} --> {q1} in {tv}")
     if isinstance(t, int):
@@ -853,35 +940,36 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
         ts = np.linspace(0, 1, t)  # normalized time from 0 -> 1
         tv = ts * t
     else:
-        tv = t.flatten()
-        tscal = max(t)
-        ts = t.flatten() / tscal
+        tarray = np.asarray(t, dtype=float)
+        tv = tarray.flatten()
+        tscal = float(np.max(tarray))
+        ts = tv / tscal
 
-    q0 = getvector(q0)
-    qf = getvector(qf)
+    q0_ = getvector(q0)
+    qf_ = getvector(qf)
 
-    if not len(q0) == len(qf):
+    if not len(q0_) == len(qf_):
         raise ValueError("q0 and q1 must be same size")
 
     if qd0 is None:
-        qd0 = np.zeros(q0.shape)
+        qd0_ = np.zeros(q0_.shape)
     else:
-        qd0 = getvector(qd0)
-        if not len(qd0) == len(q0):
+        qd0_ = getvector(qd0)
+        if not len(qd0_) == len(q0_):
             raise ValueError("qd0 has wrong size")
     if qd1 is None:
-        qd1 = np.zeros(q0.shape)
+        qd1_ = np.zeros(q0_.shape)
     else:
-        qd1 = getvector(qd1)
-        if not len(qd1) == len(q0):
+        qd1_ = getvector(qd1)
+        if not len(qd1_) == len(q0_):
             raise ValueError("qd1 has wrong size")
 
     # compute the polynomial coefficients
-    A = 6 * (qf - q0) - 3 * (qd1 + qd0) * tscal
-    B = -15 * (qf - q0) + (8 * qd0 + 7 * qd1) * tscal
-    C = 10 * (qf - q0) - (6 * qd0 + 4 * qd1) * tscal
-    E = qd0 * tscal  # as the t vector has been normalized
-    F = q0
+    A = 6 * (qf_ - q0_) - 3 * (qd1_ + qd0_) * tscal
+    B = -15 * (qf_ - q0_) + (8 * qd0_ + 7 * qd1_) * tscal
+    C = 10 * (qf_ - q0_) - (6 * qd0_ + 4 * qd1_) * tscal
+    E = qd0_ * tscal  # as the t vector has been normalized
+    F = q0_
 
     # n = len(q0)
 
@@ -952,26 +1040,26 @@ def ctraj(
     :References:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`~roboticstoolbox.trajectory.trapezoidal`,
-        :func:`~spatialmath.unitquaternion.interp`
+    :seealso: ``trapezoidal``,
+        ``interp``
     """
 
     if isinstance(t, int):
-        s = trapezoidal(0, 1, t).s
-    elif isvector(t):
-        t = getvector(t)
-        t = t / np.max(t)
+        sv = trapezoidal(0, 1, t).s
+    elif t is not None and isvector(t):
+        tv = getvector(t)
+        tv = tv / np.max(tv)
         # Preserve sampling of the zero-origin profile, including unordered samples.
-        s = trapezoidal_func(0, 1, np.max(t))(t)[0]
-    elif isvector(s):
-        s = getvector(s)
+        sv = trapezoidal_func(0, 1, float(np.max(tv)))(tv)[0]
+    elif s is not None and isvector(s):
+        sv = getvector(s)
     else:
         raise TypeError("bad argument for time, must be int or vector")
 
-    return T0.interp(T1, s)
+    return T0.interp(T1, sv)
 
 
-def cmstraj():
+def cmstraj() -> None:
     # Cartesian version of mstraj, via points are SE3
     # perhaps refactor mstraj to allow interpolation of any type
     pass
@@ -1079,68 +1167,78 @@ def mstraj(
     :seealso: :func:`trapezoidal`, :func:`ctraj`, :func:`mtraj`
     """
 
+    # q0 is overwritten below by the last point of the linear motion, as it
+    # always was, so keep it as a variable of its own
+    q0v: NDArray
     if q0 is None:
-        q0 = viapoints[0, :]
+        q0v = viapoints[0, :]
         viapoints = viapoints[1:, :]
     else:
-        q0 = getvector(q0)
-        if not viapoints.shape[1] == len(q0):
+        q0v = getvector(q0)
+        if not viapoints.shape[1] == len(q0v):
             raise ValueError("WP and Q0 must have same number of columns")
 
     ns, nj = viapoints.shape
-    Tacc = tacc
+    tseg_given: NDArray | None = None if tsegment is None else getvector(tsegment)
+    qdmax_v: NDArray | None = None
 
     if qdmax is not None and tsegment is not None:
         raise ValueError("cannot specify both qdmax and tsegment")
 
     if qdmax is None:
-        if tsegment is None:
+        if tseg_given is None:
             raise ValueError("tsegment must be given if qdmax is not")
 
-        if not len(tsegment) == ns:
+        if not len(tseg_given) == ns:
             raise ValueError("Length of TSEG does not match number of viapoints")
 
-    if tsegment is None:
+    if tseg_given is None:
         # This is unreachable, left just in case
         if qdmax is None:  # pragma nocover
             raise ValueError("qdmax must be given if tsegment is not")
 
         if isinstance(qdmax, (int, float)):
             # if qdmax is a scalar assume all axes have the same speed
-            qdmax = np.tile(qdmax, (nj,))
+            qdmax_v = np.tile(qdmax, (nj,))
         else:
-            qdmax = getvector(qdmax)
+            qdmax_v = getvector(qdmax)
 
-            if not len(qdmax) == nj:
+            if not len(qdmax_v) == nj:
                 raise ValueError("Length of QDMAX does not match number of axes")
 
-    if isinstance(Tacc, (int, float)):
-        Tacc = np.tile(Tacc, (ns,))
+    Tacc: NDArray
+    if isinstance(tacc, (int, float)):
+        Tacc = np.tile(tacc, (ns,))
     else:
+        Tacc = getvector(tacc)
         if not len(Tacc) == ns:
             raise ValueError("Tacc is wrong size")
+    qd0v: NDArray
     if qd0 is None:
-        qd0 = np.zeros((nj,))
+        qd0v = np.zeros((nj,))
     else:
-        if not len(qd0) == len(q0):
+        qd0v = getvector(qd0)
+        if not len(qd0v) == len(q0v):
             raise ValueError("qd0 is wrong size")
+    qdfv: NDArray
     if qdf is None:
-        qdf = np.zeros((nj,))
+        qdfv = np.zeros((nj,))
     else:
-        if not len(qdf) == len(q0):
+        qdfv = getvector(qdf)
+        if not len(qdfv) == len(q0v):
             raise ValueError("qdf is wrong size")
 
     # set the initial conditions
-    q_prev = q0
-    qd_prev = qd0
+    q_prev = q0v
+    qd_prev = qd0v
 
-    clock = 0  # keep track of time
+    clock: float = 0  # keep track of time
     arrive = np.zeros((ns,))  # record planned time of arrival at via points
     q_parts = []
     qd_parts = []
     qdd_parts = []
     infolist = []
-    info = namedtuple("mstraj_info", "slowest segtime clock")
+    mstraj_info = namedtuple("mstraj_info", "slowest segtime clock")
 
     def mrange(start, stop, step):
         """
@@ -1160,14 +1258,12 @@ def mstraj(
 
         # set the blend time, just half an interval for the first segment
 
-        tacc = Tacc[seg]
-
-        tacc = math.ceil(tacc / dt) * dt
-        tacc2 = math.ceil(tacc / 2 / dt) * dt
+        tacc_seg = math.ceil(Tacc[seg] / dt) * dt
+        tacc2 = math.ceil(tacc_seg / 2 / dt) * dt
         if seg == 0:
             taccx = tacc2
         else:
-            taccx = tacc
+            taccx = tacc_seg
 
         # estimate travel time
         #    could better estimate distance travelled during the blend
@@ -1182,32 +1278,34 @@ def mstraj(
         #   dq = q_next - q_prev - qb
         #   tl = abs(dq) ./ qdmax;
 
-        if qdmax is not None:
+        slowest: int | float | None
+        tseg: float
+        if qdmax_v is not None:
             # qdmax is specified, compute slowest axis
 
             # qb = taccx * qdmax / 2       # distance moved during blend
             tb = taccx
 
             # convert to time
-            tl = abs(dq) / qdmax
+            tl = abs(dq) / qdmax_v
             # tl = abs(dq - qb) / qdmax
             tl = np.ceil(tl / dt) * dt
 
             # find the total time and slowest axis
             tt = tb + tl
-            slowest = np.argmax(tt)
+            slowest = int(np.argmax(tt))
             tseg = tt[slowest]
 
             # best if there is some linear motion component
-            if tseg <= 2 * tacc:
-                tseg = 2 * tacc
+            if tseg <= 2 * tacc_seg:
+                tseg = 2 * tacc_seg
 
-        elif tsegment is not None:
+        elif tseg_given is not None:
             # segment time specified, use that
-            tseg = tsegment[seg]
+            tseg = tseg_given[seg]
             slowest = math.nan
 
-        infolist.append(info(slowest, tseg, clock))
+        infolist.append(mstraj_info(slowest, tseg, clock))
 
         # log the planned arrival time
         arrive[seg] = clock + tseg
@@ -1217,7 +1315,7 @@ def mstraj(
         if verbose:  # pragma nocover
             print(
                 f"seg {seg}, distance {dq}, "
-                "slowest axis {slowest}, time required {tseg}"
+                f"slowest axis {slowest}, time required {tseg}"
             )
 
         # create the trajectories for this segment
@@ -1228,7 +1326,7 @@ def mstraj(
         # add the blend polynomial
         if taccx > 0:
             blend = jtraj(
-                q0, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd
+                q0v, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd
             )
             if verbose:  # pragma nocover
                 print(blend.q)
@@ -1241,10 +1339,10 @@ def mstraj(
         # add the linear part, from tacc/2+dt to tseg-tacc/2
         for t in mrange(tacc2 + dt, tseg - tacc2, dt):
             s = t / tseg
-            q0 = (1 - s) * q_prev + s * q_next  # linear step
+            q0v = (1 - s) * q_prev + s * q_next  # linear step
             if verbose:  # pragma nocover
-                print(t, s, q0)
-            q_parts.append(q0[np.newaxis, :])
+                print(t, s, q0v)
+            q_parts.append(q0v[np.newaxis, :])
             qd_parts.append(qd[np.newaxis, :])
             qdd_parts.append(np.zeros((1, nj)))
             clock += dt
@@ -1254,12 +1352,12 @@ def mstraj(
 
     # add the final blend
     if tacc2 > 0:
-        blend = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf)
+        blend = jtraj(q0v, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdfv)
         q_parts.append(blend.q[1:, :])
         qd_parts.append(blend.qd[1:, :])
         qdd_parts.append(blend.qdd[1:, :])
 
-    infolist.append(info(None, tseg, clock))
+    infolist.append(mstraj_info(None, tseg, clock))
 
     q = np.vstack(q_parts)
     qd = np.vstack(qd_parts)

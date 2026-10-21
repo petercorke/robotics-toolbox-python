@@ -1,13 +1,13 @@
 Drivers
 =======
 
-These classes define agents that can drive a mobile robot around a workplace, and are
+These classes define agents that can drive a mobile robot around a workspace, and are
 useful for testing localization algorithms.
 
 Random Path
 ^^^^^^^^^^^
 
-  .. autoclass:: roboticstoolbox.mobile.drivers.RandomPath
+.. autoclass:: roboticstoolbox.mobile.drivers.RandomPath
    :members:
    :undoc-members:
    :inherited-members:
@@ -17,7 +17,7 @@ Random Path
 Pure Pursuit
 ^^^^^^^^^^^^
 
-  .. autoclass:: roboticstoolbox.mobile.drivers.PurePursuit
+.. autoclass:: roboticstoolbox.mobile.drivers.PurePursuit
    :members:
    :undoc-members:
    :inherited-members:
@@ -27,7 +27,7 @@ Pure Pursuit
 Superclass
 ^^^^^^^^^^
 
-  .. autoclass:: roboticstoolbox.mobile.drivers.VehicleDriverBase
+.. autoclass:: roboticstoolbox.mobile.drivers.VehicleDriverBase
    :members:
    :undoc-members:
    :inherited-members:

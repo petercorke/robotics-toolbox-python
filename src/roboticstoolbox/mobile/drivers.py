@@ -112,10 +112,10 @@ class VehicleDriverBase(ABC):
         """
         Compute speed and steering angle
 
-        :return: speed and steering angle demand for :class:`VehicleBase`
+        :return: speed and steering angle demand for ``VehicleBase``
 
-        When an instance of a :class:`VehicleDriverBase` class is attached as
-        the control for an instance of a :class:`VehicleBase` class, this method
+        When an instance of a :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase` class is attached as
+        the control for an instance of a ``VehicleBase`` class, this method
         is called at each time step to provide the control input.
 
         Has access to the vehicle and its state through the :meth:`vehicle`
@@ -138,8 +138,8 @@ class VehicleDriverBase(ABC):
         """
         Set/get the vehicle under control
 
-        :getter: return the :class:`VehicleBase` instance, or None
-        :setter: set the :class:`VehicleBase` instance
+        :getter: return the ``VehicleBase`` instance, or None
+        :setter: set the ``VehicleBase`` instance
 
         .. note:: The setter is invoked by ``vehicle.control = driver``
         """
@@ -226,6 +226,10 @@ class VehicleDriverBase(ABC):
 
 
 class RandomPath(VehicleDriverBase):
+    """
+    Driving agent for a random path
+    """
+
     def __init__(
         self, dthresh: float = 0.05, seed: int | None = 0, **kwargs: Any
     ) -> None:
@@ -235,7 +239,7 @@ class RandomPath(VehicleDriverBase):
         :param dthresh: distance threshold as a fraction of the larger workspace
             dimension, defaults to 0.05
         :param seed: random number seed, defaults to 0, None for a random seed
-        :param kwargs: arguments passed to :class:`VehicleDriverBase`, in
+        :param kwargs: arguments passed to :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`, in
             particular ``workspace`` which is required
         :raises ValueError: no workspace specified
 
@@ -267,7 +271,7 @@ class RandomPath(VehicleDriverBase):
               ``seed=None`` to have it randomly initialized from the operating
               system.
 
-        :seealso: :class:`Bicycle` :class:`Unicycle` :func:`~spatialmath.base.graphics.plotvol2`
+        :seealso: ``Bicycle`` ``Unicycle`` :func:`~spatialmath.base.graphics.plotvol2`
         """
 
         # TODO options to specify region, maybe accept a Map object?
@@ -341,14 +345,14 @@ class RandomPath(VehicleDriverBase):
         """
         Compute speed and steering angle for the current random waypoint
 
-        :return: speed and steering angle demand for :class:`VehicleBase`
+        :return: speed and steering angle demand for ``VehicleBase``
 
         This is the speed and steering angle that drives the vehicle toward the
         current waypoint.  When the vehicle is within ``dthresh`` times the
         larger workspace dimension of the waypoint, a new random waypoint is
         chosen.
 
-        :seealso: :class:`VehicleBase`
+        :seealso: ``VehicleBase``
         """
 
         if self._goal is None:
@@ -393,6 +397,10 @@ class RandomPath(VehicleDriverBase):
 
 
 class PurePursuit(VehicleDriverBase):
+    """
+    Driving agent for pure pursuit
+    """
+
     def __init__(
         self,
         path: Points2,
@@ -409,7 +417,7 @@ class PurePursuit(VehicleDriverBase):
         :param path_style: Matplotlib line style used to display the path,
             merged over the default :data:`PATH_STYLE` (a wide, translucent red
             line)
-        :param kwargs: arguments passed to :class:`VehicleDriverBase`
+        :param kwargs: arguments passed to :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
         :raises ValueError: ``path`` is not a 2xN array
 
         Returns a *driver* object that drives the attached vehicle along the
@@ -430,7 +438,7 @@ class PurePursuit(VehicleDriverBase):
         and the current goal point, which changes at every time step, is shown
         using ``goal_style``.
 
-        :seealso: :class:`RandomPath` :class:`VehicleBase`
+        :seealso: :class:`RandomPath` ``VehicleBase``
         """
         super().__init__(**kwargs)
 
@@ -481,7 +489,7 @@ class PurePursuit(VehicleDriverBase):
         """
         Compute speed and steering angle to follow the path
 
-        :return: speed and steering angle demand for :class:`VehicleBase`
+        :return: speed and steering angle demand for ``VehicleBase``
 
         The goal is the first point on the path, beyond the point closest to the
         vehicle, that is at least ``lookahead`` away from the vehicle.  If there

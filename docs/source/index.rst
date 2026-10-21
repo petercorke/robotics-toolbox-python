@@ -13,5 +13,6 @@ Robotics Toolbox for Python
    intro
    install
    arm
+   ets
    mobile
    blocks

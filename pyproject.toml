@@ -78,6 +78,9 @@ collision = ["coal; sys_platform != 'win32'", "trimesh"]
 
 qp = ["qpsolvers", "quadprog"]
 
+# analytic inverse kinematics: derive the equations (SymPy), much faster with FLINT
+ik = ["sympy", "python-flint"]
+
 tool = ["ipython", "pygments"]
 
 all = [
@@ -104,6 +107,7 @@ dev = [
     "coal; sys_platform != 'win32'",
     "trimesh",
     "nbmake",
+    "ipympl",
 ]
 
 # Backward-compatible alias; notebook tooling is included in "dev".
@@ -372,7 +376,6 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
-    "roboticstoolbox.tools.trajectory",
     "roboticstoolbox.tools.DHFactor",
     "roboticstoolbox.robot.DHFactor",
 ]

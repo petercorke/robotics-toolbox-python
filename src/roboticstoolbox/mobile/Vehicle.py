@@ -13,6 +13,7 @@ from math import cos, pi, sin, tan
 from typing import Any, Callable, TypeAlias
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from matplotlib import animation
 from matplotlib.axes import Axes
@@ -139,6 +140,10 @@ class Trailer:
 
 
 class VehicleBase(ABC):
+    """
+    Superclass for vehicle kinematic models
+    """
+
     def __init__(
         self,
         covar: NDArray | None = None,
@@ -424,7 +429,7 @@ class VehicleBase(ABC):
             * a constant tuple as the control inputs to the vehicle
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as f(t) that returns a tuple
-            * a driver agent, subclass of :class:`VehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         Vehicle steering, speed and acceleration limits are applied to the
         result before being input to the vehicle model.
@@ -529,7 +534,7 @@ class VehicleBase(ABC):
 
         .. warning:: Deprecated.  Use ``vehicle.control = driver`` instead.
 
-        :seealso: :class:`VehicleDriverBase` :meth:`control`
+        :seealso: :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase` :meth:`control`
         """
 
         warnings.warn("add_driver is deprecated, use veh.control=driver instead")
@@ -566,7 +571,7 @@ class VehicleBase(ABC):
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as ``f(t)`` that returns a tuple, see
               SciPy interp1d
-            * a driver agent, subclass of :class:`VehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         This is evaluated by :meth:`eval_control` which applies velocity,
         acceleration and steering limits.
@@ -645,7 +650,7 @@ class VehicleBase(ABC):
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as ``f(t)`` that returns a tuple, see
               SciPy interp1d
-            * a driver agent, subclass of :class:`VehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         This is evaluated by :meth:`eval_control` which applies velocity,
         acceleration and steering limits.
@@ -817,7 +822,7 @@ class VehicleBase(ABC):
 
         .. note:: Vehicle control input limits are applied.
 
-        :seealso: :func:`control`, :func:`update`, :func:`run`
+        :seealso: :func:`control`, ``update``, :func:`run`
         """
         # determine vehicle control
         if u is not None:
@@ -987,7 +992,7 @@ class VehicleBase(ABC):
 
         Set by :meth:`VehicleBase` subclass constructor.
 
-        :seealso: :meth:`accel_max` :meth:`steer_max` :meth:`u_limited`
+        :seealso: :meth:`accel_max` ``steer_max`` :meth:`u_limited`
         """
         return self._speed_max
 
@@ -1001,7 +1006,7 @@ class VehicleBase(ABC):
 
         Set by :meth:`VehicleBase` subclass constructor.
 
-        :seealso: :meth:`speed_max` :meth:`steer_max` :meth:`u_limited`
+        :seealso: :meth:`speed_max` ``steer_max`` :meth:`u_limited`
         """
         return self._accel_max
 
@@ -1048,7 +1053,7 @@ class VehicleBase(ABC):
         """
         Stop the simulation (superclass)
 
-        A control function can stop the simulation initated by the ``run``
+        A control function can stop the simulation initiated by the ``run``
         method.
 
         :seealso: :meth:`run`
@@ -1059,7 +1064,10 @@ class VehicleBase(ABC):
         """
         Plot xy-path from history
 
-        :param block: block until plot dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param args: positional arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
 
@@ -1070,14 +1078,16 @@ class VehicleBase(ABC):
         """
         xyt = self.x_hist
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_xyt(self, block: bool | None = None, **kwargs: Any) -> None:
         """
         Plot configuration vs time from history
 
-        :param block: block until plot dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
 
         The :math:`(x,y, \theta)` trajectory from the simulation history is plotted
@@ -1090,14 +1100,17 @@ class VehicleBase(ABC):
         plt.plot(t, xyt, **kwargs)
         plt.xlabel("time (s)")
         plt.legend(["x", "y", "$\\theta$"])
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
 
 # ========================================================================= #
 
 
 class Bicycle(VehicleBase):
+    """
+    Bicycle kinematic model
+    """
+
     def __init__(
         self, L: float = 1, steer_max: float = 0.45 * pi, **kwargs: Any
     ) -> None:
@@ -1253,6 +1266,10 @@ class Bicycle(VehicleBase):
 
 
 class Unicycle(VehicleBase):
+    """
+    Unicycle kinematic model
+    """
+
     def __init__(self, W: float = 1, steer_max: float = np.inf, **kwargs: Any) -> None:
         r"""
         Create unicycle kinematic model
@@ -1356,6 +1373,10 @@ class Unicycle(VehicleBase):
 
 
 class DiffSteer(Unicycle):
+    """
+    Differential steering kinematic model
+    """
+
     def __init__(self, W: float = 1, **kwargs: Any) -> None:
         r"""
         Create differential steering kinematic model
@@ -1730,7 +1751,7 @@ class VehicleTrailer(VehicleBase):
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
             * an interpolator called as ``f(t)`` that returns a tuple, see
               SciPy interp1d
-            * a driver agent, subclass of :class:`VehicleDriverBase`
+            * a driver agent, subclass of :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
 
         This is evaluated by :meth:`eval_control` which applies velocity,
         acceleration and steering limits.
@@ -1780,11 +1801,11 @@ class VehicleTrailer(VehicleBase):
             >>> vt = VehicleTrailer(Bicycle(), Trailer())  # default bicycle model
             >>> vt.step((1, 0.2))  # one step: v=1, γ=0.2
             >>> vt.x
-            >>> vt.run(5)  # run simulatin for 5 seconds
+            >>> vt.run(5)  # run simulation for 5 seconds
 
         .. note:: Vehicle control input limits are applied.
 
-        :seealso: :func:`control`, :func:`update`, :func:`run`
+        :seealso: :func:`control`, ``update``, :func:`run`
         """
         # determine vehicle control
         if u is not None:
