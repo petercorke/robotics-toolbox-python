@@ -777,14 +777,18 @@ class BaseETS(MutableSequence[ETT]):
 
     def swap(self, i: int) -> None:
         """
-        Swap two transforms in the ETS
+        Swap two adjacent transforms, in place
 
-        :param i: index of first transform
+        :param i: index of the first transform
+        :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
         :raises ValueError: if the two transforms do not commute
 
-        Swaps the two transforms at indices ``i`` and ``i+1``.  This is useful for
-        changing the order of commutative transforms in an ETS, and the kinematics
-        of the sequence are unchanged.  Two transforms commute if they are
+        Swaps the transforms at indices ``i`` and ``i+1``.  This **changes the
+        sequence it is called on** and returns ``None``; use :meth:`swapped` to get a
+        modified copy and leave the original alone.
+
+        The kinematics of the sequence are unchanged, because the two transforms
+        commute.  Two transforms commute if they are
 
         - of the same kind, for example two translations along x
         - both translations, along any axes
@@ -793,6 +797,10 @@ class BaseETS(MutableSequence[ETT]):
 
         Anything else, such as a rotation and a translation along a different axis,
         does not commute and raises ``ValueError``.
+
+        .. note:: Joints may be swapped.  Each joint keeps its ``jindex``, so the
+            order of the elements of ``q`` is unchanged even though the joints now
+            appear in the opposite order in the sequence.
 
         Examples
         --------
@@ -808,12 +816,9 @@ class BaseETS(MutableSequence[ETT]):
             >>> e.swap(0)
             >>> print(e)
 
+        .. seealso:: :meth:`swapped` :meth:`merge`
         """
-        if i < 0 or i >= len(self._data) - 1:
-            raise IndexError("Index out of range")  # pragma: nocover
-
-        e1 = self._data[i]
-        e2 = self._data[i + 1]
+        e1, e2 = self._adjacent(i)
         if not self._commute(e1, e2):
             raise ValueError(
                 f"transforms {e1.kind} and {e2.kind} do not commute, so they cannot be swapped"
@@ -821,6 +826,44 @@ class BaseETS(MutableSequence[ETT]):
 
         self._data[i], self._data[i + 1] = e2, e1
         self._fknm_stale = True
+
+    def swapped(self, i: int) -> Self:
+        """
+        Swap two adjacent transforms, returning a copy
+
+        :param i: index of the first transform
+        :return: a copy of the sequence with transforms ``i`` and ``i+1`` swapped
+        :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
+        :raises ValueError: if the two transforms do not commute
+
+        The sequence it is called on is not changed.  See :meth:`swap` for which
+        transforms can be swapped.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.ty(2) * ET.Rz(1)
+            >>> print(e.swapped(1))
+            >>> print(e)
+
+        .. versionadded:: 1.5.0
+
+        .. seealso:: :meth:`swap` :meth:`merged`
+        """
+        new = deepcopy(self)
+        new.swap(i)
+        return new
+
+    def _adjacent(self, i: int) -> tuple[ETT, ETT]:
+        """The transforms at ``i`` and ``i+1``, with the index checked."""
+        if i < 0 or i >= len(self._data) - 1:
+            raise IndexError(
+                f"index {i} out of range, the sequence has {len(self._data)} transforms"
+            )
+        return self._data[i], self._data[i + 1]
 
     @staticmethod
     def _commute(e1: Any, e2: Any) -> bool:
@@ -837,12 +880,35 @@ class BaseETS(MutableSequence[ETT]):
 
     def merge(self, i: int) -> None:
         """
-        Merge two transforms in the ETS
+        Merge two adjacent transforms into one, in place
 
-        :param i: index of first transform
+        :param i: index of the first transform
+        :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
+        :raises ValueError: if the transforms are not of the same kind, or either
+            is a joint
 
-        Merges the two transforms at indices ``i`` and ``i+1``.  This is useful for
-        reducing the number of transforms in an ETS.
+        Replaces the transforms at indices ``i`` and ``i+1`` with a single
+        transform whose parameter is the sum of the two.  This **changes the
+        sequence it is called on** and returns ``None``; use :meth:`merged` to get
+        a modified copy and leave the original alone.
+
+        Both transforms must be constants of the same kind, for example two ``tx``
+        or two ``Rz``.  A joint cannot be merged with a constant, since a joint
+        has no offset to absorb it.
+
+        The parameters may be symbolic.  If they add up to nothing the transform is
+        removed altogether, rather than being left as a transform that does nothing.
+        The sum is nothing if it is
+
+        - exactly zero, for example ``tx(x) * tx(-x)`` with ``x`` a SymPy symbol, or
+          ``Rx(5) * Rx(-5)``
+        - for a rotation, a whole number of turns of a symbolic angle, for example
+          ``Rz(pi/2) * Rz(3*pi/2)`` with ``pi`` from SymPy.  A floating point sum
+          such as ``Rz(pi/2) * Rz(3*pi/2)`` using :obj:`math.pi` is not exactly
+          zero, so the rotation is kept.
+
+        Merging does not look at the neighbours of the result, so if removing a
+        transform leaves two mergeable ones adjacent, call :meth:`merge` again.
 
         Examples
         --------
@@ -859,25 +925,75 @@ class BaseETS(MutableSequence[ETT]):
             >>> print(e)
             >>> e.merge(1)
             >>> print(e)
+            >>> e = ET.tx(1) * ET.Rx(0.5) * ET.Rx(-0.5) * ET.tx(2)
+            >>> e.merge(1)
+            >>> print(e)
 
-        Both transforms must be of the same kind, and at most one of them can be
-        a joint.
-
+        .. seealso:: :meth:`merged` :meth:`swap`
         """
-        if i < 0 or i >= len(self._data) - 1:
-            raise IndexError("Index out of range")  # pragma: nocover
-        e1 = self._data[i]
-        e2 = self._data[i + 1]
+        e1, e2 = self._adjacent(i)
         if e1.kind != e2.kind:
-            raise ValueError("Transforms are not the same type")  # pragma: nocover
+            raise ValueError(
+                f"transforms {e1.kind} and {e2.kind} are not the same kind, so they "
+                "cannot be merged"
+            )
+        if e1.isjoint or e2.isjoint:
+            raise ValueError("transforms include a joint, it cannot be merged")
+        if e1.param is None or e2.param is None:
+            raise ValueError("transforms are not elementary, they cannot be merged")
 
-        elif e1.isjoint or e2.isjoint:
-            # a joint with an offset, Rz(q) then Rz(a), is not an elementary
-            # transform: the constant of a joint is the value of its variable
-            raise ValueError("Transforms include a joint, it cannot be merged")
-
+        total = e1.param + e2.param
+        if self._vanishes(e1, total):
+            del self._data[i : i + 2]
         else:
-            self._data[i].param = e1.param + e2.param  # type: ignore[operator]
-            del self._data[i + 1]
-            self._fknm_stale = True
+            # a new transform, not a change to e1, which other sequences may share
+            merged = deepcopy(e1)
+            merged.param = total
+            self._data[i : i + 2] = [merged]
+        self._fknm_stale = True
 
+    def merged(self, i: int) -> Self:
+        """
+        Merge two adjacent transforms, returning a copy
+
+        :param i: index of the first transform
+        :return: a copy of the sequence with transforms ``i`` and ``i+1`` merged
+        :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
+        :raises ValueError: if the transforms are not of the same kind, or either
+            is a joint
+
+        The sequence it is called on is not changed.  See :meth:`merge` for which
+        transforms can be merged and when the result is removed.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.tx(2) * ET.Rz(1)
+            >>> print(e.merged(1))
+            >>> print(e)
+
+        .. versionadded:: 1.5.0
+
+        .. seealso:: :meth:`merge` :meth:`swapped`
+        """
+        new = deepcopy(self)
+        new.merge(i)
+        return new
+
+    @staticmethod
+    def _vanishes(e: Any, value: Any) -> bool:
+        """Is a transform of the same kind as ``e`` with parameter ``value`` nothing?"""
+        if issymbol(value):
+            import sympy
+
+            value = sympy.simplify(value)
+            if value == 0:
+                return True
+            if e.isrotation:
+                # a whole number of turns, False if SymPy cannot tell
+                return bool(sympy.simplify(value / (2 * sympy.pi)).is_integer)
+            return False
+        return bool(value == 0)
