@@ -556,7 +556,7 @@ class DynamicsMixin:
         maximum, or (2,n), in which case the first row is the minimum and the second
         row is the maximum.
         
-        .. rubric:: Example
+        .. rubric:: Examples
 
         In this example we compute the payload capacity of the Puma560 robot along a
         straight line trajectory in the x-direction, moving from tightly folded to
