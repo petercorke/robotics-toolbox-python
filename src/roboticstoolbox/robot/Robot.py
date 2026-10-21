@@ -20,6 +20,7 @@ from spatialgeometry import CollisionShape, Cylinder, Shape
 from spatialmath import (
     SE2,
     SE3,
+    SO3,
     SpatialAcceleration,
     SpatialForce,
     SpatialInertia,
@@ -51,13 +52,45 @@ _GRAVITY_DEFAULT: list[float] = [0, 0, -9.81]
 _KEYWORDS_DEFAULT: list[str] = []
 
 
+def _rotation_between_vectors(a: ArrayLike, b: ArrayLike) -> SE3:
+    """
+    Rotation that takes the direction of one vector to the direction of another
+
+    :param a: the vector to rotate, which need not be a unit vector
+    :param b: the vector to rotate it to, which need not be a unit vector
+    :returns: a pure rotation, as an SE3
+
+    The vectors can be parallel, in which case the result is the identity, or
+    antiparallel, in which case it is a half turn about an axis perpendicular to
+    both.  Computing the angle with ``arccos`` and the axis with a cross product
+    fails for both: the axis is the zero vector, which is rejected by recent
+    SpatialMath, and for a dot product of 1.0000000000000002 the angle is NaN.
+    """
+    return SE3(
+        SO3.RotatedVector(np.asarray(a, dtype=float), np.asarray(b, dtype=float))
+    )
+
+
 # ==================================================================================== #
 # ================= Robot Class ====================================================== #
 # ==================================================================================== #
 
 
 class Robot(BaseRobot[Link], RobotKinematicsMixin):
+    """
+    Robot manipulator defined by links or an elementary transform sequence
+
+    The robot is made from a list of links, an :class:`~roboticstoolbox.ets.ETS.ETS`
+    or another robot.  It can be a tree.  It is the superclass of the robots defined
+    by Denavit-Hartenberg parameters, :class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
+    and of those loaded from a URDF file.
+    """
+
     _color = True
+
+    # -------------------------------------------------------------------------- #
+    # Construction
+    # -------------------------------------------------------------------------- #
 
     def __init__(
         self,
@@ -167,68 +200,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 configs=configs,
                 check_jindex=check_jindex,
             )
-
-    # --------------------------------------------------------------------- #
-    # --------- Swift Methods --------------------------------------------- #
-    # --------------------------------------------------------------------- #
-
-    def _to_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
-        ob = []
-
-        for link in self.links:
-            if robot_alpha > 0:
-                for gi in link.geometry:
-                    gi.opacity = robot_alpha
-                    ob.append(gi.to_dict())
-            if collision_alpha > 0:
-                for gi in link.collision:
-                    gi.opacity = collision_alpha
-                    ob.append(gi.to_dict())
-
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
-                if robot_alpha > 0:
-                    for gi in link.geometry:
-                        gi.opacity = robot_alpha
-                        ob.append(gi.to_dict())
-                if collision_alpha > 0:
-                    for gi in link.collision:
-                        gi.opacity = collision_alpha
-                        ob.append(gi.to_dict())
-
-        # for o in ob:
-        #     print(o)
-
-        return ob
-
-    def _fk_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
-        ob = []
-
-        # Do the robot
-        for link in self.links:
-            if robot_alpha > 0:
-                for gi in link.geometry:
-                    ob.append(gi.fk_dict())
-            if collision_alpha > 0:
-                for gi in link.collision:
-                    ob.append(gi.fk_dict())
-
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
-                if robot_alpha > 0:
-                    for gi in link.geometry:
-                        ob.append(gi.fk_dict())
-                if collision_alpha > 0:
-                    for gi in link.collision:
-                        ob.append(gi.fk_dict())
-
-        return ob
-
-    # --------------------------------------------------------------------- #
-    # --------- URDF Methods ---------------------------------------------- #
-    # --------------------------------------------------------------------- #
 
     # @staticmethod
     # def URDF_read(
@@ -615,9 +586,67 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #         if isinstance(filename, str):
     #             file.close()
 
-    # --------------------------------------------------------------------- #
-    # --------- Kinematic Methods ----------------------------------------- #
-    # --------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
+    # Display and export for Swift
+    # -------------------------------------------------------------------------- #
+
+    def _to_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
+        ob = []
+
+        for link in self.links:
+            if robot_alpha > 0:
+                for gi in link.geometry:
+                    gi.opacity = robot_alpha
+                    ob.append(gi.to_dict())
+            if collision_alpha > 0:
+                for gi in link.collision:
+                    gi.opacity = collision_alpha
+                    ob.append(gi.to_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                if robot_alpha > 0:
+                    for gi in link.geometry:
+                        gi.opacity = robot_alpha
+                        ob.append(gi.to_dict())
+                if collision_alpha > 0:
+                    for gi in link.collision:
+                        gi.opacity = collision_alpha
+                        ob.append(gi.to_dict())
+
+        # for o in ob:
+        #     print(o)
+
+        return ob
+
+    def _fk_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
+        ob = []
+
+        # Do the robot
+        for link in self.links:
+            if robot_alpha > 0:
+                for gi in link.geometry:
+                    ob.append(gi.fk_dict())
+            if collision_alpha > 0:
+                for gi in link.collision:
+                    ob.append(gi.fk_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                if robot_alpha > 0:
+                    for gi in link.geometry:
+                        ob.append(gi.fk_dict())
+                if collision_alpha > 0:
+                    for gi in link.collision:
+                        ob.append(gi.fk_dict())
+
+        return ob
+
+    # -------------------------------------------------------------------------- #
+    # Information about the robot
+    # -------------------------------------------------------------------------- #
 
     @property
     def reach(self) -> float:
@@ -671,6 +700,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
             self._reach = max(d_all)
         return self._reach
+
+    # -------------------------------------------------------------------------- #
+    # Forward kinematics
+    # -------------------------------------------------------------------------- #
 
     def fkine_all(self, q: ArrayLike) -> SE3:
         """
@@ -803,265 +836,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return poses
 
-    @overload
-    def manipulability(
-        self,
-        q: ArrayLike = ...,
-        J: None = None,
-        end: str | Link | Gripper | None = None,
-        start: str | Link | Gripper | None = None,
-        method: L[
-            "yoshikawa", "asada", "minsingular", "invcondition"
-        ] = "yoshikawa",
-        axes: L["all", "trans", "rot"] | list[bool] = "all",
-        **kwargs: Any,
-    ) -> float | NDArray:  # pragma nocover
-        ...
-
-    @overload
-    def manipulability(
-        self,
-        q: None = None,
-        J: NDArray = ...,
-        end: str | Link | Gripper | None = None,
-        start: str | Link | Gripper | None = None,
-        method: L[
-            "yoshikawa", "asada", "minsingular", "invcondition"
-        ] = "yoshikawa",
-        axes: L["all", "trans", "rot"] | list[bool] = "all",
-        **kwargs: Any,
-    ) -> float | NDArray:  # pragma nocover
-        ...
-
-    def manipulability(
-        self,
-        q: Any = None,
-        J: Any = None,
-        end: str | Link | Gripper | None = None,
-        start: str | Link | Gripper | None = None,
-        method: L["yoshikawa", "asada", "minsingular", "invcondition"] = "yoshikawa",
-        axes: L["all", "trans", "rot"] | list[bool] = "all",
-        **kwargs: Any,
-    ) -> Any:
-        """
-        Manipulability measure
-
-        :param q: Joint coordinates, one of J or q required
-        :param J: Jacobian in base frame if already computed, one of J or q required
-        :param method: method to use, "yoshikawa" (default), "invcondition",
-            "minsingular"  or "asada"
-        :param axes: Task space axes to consider: "all" [default], "trans", or "rot"
-        :returns: manipulability index
-
-        ``manipulability(q)`` is the scalar manipulability index
-        for the robot at the joint configuration ``q``.  It indicates
-        dexterity, that is, how well conditioned the robot is for motion
-        with respect to the 6 degrees of Cartesian motion.  The values is
-        zero if the robot is at a singularity.
-
-        Various measures are supported:
-
-        - ``"yoshikawa"`` -- volume of the velocity ellipsoid, *distance*
-          from singularity [Yoshikawa85]_
-        - ``"invcondition"`` -- inverse condition number of Jacobian,
-          isotropy of the velocity ellipsoid [Klein87]_
-        - ``"minsingular"`` -- minimum singular value of the Jacobian,
-          *distance* from singularity [Klein87]_
-        - ``"asada"`` -- isotropy of the task-space acceleration ellipsoid
-          which is a function of the Cartesian inertia matrix which depends
-          on the inertial parameters [Asada83]_
-
-        **Trajectory operation**:
-
-        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
-        manipulability indices for each joint configuration specified by a row
-        of ``q``.
-
-        .. rubric:: Notes
-
-        - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
-        - The "all" option includes rotational and translational
-            dexterity, but this involves adding different units. It can be
-            more useful to look at the translational and rotational
-            manipulability separately.
-        - Examples in the RVC book (1st edition) can be replicated by
-            using the "all" option
-        - Asada's measure requires inertial a robot model with inertial
-            parameters.
-
-        .. rubric:: References
-
-        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
-                The International Journal of Robotics Research.
-                1985;4(2):3-9. doi:10.1177/027836498500400201
-        .. [Asada83] A geometrical representation of manipulator dynamics and
-                its application to arm design, H. Asada,
-                Journal of Dynamic Systems, Measurement, and Control,
-                vol. 105, p. 131, 1983.
-        .. [Klein87] Dexterity Measures for the Design and Control of
-                Kinematically Redundant Manipulators. Klein CA, Blaho BE.
-                The International Journal of Robotics Research.
-                1987;6(2):72-83. doi:10.1177/027836498700600206
-
-        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
-
-        .. versionchanged:: 1.0.3
-            Removed 'both' option for axes, added a custom list option.
-
-        """
-
-        ets = self.ets(end, start)
-
-        axes_list: list[bool] = []
-
-        if isinstance(axes, list):
-            axes_list = axes
-        elif axes == "all":
-            axes_list = [True, True, True, True, True, True]
-        elif axes.startswith("trans"):
-            axes_list = [True, True, True, False, False, False]
-        elif axes.startswith("rot"):
-            axes_list = [False, False, False, True, True, True]
-        elif axes == "both":
-            return (
-                self.manipulability(
-                    q=q, J=J, end=end, start=start, method=method, axes="trans"
-                ),
-                self.manipulability(
-                    q=q, J=J, end=end, start=start, method=method, axes="rot"
-                ),
-            )
-        else:
-            raise ValueError("axes must be all, trans, rot or both")
-
-        def yoshikawa(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
-            J = J[axes_list, :]
-            if J.shape[0] == J.shape[1]:
-                # simplified case for square matrix
-                return abs(np.linalg.det(J))
-            else:
-                m2 = np.linalg.det(J @ J.T)
-                return np.sqrt(abs(m2))
-
-        def condition(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
-            J = J[axes_list, :]
-
-            # return 1/cond(J)
-            return 1 / np.linalg.cond(J)
-
-        def minsingular(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
-            J = J[axes_list, :]
-            s = np.linalg.svd(J, compute_uv=False)
-
-            # return last/smallest singular value of J
-            return s[-1]
-
-        def asada(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
-            # dof = np.sum(axes_list)
-            if np.linalg.matrix_rank(J) < 6:
-                return 0
-            Ji = np.linalg.pinv(J)
-            Mx = Ji.T @ robot.inertia(q) @ Ji
-            d = np.where(axes_list)[0]
-            Mx = Mx[d]
-            Mx = Mx[:, d.tolist()]
-            # Mx = J^+T M J^+ is symmetric (and positive semi-definite) in theory,
-            # but floating point rounding leaves it symmetric to only ~1e-16.
-            # np.linalg.eig makes no use of the symmetry, and for a matrix that is
-            # not exactly symmetric it can return a complex array (tiny imaginary
-            # parts) which then raises a ComplexWarning when the ratio is stored
-            # as a float.  Symmetrising and using eigvalsh guarantees real
-            # eigenvalues, and is also faster and more accurate for this case.
-            e = np.linalg.eigvalsh((Mx + Mx.T) / 2)
-            return np.min(e) / np.max(e)
-
-        # choose the handler function
-        if method.lower().startswith("yoshi"):
-            mfunc = yoshikawa
-        elif method.lower().startswith("invc"):
-            mfunc = condition
-        elif method.lower().startswith("mins"):
-            mfunc = minsingular
-        elif method.lower().startswith("asa"):
-            mfunc = asada
-        else:
-            raise ValueError("Invalid method chosen")
-
-        # Calculate manipulability based on supplied Jacobian
-        w: Any
-        if J is not None:
-            w = [mfunc(self, J, q, axes_list)]
-
-        # Otherwise use the q vector/matrix
-        else:
-            if q is None:
-                raise ValueError("Either J or q must be supplied")
-
-            q = np.array(getmatrix(q, (None, self.n)))
-            w = np.zeros(q.shape[0])
-
-            for k, qk in enumerate(q):
-                Jk = ets.jacob0(qk)
-                w[k] = mfunc(self, Jk, qk, axes_list)
-
-        if len(w) == 1:
-            return w[0]
-        else:
-            return w
-
-    def jtraj(
-        self,
-        q0: ArrayLike,
-        qf: ArrayLike,
-        t: ArrayLike | int,
-        qd0: ArrayLike | None = None,
-        qd1: ArrayLike | None = None,
-    ) -> Any:
-        """
-        Joint-space trajectory between two joint configurations
-
-        :param q0: initial joint coordinates
-        :param qf: final joint coordinates
-        :param t: time vector or number of steps
-        :param qd0: initial joint velocity, defaults to zero
-        :param qd1: final joint velocity, defaults to zero
-        :raises TypeError: if ``q0`` or ``qf`` is an :class:`SE3`
-        :returns: trajectory
-
-        ``traj = robot.jtraj(q0, qf, t)`` is a trajectory object whose
-        attribute ``traj.q`` is a row-wise joint-space trajectory, a quintic
-        polynomial in time from ``q0`` to ``qf``.  It is the method form of
-        :func:`~roboticstoolbox.tools.trajectory.jtraj`.
-
-        .. deprecated:: 1.4.5
-            Passing :class:`SE3` poses for ``q0`` or ``qf`` is deprecated and now
-            raises ``TypeError``.  The poses were converted to joint coordinates
-            by inverse kinematics, which is never simple: which solution is chosen
-            depends on the solver and its starting point, and it can fail.  Do
-            that explicitly, so you control and can check it::
-
-                q0 = robot.ikine_LM(T0, q0=robot.qr).q
-                qf = robot.ikine_LM(Tf, q0=q0).q
-                traj = robot.jtraj(q0, qf, t)
-
-            For a Cartesian trajectory see
-            :func:`~roboticstoolbox.tools.trajectory.ctraj`.
-
-        .. versionchanged:: 1.4.5
-            The arguments are joint coordinates only, they were named ``T1`` and
-            ``T2`` and could be poses.  The ``**kwargs`` that were passed to the
-            inverse kinematics method are gone.
-        """
-
-        if isinstance(q0, SE3) or isinstance(qf, SE3):
-            raise TypeError(
-                "jtraj no longer accepts SE3 poses, this was deprecated in 1.4.5. "
-                "Solve the inverse kinematics explicitly and pass joint "
-                "coordinates, e.g. robot.jtraj(robot.ikine_LM(T0).q, "
-                "robot.ikine_LM(Tf).q, t)"
-            )
-
-        return rtb.jtraj(q0, qf, t, qd0=qd0, qd1=qd1)
+    # -------------------------------------------------------------------------- #
+    # Jacobians and manipulability
+    # -------------------------------------------------------------------------- #
 
     @overload
     def jacob0_dot(
@@ -1344,9 +1121,273 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return Jm
 
-    # --------------------------------------------------------------------- #
-    # --------- Collision Methods ----------------------------------------- #
-    # --------------------------------------------------------------------- #
+    @overload
+    def manipulability(
+        self,
+        q: ArrayLike = ...,
+        J: None = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        method: L[
+            "yoshikawa", "asada", "minsingular", "invcondition"
+        ] = "yoshikawa",
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
+        **kwargs: Any,
+    ) -> float | NDArray:  # pragma nocover
+        ...
+
+    @overload
+    def manipulability(
+        self,
+        q: None = None,
+        J: NDArray = ...,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        method: L[
+            "yoshikawa", "asada", "minsingular", "invcondition"
+        ] = "yoshikawa",
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
+        **kwargs: Any,
+    ) -> float | NDArray:  # pragma nocover
+        ...
+
+    def manipulability(
+        self,
+        q: Any = None,
+        J: Any = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        method: L["yoshikawa", "asada", "minsingular", "invcondition"] = "yoshikawa",
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
+        **kwargs: Any,
+    ) -> Any:
+        """
+        Manipulability measure
+
+        :param q: Joint coordinates, one of J or q required
+        :param J: Jacobian in base frame if already computed, one of J or q required
+        :param method: method to use, "yoshikawa" (default), "invcondition",
+            "minsingular"  or "asada"
+        :param axes: Task space axes to consider: "all" [default], "trans", or "rot"
+        :returns: manipulability index
+
+        ``manipulability(q)`` is the scalar manipulability index
+        for the robot at the joint configuration ``q``.  It indicates
+        dexterity, that is, how well conditioned the robot is for motion
+        with respect to the 6 degrees of Cartesian motion.  The values is
+        zero if the robot is at a singularity.
+
+        Various measures are supported:
+
+        - ``"yoshikawa"`` -- volume of the velocity ellipsoid, *distance*
+          from singularity [Yoshikawa85]_
+        - ``"invcondition"`` -- inverse condition number of Jacobian,
+          isotropy of the velocity ellipsoid [Klein87]_
+        - ``"minsingular"`` -- minimum singular value of the Jacobian,
+          *distance* from singularity [Klein87]_
+        - ``"asada"`` -- isotropy of the task-space acceleration ellipsoid
+          which is a function of the Cartesian inertia matrix which depends
+          on the inertial parameters [Asada83]_
+
+        **Trajectory operation**:
+
+        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
+        manipulability indices for each joint configuration specified by a row
+        of ``q``.
+
+        .. rubric:: Notes
+
+        - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
+        - The "all" option includes rotational and translational
+            dexterity, but this involves adding different units. It can be
+            more useful to look at the translational and rotational
+            manipulability separately.
+        - Examples in the RVC book (1st edition) can be replicated by
+            using the "all" option
+        - Asada's measure requires inertial a robot model with inertial
+            parameters.
+
+        .. rubric:: References
+
+        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
+                The International Journal of Robotics Research.
+                1985;4(2):3-9. doi:10.1177/027836498500400201
+        .. [Asada83] A geometrical representation of manipulator dynamics and
+                its application to arm design, H. Asada,
+                Journal of Dynamic Systems, Measurement, and Control,
+                vol. 105, p. 131, 1983.
+        .. [Klein87] Dexterity Measures for the Design and Control of
+                Kinematically Redundant Manipulators. Klein CA, Blaho BE.
+                The International Journal of Robotics Research.
+                1987;6(2):72-83. doi:10.1177/027836498700600206
+
+        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
+
+        .. versionchanged:: 1.0.3
+            Removed 'both' option for axes, added a custom list option.
+
+        """
+
+        ets = self.ets(end, start)
+
+        axes_list: list[bool] = []
+
+        if isinstance(axes, list):
+            axes_list = axes
+        elif axes == "all":
+            axes_list = [True, True, True, True, True, True]
+        elif axes.startswith("trans"):
+            axes_list = [True, True, True, False, False, False]
+        elif axes.startswith("rot"):
+            axes_list = [False, False, False, True, True, True]
+        elif axes == "both":
+            return (
+                self.manipulability(
+                    q=q, J=J, end=end, start=start, method=method, axes="trans"
+                ),
+                self.manipulability(
+                    q=q, J=J, end=end, start=start, method=method, axes="rot"
+                ),
+            )
+        else:
+            raise ValueError("axes must be all, trans, rot or both")
+
+        def yoshikawa(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
+            J = J[axes_list, :]
+            if J.shape[0] == J.shape[1]:
+                # simplified case for square matrix
+                return abs(np.linalg.det(J))
+            else:
+                m2 = np.linalg.det(J @ J.T)
+                return np.sqrt(abs(m2))
+
+        def condition(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
+            J = J[axes_list, :]
+
+            # return 1/cond(J)
+            return 1 / np.linalg.cond(J)
+
+        def minsingular(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
+            J = J[axes_list, :]
+            s = np.linalg.svd(J, compute_uv=False)
+
+            # return last/smallest singular value of J
+            return s[-1]
+
+        def asada(robot: Any, J: Any, q: Any, axes_list: Any) -> Any:
+            # dof = np.sum(axes_list)
+            if np.linalg.matrix_rank(J) < 6:
+                return 0
+            Ji = np.linalg.pinv(J)
+            Mx = Ji.T @ robot.inertia(q) @ Ji
+            d = np.where(axes_list)[0]
+            Mx = Mx[d]
+            Mx = Mx[:, d.tolist()]
+            # Mx = J^+T M J^+ is symmetric (and positive semi-definite) in theory,
+            # but floating point rounding leaves it symmetric to only ~1e-16.
+            # np.linalg.eig makes no use of the symmetry, and for a matrix that is
+            # not exactly symmetric it can return a complex array (tiny imaginary
+            # parts) which then raises a ComplexWarning when the ratio is stored
+            # as a float.  Symmetrising and using eigvalsh guarantees real
+            # eigenvalues, and is also faster and more accurate for this case.
+            e = np.linalg.eigvalsh((Mx + Mx.T) / 2)
+            return np.min(e) / np.max(e)
+
+        # choose the handler function
+        if method.lower().startswith("yoshi"):
+            mfunc = yoshikawa
+        elif method.lower().startswith("invc"):
+            mfunc = condition
+        elif method.lower().startswith("mins"):
+            mfunc = minsingular
+        elif method.lower().startswith("asa"):
+            mfunc = asada
+        else:
+            raise ValueError("Invalid method chosen")
+
+        # Calculate manipulability based on supplied Jacobian
+        w: Any
+        if J is not None:
+            w = [mfunc(self, J, q, axes_list)]
+
+        # Otherwise use the q vector/matrix
+        else:
+            if q is None:
+                raise ValueError("Either J or q must be supplied")
+
+            q = np.array(getmatrix(q, (None, self.n)))
+            w = np.zeros(q.shape[0])
+
+            for k, qk in enumerate(q):
+                Jk = ets.jacob0(qk)
+                w[k] = mfunc(self, Jk, qk, axes_list)
+
+        if len(w) == 1:
+            return w[0]
+        else:
+            return w
+
+    # -------------------------------------------------------------------------- #
+    # Trajectories
+    # -------------------------------------------------------------------------- #
+
+    def jtraj(
+        self,
+        q0: ArrayLike,
+        qf: ArrayLike,
+        t: ArrayLike | int,
+        qd0: ArrayLike | None = None,
+        qd1: ArrayLike | None = None,
+    ) -> Any:
+        """
+        Joint-space trajectory between two joint configurations
+
+        :param q0: initial joint coordinates
+        :param qf: final joint coordinates
+        :param t: time vector or number of steps
+        :param qd0: initial joint velocity, defaults to zero
+        :param qd1: final joint velocity, defaults to zero
+        :raises TypeError: if ``q0`` or ``qf`` is an :class:`SE3`
+        :returns: trajectory
+
+        ``traj = robot.jtraj(q0, qf, t)`` is a trajectory object whose
+        attribute ``traj.q`` is a row-wise joint-space trajectory, a quintic
+        polynomial in time from ``q0`` to ``qf``.  It is the method form of
+        :func:`~roboticstoolbox.tools.trajectory.jtraj`.
+
+        .. deprecated:: 1.4.5
+            Passing :class:`SE3` poses for ``q0`` or ``qf`` is deprecated and now
+            raises ``TypeError``.  The poses were converted to joint coordinates
+            by inverse kinematics, which is never simple: which solution is chosen
+            depends on the solver and its starting point, and it can fail.  Do
+            that explicitly, so you control and can check it::
+
+                q0 = robot.ikine_LM(T0, q0=robot.qr).q
+                qf = robot.ikine_LM(Tf, q0=q0).q
+                traj = robot.jtraj(q0, qf, t)
+
+            For a Cartesian trajectory see
+            :func:`~roboticstoolbox.tools.trajectory.ctraj`.
+
+        .. versionchanged:: 1.4.5
+            The arguments are joint coordinates only, they were named ``T1`` and
+            ``T2`` and could be poses.  The ``**kwargs`` that were passed to the
+            inverse kinematics method are gone.
+        """
+
+        if isinstance(q0, SE3) or isinstance(qf, SE3):
+            raise TypeError(
+                "jtraj no longer accepts SE3 poses, this was deprecated in 1.4.5. "
+                "Solve the inverse kinematics explicitly and pass joint "
+                "coordinates, e.g. robot.jtraj(robot.ikine_LM(T0).q, "
+                "robot.ikine_LM(Tf).q, t)"
+            )
+
+        return rtb.jtraj(q0, qf, t, qd0=qd0, qd1=qd1)
+
+    # -------------------------------------------------------------------------- #
+    # Collision checking
+    # -------------------------------------------------------------------------- #
 
     def closest_point(
         self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
@@ -1422,7 +1463,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def collided(self, q: Any, shape: Shape, skip: bool = False) -> bool:
         """
-        Check if the robot is in collision with a shape
+        Check if the robot is in collision with a shape (deprecated)
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
@@ -1436,9 +1477,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         warn("method collided is deprecated, use iscollided instead", FutureWarning)
         return self.iscollided(q, shape, skip=skip)
 
-    # --------------------------------------------------------------------- #
-    # --------- Constraint Methods ---------------------------------------- #
-    # --------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
+    # Motion constraints for QP control
+    # -------------------------------------------------------------------------- #
 
     def joint_velocity_damper(
         self,
@@ -1635,15 +1676,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = None
         bin = None
 
-        def rotation_between_vectors(a: Any, b: Any) -> Any:
-            a = a / np.linalg.norm(a)
-            b = b / np.linalg.norm(b)
-
-            angle = np.arccos(np.dot(a, b))
-            axis = np.cross(a, b)
-
-            return SE3.AngleAxis(angle, axis)
-
         if isinstance(camera, rtb.BaseRobot):
             wTcp = cast(NDArray, camera.fkine(camera.q).A)[:3, 3]
         elif isinstance(camera, SE3):
@@ -1655,7 +1687,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         # Create line of sight object
         los_mid = SE3((wTcp + wTtp) / 2)
-        los_orientation = rotation_between_vectors(
+        los_orientation = _rotation_between_vectors(
             np.array([0.0, 0.0, 1.0]),
             wTcp - wTtp,
         )
@@ -1738,9 +1770,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return Ain, bin
 
-    # --------------------------------------------------------------------- #
-    # --------- Dynamics Methods ------------------------------------------ #
-    # --------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
+    # Dynamics
+    # -------------------------------------------------------------------------- #
 
     def rne(
         self,
@@ -1805,6 +1837,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             guard if the Robot/Link class hierarchy is ever redesigned --
             see https://github.com/petercorke/robotics-toolbox-python/issues/571.
         """
+        self._require_dynamics()
 
         # Checked via the `mdh` attribute rather than isinstance/class name:
         # joint-last compliance tracks the DH convention actually in use
@@ -2122,7 +2155,7 @@ class Robot2(BaseRobot[Link2]):
     @property
     def base(self) -> SE2:
         """
-        Get/set robot base transform (Robot superclass)
+        Get/set robot base transform
 
         :returns: robot tool transform
 

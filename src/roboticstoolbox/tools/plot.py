@@ -77,10 +77,11 @@ def xplot(
     r"""
     Plot trajectory data
 
-    :param x: trajectory, one row per timestep
-    :type x: ndarray(m,n)
-    :param t: time vector, optional
-    :type t: numpy ndarray, shape=(M,)
+    :param x: the trajectory, one row per timestep, or the time vector if ``y`` is
+        given
+    :type x: ndarray(m,n) or ndarray(m)
+    :param y: the trajectory, one row per timestep, optional
+    :type y: ndarray(m,n)
     :param wrist: distinguish arm and wrist joints with line styles
     :type wrist: bool
     :param unwrap: unwrap joint angles so that they smoothly increase or
@@ -90,27 +91,39 @@ def xplot(
         ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
         it and waits until it is closed; ignored by notebook backends,
         defaults to False
-    :param labels: legend labels
+    :param labels: legend labels, default ``q0``, ``q1``, ...
     :type labels: list of str, or single string with space separated labels
-    :param kwargs: options passed to pyplot.plot
     :param loc: legend location as per pyplot.legend
     :type loc: str
+    :param grid: show a grid, defaults to True
+    :param stack: plot each column in its own axes, one above the other, defaults
+        to False
+    :param kwargs: options passed to pyplot.plot
+    :return: the axes of the figure
 
     This is a convenience function to plot trajectories, where each row represents one time step.
 
-    - ``xplot(q)`` plots the joint angles versus row number.  If N==6 a
-      conventional 6-axis robot is assumed, and the first three joints are
-      shown as solid lines, the last three joints (wrist) are shown as dashed
-      lines. A legend is also displayed.
+    - ``xplot(q)`` plots the joint angles versus row number.  If ``wrist`` is
+      true and there are six joints, a conventional 6-axis robot is assumed, and
+      the first three joints are shown as solid lines, the last three joints
+      (wrist) are shown as dashed lines. A legend is also displayed.
 
     - ``xplot(t, q)`` as above but displays the joint angle trajectory versus
-      time given the time vector T (Mx1).
+      time given the time vector ``t``, shape (m,).
 
-    Example::
+    Example, which is not run when the documentation is built::
 
-        >>> qplot(q, x, labels='x y z')
+        import numpy as np
+        import roboticstoolbox as rtb
 
-    :seealso: :func:`jtraj`, :func:`numpy.unwrap`
+        puma = rtb.models.DH.Puma560()
+        tg = rtb.jtraj(puma.qz, puma.qr, 50)  # a trajectory of 50 steps
+        rtb.xplot(tg.q, wrist=True, labels="q1 q2 q3 q4 q5 q6")
+
+        t = np.linspace(0, 2, 50)  # with a time vector
+        rtb.xplot(t, tg.q)
+
+    :seealso: :func:`~roboticstoolbox.tools.trajectory.jtraj`, :func:`numpy.unwrap`
 
     .. versionchanged:: 1.5.0
         ``block=None`` does not call ``plt.show``, as documented. It used to call

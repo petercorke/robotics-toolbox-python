@@ -284,7 +284,7 @@ class RobotKinematicsMixin:
         tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
-        Manipulator Hessian
+        Manipulator Hessian in the start frame
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
@@ -384,7 +384,7 @@ class RobotKinematicsMixin:
         tool: NDArray | SE3 | None = None,
     ) -> NDArray:
         r"""
-        Manipulator Hessian
+        Manipulator Hessian in the end-effector frame
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
@@ -601,10 +601,13 @@ class RobotKinematicsMixin:
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_LM` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_LM`, which
+            has none of these limits.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method. This
@@ -766,10 +769,13 @@ class RobotKinematicsMixin:
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_NR` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_NR`, which
+            has none of these limits.
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -891,10 +897,13 @@ class RobotKinematicsMixin:
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_GN` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_GN`, which
+            has none of these limits.
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -1543,7 +1552,7 @@ class RobotKinematicsMixin:
         :param tool: a static tool transformation matrix to apply to the
             end of ``end``; defaults to the robot's own ``self.tool`` if
             not given
-        :raises ImportError: If the package ``qpsolvers`` is not installed
+        :raises ImportError: If the package ``qpsolvers`` is not installed, see the note below
         :returns: an IKSolution containing joint coordinates ``q``, ``success`` flag,
             ``iterations``, ``searches``, ``residual`` error value, and ``reason``
             string if applicable
@@ -1561,6 +1570,12 @@ class RobotKinematicsMixin:
 
         A method that provides functionality to perform numerical inverse kinematics
         (IK) using a quadratic programming approach.
+
+        .. note::
+
+            This needs the packages ``qpsolvers`` and ``quadprog``, which are not
+            installed with the Toolbox by default.  Install them with the ``qp``
+            extra: ``pip install roboticstoolbox-python[qp]``.
 
         See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.

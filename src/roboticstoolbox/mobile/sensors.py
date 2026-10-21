@@ -37,6 +37,10 @@ See also RangeBearingSensor, EKF, Vehicle, Landmarkself.
 
 
 class SensorBase(ABC):
+    """
+    Superclass for sensors
+    """
+
     # TODO, pose option, wrt vehicle
 
     # robot
@@ -219,6 +223,10 @@ class SensorBase(ABC):
 # covar can be 2x2 or (2,)
 # .W property
 class RangeBearingSensor(SensorBase):
+    """
+    Range and bearing angle sensor
+    """
+
     def __init__(
         self,
         robot: Any,

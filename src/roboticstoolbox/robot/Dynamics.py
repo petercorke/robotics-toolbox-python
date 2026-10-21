@@ -54,9 +54,19 @@ class fdyn(NamedTuple):
 
 class DynamicsMixin:
     # --------------------------------------------------------------------- #
+    def _require_dynamics(self: RobotProto) -> None:
+        # ``hasdynamics`` is a cached flag, so this costs nothing
+        if not self.hasdynamics:
+            raise ValueError(
+                f"model '{self.name}' has no dynamic parameters (all link masses "
+                "and motor inertias are zero); use a model that defines them, for "
+                "example rtb.models.DH.Panda(), or set m, r and I on its links"
+            )
+
+    # --------------------------------------------------------------------- #
     def dynamics(self: RobotProto) -> None:
         """
-        Pretty print the dynamic parameters (Robot superclass)
+        Pretty print the dynamic parameters
 
         The dynamic parameters (inertial and friction) are printed in a table,
         with one row per link.
@@ -90,7 +100,7 @@ class DynamicsMixin:
 
     def dynamics_list(self: RobotProto) -> None:
         """
-        Print dynamic parameters (Robot superclass)
+        Print dynamic parameters
 
         Display the kinematic and dynamic parameters to the console in
         reable format
@@ -104,7 +114,7 @@ class DynamicsMixin:
 
     def friction(self: RobotProto, qd: NDArray) -> NDArray:
         r"""
-        Manipulator joint friction (Robot superclass)
+        Manipulator joint friction
 
         :param qd: The joint velocities of the robot
         :type qd: ndarray(n,)
@@ -299,6 +309,7 @@ class DynamicsMixin:
         :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.rne`.
 
         """
+        self._require_dynamics()
 
         n = self.n
 
@@ -470,6 +481,7 @@ class DynamicsMixin:
             104, no. 3, pp. 205-211, 1982.
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -760,6 +772,7 @@ class DynamicsMixin:
         :func:`cinertia`
 
         """
+        self._require_dynamics()
         q = getmatrix(q, (None, self.n))
 
         In = np.zeros((q.shape[0], self.n, self.n))
@@ -821,6 +834,7 @@ class DynamicsMixin:
         - Computationally slow, involves :math:`n^2/2` invocations of RNE.
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -911,6 +925,7 @@ class DynamicsMixin:
             >>> puma.gravload(puma.qz)
 
         """
+        self._require_dynamics()
 
         q = np.asarray(getmatrix(q, (None, self.n)))
 
@@ -1398,6 +1413,7 @@ class DynamicsMixin:
         :func:`inertia`
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qdd = getmatrix(qdd, (None, self.n))

@@ -4630,10 +4630,16 @@ class TestETS(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "do not commute"):
             e.swap(0)
 
-    def test_merge_joint_is_an_error(self):
+    def test_merge_joint_with_a_constant(self):
+        # the constant becomes the offset of the joint
         e = ET.tx(1) * ET.tx()
+        e.merge(0)
+        self.assertEqual(len(e), 1)
+        self.assertTrue(e[0].isjoint)
+        nt.assert_almost_equal(e[0].offset, 1)
+        # two joints are two variables
         with self.assertRaisesRegex(ValueError, "joint"):
-            e.merge(0)
+            (ET.tx() * ET.tx()).merge(0)
         e = ET.tx(1) * ET.tx(2)
         e.merge(0)
         self.assertEqual(len(e), 1)

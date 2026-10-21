@@ -134,6 +134,10 @@ class VehicleAnimationBase(ABC):
 
 # ========================================================================= #
 class VehicleMarker(VehicleAnimationBase):
+    """
+    Vehicle animation as a Matplotlib marker
+    """
+
     def __init__(self, **kwargs: Any) -> None:
         """
         Create graphical animation of vehicle as a Matplotlib marker
@@ -181,6 +185,10 @@ class VehicleMarker(VehicleAnimationBase):
 
 
 class VehiclePolygon(VehicleAnimationBase):
+    """
+    Vehicle animation as a polygon
+    """
+
     def __init__(
         self,
         shape: str | NDArray | Polygon2 = "car",
@@ -290,6 +298,10 @@ class VehiclePolygon(VehicleAnimationBase):
 
 
 class VehicleIcon(VehicleAnimationBase):
+    """
+    Vehicle animation as an image icon
+    """
+
     def __init__(
         self,
         filename: str,

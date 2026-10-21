@@ -58,7 +58,7 @@ class Connector(Protocol):
     @abstractmethod
     def reset(self, *args: Any, **kwargs: Any) -> Any:
         """
-        Reset the external program to the state defined by :meth:`launch`
+        Reset the external program to the state defined by :meth:`~roboticstoolbox.backends.Connector.Connector.launch`
         """
         ...
 
@@ -66,7 +66,7 @@ class Connector(Protocol):
     def restart(self, *args: Any, **kwargs: Any) -> Any:
         """
         Close and relaunch the external program to the state defined by
-        :meth:`launch`
+        :meth:`~roboticstoolbox.backends.Connector.Connector.launch`
         """
         ...
 

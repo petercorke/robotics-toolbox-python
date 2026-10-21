@@ -549,6 +549,10 @@ class BaseOccupancyGrid(BaseMap):
 
 
 class BinaryOccupancyGrid(BaseOccupancyGrid):
+    """
+    Binary occupancy grid
+    """
+
     def __init__(
         self,
         grid: NDArray | BinaryOccupancyGrid | None = None,
@@ -706,6 +710,10 @@ class OccupancyGrid(BaseOccupancyGrid):
 
 
 class PolygonMap(BaseMap):
+    """
+    Polygonal obstacle map
+    """
+
     def __init__(
         self,
         workspace: WorkspaceLike | None = None,

@@ -932,7 +932,7 @@ def jtraj(
 
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`ctraj`, ``qplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
+    :seealso: :func:`ctraj`, ``xplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
     # print(f"  --- jtraj: {q0} --> {q1} in {tv}")
     if isinstance(t, int):

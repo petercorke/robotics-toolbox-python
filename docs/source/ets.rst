@@ -123,6 +123,18 @@ every parent and child link pair.
    >>> from math import pi
    >>> e.fkine([pi/2, -pi/2])
 
+The sequence can be drawn, here for the second set of joint angles above.  The
+``plot`` method wraps the sequence in a robot, and plots that.
+
+.. plot::
+   :include-source:
+
+   from math import pi
+   from roboticstoolbox import ET
+
+   e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+   e.plot([pi/2, -pi/2], block=False)
+
 A joint is a variable transform, and the number of joints in the sequence is its
 ``n``.  Joint values are passed to the sequence as a vector, and a joint can
 also be *flipped* (its sign reversed) and have *joint limits*.  The ETS joint
@@ -140,7 +152,7 @@ Inverse kinematics
 The other very common kinematics operation is inverse kinematics (IK) and there
 are several options.
 
-Using C++ solvers, fast but not extensible, and won't easily work in a pyodide environment
+Using C++ solvers, fast but not extensible.  They need the compiled extension, so they do not work in the browser (Pyodide/JupyterLite), and they cannot be used for a sequence with SymPy parameters or joint offsets, see :ref:`ik-cpp-limits`
 
 .. runblock:: pycon
    :linenos:
@@ -152,7 +164,7 @@ Using C++ solvers, fast but not extensible, and won't easily work in a pyodide e
 
 The return value is an :class:`~roboticstoolbox.robot.IK.IKSolution` object, which contains the solution, the number of iterations, and a success flag.  The solution can be evaluated with the ``fkine`` method to check that it is correct.
 
-Using Python solvers, based on NumPy, slower but extensible, and will work in a pyodide environment
+Using Python solvers, based on NumPy, slower but extensible, and they work everywhere, including the browser
 
 .. runblock:: pycon
    :linenos:

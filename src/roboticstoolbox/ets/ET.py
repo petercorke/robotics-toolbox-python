@@ -62,7 +62,15 @@ class ET(BaseET):
         """
         Build the compiled struct that holds this ET's data, from the
         current (final) Python-side state.
+
+        A joint with an offset has no compiled struct, which the compiled code
+        does not know about.  The handle is ``None``, and every evaluation falls
+        back to the Python code, which does add the offset.
         """
+        if self._offset != 0:
+            self.__fknm = None
+            return
+
         if self.jindex is None:
             jindex = 0
         else:
