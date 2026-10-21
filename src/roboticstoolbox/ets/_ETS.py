@@ -776,27 +776,49 @@ class BaseETS(MutableSequence[ETT]):
         return q
 
     def swap(self, i: int) -> None:
-        """
+        r"""
         Swap two adjacent transforms, in place
 
         :param i: index of the first transform
         :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
-        :raises ValueError: if the two transforms do not commute
+        :raises ValueError: if the two transforms cannot be swapped
 
-        Swaps the transforms at indices ``i`` and ``i+1``.  This **changes the
-        sequence it is called on** and returns ``None``; use :meth:`swapped` to get a
-        modified copy and leave the original alone.
+        Swaps the transforms at indices ``i`` and ``i+1`` without changing what the
+        sequence means.  This **changes the sequence it is called on** and returns
+        ``None``; use :meth:`swapped` to get a modified copy and leave the original
+        alone.
 
-        The kinematics of the sequence are unchanged, because the two transforms
-        commute.  Two transforms commute if they are
+        There are two ways the transforms can swap.
+
+        **They commute**, so they trade places unchanged.  Two transforms commute
+        if they are
 
         - of the same kind, for example two translations along x
         - both translations, along any axes
         - a rotation and a translation along the axis of that rotation, for
           example ``Rz`` and ``tz``
 
-        Anything else, such as a rotation and a translation along a different axis,
-        does not commute and raises ``ValueError``.
+        **One is a constant quarter or half turn**, a rotation :math:`R` of
+        :math:`\pm 90^\circ` or :math:`180^\circ`.  The other transform :math:`B`
+        is carried across it by being turned with it, since
+        :math:`R B = (R B R^{-1}) R`.  The rotation is unchanged, and the other
+        transform moves to the other side of it and changes axis, and its sign if
+        the axis comes out reversed.  For example ``Rx(90°) ⊕ ty(d)`` is
+        ``tz(d) ⊕ Rx(90°)``, and ``Rx(90°) ⊕ Ry(q)`` is ``Rz(q) ⊕ Rx(90°)``.  The
+        other transform may be a translation or a rotation, a joint or a constant.
+        A joint keeps its ``jindex`` and ``qlim``; if its axis comes out reversed
+        it is flipped, and its offset changes sign.
+
+        A rotation is a quarter turn if it is a whole number of quarter turns of a
+        symbolic angle, such as ``pi/2`` or ``3*pi/2`` with ``pi`` from SymPy, or a
+        float that is within :math:`10^{-9}` of one, which a model loaded from a file
+        will have.  The new transform takes its parameter from the old one by a
+        change of sign only, so it is as exact as the old one.
+
+        Anything else, such as a rotation that is not a quarter turn and a
+        translation along a different axis, does not swap and raises
+        ``ValueError``, as do two quarter turns about different axes, since either
+        could be the one that is carried across.
 
         .. note:: Joints may be swapped.  Each joint keeps its ``jindex``, so the
             order of the elements of ``q`` is unchanged even though the joints now
@@ -816,16 +838,50 @@ class BaseETS(MutableSequence[ETT]):
             >>> e.swap(0)
             >>> print(e)
 
+        A quarter turn carries the other transform with it:
+
+        .. runblock:: pycon
+
+            >>> from math import pi
+            >>> e = ET.Rx(pi / 2) * ET.ty(1) * ET.tx(2)
+            >>> print(e)
+            >>> e.swap(0)
+            >>> print(e)
+            >>> e = ET.Rx(pi / 2) * ET.Ry()
+            >>> e.swap(0)
+            >>> print(e)
+            >>> e = ET.Rx(-pi / 2) * ET.Ry()
+            >>> e.swap(0)
+            >>> print(e)
+
+        .. versionchanged:: 1.5.0
+            A transform can be swapped across a constant quarter or half turn.
+
         .. seealso:: :meth:`swapped` :meth:`merge`
         """
         e1, e2 = self._adjacent(i)
-        if not self._commute(e1, e2):
-            raise ValueError(
-                f"transforms {e1.kind} and {e2.kind} do not commute, so they cannot be swapped"
-            )
 
-        self._data[i], self._data[i + 1] = e2, e1
-        self._fknm_stale = True
+        if self._commute(e1, e2):
+            self._data[i], self._data[i + 1] = e2, e1
+        else:
+            k1, k2 = self._quarter_turns(e1), self._quarter_turns(e2)
+            if k1 is not None and k2 is None and e2.iselementary:
+                # R B = (R B R^-1) R
+                self._data[i], self._data[i + 1] = self._conjugate(e2, cast(str, e1.ax), k1), e1
+            elif k2 is not None and k1 is None and e1.iselementary:
+                # B R = R (R^-1 B R)
+                self._data[i], self._data[i + 1] = e2, self._conjugate(e1, cast(str, e2.ax), -k2)
+            elif k1 is not None and k2 is not None:
+                raise ValueError(
+                    f"transforms {e1.kind} and {e2.kind} are both quarter turns about "
+                    "different axes, so it is not clear which to carry across the other"
+                )
+            else:
+                raise ValueError(
+                    f"transforms {e1.kind} and {e2.kind} do not commute, so they "
+                    "cannot be swapped"
+                )
+        self._changed()
 
     def swapped(self, i: int) -> Self:
         """
@@ -865,6 +921,11 @@ class BaseETS(MutableSequence[ETT]):
             )
         return self._data[i], self._data[i + 1]
 
+    def _changed(self) -> None:
+        """Forget what depends on the order and kind of the transforms."""
+        self._fknm_stale = True
+        self.__dict__.pop("jindices", None)  # invalidate cached_property
+
     @staticmethod
     def _commute(e1: Any, e2: Any) -> bool:
         """Do the two elementary transforms commute, in either order?"""
@@ -877,6 +938,71 @@ class BaseETS(MutableSequence[ETT]):
         # a rotation and a translation along the axis of the rotation, there is no
         # such axis for a rotation in the plane, which is about z, out of the plane
         return e1.ax is not None and e1.ax == e2.ax
+
+    @staticmethod
+    def _quarter_turns(e: Any) -> int | None:
+        """
+        The number of quarter turns, modulo four, of a constant rotation
+
+        None if ``e`` is not a constant rotation about an axis, or is not a whole
+        number of quarter turns.  A symbolic angle must be exactly so; a float
+        is within 1e-9 of it.
+        """
+        if not (e.isrotation and e.iselementary and not e.isjoint) or e.ax is None:
+            return None
+        angle = e.param
+        if issymbol(angle):
+            import sympy
+
+            turns = sympy.simplify(angle / (sympy.pi / 2))
+            return int(turns) % 4 if turns.is_integer else None
+        turns = float(angle) / (np.pi / 2)
+        whole = round(turns)
+        return whole % 4 if abs(turns - whole) * (np.pi / 2) < 1e-9 else None
+
+    @staticmethod
+    def _conjugate(e: Any, axis: str, quarters: int) -> Any:
+        """
+        The transform ``R e R^-1``, for a rotation R of quarter turns about an axis
+
+        :param e: an elementary transform, a translation or rotation, a joint or a
+            constant
+        :param axis: the axis of R, ``"x"``, ``"y"`` or ``"z"``
+        :param quarters: the angle of R in quarter turns, which may be negative
+        :returns: a new transform, of the other kind if the axis of ``e`` is turned
+
+        Turning a transform about an axis is turning its own axis, so the result
+        is the same kind of transform on the new axis.  If the new axis is the
+        opposite direction the parameter has its sign changed, and a joint is
+        flipped and its offset negated.  Everything else about a joint, its
+        ``jindex`` and ``qlim``, is kept.
+        """
+        from roboticstoolbox.ets.ET import ET
+
+        letters = "xyz"
+        k = quarters % 4
+        c, s = (1, 0, -1, 0)[k], (0, 1, 0, -1)[k]  # cosine, sine, exactly
+        i = letters.index(axis)
+        a, b = (i + 1) % 3, (i + 2) % 3
+        t = letters.index(e.ax)
+        if t == i:
+            new_axis, sign = e.ax, 1
+        elif t == a:  # e_a -> c e_a + s e_b
+            new_axis, sign = (letters[a], c) if c else (letters[b], s)
+        else:  # e_b -> -s e_a + c e_b
+            new_axis, sign = (letters[b], c) if c else (letters[a], -s)
+
+        make = getattr(ET, e.kind[0] + new_axis)
+        if e.isjoint:
+            new = make(
+                flip=bool(e.isflip) != (sign < 0), qlim=e.qlim, jindex=e.jindex
+            )
+            if e.offset != 0:
+                new.offset = sign * e.offset
+            if sign > 0 and e._joint_name is not None:
+                new._joint_name = e._joint_name
+            return new
+        return make(sign * e.param)
 
     def merge(self, i: int) -> None:
         """
@@ -990,7 +1116,7 @@ class BaseETS(MutableSequence[ETT]):
                 merged = deepcopy(e1)
                 merged.param = total
                 self._data[i : i + 2] = [merged]
-        self._fknm_stale = True
+        self._changed()
 
     def merged(self, i: int) -> Self:
         """
