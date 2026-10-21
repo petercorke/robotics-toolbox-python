@@ -738,6 +738,8 @@ class PoseGraph:
             islice = slice(i * 3, (i + 1) * 3)
             jslice = slice(j * 3, (j + 1) * 3)
 
+            # RVC3, Appendix F.2.4.1: accumulate H_ij += ... and b_i += ...
+            # over the edges, storing only the nonzero blocks of H.
             # Keep the original accumulation order: sorting duplicate COO
             # entries can change rounding in poorly conditioned pose graphs.
             for key, block in (
