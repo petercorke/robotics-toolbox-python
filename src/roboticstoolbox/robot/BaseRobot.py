@@ -2185,7 +2185,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # in real time, one step to each dt: unpaced, Swift draws at most 60 frames
         # per second and skips the steps that come sooner, so the whole trajectory runs
         # in a few milliseconds and only its first frame is ever drawn.
-        if type(env).__name__ == "Swift":
+        is_swift = type(env).__name__ == "Swift"
+        if is_swift:
             from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook
 
             if _isnotebook():
@@ -2205,7 +2206,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 **launch_kwargs,
             )
 
-        env.add(self, readonly=True, **kwargs)
+        handle = env.add(self, readonly=True, **kwargs)
         self._active_plot_env = env
 
         if vellipse:
@@ -2228,7 +2229,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         while True:
             for qk in q:
-                self.q = qk
+                if is_swift:
+                    # Swift keeps the joint state of what it shows in the handle that
+                    # add() returned, and deprecates driving it through robot.q
+                    handle.q = qk
+                else:
+                    self.q = qk
                 if vell is not None:
                     vell.q = qk
                 if fell is not None:
@@ -2250,6 +2256,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 )
             if not loop:
                 break
+
+        self.q = q[-1]
 
         # Keep the plot open
         if block:  # pragma nocover

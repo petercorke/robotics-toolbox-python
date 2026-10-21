@@ -108,3 +108,12 @@ Swift
 ^^^^^
 
 `Swift <https://github.com/jhavl/swift>`_ is a separate package which supports the backend contract, and is installed by the ``swift`` extra.  It shows the robot in a web browser, with its meshes, and the teach pendant as a panel of sliders.  It does not draw ellipsoids.
+
+Swift is a web page served by the Python process, and :py:meth:`~roboticstoolbox.robot.Robot.Robot.plot` works out how to show it:
+
+* In a script it opens a browser window.  ``browser="chrome"``, ``"firefox"``, ``"safari"`` or any other name known to Python's `webbrowser <https://docs.python.org/3/library/webbrowser.html>`_ module chooses the browser, and the default is the system's.
+* In a notebook it is shown in a frame of the cell, so the same ``robot.plot(q)`` works whichever you use.  ``browser="notebook"`` asks for this explicitly.  The kernel must be on the machine with the browser, since the frame points at ``localhost``.
+* A trajectory is animated in real time, one step to each ``dt``.  Swift draws at most 60 frames per second and skips a step that comes sooner, so ``realtime=False`` would show only the first frame of a trajectory.
+
+.. versionchanged:: 1.5.0
+    In a notebook Swift is shown in the cell and not in a browser window, and a trajectory is animated.
