@@ -30,7 +30,8 @@ alternative to fall back on the way ``DHRobot`` has two.
 from __future__ import annotations
 
 import warnings
-from typing import Any, Callable, NamedTuple
+from collections.abc import Callable
+from typing import Any, NamedTuple
 from typing import Literal as L
 
 import numpy as np
@@ -207,10 +208,10 @@ class DynamicsMixin:
         T: float,
         q0: ArrayLike,
         Q: Callable[[Any, float, NDArray, NDArray], NDArray] | None = None,
-        Q_args: dict = {},
+        Q_args: dict | None = None,
         qd0: ArrayLike | None = None,
         solver: str = "RK45",
-        solver_args: dict = {},
+        solver_args: dict | None = None,
         dt: float | None = None,
         progress: bool = False,
     ) -> Any:
@@ -320,9 +321,11 @@ class DynamicsMixin:
             qd0 = np.zeros((n,))
         else:
             qd0 = getvector(qd0, n)
-        if Q is not None:
-            if not callable(Q):
-                raise ValueError("generalized joint torque function must be callable")
+        if Q is not None and not callable(Q):
+            raise ValueError("generalized joint torque function must be callable")
+        # not a default argument, which would be one dict shared by every call
+        Q_args = {} if Q_args is None else Q_args
+        solver_args = {} if solver_args is None else solver_args
 
         # concatenate q and qd into the initial state vector
         x0 = np.r_[q0, qd0]
@@ -613,7 +616,7 @@ class DynamicsMixin:
 
         return tau
 
-    def payload(self: RobotProto, m: float, p: Any = np.zeros(3)) -> None:
+    def payload(self: RobotProto, m: float, p: ArrayLike | None = None) -> None:
         """
         Add a payload to the end-effector
 
@@ -661,7 +664,7 @@ class DynamicsMixin:
             link.I = I0.copy()
             return
 
-        p = getvector(p, 3)
+        p = np.zeros(3) if p is None else getvector(p, 3)
         mc = m0 + m
         rc = (m0 * r0 + m * p) / mc
 
@@ -704,8 +707,8 @@ class DynamicsMixin:
         tf = []
         for j, link in enumerate(self.links):
             # compute inertia for this joint
-            zero = np.zeros((self.n))
-            qdd = np.zeros((self.n))
+            zero = np.zeros(self.n)
+            qdd = np.zeros(self.n)
             qdd[j] = 1
             M = self.rne(q, zero, qdd, gravity=[0, 0, 0])
             J = link.Jm + M[j] / abs(link.G) ** 2
