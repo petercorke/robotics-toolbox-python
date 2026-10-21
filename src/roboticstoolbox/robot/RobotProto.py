@@ -1,4 +1,5 @@
-from typing import Callable, Literal
+from collections.abc import Callable
+from typing import Literal
 
 from spatialmath import SE3
 from typing_extensions import Protocol, Self
