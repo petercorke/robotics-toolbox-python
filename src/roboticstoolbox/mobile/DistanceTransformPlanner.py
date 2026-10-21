@@ -38,7 +38,7 @@ class DistanceTransformPlanner(PlannerBase):
     :raises ValueError: ``metric`` is not recognised, or ``metric`` and
         ``distance`` are both given and are different
 
-    .. deprecated:: 1.4.5
+    .. deprecated:: 1.5.0
         ``distance`` is deprecated, use ``metric``.  It was never an argument
         (it was silently ignored), but code printed in the book uses it.
 
@@ -81,7 +81,7 @@ class DistanceTransformPlanner(PlannerBase):
 
     :author: Peter Corke
 
-    :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`
+    .. seealso:: :meth:`plan` :meth:`query` :class:`PlannerBase`
     """
 
     def __init__(
@@ -170,7 +170,7 @@ class DistanceTransformPlanner(PlannerBase):
         minimum obstacle-free distance to the goal using the particular distance
         metric.
 
-        :seealso: :meth:`query`
+        .. seealso:: :meth:`query`
         """
         if goal is not None:
             self.goal = goal
@@ -229,10 +229,10 @@ class DistanceTransformPlanner(PlannerBase):
         Repeatedly steps to the neighbouring cell with the lowest distance
         until the goal is reached.
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``next`` was accepted but had no effect.
 
-        :seealso: :meth:`plan`
+        .. seealso:: :meth:`plan`
         """
         if next is not None:
             warnings.warn(
@@ -297,7 +297,7 @@ class DistanceTransformPlanner(PlannerBase):
         Return the robot position that is one step closer to the goal. Called
         by :meth:`query` to find a path from start to goal.
 
-        :seealso: :meth:`plan` :meth:`query`
+        .. seealso:: :meth:`plan` :meth:`query`
         """
         if self.distancemap is None:
             raise RuntimeError("no plan computed, call plan() first")
@@ -376,7 +376,7 @@ class DistanceTransformPlanner(PlannerBase):
         Creates a 3D plot showing distance from the goal as a cost surface.
         Overlays the path if given.
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``ls`` is deprecated, use ``path_style``.
 
         .. warning:: The visualization is poor because of Matplotlib's poor hidden

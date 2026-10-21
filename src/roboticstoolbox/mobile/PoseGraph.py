@@ -167,7 +167,7 @@ class PoseGraph:
           in IEEE Intelligent Transportation Systems Magazine,
           vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
 
-    :seealso: :meth:`optimize` :meth:`plot` :meth:`scanmap`
+    .. seealso:: :meth:`optimize` :meth:`plot` :meth:`scanmap`
     """
 
     def __init__(
@@ -403,7 +403,7 @@ class PoseGraph:
         :return: range and bearing of each beam
         :rtype: ndarray(N), ndarray(N)
 
-        :seealso: :meth:`scanxy`
+        .. seealso:: :meth:`scanxy`
         """
         v = self._scan_vertex(i)
         return v.range, v.theta
@@ -419,7 +419,7 @@ class PoseGraph:
             range less than the maximum range of the sensor
         :rtype: ndarray(2,N)
 
-        :seealso: :meth:`scan`
+        .. seealso:: :meth:`scan`
         """
         range, theta = self.scan(i)
         range = np.where(range < self._maxrange, range, np.nan)
@@ -438,7 +438,7 @@ class PoseGraph:
 
         Each scan is plotted in the sensor frame, in turn.
 
-        :seealso: :meth:`scanxy`
+        .. seealso:: :meth:`scanxy`
         """
         style = dict(markersize=10) | kwargs
         for i in smb.getvector(n):
@@ -489,11 +489,11 @@ class PoseGraph:
         :param eopt: deprecated, use ``edge_style``
         :param kwargs: options passed to ``pgraph.UGraph.plot``
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``vopt`` and ``eopt`` are deprecated, use ``vertex_style`` and
             ``edge_style``.
 
-        :seealso: :meth:`optimize`
+        .. seealso:: :meth:`optimize`
         """
         for old, new, value in (
             ("vopt", "vertex_style", vopt),
@@ -540,7 +540,7 @@ class PoseGraph:
         :raises ValueError: a vertex has no lidar scan
         :return: relative pose, found by iterative closest point
 
-        :seealso: :func:`spatialmath.base.ICP2d`
+        .. seealso:: :func:`spatialmath.base.ICP2d`
         """
         p1 = self.scanxy(s1)
         p2 = self.scanxy(s2)
@@ -566,7 +566,7 @@ class PoseGraph:
         .. note:: Scans are taken in vertex order, so the result depends on the
             current vertex poses, and is best made after :meth:`optimize`.
 
-        :seealso: :meth:`scanxy` :meth:`~roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.line_world`
+        .. seealso:: :meth:`scanxy` :meth:`~roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.line_world`
         """
         indices = range(0, self.graph.n, step)
         bar = FillingCirclesBar(
@@ -633,7 +633,7 @@ class PoseGraph:
         :param kwargs: options passed to ``pgraph.UGraph.plot`` when animating
         :raises NotImplementedError: the graph has landmark vertices
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``vopt`` and ``eopt`` are deprecated, use ``vertex_style`` and
             ``edge_style``.
 
@@ -641,7 +641,7 @@ class PoseGraph:
         correction to all the poses, which are updated in place.  Iteration
         stops early if the total error does not decrease.
 
-        :seealso: :meth:`linearize_and_solve` :meth:`plot`
+        .. seealso:: :meth:`linearize_and_solve` :meth:`plot`
         """
         if any(v.type == "landmark" for v in self.graph):
             raise NotImplementedError("optimize does not support landmark vertices")
@@ -705,7 +705,7 @@ class PoseGraph:
 
         The first vertex is anchored, since the measurements are all relative.
 
-        :seealso: :meth:`optimize`
+        .. seealso:: :meth:`optimize`
         """
         t0 = time.time()
 

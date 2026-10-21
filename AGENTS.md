@@ -49,6 +49,12 @@ description and ask first.
   `NDArray` for returned arrays. The shape goes in the docstring (`:type q: array_like(n)`,
   `:rtype: ndarray(6,n)`) where it adds information, not in the annotation. One definition means
   one place to change what "array-like" means.
+- Docstring sections are reST, not NumPy style: a heading is ``.. rubric:: Examples`` (always
+  plural), ``.. rubric:: Notes`` or ``.. rubric:: References``, never an underlined title, and
+  cross-references are ``.. seealso:: :meth:`other```, never ``:seealso:`` (which Sphinx
+  does not know: it renders as one more field after the parameters). A ``.. versionadded::``,
+  ``.. versionchanged::`` or ``.. deprecated::`` names the release it ships in; the next
+  release is the one after the version in ``pyproject.toml``.
 - New code uses modern annotation syntax: `X | Y`, `X | None`, `list[X]`, `dict[K, V]`, not
   `Union`, `Optional`, `List` or `Dict`.
 - Type checking: `mypy` (config in `pyproject.toml`, run it from the repo root with no arguments).

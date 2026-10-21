@@ -497,7 +497,8 @@ class ReedsSheppPlanner(PlannerBase):
         pp. 367–393.
 
     :thanks: based on Reeds-Shepp path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
-    :seealso: :class:`DubinsPlanner` :class:`PlannerBase`
+
+    .. seealso:: :class:`DubinsPlanner` :class:`PlannerBase`
     """
 
     def __init__(

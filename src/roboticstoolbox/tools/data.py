@@ -51,7 +51,7 @@ def rtb_load_matfile(filename: Any) -> Any:
         - MATLAB structs are converted to Python dicts, but extended so that
           elements can be accessed using dot notation.
 
-    :seealso: :func:`path_to_datafile`
+    .. seealso:: :func:`path_to_datafile`
     """
 
     from scipy.io import loadmat
@@ -98,7 +98,7 @@ def rtb_load_jsonfile(filename: Any) -> Any:
         - If the filename has no path component, eg. ``map1.mat`, it will be
           first be looked for in the folder ``roboticstoolbox/data``.
 
-    :seealso: :func:`path_to_datafile`
+    .. seealso:: :func:`path_to_datafile`
     """
     import json
 
@@ -129,7 +129,7 @@ def rtb_load_data(filename: Any, handler: Any, **kwargs: Any) -> Any:
     .. note:: If the filename has no path component, eg. ``foo.dat``, it will
         first be looked for in the folder ``roboticstoolbox/data``.
 
-    :seealso: :func:`path_to_datafile`
+    .. seealso:: :func:`path_to_datafile`
     """
     path = rtb_path_to_datafile(filename, local=False)
     return handler(path, **kwargs)

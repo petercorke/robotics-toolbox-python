@@ -97,8 +97,8 @@ class RobotKinematicsMixin:
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example makes a ``panda`` robot object, and solves for the
         forward kinematics at the listed configuration.
 
@@ -176,8 +176,8 @@ class RobotKinematicsMixin:
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example makes a ``Puma560`` robot object, and solves for the
         base-frame Jacobian at the zero joint angle configuration
 
@@ -227,8 +227,8 @@ class RobotKinematicsMixin:
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example makes a ``Puma560`` robot object, and solves for the
         end-effector frame Jacobian at the zero joint angle configuration
 
@@ -332,8 +332,8 @@ class RobotKinematicsMixin:
 
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example makes a ``Panda`` robot object, and solves for the
         base frame Hessian at the given joint angle configuration
 
@@ -432,8 +432,8 @@ class RobotKinematicsMixin:
 
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example makes a ``Panda`` robot object, and solves for the
         end-effector frame Hessian at the given joint angle configuration
 
@@ -475,8 +475,8 @@ class RobotKinematicsMixin:
         where the Jacobian is the first partial derivative and the Hessian is the
         second.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example makes a ``Panda`` robot object, and solves for the
         base-effector frame 4th defivative of the forward kinematics at the given
         joint angle configuration
@@ -538,8 +538,8 @@ class RobotKinematicsMixin:
            * - ``'exp'``
              - exponential coordinate rates
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         Makes a robot object and computes the analytic Jacobian for the given
         joint configuration
 
@@ -674,8 +674,8 @@ class RobotKinematicsMixin:
 
         Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example makes a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ik_LM` method.
@@ -812,8 +812,8 @@ class RobotKinematicsMixin:
 
             \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example gets a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ik_NR` method.
@@ -955,8 +955,8 @@ class RobotKinematicsMixin:
         the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
         is singular, the above can not be computed and the GN solution is infeasible.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example gets a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ik_GN` method.
@@ -1059,7 +1059,7 @@ class RobotKinematicsMixin:
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1127,8 +1127,8 @@ class RobotKinematicsMixin:
 
         Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example makes a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_LM` method.
@@ -1158,18 +1158,18 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_LM`
-            An IK Solver class which implements the Levenberg-Marquardt optimisation technique
-        ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`Robot` class
-        ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`Robot` class
-        ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`Robot` class
-        :meth:`ik_LM`
-            The fast, C++-backed equivalent of this method (requires the compiled extension)
+        .. seealso::
+
+            :py:class:`~roboticstoolbox.robot.IK.IK_LM`
+                An IK Solver class which implements the Levenberg-Marquardt optimisation technique
+            ikine_NR
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`Robot` class
+            ikine_GN
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`Robot` class
+            ikine_QP
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`Robot` class
+            :meth:`ik_LM`
+                The fast, C++-backed equivalent of this method (requires the compiled extension)
 
 
         .. versionchanged:: 1.0.4
@@ -1257,7 +1257,7 @@ class RobotKinematicsMixin:
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1277,8 +1277,8 @@ class RobotKinematicsMixin:
 
             \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example gets a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_NR` method.
@@ -1304,18 +1304,18 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_NR`
-            An IK Solver class which implements the Newton-Raphson optimisation technique
-        ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
-        ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`~roboticstoolbox.ETS` class
-        ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`~roboticstoolbox.ETS` class
-        :meth:`ik_NR`
-            The fast, C++-backed equivalent of this method (requires the compiled extension)
+        .. seealso::
+
+            :py:class:`~roboticstoolbox.robot.IK.IK_NR`
+                An IK Solver class which implements the Newton-Raphson optimisation technique
+            ikine_LM
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+            ikine_GN
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+            ikine_QP
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+            :meth:`ik_NR`
+                The fast, C++-backed equivalent of this method (requires the compiled extension)
 
 
         .. versionchanged:: 1.0.4
@@ -1402,7 +1402,7 @@ class RobotKinematicsMixin:
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1437,8 +1437,8 @@ class RobotKinematicsMixin:
         the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
         is singular, the above can not be computed and the GN solution is infeasible.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example gets a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_GN` method.
@@ -1464,18 +1464,18 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_GN`
-            An IK Solver class which implements the Gauss-Newton optimisation technique
-        ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
-        ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`~roboticstoolbox.ETS` class
-        ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`~roboticstoolbox.ETS` class
-        :meth:`ik_GN`
-            The fast, C++-backed equivalent of this method (requires the compiled extension)
+        .. seealso::
+
+            :py:class:`~roboticstoolbox.robot.IK.IK_GN`
+                An IK Solver class which implements the Gauss-Newton optimisation technique
+            ikine_LM
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+            ikine_NR
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+            ikine_QP
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+            :meth:`ik_GN`
+                The fast, C++-backed equivalent of this method (requires the compiled extension)
 
 
         .. versionchanged:: 1.0.4
@@ -1564,7 +1564,7 @@ class RobotKinematicsMixin:
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1640,8 +1640,8 @@ class RobotKinematicsMixin:
         :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and
         :math:`\dvec{\delta}^{-,+}` are the minimum and maximum slack velocities.
 
-        Examples
-        --------
+        .. rubric:: Examples
+
         The following example gets a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
         ``Tep`` using the `ikine_QP` method.
@@ -1667,16 +1667,16 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_QP`
-            An IK Solver class which implements a quadratic programming approach
-        ikine_LM
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
-        ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`~roboticstoolbox.ETS` class
-        ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+        .. seealso::
+
+            :py:class:`~roboticstoolbox.robot.IK.IK_QP`
+                An IK Solver class which implements a quadratic programming approach
+            ikine_LM
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+            ikine_GN
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`~roboticstoolbox.ETS` class
+            ikine_NR
+                Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`~roboticstoolbox.ETS` class
 
 
         .. versionchanged:: 1.0.4

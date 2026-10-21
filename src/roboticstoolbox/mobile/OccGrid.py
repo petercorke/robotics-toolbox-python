@@ -381,7 +381,7 @@ class BaseOccupancyGrid(BaseMap):
         half a cell beyond the outer centres. ``labels`` shows the edge cells
         whole. The field and supplied style dictionaries are not modified.
 
-        :seealso: :meth:`world_to_grid` :meth:`grid_to_world`
+        .. seealso:: :meth:`world_to_grid` :meth:`grid_to_world`
         """
 
         if map is not None and field is not None:
@@ -522,7 +522,7 @@ class BaseOccupancyGrid(BaseMap):
 
         ``line_w`` is a shorthand for this method.
 
-        :seealso: :meth:`ravel` :meth:`world_to_grid`
+        .. seealso:: :meth:`ravel` :meth:`world_to_grid`
         """
 
         gp1 = self.world_to_grid(p1)
@@ -596,7 +596,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
             >>> og = BinaryOccupancyGrid(workspace=[-5,5], cellsize=0.1, value=0)
             >>> print(og)
 
-        :seealso: :class:`OccupancyGrid`
+        .. seealso:: :class:`OccupancyGrid`
         """
 
         if grid is not None:
@@ -640,7 +640,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         value.  If the coordinate is outside the bounds of the occupancy grid
         it is considered to be occupied.
 
-        :seealso: :meth:`w2g`
+        .. seealso:: :meth:`w2g`
         """
         c, r = self.w2g(p)
         # NumPy accepts negative indices by wrapping around to the opposite edge.
@@ -662,7 +662,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
 
         Successive calls to ``inflate`` will compound the inflation.
 
-        :seealso: :func:`scipy.ndimage.binary_dilation`
+        .. seealso:: :func:`scipy.ndimage.binary_dilation`
         """
         # Generate a circular structuring element
         r = round(radius / self._cellsize)
@@ -693,7 +693,7 @@ class OccupancyGrid(BaseOccupancyGrid):
         >>> og = OccupancyGrid(workspace=[-5,5], cellsize=0.1, value=0.5)
         >>> print(og)
 
-    :seealso: :class:`BinaryOccupancyGrid`
+    .. seealso:: :class:`BinaryOccupancyGrid`
     """
 
     def __str__(self) -> str:
@@ -772,7 +772,7 @@ class PolygonMap(BaseMap):
         The ``polygon`` is tested against polygons in the map, and returns True
         on the first collision.
 
-        :seealso: :meth:`add` :class:`~spatialmath.geom2d.Polygon2`
+        .. seealso:: :meth:`add` :class:`~spatialmath.geom2d.Polygon2`
         """
         if not isinstance(polygon, Polygon2):
             polygon = Polygon2(polygon)

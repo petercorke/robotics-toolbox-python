@@ -1,7 +1,7 @@
 """
 Unknown keyword arguments to the planners' constructor and plot methods.
 
-RTB 1.4.4 silently swallowed them (``**unused``), RTB 1.4.5 first made them an
+RTB 1.4.4 silently swallowed them (``**unused``), RTB 1.5.0 first made them an
 error, which broke code printed in the book, for example
 ``dx.plot(nonsense=True)``.  They are ignored with a ``DeprecationWarning``.
 """
