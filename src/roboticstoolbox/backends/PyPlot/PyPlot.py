@@ -18,7 +18,7 @@ import roboticstoolbox as rp
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
-from roboticstoolbox.tools.plot import set_window_title
+from roboticstoolbox.tools.plot import plane_view, set_window_title
 from roboticstoolbox.tools.types import ArrayLike
 
 # from roboticstoolbox.tools import Ticker
@@ -133,6 +133,7 @@ class PyPlot(Connector):
         fig: Any = None,
         ax: Any = None,
         limits: ArrayLike | None = None,
+        view: str | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -140,6 +141,13 @@ class PyPlot(Connector):
 
         ```env = launch()``` creates a blank 3D matplotlib figure and returns
         a reference to the backend.
+
+        :param view: ``"xy"``, ``"xz"`` or ``"yz"`` to start with a flat,
+            axis-aligned view of that plane, see
+            :func:`~roboticstoolbox.tools.plot.plane_view`, or None for the usual
+            three-dimensional view.  The view is not locked, the plot can be rotated
+            as usual.
+        :raises ValueError: if ``view`` is not one of those
 
         Optional keyword arguments
         --------------------------
@@ -161,6 +169,9 @@ class PyPlot(Connector):
             DPI for PNG inline frames only. Ignored for SVG.
         """
 
+
+        # checked first, so that a bad name does not leave a figure behind
+        view_init = plane_view(view) if view is not None else None
 
         self.render_mode = _resolve_render_mode(
             kwargs.get("render_mode"), bool(kwargs.get("animation", False))
@@ -233,6 +244,9 @@ class PyPlot(Connector):
 
         self.limits = limits
 
+        if view_init is not None:
+            self.ax.view_init(**view_init)
+
         # disable the display of value under cursor
         # self.ax.format_coord = lambda x, y: ''
 
@@ -269,6 +283,8 @@ class PyPlot(Connector):
 
         :param dt: time step in seconds, defaults to 50 (0.05 s)
         :type dt: int, optional
+        :raises ValueError: if ``dt`` is not greater than zero in a window, where the
+            plot pauses for ``dt``
 
         ``env.step(args)`` triggers an update of the 3D scene in the matplotlib
         window referenced by ``env``.
@@ -281,10 +297,20 @@ class PyPlot(Connector):
               updated in the internal state of the robot object.
             - The control type is defined by the robot object, and not all
               robot objects support all control types.
-            - Execution is blocked for the specified interval
+            - In a window the execution is blocked for the specified interval, which
+              must be greater than zero: Matplotlib's ``pause(0)`` does not return,
+              since a timeout of zero means to wait until the event loop is stopped.
+              In a notebook there is no pause and ``dt`` of zero is fine.
 
+        .. versionchanged:: 1.5.0
+            In a window, ``dt`` of zero or less raises ``ValueError``, it used to wait
+            for ever.
         """
-
+        if dt <= 0 and self.render_mode == "window":
+            raise ValueError(
+                f"dt is {dt}, it must be greater than zero: a pause of zero seconds "
+                "does not return"
+            )
 
         # update the robot's state
         for rpl in self.robots:
