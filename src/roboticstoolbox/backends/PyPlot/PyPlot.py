@@ -18,7 +18,7 @@ import roboticstoolbox as rp
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
-from roboticstoolbox.tools.plot import set_window_title
+from roboticstoolbox.tools.plot import plane_view, set_window_title
 from roboticstoolbox.tools.types import ArrayLike
 
 # from roboticstoolbox.tools import Ticker
@@ -133,6 +133,7 @@ class PyPlot(Connector):
         fig: Any = None,
         ax: Any = None,
         limits: ArrayLike | None = None,
+        view: str | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -140,6 +141,13 @@ class PyPlot(Connector):
 
         ```env = launch()``` creates a blank 3D matplotlib figure and returns
         a reference to the backend.
+
+        :param view: ``"xy"``, ``"xz"`` or ``"yz"`` to start with a flat,
+            axis-aligned view of that plane, see
+            :func:`~roboticstoolbox.tools.plot.plane_view`, or None for the usual
+            three-dimensional view.  The view is not locked, the plot can be rotated
+            as usual.
+        :raises ValueError: if ``view`` is not one of those
 
         Optional keyword arguments
         --------------------------
@@ -161,6 +169,9 @@ class PyPlot(Connector):
             DPI for PNG inline frames only. Ignored for SVG.
         """
 
+
+        # checked first, so that a bad name does not leave a figure behind
+        view_init = plane_view(view) if view is not None else None
 
         self.render_mode = _resolve_render_mode(
             kwargs.get("render_mode"), bool(kwargs.get("animation", False))
@@ -232,6 +243,9 @@ class PyPlot(Connector):
             self.ax.set_zlim3d([limits[4], limits[5]])
 
         self.limits = limits
+
+        if view_init is not None:
+            self.ax.view_init(**view_init)
 
         # disable the display of value under cursor
         # self.ax.format_coord = lambda x, y: ''
