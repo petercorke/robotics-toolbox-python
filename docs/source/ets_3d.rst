@@ -295,7 +295,7 @@ the same methods, which call them on its own sequence.
        :meth:`~roboticstoolbox.ETS.ik_NR`,
        :meth:`~roboticstoolbox.ETS.ik_GN`
      - one
-     - fast, written in C++, not easy to extend
+     - fast, written in C++, not easy to extend; they need the compiled extension, so not in the browser, and no SymPy parameters or joint offsets, see :ref:`ik-cpp-limits`
    * - :meth:`~roboticstoolbox.ETS.ikine_LM`,
        :meth:`~roboticstoolbox.ETS.ikine_NR`,
        :meth:`~roboticstoolbox.ETS.ikine_GN`,
