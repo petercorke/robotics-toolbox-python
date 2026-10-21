@@ -2103,6 +2103,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         movie: str | None = None,
         loop: bool = False,
         notebook: bool | None = None,
+        ax: Any = None,
+        env: Connector | None = None,
         **kwargs: Any,
     ) -> Connector:
         """
@@ -2127,6 +2129,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param vellipse: (Plot Option) Plot the velocity ellipse at the end-effector (this option is for 'pyplot' only)
         :param fellipse: (Plot Option) Plot the force ellipse at the end-effector (this option is for 'pyplot' only)
         :param fig: (Plot Option) The figure label to plot in (this option is for 'pyplot' only)
+        :param ax: (Plot Option) Existing Matplotlib 3D axes to draw the scene on, instead of making a figure (this option is for 'pyplot' only)
+        :param env: The scene returned by an earlier ``plot``, to add this robot to, instead of making a new scene; see *Several configurations* below.  The backend of the scene is used, so ``backend`` is ignored, and the options that are set when a scene is made (``limits``, ``fig``, ``ax``, ``render_mode``, ``inline_*``, ``notebook`` and ``browser``) cannot be given
+        :param color: (Plot Option) The color of the robot's line, any Matplotlib color (this option is for 'pyplot' only)
         :param movie: (Plot Option) The filename to save the movie to (this option is for 'pyplot' only)
         :param loop: (Plot Option) Loop the movie (this option is for 'pyplot' only)
         :param notebook: (Plot Option, Swift only) ``True`` shows Swift in a frame of the current notebook cell, ``False`` opens it in a browser window, and ``None`` (default) chooses the frame in a notebook, unless a ``browser`` is named, and a window otherwise, so the same call works in a script and in a notebook.  The browser showing the notebook must be on the machine running the kernel, since the frame points at ``localhost``
@@ -2153,6 +2158,30 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             the browser named by ``browser`` is installed, or leave it as ``None`` to use
             the system's default browser.  See :py:meth:`swift.Swift.Swift.launch`.
 
+        .. rubric:: Several configurations
+
+        ``plot`` returns the scene it made, and passing that as ``env`` to another
+        ``plot`` adds a robot to it instead of making a new scene.  The robot is the
+        same model, and each plot of it holds the pose it was given, so the robot is
+        shown in two configurations at once, here the initial and the final.  Give each
+        a ``color``, and turn off what would be drawn twice.
+
+        .. plot::
+            :include-source:
+
+            import roboticstoolbox as rtb
+
+            puma = rtb.models.DH.Puma560()
+            env = puma.plot(puma.qr, color="gray", block=False)
+            puma.plot(puma.qn, env=env, color="red", name=False, block=False)
+
+        The scene can be given a pose to draw directly, ``handle = env.add(puma, q=q)``,
+        and ``handle.q = q`` moves only that drawing.  A robot that is added without a
+        ``q`` follows ``puma.q``, as it always has.  A trajectory can be plotted on top
+        of an earlier plot in the same way; the earlier plot stays where it was.  In a
+        notebook, an animation needs the scene to have been made with
+        ``render_mode="notebook-inline"``.
+
         .. rubric:: Notes
 
         - By default this method will block until the figure is dismissed.
@@ -2168,9 +2197,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
-        env = None
-
-        env = self._get_graphical_backend(backend)
+        # a scene to add to, or a new one
+        adding = env is not None
+        if env is None:
+            env = self._get_graphical_backend(backend)
+        elif ax is not None:
+            raise ValueError("ax and env cannot both be given: the scene has axes")
 
         if movie is not None:
             from roboticstoolbox.backends.PyPlot import PyPlot
@@ -2187,12 +2219,31 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             if key in kwargs:
                 launch_kwargs[key] = kwargs.pop(key)
 
+        if adding:
+            # these are fixed when a scene is made
+            fixed = [k for k in launch_kwargs if k != "realtime"]
+            if limits is not None:
+                fixed.append("limits")
+            if fig is not None:
+                fixed.append("fig")
+            if notebook is not None:
+                fixed.append("notebook")
+            if fixed:
+                raise ValueError(
+                    f"{', '.join(fixed)} cannot be used with env, they are set when "
+                    "the scene is made"
+                )
+        if ax is not None:
+            if "ax" not in inspect.signature(env.launch).parameters:
+                raise ValueError(f"the {type(env).__name__} backend cannot plot on ax")
+            launch_kwargs["ax"] = ax
+
         q = np.array(getmatrix(q, (None, self.n)))
         self.q = q[0, :]
 
         # a trajectory is an animation, which the PyPlot backends render differently
         # in a notebook (the other backends have no render mode)
-        if q.shape[0] > 1 and hasattr(env, "render_mode"):
+        if q.shape[0] > 1 and hasattr(env, "render_mode") and not adding:
             launch_kwargs.setdefault("animation", True)
 
         # Swift is a web page, served by this process.  In a notebook it is shown in a
@@ -2201,7 +2252,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # per second and skips the steps that come sooner, so the whole trajectory runs
         # in a few milliseconds and only its first frame is ever drawn.
         is_swift = type(env).__name__ == "Swift"
-        if is_swift:
+        if is_swift and not adding:
             from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook
 
             if launch_kwargs.get("browser") == "notebook":
@@ -2228,7 +2279,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             launch_kwargs.setdefault("realtime", q.shape[0] > 1)
 
         # Add the self to the figure in readonly mode
-        if q.shape[0] == 1:
+        if adding:
+            pass  # the scene was launched by the plot that made it
+        elif q.shape[0] == 1:
             env.launch(
                 name=self.name + " Plot", limits=limits, fig=fig, **launch_kwargs
             )
@@ -2240,6 +2293,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 **launch_kwargs,
             )
 
+        # The drawing of this robot holds the pose it is drawn in, if the backend lets
+        # it, so the same robot can be added to a scene again in another pose.
+        if "q" in inspect.signature(env.add).parameters:
+            kwargs["q"] = q[0]
         handle = env.add(self, readonly=True, **kwargs)
         self._active_plot_env = env
 
@@ -2263,9 +2320,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         while True:
             for qk in q:
-                if is_swift:
-                    # Swift keeps the joint state of what it shows in the handle that
-                    # add() returned, and deprecates driving it through robot.q
+                if hasattr(handle, "q"):
+                    # The drawing keeps the pose of what it shows, as Swift does in the
+                    # handle that add() returned, and the robot is only a model.
+                    # Swift deprecates driving it through robot.q.
                     handle.q = qk
                 else:
                     self.q = qk

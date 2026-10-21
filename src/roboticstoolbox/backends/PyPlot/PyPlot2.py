@@ -261,19 +261,26 @@ class PyPlot2(Connector):
         display: bool = True,
         eeframe: bool = True,
         name: bool = False,
+        q: Any = None,
         **kwargs: Any,
-    ) -> None:
+    ) -> Any:
         """
-        id = add(robot) adds the robot to the external environment. robot must
+        handle = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
         robots which will act upon the step() method being called.
 
+        If ``q`` is given the drawing of the robot is pinned to that pose, and the same
+        robot can be added again in another pose; the handle that is returned is the
+        drawing, and ``handle.q = q`` moves only that drawing.  Otherwise it follows
+        ``robot.q``.  An ellipse has no handle.
         """
-
-
+        handle = None
         if isinstance(ob, rp.Robot2):
-            self.robots.append(RobotPlot2(ob, self, readonly, display, eeframe, name))
+            self.robots.append(
+                RobotPlot2(ob, self, readonly, display, eeframe, name, q=q)
+            )
             self.robots[len(self.robots) - 1].draw()
+            handle = self.robots[-1]
 
         elif isinstance(ob, EllipsePlot):
             ob.ax = self.ax
@@ -286,6 +293,7 @@ class PyPlot2(Connector):
         else:
             plt.draw()
             plt.show(block=False)
+        return handle
 
     def remove(self) -> None:
         """

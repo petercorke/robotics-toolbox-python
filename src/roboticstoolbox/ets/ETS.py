@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 from typing import Literal as L
 
 import numpy as np
@@ -16,6 +16,7 @@ from numpy.linalg import cond, det, inv, svd
 from spatialmath import SE3
 from spatialmath.base import (
     getmatrix,
+    issymbol,
     rotvelxform,
     simplify,
     t2r,
@@ -209,6 +210,129 @@ class ETS(BaseETS[ET]):
             joint_index += 1
 
         return ETS(parts)
+
+    def replace(self, i: int, axis: str) -> None:
+        r"""
+        Replace a transform by an equivalent one on another axis, in place
+
+        :param i: index of the transform
+        :param axis: the new axis, ``"x"``, ``"y"`` or ``"z"``
+        :raises IndexError: if ``i`` is not in the sequence
+        :raises ValueError: if ``axis`` is not ``"x"``, ``"y"`` or ``"z"``, or the
+            transform has no axis, such as an arbitrary ``SE3``
+
+        The transform at index ``i`` becomes three, which together mean the same
+        thing: a constant quarter turn :math:`R`, the transform moved to the new
+        axis, and the inverse of :math:`R`.  This **changes the sequence it is
+        called on** and returns ``None``; use :meth:`replaced` to get a modified
+        copy and leave the original alone.  If the transform is already on the
+        axis nothing is changed.
+
+        The quarter turn is the one that carries the new axis onto the old, and it
+        is about the third axis, so there is only one choice, and the transform
+        keeps its sign: a joint is not flipped and its offset is unchanged.  These
+        are the substitutions of Corke's method for assigning Denavit-Hartenberg
+        parameters, for example
+
+        - ``Rx(q) = Ry(90°) ⊕ Rz(q) ⊕ Ry(-90°)``
+        - ``Ry(q) = Rx(-90°) ⊕ Rz(q) ⊕ Rx(90°)``
+        - ``tx(d) = Ry(90°) ⊕ tz(d) ⊕ Ry(-90°)``
+
+        The transform may be a translation or a rotation, a joint or a constant.  A
+        joint keeps its ``jindex``, ``qlim`` and offset.  The quarter turns are
+        exact, ``pi/2`` from SymPy, if the transform has a symbolic parameter or
+        offset, and floating point otherwise.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1) * ET.Ry() * ET.tx(2)
+            >>> print(e)
+            >>> e.replace(1, "z")
+            >>> print(e)
+            >>> e = ET.tx(1) * ET.ty(2) * ET.tx(3)
+            >>> e.replace(1, "z")
+            >>> print(e)
+
+        With symbolic values:
+
+        .. runblock:: pycon
+
+            >>> from spatialmath.base import symbol
+            >>> L = symbol("L")
+            >>> e = ET.Rz() * ET.tx(L) * ET.Rx()
+            >>> e.replace(1, "z")
+            >>> print(e)
+
+        .. versionadded:: 1.5.0
+
+        .. seealso:: :meth:`replaced` :meth:`swap`
+        """
+        if axis not in ("x", "y", "z"):
+            raise ValueError(f"axis is {axis!r}, must be 'x', 'y' or 'z'")
+        if not 0 <= i < len(self._data):
+            raise IndexError(
+                f"index {i} out of range, the sequence has {len(self._data)} transforms"
+            )
+        e = self._data[i]
+        if not e.iselementary:
+            raise ValueError(f"transform {e.kind} has no axis, it cannot be replaced")
+        old = cast(str, e.ax)
+        if old == axis:
+            return
+
+        # the quarter turn about the third axis that carries the new axis onto the
+        # old one, which is +90 or -90 degrees and only one of them is right
+        third = next(a for a in "xyz" if a not in (old, axis))
+        k = 1 if self._axis_image(third, 1, axis) == (old, 1) else -1
+        symbolic = issymbol(e.param) or issymbol(e.offset)
+        if symbolic:
+            import sympy
+
+            quarter: Any = sympy.pi / 2
+        else:
+            quarter = np.pi / 2
+
+        make = getattr(ET, "R" + third)
+        turn, back = make(k * quarter), make(-k * quarter)
+        moved = self._conjugate(e, third, -k)  # R^-1 e R
+        self._data[i : i + 1] = [turn, moved, back]
+        self._changed()
+
+    def replaced(self, i: int, axis: str) -> ETS:
+        """
+        Replace a transform by an equivalent one on another axis, returning a copy
+
+        :param i: index of the transform
+        :param axis: the new axis, ``"x"``, ``"y"`` or ``"z"``
+        :return: a copy of the sequence with the transform at ``i`` replaced
+        :raises IndexError: if ``i`` is not in the sequence
+        :raises ValueError: if ``axis`` is not ``"x"``, ``"y"`` or ``"z"``, or the
+            transform has no axis, such as an arbitrary ``SE3``
+
+        The sequence it is called on is not changed.  See :meth:`replace` for what
+        the transform is replaced by.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1) * ET.Ry() * ET.tx(2)
+            >>> print(e.replaced(1, "z"))
+            >>> print(e)
+
+        .. versionadded:: 1.5.0
+
+        .. seealso:: :meth:`replace` :meth:`swapped`
+        """
+        new = deepcopy(self)
+        new.replace(i, axis)
+        return new
 
     def compile(self) -> ETS:
         """
@@ -1086,10 +1210,13 @@ class ETS(BaseETS[ET]):
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_LM` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_LM`, which
+            has none of these limits.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method. This is a fast solver implemented in C++.
@@ -1240,10 +1367,13 @@ class ETS(BaseETS[ET]):
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_NR` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_NR`, which
+            has none of these limits.
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -1346,6 +1476,16 @@ class ETS(BaseETS[ET]):
             always empty -- this fast C++ solver doesn't produce a granular failure
             reason string, unlike :meth:`ikine_GN`)
         :rtype: IKSolution
+
+        .. warning::
+
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_GN`, which
+            has none of these limits.
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
