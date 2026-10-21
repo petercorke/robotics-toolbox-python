@@ -691,7 +691,7 @@ to import them if the user attempts to exploit a functionality that requires it.
 If a dependency is not installed, a warning provides instructions on how to install it using ``pip``.
 
 C/C++ extensions are provided for recursive Newton-Euler dynamics and optimized forward and inverse kinematics for ETS defined robots.  These
-wheels are built by the GitHub CI actions.  A pure-Python wheel (using tested pure-Python fallbacks for the C/C++ functionality) is also built for use in the browser via Pyodide/JupyterLite, and is published to PyPI alongside the compiled wheels.
+wheels are built by the GitHub CI actions.  A pure-Python wheel (using tested pure-Python fallbacks for the C/C++ functionality, except for the fast ``ik_XX`` inverse kinematics solvers, for which use ``ikine_XX``) is also built for use in the browser via Pyodide/JupyterLite, and is published to PyPI alongside the compiled wheels.
 
 
 Spatial math layer

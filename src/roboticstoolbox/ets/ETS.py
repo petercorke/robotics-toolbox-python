@@ -1086,10 +1086,13 @@ class ETS(BaseETS[ET]):
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_LM` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_LM`, which
+            has none of these limits.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method. This is a fast solver implemented in C++.
@@ -1240,10 +1243,13 @@ class ETS(BaseETS[ET]):
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_NR` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_NR`, which
+            has none of these limits.
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -1346,6 +1352,16 @@ class ETS(BaseETS[ET]):
             always empty -- this fast C++ solver doesn't produce a granular failure
             reason string, unlike :meth:`ikine_GN`)
         :rtype: IKSolution
+
+        .. warning::
+
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_GN`, which
+            has none of these limits.
 
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
