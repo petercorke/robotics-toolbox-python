@@ -16,9 +16,12 @@ Collision checking
 
 ``robot.iscollided(q, shape)`` checks the robot against an external shape.
 ``robot.isselfcollided(q)`` checks its own non-adjacent links, including gripper
-links; ``robot.iscollided(q, robot)`` is equivalent. Shapes on the same link and
-direct parent-child link pairs are excluded. Links in separate branches are
-checked, and touching counts as a collision.
+links; ``robot.iscollided(q, robot)`` is equivalent. Shapes on the same link,
+neighbouring links, and links within the same gripper are excluded. Links without
+collision geometry are transparent when determining neighbours, so each link's
+nearest ancestor with collision geometry is excluded. Links in separate branches
+are checked unless they belong to the same gripper, and touching counts as a
+collision for the pairs that are checked.
 
 The checks use collision geometry, not visual geometry, and require the optional
 ``coal`` dependency. A model without collision geometry raises ``ValueError``

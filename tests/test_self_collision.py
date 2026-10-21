@@ -20,13 +20,19 @@ from tests import skip_no_collision_checking
 
 def chain() -> Robot:
     """
-    Construct a two-joint chain with collision geometry on its base and tip
+    Construct a two-joint chain with collision geometry on all three links
 
     :returns: robot with two unit-length segments and spherical geometry
     """
     # The tip centre moves from x=2 to the base centre as q goes from 0 to pi.
     base = Link(ET.Rz(), name="base", collision=[Sphere(0.2)])
-    middle = Link(ET.tx(1) * ET.Rz(), parent=base, name="middle")
+    # A distant middle body keeps base and tip non-adjacent without colliding.
+    middle = Link(
+        ET.tx(1) * ET.Rz(),
+        parent=base,
+        name="middle",
+        collision=[Sphere(0.1, pose=SE3.Tz(10))],
+    )
     tip = Link(ET.tx(1), parent=middle, name="tip", collision=[Sphere(0.2)])
     return Robot([base, middle, tip])
 
@@ -86,6 +92,37 @@ def test_adjacent_links_are_not_checked() -> None:
     collided.assert_not_called()
 
 
+@pytest.mark.parametrize("depth", [1, 3])
+def test_empty_spacer_links_are_transparent_to_adjacency(depth: int) -> None:
+    base = Link(ET.Rz(), name="base", collision=[Sphere(1)])
+    links = [base]
+    for i in range(depth):
+        links.append(
+            Link(
+                ET.tx(0),
+                parent=links[-1],
+                name=f"spacer{i}",
+                collision=[CollisionShapeGroup([CollisionShapeGroup()])],
+            )
+        )
+    links.append(Link(ET.tx(0), parent=links[-1], name="tip", collision=[Sphere(1)]))
+    robot = Robot(links)
+    with patch.object(Sphere, "iscollided") as collided:
+        assert robot.isselfcollided([0]) is False
+    collided.assert_not_called()
+
+
+def test_links_in_same_gripper_are_not_checked() -> None:
+    root = Link(ET.Rz(), name="root")
+    hand = Link(ET.tx(0), parent=root, name="hand", collision=[Sphere(1)])
+    left = Link(ET.tx(), parent=hand, name="left", collision=[Sphere(1)])
+    right = Link(ET.ty(), parent=hand, name="right", collision=[Sphere(1)])
+    robot = Robot([root, hand, left, right], gripper_links=hand)
+    with patch.object(Sphere, "iscollided") as collided:
+        assert robot.isselfcollided([0]) is False
+    collided.assert_not_called()
+
+
 def test_each_non_adjacent_shape_pair_is_checked_once() -> None:
     robot = chain()
     robot.links[0].collision.append(Sphere(0.1))
@@ -142,6 +179,19 @@ def test_reported_urdf_panda_example_accepts_self() -> None:
 
 
 @skip_no_collision_checking
+@pytest.mark.parametrize("model", [models.Panda, models.Frankie])
+def test_panda_and_frankie_ready_pose_is_collision_free(model: type[Robot]) -> None:
+    robot = model()
+    before = robot.q.copy()
+    gripper_configurations = [g.q.copy() for g in robot.grippers]
+    assert robot.isselfcollided(robot.qr) is False
+    assert robot.iscollided(robot.qr, robot) is False
+    np.testing.assert_array_equal(robot.q, before)
+    for gripper, configuration in zip(robot.grippers, gripper_configurations):
+        np.testing.assert_array_equal(gripper.q, configuration)
+
+
+@skip_no_collision_checking
 def test_touching_non_adjacent_shapes_count_as_collision() -> None:
     robot = chain()
     robot.links[0].collision[0].radius = 1
@@ -174,7 +224,7 @@ def test_rotated_cuboid_in_nested_group(
     group_type: type[CollisionShapeGroup] | type[SceneGroup],
 ) -> None:
     base = Link(ET.Rz(), collision=[Sphere(0.1, pose=SE3.Tx(1))])
-    middle = Link(ET.tx(0), parent=base)
+    middle = Link(ET.tx(0), parent=base, collision=[Sphere(0.1, pose=SE3.Tz(10))])
     group = group_type([Cuboid([3, 0.1, 0.1])])
     group.T = SE3.Rz(np.pi / 2)
     tip = Link(ET.Rz(), parent=middle, collision=[CollisionShapeGroup(), group])
@@ -207,7 +257,12 @@ def test_default_configuration_and_repeated_queries() -> None:
     robot.q = [0, np.pi]
     assert robot.isselfcollided() is True
     assert robot.isselfcollided([0, 0]) is False
+    # A public scene update must retain the requested configuration, rather
+    # than overwrite collision poses with stale local link transforms.
+    robot.update()
+    assert robot.isselfcollided(skip=True) is False
     assert robot.isselfcollided([0, np.pi]) is True
+    robot.update()
     assert robot.isselfcollided(skip=True) is True
 
 
@@ -263,7 +318,9 @@ def test_sibling_links_are_not_treated_as_adjacent() -> None:
 @skip_no_collision_checking
 def test_gripper_links_use_their_own_configuration() -> None:
     base = Link(ET.Rz(), name="base", collision=[Sphere(0.2)])
-    wrist = Link(ET.tx(1), parent=base, name="wrist")
+    wrist = Link(
+        ET.tx(1), parent=base, name="wrist", collision=[Sphere(0.1, pose=SE3.Tz(10))]
+    )
     finger = Link(
         ET.tx(1) * ET.tx(), parent=wrist, name="finger", collision=[Sphere(0.2)]
     )
@@ -278,7 +335,7 @@ def test_dh_robot_with_collision_geometry() -> None:
     robot = DHRobot(
         [
             RevoluteDH(a=1, collision=[Sphere(0.2, pose=SE3.Tx(-1))]),
-            RevoluteDH(a=1),
+            RevoluteDH(a=1, collision=[Sphere(0.1, pose=SE3.Tz(10))]),
             RevoluteDH(a=0, collision=[Sphere(0.2)]),
         ]
     )

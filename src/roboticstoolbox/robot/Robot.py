@@ -1450,9 +1450,12 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             not a single finite joint configuration
 
         Checks the collision geometry of the robot and all its grippers.
-        Shapes attached to the same link, and links connected directly by a
-        parent-child relationship, are not tested against each other. Links
-        in separate branches are tested, including siblings and gripper links.
+        Shapes attached to the same link, neighbouring links, and links in
+        the same gripper are not tested against each other. Links without
+        collision geometry are transparent when determining neighbours: a
+        link's nearest ancestor with collision geometry is its neighbour.
+        Links in separate branches are tested, including siblings outside a
+        shared gripper and links belonging to different grippers.
         Touching counts as a collision, as in :meth:`iscollided`.
 
         Each gripper uses its own current joint configuration. The robot's
@@ -1491,28 +1494,35 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             configuration = self.q if q is None else getvector(q, self.n)
             if configuration.ndim != 1 or not np.all(np.isfinite(configuration)):
                 raise ValueError("q must be a single finite joint configuration")
-            # The scene update path relies on the optional C extension. Use FK
-            # directly so collision checking also works with the Python facade,
-            # and keep each collision group's local placement intact.
+            # FK works with both the compiled extension and the Python facade.
+            # Set local link poses through the public scene API, then let
+            # spatialgeometry update world poses and collision orientations.
             frames = self.fkine_all(configuration)
+            for link in links:
+                parent = frames[link.parent.number] if link.parent else self.base
+                link.T = parent.inv() * frames[link.number]
+            self.update()
 
-            def update_collision(node: SceneNode, parent: SE3) -> None:
-                pose = parent * SE3(node.T)
-                # Coal reads the cached world pose. Keep the local transform
-                # unchanged so repeated queries do not accumulate transforms.
-                node._wT[:] = pose.A
-                node._wq[:] = smb.r2q(pose.R, order="xyzs")
-                for child in node.scene_children:
-                    update_collision(child, pose)
-
-            for link, _ in geometries:
-                update_collision(link.collision, frames[link.number])
+        # Empty spacer links do not separate neighbouring collision bodies,
+        # for example Panda's link7 -> link8 (no geometry) -> hand.
+        collision_links = {link for link, _ in geometries}
+        neighbours = {}
+        for link, _ in geometries:
+            ancestor = link.parent
+            while ancestor is not None and ancestor not in collision_links:
+                ancestor = ancestor.parent
+            neighbours[link] = ancestor
+        grippers = {link: g for g in self.grippers for link in g.links}
 
         for i, (link, shapes) in enumerate(geometries):
             # Visit each unordered pair once. Adjacency is determined by the
             # link tree, since consecutive list entries can belong to branches.
             for other, other_shapes in geometries[i + 1 :]:
-                if link.parent is other or other.parent is link:
+                if neighbours[link] is other or neighbours[other] is link:
+                    continue
+                # Finger contact is normal within a gripper; collisions with
+                # the arm or another gripper must still be checked.
+                if link in grippers and grippers[link] is grippers.get(other):
                     continue
                 for shape in shapes:
                     for other_shape in other_shapes:
