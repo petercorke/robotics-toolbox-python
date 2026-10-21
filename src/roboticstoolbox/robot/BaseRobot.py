@@ -2142,6 +2142,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param inline_dpi: (Plot Option) DPI for PNG inline frames only; ignored when ``inline_format='svg'``.
         :returns: A reference to the environment object which controls the figure
 
+        .. note::
+
+            Python's ``webbrowser`` module cannot tell whether a browser is installed, so
+            a browser that cannot be opened is not reported as such.  On macOS the names
+            ``"chrome"``, ``"firefox"`` and ``"safari"`` are always accepted, whether or
+            not the app is installed.  If it is not, no window opens and there is no
+            error: Swift waits about 10 seconds for the page to connect and then reports
+            ``Could not connect to the Swift simulator``.  If you see that, check that
+            the browser named by ``browser`` is installed, or leave it as ``None`` to use
+            the system's default browser.  See :py:meth:`swift.Swift.Swift.launch`.
+
         .. rubric:: Notes
 
         - By default this method will block until the figure is dismissed.
