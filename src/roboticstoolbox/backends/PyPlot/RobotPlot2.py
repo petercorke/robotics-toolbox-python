@@ -24,6 +24,7 @@ class RobotPlot2(RobotPlot):
         eeframe: bool = True,
         name: bool = True,
         options: Any = None,
+        q: Any = None,
     ) -> None:
 
         super().__init__(
@@ -35,6 +36,7 @@ class RobotPlot2(RobotPlot):
             shadow=False,
             eeframe=eeframe,
             name=name,
+            q=q,
         )
 
         defaults: dict[str, Any] = {
@@ -66,7 +68,7 @@ class RobotPlot2(RobotPlot):
         ## Update the robot links
 
         # compute all link frames
-        T = self.robot.fkine_all(self.robot.q)
+        T = self.robot.fkine_all(self.q)
 
         # draw all the line segments for the noodle plot
         for i, segment in enumerate(self.segments):
