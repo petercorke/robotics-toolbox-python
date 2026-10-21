@@ -87,8 +87,16 @@ For a **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
       - ``ik``, see :ref:`analytic-ik`
       - none
       - none
+    * - In the browser (JupyterLite)
+      - yes
+      - yes
+      - no, it needs the compiled extension
+    * - SymPy parameters, joint offsets
+      - not applicable
+      - yes, if every parameter has a numeric value
+      - no, see :ref:`ik-cpp-limits`
 
-The times are indicative, for a six-axis arm on a recent laptop (an Apple M4).  The script ``examples/benchmark_ik.py`` in the repository measures the numerical solvers on your own machine.  Where an analytic solution exists it is the right choice: it is exact, finds every configuration, and can be generated as code for a controller.  Otherwise use a numerical solver, and the C++ one if you only need a single pose quickly.
+The times are indicative, for a six-axis arm on a recent laptop (an Apple M4).  The script ``examples/benchmark_ik.py`` in the repository measures the numerical solvers on your own machine.  Where an analytic solution exists it is the right choice: it is exact, finds every configuration, and can be generated as code for a controller.  Otherwise use a numerical solver, and the C++ one if you only need a single pose quickly and its :ref:`limits <ik-cpp-limits>` do not matter to you.
 
 .. rubric:: Analytic
 
@@ -96,7 +104,7 @@ The analytic solvers are methods of a :py:class:`~roboticstoolbox.robot.DHRobot.
 
 .. rubric:: Numerical
 
-The numerical solvers start from a guess and iterate.  They work for any robot and are written in C++ and in Python.  See :doc:`numerical` for the arguments that they share, and for the C++ and Python solvers, the classes that implement them and examples.
+The numerical solvers start from a guess and iterate.  They work for any robot and are written in C++ and in Python, but the C++ ones need the compiled extension and have :ref:`limits <ik-cpp-limits>`.  See :doc:`numerical` for the arguments that they share, and for the C++ and Python solvers, the classes that implement them and examples.
 
 .. toctree::
     :maxdepth: 1

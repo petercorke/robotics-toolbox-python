@@ -130,9 +130,30 @@ class TestEvaluate(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "offset"):
             e.ik_LM(e.fkine([0.1]).A)
         # the Python solver does work
-        sol = e.ikine_LM(e.fkine([0.1]))
+        sol = e.ikine_LM(e.fkine([0.1]), q0=[0.0])
         self.assertTrue(sol.success)
         self.assertAlmostEqual(sol.q[0], 0.1, delta=1e-2)
+
+
+class TestCompiledIKLimits(unittest.TestCase):
+    """The ik_XX solvers need the compiled handle, the ikine_XX solvers do not."""
+
+    def test_sympy_parameter_with_a_numeric_value(self):
+        e = ET.Rz() * ET.tx(1) * ET.Rx(sp.pi / 2) * ET.Rz() * ET.tx(0.5)
+        T = e.fkine([0.3, 0.4])
+        for name in ("ik_LM", "ik_NR", "ik_GN"):
+            with self.assertRaisesRegex(RuntimeError, "SymPy parameter"):
+                getattr(e, name)(T)
+        sol = e.ikine_LM(T, q0=[0.2, 0.3])  # a start near the solution, not random
+        self.assertTrue(sol.success)
+        nt.assert_array_almost_equal(sol.q, [0.3, 0.4], decimal=4)
+
+    def test_joint_offset(self):
+        e = ET.Rz() * ET.tx(1)
+        e[0].offset = 0.4
+        for name in ("ik_LM", "ik_NR", "ik_GN"):
+            with self.assertRaisesRegex(RuntimeError, "joint with an offset"):
+                getattr(e, name)(e.fkine([0.1]).A)
 
 
 class TestDisplay(unittest.TestCase):

@@ -5,6 +5,8 @@ Tries to import from the compiled extension.  When unavailable (Pyodide
 without a WASM build, CI forcing the Python path, etc.) pure-Python
 implementations are used for ETS evaluation functions.  IK C solvers and
 visualisation helpers require the extension and raise at call time when absent.
+The IK C solvers also raise for a sequence that has no compiled handle, which is one
+with a SymPy parameter or a joint with an offset; use the ``ikine_XX`` solvers.
 """
 
 from __future__ import annotations
@@ -326,7 +328,7 @@ def IK_NR_c(fknm: Any, *args: Any, **kwargs: Any) -> Any:
     if fknm is None:
         raise RuntimeError(
             "ik_NR requires the compiled code, which is missing or cannot be used "
-            "for a sequence with a symbolic constant or a joint with an offset; "
+            "for a sequence with a SymPy parameter or a joint with an offset; "
             "use ikine_NR for the Python solver"
         )
     return _c_IK_NR_c(fknm, *_ik_args_se3(args), **kwargs)
@@ -336,7 +338,7 @@ def IK_GN_c(fknm: Any, *args: Any, **kwargs: Any) -> Any:
     if fknm is None:
         raise RuntimeError(
             "ik_GN requires the compiled code, which is missing or cannot be used "
-            "for a sequence with a symbolic constant or a joint with an offset; "
+            "for a sequence with a SymPy parameter or a joint with an offset; "
             "use ikine_GN for the Python solver"
         )
     return _c_IK_GN_c(fknm, *_ik_args_se3(args), **kwargs)
@@ -346,7 +348,7 @@ def IK_LM_c(fknm: Any, *args: Any, **kwargs: Any) -> Any:
     if fknm is None:
         raise RuntimeError(
             "ik_LM requires the compiled code, which is missing or cannot be used "
-            "for a sequence with a symbolic constant or a joint with an offset; "
+            "for a sequence with a SymPy parameter or a joint with an offset; "
             "use ikine_LM for the Python solver"
         )
     return _c_IK_LM_c(fknm, *_ik_args_se3(args), **kwargs)

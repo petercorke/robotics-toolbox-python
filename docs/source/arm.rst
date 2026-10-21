@@ -117,7 +117,7 @@ The graphical :doc:`backends <arm_backend>` do the drawing.
     ~roboticstoolbox.robot.Robot.Robot.ikine_LM
     ~roboticstoolbox.robot.Robot.Robot.ik_LM
 
-``ikine_LM`` and ``ik_LM`` are two examples.  All the inverse kinematics methods, ``ikine_XX`` and ``ik_XX``, are described under :doc:`Inverse Kinematics <IK/ik>`.
+``ikine_LM`` and ``ik_LM`` are two examples: the first is written in Python, the second in C++ and is faster but has :ref:`limits <ik-cpp-limits>`.  All the inverse kinematics methods, ``ikine_XX`` and ``ik_XX``, are described under :doc:`Inverse Kinematics <IK/ik>`.
 
 .. rubric:: Dynamics
 
