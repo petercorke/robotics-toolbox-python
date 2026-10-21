@@ -961,6 +961,31 @@ class BaseETS(MutableSequence[ETT]):
         return whole % 4 if abs(turns - whole) * (np.pi / 2) < 1e-9 else None
 
     @staticmethod
+    def _axis_image(axis: str, quarters: int, target: str) -> tuple[str, int]:
+        """
+        Where a rotation sends an axis
+
+        :param axis: the axis of the rotation, ``"x"``, ``"y"`` or ``"z"``
+        :param quarters: the angle of the rotation in quarter turns, may be negative
+        :param target: the axis, ``"x"``, ``"y"`` or ``"z"``, that is rotated
+        :returns: the axis that ``target`` is turned onto, and ``+1`` if it points
+            along that axis or ``-1`` if the opposite way
+
+        For the unit vectors this is exact, with no trigonometry.
+        """
+        letters = "xyz"
+        k = quarters % 4
+        c, s = (1, 0, -1, 0)[k], (0, 1, 0, -1)[k]  # cosine, sine, exactly
+        i = letters.index(axis)
+        a, b = (i + 1) % 3, (i + 2) % 3
+        t = letters.index(target)
+        if t == i:
+            return target, 1
+        if t == a:  # e_a -> c e_a + s e_b
+            return (letters[a], c) if c else (letters[b], s)
+        return (letters[b], c) if c else (letters[a], -s)  # e_b -> -s e_a + c e_b
+
+    @staticmethod
     def _conjugate(e: Any, axis: str, quarters: int) -> Any:
         """
         The transform ``R e R^-1``, for a rotation R of quarter turns about an axis
@@ -979,18 +1004,7 @@ class BaseETS(MutableSequence[ETT]):
         """
         from roboticstoolbox.ets.ET import ET
 
-        letters = "xyz"
-        k = quarters % 4
-        c, s = (1, 0, -1, 0)[k], (0, 1, 0, -1)[k]  # cosine, sine, exactly
-        i = letters.index(axis)
-        a, b = (i + 1) % 3, (i + 2) % 3
-        t = letters.index(e.ax)
-        if t == i:
-            new_axis, sign = e.ax, 1
-        elif t == a:  # e_a -> c e_a + s e_b
-            new_axis, sign = (letters[a], c) if c else (letters[b], s)
-        else:  # e_b -> -s e_a + c e_b
-            new_axis, sign = (letters[b], c) if c else (letters[a], -s)
+        new_axis, sign = BaseETS._axis_image(axis, quarters, cast(str, e.ax))
 
         make = getattr(ET, e.kind[0] + new_axis)
         if e.isjoint:

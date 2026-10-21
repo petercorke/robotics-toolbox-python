@@ -227,6 +227,8 @@ Modification
    ~roboticstoolbox.ETS.swapped
    ~roboticstoolbox.ETS.merge
    ~roboticstoolbox.ETS.merged
+   ~roboticstoolbox.ETS.replace
+   ~roboticstoolbox.ETS.replaced
    ~roboticstoolbox.ETS.compile
 
 List operations
@@ -325,5 +327,5 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ETS
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, swapped, merge, merged, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, swapped, merge, merged, replace, replaced, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
    :member-order: bysource
