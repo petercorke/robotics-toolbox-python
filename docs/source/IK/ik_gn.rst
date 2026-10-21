@@ -11,6 +11,7 @@ IK_GN - Gauss-Newton Numerical IK
 
 .. autosummary::
    :toctree: stubs
+   :template: method_indexed.rst
 
    ~IK_GN.step
    ~IK_GN.solve
@@ -20,6 +21,7 @@ IK_GN - Gauss-Newton Numerical IK
 
 .. autosummary::
    :toctree: stubs
+   :template: method_indexed.rst
    
    ~IK_GN._random_q
    ~IK_GN._check_jl

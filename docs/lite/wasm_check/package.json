@@ -1,0 +1,9 @@
+{
+  "name": "rtb-wasm-check",
+  "private": true,
+  "type": "module",
+  "description": "Real-Pyodide (Node.js) dependency-completeness check for the JupyterLite install path -- see check_pyodide_install.mjs and README.md.",
+  "dependencies": {
+    "pyodide": "0.27.6"
+  }
+}

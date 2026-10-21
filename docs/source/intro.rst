@@ -6,12 +6,13 @@ The Robotics Toolbox for Python (RTB-P) provides tools for the kinematics,
 dynamics, motion planning and control of both arm-type (serial-link
 manipulator) and mobile (wheeled) robots. 
 
-Inspired by the original Robotics Toolbox for MATLAB (RTB-M) :cite:`Corke96`, RTB-P :cite:`corke21a`
-is a complete rewrite in Python, and is designed to be more modular and extensible.  It
-is intended to be used in conjunction with the Spatial Math Toolbox for Python (SMTB-P)
-:cite:`SMTB-P` which provides the underlying representations of pose and orientation used
-throughout. The project's history, and an introduction to the
-spatial-math layer, are given at the end of this document.
+It works with the Spatial Math Toolbox for Python (SMTB-P) :cite:`SMTB-P`, which provides the
+representations of pose and orientation used throughout.
+
+A good introduction to the many capabilities of the Toolbox is the notebook
+``icra2026.ipynb``, the tutorial presented at ICRA 2026.  You can run it in your browser,
+with nothing to install, by `trying it online <https://petercorke.github.io/robotics-toolbox-python/lite/lab?path=icra2026.ipynb>`_, or read it on
+`GitHub <https://github.com/petercorke/robotics-toolbox-python/blob/main/docs/notebooks/icra2026.ipynb>`_.
 
 
 Arm robots
@@ -20,11 +21,11 @@ Arm robots
 Robot models
 ^^^^^^^^^^^^
 
-The Toolbox ships with over 50 robot models, most of which are purely kinematic
+The Toolbox provides seamless access to over 150 robot models, most of which are purely kinematic
 but some have inertial and frictional parameters. Kinematic models can be
 specified in a variety of ways:  standard or modified Denavit-Hartenberg (DH,
-MDH) notation, as an ETS string :cite:`Corke07`, as a rigid-body tree, or from a URDF
-file.
+MDH) notation, as an elementary transform sequence (ETS) :cite:`Corke07`, which can
+describe a branched robot, or from a URDF file.
 
 
 Denavit-Hartenberg parameters
@@ -52,7 +53,7 @@ inertia, viscous friction, Coulomb friction, and joint limits can also be
 specified using additional keyword arguments.
 
 The toolbox provides some such robot models wrapped as class definitions, for example the 
-core logic of `models.DH.Puma560` is::
+core logic of ``models.DH.Puma560`` is::
 
     class Puma560(DHRobot):
 
@@ -84,8 +85,8 @@ We can now easily perform standard kinematic operations
     >>> print(sol.q)
 
 
-The Toolbox supports named joint configurations and these are shown in the table at
-lines 16-22.  For example, ``puma.qr`` is the upright "ready" configuration,
+The Toolbox supports named joint configurations and these are shown in the table
+printed above.  For example, ``puma.qr`` is the upright "ready" configuration,
 ``puma.qz`` is the zero angle configuration, and ``puma.qn`` is a nominal elbow up table-top working configuration.
 
 .. runblock:: pycon
@@ -104,11 +105,11 @@ All robots can generate a random joint configuration informed by joint limits, i
 
 ``ikine_LM`` is a generalised iterative numerical solution based on
 Levenberg-Marquardt minimization, and additional status results are also
-returned as part of a named tuple.  
+returned as part of an :class:`~roboticstoolbox.robot.IK.IKSolution` object.
 
 .. warning:: 
     - The solution is not unique and the algorithm may converge to different solutions depending on the initial joint configuration. If not specified, the initial joint configuration is random.
-    - The solution may also fail to converge, `sol.success` is `False`,if the specified transform is out of reach of the manipulator.
+    - The solution may also fail to converge, ``sol.success`` is ``False``, if the specified transform is out of reach of the manipulator.
 
 The default plot method::
 
@@ -138,6 +139,18 @@ Some provided robot models have an analytical solution coded, for example:
 
 where we have specified a left-handed, elbow up and wrist no-flip configuration.
 
+The Toolbox can also derive an analytic solution itself, for any six-axis arm with a
+spherical wrist, three parallel axes, or no special structure at all, and gives every solution
+for a pose, see :doc:`IK/analytic`.
+
+.. runblock:: pycon
+
+    >>> from roboticstoolbox.models.DH import Puma560
+    >>> puma = Puma560()
+    >>> T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+    >>> sol = puma.analytic_ik().solve(T)   # all the solutions within the joint limits
+    >>> len(sol)
+
 
 ETS notation
 ^^^^^^^^^^^^
@@ -157,10 +170,10 @@ or pure rotation -- each with either a constant parameter or a free parameter wh
 
 Line 2 defines the unique lengths of the Puma robot, and line 3 defines the kinematic chain in
 terms of elementary transforms.  In contrast to DH notation, this description allows joint rotations about arbitrary axes and translations along arbitrary axes, and the order of the transforms is explicit.
-In line 6 we pass the ETS to the constructor for a ``Robot`` which partitions the
+In line 5 we pass the ETS to the constructor for a ``Robot`` which partitions the
 elementary transform sequence into a series of links and joints -- link frames are declared
 after each joint variable as well as the start and end of the sequence.
-By explicitly creating `ETSLink` objects we can
+By explicitly creating ``ELink`` objects we can
 represent general branched robot structures and also specify inertial and frictional parameters for each link.
 
 Kinematic and plotting operations are performed using methods with the same names
@@ -170,7 +183,7 @@ as discussed above.
 URDF import
 ^^^^^^^^^^^
 
-The final approach to manipulator modeling is to an import a URDF file.  The Toolbox includes a parser and xacro preprocessor
+The final approach to manipulator modeling is to import a URDF file.  The Toolbox includes a parser and xacro preprocessor
 which makes many models from the ROS universe available.
 
 Provided models, such as for Panda or Puma, are again encapsulated as classes:
@@ -238,11 +251,12 @@ Animations can be recorded as MP4 files or animated GIF files which are useful f
 
 To load an arbitrary URDF or xacro file we can use::
 
+    >>> from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
     >>> robot = URDFRobot(filename)
 
 which will preprocess and parse the file, and loads any associated mesh assets.
 
-If `filename` is a plain name with no suffix, like `"ur5"`, the Toolbox will attempt to dynamically load
+If ``filename`` is a plain name with no suffix, like ``"ur5"``, the Toolbox will attempt to dynamically load
 the model from the `robot_descriptions <https://github.com/robot-descriptions/robot_descriptions.py>`_ package, which is a collection of URDF and xacro files for many robots.
 This package is installed automatically with RTB-P.
 
@@ -330,13 +344,13 @@ two points specified by a pair of poses in :math:`\SE{3}`
     >>> sol.success
     >>> sol.q.shape
 
-At line 9 we see that the resulting trajectory, ``Ts``, is an ``SE3`` instance
+At line 10 we see that the resulting trajectory, ``Ts``, is an ``SE3`` instance
 with 200 values.
 
-At line 10 we compute the inverse kinematics of the whole trajectory in a
+At line 11 we compute the inverse kinematics of the whole trajectory in a
 single call to ``ikine_LM``, seeded with the joint coordinates ``puma.qn``.
-Line 11 confirms the solve converged for every pose in the sequence, and at
-line 12 the per-step joint coordinates are returned as a single array, with
+Line 12 confirms the solve converged for every pose in the sequence, and at
+line 13 the per-step joint coordinates are returned as a single array, with
 one row per time step.
 
 
@@ -359,7 +373,7 @@ The capability extends to forward kinematics
     >>> from roboticstoolbox.models.DH import Puma560
     >>> from spatialmath import base
     >>> puma = Puma560(symbolic=True)
-    >>> q = base.sym.symbol("q_:6") # q = (q_1, q_2, ... q_5)
+    >>> q = base.sym.symbol("q_:6") # q = (q_0, q_1, ... q_5)
     >>> T = puma.fkine(q)
     >>> T.t[0]
 
@@ -385,6 +399,7 @@ At a singular configuration
 .. runblock:: pycon
 
     >>> from roboticstoolbox.models.DH import Puma560
+    >>> import numpy as np
     >>> from roboticstoolbox import jsingu
     >>> puma = Puma560()
     >>> J = puma.jacob0(puma.qr)
@@ -425,7 +440,7 @@ of freedom.
 For ``Robot`` instances we can also compute the manipulability
 Jacobian::
 
-    >>> Jm = puma.manipm(q, J, H)
+    >>> Jm = puma.jacobm(q, J, H)
 
 such that :math:`\dot{m} = \mat{J}_m(\vec{q}) \dvec{q}`.
 
@@ -443,6 +458,7 @@ For example, the inverse dynamics
 .. runblock:: pycon
 
     >>> from roboticstoolbox.models.DH import Puma560
+    >>> import numpy as np
     >>> puma = Puma560()
     >>> tau = puma.rne(puma.qn, np.zeros((6,)), np.zeros((6,)))
     >>> print(tau)
@@ -488,7 +504,7 @@ velocity, acceleration, momentum, force and inertia.
 Collision checking
 ^^^^^^^^^^^^^^^^^^
 
-The Toolbox supports collision checking using the Python version using :cite:`coal`, the actively
+The Toolbox supports collision checking using :cite:`coal`, the actively
 maintained successor to FCL/hpp-fcl, which performs GJK/EPA-based distance and
 collision queries against primitive shapes such as Cylinders, Spheres and Boxes
 as well as mesh objects. Every robot link can have a collision shape in addition
@@ -504,8 +520,11 @@ whole robots, discrete links, and objects in the world. For example a :math:`1
 \times 1 \times 1` box centered at :math:`(1,0,0)` can be tested against all, or
 just one link, of the robot by::
 
+    >>> from roboticstoolbox.models.URDF import Panda
+    >>> from spatialgeometry import Cuboid
+    >>> from spatialmath import SE3
     >>> panda = Panda()
-    >>> obstacle = Cuboid([1, 1, 1], pose = SE3(1, 0, 0))
+    >>> obstacle = Cuboid([1, 1, 1], pose=SE3(1, 0, 0))
     >>> iscollision = panda.iscollided(panda.q, obstacle) # boolean
     >>> iscollision = panda.links[0].iscollided(obstacle)
 
@@ -516,6 +535,18 @@ segment defined by two points in the world frame::
 
     >>> d, p1, p2 = panda.closest_point(obstacle)
     >>> d, p1, p2 = panda.links[0].closest_point(obstacle)
+
+
+Branched mechanisms
+^^^^^^^^^^^^^^^^^^^
+
+The RTB-M ``SerialLink`` class had no option to express branching. In RTB-P the
+equivalent class, ``DHRobot``, is similarly limited, but the ``Robot`` class
+is more general and allows for branching (but not closed kinematic loops). The
+robot is described by a set of ``ELink`` objects, each of which points to its
+parent link. The ``Robot`` has references to the root and leaf ``ELink`` objects. This
+structure closely mirrors the URDF representation, allowing for easy import of
+URDF models.
 
 
 Mobile robots
@@ -577,8 +608,8 @@ planner
     >>> path = dx.query(start=(1, 1))
     >>> path.shape
 
-At line 7 a path is planned from the start to the goal cell, and its shape at
-line 8 shows one row per waypoint. Other planners include ``Dstar``, ``PRM``,
+At line 6 a plan is made to the goal cell, at line 7 a path is queried from
+the start cell, and its shape at line 8 shows one row per waypoint. Other planners include ``Dstar``, ``PRM``,
 ``Lattice``, ``Dubins``, ``ReedsShepp``, ``CurvaturePoly`` and ``QuinticPoly``,
 which trade off computation time, path optimality, and vehicle kinematic
 constraints in different ways.
@@ -629,8 +660,9 @@ By default the Toolbox behaves like the MATLAB version with a plot method::
 
     >>> puma.plot(q)
 
-which will plot the robot at the specified joint configurmation, or animate it if ``q`` is an :math:`m \times 6` matrix, using
-the default ``PyPlot`` backend which draws a "noodle robot" using the PyPlot backend.
+which will plot the robot at the specified joint configuration, or animate it if ``q`` is an :math:`m \times 6` matrix, using
+the default ``PyPlot`` backend, which draws a "noodle robot".  The :doc:`arm_backend` page describes the
+other backends, and how one is chosen.
 
 The more general solution, and what is implemented inside ``plot`` in the example above, is::
 
@@ -644,10 +676,10 @@ The more general solution, and what is implemented inside ``plot`` in the exampl
 This makes it possible to animate multiple robots in the one graphical window, or the one robot in various environments either graphical
 or real.
 
-The code is implemented in Python, currently supporting versions 3.10 and higher. Type hinting is been added throughout the codebase
-using modern (PEP604) Python type hints. Code coverage The code is hosted on GitHub and
-unit-testing for Mac, Linux and Windows over all supported Python versions is performed using GitHub-actions. Test coverage, currently over 70%, is uploaded to
-``codecov.io`` for visualization and trending. The code is documented with ReStructured Text format
+The code is implemented in Python, currently supporting versions 3.10 and higher. Type hints, in the modern (PEP 604) syntax, are used throughout the codebase.
+The code is hosted on GitHub and unit testing for Mac, Linux and Windows over all
+supported Python versions is performed using GitHub Actions. Test coverage, currently over 70%, is uploaded to
+``codecov.io`` for visualization and trending. The code is documented with reStructuredText
 docstrings which provides powerful markup including cross-referencing,
 equations, class inheritance diagrams and figures -- all of which is converted
 to HTML documentation whenever a change is pushed, and this is accessible via
@@ -659,7 +691,7 @@ to import them if the user attempts to exploit a functionality that requires it.
 If a dependency is not installed, a warning provides instructions on how to install it using ``pip``.
 
 C/C++ extensions are provided for recursive Newton-Euler dynamics and optimized forward and inverse kinematics for ETS defined robots.  These
-wheels are built by the GitHub CI actions.  A pure-Python wheel (using tested pure-Python fallbacks for the C/C++ functionality) is also built for use in the browser via Pyodide/JupyterLite, and is published to PyPI alongside the compiled wheels.
+wheels are built by the GitHub CI actions.  A pure-Python wheel (using tested pure-Python fallbacks for the C/C++ functionality, except for the fast ``ik_XX`` inverse kinematics solvers, for which use ``ikine_XX``) is also built for use in the browser via Pyodide/JupyterLite, and is published to PyPI alongside the compiled wheels.
 
 
 Spatial math layer
@@ -730,8 +762,8 @@ coded at the console or in ipython).
 and ``SE3.Rx()`` creates an ``SE3`` instance from a pure rotation about the x-axis.
 Attempts to compose with a non ``SE3`` instance would result in a ``TypeError``.
 
-The orientation of the new coordinate frame may be expressed in terms of Euler angles (line 9)
-and components can be extracted such as the rotation submatrix (line 11) and translation (line 15).
+The orientation of the new coordinate frame may be expressed in terms of Euler angles (line 4)
+and components can be extracted such as the rotation submatrix (line 5) and translation (line 6).
 
 The pose ``T`` can also be displayed as a 3D coordinate frame::
 
@@ -784,7 +816,7 @@ across the sequence
 Common constructors
 ^^^^^^^^^^^^^^^^^^^
 
-The Toolboxes classes are somewhat polymorphic and share many "variant constructors" that allow object construction:
+The Toolbox's classes are somewhat polymorphic and share many "variant constructors" that allow object construction:
 
 - with orientation expressed in terms of canonic axis rotations, Euler vectors, angle-vector pair,
   Euler or roll-pitch-yaw angles or orientation- and approach-vectors.
@@ -813,7 +845,7 @@ These benefits come at a price in terms of execution time due to the overhead of
 constructors, methods which wrap base functions, and type checking. The
 Toolbox supports SymPy which provides powerful symbolic support for Python and
 it works well in conjunction with NumPy, ie. a NumPy array can contain symbolic
-elements.  Many the Toolbox methods and functions contain extra logic to ensure
+elements.  Many of the Toolbox methods and functions contain extra logic to ensure
 that symbolic operations work as expected. While this adds to the overhead it
 means that for the user, working with symbols is as easy as working with
 numbers.
@@ -835,21 +867,16 @@ numbers.
     ===================  ==============
 
 
-History
+Summary
 =======
 
+The Robotics Toolbox for Python runs on Mac, Windows and Linux
+using Python 3.10 or better. The code is free and open, and released under the
+MIT licence. It provides many of the essential tools necessary for modelling, simulation and  control of arm and mobile robots, which is essential for robotics
+education  and research. 
 
-
-Branched mechanisms
-^^^^^^^^^^^^^^^^^^^
-
-The RTB-M ``SerialLink`` class had no option to express branching. In RTB-P the
-equivalent class is ``DHRobot`` is similarly limited, but a new class ``ERobot``
-is more general and allows for branching (but not closed kinematic loops). The
-robot is described by a set of ``ELink`` objects, each of which points to its
-parent link. The ``ERobot`` has references to the root and leaf ``ELink`` objects. This
-structure closely mirrors the URDF representation, allowing for easy import of
-URDF models.
+History
+=======
 
 The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support
 Peter Corke’s PhD research and was first published in 1995-6 :cite:`Corke95`
@@ -875,7 +902,8 @@ version control tools including rcs, cvs, svn and git.
 The imperative for a Python version has long existed and the first port was
 started in 2008 but ultimately failed for lack of ongoing resources to complete
 a sufficient subset of functionality. Subsequent attempts have all met the same
-fate.
+fate.  The Toolbox for Python (RTB-P) :cite:`corke21a` is a complete rewrite in
+Python, designed to be more modular and extensible.
 
 The design goals (as of 2021) can be summarised as new functionality:
 
@@ -893,13 +921,13 @@ and improved software engineering:
 
 * Use Python 3 (3.10 and greater)
 * Utilize WebGL and Javascript graphics technologies
-* Documentation in ReStructured Text using Sphinx and delivered via GitHub pages.
+* Documentation in reStructuredText using Sphinx and delivered via GitHub pages.
 * Hosted on GitHub with continuous integration using GitHub actions
 * High code-quality metrics for test coverage and automated code review and security analysis
 * As few dependencies as possible, in particular being able to work with ROS but not be dependent on ROS. This sidesteps ROS constraints, at the time, on operating system and Python versions.
 * Modular approach to interfacing to different graphics libraries, simulators and physical robots.
-* Support Python notebooks which allows publication of static notebooks (for example via GitHub) and interactive online notebooks (JupyterLite, `MyBinder.org <MyBinder.org>`_).
-* Use of UniCode characters to make console output easier to read
+* Support Python notebooks which allows publication of static notebooks (for example via GitHub) and interactive online notebooks (JupyterLite, `MyBinder.org <https://mybinder.org>`_).
+* Use of Unicode characters to make console output easier to read
 
 while being **familiar yet new**. It is hoped that it will serve the
 community well for the next 30 years.
@@ -908,14 +936,6 @@ The Toolbox:
 
 - has enabled the development of  NEO, a high-performance reactive motion controller :cite:`neo` for robot arms and mobile manipulators;
 - integrates with :cite:`bdsim`, a complementary minimalist block-diagram simulation tool.
-
-Summary
-=======
-
-The Robotics Toolbox for Python runs on Mac, Windows and Linux
-using Python 3.10 or better. The code is free and open, and released under the
-MIT licence. It provides many of the essential tools necessary for modelling, simulation and  control of arm and mobile robots, which is essential for robotics
-education  and research. 
 
 References
 ==========

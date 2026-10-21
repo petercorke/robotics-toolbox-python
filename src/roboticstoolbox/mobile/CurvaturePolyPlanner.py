@@ -93,6 +93,10 @@ class CurvaturePolyStatus(NamedTuple):
 
 
 class CurvaturePolyPlanner(PlannerBase):
+    """
+    Continuous curvature path planner
+    """
+
     def __init__(self, curvature: float | None = None) -> None:
         r"""
         Continuous curvature path planner

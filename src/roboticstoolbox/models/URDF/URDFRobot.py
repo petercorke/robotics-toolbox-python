@@ -363,11 +363,9 @@ def _links_from_urdf(urdf: URDF) -> Any:
         elinks.append(elink)
         elinkdict[link.name] = elink
 
-        try:
-            # geometry has no setter, so this raises AttributeError and is ignored
-            elink.geometry = [v.geometry.ob for v in link.visuals]
-        except AttributeError:
-            pass
+        # a visual without a shape, or with a mesh that cannot be found, is
+        # rejected when the URDF is parsed, so every visual here has an `ob`
+        elink.geometry = [v.geometry.ob for v in link.visuals]
 
         if link.collisions:
             shapes = []

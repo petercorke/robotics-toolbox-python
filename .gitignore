@@ -190,3 +190,12 @@ CATKIN_IGNORE
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
+
+# JupyterLite and the Node Pyodide check
+docs/lite/pypi/
+docs/lite/files/
+docs/lite/wasm_check/node_modules/
+
+# files written by running docs/notebooks/branched-robot.ipynb
+docs/notebooks/*.dot
+docs/notebooks/*.svg

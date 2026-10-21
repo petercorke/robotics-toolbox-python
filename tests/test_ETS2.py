@@ -156,6 +156,93 @@ class TestETS2(unittest.TestCase):
         self.assertEqual(ets1.structure, "")
         self.assertEqual(ets2.structure, "RR")
 
+    def test_fixjoint_preserves_kinematics_and_limits(self):
+        ets = (
+            tx(0.2)
+            * R(qlim=[-1, 1])
+            * ty(0.3)
+            * tx(flip=True, qlim=[-2, 2])
+            * R(flip=True, qlim=[-3, 3])
+        )
+        q = np.array([0.3, -0.25, 0.12])
+        original = ets.eval(q)
+
+        for j in range(ets.n):
+            with self.subTest(j=j):
+                reduced = ets.fixjoint(j, q[j])
+                self.assertIsInstance(reduced, rtb.ETS2)
+                self.assertEqual(reduced.n, ets.n - 1)
+                self.assertEqual([e.jindex for e in reduced.joints()], [0, 1])
+                nt.assert_allclose(reduced.eval(np.delete(q, j)), original)
+
+                surviving = [e for k, e in enumerate(ets.joints()) if k != j]
+                for actual, expected in zip(reduced.joints(), surviving):
+                    self.assertEqual(actual.kind, expected.kind)
+                    self.assertEqual(actual.isflip, expected.isflip)
+                    nt.assert_array_equal(actual.qlim, expected.qlim)
+
+        nt.assert_allclose(ets.eval(q), original)
+        self.assertEqual([e.jindex for e in ets.joints()], [0, 1, 2])
+
+    def test_fixjoint_noncontiguous_jindices(self):
+        ets = R(jindex=3, qlim=[-1, 1]) * tx(0.2) * ty(
+            jindex=7, flip=True, qlim=[-2, 2]
+        )
+        q = np.zeros(8)
+        q[3] = 0.2
+        q[7] = -0.4
+        original = ets.eval(q)
+
+        reduced = ets.fixjoint(0, q[3])
+        self.assertEqual([e.jindex for e in reduced.joints()], [7])
+        self.assertTrue(reduced.joints()[0].isflip)
+        nt.assert_allclose(reduced.eval([q[7]]), original)
+        nt.assert_allclose(reduced.eval(q), original)
+
+        reduced = ets.fixjoint(1, q[7])
+        self.assertEqual([e.jindex for e in reduced.joints()], [3])
+        nt.assert_allclose(reduced.eval([q[3]]), original)
+        nt.assert_allclose(reduced.eval(q), original)
+        self.assertEqual([e.jindex for e in ets.joints()], [3, 7])
+
+    def test_fixjoint_rotation_in_degrees(self):
+        ets = R() * tx(qlim=[-1, 1]) * R(flip=True)
+        q = np.array([np.pi / 2, 0.25, -np.pi / 2])
+        expected = ets.eval(q)
+
+        for j in (0, 2):
+            with self.subTest(j=j):
+                reduced = ets.fixjoint(j, float(np.rad2deg(q[j])), unit="deg")
+                self.assertIsInstance(reduced, rtb.ETS2)
+                nt.assert_allclose(reduced.eval(np.delete(q, j)), expected)
+                nt.assert_allclose(
+                    reduced.eval(np.delete(q, j)),
+                    ets.fixjoint(j, q[j]).eval(np.delete(q, j)),
+                )
+
+        # A translation stays in metres and cannot accept angular degrees.
+        nt.assert_allclose(
+            ets.fixjoint(1, q[1]).eval(np.delete(q, 1)), expected
+        )
+        with self.assertRaisesRegex(ValueError, "only valid for rotational"):
+            ets.fixjoint(1, 90, unit="deg")
+        with self.assertRaisesRegex(ValueError, "unit must"):
+            ets.fixjoint(0, 90, unit="grad")
+        nt.assert_allclose(ets.eval(q), expected)
+
+    def test_fixjoint_single_joint_and_bad_indices(self):
+        ets = rtb.ETS2(R())
+        fixed = ets.fixjoint(0, 0.3)
+        self.assertEqual(fixed.n, 0)
+        nt.assert_allclose(fixed[0].A(), R(0.3).A())
+        self.assertEqual(ets.n, 1)
+
+        for index in (-1, 1, 0.5, "0"):
+            with self.subTest(index=index), self.assertRaises(ValueError):
+                ets.fixjoint(index, 0.3)
+        with self.assertRaises(ValueError):
+            rtb.ETS2().fixjoint(0, 0.3)
+
     def test_fkine(self):
         q = np.array([0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         rx = R(1.543)
@@ -470,6 +557,45 @@ class TestETS2(unittest.TestCase):
         a = rtb.ETS2(rtb.ET2.SE2(np.eye(3)))
         r = t_x + t_y + rz + a
         r.teach(q=q2, block=False)
+
+    def test_swap_and_merge(self):
+        e = ET2.tx(1) * ET2.ty(2)
+        before = e.fkine([]).A
+        e.swap(0)
+        nt.assert_array_almost_equal(e.fkine([]).A, before)
+
+        e = ET2.R() * ET2.tx(1)
+        with self.assertRaisesRegex(ValueError, "do not commute"):
+            e.swap(0)
+
+        # a constant merged into a joint is the offset of the joint
+        e = ET2.tx(1) * ET2.tx()
+        e.merge(0)
+        self.assertEqual(len(e), 1)
+        nt.assert_almost_equal(e[0].offset, 1)
+        with self.assertRaisesRegex(ValueError, "joint"):
+            (ET2.tx() * ET2.tx()).merge(0)
+
+    def test_motion_subspace(self):
+        nt.assert_array_equal(ET2.R().s, [0, 0, 1])
+        nt.assert_array_equal(ET2.tx().s, [1, 0, 0])
+        nt.assert_array_equal(ET2.ty().s, [0, 1, 0])
+
+    def test_fkine_no_argument(self):
+        # a sequence with no joints needs no q
+        e = ET2.R(0.3) * ET2.tx(0.75)
+        nt.assert_array_almost_equal(e.fkine().A, e.fkine([]).A)
+        nt.assert_array_almost_equal(e.eval(), e.eval([]))
+
+    def test_fkine_missing_or_short_q(self):
+        # a sequence with joints gives a ValueError that names the lengths,
+        # not a low-level index error
+        e = ET2.R() * ET2.tx(1) * ET2.R()
+        for call in (e.fkine, e.eval):
+            with self.assertRaisesRegex(ValueError, "q has length 0, expected 2"):
+                call()
+            with self.assertRaisesRegex(ValueError, "q has length 1, expected 2"):
+                call([0.1])
 
 
 if __name__ == "__main__":

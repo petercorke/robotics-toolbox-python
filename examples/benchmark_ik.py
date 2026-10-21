@@ -4,6 +4,9 @@ solvers; the pure-Python ikine_XX solvers backed by the C-accelerated ETS
 (fkine/jacobian evaluated in C++); and ikine_XX backed by the pure-Python
 ETS fallback (fkine/jacobian evaluated in Python too, as in a pure-Python
 wheel/Pyodide build).
+
+The ik_XX solvers need the compiled extension: they raise RuntimeError without it, and
+for a sequence with a SymPy parameter or a joint offset.  The ikine_XX solvers do not.
 """
 
 import time

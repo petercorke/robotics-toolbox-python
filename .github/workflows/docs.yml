@@ -28,10 +28,15 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Check notebook bootstrap cells and outputs are in sync
+        run: |
+          python docs/notebooks/sync_bootstrap.py --check
+          python docs/notebooks/clear_outputs.py --check
+
       - name: Install docs dependencies
         run: |
           pip install .[docs]
-          pip install sympy
+          pip install sympy python-flint  # for the analytic IK examples
           sudo apt-get install -y graphviz
 
       # See the "Cache robot_descriptions assets" step in ci.yml's test-core
@@ -68,6 +73,20 @@ jobs:
           pip install build
           RTB_PURE_WHEEL=1 python3 -m build --wheel --outdir docs/lite/pypi
 
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: docs/lite/wasm_check/package-lock.json
+
+      - name: Check the JupyterLite install path actually works (real Pyodide, real WASM)
+        # Runs the notebooks' bootstrap in Pyodide under Node against the wheel
+        # just built, so a dependency that cannot be installed in the browser
+        # fails here and not on the published site.
+        run: |
+          npm --prefix docs/lite/wasm_check ci
+          node docs/lite/wasm_check/check_pyodide_install.mjs docs/lite/pypi/*.whl
+
       - name: Sync notebooks into JupyterLite content
         # Copies *.ipynb plus any local asset directories (e.g.
         # docs/notebooks/figs/, referenced by relative path from markdown
@@ -76,10 +95,13 @@ jobs:
         # it benchmarks numeric IK solver performance and uses the
         # websocket-based Swift visualizer, neither of which is meaningful
         # or functional inside the Pyodide sandbox -- it stays Colab-only.
+        # ik-symbolic.ipynb is included: SymPy is one of Pyodide's own packages
+        # and the derivation takes 1 to 10 s without python-flint (timed in
+        # docs/lite/wasm_check, which checks it on every build).
         run: |
           mkdir -p docs/lite/files
           rsync -a --exclude '.ipynb_checkpoints' --exclude '__pycache__' \
-            --exclude 'Untitled*.ipynb' --exclude '*.py' --exclude 'Makefile' \
+            --exclude 'Untitled*.ipynb' --exclude '*.py' --exclude 'Makefile' --exclude 'README.md' \
             --exclude 'ik_benchmark.ipynb' \
             docs/notebooks/ docs/lite/files/
 
@@ -126,8 +148,12 @@ jobs:
         # version-pinning section for the full story before bumping this.
         # Once Safari (and Firefox out-of-flag) ship JSPI, revisit this pin
         # across RTB/MVTB/bdsim together.
+        # ipympl is installed here, in the build environment, so that the
+        # jupyter-matplotlib extension is bundled into the site: the notebooks
+        # use %matplotlib ipympl, and without the extension a figure is blank.
+        # (The notebooks install ipympl itself into the in-browser kernel.)
         run: |
-          pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server
+          pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server ipympl
           cd docs/lite && jupyter lite build --output-dir ../build/html/lite
 
       - name: Upload Pages artifact

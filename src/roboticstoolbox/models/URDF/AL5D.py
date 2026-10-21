@@ -24,7 +24,7 @@ class AL5D(URDFRobot):
     Defined joint configurations are:
 
     - qz, zero joint angle configuration, 'L' shaped configuration
-    - up, robot poiting upwards
+    - up, robot pointing upwards
 
     .. codeauthor:: Tassos Natsakis
     """

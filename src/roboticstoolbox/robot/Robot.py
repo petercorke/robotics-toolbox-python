@@ -20,6 +20,7 @@ from spatialgeometry import CollisionShape, Cylinder, Shape
 from spatialmath import (
     SE2,
     SE3,
+    SO3,
     SpatialAcceleration,
     SpatialForce,
     SpatialInertia,
@@ -51,13 +52,45 @@ _GRAVITY_DEFAULT: list[float] = [0, 0, -9.81]
 _KEYWORDS_DEFAULT: list[str] = []
 
 
+def _rotation_between_vectors(a: ArrayLike, b: ArrayLike) -> SE3:
+    """
+    Rotation that takes the direction of one vector to the direction of another
+
+    :param a: the vector to rotate, which need not be a unit vector
+    :param b: the vector to rotate it to, which need not be a unit vector
+    :returns: a pure rotation, as an SE3
+
+    The vectors can be parallel, in which case the result is the identity, or
+    antiparallel, in which case it is a half turn about an axis perpendicular to
+    both.  Computing the angle with ``arccos`` and the axis with a cross product
+    fails for both: the axis is the zero vector, which is rejected by recent
+    SpatialMath, and for a dot product of 1.0000000000000002 the angle is NaN.
+    """
+    return SE3(
+        SO3.RotatedVector(np.asarray(a, dtype=float), np.asarray(b, dtype=float))
+    )
+
+
 # ==================================================================================== #
 # ================= Robot Class ====================================================== #
 # ==================================================================================== #
 
 
 class Robot(BaseRobot[Link], RobotKinematicsMixin):
+    """
+    Robot manipulator defined by links or an elementary transform sequence
+
+    The robot is made from a list of links, an :class:`~roboticstoolbox.ets.ETS.ETS`
+    or another robot.  It can be a tree.  It is the superclass of the robots defined
+    by Denavit-Hartenberg parameters, :class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
+    and of those loaded from a URDF file.
+    """
+
     _color = True
+
+    # -------------------------------------------------------------------------- #
+    # Construction
+    # -------------------------------------------------------------------------- #
 
     def __init__(
         self,
@@ -168,68 +201,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 check_jindex=check_jindex,
             )
 
-    # --------------------------------------------------------------------- #
-    # --------- Swift Methods --------------------------------------------- #
-    # --------------------------------------------------------------------- #
-
-    def _to_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
-        ob = []
-
-        for link in self.links:
-            if robot_alpha > 0:
-                for gi in link.geometry:
-                    gi.opacity = robot_alpha
-                    ob.append(gi.to_dict())
-            if collision_alpha > 0:
-                for gi in link.collision:
-                    gi.opacity = collision_alpha
-                    ob.append(gi.to_dict())
-
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
-                if robot_alpha > 0:
-                    for gi in link.geometry:
-                        gi.opacity = robot_alpha
-                        ob.append(gi.to_dict())
-                if collision_alpha > 0:
-                    for gi in link.collision:
-                        gi.opacity = collision_alpha
-                        ob.append(gi.to_dict())
-
-        # for o in ob:
-        #     print(o)
-
-        return ob
-
-    def _fk_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
-        ob = []
-
-        # Do the robot
-        for link in self.links:
-            if robot_alpha > 0:
-                for gi in link.geometry:
-                    ob.append(gi.fk_dict())
-            if collision_alpha > 0:
-                for gi in link.collision:
-                    ob.append(gi.fk_dict())
-
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
-                if robot_alpha > 0:
-                    for gi in link.geometry:
-                        ob.append(gi.fk_dict())
-                if collision_alpha > 0:
-                    for gi in link.collision:
-                        ob.append(gi.fk_dict())
-
-        return ob
-
-    # --------------------------------------------------------------------- #
-    # --------- URDF Methods ---------------------------------------------- #
-    # --------------------------------------------------------------------- #
-
     # @staticmethod
     # def URDF_read(
     #     file_path, tld=None, xacro_tld=None
@@ -338,7 +309,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     @classmethod
     def URDF(cls, file: Any, gripper: Any = None, manufacturer: Any = None) -> Any:
-        """Deprecated. Use :class:`~roboticstoolbox.models.URDF.URDFRobot` as a
+        """Deprecated. Use ``URDFRobot`` as a
         base class, or call ``URDF_read()`` from
         ``roboticstoolbox.models.URDF.URDFRobot`` and construct ``Robot``
         directly."""
@@ -389,10 +360,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #             - ETS transforms are indicated by rounded boxes
 
     #         The edges are:
-    #             - an arrow if `jtype` is False or the joint is fixed
-    #             - an arrow with a round head if `jtype` is True and the joint is
+    #             - an arrow if ``jtype`` is False or the joint is fixed
+    #             - an arrow with a round head if ``jtype`` is True and the joint is
     #               revolute
-    #             - an arrow with a box head if `jtype` is True and the joint is
+    #             - an arrow with a box head if ``jtype`` is True and the joint is
     #               prismatic
 
     #         Edge labels or nodes in blue have a fixed transformation to the
@@ -466,10 +437,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #             - ETS transforms are indicated by rounded boxes
 
     #         The edges are:
-    #             - an arrow if `jtype` is False or the joint is fixed
-    #             - an arrow with a round head if `jtype` is True and the joint is
+    #             - an arrow if ``jtype`` is False or the joint is fixed
+    #             - an arrow with a round head if ``jtype`` is True and the joint is
     #               revolute
-    #             - an arrow with a box head if `jtype` is True and the joint is
+    #             - an arrow with a box head if ``jtype`` is True and the joint is
     #               prismatic
 
     #         Edge labels or nodes in blue have a fixed transformation to the
@@ -615,9 +586,67 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     #         if isinstance(filename, str):
     #             file.close()
 
-    # --------------------------------------------------------------------- #
-    # --------- Kinematic Methods ----------------------------------------- #
-    # --------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
+    # Display and export for Swift
+    # -------------------------------------------------------------------------- #
+
+    def _to_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
+        ob = []
+
+        for link in self.links:
+            if robot_alpha > 0:
+                for gi in link.geometry:
+                    gi.opacity = robot_alpha
+                    ob.append(gi.to_dict())
+            if collision_alpha > 0:
+                for gi in link.collision:
+                    gi.opacity = collision_alpha
+                    ob.append(gi.to_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                if robot_alpha > 0:
+                    for gi in link.geometry:
+                        gi.opacity = robot_alpha
+                        ob.append(gi.to_dict())
+                if collision_alpha > 0:
+                    for gi in link.collision:
+                        gi.opacity = collision_alpha
+                        ob.append(gi.to_dict())
+
+        # for o in ob:
+        #     print(o)
+
+        return ob
+
+    def _fk_dict(self, robot_alpha: float = 1.0, collision_alpha: float = 0.0) -> Any:
+        ob = []
+
+        # Do the robot
+        for link in self.links:
+            if robot_alpha > 0:
+                for gi in link.geometry:
+                    ob.append(gi.fk_dict())
+            if collision_alpha > 0:
+                for gi in link.collision:
+                    ob.append(gi.fk_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                if robot_alpha > 0:
+                    for gi in link.geometry:
+                        ob.append(gi.fk_dict())
+                if collision_alpha > 0:
+                    for gi in link.collision:
+                        ob.append(gi.fk_dict())
+
+        return ob
+
+    # -------------------------------------------------------------------------- #
+    # Information about the robot
+    # -------------------------------------------------------------------------- #
 
     @property
     def reach(self) -> float:
@@ -671,6 +700,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
             self._reach = max(d_all)
         return self._reach
+
+    # -------------------------------------------------------------------------- #
+    # Forward kinematics
+    # -------------------------------------------------------------------------- #
 
     def fkine_all(self, q: ArrayLike) -> SE3:
         """
@@ -802,6 +835,291 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                         poses.append(T_link * SE3(gi._T, check=False))
 
         return poses
+
+    # -------------------------------------------------------------------------- #
+    # Jacobians and manipulability
+    # -------------------------------------------------------------------------- #
+
+    @overload
+    def jacob0_dot(
+        self,
+        q: ArrayLike,
+        qd: ArrayLike,
+        J0: None = None,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
+    ) -> NDArray:  # pragma no cover
+        ...
+
+    @overload
+    def jacob0_dot(
+        self,
+        q: None,
+        qd: ArrayLike,
+        J0: NDArray = ...,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
+    ) -> NDArray:  # pragma no cover
+        ...
+
+    def jacob0_dot(
+        self,
+        q: Any,
+        qd: ArrayLike,
+        J0: Any = None,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
+    ) -> Any:
+        r"""
+        Time derivative of manipulator Jacobian in frame {0}
+
+        :param q: The joint configuration of the robot. Must be provided if
+            ``representation`` is specified; may be omitted if ``J0`` is
+            provided and ``representation`` is not.
+        :type q: ArrayLike(n), optional
+        :param qd: The joint velocity of the robot
+        :type qd: ArrayLike(n)
+        :param J0: Jacobian in {0} frame. Ignored if ``representation`` is
+            specified; may be provided to save computation if
+            ``representation`` is not specified.
+        :type J0: ndarray(6,n), optional
+        :param representation: Angular representation for analytical Jacobian
+            ('rpy/xyz', 'rpy/zyx', 'eul', or 'exp')
+        :type representation: str, optional
+        :returns: The time derivative of the manipulator Jacobian
+        :rtype: ndarray(6,n)
+
+        ``robot.jacob0_dot(q, qd)`` computes the rate of change of the
+        manipulator Jacobian elements
+
+        .. math::
+
+            \dmat{J} = \frac{d \mat{J}}{d \vec{q}} \frac{d \vec{q}}{dt}
+
+        where the first term is the rank-3 Hessian.
+
+        If ``J0`` is already calculated for the joint
+        coordinates ``q`` it can be passed in to save computation time.
+
+        For the geometric Jacobian (``representation=None``), it is computed
+        analytically as the mode-3 product of the Hessian tensor and the joint
+        velocity vector:
+
+        .. math::
+
+            \dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}
+
+        The derivative of an analytical Jacobian can be obtained by setting
+        ``representation`` as
+
+        .. list-table::
+           :header-rows: 1
+
+           * - ``representation``
+             - Rotational representation
+           * - ``'rpy/xyz'``
+             - RPY angular rates in XYZ order
+           * - ``'rpy/zyx'``
+             - RPY angular rates in ZYX order
+           * - ``'eul'``
+             - Euler angular rates in ZYZ order
+           * - ``'exp'``
+             - exponential coordinate rates
+
+        When ``representation`` is specified, the Hessian of the analytical
+        Jacobian is evaluated numerically using finite differences via
+        :func:`spatialmath.base.numhess` and contracted with ``qd``. This is
+        an approximate, numerical calculation and is slower than the closed-form
+        geometric Jacobian derivative.
+
+        .. list-table:: Parameter interaction between ``representation``, ``q``, and ``J0``
+           :header-rows: 1
+
+           * - ``representation``
+             - ``q``
+             - ``J0``
+             - Behavior
+           * - Omitted / ``None``
+             - Provided
+             - Omitted / ``None``
+             - Geometric Jacobian: computes :math:`\mat{J}_0` and Hessian :math:`\mathcal{H}_0` from ``q``, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
+           * - Omitted / ``None``
+             - Omitted (or ``None``)
+             - Provided
+             - Geometric Jacobian: reuses precomputed ``J0`` to compute Hessian :math:`\mathcal{H}_0`, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
+           * - Specified (e.g. ``'rpy/xyz'``)
+             - Provided
+             - Ignored
+             - Analytical Jacobian: evaluates numerical Hessian via :func:`spatialmath.base.numhess` at ``q`` and contracts with ``qd``.
+           * - Specified (e.g. ``'rpy/xyz'``)
+             - Omitted (or ``None``)
+             - Any
+             - Raises :class:`ValueError` (``q`` is required to evaluate the analytical Jacobian).
+
+        .. rubric:: References
+
+        - Kinematic Derivatives using the Elementary Transform
+          Sequence, J. Haviland and P. Corke
+
+        .. seealso:: :func:`jacob0`, ``hessian0``
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> q = robot.qn
+            >>> qd = [0.1, -0.2, 0.3, -0.1, 0.2, -0.3]
+            >>> j0_dot = robot.jacob0_dot(q, qd)
+            >>> j0_dot.shape
+            (6, 6)
+            >>> # If J0 is already computed, it can be passed in directly:
+            >>> J0 = robot.jacob0(q)
+            >>> j0_dot_fast = robot.jacob0_dot(None, qd, J0=J0)
+            >>> import numpy as np
+            >>> np.allclose(j0_dot, j0_dot_fast)
+            True
+
+        """
+
+        qd = np.array(qd)
+
+        if representation is None:
+            if J0 is None:
+                J0 = self.jacob0(q)
+            H = self.hessian0(q, J0=J0)
+
+        else:
+            if q is None:
+                raise ValueError("q must be provided when representation is specified")
+
+            # Numerical Hessian of the analytical Jacobian
+            H = smb.numhess(
+                lambda q: self.jacob0_analytical(q, representation=representation), q
+            )
+
+        return np.tensordot(H, qd, (0, 0))
+
+    @overload
+    def jacobm(
+        self,
+        q: ArrayLike = ...,
+        J: None = None,
+        H: None = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
+    ) -> NDArray:  # pragma no cover
+        ...
+
+    @overload
+    def jacobm(
+        self,
+        q: None = None,
+        J: NDArray = ...,
+        H: NDArray = ...,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
+    ) -> NDArray:  # pragma no cover
+        ...
+
+    def jacobm(
+        self,
+        q: Any = None,
+        J: Any = None,
+        H: Any = None,
+        end: str | Link | Gripper | None = None,
+        start: str | Link | Gripper | None = None,
+        axes: L["all", "trans", "rot"] | list[bool] = "all",
+    ) -> NDArray:
+        r"""
+        The manipulability Jacobian
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :param J: The manipulator Jacobian in any frame
+        :param H: The manipulator Hessian in any frame
+        :param end: the final link or Gripper which the Hessian represents
+        :param start: the first link which the Hessian represents
+        :returns: The manipulability Jacobian
+
+        This measure relates the rate of change of the manipulability to the
+        joint velocities of the robot. One of J or q is required. Supply J
+        and H if already calculated to save computation time.
+
+        Yoshikawa's manipulability measure
+
+        .. math::
+
+            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
+
+        This method returns its Jacobian with respect to configuration
+
+        .. math::
+
+            \frac{\partial m(\vec{q})}{\partial \vec{q}}
+
+        .. rubric:: References
+
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        """
+
+        end, start, _ = self._get_limit_links(end, start)
+
+        #
+        if not isinstance(axes, list):
+            if axes.startswith("all"):
+                axes = [True, True, True, True, True, True]
+            elif axes.startswith("trans"):
+                axes = [True, True, True, False, False, False]
+            elif axes.startswith("rot"):
+                axes = [False, False, False, True, True, True]
+            else:
+                raise ValueError("axes must be all, trans or rot")
+
+        if J is None:
+            if q is None:
+                q = np.copy(self.q)
+            else:
+                q = getvector(q, self.n)
+
+            J = self.jacob0(q, start=start, end=end)
+        else:
+            verifymatrix(J, (6, self.n))
+
+        n = J.shape[1]
+
+        if H is None:
+            H = self.hessian0(J0=J, start=start, end=end)
+        # else:
+        #     verifymatrix(H, (6, self.n, self.n))
+        elif not isinstance(H, np.ndarray):
+            raise TypeError("Hessian must be numpy array of shape 6xnxn")
+        elif H.shape != (6, self.n, self.n):
+            raise ValueError("Hessian must be numpy array of shape 6xnxn")
+
+        manipulability = self.manipulability(
+            q,
+            J=J,
+            start=start,
+            end=end,
+            axes=axes,
+        )
+
+        J = J[axes, :]
+        H = H[:, axes, :]
+
+        b = np.linalg.inv(J @ np.transpose(J))
+        Jm = np.zeros((n, 1))
+
+        for i in range(n):
+            c = J @ np.transpose(H[i, :, :])
+            Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
+
+        return Jm
 
     @overload
     def manipulability(
@@ -965,7 +1283,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             d = np.where(axes_list)[0]
             Mx = Mx[d]
             Mx = Mx[:, d.tolist()]
-            e, _ = np.linalg.eig(Mx)
+            # Mx = J^+T M J^+ is symmetric (and positive semi-definite) in theory,
+            # but floating point rounding leaves it symmetric to only ~1e-16.
+            # np.linalg.eig makes no use of the symmetry, and for a matrix that is
+            # not exactly symmetric it can return a complex array (tiny imaginary
+            # parts) which then raises a ComplexWarning when the ratio is stored
+            # as a float.  Symmetrising and using eigvalsh guarantees real
+            # eigenvalues, and is also faster and more accurate for this case.
+            e = np.linalg.eigvalsh((Mx + Mx.T) / 2)
             return np.min(e) / np.max(e)
 
         # choose the handler function
@@ -1001,6 +1326,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             return w[0]
         else:
             return w
+
+    # -------------------------------------------------------------------------- #
+    # Trajectories
+    # -------------------------------------------------------------------------- #
 
     def jtraj(
         self,
@@ -1056,290 +1385,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return rtb.jtraj(q0, qf, t, qd0=qd0, qd1=qd1)
 
-    @overload
-    def jacob0_dot(
-        self,
-        q: ArrayLike,
-        qd: ArrayLike,
-        J0: None = None,
-        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
-    ) -> NDArray:  # pragma no cover
-        ...
-
-    @overload
-    def jacob0_dot(
-        self,
-        q: None,
-        qd: ArrayLike,
-        J0: NDArray = ...,
-        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
-    ) -> NDArray:  # pragma no cover
-        ...
-
-    def jacob0_dot(
-        self,
-        q: Any,
-        qd: ArrayLike,
-        J0: Any = None,
-        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] | None = None,
-    ) -> Any:
-        r"""
-        Time derivative of manipulator Jacobian in frame {0}
-
-        :param q: The joint configuration of the robot. Must be provided if
-            ``representation`` is specified; may be omitted if ``J0`` is
-            provided and ``representation`` is not.
-        :type q: ArrayLike(n), optional
-        :param qd: The joint velocity of the robot
-        :type qd: ArrayLike(n)
-        :param J0: Jacobian in {0} frame. Ignored if ``representation`` is
-            specified; may be provided to save computation if
-            ``representation`` is not specified.
-        :type J0: ndarray(6,n), optional
-        :param representation: Angular representation for analytical Jacobian
-            ('rpy/xyz', 'rpy/zyx', 'eul', or 'exp')
-        :type representation: str, optional
-        :returns: The time derivative of the manipulator Jacobian
-        :rtype: ndarray(6,n)
-
-        ``robot.jacob0_dot(q, qd)`` computes the rate of change of the
-        manipulator Jacobian elements
-
-        .. math::
-
-            \dmat{J} = \frac{d \mat{J}}{d \vec{q}} \frac{d \vec{q}}{dt}
-
-        where the first term is the rank-3 Hessian.
-
-        If ``J0`` is already calculated for the joint
-        coordinates ``q`` it can be passed in to save computation time.
-
-        For the geometric Jacobian (``representation=None``), it is computed
-        analytically as the mode-3 product of the Hessian tensor and the joint
-        velocity vector:
-
-        .. math::
-
-            \dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}
-
-        The derivative of an analytical Jacobian can be obtained by setting
-        ``representation`` as
-
-        .. list-table::
-           :header-rows: 1
-
-           * - ``representation``
-             - Rotational representation
-           * - ``'rpy/xyz'``
-             - RPY angular rates in XYZ order
-           * - ``'rpy/zyx'``
-             - RPY angular rates in ZYX order
-           * - ``'eul'``
-             - Euler angular rates in ZYZ order
-           * - ``'exp'``
-             - exponential coordinate rates
-
-        When ``representation`` is specified, the Hessian of the analytical
-        Jacobian is evaluated numerically using finite differences via
-        :func:`spatialmath.base.numhess` and contracted with ``qd``. This is
-        an approximate, numerical calculation and is slower than the closed-form
-        geometric Jacobian derivative.
-
-        .. list-table:: Parameter interaction between ``representation``, ``q``, and ``J0``
-           :header-rows: 1
-
-           * - ``representation``
-             - ``q``
-             - ``J0``
-             - Behavior
-           * - Omitted / ``None``
-             - Provided
-             - Omitted / ``None``
-             - Geometric Jacobian: computes :math:`\mat{J}_0` and Hessian :math:`\mathcal{H}_0` from ``q``, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
-           * - Omitted / ``None``
-             - Omitted (or ``None``)
-             - Provided
-             - Geometric Jacobian: reuses precomputed ``J0`` to compute Hessian :math:`\mathcal{H}_0`, then :math:`\dmat{J}_0 = \mathcal{H}_0 \times_3 \dot{\vec{q}}`.
-           * - Specified (e.g. ``'rpy/xyz'``)
-             - Provided
-             - Ignored
-             - Analytical Jacobian: evaluates numerical Hessian via :func:`spatialmath.base.numhess` at ``q`` and contracts with ``qd``.
-           * - Specified (e.g. ``'rpy/xyz'``)
-             - Omitted (or ``None``)
-             - Any
-             - Raises :class:`ValueError` (``q`` is required to evaluate the analytical Jacobian).
-
-        .. rubric:: References
-
-        - Kinematic Derivatives using the Elementary Transform
-          Sequence, J. Haviland and P. Corke
-
-        .. seealso:: :func:`jacob0`, :func:`hessian0`
-
-        .. rubric:: Examples
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> q = robot.qn
-            >>> qd = [0.1, -0.2, 0.3, -0.1, 0.2, -0.3]
-            >>> j0_dot = robot.jacob0_dot(q, qd)
-            >>> j0_dot.shape
-            (6, 6)
-            >>> # If J0 is already computed, it can be passed in directly:
-            >>> J0 = robot.jacob0(q)
-            >>> j0_dot_fast = robot.jacob0_dot(None, qd, J0=J0)
-            >>> import numpy as np
-            >>> np.allclose(j0_dot, j0_dot_fast)
-            True
-
-        """
-
-        qd = np.array(qd)
-
-        if representation is None:
-            if J0 is None:
-                J0 = self.jacob0(q)
-            H = self.hessian0(q, J0=J0)
-
-        else:
-            if q is None:
-                raise ValueError("q must be provided when representation is specified")
-
-            # Numerical Hessian of the analytical Jacobian
-            H = smb.numhess(
-                lambda q: self.jacob0_analytical(q, representation=representation), q
-            )
-
-        return np.tensordot(H, qd, (0, 0))
-
-    @overload
-    def jacobm(
-        self,
-        q: ArrayLike = ...,
-        J: None = None,
-        H: None = None,
-        end: str | Link | Gripper | None = None,
-        start: str | Link | Gripper | None = None,
-        axes: L["all", "trans", "rot"] | list[bool] = "all",
-    ) -> NDArray:  # pragma no cover
-        ...
-
-    @overload
-    def jacobm(
-        self,
-        q: None = None,
-        J: NDArray = ...,
-        H: NDArray = ...,
-        end: str | Link | Gripper | None = None,
-        start: str | Link | Gripper | None = None,
-        axes: L["all", "trans", "rot"] | list[bool] = "all",
-    ) -> NDArray:  # pragma no cover
-        ...
-
-    def jacobm(
-        self,
-        q: Any = None,
-        J: Any = None,
-        H: Any = None,
-        end: str | Link | Gripper | None = None,
-        start: str | Link | Gripper | None = None,
-        axes: L["all", "trans", "rot"] | list[bool] = "all",
-    ) -> NDArray:
-        r"""
-        The manipulability Jacobian
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :param J: The manipulator Jacobian in any frame
-        :param H: The manipulator Hessian in any frame
-        :param end: the final link or Gripper which the Hessian represents
-        :param start: the first link which the Hessian represents
-        :returns: The manipulability Jacobian
-
-        This measure relates the rate of change of the manipulability to the
-        joint velocities of the robot. One of J or q is required. Supply J
-        and H if already calculated to save computation time.
-
-        Yoshikawa's manipulability measure
-
-        .. math::
-
-            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
-
-        This method returns its Jacobian with respect to configuration
-
-        .. math::
-
-            \frac{\partial m(\vec{q})}{\partial \vec{q}}
-
-        .. rubric:: References
-
-        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
-          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
-        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
-          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
-
-        """
-
-        end, start, _ = self._get_limit_links(end, start)
-
-        #
-        if not isinstance(axes, list):
-            if axes.startswith("all"):
-                axes = [True, True, True, True, True, True]
-            elif axes.startswith("trans"):
-                axes = [True, True, True, False, False, False]
-            elif axes.startswith("rot"):
-                axes = [False, False, False, True, True, True]
-            else:
-                raise ValueError("axes must be all, trans or rot")
-
-        if J is None:
-            if q is None:
-                q = np.copy(self.q)
-            else:
-                q = getvector(q, self.n)
-
-            J = self.jacob0(q, start=start, end=end)
-        else:
-            verifymatrix(J, (6, self.n))
-
-        n = J.shape[1]
-
-        if H is None:
-            H = self.hessian0(J0=J, start=start, end=end)
-        # else:
-        #     verifymatrix(H, (6, self.n, self.n))
-        elif not isinstance(H, np.ndarray):
-            raise TypeError("Hessian must be numpy array of shape 6xnxn")
-        elif H.shape != (6, self.n, self.n):
-            raise ValueError("Hessian must be numpy array of shape 6xnxn")
-
-        manipulability = self.manipulability(
-            q,
-            J=J,
-            start=start,
-            end=end,
-            axes=axes,
-        )
-
-        J = J[axes, :]
-        H = H[:, axes, :]
-
-        b = np.linalg.inv(J @ np.transpose(J))
-        Jm = np.zeros((n, 1))
-
-        for i in range(n):
-            c = J @ np.transpose(H[i, :, :])
-            Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
-
-        return Jm
-
-    # --------------------------------------------------------------------- #
-    # --------- Collision Methods ----------------------------------------- #
-    # --------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
+    # Collision checking
+    # -------------------------------------------------------------------------- #
 
     def closest_point(
         self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
@@ -1350,7 +1398,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param shape: The shape to compare distance to
         :param inf_dist: The minimum distance within which to consider the shape
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: tuple of (distance, point on robot, point on shape)
 
         ``closest_point(shape, inf_dist)`` returns the minimum euclidean
@@ -1389,7 +1437,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: True if shapes have collided
 
         ``iscollided(shape)`` checks if this robot and shape have collided
@@ -1415,11 +1463,11 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def collided(self, q: Any, shape: Shape, skip: bool = False) -> bool:
         """
-        Check if the robot is in collision with a shape
+        Check if the robot is in collision with a shape (deprecated)
 
         :param shape: The shape to compare distance to
         :param skip: Skip setting all shape transforms based on q, use this
-            option if using this method in conjuction with Swift to save time
+            option if using this method in conjunction with Swift to save time
         :returns: True if shapes have collided
 
         ``collided(shape)`` checks if this robot and shape have collided
@@ -1429,9 +1477,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         warn("method collided is deprecated, use iscollided instead", FutureWarning)
         return self.iscollided(q, shape, skip=skip)
 
-    # --------------------------------------------------------------------- #
-    # --------- Constraint Methods ---------------------------------------- #
-    # --------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
+    # Motion constraints for QP control
+    # -------------------------------------------------------------------------- #
 
     def joint_velocity_damper(
         self,
@@ -1452,7 +1500,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param gain: The gain for the velocity damper
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into joint limits. Requires
         the joint limits of the robot to be specified. See examples/mmc.py
         for use case.
@@ -1502,7 +1550,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param collision_list: A list of shapes to consider for collision
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into a collision. Requires
         See examples/neo.py for use case.
 
@@ -1613,7 +1661,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :param collision_list: A list of shapes to consider for collision
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
-        Formulates an inequality contraint which, when optimised for will
+        Formulates an inequality constraint which, when optimised for will
         make it impossible for the robot to run into a line of sight.
         See examples/fetch_vision.py for use case.
 
@@ -1628,15 +1676,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = None
         bin = None
 
-        def rotation_between_vectors(a: Any, b: Any) -> Any:
-            a = a / np.linalg.norm(a)
-            b = b / np.linalg.norm(b)
-
-            angle = np.arccos(np.dot(a, b))
-            axis = np.cross(a, b)
-
-            return SE3.AngleAxis(angle, axis)
-
         if isinstance(camera, rtb.BaseRobot):
             wTcp = cast(NDArray, camera.fkine(camera.q).A)[:3, 3]
         elif isinstance(camera, SE3):
@@ -1648,7 +1687,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         # Create line of sight object
         los_mid = SE3((wTcp + wTtp) / 2)
-        los_orientation = rotation_between_vectors(
+        los_orientation = _rotation_between_vectors(
             np.array([0.0, 0.0, 1.0]),
             wTcp - wTtp,
         )
@@ -1731,9 +1770,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         return Ain, bin
 
-    # --------------------------------------------------------------------- #
-    # --------- Dynamics Methods ------------------------------------------ #
-    # --------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
+    # Dynamics
+    # -------------------------------------------------------------------------- #
 
     def rne(
         self,
@@ -1798,6 +1837,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             guard if the Robot/Link class hierarchy is ever redesigned --
             see https://github.com/petercorke/robotics-toolbox-python/issues/571.
         """
+        self._require_dynamics()
 
         # Checked via the `mdh` attribute rather than isinstance/class name:
         # joint-last compliance tracks the DH convention actually in use
@@ -2115,7 +2155,7 @@ class Robot2(BaseRobot[Link2]):
     @property
     def base(self) -> SE2:
         """
-        Get/set robot base transform (Robot superclass)
+        Get/set robot base transform
 
         :returns: robot tool transform
 

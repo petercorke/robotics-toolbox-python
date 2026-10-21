@@ -3,6 +3,9 @@
 """
 
 # import numpy.testing as nt
+import contextlib
+import importlib.util
+import io
 import roboticstoolbox as rtb
 import numpy as np
 import unittest
@@ -1137,6 +1140,278 @@ class TestIK(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             ets.ik_LM(np.eye(4))
+
+
+class TestIKInitialCoordinates(unittest.TestCase):
+    """The length of q0 is checked, by the C++ and by the Python solvers."""
+
+    def setUp(self):
+        self.robot = rtb.models.Panda()
+        self.ets = self.robot.ets()
+        self.Tep = self.ets.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+    def test_cpp_wrong_length(self):
+        for method in (self.ets.ik_LM, self.ets.ik_NR, self.ets.ik_GN):
+            for q0 in (np.zeros(3), np.zeros(10)):
+                with self.assertRaisesRegex(ValueError, "q0 has length"):
+                    method(self.Tep, q0=q0)
+            with self.assertRaisesRegex(ValueError, "q0 must be a vector"):
+                method(self.Tep, q0=np.zeros((2, 7)))
+
+    def test_cpp_robot_wrapper(self):
+        with self.assertRaisesRegex(ValueError, "q0 has length 3"):
+            self.robot.ik_LM(self.Tep, q0=np.zeros(3))
+
+    def test_python_wrong_length(self):
+        for method in (self.ets.ikine_LM, self.ets.ikine_NR, self.ets.ikine_GN):
+            with self.assertRaisesRegex(ValueError, "q0 has length 3"):
+                method(self.Tep, q0=np.zeros(3))
+            with self.assertRaisesRegex(ValueError, "q0 has 3 columns"):
+                method(self.Tep, q0=np.zeros((2, 3)))
+        with self.assertRaisesRegex(ValueError, "rows, but slimit is"):
+            self.ets.ikine_LM(self.Tep, q0=np.zeros((5, 7)), slimit=2)
+
+    def test_mask_wrong_length(self):
+        for method in (
+            self.ets.ik_LM,
+            self.ets.ik_NR,
+            self.ets.ik_GN,
+            self.ets.ikine_LM,
+            self.ets.ikine_NR,
+            self.ets.ikine_GN,
+        ):
+            with self.assertRaisesRegex(ValueError, "mask must be a vector of 6"):
+                method(self.Tep, mask=np.ones(3))
+
+    def test_right_length_still_works(self):
+        q = np.array([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        for sol in (
+            self.ets.ik_LM(self.Tep, q0=q),
+            self.ets.ikine_LM(self.Tep, q0=q),
+            self.ets.ikine_LM(self.Tep, q0=np.array([q, q])),
+            self.ets.ikine_LM(self.Tep),
+            self.ets.ik_LM(self.Tep),
+        ):
+            self.assertTrue(sol.success)
+
+
+class TestIKVerbose(unittest.TestCase):
+    """verbose=True prints the progress of each search, from the Python solvers."""
+
+    def setUp(self):
+        self.puma = rtb.models.DH.Puma560()
+        self.panda = rtb.models.Panda()
+
+    def test_silent_by_default(self):
+        Tep = self.panda.fkine(self.panda.qr)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.panda.ikine_LM(Tep, q0=self.panda.qr)
+        self.assertEqual(out.getvalue(), "")
+
+    def test_each_solver(self):
+        # an exact q0 converges at iteration 0, whichever solver
+        Tep = self.panda.fkine(self.panda.qr)
+        for method in ("ikine_LM", "ikine_NR", "ikine_GN"):
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                sol = getattr(self.panda, method)(Tep, q0=self.panda.qr, verbose=True)
+            self.assertTrue(sol.success, msg=method)
+            text = out.getvalue()
+            self.assertIn("Search 1", text, msg=method)
+            self.assertRegex(text, r"Iteration +0 ", msg=method)
+            self.assertIn("Converged", text, msg=method)
+            self.assertIn("accepted", text, msg=method)
+
+    @skip_no_qp
+    def test_qp(self):
+        Tep = self.panda.fkine(self.panda.qr)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.panda.ikine_QP(Tep, q0=self.panda.qr, verbose=True)
+        self.assertIn("Search 1", out.getvalue())
+
+    def test_rejected_by_joint_limits(self):
+        # this solution of the Puma560 has q[4] outside its limits for every
+        # equivalent angle (q[2] = 3.106 is -3.177, inside [-225, 45] degrees), so
+        # the search is rejected and another is made.  None of the 22 distinct
+        # solutions of this pose is inside the limits of the Puma560 (each is
+        # outside at least one), so the solver fails after its searches
+        q = np.array([0.2528, 0.7041, 3.106, 0.0, 2.473, -0.2528])
+        Tep = self.puma.fkine(q)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            sol = self.puma.ikine_LM(
+                Tep, q0=self.puma.qn, verbose=True, seed=0, slimit=3
+            )
+        text = out.getvalue()
+        self.assertFalse(sol.success)
+        self.assertIn("rejected", text)
+        self.assertIn("q[4]=-3.81 outside [-1.745, 1.745]", text)
+        self.assertNotIn("q[2]=", text)
+        self.assertIn("Search 2", text)
+
+    def test_trajectory(self):
+        Ts = self.panda.fkine(np.array([self.panda.qr, self.panda.qr]))
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.panda.ikine_LM(Ts, q0=self.panda.qr, verbose=True)
+        self.assertIn("Pose 1 of 2", out.getvalue())
+        self.assertIn("Pose 2 of 2", out.getvalue())
+
+    def test_not_for_the_cpp_solvers(self):
+        Tep = self.panda.fkine(self.panda.qr)
+        with self.assertRaises(TypeError):
+            self.panda.ik_LM(Tep, verbose=True)
+
+
+def _solver_classes():
+    """The four Python solvers, the QP solver only if qpsolvers is installed"""
+    classes = [rtb.IK_LM, rtb.IK_NR, rtb.IK_GN]
+    if importlib.util.find_spec("qpsolvers") is not None:
+        classes.append(rtb.IK_QP)
+    return classes
+
+
+class TestIKVerboseAllSolvers(unittest.TestCase):
+    """
+    verbose=True, for each of the solver classes, and the methods that wrap them
+
+    The cases are deterministic: q0 is either an exact solution, which converges
+    at iteration 0, or a solution that violates the joint limits, or the number
+    of iterations allowed is zero.
+    """
+
+    # a solution of the Puma560 with q[4] outside its limits, for every equivalent
+    # angle
+    Q_BAD = np.array([0.2528, 0.7041, 3.106, 0.0, 2.473, -0.2528])
+
+    # a configuration inside the limits
+    Q_OK = np.array([0.2, 0.9, 0.1, 0.3, -0.5, 0.4])
+
+    def setUp(self):
+        self.puma = rtb.models.DH.Puma560()
+        self.ets = self.puma.ets()
+        self.T_good = self.puma.fkine(self.Q_OK)
+        self.T_bad = self.puma.fkine(self.Q_BAD)
+
+    @staticmethod
+    def capture(call):
+        """Call ``call()``, return what it printed and its result"""
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            result = call()
+        return out.getvalue(), result
+
+    def test_attribute(self):
+        for cls in _solver_classes():
+            self.assertFalse(cls().verbose, msg=cls.__name__)
+            self.assertTrue(cls(verbose=True).verbose, msg=cls.__name__)
+
+    def test_silent_by_default(self):
+        for cls in _solver_classes():
+            text, sol = self.capture(
+                lambda: cls().solve(self.ets, self.T_good, self.Q_OK)
+            )
+            self.assertEqual(text, "", msg=cls.__name__)
+            self.assertTrue(sol.success, msg=cls.__name__)
+
+    def test_accepted(self):
+        for cls in _solver_classes():
+            text, sol = self.capture(
+                lambda: cls(verbose=True).solve(self.ets, self.T_good, self.Q_OK)
+            )
+            self.assertTrue(sol.success, msg=cls.__name__)
+            lines = text.splitlines()
+            self.assertEqual(lines[0], "Search 1", msg=cls.__name__)
+            self.assertRegex(lines[1], r"^  Iteration +0  E=", msg=cls.__name__)
+            self.assertRegex(lines[2], r"^  Converged +E=.*accepted$", msg=cls.__name__)
+            self.assertEqual(len(lines), 3, msg=cls.__name__)
+
+    def test_rejected_names_the_joints(self):
+        for cls in _solver_classes():
+            text, sol = self.capture(
+                lambda: cls(verbose=True, slimit=1).solve(
+                    self.ets, self.T_bad, self.Q_BAD
+                )
+            )
+            self.assertFalse(sol.success, msg=cls.__name__)
+            self.assertIn("rejected", text, msg=cls.__name__)
+            # only q[4] is outside its limits: q[2] = 3.106 is -3.177 when wrapped,
+            # which is inside [-225, 45] degrees
+            self.assertIn("q[4]=-3.81 outside [-1.745, 1.745]", text, msg=cls.__name__)
+            self.assertNotIn("q[2]", text, msg=cls.__name__)
+            self.assertNotIn("q[0]", text, msg=cls.__name__)
+
+    def test_joint_limits_off_accepts(self):
+        for cls in _solver_classes():
+            text, sol = self.capture(
+                lambda: cls(verbose=True, slimit=1, joint_limits=False).solve(
+                    self.ets, self.T_bad, self.Q_BAD
+                )
+            )
+            self.assertTrue(sol.success, msg=cls.__name__)
+            self.assertIn("accepted", text, msg=cls.__name__)
+            self.assertNotIn("rejected", text, msg=cls.__name__)
+
+    def test_iteration_limit(self):
+        for cls in _solver_classes():
+            text, sol = self.capture(
+                lambda: cls(verbose=True, ilimit=0, slimit=2).solve(
+                    self.ets, self.T_good, self.Q_BAD
+                )
+            )
+            self.assertFalse(sol.success, msg=cls.__name__)
+            self.assertEqual(text.count("Abandoned"), 2, msg=cls.__name__)
+            self.assertIn("iteration limit reached", text, msg=cls.__name__)
+            self.assertIn("Search 2", text, msg=cls.__name__)
+
+    def test_columns_line_up(self):
+        # the error starts in the same column on every line that has one
+        for cls in _solver_classes():
+            text, _ = self.capture(
+                lambda: cls(verbose=True, slimit=1).solve(
+                    self.ets, self.T_bad, self.Q_BAD
+                )
+            )
+            columns = {line.index("E=") for line in text.splitlines() if "E=" in line}
+            self.assertEqual(len(columns), 1, msg=f"{cls.__name__}: {columns}")
+
+    def test_trajectory(self):
+        Ts = self.puma.fkine(np.array([self.Q_OK, self.Q_OK, self.Q_OK]))
+        for cls in _solver_classes():
+            text, sol = self.capture(
+                lambda: cls(verbose=True).solve(self.ets, Ts, self.Q_OK)
+            )
+            self.assertTrue(sol.success, msg=cls.__name__)
+            for k in (1, 2, 3):
+                self.assertIn(f"Pose {k} of 3", text, msg=cls.__name__)
+            self.assertEqual(text.count("Search 1"), 3, msg=cls.__name__)
+
+    def test_methods_pass_verbose_through(self):
+        # ETS, DHRobot and URDF robot methods give the keyword to the solver
+        panda = rtb.models.Panda()
+        cases = [
+            ("ETS", self.ets, self.T_good, self.Q_OK),
+            ("DHRobot", self.puma, self.T_good, self.Q_OK),
+            ("Robot", panda, panda.fkine(panda.qr), panda.qr),
+        ]
+        names = ["ikine_LM", "ikine_NR", "ikine_GN"]
+        if importlib.util.find_spec("qpsolvers") is not None:
+            names.append("ikine_QP")
+        for label, obj, T, q0 in cases:
+            for name in names:
+                if name == "ikine_NR" and label == "DHRobot":
+                    continue  # DHRobot has only ikine_LM of its own
+                text, sol = self.capture(
+                    lambda: getattr(obj, name)(T, q0=q0, verbose=True)
+                )
+                self.assertIn("Search 1", text, msg=f"{label}.{name}")
+                self.assertIn("accepted", text, msg=f"{label}.{name}")
+                text, _ = self.capture(lambda: getattr(obj, name)(T, q0=q0))
+                self.assertEqual(text, "", msg=f"{label}.{name}")
+
+    def test_cpp_solvers_do_not_take_it(self):
+        panda = rtb.models.Panda()
+        Tep = panda.fkine(panda.qr)
+        for name in ("ik_LM", "ik_NR", "ik_GN"):
+            for obj in (panda, panda.ets()):
+                with self.assertRaises(TypeError, msg=name):
+                    getattr(obj, name)(Tep, verbose=True)
 
 
 if __name__ == "__main__":

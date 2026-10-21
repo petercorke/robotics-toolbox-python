@@ -1,3 +1,5 @@
+# Compare the fast, C++ ik_XX solvers.  They need the compiled extension: they raise
+# RuntimeError without it, and for a sequence with a SymPy parameter or a joint offset.
 import numpy as np
 import roboticstoolbox as rtb
 from ansitable import ANSITable

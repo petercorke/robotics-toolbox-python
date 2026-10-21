@@ -62,7 +62,15 @@ class ET(BaseET):
         """
         Build the compiled struct that holds this ET's data, from the
         current (final) Python-side state.
+
+        A joint with an offset has no compiled struct, which the compiled code
+        does not know about.  The handle is ``None``, and every evaluation falls
+        back to the Python code, which does add the offset.
         """
+        if self._offset != 0:
+            self.__fknm = None
+            return
+
         if self.jindex is None:
             jindex = 0
         else:
@@ -154,6 +162,12 @@ class ET(BaseET):
 
     @property
     def s(self) -> ndarray:  # pragma: nocover
+        """
+        Motion subspace of the joint
+
+        :returns: the 6-vector :math:`(v, \\omega)` that is the unit twist of
+            the transform: a unit translation or a unit rotation about the axis
+        """
         if self.kind[1] == "x":
             if self.kind[0] == "R":
                 return array([0, 0, 0, 1, 0, 0])
@@ -182,7 +196,7 @@ class ET(BaseET):
         """
         Pure rotation about the x-axis
 
-        :param param: rotation about the x-axis
+        :param param: rotation about the x-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -217,7 +231,7 @@ class ET(BaseET):
         """
         Pure rotation about the y-axis
 
-        :param param: rotation about the y-axis
+        :param param: rotation about the y-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -252,7 +266,7 @@ class ET(BaseET):
         """
         Pure rotation about the z-axis
 
-        :param param: rotation about the z-axis
+        :param param: rotation about the z-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -286,7 +300,7 @@ class ET(BaseET):
         """
         Pure translation along the x-axis
 
-        :param param: translation distance along the x-axis
+        :param param: translation distance along the x-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
@@ -331,7 +345,7 @@ class ET(BaseET):
         """
         Pure translation along the y-axis
 
-        :param param: translation distance along the y-axis
+        :param param: translation distance along the y-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform

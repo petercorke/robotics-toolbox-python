@@ -54,9 +54,19 @@ class fdyn(NamedTuple):
 
 class DynamicsMixin:
     # --------------------------------------------------------------------- #
+    def _require_dynamics(self: RobotProto) -> None:
+        # ``hasdynamics`` is a cached flag, so this costs nothing
+        if not self.hasdynamics:
+            raise ValueError(
+                f"model '{self.name}' has no dynamic parameters (all link masses "
+                "and motor inertias are zero); use a model that defines them, for "
+                "example rtb.models.DH.Panda(), or set m, r and I on its links"
+            )
+
+    # --------------------------------------------------------------------- #
     def dynamics(self: RobotProto) -> None:
         """
-        Pretty print the dynamic parameters (Robot superclass)
+        Pretty print the dynamic parameters
 
         The dynamic parameters (inertial and friction) are printed in a table,
         with one row per link.
@@ -90,7 +100,7 @@ class DynamicsMixin:
 
     def dynamics_list(self: RobotProto) -> None:
         """
-        Print dynamic parameters (Robot superclass)
+        Print dynamic parameters
 
         Display the kinematic and dynamic parameters to the console in
         reable format
@@ -104,7 +114,7 @@ class DynamicsMixin:
 
     def friction(self: RobotProto, qd: NDArray) -> NDArray:
         r"""
-        Manipulator joint friction (Robot superclass)
+        Manipulator joint friction
 
         :param qd: The joint velocities of the robot
         :type qd: ndarray(n,)
@@ -146,8 +156,8 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`Robot.nofriction`
-        :func:`Link.friction`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.nofriction`
+        :meth:`~roboticstoolbox.robot.Link.Link.friction`
 
         """
 
@@ -175,8 +185,8 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`Robot.friction`
-        :func:`Link.nofriction`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.friction`
+        :meth:`~roboticstoolbox.robot.Link.Link.nofriction`
 
         """
 
@@ -294,11 +304,12 @@ class DynamicsMixin:
 
         See Also
         --------
-        :func:`DHRobot.accel`
-        :func:`DHRobot.nofriction`,
-        :func:`DHRobot.rne`.
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.accel`
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.nofriction`,
+        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.rne`.
 
         """
+        self._require_dynamics()
 
         n = self.n
 
@@ -470,6 +481,7 @@ class DynamicsMixin:
             104, no. 3, pp. 205-211, 1982.
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -732,7 +744,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` is a matrix (m,n), each row is interpretted as a joint state
+        If ``q`` is a matrix (m,n), each row is interpreted as a joint state
         vector, and the result is a 3d-matrix (nxnxk) where each plane
         corresponds to the inertia for the corresponding row of q.
 
@@ -760,6 +772,7 @@ class DynamicsMixin:
         :func:`cinertia`
 
         """
+        self._require_dynamics()
         q = getmatrix(q, (None, self.n))
 
         In = np.zeros((q.shape[0], self.n, self.n))
@@ -801,7 +814,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and `qd` are matrices (m,n), each row is interpretted as a
+        If ``q`` and `qd` are matrices (m,n), each row is interpreted as a
         joint configuration, and the result (n,n,m) is a 3d-matrix where
         each plane corresponds to a row of ``q`` and ``qd``.
 
@@ -821,6 +834,7 @@ class DynamicsMixin:
         - Computationally slow, involves :math:`n^2/2` invocations of RNE.
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -911,6 +925,7 @@ class DynamicsMixin:
             >>> puma.gravload(puma.qz)
 
         """
+        self._require_dynamics()
 
         q = np.asarray(getmatrix(q, (None, self.n)))
 
@@ -972,7 +987,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` is a matrix (m,n), each row is interpretted as a joint state
+        If ``q`` is a matrix (m,n), each row is interpreted as a joint state
         vector, and the result is a 3d-matrix (m,n,n) where each plane
         corresponds to the Cartesian inertia for the corresponding
         row of ``q``.
@@ -1094,7 +1109,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and `qd` are matrices (m,n), each row is interpretted as a
+        If ``q`` and `qd` are matrices (m,n), each row is interpreted as a
         joint configuration, and the result is an array (m,6,6) where
         each matrix corresponds to a row of ``q`` and ``qd``.
 
@@ -1121,7 +1136,7 @@ class DynamicsMixin:
         --------
         :func:`coriolis`
         :func:`inertia_x`
-        :func:`hessian0`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.hessian0`
 
         """
 
@@ -1375,7 +1390,7 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and ``qdd`` are matrices (m,n), each row is interpretted as a
+        If ``q`` and ``qdd`` are matrices (m,n), each row is interpreted as a
         joint configuration, and the result is a matrix (m,n) where each row is
         the corresponding joint torques.
 
@@ -1398,6 +1413,7 @@ class DynamicsMixin:
         :func:`inertia`
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qdd = getmatrix(qdd, (None, self.n))

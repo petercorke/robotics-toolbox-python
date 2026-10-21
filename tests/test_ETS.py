@@ -157,6 +157,93 @@ class TestETS(unittest.TestCase):
         self.assertEqual(ets1.structure, "")
         self.assertEqual(ets2.structure, "RR")
 
+    def test_fixjoint_preserves_kinematics_and_limits(self):
+        ets = (
+            tx(0.2)
+            * Rz(qlim=[-1, 1])
+            * ty(0.3)
+            * Rx(flip=True, qlim=[-2, 2])
+            * tz(0.1)
+            * tx(qlim=[-0.5, 0.5])
+        )
+        q = np.array([0.3, -0.25, 0.12])
+        original = ets.eval(q)
+
+        for j in range(ets.n):
+            reduced = ets.fixjoint(j, q[j])
+            self.assertEqual(reduced.n, ets.n - 1)
+            self.assertEqual([e.jindex for e in reduced.joints()], [0, 1])
+            nt.assert_allclose(reduced.eval(np.delete(q, j)), original)
+
+            surviving = [e for k, e in enumerate(ets.joints()) if k != j]
+            for actual, expected in zip(reduced.joints(), surviving):
+                self.assertEqual(actual.kind, expected.kind)
+                self.assertEqual(actual.isflip, expected.isflip)
+                nt.assert_array_equal(actual.qlim, expected.qlim)
+
+        nt.assert_allclose(ets.eval(q), original)
+        self.assertEqual([e.jindex for e in ets.joints()], [0, 1, 2])
+
+    def test_fixjoint_noncontiguous_jindices(self):
+        ets = Rz(jindex=3, qlim=[-1, 1]) * tx(0.2) * Rx(
+            jindex=7, flip=True, qlim=[-2, 2]
+        )
+        q = np.zeros(8)
+        q[3] = 0.2
+        q[7] = -0.4
+        original = ets.eval(q)
+
+        reduced = ets.fixjoint(0, q[3])
+        self.assertEqual(reduced.n, 1)
+        self.assertEqual([e.jindex for e in reduced.joints()], [7])
+        self.assertTrue(reduced.joints()[0].isflip)
+        nt.assert_allclose(reduced.eval([q[7]]), original)
+        nt.assert_allclose(reduced.eval(q), original)
+
+        reduced = ets.fixjoint(1, q[7])
+        self.assertEqual([e.jindex for e in reduced.joints()], [3])
+        nt.assert_allclose(reduced.eval([q[3]]), original)
+        nt.assert_allclose(reduced.eval(q), original)
+        self.assertEqual([e.jindex for e in ets.joints()], [3, 7])
+
+    def test_fixjoint_rotation_in_degrees(self):
+        ets = Rz() * tx(qlim=[-1, 1]) * Rx(flip=True)
+        q = np.array([np.pi / 2, 0.25, -np.pi / 2])
+        expected = ets.eval(q)
+
+        for j in (0, 2):
+            with self.subTest(j=j):
+                reduced = ets.fixjoint(j, float(np.rad2deg(q[j])), unit="deg")
+                self.assertIsInstance(reduced, rtb.ETS)
+                nt.assert_allclose(reduced.eval(np.delete(q, j)), expected)
+                nt.assert_allclose(
+                    reduced.eval(np.delete(q, j)),
+                    ets.fixjoint(j, q[j]).eval(np.delete(q, j)),
+                )
+
+        # A translation stays in metres and cannot accept angular degrees.
+        nt.assert_allclose(
+            ets.fixjoint(1, q[1]).eval(np.delete(q, 1)), expected
+        )
+        with self.assertRaisesRegex(ValueError, "only valid for rotational"):
+            ets.fixjoint(1, 90, unit="deg")
+        with self.assertRaisesRegex(ValueError, "unit must"):
+            ets.fixjoint(0, 90, unit="grad")
+        nt.assert_allclose(ets.eval(q), expected)
+
+    def test_fixjoint_single_joint_and_bad_indices(self):
+        ets = rtb.ETS(Rz())
+        fixed = ets.fixjoint(0, 0.3)
+        self.assertEqual(fixed.n, 0)
+        nt.assert_allclose(fixed[0].A(), Rz(0.3).A())
+        self.assertEqual(ets.n, 1)
+
+        for index in (-1, 1, 0.5, "0"):
+            with self.subTest(index=index), self.assertRaises(ValueError):
+                ets.fixjoint(index, 0.3)
+        with self.assertRaises(ValueError):
+            rtb.ETS().fixjoint(0, 0.3)
+
     def test_fkine(self):
         q = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         rx = Rx(1.543)
@@ -4507,6 +4594,55 @@ class TestETS(unittest.TestCase):
 
         T = panda.eval(qt)
         self.assertEqual(T.shape, (5, 4, 4))
+
+    def test_swap_commuting_transforms(self):
+        # translations along different axes, and a rotation with a translation
+        # along its axis, commute: the kinematics are unchanged by the swap
+        q = [0.3, -0.4]
+        for e, i in (
+            (ET.Rz() * ET.tx(1) * ET.ty(2) * ET.Rz(), 1),
+            (ET.Rz() * ET.tz(1) * ET.Rz(0.2) * ET.Rx(), 0),
+            (ET.tx(1) * ET.tx(2) * ET.Rz() * ET.Ry(), 0),
+        ):
+            before = e.fkine(q).A
+            e.swap(i)
+            nt.assert_array_almost_equal(e.fkine(q).A, before)
+
+    def test_swap_not_commuting(self):
+        e = ET.Rz() * ET.tx(1)
+        with self.assertRaisesRegex(ValueError, "do not commute"):
+            e.swap(0)
+
+    def test_merge_joint_with_a_constant(self):
+        # the constant becomes the offset of the joint
+        e = ET.tx(1) * ET.tx()
+        e.merge(0)
+        self.assertEqual(len(e), 1)
+        self.assertTrue(e[0].isjoint)
+        nt.assert_almost_equal(e[0].offset, 1)
+        # two joints are two variables
+        with self.assertRaisesRegex(ValueError, "joint"):
+            (ET.tx() * ET.tx()).merge(0)
+        e = ET.tx(1) * ET.tx(2)
+        e.merge(0)
+        self.assertEqual(len(e), 1)
+        nt.assert_almost_equal(e[0].param, 3)
+
+    def test_fkine_no_argument(self):
+        # a sequence with no joints needs no q
+        e = ET.Rx(0.3) * ET.tz(0.75)
+        nt.assert_array_almost_equal(e.fkine().A, e.fkine([]).A)
+        nt.assert_array_almost_equal(e.eval(), e.eval([]))
+
+    def test_fkine_missing_or_short_q(self):
+        # a sequence with joints gives a ValueError that names the lengths,
+        # not a low-level index error
+        e = ET.Rz() * ET.tx(1) * ET.Ry()
+        for call in (e.fkine, e.eval):
+            with self.assertRaisesRegex(ValueError, "q has length 0, expected 2"):
+                call()
+            with self.assertRaisesRegex(ValueError, "q has length 1, expected 2"):
+                call([0.1])
 
 
 if __name__ == "__main__":

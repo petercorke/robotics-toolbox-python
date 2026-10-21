@@ -33,6 +33,35 @@ except ImportError:  # pragma: no cover
         return False
 
 
+def apply_block(block: bool | None) -> None:
+    """
+    Apply the ``block`` argument of a plot method: whether to show the figure and wait
+
+    :param block: ``None`` does nothing, ``False`` shows the figures and returns at
+        once, ``True`` shows them and waits until the windows are closed
+
+    This is the one place that turns ``block`` into a Matplotlib call, so that every
+    plot method in the toolbox treats it the same way:
+
+    =========  ===========================  ====================================
+    ``block``  call                         use
+    =========  ===========================  ====================================
+    ``None``   none                         leave showing the figure to the
+                                            environment, eg. a notebook
+    ``False``  ``plt.show(block=False)``    show the figure, carry on
+    ``True``   ``plt.show(block=True)``     show the figure, wait until closed
+    =========  ===========================  ====================================
+
+    ``None`` is not Matplotlib's ``block=None``, which shows the figure and decides
+    for itself whether to wait.  Notebook backends (``inline``, ``ipympl``) ignore
+    the argument.  See the RVC ecosystem ``notebooks.md``.
+
+    .. versionadded:: 1.5.0
+    """
+    if block is not None:
+        plt.show(block=block)
+
+
 def xplot(
     x: Any,
     y: Any = None,
@@ -48,38 +77,57 @@ def xplot(
     r"""
     Plot trajectory data
 
-    :param x: trajectory, one row per timestep
-    :type x: ndarray(m,n)
-    :param t: time vector, optional
-    :type t: numpy ndarray, shape=(M,)
+    :param x: the trajectory, one row per timestep, or the time vector if ``y`` is
+        given
+    :type x: ndarray(m,n) or ndarray(m)
+    :param y: the trajectory, one row per timestep, optional
+    :type y: ndarray(m,n)
     :param wrist: distinguish arm and wrist joints with line styles
     :type wrist: bool
     :param unwrap: unwrap joint angles so that they smoothly increase or
         decrease when they pass through :math:`\pm \pi`
     :type unwrap: bool
-    :param block: block until the plot is closed
-    :type block: bool
-    :param labels: legend labels
+    :param block: ``None`` leaves showing the figure to the environment (no
+        ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+        it and waits until it is closed; ignored by notebook backends,
+        defaults to False
+    :param labels: legend labels, default ``q0``, ``q1``, ...
     :type labels: list of str, or single string with space separated labels
-    :param kwargs: options passed to pyplot.plot
     :param loc: legend location as per pyplot.legend
     :type loc: str
+    :param grid: show a grid, defaults to True
+    :param stack: plot each column in its own axes, one above the other, defaults
+        to False
+    :param kwargs: options passed to pyplot.plot
+    :return: the axes of the figure
 
     This is a convenience function to plot trajectories, where each row represents one time step.
 
-    - ``xplot(q)`` plots the joint angles versus row number.  If N==6 a
-      conventional 6-axis robot is assumed, and the first three joints are
-      shown as solid lines, the last three joints (wrist) are shown as dashed
-      lines. A legend is also displayed.
+    - ``xplot(q)`` plots the joint angles versus row number.  If ``wrist`` is
+      true and there are six joints, a conventional 6-axis robot is assumed, and
+      the first three joints are shown as solid lines, the last three joints
+      (wrist) are shown as dashed lines. A legend is also displayed.
 
     - ``xplot(t, q)`` as above but displays the joint angle trajectory versus
-      time given the time vector T (Mx1).
+      time given the time vector ``t``, shape (m,).
 
-    Example::
+    Example, which is not run when the documentation is built::
 
-        >>> qplot(q, x, labels='x y z')
+        import numpy as np
+        import roboticstoolbox as rtb
 
-    :seealso: :func:`jtraj`, :func:`numpy.unwrap`
+        puma = rtb.models.DH.Puma560()
+        tg = rtb.jtraj(puma.qz, puma.qr, 50)  # a trajectory of 50 steps
+        rtb.xplot(tg.q, wrist=True, labels="q1 q2 q3 q4 q5 q6")
+
+        t = np.linspace(0, 2, 50)  # with a time vector
+        rtb.xplot(t, tg.q)
+
+    :seealso: :func:`~roboticstoolbox.tools.trajectory.jtraj`, :func:`numpy.unwrap`
+
+    .. versionchanged:: 1.5.0
+        ``block=None`` does not call ``plt.show``, as documented. It used to call
+        ``plt.show(block=None)``, which waits in a script. The default, ``False``, is unchanged.
     """
     if y is None:
         q = x
@@ -135,6 +183,6 @@ def xplot(
         ax.set_ylabel("Joint coordinates (rad,m)")
         # ax.set_xlim(t[0], t[-1])  fails with RVC3 Sec 3.3.3
 
-    plt.show(block=block)
+    apply_block(block)
 
     return fig.get_axes()

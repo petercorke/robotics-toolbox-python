@@ -16,6 +16,7 @@ from spatialmath import SE2
 import roboticstoolbox as rp
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook, _resolve_render_mode
 from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
 from roboticstoolbox.tools.plot import set_window_title
 
@@ -89,12 +90,16 @@ class PyPlot2(Connector):
 
     def launch(self, name: Any = None, limits: Any = None, **kwargs: Any) -> None:
         """
-        env = launch() launchs a blank 2D matplotlib figure
+        env = launch() launches a blank 2D matplotlib figure
 
         Optional keyword arguments
         --------------------------
         render_mode
             One of ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``.
+            If omitted it is chosen from the environment.
+        animation
+            True if frames will be stepped through in a single running cell, which
+            selects the inline mode for the ``ipympl`` backend.
         inline_every_n
             Push one inline frame every N simulation steps (inline mode only).
         inline_format
@@ -105,7 +110,9 @@ class PyPlot2(Connector):
         """
 
 
-        self.render_mode = _resolve_render_mode(kwargs.get("render_mode"))
+        self.render_mode = _resolve_render_mode(
+            kwargs.get("render_mode"), bool(kwargs.get("animation", False))
+        )
         self.inline_every_n = max(1, int(kwargs.get("inline_every_n", 1)))
         self.inline_format = kwargs.get("inline_format", "svg")
         if self.inline_format not in ["png", "svg"]:
@@ -236,7 +243,7 @@ class PyPlot2(Connector):
         plt.close(self.fig)
 
     #
-    #  Methods to interface with the robots created in other environemnts
+    #  Methods to interface with the robots created in other environments
     #
 
     def add(
@@ -246,19 +253,26 @@ class PyPlot2(Connector):
         display: bool = True,
         eeframe: bool = True,
         name: bool = False,
+        q: Any = None,
         **kwargs: Any,
-    ) -> None:
+    ) -> Any:
         """
-        id = add(robot) adds the robot to the external environment. robot must
+        handle = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
         robots which will act upon the step() method being called.
 
+        If ``q`` is given the drawing of the robot is pinned to that pose, and the same
+        robot can be added again in another pose; the handle that is returned is the
+        drawing, and ``handle.q = q`` moves only that drawing.  Otherwise it follows
+        ``robot.q``.  An ellipse has no handle.
         """
-
-
+        handle = None
         if isinstance(ob, rp.Robot2):
-            self.robots.append(RobotPlot2(ob, self, readonly, display, eeframe, name))
+            self.robots.append(
+                RobotPlot2(ob, self, readonly, display, eeframe, name, q=q)
+            )
             self.robots[len(self.robots) - 1].draw()
+            handle = self.robots[-1]
 
         elif isinstance(ob, EllipsePlot):
             ob.ax = self.ax
@@ -271,6 +285,7 @@ class PyPlot2(Connector):
         else:
             plt.draw()
             plt.show(block=False)
+        return handle
 
     def remove(self) -> None:
         """
@@ -373,7 +388,7 @@ class PyPlot2(Connector):
 
         :param robot: Robot being taught
         :type robot: ERobot class
-        :param q: inital joint angles in radians
+        :param q: initial joint angles in radians
         :type q: array_like(n)
         :param handle: unused here -- PyPlot2 has no AssemblyHandle
             concept, it drives the panel by mutating robot.q directly
@@ -496,52 +511,3 @@ class PyPlot2(Connector):
             self.sjoint.append(slider)
         robot.q = q
         self.step()
-
-
-def _isnotebook() -> Any:
-    """
-    Determine if code is being run from a Jupyter notebook or JupyterLite
-
-    ``_isnotebook`` is True if running Jupyter notebook, JupyterLite, or similar, else False
-
-    :references:
-
-        - https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-
-        is-executed-in-the-ipython-notebook/39662359#39662359
-    """
-    import sys
-
-    # Check if running in Pyodide/JupyterLite
-    if sys.platform == "emscripten":
-        return True
-
-    # Fall back to checking IPython shell type
-    try:
-        shell = get_ipython().__class__.__name__  # type: ignore[name-defined]
-        if shell == "ZMQInteractiveShell":
-            return True  # Jupyter notebook or qtconsole
-        elif shell == "TerminalInteractiveShell":
-            return False  # Terminal running IPython
-        else:
-            return False  # Other type (?)
-    except NameError:
-        return False  # Probably standard Python interpreter
-
-
-def _resolve_render_mode(render_mode: Any = None) -> Any:
-    if render_mode is not None:
-        if render_mode not in ["window", "notebook-widget", "notebook-inline"]:
-            raise ValueError(
-                "render_mode must be one of 'window', "
-                "'notebook-widget', or 'notebook-inline'"
-            )
-        return render_mode
-
-    if not _isnotebook():
-        return "window"
-
-    backend = matplotlib.get_backend().lower()
-    if "ipympl" in backend or "widget" in backend or "nbagg" in backend:
-        return "notebook-widget"
-
-    return "notebook-inline"

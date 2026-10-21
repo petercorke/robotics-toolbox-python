@@ -31,7 +31,7 @@ def null(A: Any, atol: float = 1e-13, rtol: float = 0) -> Any:
         - If both `atol` and `rtol` are positive, the combined tolerance is
           the maximum of the two; that is:
           tol = max(atol, rtol * smax)
-        - Singular values smaller than `tol` are considered to be zero.
+        - Singular values smaller than ``tol`` are considered to be zero.
 
     Return value
     ------------

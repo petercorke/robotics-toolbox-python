@@ -1802,5 +1802,32 @@ class TestRobot(unittest.TestCase):
         nt.assert_almost_equal(r.qlim, np.array([[-4, 4]]).T)
 
 
+    def test_dynamics_requires_dynamic_parameters(self):
+        # a kinematics-only model must raise, not return zeros or a confusing error
+        robot = rtb.models.Panda()
+        q = np.zeros(robot.n)
+        self.assertFalse(robot.hasdynamics)
+        calls = [
+            lambda: robot.gravload(q),
+            lambda: robot.inertia(q),
+            lambda: robot.coriolis(q, q),
+            lambda: robot.rne(q, q, q),
+            lambda: robot.accel(q, q, q),
+            lambda: robot.itorque(q, q),
+        ]
+        for call in calls:
+            with self.assertRaisesRegex(ValueError, "no dynamic parameters"):
+                call()
+
+    def test_hasdynamics(self):
+        self.assertTrue(rtb.models.DH.Panda().hasdynamics)
+        # the first link of the DH Puma560 has zero mass, the others do not
+        puma = rtb.models.DH.Puma560()
+        self.assertEqual(puma.links[0].m, 0)
+        self.assertTrue(puma.hasdynamics)
+        q = np.zeros(puma.n)
+        self.assertEqual(puma.gravload(q).shape, (puma.n,))
+
+
 if __name__ == "__main__":  # pragma nocover
     unittest.main()

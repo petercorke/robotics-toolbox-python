@@ -130,7 +130,7 @@ class LatticePlanner(PlannerBase):
     to reach it from the root.  This means, that any configuration, ie.
     :math:`(x, y, \theta)` can be reached by multiple paths and potentially have
     multiple names.  The first name assigned to a vertex is permanent and is not
-    overriden.
+    overridden.
 
     If an occupancy grid exists and the configuration is an obstacle, then
     the vertex is not added.

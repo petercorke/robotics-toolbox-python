@@ -72,7 +72,7 @@ def p_servo(
         using angle-axis method.
     :type method: string: 'rpy' or 'angle-axis'
 
-    :returns v: The velocity of the end-effecotr which will casue the robot
+    :returns v: The velocity of the end-effector which will cause the robot
         to approach wTep
     :rtype v: ndarray(6)
     :returns arrived: True if the robot is within the threshold of the final
