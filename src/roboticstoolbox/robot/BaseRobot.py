@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 # import sys
+import inspect
 import io
 from abc import ABC
 from copy import deepcopy
@@ -21,6 +22,7 @@ from typing import (
     TypeVar,
     cast,
 )
+from warnings import warn
 
 import numpy as np
 from ansitable import ANSITable, Column
@@ -2100,6 +2102,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         fig: str | None = None,
         movie: str | None = None,
         loop: bool = False,
+        notebook: bool | None = None,
         **kwargs: Any,
     ) -> Connector:
         """
@@ -2126,7 +2129,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param fig: (Plot Option) The figure label to plot in (this option is for 'pyplot' only)
         :param movie: (Plot Option) The filename to save the movie to (this option is for 'pyplot' only)
         :param loop: (Plot Option) Loop the movie (this option is for 'pyplot' only)
-        :param browser: (Plot Option) The browser to show Swift in, see ``Swift.launch``; ``'notebook'`` shows it in a frame of the cell, and is the default in a notebook (this option is for 'swift' only)
+        :param notebook: (Plot Option, Swift only) ``True`` shows Swift in a frame of the current notebook cell, ``False`` opens it in a browser window, and ``None`` (default) chooses the frame in a notebook, unless a ``browser`` is named, and a window otherwise, so the same call works in a script and in a notebook.  The browser showing the notebook must be on the machine running the kernel, since the frame points at ``localhost``
+        :param browser: (Plot Option, Swift only) the browser for the window, or ``None`` (default) for the system's.  This is a name known to Python's ``webbrowser`` module, which depends on the operating system, for example ``"chrome"``, ``"firefox"`` or ``"safari"`` on macOS and ``"google-chrome"`` or ``"chromium"`` on Linux, or a command line with ``%s`` where the URL goes, for any other browser; ``webbrowser.get(name)`` tells you whether a name works.  Naming a browser means a window, not the notebook frame.  ``browser="notebook"`` is deprecated, use ``notebook=True``.  See :py:meth:`swift.Swift.Swift.launch`
         :param realtime: (Plot Option) Pace the steps of a trajectory in real time, one each ``dt``, defaults to True for a trajectory (this option is for 'swift' only)
         :param jointaxes: (Plot Option) Plot an arrow indicating the axes in which the joint revolves around(revolute joint) or translates along (prosmatic joint) (this option is for 'pyplot' only)
         :param eeframe: (Plot Option) Plot the end-effector coordinate frame at the location of the end-effector. Uses three arrows, red, green and blue to indicate the x, y, and z-axes. (this option is for 'pyplot' only)
@@ -2189,8 +2193,27 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         if is_swift:
             from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook
 
-            if _isnotebook():
-                launch_kwargs.setdefault("browser", "notebook")
+            if launch_kwargs.get("browser") == "notebook":
+                warn(
+                    'plot(browser="notebook") is deprecated, use plot(notebook=True)',
+                    FutureWarning,
+                    stacklevel=2,
+                )
+                del launch_kwargs["browser"]
+                notebook = True
+            if notebook is None:
+                notebook = launch_kwargs.get("browser") is None and _isnotebook()
+            if notebook:
+                if launch_kwargs.get("browser") is not None:
+                    raise ValueError(
+                        f"browser={launch_kwargs['browser']!r} cannot be used with "
+                        "notebook=True: the page is shown in the cell, not in a window"
+                    )
+                # Swift 2.1 has notebook=, before that it was browser="notebook"
+                if "notebook" in inspect.signature(env.launch).parameters:
+                    launch_kwargs["notebook"] = True
+                else:
+                    launch_kwargs["browser"] = "notebook"
             launch_kwargs.setdefault("realtime", q.shape[0] > 1)
 
         # Add the self to the figure in readonly mode
