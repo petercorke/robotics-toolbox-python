@@ -269,6 +269,7 @@ class PyPlot(Connector):
 
         :param dt: time step in seconds, defaults to 50 (0.05 s)
         :type dt: int, optional
+        :raises ValueError: if ``dt`` is not greater than zero
 
         ``env.step(args)`` triggers an update of the 3D scene in the matplotlib
         window referenced by ``env``.
@@ -281,10 +282,18 @@ class PyPlot(Connector):
               updated in the internal state of the robot object.
             - The control type is defined by the robot object, and not all
               robot objects support all control types.
-            - Execution is blocked for the specified interval
+            - Execution is blocked for the specified interval, which must be
+              greater than zero: Matplotlib's ``pause(0)`` does not return, since a
+              timeout of zero means to wait until the event loop is stopped
 
+        .. versionchanged:: 1.5.0
+            ``dt`` of zero or less raises ``ValueError``, it used to wait for ever.
         """
-
+        if dt <= 0:
+            raise ValueError(
+                f"dt is {dt}, it must be greater than zero: a pause of zero seconds "
+                "does not return"
+            )
 
         # update the robot's state
         for rpl in self.robots:
