@@ -2105,6 +2105,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         notebook: bool | None = None,
         ax: Any = None,
         env: Connector | None = None,
+        view: str | None = None,
         **kwargs: Any,
     ) -> Connector:
         """
@@ -2132,6 +2133,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param ax: (Plot Option) Existing Matplotlib 3D axes to draw the scene on, instead of making a figure (this option is for 'pyplot' only)
         :param env: The scene returned by an earlier ``plot``, to add this robot to, instead of making a new scene; see *Several configurations* below.  The backend of the scene is used, so ``backend`` is ignored, and the options that are set when a scene is made (``limits``, ``fig``, ``ax``, ``render_mode``, ``inline_*``, ``notebook`` and ``browser``) cannot be given
         :param color: (Plot Option) The color of the robot's line, any Matplotlib color (this option is for 'pyplot' only)
+        :param view: (Plot Option) ``"xy"``, ``"xz"`` or ``"yz"`` to start with a flat view of that plane, the first axis to the right and the second up, or ``None`` (default) for the usual three-dimensional view.  The view is not locked, the plot can be rotated as usual.  With ``env`` it changes the view of that scene (this option is for 'pyplot' only)
         :param movie: (Plot Option) The filename to save the movie to (this option is for 'pyplot' only)
         :param loop: (Plot Option) Loop the movie (this option is for 'pyplot' only)
         :param notebook: (Plot Option, Swift only) ``True`` shows Swift in a frame of the current notebook cell, ``False`` opens it in a browser window, and ``None`` (default) chooses the frame in a notebook, unless a ``browser`` is named, and a window otherwise, so the same call works in a script and in a notebook.  The browser showing the notebook must be on the machine running the kernel, since the frame points at ``localhost``
@@ -2219,6 +2221,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             if key in kwargs:
                 launch_kwargs[key] = kwargs.pop(key)
 
+        if view is not None:
+            from roboticstoolbox.tools.plot import plane_view
+
+            plane_view(view)  # a bad name raises before a scene is made
+            if "view" not in inspect.signature(env.launch).parameters:
+                raise ValueError(f"the {type(env).__name__} backend cannot set a view")
+            if not adding:
+                launch_kwargs["view"] = view
+
         if adding:
             # these are fixed when a scene is made
             fixed = [k for k in launch_kwargs if k != "realtime"]
@@ -2293,6 +2304,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 **launch_kwargs,
             )
 
+        if adding and view is not None:
+            from roboticstoolbox.tools.plot import set_plane_view
+
+            set_plane_view(env.ax, view)  # type: ignore[attr-defined]
+
         # The drawing of this robot holds the pose it is drawn in, if the backend lets
         # it, so the same robot can be added to a scene again in another pose.
         if "q" in inspect.signature(env.add).parameters:
@@ -2365,6 +2381,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         vellipse: bool = False,
         fellipse: bool = False,
         backend: L["swift", "pyplot", "pyplot2"] | None = None,
+        view: str | None = None,
     ) -> Connector:
         """
         Graphical teach pendant
@@ -2392,6 +2409,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param backend: The graphical backend to use -- 'swift', 'pyplot',
             or 'pyplot2'. Defaults to whatever :meth:`plot` would pick for
             this robot (see its own ``backend`` for the resolution rule).
+        :param view: ``"xy"``, ``"xz"`` or ``"yz"`` to start with a flat view of
+            that plane, the first axis to the right and the second up, or ``None``
+            (default) for the usual three-dimensional view.  The view is not
+            locked, the plot can be rotated as usual (this option is for 'pyplot'
+            only)
 
         :returns: A reference to the environment object which controls
             the figure/view
@@ -2433,7 +2455,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             )
 
         # Add the self to the figure in readonly mode
-        env.launch(name="Teach " + self.name, limits=limits)
+        launch_kwargs: dict[str, Any] = {}
+        if view is not None:
+            from roboticstoolbox.tools.plot import plane_view
+
+            plane_view(view)  # a bad name raises before a scene is made
+            if "view" not in inspect.signature(env.launch).parameters:
+                raise ValueError(f"the {type(env).__name__} backend cannot set a view")
+            launch_kwargs["view"] = view
+        env.launch(name="Teach " + self.name, limits=limits, **launch_kwargs)
         handle = env.add(
             self,
             readonly=True,
