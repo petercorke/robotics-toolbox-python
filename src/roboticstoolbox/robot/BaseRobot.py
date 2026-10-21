@@ -2110,6 +2110,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param fig: (Plot Option) The figure label to plot in (this option is for 'pyplot' only)
         :param movie: (Plot Option) The filename to save the movie to (this option is for 'pyplot' only)
         :param loop: (Plot Option) Loop the movie (this option is for 'pyplot' only)
+        :param browser: (Plot Option) The browser to show Swift in, see ``Swift.launch``; ``'notebook'`` shows it in a frame of the cell, and is the default in a notebook (this option is for 'swift' only)
+        :param realtime: (Plot Option) Pace the steps of a trajectory in real time, one each ``dt``, defaults to True for a trajectory (this option is for 'swift' only)
         :param jointaxes: (Plot Option) Plot an arrow indicating the axes in which the joint revolves around(revolute joint) or translates along (prosmatic joint) (this option is for 'pyplot' only)
         :param eeframe: (Plot Option) Plot the end-effector coordinate frame at the location of the end-effector. Uses three arrows, red, green and blue to indicate the x, y, and z-axes. (this option is for 'pyplot' only)
         :param shadow: (Plot Option) Plot a shadow of the robot in the x-y plane. (this option is for 'pyplot' only)
@@ -2143,7 +2145,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             from roboticstoolbox.backends.PyPlot import PyPlot
 
         launch_kwargs: dict[str, Any] = {}
-        for key in ("render_mode", "inline_every_n", "inline_format", "inline_dpi"):
+        for key in (
+            "render_mode",
+            "inline_every_n",
+            "inline_format",
+            "inline_dpi",
+            "browser",
+            "realtime",
+        ):
             if key in kwargs:
                 launch_kwargs[key] = kwargs.pop(key)
 
@@ -2154,6 +2163,18 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # in a notebook (the other backends have no render mode)
         if q.shape[0] > 1 and hasattr(env, "render_mode"):
             launch_kwargs.setdefault("animation", True)
+
+        # Swift is a web page, served by this process.  In a notebook it is shown in a
+        # frame of the cell, not in a browser window of its own.  An animation is paced
+        # in real time, one step to each dt: unpaced, Swift draws at most 60 frames
+        # per second and skips the steps that come sooner, so the whole trajectory runs
+        # in a few milliseconds and only its first frame is ever drawn.
+        if type(env).__name__ == "Swift":
+            from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook
+
+            if _isnotebook():
+                launch_kwargs.setdefault("browser", "notebook")
+            launch_kwargs.setdefault("realtime", q.shape[0] > 1)
 
         # Add the self to the figure in readonly mode
         if q.shape[0] == 1:
