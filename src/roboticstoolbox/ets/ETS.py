@@ -174,6 +174,23 @@ class ETS(BaseETS[ET]):
         :param unit: angular unit for rotational joints, "rad" [default] or "deg"
         :returns: ETS with one fewer joint
         :raises ValueError: for an invalid joint position or angular unit
+
+        A flipped joint can be fixed in degrees, without modifying the original
+        sequence. This also works on the kinematics of a robot:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET, models
+            >>> ets = ET.Rz(flip=True) * ET.tx(1) * ET.Ry()
+            >>> fixed = ets.fixjoint(0, 90, unit="deg")
+            >>> fixed.n, ets.n
+            (1, 2)
+            >>> robot = models.ETS.Panda()
+            >>> reduced = robot.ets().fixjoint(2, 0)
+            >>> reduced.n == robot.n - 1
+            True
+
+        .. versionadded:: 1.5.0
         """
         if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
             raise ValueError(f"joint index {j} out of range for {self.n} joints")
