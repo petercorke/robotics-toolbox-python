@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 # import sys
+import inspect
 import io
 from abc import ABC
 from copy import deepcopy
@@ -21,6 +22,7 @@ from typing import (
     TypeVar,
     cast,
 )
+from warnings import warn
 
 import numpy as np
 from ansitable import ANSITable, Column
@@ -71,6 +73,10 @@ def _is_symbolic(value: Any) -> bool:
     if value is None:
         return False
     return np.asarray(value).dtype == object
+
+
+# the modules of the robot classes themselves, as distinct from models built from them
+_FRAMEWORK_MODULES = ("roboticstoolbox.robot.", "roboticstoolbox.models.URDF.URDFRobot")
 
 
 class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[LinkType]):
@@ -531,9 +537,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 f"{s}",
             )
 
-        classname = "ERobot"
-
-        s = f"{classname}: {self.name}"
+        s = f"{self._class_label()}: {self.name}"
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
@@ -558,6 +562,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def __repr__(self) -> str:
         return str(self)
+
+    def _class_label(self) -> str:
+        """
+        The class of this robot, for the first line of its display
+
+        ``Robot``, ``Robot2``, ``DHRobot`` or ``URDFRobot`` for an instance of the class
+        itself, and ``X.Y`` for an instance of a subclass ``Y`` of one of them, for
+        example ``DHRobot.Puma560`` or ``URDFRobot.Panda``: the kind of robot, then the
+        model.
+        """
+        cls = type(self)
+        if cls.__module__.startswith(_FRAMEWORK_MODULES):
+            return cls.__name__
+        return f"{cls.__mro__[1].__name__}.{cls.__name__}"
 
     # --------------------------------------------------------------------- #
     # --------- Properties ------------------------------------------------ #
@@ -1017,14 +1035,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         for link in self.links:
             if link.isrevolute:
-                if (
-                    link.qlim is None
-                    or link.qlim[0] is None
-                    or np.any(np.isnan(link.qlim))
-                ):
+                # a symbolic model holds SymPy numbers, which np.isnan rejects
+                qlim = None if link.qlim is None else np.asarray(link.qlim, dtype=float)
+                if qlim is None or np.any(np.isnan(qlim)):
                     v = [-np.pi, np.pi]
                 else:
-                    v = link.qlim
+                    v = qlim
             elif link.isprismatic:
                 if link.qlim is None:
                     raise ValueError("Undefined prismatic joint limit")
@@ -2086,6 +2102,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         fig: str | None = None,
         movie: str | None = None,
         loop: bool = False,
+        notebook: bool | None = None,
         **kwargs: Any,
     ) -> Connector:
         """
@@ -2112,15 +2129,29 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param fig: (Plot Option) The figure label to plot in (this option is for 'pyplot' only)
         :param movie: (Plot Option) The filename to save the movie to (this option is for 'pyplot' only)
         :param loop: (Plot Option) Loop the movie (this option is for 'pyplot' only)
+        :param notebook: (Plot Option, Swift only) ``True`` shows Swift in a frame of the current notebook cell, ``False`` opens it in a browser window, and ``None`` (default) chooses the frame in a notebook, unless a ``browser`` is named, and a window otherwise, so the same call works in a script and in a notebook.  The browser showing the notebook must be on the machine running the kernel, since the frame points at ``localhost``
+        :param browser: (Plot Option, Swift only) the browser for the window, or ``None`` (default) for the system's.  This is a name known to Python's ``webbrowser`` module, which depends on the operating system, for example ``"chrome"``, ``"firefox"`` or ``"safari"`` on macOS and ``"google-chrome"`` or ``"chromium"`` on Linux, or a command line with ``%s`` where the URL goes, for any other browser; ``webbrowser.get(name)`` tells you whether a name works.  Naming a browser means a window, not the notebook frame.  ``browser="notebook"`` is deprecated, use ``notebook=True``.  See :py:meth:`swift.Swift.Swift.launch`
+        :param realtime: (Plot Option) Pace the steps of a trajectory in real time, one each ``dt``, defaults to True for a trajectory (this option is for 'swift' only)
         :param jointaxes: (Plot Option) Plot an arrow indicating the axes in which the joint revolves around(revolute joint) or translates along (prosmatic joint) (this option is for 'pyplot' only)
         :param eeframe: (Plot Option) Plot the end-effector coordinate frame at the location of the end-effector. Uses three arrows, red, green and blue to indicate the x, y, and z-axes. (this option is for 'pyplot' only)
         :param shadow: (Plot Option) Plot a shadow of the robot in the x-y plane. (this option is for 'pyplot' only)
         :param name: (Plot Option) Plot the name of the robot near its base (this option is for 'pyplot' only)
-        :param render_mode: (Plot Option) Rendering mode for matplotlib backends: ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``. If omitted, an environment-appropriate mode is selected.
+        :param render_mode: (Plot Option) Rendering mode for matplotlib backends: ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``. If omitted, a mode is chosen from the environment, so the same call works for any ``%matplotlib`` setting: for the interactive ``ipympl`` backend a single pose is a widget that can be rotated, but a trajectory uses ``'notebook-inline'``, since a widget cannot update while the cell is running.
         :param inline_every_n: (Plot Option) In notebook-inline mode, push one rendered frame every N simulation steps. Larger N reduces output load.
         :param inline_format: (Plot Option) In notebook-inline mode, frame format: ``'svg'`` (default) or ``'png'``.
         :param inline_dpi: (Plot Option) DPI for PNG inline frames only; ignored when ``inline_format='svg'``.
         :returns: A reference to the environment object which controls the figure
+
+        .. note::
+
+            Python's ``webbrowser`` module cannot tell whether a browser is installed, so
+            a browser that cannot be opened is not reported as such.  On macOS the names
+            ``"chrome"``, ``"firefox"`` and ``"safari"`` are always accepted, whether or
+            not the app is installed.  If it is not, no window opens and there is no
+            error: Swift waits about 10 seconds for the page to connect and then reports
+            ``Could not connect to the Swift simulator``.  If you see that, check that
+            the browser named by ``browser`` is installed, or leave it as ``None`` to use
+            the system's default browser.  See :py:meth:`swift.Swift.Swift.launch`.
 
         .. rubric:: Notes
 
@@ -2144,13 +2175,57 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         if movie is not None:
             from roboticstoolbox.backends.PyPlot import PyPlot
 
-        launch_kwargs = {}
-        for key in ("render_mode", "inline_every_n", "inline_format", "inline_dpi"):
+        launch_kwargs: dict[str, Any] = {}
+        for key in (
+            "render_mode",
+            "inline_every_n",
+            "inline_format",
+            "inline_dpi",
+            "browser",
+            "realtime",
+        ):
             if key in kwargs:
                 launch_kwargs[key] = kwargs.pop(key)
 
         q = np.array(getmatrix(q, (None, self.n)))
         self.q = q[0, :]
+
+        # a trajectory is an animation, which the PyPlot backends render differently
+        # in a notebook (the other backends have no render mode)
+        if q.shape[0] > 1 and hasattr(env, "render_mode"):
+            launch_kwargs.setdefault("animation", True)
+
+        # Swift is a web page, served by this process.  In a notebook it is shown in a
+        # frame of the cell, not in a browser window of its own.  An animation is paced
+        # in real time, one step to each dt: unpaced, Swift draws at most 60 frames
+        # per second and skips the steps that come sooner, so the whole trajectory runs
+        # in a few milliseconds and only its first frame is ever drawn.
+        is_swift = type(env).__name__ == "Swift"
+        if is_swift:
+            from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook
+
+            if launch_kwargs.get("browser") == "notebook":
+                warn(
+                    'plot(browser="notebook") is deprecated, use plot(notebook=True)',
+                    FutureWarning,
+                    stacklevel=2,
+                )
+                del launch_kwargs["browser"]
+                notebook = True
+            if notebook is None:
+                notebook = launch_kwargs.get("browser") is None and _isnotebook()
+            if notebook:
+                if launch_kwargs.get("browser") is not None:
+                    raise ValueError(
+                        f"browser={launch_kwargs['browser']!r} cannot be used with "
+                        "notebook=True: the page is shown in the cell, not in a window"
+                    )
+                # Swift 2.1 has notebook=, before that it was browser="notebook"
+                if "notebook" in inspect.signature(env.launch).parameters:
+                    launch_kwargs["notebook"] = True
+                else:
+                    launch_kwargs["browser"] = "notebook"
+            launch_kwargs.setdefault("realtime", q.shape[0] > 1)
 
         # Add the self to the figure in readonly mode
         if q.shape[0] == 1:
@@ -2165,7 +2240,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 **launch_kwargs,
             )
 
-        env.add(self, readonly=True, **kwargs)
+        handle = env.add(self, readonly=True, **kwargs)
         self._active_plot_env = env
 
         if vellipse:
@@ -2188,7 +2263,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         while True:
             for qk in q:
-                self.q = qk
+                if is_swift:
+                    # Swift keeps the joint state of what it shows in the handle that
+                    # add() returned, and deprecates driving it through robot.q
+                    handle.q = qk
+                else:
+                    self.q = qk
                 if vell is not None:
                     vell.q = qk
                 if fell is not None:
@@ -2210,6 +2290,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 )
             if not loop:
                 break
+
+        self.q = q[-1]
 
         # Keep the plot open
         if block:  # pragma nocover

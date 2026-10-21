@@ -61,6 +61,7 @@ Information
    ~roboticstoolbox.ET2.param
    ~roboticstoolbox.ET2.isjoint
    ~roboticstoolbox.ET2.isflip
+   ~roboticstoolbox.ET2.offset
    ~roboticstoolbox.ET2.isrotation
    ~roboticstoolbox.ET2.istranslation
    ~roboticstoolbox.ET2.iselementary
@@ -81,7 +82,7 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ET2
-   :members: R, tx, ty, SE2, kind, axis, ax, param, eta, isjoint, isflip, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
+   :members: R, tx, ty, SE2, kind, axis, ax, param, eta, isjoint, isflip, offset, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
    :member-order: bysource
 
 ETS: Elementary Transform Sequence
@@ -118,7 +119,9 @@ Modification
    ~roboticstoolbox.ETS2.fixjoint
    ~roboticstoolbox.ETS2.split
    ~roboticstoolbox.ETS2.swap
+   ~roboticstoolbox.ETS2.swapped
    ~roboticstoolbox.ETS2.merge
+   ~roboticstoolbox.ETS2.merged
    ~roboticstoolbox.ETS2.compile
 
 List operations
@@ -174,5 +177,5 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ETS2
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, ikine_LM, plot, teach
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, swapped, merge, merged, compile, fkine, eval, jacob0, jacobe, ikine_LM, plot, teach
    :member-order: bysource

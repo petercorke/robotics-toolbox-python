@@ -21,6 +21,35 @@ found by that line, not by its position) and is folded by default.
   Then it installs the toolbox with its dependencies, from the wheel bundled with the
   JupyterLite site if there is one, or else from PyPI.
 
+## The first cell
+
+The first cell of a notebook is ordinary markdown, written by hand: the logo and title,
+the copyright line and a description.  The logo is an absolute GitHub URL, since Colab
+fetches only the one `.ipynb` file and cannot see `figs/`.  A notebook that was updated
+for API drift says so there ("Modernised <date>").
+
+The second cell is the generated bootstrap cell, below.
+
+## Editing a notebook
+
+Edit it as you like, in VS Code or anywhere, and commit it.  That is all.
+
+Install the commit hook once, in any clone or worktree:
+
+    python docs/notebooks/pre_commit.py --install
+
+and every commit that includes a notebook first tidies it: no outputs or execution
+counts, a cell id on every cell, the same kernel and language in the metadata (an editor
+writes the name and version of your Python environment, which is noise in every diff),
+and the file written as Jupyter writes it, so that opening and saving a notebook never
+shows up as a change.  It refuses the commit, with a message, if a notebook still has
+merge conflict markers.
+
+Without the hook, run `python docs/notebooks/clear_outputs.py` before committing, and
+`python docs/notebooks/sync_bootstrap.py` after changing `_rtb_nb_bootstrap.py` or a
+notebook's `rtb_bootstrap` metadata.  `docs.yml` runs both with `--check`, so CI tells you
+if you forgot.
+
 ## Outputs are not committed
 
 Notebooks are committed without outputs or execution counts, so diffs show only what

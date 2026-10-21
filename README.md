@@ -223,7 +223,7 @@ import roboticstoolbox as rtb
 robot = rtb.models.Panda()
 print(robot)
 
-	ERobot: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision
+	URDFRobot.Panda: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision
 	┌─────┬──────────────┬───────┬─────────────┬────────────────────────────────────────────────┐
 	│link │     link     │ joint │   parent    │              ETS: parent to link               │
 	├─────┼──────────────┼───────┼─────────────┼────────────────────────────────────────────────┤
