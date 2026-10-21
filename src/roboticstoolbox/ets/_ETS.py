@@ -881,7 +881,7 @@ class BaseETS(MutableSequence[ETT]):
                     f"transforms {e1.kind} and {e2.kind} do not commute, so they "
                     "cannot be swapped"
                 )
-        self._fknm_stale = True
+        self._changed()
 
     def swapped(self, i: int) -> Self:
         """
@@ -920,6 +920,11 @@ class BaseETS(MutableSequence[ETT]):
                 f"index {i} out of range, the sequence has {len(self._data)} transforms"
             )
         return self._data[i], self._data[i + 1]
+
+    def _changed(self) -> None:
+        """Forget what depends on the order and kind of the transforms."""
+        self._fknm_stale = True
+        self.__dict__.pop("jindices", None)  # invalidate cached_property
 
     @staticmethod
     def _commute(e1: Any, e2: Any) -> bool:
@@ -1111,7 +1116,7 @@ class BaseETS(MutableSequence[ETT]):
                 merged = deepcopy(e1)
                 merged.param = total
                 self._data[i : i + 2] = [merged]
-        self._fknm_stale = True
+        self._changed()
 
     def merged(self, i: int) -> Self:
         """

@@ -257,6 +257,23 @@ class TestJoints(unittest.TestCase):
         nt.assert_array_almost_equal(e.fkine([0.5]).A, before)
 
 
+class TestJindices(unittest.TestCase):
+    def test_cached_joint_indices_follow_a_swap(self):
+        e = ET.Rz(jindex=0) * ET.Rz(jindex=1)
+        nt.assert_array_equal(e.jindices, [0, 1])  # cached
+        e.swap(0)
+        nt.assert_array_equal(e.jindices, [1, 0])
+
+    def test_cached_joint_indices_follow_a_swap_across_a_quarter_turn(self):
+        e = ET.Rx(pi / 2) * ET.Ry(jindex=0) * ET.Rz(jindex=1)
+        nt.assert_array_equal(e.jindices, [0, 1])
+        e.swap(0)
+        nt.assert_array_equal(e.jindices, [0, 1])
+        e.swap(1)  # Rx(90) and Rz(q1)
+        nt.assert_array_equal(e.jindices, [0, 1])
+        self.assertEqual([t.jindex for t in e.joints()], [0, 1])
+
+
 class TestErrors(unittest.TestCase):
     def test_two_quarter_turns_about_different_axes(self):
         with self.assertRaisesRegex(ValueError, "both quarter turns"):
