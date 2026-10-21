@@ -60,6 +60,7 @@ Information
    ~roboticstoolbox.ET2.param
    ~roboticstoolbox.ET2.isjoint
    ~roboticstoolbox.ET2.isflip
+   ~roboticstoolbox.ET2.offset
    ~roboticstoolbox.ET2.isrotation
    ~roboticstoolbox.ET2.istranslation
    ~roboticstoolbox.ET2.iselementary
@@ -80,7 +81,7 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ET2
-   :members: R, tx, ty, SE2, kind, axis, ax, param, eta, isjoint, isflip, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
+   :members: R, tx, ty, SE2, kind, axis, ax, param, eta, isjoint, isflip, offset, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
    :member-order: bysource
 
 ETS: Elementary Transform Sequence

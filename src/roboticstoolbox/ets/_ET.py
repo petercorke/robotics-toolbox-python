@@ -31,6 +31,43 @@ else:  # pragma: nocover
     Sym = None
 
 
+def _is_nothing(value: Any, rotation: bool) -> bool:
+    """
+    Is a transform with this parameter value no transform at all?
+
+    True if ``value`` is exactly zero and, for a rotation given as a SymPy
+    expression, a whole number of turns, such as ``pi/2 + 3*pi/2``.  A float that
+    is only nearly zero, or ``math.pi + math.pi``, is not exactly nothing.
+    """
+    if issymbol(value):
+        import sympy
+
+        value = sympy.simplify(value)
+        if value == 0:
+            return True
+        if rotation:
+            # a whole number of turns, False if SymPy cannot tell
+            return bool(sympy.simplify(value / (2 * sympy.pi)).is_integer)
+        return False
+    return bool(value == 0)
+
+
+def _offset_suffix(offset: Any, rotation: bool) -> str:
+    """
+    The offset of a joint as it is displayed after the joint variable
+
+    ``" + 90°"`` or ``" - a"``, or an empty string if there is no offset.
+    """
+    if not issymbol(offset):
+        if offset == 0:
+            return ""
+        value = offset * 180 / pi if rotation else offset
+        unit = "°" if rotation else ""
+        return f" {'+' if value >= 0 else '-'} {abs(value):.4g}{unit}"
+    text = str(offset)
+    return f" - {text[1:]}" if text.startswith("-") else f" + {text}"
+
+
 def _resolve_param(
     param: float | Sym | None, eta: float | None
 ) -> float | Sym | None:
@@ -161,6 +198,12 @@ class BaseET:
 
         flip = bool(flip)  # None (not given, and not set above) -> False
 
+        # The offset of a joint, added to the joint variable: a joint transforms
+        # by ``+-q + offset``.  Zero for every transform that is not a joint with
+        # an offset, which is the usual case.  Kept apart from ``param``, which is
+        # None for a joint and which the compiled code relies on being so.
+        self._offset: float | Sym = 0.0
+
         # A flag to check if the ET is a static joint with a symbolic value
         # Defaults to False as is set to True if param is a symbol below
         self._isstaticsym = False
@@ -212,6 +255,7 @@ class BaseET:
                 param_str = "q"
             else:
                 param_str = f"q{self.jindex}"
+            param_str += _offset_suffix(self._offset, self.isrotation)
         elif issymbol(self.param):
             # Check if symbolic
             param_str = f"{self.param}"
@@ -253,10 +297,11 @@ class BaseET:
             else ""
         )
         s_flip = "" if not self.isflip else f"flip={self.isflip}"
+        s_offset = "" if _is_nothing(self._offset, False) else f"offset={self._offset}"
         s_qlim = "" if self.qlim is None else f"qlim={repr(self.qlim)}"
         s_jindex = "" if self.jindex is None else f"jindex={self.jindex}"
 
-        kwargs = [s_param, s_T, s_jindex, s_flip, s_qlim]
+        kwargs = [s_param, s_T, s_jindex, s_flip, s_offset, s_qlim]
         s_kwargs = ", ".join(filter(None, kwargs))
 
         # self.__class__.__name__ rather than isinstance(self, ET)/(self, ET2):
@@ -511,6 +556,55 @@ class BaseET:
         return self._joint
 
     @property
+    def offset(self) -> float | Sym:
+        r"""
+        Offset of a joint
+
+        :returns: the offset, zero unless one has been set
+        :raises TypeError: on set, if the transform is not a joint
+
+        A joint transforms by :math:`\pm q + a`: the joint variable, negated if the
+        joint is flipped, plus the offset :math:`a`.  This is the offset of a
+        Denavit-Hartenberg link, and it is what remains of a constant transform of
+        the same kind that is merged into a joint, see
+        :meth:`~roboticstoolbox.ets.ETS.ETS.merge`.  The joint limits ``qlim`` are
+        limits on :math:`q`, not on :math:`\pm q + a`.
+
+        The offset may be symbolic.  It is zero if it is exactly zero or, for a
+        rotation, a whole number of turns of a symbolic angle.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz()
+            >>> e.offset = 0.5
+            >>> print(e)
+            >>> e.A(0.1)
+            >>> print(e.inv())
+
+        .. note:: A joint with an offset is evaluated by the Python code, not the
+            compiled code, so it is slower.  ``ik_LM``, ``ik_NR`` and ``ik_GN``,
+            which need the compiled code, do not accept it.
+        """
+        return self._offset
+
+    @offset.setter
+    def offset(self, value: float | Sym) -> None:
+        if not self.isjoint:
+            raise TypeError("only a joint has an offset, a constant has a param")
+        if issymbol(value):
+            if _is_nothing(value, self.isrotation):
+                value = 0.0
+        else:
+            value = float(value)
+        self._offset = value
+        # the compiled code does not know about the offset
+        self._accel_init()
+
+    @property
     def isflip(self) -> bool:
         """
         Test if ET joint is flipped
@@ -677,7 +771,9 @@ class BaseET:
         inv = deepcopy(self)
 
         if inv.isjoint:
+            # the inverse of ``+-q + a`` is ``-+q - a``
             inv._flip ^= True
+            inv._offset = -inv._offset
         elif not inv.iselementary:
             inv._T = npinv(inv._T).copy(order="F")
         elif inv._param is not None:
@@ -713,6 +809,8 @@ class BaseET:
         if self.isjoint:
             if self.isflip:
                 q = -q
+            if self._offset != 0:
+                q = q + self._offset
 
             if self.axis_func is not None:
                 return self.axis_func(q)

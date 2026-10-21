@@ -105,6 +105,7 @@ Information
    ~roboticstoolbox.ET.param
    ~roboticstoolbox.ET.isjoint
    ~roboticstoolbox.ET.isflip
+   ~roboticstoolbox.ET.offset
    ~roboticstoolbox.ET.isrotation
    ~roboticstoolbox.ET.istranslation
    ~roboticstoolbox.ET.iselementary
@@ -185,7 +186,7 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ET
-   :members: Rx, Ry, Rz, tx, ty, tz, SE3, kind, axis, ax, param, eta, isjoint, isflip, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
+   :members: Rx, Ry, Rz, tx, ty, tz, SE3, kind, axis, ax, param, eta, isjoint, isflip, offset, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
    :member-order: bysource
 
 ETS: Elementary Transform Sequence

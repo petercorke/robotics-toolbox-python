@@ -27,7 +27,7 @@ from spatialmath.base import (
 )
 from typing_extensions import Self
 
-from roboticstoolbox.ets._ET import BaseET
+from roboticstoolbox.ets._ET import BaseET, _is_nothing, _offset_suffix
 from roboticstoolbox.ets.fknm import (
     ETS_init,
 )
@@ -199,7 +199,8 @@ class BaseETS(MutableSequence[ETT]):
                 # takes over the whole "q0"/"-q0" formatting below rather
                 # than combining with it.
                 if et._joint_name is not None:
-                    s = f"{et.kind}({et._joint_name})"
+                    suffix = _offset_suffix(et.offset, et.isrotation)
+                    s = f"{et.kind}({et._joint_name}{suffix})"
                     j += 1
                     es.append(s)
                     continue
@@ -216,9 +217,8 @@ class BaseETS(MutableSequence[ETT]):
                 #     qvar = ""
 
                 if et.isflip:
-                    s = f"{et.kind}(-{qvar})"
-                else:
-                    s = f"{et.kind}({qvar})"
+                    qvar = f"-{qvar}"
+                s = f"{et.kind}({qvar}{_offset_suffix(et.offset, et.isrotation)})"
                 j += 1
 
             elif et.isrotation:
@@ -884,21 +884,28 @@ class BaseETS(MutableSequence[ETT]):
 
         :param i: index of the first transform
         :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
-        :raises ValueError: if the transforms are not of the same kind, or either
-            is a joint
+        :raises ValueError: if the transforms are not of the same kind, or both
+            are joints
 
         Replaces the transforms at indices ``i`` and ``i+1`` with a single
-        transform whose parameter is the sum of the two.  This **changes the
-        sequence it is called on** and returns ``None``; use :meth:`merged` to get
-        a modified copy and leave the original alone.
+        transform.  This **changes the sequence it is called on** and returns
+        ``None``; use :meth:`merged` to get a modified copy and leave the original
+        alone.
 
-        Both transforms must be constants of the same kind, for example two ``tx``
-        or two ``Rz``.  A joint cannot be merged with a constant, since a joint
-        has no offset to absorb it.
+        The two transforms must be of the same kind, for example two ``tx`` or two
+        ``Rz``.  There are two cases:
 
-        The parameters may be symbolic.  If they add up to nothing the transform is
-        removed altogether, rather than being left as a transform that does nothing.
-        The sum is nothing if it is
+        - Two constants become a constant whose parameter is the sum of the two.
+        - A joint and a constant become the same joint, with the constant added to
+          its :attr:`~roboticstoolbox.ets.ET.ET.offset`, so ``Rz(q) * Rz(a)`` is
+          ``Rz(q + a)``.  The joint keeps its ``jindex``, ``flip`` and ``qlim``.
+
+        Two joints cannot be merged, since they are two variables.
+
+        The parameters and offsets may be numeric or symbolic, or one of each.  If
+        two constants add up to nothing the transform is removed altogether, rather
+        than being left as a transform that does nothing.  An offset that adds up
+        to nothing is zero but the joint stays.  The sum is nothing if it is
 
         - exactly zero, for example ``tx(x) * tx(-x)`` with ``x`` a SymPy symbol, or
           ``Rx(5) * Rx(-5)``
@@ -929,6 +936,26 @@ class BaseETS(MutableSequence[ETT]):
             >>> e.merge(1)
             >>> print(e)
 
+        A constant merged into a joint becomes its offset, which may be symbolic:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> from spatialmath.base import symbol
+            >>> a = symbol("a")
+            >>> e = ET.tx(1) * ET.Rz() * ET.Rz(a) * ET.tx(2)
+            >>> e.merge(1)
+            >>> print(e)
+            >>> e = ET.Rz(-a) * ET.Rz() * ET.Rz(a)
+            >>> e.merge(1)
+            >>> print(e)
+            >>> e.merge(0)
+            >>> print(e)
+
+        .. versionchanged:: 1.5.0
+            A joint can be merged with a constant, and a transform that adds up to
+            nothing is removed.
+
         .. seealso:: :meth:`merged` :meth:`swap`
         """
         e1, e2 = self._adjacent(i)
@@ -937,19 +964,32 @@ class BaseETS(MutableSequence[ETT]):
                 f"transforms {e1.kind} and {e2.kind} are not the same kind, so they "
                 "cannot be merged"
             )
-        if e1.isjoint or e2.isjoint:
-            raise ValueError("transforms include a joint, it cannot be merged")
-        if e1.param is None or e2.param is None:
-            raise ValueError("transforms are not elementary, they cannot be merged")
+        if e1.isjoint and e2.isjoint:
+            raise ValueError("both transforms are joints, they cannot be merged")
 
-        total = e1.param + e2.param
-        if self._vanishes(e1, total):
-            del self._data[i : i + 2]
-        else:
-            # a new transform, not a change to e1, which other sequences may share
-            merged = deepcopy(e1)
-            merged.param = total
+        if e1.isjoint or e2.isjoint:
+            joint, const = (e1, e2) if e1.isjoint else (e2, e1)
+            if const.param is None:
+                raise ValueError(
+                    "transforms are not elementary, they cannot be merged"
+                )
+            merged = deepcopy(joint)
+            merged.offset = joint.offset + const.param
             self._data[i : i + 2] = [merged]
+        else:
+            if e1.param is None or e2.param is None:
+                raise ValueError(
+                    "transforms are not elementary, they cannot be merged"
+                )
+            total = e1.param + e2.param
+            if _is_nothing(total, e1.isrotation):
+                del self._data[i : i + 2]
+            else:
+                # a new transform, not a change to e1, which other sequences may
+                # share
+                merged = deepcopy(e1)
+                merged.param = total
+                self._data[i : i + 2] = [merged]
         self._fknm_stale = True
 
     def merged(self, i: int) -> Self:
@@ -959,8 +999,8 @@ class BaseETS(MutableSequence[ETT]):
         :param i: index of the first transform
         :return: a copy of the sequence with transforms ``i`` and ``i+1`` merged
         :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
-        :raises ValueError: if the transforms are not of the same kind, or either
-            is a joint
+        :raises ValueError: if the transforms are not of the same kind, or both
+            are joints
 
         The sequence it is called on is not changed.  See :meth:`merge` for which
         transforms can be merged and when the result is removed.
@@ -982,18 +1022,3 @@ class BaseETS(MutableSequence[ETT]):
         new = deepcopy(self)
         new.merge(i)
         return new
-
-    @staticmethod
-    def _vanishes(e: Any, value: Any) -> bool:
-        """Is a transform of the same kind as ``e`` with parameter ``value`` nothing?"""
-        if issymbol(value):
-            import sympy
-
-            value = sympy.simplify(value)
-            if value == 0:
-                return True
-            if e.isrotation:
-                # a whole number of turns, False if SymPy cannot tell
-                return bool(sympy.simplify(value / (2 * sympy.pi)).is_integer)
-            return False
-        return bool(value == 0)

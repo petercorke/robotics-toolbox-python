@@ -95,8 +95,6 @@ class TestMerge(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "not the same kind"):
             (ET.tx(1) * ET.Rz(1)).merge(0)
         with self.assertRaisesRegex(ValueError, "joint"):
-            (ET.Rz() * ET.Rz(1)).merge(0)
-        with self.assertRaisesRegex(ValueError, "joint"):
             (ET.Rz() * ET.Rz()).merge(0)
         for i in (-1, 1):
             with self.assertRaises(IndexError):
