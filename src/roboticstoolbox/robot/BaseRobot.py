@@ -75,6 +75,10 @@ def _is_symbolic(value: Any) -> bool:
     return np.asarray(value).dtype == object
 
 
+# the modules of the robot classes themselves, as distinct from models built from them
+_FRAMEWORK_MODULES = ("roboticstoolbox.robot.", "roboticstoolbox.models.URDF.URDFRobot")
+
+
 class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[LinkType]):
     # set when the links are processed in the constructor
     _base_link: LinkType
@@ -533,9 +537,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 f"{s}",
             )
 
-        classname = "ERobot"
-
-        s = f"{classname}: {self.name}"
+        s = f"{self._class_label()}: {self.name}"
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
@@ -560,6 +562,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def __repr__(self) -> str:
         return str(self)
+
+    def _class_label(self) -> str:
+        """
+        The class of this robot, for the first line of its display
+
+        ``Robot``, ``Robot2``, ``DHRobot`` or ``URDFRobot`` for an instance of the class
+        itself, and ``X.Y`` for an instance of a subclass ``Y`` of one of them, for
+        example ``DHRobot.Puma560`` or ``URDFRobot.Panda``: the kind of robot, then the
+        model.
+        """
+        cls = type(self)
+        if cls.__module__.startswith(_FRAMEWORK_MODULES):
+            return cls.__name__
+        return f"{cls.__mro__[1].__name__}.{cls.__name__}"
 
     # --------------------------------------------------------------------- #
     # --------- Properties ------------------------------------------------ #
@@ -2125,6 +2141,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param inline_format: (Plot Option) In notebook-inline mode, frame format: ``'svg'`` (default) or ``'png'``.
         :param inline_dpi: (Plot Option) DPI for PNG inline frames only; ignored when ``inline_format='svg'``.
         :returns: A reference to the environment object which controls the figure
+
+        .. note::
+
+            Python's ``webbrowser`` module cannot tell whether a browser is installed, so
+            a browser that cannot be opened is not reported as such.  On macOS the names
+            ``"chrome"``, ``"firefox"`` and ``"safari"`` are always accepted, whether or
+            not the app is installed.  If it is not, no window opens and there is no
+            error: Swift waits about 10 seconds for the page to connect and then reports
+            ``Could not connect to the Swift simulator``.  If you see that, check that
+            the browser named by ``browser`` is installed, or leave it as ``None`` to use
+            the system's default browser.  See :py:meth:`swift.Swift.Swift.launch`.
 
         .. rubric:: Notes
 
