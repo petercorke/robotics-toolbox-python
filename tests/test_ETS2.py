@@ -568,9 +568,13 @@ class TestETS2(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "do not commute"):
             e.swap(0)
 
+        # a constant merged into a joint is the offset of the joint
         e = ET2.tx(1) * ET2.tx()
+        e.merge(0)
+        self.assertEqual(len(e), 1)
+        nt.assert_almost_equal(e[0].offset, 1)
         with self.assertRaisesRegex(ValueError, "joint"):
-            e.merge(0)
+            (ET2.tx() * ET2.tx()).merge(0)
 
     def test_motion_subspace(self):
         nt.assert_array_equal(ET2.R().s, [0, 0, 1])

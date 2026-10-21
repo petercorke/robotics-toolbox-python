@@ -190,18 +190,22 @@ class ETS(BaseETS[ET]):
             if joint_index == j:
                 fixed = -value if et.isflip else value
                 if et.isrotation:
-                    parts.append(constructor(fixed, unit=unit))
+                    new = constructor(fixed, unit=unit)
                 else:
                     if unit != "rad":
                         raise ValueError("unit='deg' is only valid for rotational joints")
-                    parts.append(constructor(fixed))
+                    new = constructor(fixed)
+                if et.offset != 0:
+                    # the joint transforms by +-q + offset
+                    new.param = new.param + et.offset
             else:
                 if self._auto_jindex:
-                    parts.append(constructor(flip=et.isflip, qlim=et.qlim))
+                    new = constructor(flip=et.isflip, qlim=et.qlim)
                 else:
-                    parts.append(
-                        constructor(flip=et.isflip, qlim=et.qlim, jindex=et.jindex)
-                    )
+                    new = constructor(flip=et.isflip, qlim=et.qlim, jindex=et.jindex)
+                if et.offset != 0:
+                    new.offset = et.offset
+            parts.append(new)
             joint_index += 1
 
         return ETS(parts)
