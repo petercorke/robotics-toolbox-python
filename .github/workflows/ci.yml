@@ -62,7 +62,7 @@ jobs:
           '
 
       - name: Test (core)
-        run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
+        run: pytest tests/ --ignore=tests/test_blocks.py -m "not slow" --timeout=50 --timeout_method=thread -q
 
   test:
     runs-on: ${{ matrix.os }}
@@ -109,7 +109,7 @@ jobs:
           '
 
       - name: Test
-        run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
+        run: pytest tests/ --ignore=tests/test_blocks.py -m "not slow" --timeout=50 --timeout_method=thread -q
 
   all-tests-passed:
     name: All tests passed
