@@ -147,6 +147,18 @@ class ETS2(BaseETS[ET2]):
         :param unit: angular unit for rotational joints, "rad" [default] or "deg"
         :returns: ETS2 with one fewer joint
         :raises ValueError: for an invalid joint position or angular unit
+
+        Fixing a flipped revolute joint preserves the other joint as a variable:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET2
+            >>> ets = ET2.R(flip=True) * ET2.tx(1) * ET2.R()
+            >>> fixed = ets.fixjoint(0, 90, unit="deg")
+            >>> fixed.n, ets.n
+            (1, 2)
+
+        .. versionadded:: 1.5.0
         """
         # bool subclasses int, but must not select joint 0 or 1.
         if (
