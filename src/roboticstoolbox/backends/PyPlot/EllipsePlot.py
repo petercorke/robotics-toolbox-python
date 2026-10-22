@@ -8,7 +8,6 @@ from __future__ import annotations
 import warnings
 from typing import Any
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 # import scipy as sp
