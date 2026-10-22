@@ -134,6 +134,7 @@ The graphical :doc:`backends <arm_backend>` do the drawing.
     ~roboticstoolbox.robot.Robot.Robot.friction
     ~roboticstoolbox.robot.Robot.Robot.nofriction
     ~roboticstoolbox.robot.Robot.Robot.payload
+    ~roboticstoolbox.robot.Robot.Robot.payload_capacity
     ~roboticstoolbox.robot.Robot.Robot.perturb
 
 .. rubric:: Collision checking
