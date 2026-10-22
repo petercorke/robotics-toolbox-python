@@ -1607,7 +1607,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             name=name,
             manufacturer=manufacturer,
             comment=comment,
-            base=base,  # type: ignore
+            base=base,
             tool=tool,
             gravity=gravity,
             keywords=keywords,

@@ -452,8 +452,8 @@ class BaseLink(SceneNode, ABC):
             qlim=qlim,
             qdlim=qdlim,
             tlim=tlim,
-            geometry=geometry,  # type: ignore
-            collision=collision,  # type: ignore
+            geometry=geometry,
+            collision=collision
         )
 
         # Register first: a link's parent and children form a graph, not a tree.
