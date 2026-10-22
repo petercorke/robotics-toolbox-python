@@ -250,6 +250,7 @@ module = [
     "roboticstoolbox.mobile.PoseGraph",
     "roboticstoolbox.mobile.EKF",
     "roboticstoolbox.mobile.sensors",
+    "roboticstoolbox.mobile.ParticleFilter",
     "roboticstoolbox.backends",
     "roboticstoolbox.backends.Connector",
     "roboticstoolbox.backends.swift",
@@ -368,12 +369,6 @@ disallow_untyped_defs = true
 # has type errors; fix a module, delete its line, and mypy then holds it to
 # zero.  The list should only ever get shorter.  A module that is not listed
 # is checked, and must stay clean.
-[[tool.mypy.overrides]]
-module = [
-    "roboticstoolbox.mobile.ParticleFilter",
-]
-ignore_errors = true
-
 [[tool.mypy.overrides]]
 module = [
     "roboticstoolbox.tools.DHFactor",
