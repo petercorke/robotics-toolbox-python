@@ -704,6 +704,9 @@ class PoseGraph:
         If the graph is ``verbose`` the cost and the time taken are printed.
 
         The first vertex is anchored, since the measurements are all relative.
+        The system matrix is assembled from sparse 3-by-3 blocks, so assembly
+        storage grows with the graph's vertices and edges rather than the
+        square of its vertex count.
 
         .. seealso:: :meth:`optimize`
         """
@@ -711,11 +714,10 @@ class PoseGraph:
 
         g = self.graph
 
-        # H and b are respectively the system matrix and the system vector
-        H = np.zeros((g.n * 3, g.n * 3))
+        # Each edge contributes four 3x3 blocks. Assemble only those blocks,
+        # rather than allocating and scanning a dense (3N, 3N) matrix.
+        blocks: dict[tuple[int, int], NDArray] = {(0, 0): np.zeros((3, 3))}
         b = np.zeros((g.n * 3, 1))
-        # this loop constructs the global system by accumulating in H and b the contributions
-        # of all edges (see lecture)
 
         etotal = 0
         for edge in g.edges():
@@ -736,28 +738,41 @@ class PoseGraph:
             islice = slice(i * 3, (i + 1) * 3)
             jslice = slice(j * 3, (j + 1) * 3)
 
-            # accumulate the blocks in H and b
-            H[islice, islice] += Hii
-            H[jslice, jslice] += Hjj
-            H[islice, jslice] += Hij
-            H[jslice, islice] += Hij.T
+            # RVC3, Appendix F.2.4.1: accumulate H_ij += ... and b_i += ...
+            # over the edges, storing only the nonzero blocks of H.
+            # Keep the original accumulation order: sorting duplicate COO
+            # entries can change rounding in poorly conditioned pose graphs.
+            for key, block in (
+                ((i, i), Hii),
+                ((j, j), Hjj),
+                ((i, j), Hij),
+                ((j, i), Hij.T),
+            ):
+                if key in blocks:
+                    blocks[key] += block
+                else:
+                    blocks[key] = block.copy()
 
             b[islice, 0] += bi
             b[jslice, 0] += bj
 
             etotal += np.inner(e, e)
 
-        # note that the system (H b) is obtained only from
-        # relative constraints. H is not full rank.
-        # we solve the problem by anchoring the position of
-        # the the first vertex.
-        # this can be expressed by adding the equation
-        #  deltax(1:3,1) = 0
-        # which is equivalent to the following
+        # Relative constraints leave a global translation and rotation free.
+        # Anchor the first pose by adding an identity block to its diagonal.
+        blocks[0, 0] += np.eye(3)
 
-        H[0:3, 0:3] += np.eye(3)
-
-        SH = scipy.sparse.csr_matrix(H)
+        # Expand each block's vertex indices into scalar matrix coordinates
+        # in the same row-major order as its nine flattened coefficients.
+        indices = np.array(list(blocks))
+        rows = (3 * indices[:, 0, None] + np.repeat(np.arange(3), 3)).ravel()
+        cols = (3 * indices[:, 1, None] + np.tile(np.arange(3), 3)).ravel()
+        SH = scipy.sparse.coo_matrix(
+            (np.array(list(blocks.values())).ravel(), (rows, cols)),
+            shape=(g.n * 3, g.n * 3),
+        ).tocsr()
+        # Match the nonzero structure of the original dense-to-CSR conversion.
+        SH.eliminate_zeros()
         deltax = scipy.sparse.linalg.spsolve(SH, b)  # SH \ b
 
         # split the increments in nice 3x1 vectors and sum them up to the original matrix
