@@ -3,14 +3,15 @@
 @author Jesse Haviland
 """
 
-from roboticstoolbox.backends.Connector import Connector
-import roboticstoolbox as rtb
-import numpy as np
-import spatialmath as sm
-
-import time
-import subprocess
 import os
+import subprocess
+import time
+
+import numpy as np
+
+import roboticstoolbox as rtb
+from roboticstoolbox.backends.Connector import Connector
+
 # import rospy
 # from std_msgs.msg import Float32MultiArray
 

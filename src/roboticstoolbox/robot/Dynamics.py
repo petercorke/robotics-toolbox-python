@@ -2,7 +2,7 @@
 Rigid-body dynamics functionality of the Toolbox.
 
 ``DynamicsMixin`` holds *derived* dynamics quantities -- ``accel``,
-``gravload``, ``coriolis``, ``inertia``, ``itorque``, ``pay``, etc. --
+``gravload``, ``coriolis``, ``inertia``, ``itorque``, ``payload_capacity``, etc. --
 implemented generically, in terms of a small set of primitives (``rne``,
 ``jacob0``, ...) declared abstractly by ``RobotProto``. This mixin never
 touches representation-specific internals (DH parameters, ETS chains, the
@@ -27,34 +27,52 @@ implementation available to ``ERobot``/URDF/general robots -- there's no
 alternative to fall back on the way ``DHRobot`` has two.
 """
 
-from collections import namedtuple
-from typing import Any, Callable
-import numpy as np
-from spatialmath.base import getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
-from scipy import integrate, interpolate
-from spatialmath.base import symbolic as sym
-from roboticstoolbox.tools.params import rtb_get_param
-from roboticstoolbox.robot.RobotProto import RobotProto
+from __future__ import annotations
 
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-from typing_extensions import Self
-import roboticstoolbox as rtb
-
-from ansitable import ANSITable, Column
 import warnings
+from collections.abc import Callable
+from typing import Any, NamedTuple
+from typing import Literal as L
+
+import numpy as np
+from ansitable import ANSITable, Column
+from scipy import integrate, interpolate
+from spatialmath.base import getmatrix, getvector, isscalar
+
+import roboticstoolbox as rtb
+from roboticstoolbox.robot.RobotProto import RobotProto
+from roboticstoolbox.tools.params import rtb_get_param
+from roboticstoolbox.tools.types import ArrayLike, NDArray
+
+
+class fdyn(NamedTuple):
+    """Result of :meth:`DynamicsMixin.fdyn`: time, joint angles and velocities"""
+
+    t: NDArray
+    q: NDArray
+    qd: NDArray
 
 
 class DynamicsMixin:
     # --------------------------------------------------------------------- #
-    def dynamics(self: RobotProto):
+    def _require_dynamics(self: RobotProto) -> None:
+        # ``hasdynamics`` is a cached flag, so this costs nothing
+        if not self.hasdynamics:
+            raise ValueError(
+                f"model '{self.name}' has no dynamic parameters (all link masses "
+                "and motor inertias are zero); use a model that defines them, for "
+                "example rtb.models.DH.Panda(), or set m, r and I on its links"
+            )
+
+    # --------------------------------------------------------------------- #
+    def dynamics(self: RobotProto) -> None:
         """
-        Pretty print the dynamic parameters (Robot superclass)
+        Pretty print the dynamic parameters
 
         The dynamic parameters (inertial and friction) are printed in a table,
         with one row per link.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -80,23 +98,23 @@ class DynamicsMixin:
             table.row(link.name, *link._dyn2list())
         table.print()
 
-    def dynamics_list(self: RobotProto):
+    def dynamics_list(self: RobotProto) -> None:
         """
-        Print dynamic parameters (Robot superclass)
+        Print dynamic parameters
 
         Display the kinematic and dynamic parameters to the console in
         reable format
 
         """
         for j, link in enumerate(self.links):
-            print("\nLink {:d}::".format(j), link)
+            print(f"\nLink {j:d}::", link)
             print(link.dyn(indent=2))
 
     # --------------------------------------------------------------------- #
 
     def friction(self: RobotProto, qd: NDArray) -> NDArray:
         r"""
-        Manipulator joint friction (Robot superclass)
+        Manipulator joint friction
 
         :param qd: The joint velocities of the robot
         :type qd: ndarray(n,)
@@ -136,10 +154,7 @@ class DynamicsMixin:
             ratios are tricky: the Puma560 robot has negative gear ratio for
             joints 1 and 3.
 
-        See Also
-        --------
-        :func:`Robot.nofriction`
-        :func:`Link.friction`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.nofriction` :meth:`~roboticstoolbox.robot.Link.Link.friction`
 
         """
 
@@ -153,7 +168,7 @@ class DynamicsMixin:
 
     # --------------------------------------------------------------------- #
 
-    def nofriction(self: RobotProto, coulomb: bool = True, viscous: bool = False):
+    def nofriction(self: RobotProto, coulomb: bool = True, viscous: bool = False) -> Any:
         """
         Remove manipulator joint friction
 
@@ -165,10 +180,7 @@ class DynamicsMixin:
         a robot with the same link parameters except the Coulomb and/or viscous
         friction parameter are set to zero.
 
-        See Also
-        --------
-        :func:`Robot.friction`
-        :func:`Link.nofriction`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.friction` :meth:`~roboticstoolbox.robot.Link.Link.nofriction`
 
         """
 
@@ -179,8 +191,7 @@ class DynamicsMixin:
         nf = self.copy()
         nf.name = "NF/" + self.name
 
-        # Reuse Link.nofriction, but preserve the copies' graph identities.
-        # Replacing _links with independently cloned links breaks parent links.
+        # Reuse Link.nofriction, but keep the copied robot's link graph intact.
         for link in nf.links:
             frictionless = link.nofriction(coulomb, viscous)
             if viscous:
@@ -195,13 +206,13 @@ class DynamicsMixin:
         T: float,
         q0: ArrayLike,
         Q: Callable[[Any, float, NDArray, NDArray], NDArray] | None = None,
-        Q_args: dict = {},
+        Q_args: dict | None = None,
         qd0: ArrayLike | None = None,
         solver: str = "RK45",
-        solver_args: dict = {},
+        solver_args: dict | None = None,
         dt: float | None = None,
         progress: bool = False,
-    ):
+    ) -> Any:
         """
         Integrate forward dynamics
 
@@ -244,8 +255,7 @@ class DynamicsMixin:
 
         The function must return a Numpy array (n,) of joint forces/torques.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         To apply zero joint torque to the robot without Coulomb
         friction:
@@ -290,13 +300,10 @@ class DynamicsMixin:
         - Interpolation is performed using
           `SciPy interp1d <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`_
 
-        See Also
-        --------
-        :func:`DHRobot.accel`
-        :func:`DHRobot.nofriction`,
-        :func:`DHRobot.rne`.
+        .. seealso:: :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.accel` :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.nofriction`, :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.rne`.
 
         """
+        self._require_dynamics()
 
         n = self.n
 
@@ -307,9 +314,11 @@ class DynamicsMixin:
             qd0 = np.zeros((n,))
         else:
             qd0 = getvector(qd0, n)
-        if Q is not None:
-            if not callable(Q):
-                raise ValueError("generalized joint torque function must be callable")
+        if Q is not None and not callable(Q):
+            raise ValueError("generalized joint torque function must be callable")
+        # not a default argument, which would be one dict shared by every call
+        Q_args = {} if Q_args is None else Q_args
+        solver_args = {} if solver_args is None else solver_args
 
         # concatenate q and qd into the initial state vector
         x0 = np.r_[q0, qd0]
@@ -362,17 +371,17 @@ class DynamicsMixin:
 
             tnew = np.arange(0, T, dt)
             xnew = interp(tnew)
-            return namedtuple("fdyn", "t q qd")(tnew, xnew[:, :n], xnew[:, n:])
+            return fdyn(tnew, xnew[:, :n], xnew[:, n:])
         else:
-            return namedtuple("fdyn", "t q qd")(tarray, xarray[:, :n], xarray[:, n:])
+            return fdyn(tarray, xarray[:, :n], xarray[:, n:])
 
     def _fdyn(
         self: RobotProto,
         t: float,
         x: NDArray,
-        Qfunc: Callable[[Any, float, NDArray, NDArray], NDArray],
+        Qfunc: Callable[[Any, float, NDArray, NDArray], NDArray] | None,
         Qargs: dict,
-    ):
+    ) -> NDArray:
         """
         Private function called by fdyn
 
@@ -409,7 +418,7 @@ class DynamicsMixin:
 
         return np.r_[qd, qdd]
 
-    def accel(self: RobotProto, q, qd, torque, gravity=None):
+    def accel(self: RobotProto, q: Any, qd: Any, torque: Any, gravity: Any = None) -> Any:
         r"""
         Compute acceleration due to applied torque
 
@@ -441,8 +450,7 @@ class DynamicsMixin:
         where each row is the acceleration corresponding to the equivalent rows
         of q, qd, torque.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -468,6 +476,7 @@ class DynamicsMixin:
             104, no. 3, pp. 205-211, 1982.
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -496,110 +505,151 @@ class DynamicsMixin:
         else:
             return qdd
 
-    def pay(
+    def payload_capacity(
         self: RobotProto,
-        W: ArrayLike,
-        q: NDArray | None = None,
-        J: NDArray | None = None,
-        frame: int = 1,
-    ):
+        q: ArrayLike,
+        tau_m: ArrayLike,
+        w: ArrayLike,
+        frame: L["base", "ee"] = "base",
+    ) -> NDArray:
         """
-        Generalised joint force/torque due to a payload wrench
+        Compute the payload capacity of the manipulator
 
-        :param W: A wrench vector applied at the end effector,
-            W = [Fx Fy Fz Mx My Mz]
-        :type W: ndarray(6,)
-        :param q: Joint coordinates
-        :type q: ndarray(n,)
-        :param J: The manipulator Jacobian (Optional, if not supplied will
-            use the q value).
-        :type J: ndarray(6,n)
-        :param frame: The frame in which to torques are expressed in when J
-            is not supplied. 0 means base frame of the robot, 1 means end-
-            effector frame
-        :returns: Joint forces/torques due to W
-        :rtype: ndarray(n,)
+        :param q: Joint coordinates for trajectory
+        :type q: ndarray(m,n) where `m` is the number of trajectory points and `n` is
+            the number of robot joints
+        :param tau_m: actuator torque limits
+        :type tau_m: ndarray(n,), ndarray(1,n), ndarray(2,n) where `n` is the number of
+            robot joints
+        :param w: External wrench applied to the end-effector
+        :type w: ArrayLike(6)
+        :param frame: the frame in which ``w`` is expressed, ``"base"`` for the base
+            frame (default) and ``"ee"`` for the end-effector frame, which includes
+            the tool transform
+        :returns: Payload capacity of the manipulator
+        :rtype: ndarray(m,n)
 
-        tau = pay(W, J) Returns the generalised joint force/torques due to a
-        payload wrench W applied to the end-effector. Where the manipulator
-        Jacobian is J (6xn), and n is the number of robot joints.
+        For each configuration, row of ``q``, compute the multiple of the applied external
+        wrench ``w`` that can be applied to the end-effector without exceeding the
+        actuator torque limits ``tau_m``.  If ``w`` is the weight of a 1 kg mass then
+        the multiple is the capacity in kg.  A load such as a weight is fixed in the
+        world, so ``w`` is in the base frame by default; use ``frame="ee"`` for a wrench
+        that is fixed to the end-effector, such as a force along the tool axis.  This
+        multiple is computed for each joint and can be
+        
+        * a positive real number
+        * ``inf`` the joint has no role in determining the payload capacity
+        * ``nan`` the gravity load already exceeds the joint torque limit
 
-        tau = pay(W, q, frame) as above but the Jacobian is calculated at pose
-        q in the frame given by frame which is 0 for base frame, 1 for
-        end-effector frame.
+        The joint with the lowest payload capacity is the one that determines the
+        overall payload capacity for that configuration.  
+        
+        The result is a matrix of payload capacities for each joint and configuration.
 
-        Uses the formula tau = J'W, where W is a wrench vector applied at the
-        end effector, W = [Fx Fy Fz Mx My Mz]'.
+        The joint force/torque limits ``tau_m`` are given as an array of shape (n,) or
+        (1,n) of maximum values, in which case the minimum is the negative of the
+        maximum, or (2,n), in which case the first row is the minimum and the second
+        row is the maximum.
+        
+        .. rubric:: Examples
 
-        Trajectory operation:
-          In the case q is nxm or J is 6xnxm then tau is nxm where each row
-          is the generalised force/torque at the pose given by corresponding
-          row of q.
+        In this example we compute the payload capacity of the Puma560 robot along a
+        straight line trajectory in the x-direction, moving from tightly folded to
+        almost straight.  The end-effector is oriented with the tool frame pointing in
+        the x-direction, and a tool offset is added so that the load causes a moment on
+        the wrist.  The external wrench is a downward force of 9.81 N, which is
+        equivalent to a 1 kg mass.  The torque limits are the motor fuse limits from
+        Table 2.17 of "Visual Control of Robots", Corke (1996).  The payload capacity,
+        as well as the limiting joint, is plotted as a function of the x-position of the
+        end-effector.  The minimum payload capacity is also plotted, along with the
+        index of the joint that determines the payload capacity.
 
-        .. rubric:: Notes
+        .. code::
 
-        - Wrench vector and Jacobian must be from the same reference
-            frame.
-        - Tool transforms are taken into consideration when frame=1.
-        - Must have a constant wrench - no trajectory support for this
-            yet.
+            >>> from roboticstoolbox import models
+            >>> import matplotlib.pyplot as plt
+            >>> import numpy as np
+            >>> from spatialmath import SE3
+            >>> puma = models.DH.Puma560()
+            >>> puma.tool = SE3.Tz(0.05)
+            >>> T = SE3.Tx(np.arange(0.35, 0.85, 0.01)) * SE3.Tz(puma.links[0].d) * SE3.Ry(90, "deg")
+            >>> sol = puma.ikine_a(T)
+            >>> w = [0,0,-9.81,0,0,0]
+            >>> cap = puma.payload_capacity(sol.q, [56, 97, 52,10,10,10], w)
+            >>> plt.plot(T.x, [np.min(c) for c in cap])
+            >>> plt.plot(T.x, [np.argmin(c) for c in cap])
 
+        .. plot::
+
+            from roboticstoolbox import models
+            import matplotlib.pyplot as plt
+            import numpy as np
+            from spatialmath import SE3
+            puma = models.DH.Puma560()
+            puma.tool = SE3.Tz(0.05)
+            T = SE3.Tx(np.arange(0.35, 0.85, 0.01)) * SE3.Tz(puma.links[0].d) * SE3.Ry(90, "deg") 
+            sol = puma.ikine_a(T) 
+            w = [0,0,-9.81,0,0,0] 
+            cap = puma.payload_capacity(sol.q, [56, 97, 52,10,10,10], w)
+            fig, (ax1, ax2) = plt.subplots(2, 1)
+            ax1.plot(T.x, [np.min(c) for c in cap])
+            ax1.set_ylabel("payload capacity (kg)")
+            ax1.grid(True)
+            ax2.plot(T.x, [np.argmin(c) for c in cap])
+            ax2.set_xlabel("x-position of end-effector (m)")
+            ax2.set_ylabel("index of limiting joint")
+            ax2.grid(True)
+
+        Derived from the MATLAB functions ``pay`` and ``paycap`` originally contributed
+        to the MATLAB Robotics Toolbox by Bryan Moutrie (@au-phiware). Ported to Python
+        and adapted for ``robotics-toolbox-python`` with permission from the original
+        author.
+
+        .. versionadded:: 1.5.0
+
+        :seealso: :meth:`gravload` :meth:`payload`
         """
-
-        try:
-            W = np.array(getvector(W, 6))
-            trajn = 0
-        except ValueError:
-            if isinstance(W, NDArray):
-                trajn = W.shape[0]
-                verifymatrix(W, (trajn, 6))
-            else:
-                raise ValueError("W is invalid")
-
-        if trajn:
-            # A trajectory
-            if J is not None:
-                # Jacobian supplied
-                verifymatrix(J, (trajn, 6, self.n))
-            elif q is not None:
-                # Use q instead
-                verifymatrix(q, (trajn, self.n))
-                J = np.zeros((trajn, 6, self.n))
-                for i in range(trajn):
-                    if frame:
-                        J[i, :, :] = self.jacobe(q[i, :])
-                    else:
-                        J[i, :, :] = self.jacob0(q[i, :])
-            else:
-                raise ValueError("q of J is needed for trajectory")
+        # each of τ_min, τ_max are (n,) arrays of joint torque limits
+        tau_m = np.asarray(getmatrix(tau_m, (None, self.n)))
+        if tau_m.shape[0] == 1:
+            τ_max = tau_m.squeeze()
+            τ_min = -τ_max
         else:
-            # Single configuration
-            if J is not None:
-                # Jacobian supplied
-                verifymatrix(J, (6, self.n))
-            else:
-                # Use q instead
-                if q is None:
-                    q = np.copy(self.q)
-                else:
-                    q = getvector(q, self.n)
+            τ_min = tau_m[0].squeeze()
+            τ_max = tau_m[1].squeeze()
 
-                if frame:
-                    J = self.jacobe(q)
-                else:
-                    J = self.jacob0(q)
+        w = np.asarray(getvector(w, 6))
+        q = np.asarray(getmatrix(q, (None, self.n)))
 
-        if trajn == 0:
-            tau = -J.T @ W
+        # the Jacobian that is in the frame of the wrench
+        if frame == "base":
+            jacobian = self.jacob0
+        elif frame == "ee":
+            jacobian = self.jacobe
         else:
-            tau = np.zeros((trajn, self.n))
+            raise ValueError(f"frame is {frame!r}, choose from: 'base', 'ee'")
 
-            for i in range(trajn):
-                tau[i, :] = -J[i, :, :].T @ W[i, :]
+        # The motor torque that holds the robot and a payload s * w is
+        #   τ = τ_g + s τ_p
+        # where τ_g is the gravity load, and τ_p is the torque due to w, which is
+        # -Jᵀw since w is the wrench that the payload applies to the robot.
+        limits = []
+        for _q in q:
+            τ_g = self.gravload(_q)
+            τ_p = -jacobian(_q).T @ w
 
-        return tau
+            # Pick the appropriate bound based on sign of τ_p
+            bound = np.where(τ_p > 0, τ_max, τ_min)
 
-    def payload(self: RobotProto, m: float, p=np.zeros(3)):
+            with np.errstate(divide='ignore', invalid='ignore'):
+                s = np.where(abs(τ_p) > 1e-10, (bound - τ_g) / τ_p, np.inf)
+            # Overwrite out-of-bounds positions with NaN
+            s[(τ_g > τ_max) | (τ_g < τ_min)] = np.nan
+            limits.append(s)
+
+        return np.array(limits)
+
+    def payload(self: RobotProto, m: float, p: ArrayLike | None = None) -> None:
         """
         Add a payload to the end-effector
 
@@ -647,7 +697,7 @@ class DynamicsMixin:
             link.I = I0.copy()
             return
 
-        p = getvector(p, 3)
+        p = np.zeros(3) if p is None else getvector(p, 3)
         mc = m0 + m
         rc = (m0 * r0 + m * p) / mc
 
@@ -664,7 +714,7 @@ class DynamicsMixin:
             + m * (np.dot(dp, dp) * E - np.outer(dp, dp))
         )
 
-    def jointdynamics(self: RobotProto, q, qd=None):
+    def jointdynamics(self: RobotProto, q: Any, qd: Any = None) -> Any:
         """
         Transfer function of joint actuator
 
@@ -690,8 +740,8 @@ class DynamicsMixin:
         tf = []
         for j, link in enumerate(self.links):
             # compute inertia for this joint
-            zero = np.zeros((self.n))
-            qdd = np.zeros((self.n))
+            zero = np.zeros(self.n)
+            qdd = np.zeros(self.n)
             qdd[j] = 1
             M = self.rne(q, zero, qdd, gravity=[0, 0, 0])
             J = link.Jm + M[j] / abs(link.G) ** 2
@@ -708,7 +758,7 @@ class DynamicsMixin:
 
         return tf
 
-    def cinertia(self: RobotProto, q):
+    def cinertia(self: RobotProto, q: Any) -> None:
         """
         Deprecated, use ``inertia_x``
 
@@ -730,12 +780,11 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` is a matrix (m,n), each row is interpretted as a joint state
+        If ``q`` is a matrix (m,n), each row is interpreted as a joint state
         vector, and the result is a 3d-matrix (nxnxk) where each plane
         corresponds to the inertia for the corresponding row of q.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -753,11 +802,10 @@ class DynamicsMixin:
         - The diagonal terms include the motor inertia reflected through
             the gear ratio.
 
-        See Also
-        --------
-        :func:`cinertia`
+        .. seealso:: :func:`cinertia`
 
         """
+        self._require_dynamics()
         q = getmatrix(q, (None, self.n))
 
         In = np.zeros((q.shape[0], self.n, self.n))
@@ -775,7 +823,7 @@ class DynamicsMixin:
         else:
             return In
 
-    def coriolis(self: RobotProto, q, qd):
+    def coriolis(self: RobotProto, q: Any, qd: Any) -> Any:
         r"""
         Coriolis and centripetal term
 
@@ -799,12 +847,11 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and `qd` are matrices (m,n), each row is interpretted as a
+        If ``q`` and `qd` are matrices (m,n), each row is interpreted as a
         joint configuration, and the result (n,n,m) is a 3d-matrix where
         each plane corresponds to a row of ``q`` and ``qd``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -819,6 +866,7 @@ class DynamicsMixin:
         - Computationally slow, involves :math:`n^2/2` invocations of RNE.
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
@@ -871,10 +919,8 @@ class DynamicsMixin:
             return C
 
     def gravload(
-        self: RobotProto,
-        q: ArrayLike | None = None,
-        gravity: ArrayLike | None = None,
-    ):
+        self: RobotProto, q: ArrayLike | None = None, gravity: ArrayLike | None = None
+    ) -> Any:
         """
         Compute gravity load
 
@@ -895,14 +941,15 @@ class DynamicsMixin:
         ``robot.gravload(q, gravity=g)`` as above except the gravitational
         acceleration is explicitly specified as ``g``.
 
+        The return value is referenced to the load, not the motor, the gear ratio is not taken into account.
+
         **Trajectory operation**
 
         If q is a matrix (nxm) each column is interpreted as a joint
         configuration vector, and the result is a matrix (nxm) each column
         being the corresponding joint torques.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -911,8 +958,9 @@ class DynamicsMixin:
             >>> puma.gravload(puma.qz)
 
         """
+        self._require_dynamics()
 
-        q = getmatrix(q, (None, self.n))
+        q = np.asarray(getmatrix(q, (None, self.n)))
 
         if gravity is None:
             gravity = self.gravity
@@ -931,8 +979,12 @@ class DynamicsMixin:
             return taug
 
     def inertia_x(
-        self: RobotProto, q=None, pinv=False, representation="rpy/xyz", Ji=None
-    ):
+        self: RobotProto,
+        q: Any = None,
+        pinv: bool = False,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
+        Ji: Any = None,
+    ) -> Any:
         r"""
         Operational space inertia matrix
 
@@ -968,13 +1020,12 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` is a matrix (m,n), each row is interpretted as a joint state
+        If ``q`` is a matrix (m,n), each row is interpreted as a joint state
         vector, and the result is a 3d-matrix (m,n,n) where each plane
         corresponds to the Cartesian inertia for the corresponding
         row of ``q``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -989,9 +1040,7 @@ class DynamicsMixin:
 
         .. warning:: Assumes that the operational space has 6 DOF.
 
-        See Also
-        --------
-        :func:`inertia`
+        .. seealso:: :func:`inertia`
 
         """
 
@@ -1027,16 +1076,16 @@ class DynamicsMixin:
 
     def coriolis_x(
         self: RobotProto,
-        q,
-        qd,
-        pinv=False,
-        representation="rpy/xyz",
-        J=None,
-        Ji=None,
-        Jd=None,
-        C=None,
-        Mx=None,
-    ):
+        q: Any,
+        qd: Any,
+        pinv: bool = False,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
+        J: Any = None,
+        Ji: Any = None,
+        Jd: Any = None,
+        C: Any = None,
+        Mx: Any = None,
+    ) -> Any:
         r"""
         Operational space Coriolis and centripetal term
 
@@ -1066,9 +1115,10 @@ class DynamicsMixin:
 
         .. math::
 
-            \mathbf{C}_x = \mathbf{J}(q)^{-T} \left(
-                \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q)
-                \right) \mathbf{J}(q)^{-1}
+            \mathbf{C}_x = \mathbf{J}(q)^{-T} \mathbf{C}(q, \dot{q})
+                \mathbf{J}(q)^{-1}
+                - \mathbf{M}_x(q) \dot{\mathbf{J}}(q, \dot{q})
+                \mathbf{J}(q)^{-1}
 
         The product :math:`\mathbf{C} \dot{x}` is the operational space wrench
         due to joint velocity coupling. This matrix is also known as the
@@ -1089,12 +1139,11 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and `qd` are matrices (m,n), each row is interpretted as a
-        joint configuration, and the result (n,n,m) is a 3d-matrix where
-        each plane corresponds to a row of ``q`` and ``qd``.
+        If ``q`` and `qd` are matrices (m,n), each row is interpreted as a
+        joint configuration, and the result is an array (m,6,6) where
+        each matrix corresponds to a row of ``q`` and ``qd``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1112,63 +1161,49 @@ class DynamicsMixin:
 
         .. warning:: Assumes that the operational space has 6 DOF.
 
-        See Also
-        --------
-        :func:`coriolis`
-        :func:`inertia_x`
-        :func:`hessian0`
+        .. seealso:: :func:`coriolis` :func:`inertia_x` :meth:`~roboticstoolbox.robot.Robot.Robot.hessian0`
 
         """
 
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
+        if q.shape[0] != qd.shape[0]:
+            raise ValueError("q and qd must have the same number of rows")
         n = q.shape[1]
         if n != 6:
             pinv = True
 
+        Ct = np.zeros((q.shape[0], 6, 6))
+
+        for k, (qk, qdk) in enumerate(zip(q, qd)):
+            Jik = Ji
+            if Jik is None:
+                Ja = J if J is not None else self.jacob0_analytical(qk, representation)
+                Jik = np.linalg.pinv(Ja) if pinv else np.linalg.inv(Ja)
+
+            Ck = C if C is not None else self.coriolis(qk, qdk)
+            Mxk = Mx if Mx is not None else self.inertia_x(qk, Ji=Jik)
+            Jdk = (
+                Jd
+                if Jd is not None
+                else self.jacob0_dot(qk, qdk, representation=representation)
+            )
+
+            Ct[k, :, :] = Jik.T @ Ck @ Jik - Mxk @ Jdk @ Jik
+
         if q.shape[0] == 1:
-            # single q case
-            if Ji is None:
-                Ja = self.jacob0_analytical(q[0, :], representation)
-                if pinv:
-                    Ji = np.linalg.pinv(Ja)
-                else:
-                    Ji = np.linalg.inv(Ja)
-            if C is None:
-                C = self.coriolis(q[0, :], qd[0, :])
-            if Mx is None:
-                Mx = self.inertia_x(q[0, :], Ji=Ji)
-            if Jd is None:
-                Jd = self.jacob0_dot(q[0, :], qd[0, :], J0=Ja)
-            return Ji.T @ (C - Mx @ Jd) @ Ji
+            return Ct[0, :, :]
         else:
-            # trajectory case
-            Ct = np.zeros((q.shape[0], 6, 6))
-
-            for k, (qk, qdk) in enumerate(zip(q, qd)):
-                if Ji is None:
-                    Ja = self.jacob0_analytical(q[0, :], representation)
-                    if pinv:
-                        Ji = np.linalg.pinv(Ja)
-                    else:
-                        Ji = np.linalg.inv(Ja)
-
-                C = self.coriolis(qk, qdk)
-                Mx = self.inertia_x(qk, Ji=Ji)
-                Jd = self.jacob0_dot(qk, qdk, J0=J)
-
-                Ct[k, :, :] = Ji.T @ (C - Mx @ Jd) @ Ji
-
             return Ct
 
     def gravload_x(
         self: RobotProto,
-        q=None,
-        gravity=None,
-        pinv=False,
-        representation="rpy/xyz",
-        Ji=None,
-    ):
+        q: Any = None,
+        gravity: Any = None,
+        pinv: bool = False,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
+        Ji: Any = None,
+    ) -> Any:
         r"""
         Operational space gravity load
 
@@ -1212,12 +1247,11 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If q is a matrix (nxm) each column is interpreted as a joint
-        configuration vector, and the result is a matrix (nxm) each column
-        being the corresponding joint torques.
+        If q is a matrix (m,n), each row is interpreted as a joint
+        configuration vector, and the result is a matrix (m,6) with one
+        gravity wrench per row.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1232,9 +1266,7 @@ class DynamicsMixin:
 
         .. warning:: Assumes that the operational space has 6 DOF.
 
-        See Also
-        --------
-        :func:`gravload`
+        .. seealso:: :func:`gravload`
 
         """
 
@@ -1242,48 +1274,30 @@ class DynamicsMixin:
         if q.shape[1] != 6:
             pinv = True
 
-        # if gravity is None:
-        #     gravity = self.gravity
-        # else:
-        #     gravity = getvector(gravity, 3)
+        taug = np.zeros((q.shape[0], 6))
+        for k, qk in enumerate(q):
+            Jik = Ji
+            if Jik is None:
+                Ja = self.jacob0_analytical(qk, representation=representation)
+                Jik = np.linalg.pinv(Ja) if pinv else np.linalg.inv(Ja)
+
+            G = self.gravload(qk, gravity=gravity)
+            taug[k, :] = Jik.T @ G
 
         if q.shape[0] == 1:
-            # single q case
-            if Ji is None:
-                Ja = self.jacob0_analytical(q[0, :], representation=representation)
-                if pinv:
-                    Ji = np.linalg.pinv(Ja)
-                else:
-                    Ji = np.linalg.inv(Ja)
-            G = self.gravload(q[0, :])
-            return Ji.T @ G
-
+            return taug[0, :]
         else:
-            # trajectory case
-            taug = np.zeros((q.shape[0], self.n))
-            # z = np.zeros(self.n)
-
-            for k, qk in enumerate(q):
-                Ja = self.jacob0_analytical(qk, representation=representation)
-                G = self.gravload(qk)
-                if pinv:
-                    Ji = np.linalg.pinv(Ja)
-                else:
-                    Ji = np.linalg.inv(Ja)
-
-                taug[k, :] = Ji.T @ G
-
             return taug
 
     def accel_x(
         self: RobotProto,
-        q,
-        xd,
-        wrench,
-        gravity=None,
-        pinv=False,
-        representation="rpy/xyz",
-    ):
+        q: Any,
+        xd: Any,
+        wrench: Any,
+        gravity: Any = None,
+        pinv: bool = False,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
+    ) -> Any:
         r"""
         Operational space acceleration due to applied wrench
 
@@ -1331,9 +1345,7 @@ class DynamicsMixin:
             numbers of joints.
         - Joint friction is considered.
 
-        See Also
-        --------
-        :func:`accel`
+        .. seealso:: :func:`accel`
 
         """
 
@@ -1381,7 +1393,7 @@ class DynamicsMixin:
         else:
             return xdd
 
-    def itorque(self: RobotProto, q, qdd):
+    def itorque(self: RobotProto, q: Any, qdd: Any) -> Any:
         r"""
         Inertia torque
 
@@ -1398,12 +1410,11 @@ class DynamicsMixin:
 
         **Trajectory operation**
 
-        If ``q`` and ``qdd`` are matrices (m,n), each row is interpretted as a
+        If ``q`` and ``qdd`` are matrices (m,n), each row is interpreted as a
         joint configuration, and the result is a matrix (m,n) where each row is
         the corresponding joint torques.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1416,11 +1427,10 @@ class DynamicsMixin:
         - If the robot model contains non-zero motor inertia then this
             will be included in the result.
 
-        See Also
-        --------
-        :func:`inertia`
+        .. seealso:: :func:`inertia`
 
         """
+        self._require_dynamics()
 
         q = getmatrix(q, (None, self.n))
         qdd = getmatrix(qdd, (None, self.n))
@@ -1437,102 +1447,7 @@ class DynamicsMixin:
         else:
             return taui
 
-    def paycap(
-        self: RobotProto,
-        w: NDArray,
-        tauR: NDArray,
-        frame: int = 1,
-        q: ArrayLike | None = None,
-    ):
-        """
-        Static payload capacity of a robot
-
-        :param w: The payload wrench
-        :type w: ndarray(6,)
-        :param tauR: Joint torque matrix minimum and maximums
-        :type tauR: ndarray(n,2)
-        :param frame: The frame in which to torques are expressed in when J
-            is not supplied. 'base' means base frame of the robot, 'ee' means
-            end-effector frame
-        :param q: Joint coordinates
-        :type q: ndarray(n,)
-        :returns: The maximum permissible payload wrench
-        :rtype: ndarray(6,)
-
-        ``wmax, joint = paycap(q, w, f, tauR)`` returns the maximum permissible
-        payload wrench ``wmax`` (6) applied at the end-effector, and the index
-        of the joint (zero indexed) which hits its force/torque limit at that
-        wrench. ``q`` (n) is the manipulator pose, ``w`` the payload wrench
-        (6), ``f`` the wrench reference frame and tauR (nx2) is a matrix of
-        joint forces/torques (first col is maximum, second col minimum).
-
-        **Trajectory operation:**
-
-        In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
-        the results at the pose given by corresponding row of q.
-
-        .. rubric:: Notes
-
-        - Wrench vector and Jacobian must be from the same reference frame
-        - Tool transforms are taken into consideration for frame=1.
-
-        """
-
-        # TODO rewrite
-        trajn = 1
-
-        if q is None:
-            q = self.q
-        else:
-            q = np.array(q)
-
-        try:
-            q = np.array(getvector(q, self.n, "row"))
-            w = np.array(getvector(w, 6, "row"))
-        except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (trajn, self.n))
-            verifymatrix(w, (trajn, 6))
-
-        verifymatrix(tauR, (self.n, 2))
-
-        wmax = np.zeros((trajn, 6))
-        joint = np.zeros(trajn, dtype=int)
-
-        for i in range(trajn):
-            tauB = self.gravload(q[i, :])
-
-            # tauP = self.rne(
-            #     np.zeros(self.n), np.zeros(self.n),
-            #     q, grav=[0, 0, 0], fext=w/np.linalg.norm(w))
-
-            tauP = self.pay(w[i, :] / np.linalg.norm(w[i, :]), q=q[i, :], frame=frame)
-
-            M = tauP > 0
-            m = tauP <= 0
-
-            TAUm = np.ones(self.n)
-            TAUM = np.ones(self.n)
-
-            for c in range(self.n):
-                TAUM[c] = tauR[c, 0]
-                TAUm[c] = tauR[c, 1]
-
-            WM = np.zeros(self.n)
-            WM[M] = (TAUM[M] - tauB[M]) / tauP[M]
-            WM[m] = (TAUm[m] - tauB[m]) / tauP[m]
-
-            WM[WM == -np.inf] = np.inf
-
-            wmax[i, :] = WM
-            joint[i] = np.argmin(WM)
-
-        if trajn == 1:
-            return wmax[0, :], joint[0]
-        else:
-            return wmax, joint
-
-    def perturb(self: RobotProto, p=0.1):
+    def perturb(self: RobotProto, p: float = 0.1) -> Any:
         """
         Perturb robot parameters
 
@@ -1565,8 +1480,14 @@ class DynamicsMixin:
 
 
 def _printProgressBar(
-    fraction, prefix="", suffix="", decimals=1, length=50, fill="█", printEnd="\r"
-):
+    fraction: Any,
+    prefix: str = "",
+    suffix: str = "",
+    decimals: int = 1,
+    length: int = 50,
+    fill: str = "█",
+    printEnd: str = "\r",
+) -> None:
 
     percent = ("{0:." + str(decimals) + "f}").format(fraction * 100)
     filledLength = int(length * fraction)
@@ -1577,4 +1498,4 @@ def _printProgressBar(
 if __name__ == "__main__":  # pragma nocover
     import roboticstoolbox as rtb
 
-    puma = rtb.models.DH.Puma560()
+    puma = rtb.models.DH.Puma560()  # type: ignore[operator]  # class, not module

@@ -10,30 +10,67 @@ each other (BaseET is depended on by both, so it can't depend on either
 without a cycle).
 """
 
+from __future__ import annotations
+
 import re
 import warnings
 from copy import deepcopy
+from typing import TYPE_CHECKING, Any, Callable
 
-from numpy import array, ndarray, deg2rad, eye, pi
+from numpy import deg2rad, eye, ndarray, pi
 from numpy.linalg import inv as npinv
 from spatialmath.base import getvector, issymbol, tr2rpy, tr2xyt
-from typing import Callable, TYPE_CHECKING
 
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 _AXIS_TO_INT: dict[str, int] = {"Rx": 0, "Ry": 1, "Rz": 2, "tx": 3, "ty": 4, "tz": 5}
 
 if TYPE_CHECKING:  # pragma: nocover
-    import sympy
-
-    Sym = sympy.core.symbol.Symbol  # type: ignore
+    from sympy import Symbol as Sym
 else:  # pragma: nocover
     Sym = None
 
 
+def _is_nothing(value: Any, rotation: bool) -> bool:
+    """
+    Is a transform with this parameter value no transform at all?
+
+    True if ``value`` is exactly zero and, for a rotation given as a SymPy
+    expression, a whole number of turns, such as ``pi/2 + 3*pi/2``.  A float that
+    is only nearly zero, or ``math.pi + math.pi``, is not exactly nothing.
+    """
+    if issymbol(value):
+        import sympy
+
+        value = sympy.simplify(value)
+        if value == 0:
+            return True
+        if rotation:
+            # a whole number of turns, False if SymPy cannot tell
+            return bool(sympy.simplify(value / (2 * sympy.pi)).is_integer)
+        return False
+    return bool(value == 0)
+
+
+def _offset_suffix(offset: Any, rotation: bool) -> str:
+    """
+    The offset of a joint as it is displayed after the joint variable
+
+    ``" + 90°"`` or ``" - a"``, or an empty string if there is no offset.
+    """
+    if not issymbol(offset):
+        if offset == 0:
+            return ""
+        value = offset * 180 / pi if rotation else offset
+        unit = "°" if rotation else ""
+        return f" {'+' if value >= 0 else '-'} {abs(value):.4g}{unit}"
+    text = str(offset)
+    return f" - {text[1:]}" if text.startswith("-") else f" + {text}"
+
+
 def _resolve_param(
-    param: "float | Sym | None", eta: "float | None"
-) -> "float | Sym | None":
+    param: float | Sym | None, eta: float | None
+) -> float | Sym | None:
     """
     Merge the `param` kwarg with the deprecated `eta` kwarg.
 
@@ -52,28 +89,71 @@ def _resolve_param(
     return param
 
 
-def _parse_joint_descriptor(s: str) -> "tuple[int | None, bool]":
+#: characters that negate the joint variable when they start a joint descriptor
+_MINUS_SIGNS = ("-", "\u2212")  # hyphen-minus and the Unicode minus sign
+
+
+def _parse_joint_descriptor(s: str) -> tuple[int | None, bool]:
     """
     Parse a joint descriptor string into (jindex, flip).
 
-    A leading '-' sets flip (and is stripped); a leading '+' is stripped and
-    ignored. The first run of digits found anywhere in what remains becomes
-    the joint index - this treats 'theta2', 'q2', 'q(3)' and 'θ_3' the same
-    regardless of how the index is set off from the rest of the name. If no
-    digit is found, jindex is None, so the joint falls through to ETS's
-    existing auto-numbering for unassigned joints.
+    A leading '-' (or the Unicode minus sign) sets flip, and a leading '+' is
+    ignored; the sign is then stripped. The first run of digits found anywhere
+    in what remains becomes the joint index - this treats 'theta2', 'q2', 'q(3)'
+    and 'θ_3' the same regardless of how the index is set off from the rest of
+    the name. If no digit is found, jindex is None, so the joint falls through
+    to ETS's existing auto-numbering for unassigned joints.
+
+    Joint indices count from zero.  A name that ends with an underscore, such as
+    'A1_' or 'θ2_', counts from one: the index is one less than the digits.
+
+    :raises ValueError: the name counts from one and the number is zero
     """
-    flip = s.startswith("-")
-    if s[:1] in "+-":
+    flip = s[:1] in _MINUS_SIGNS
+    if s[:1] in _MINUS_SIGNS or s[:1] == "+":
         s = s[1:]
 
     match = re.search(r"\d+", s)
     jindex = int(match.group()) if match else None
 
+    if jindex is not None and s.endswith("_"):
+        if jindex == 0:
+            raise ValueError(
+                f"joint name {s!r} ends with an underscore, so the number must "
+                "count from one, but it is zero"
+            )
+        jindex -= 1
+
     return jindex, flip
 
 
+def _joint_display_name(s: str) -> str:
+    """
+    The name of a joint, as displayed, from its descriptor
+
+    The underscore that says the number counts from one is an instruction and is
+    not part of the name, so 'A1_' is displayed as 'A1'.  A name without a number
+    is shown as given.
+    """
+    body = s[1:] if s[:1] in _MINUS_SIGNS or s[:1] == "+" else s
+    if s.endswith("_") and re.search(r"\d", body):
+        return s[:-1]
+    return s
+
+
 class BaseET:
+    r"""
+    Elementary transform, the base class of :class:`ET` and :class:`ET2`
+
+    The parameter ``param`` of a transform may be a string naming a variable
+    joint, such as ``"q2"`` or ``"-theta3"``, instead of a number.  The rules for
+    these *joint descriptors* are in the ETS documentation, section "Joint
+    descriptors".
+
+    .. versionchanged:: 1.5.0
+        A trailing underscore, and the Unicode minus sign, are accepted.
+    """
+
     def __init__(
         self,
         axis: str,
@@ -86,7 +166,7 @@ class BaseET:
         qlim: ArrayLike | None = None,
         *,
         eta: float | None = None,
-    ):
+    ) -> None:
         param = _resolve_param(param, eta)
 
         self._kind = axis
@@ -94,7 +174,7 @@ class BaseET:
         # A custom joint display name, e.g. "theta2" from a string `param`
         # descriptor below - printed by __str__ in place of the generic
         # "q2" when set.
-        self._joint_name = None
+        self._joint_name: str | None = None
 
         # A string `param` that doesn't parse as a plain number is a joint
         # descriptor (e.g. "theta2", "-q(3)", "θ_3"): regex-parsed for
@@ -103,19 +183,26 @@ class BaseET:
         # not also be given explicitly in this case - one form or the
         # other, not a silent merge of both.
         if isinstance(param, str):
+            descriptor: str = param
             try:
-                param = float(param)
+                param = float(descriptor)
             except ValueError:
                 if jindex is not None or flip is not None:
                     raise ValueError(
                         "cannot specify `jindex` or `flip` alongside a string "
                         "joint descriptor for `param`"
                     )
-                jindex, flip = _parse_joint_descriptor(param)
-                self._joint_name = param
+                jindex, flip = _parse_joint_descriptor(descriptor)
+                self._joint_name = _joint_display_name(descriptor)
                 param = None
 
         flip = bool(flip)  # None (not given, and not set above) -> False
+
+        # The offset of a joint, added to the joint variable: a joint transforms
+        # by ``+-q + offset``.  Zero for every transform that is not a joint with
+        # an offset, which is the usual case.  Kept apart from ``param``, which is
+        # None for a joint and which the compiled code relies on being so.
+        self._offset: float | Sym = 0.0
 
         # A flag to check if the ET is a static joint with a symbolic value
         # Defaults to False as is set to True if param is a symbol below
@@ -130,11 +217,13 @@ class BaseET:
         self._flip = flip
         self._jindex = jindex
 
+        self._qlim: NDArray | None
         if qlim is not None:
-            self._qlim: NDArray | None = getvector(qlim, 2, out="array")
+            self._qlim = getvector(qlim, 2, out="array")
         else:
-            self._qlim: NDArray | None = None
+            self._qlim = None
 
+        self._param: float | Sym | None
         if param is None:
             self._param = None
             if T is None:
@@ -149,12 +238,14 @@ class BaseET:
             if axis[0] == "R" and unit.lower().startswith("deg"):
                 if not issymbol(param):
                     param = deg2rad(float(param))
+            # a string `param` has been converted to a float, or to None above
+            assert not isinstance(param, str)
             # This is a static joint. The `param` setter validates axis_func,
             # computes `_T`, sets `_isstaticsym`/`_joint`, and (for ET)
             # syncs the compiled acceleration struct.
             self.param = param
 
-    def __str__(self):
+    def __str__(self) -> str:
         param_str = ""
 
         if self.isjoint:
@@ -164,6 +255,7 @@ class BaseET:
                 param_str = "q"
             else:
                 param_str = f"q{self.jindex}"
+            param_str += _offset_suffix(self._offset, self.isrotation)
         elif issymbol(self.param):
             # Check if symbolic
             param_str = f"{self.param}"
@@ -197,7 +289,7 @@ class BaseET:
 
         return f"{self.kind}({param_str})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         s_param = "" if self.param is None else f"param={self.param}"
         s_T = (
             f"T={repr(self._T)}"
@@ -205,10 +297,11 @@ class BaseET:
             else ""
         )
         s_flip = "" if not self.isflip else f"flip={self.isflip}"
+        s_offset = "" if _is_nothing(self._offset, False) else f"offset={self._offset}"
         s_qlim = "" if self.qlim is None else f"qlim={repr(self.qlim)}"
         s_jindex = "" if self.jindex is None else f"jindex={self.jindex}"
 
-        kwargs = [s_param, s_T, s_jindex, s_flip, s_qlim]
+        kwargs = [s_param, s_T, s_jindex, s_flip, s_offset, s_qlim]
         s_kwargs = ", ".join(filter(None, kwargs))
 
         # self.__class__.__name__ rather than isinstance(self, ET)/(self, ET2):
@@ -219,7 +312,7 @@ class BaseET:
 
         return f"{start}.{self.kind}({s_kwargs})"
 
-    def _repr_pretty_(self, p, cycle):
+    def _repr_pretty_(self, p: Any, cycle: Any) -> None:
         """
         Pretty string for IPython
 
@@ -242,7 +335,7 @@ class BaseET:
     # Python ET2; overridden by ET.
     _deepcopy_skip: tuple[str, ...] = ()
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> Any:
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
@@ -254,10 +347,10 @@ class BaseET:
         result._accel_init()
         return result
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> Any:
         return repr(self) == repr(other)
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> Any:
         # lets sum() work without an explicit start value, since its
         # default start is the int 0, which has no idea how to compose
         # with an ET/ET2
@@ -286,8 +379,7 @@ class BaseET:
         :returns: The constant value if set
         :rtype: float or Sym or None
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -382,8 +474,7 @@ class BaseET:
         :returns: The transform type and axis, e.g. ``"Rx"``, ``"tx"``, ``"SE3"``
         :rtype: str
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -425,8 +516,7 @@ class BaseET:
             letter, or a compound/arbitrary ``SE3``/``SE2`` transform)
         :rtype: str or None
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -448,8 +538,7 @@ class BaseET:
         :returns: True if a joint
         :rtype: bool
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -463,6 +552,54 @@ class BaseET:
         return self._joint
 
     @property
+    def offset(self) -> float | Sym:
+        r"""
+        Offset of a joint
+
+        :returns: the offset, zero unless one has been set
+        :raises TypeError: on set, if the transform is not a joint
+
+        A joint transforms by :math:`\pm q + a`: the joint variable, negated if the
+        joint is flipped, plus the offset :math:`a`.  This is the offset of a
+        Denavit-Hartenberg link, and it is what remains of a constant transform of
+        the same kind that is merged into a joint, see
+        :meth:`~roboticstoolbox.ets.ETS.ETS.merge`.  The joint limits ``qlim`` are
+        limits on :math:`q`, not on :math:`\pm q + a`.
+
+        The offset may be symbolic.  It is zero if it is exactly zero or, for a
+        rotation, a whole number of turns of a symbolic angle.
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz()
+            >>> e.offset = 0.5
+            >>> print(e)
+            >>> e.A(0.1)
+            >>> print(e.inv())
+
+        .. note:: A joint with an offset is evaluated by the Python code, not the
+            compiled code, so it is slower.  ``ik_LM``, ``ik_NR`` and ``ik_GN``,
+            which need the compiled code, do not accept it.
+        """
+        return self._offset
+
+    @offset.setter
+    def offset(self, value: float | Sym) -> None:
+        if not self.isjoint:
+            raise TypeError("only a joint has an offset, a constant has a param")
+        if issymbol(value):
+            if _is_nothing(value, self.isrotation):
+                value = 0.0
+        else:
+            value = float(value)
+        self._offset = value
+        # the compiled code does not know about the offset
+        self._accel_init()
+
+    @property
     def isflip(self) -> bool:
         """
         Test if ET joint is flipped
@@ -473,16 +610,15 @@ class BaseET:
         A flipped joint uses the negative of the joint variable, ie. it rotates
         or moves in the opposite direction.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx()
-            >>> e.T(1)
+            >>> e.A(1)
             >>> eflip = ET.tx(flip=True)
-            >>> eflip.T(1)
+            >>> eflip.A(1)
 
         """
 
@@ -496,15 +632,14 @@ class BaseET:
         :returns: True if a rotation
         :rtype: bool
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.isrotation
-            >>> e = ET.rx()
+            >>> e = ET.Rx()
             >>> e.isrotation
 
         """
@@ -519,15 +654,14 @@ class BaseET:
         :returns: True if a translation
         :rtype: bool
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.istranslation
-            >>> e = ET.rx()
+            >>> e = ET.Rx()
             >>> e.istranslation
 
         """
@@ -536,13 +670,19 @@ class BaseET:
 
     @property
     def qlim(self) -> ndarray | None:
+        """
+        Joint limits
+
+        :returns: the joint limits as a 2-vector ``[lower, upper]``, or None if
+            the transform has no limits
+        """
         return self._qlim
 
     @qlim.setter
     def qlim(self, qlim_new: ArrayLike | None) -> None:
-        if qlim_new is not None:
-            qlim_new = getvector(qlim_new, 2, out="array")
-        self._qlim = qlim_new
+        self._qlim = (
+            None if qlim_new is None else getvector(qlim_new, 2, out="array")
+        )
         self._accel_update()
 
     @property
@@ -555,15 +695,14 @@ class BaseET:
 
         Allows an ET to be associated with a numbered joint in a robot.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx()
             >>> print(e)
-            >>> e = ET.tx(j=3)
+            >>> e = ET.tx(jindex=3)
             >>> print(e)
             >>> print(e.jindex)
 
@@ -572,7 +711,7 @@ class BaseET:
         return self._jindex
 
     @jindex.setter
-    def jindex(self, j):
+    def jindex(self, j: Any) -> None:
         if not isinstance(j, int) or j < 0:
             raise ValueError(f"jindex is {j}, must be an int >= 0")
         self._jindex = j
@@ -591,15 +730,13 @@ class BaseET:
         - ET's may not actually be "elementary", it can be a complex
             mix of rotations and translations.
 
-        See Also
-        --------
-        :func:`compile`
+        .. seealso:: :func:`compile`
 
         """
 
         return self.kind[0] != "S"
 
-    def inv(self):
+    def inv(self) -> Any:
         r"""
         Inverse of ET
 
@@ -608,8 +745,7 @@ class BaseET:
 
         The inverse of a given ET.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -618,12 +754,14 @@ class BaseET:
             >>> print(e)
             >>> print(e.inv())
 
-        """  # noqa
+        """
 
         inv = deepcopy(self)
 
         if inv.isjoint:
+            # the inverse of ``+-q + a`` is ``-+q - a``
             inv._flip ^= True
+            inv._offset = -inv._offset
         elif not inv.iselementary:
             inv._T = npinv(inv._T).copy(order="F")
         elif inv._param is not None:
@@ -642,8 +780,7 @@ class BaseET:
         :returns: The SE(3) or SE(2) matrix value of the ET
         :rtype: ndarray
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -658,7 +795,9 @@ class BaseET:
         """
         if self.isjoint:
             if self.isflip:
-                q = -q  # type: ignore
+                q = -q
+            if self._offset != 0:
+                q = q + self._offset
 
             if self.axis_func is not None:
                 return self.axis_func(q)

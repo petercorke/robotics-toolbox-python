@@ -3,7 +3,10 @@
 @author: Peter Corke
 """
 
+from __future__ import annotations
+
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
 
 
@@ -41,12 +44,12 @@ class Coil(DHRobot):
           calculation of rigid body dynamics, Part 2",
           Int. J. Robotics Research, 18(9), pp 876-892.
 
-    :seealso: :func:`Hyper`, :func:`Ball`
+    .. seealso:: :func:`Hyper`, :func:`Ball`
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
-    def __init__(self, N=10, symbolic=False):
+    def __init__(self, N: int = 10, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym

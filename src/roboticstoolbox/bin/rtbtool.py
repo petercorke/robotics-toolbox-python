@@ -9,6 +9,10 @@ Usage::
     $ rtbtool myscript.py
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 # import stuff
 import argparse
 import pathlib
@@ -51,7 +55,7 @@ from roboticstoolbox import *  # lgtm [py/unused-import]
 _OPTIONS_ENVVAR = "RTB_OPTIONS"
 
 
-def env_arguments(parser):
+def env_arguments(parser: Any) -> Any:
     """Return command-line style options from the environment.
 
     :param parser: argument parser used for error reporting
@@ -69,7 +73,7 @@ def env_arguments(parser):
         parser.error(f"invalid {_OPTIONS_ENVVAR}: {exc}")
 
 
-def parse_arguments():
+def parse_arguments() -> Any:
     parser = argparse.ArgumentParser(
         description="Robotics Toolbox shell",
         formatter_class=LineWrapRawTextDefaultsHelpFormatter,
@@ -180,7 +184,7 @@ def get_versions() -> list[str]:
     ]
 
 
-def make_banner():
+def make_banner() -> Any:
     # banner template
     # https://patorjk.com/software/taag/#p=display&f=Cybermedium&t=Robotics%20Toolbox%0A
 
@@ -218,12 +222,12 @@ def make_banner():
     return banner
 
 
-def examples_path():
+def examples_path() -> Any:
     # Repository layout: <root>/src/roboticstoolbox/bin/rtbtool.py
     return pathlib.Path(__file__).resolve().parents[3] / "examples"
 
 
-def startup():
+def startup() -> None:
     plt.ion()
 
 
@@ -271,7 +275,7 @@ def run_smoke_test() -> bool:
     return n_passed == len(checks)
 
 
-def main():
+def main() -> None:
     args, ipython_args = parse_arguments()
 
     if args.test:
@@ -317,10 +321,10 @@ def main():
 
     # set default backend for Robot.plot
     if args.swift:
-        Robot.default_backend = "swift"
+        Robot.set_default_backend("swift")
 
     # set matrix printing mode for spatialmath
-    SE3._ansimatrix = args.ansi
+    SE3._ansimatrix = args.ansi  # type: ignore[name-defined]  # from the star import
 
     # set default matplotlib backend
     if args.backend is not None:
@@ -343,10 +347,10 @@ def main():
 
     # drop into IPython
     class MyPrompt(Prompts):
-        def in_prompt_tokens(self, cli=None):
+        def in_prompt_tokens(self, cli: Any = None) -> Any:
             return [(Token.Prompt, args.prompt)]
 
-        def out_prompt_tokens(self, cli=None):
+        def out_prompt_tokens(self, cli: Any = None) -> Any:
             if args.resultprefix is None:
                 # traditional behaviour
                 return [

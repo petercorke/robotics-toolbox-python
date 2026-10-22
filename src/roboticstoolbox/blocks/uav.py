@@ -1,11 +1,10 @@
+from __future__ import annotations
+
+from math import atan2, cos, pi, sin, sqrt
+from typing import Any
+
 import numpy as np
-from math import sin, cos, atan2, tan, sqrt, pi
-
-import matplotlib.pyplot as plt
-import time
-
-
-from bdsim.block_types import GraphicsBlock, ContinuousBlock, FunctionBlock
+from bdsim.block_types import ContinuousBlock, FunctionBlock, GraphicsBlock
 
 
 class MultiRotor(ContinuousBlock):
@@ -96,7 +95,7 @@ class MultiRotor(ContinuousBlock):
           Australian National University, 2007.
         - Robotics, Vision & Control by Peter Corke, sec 4.2 in all editions
 
-    :seealso: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
+    .. seealso:: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
     """
 
     nin = 1
@@ -153,7 +152,14 @@ class MultiRotor(ContinuousBlock):
     #   R = f(n)
     #   n` = inv(W)*o
     #
-    def __init__(self, model, groundcheck=True, speedcheck=True, x0=None, **blockargs):
+    def __init__(
+        self,
+        model: Any,
+        groundcheck: bool = True,
+        speedcheck: bool = True,
+        x0: Any = None,
+        **blockargs: Any,
+    ) -> None:
         r"""
         Create a multi-rotor dynamic model block.
 
@@ -218,7 +224,7 @@ class MultiRotor(ContinuousBlock):
         self.a1s = np.zeros((self.nrotors,))
         self.b1s = np.zeros((self.nrotors,))
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
 
         model = self.model
 
@@ -285,7 +291,7 @@ class MultiRotor(ContinuousBlock):
 
         return [out]
 
-    def deriv(self, t, inports, x):
+    def deriv(self, t: Any, inports: Any, x: Any) -> Any:
 
         model = self.model
 
@@ -309,7 +315,7 @@ class MultiRotor(ContinuousBlock):
         v = x[6:9]  # velocity in {W}
         o = x[9:12]  # angular velocity in {W}
 
-        # PREPROCESS ROTATION AND WRONSKIAN MATRICIES
+        # PREPROCESS ROTATION AND WRONSKIAN MATRICES
         phi = n[0]  # yaw
         the = n[1]  # pitch
         psi = n[2]  # roll
@@ -511,7 +517,7 @@ class MultiRotorMixer(FunctionBlock):
 
     .. note:: Based on MATLAB code developed by Pauline Pounds 2004.
 
-    :seealso: :class:`MultiRotor` :class:`MultiRotorPlot`
+    .. seealso:: :class:`MultiRotor` :class:`MultiRotorPlot`
     """
 
     nin = 4
@@ -519,7 +525,9 @@ class MultiRotorMixer(FunctionBlock):
     inlabels = ("τr", "τp", "τy", "T")
     outlabels = ("ω",)
 
-    def __init__(self, model=None, wmax=1000, wmin=5, **blockargs):
+    def __init__(
+        self, model: Any = None, wmax: float = 1000, wmin: float = 5, **blockargs: Any
+    ) -> None:
         """
         :param model: A dictionary of vehicle geometric and inertial properties
         :type model: dict
@@ -558,7 +566,7 @@ class MultiRotorMixer(FunctionBlock):
         self.Minv = np.linalg.inv(self.M)
         self.signs = np.array(s)
 
-    def output(self, t, inports, x):
+    def output(self, t: Any, inports: Any, x: Any) -> Any:
         tau = inports
 
         # mix airframe force/torque to rotor thrusts
@@ -603,7 +611,7 @@ class MultiRotorPlot(GraphicsBlock):
 
     Animate a multi-rotor flying vehicle using Matplotlib graphics.  The
     rotors are shown as circles and their orientation includes rotor
-    flapping which can be exagerated by ``flapscale``.
+    flapping which can be exaggerated by ``flapscale``.
 
     .. figure:: ../figs/multirotorplot.png
         :width: 500px
@@ -630,7 +638,7 @@ class MultiRotorPlot(GraphicsBlock):
 
     .. note:: Based on MATLAB code developed by Pauline Pounds 2004.
 
-    :seealso: :class:`MultiRotor` :class:`MultiRotorMixer`
+    .. seealso:: :class:`MultiRotor` :class:`MultiRotorMixer`
     """
 
     nin = 1
@@ -661,18 +669,18 @@ class MultiRotorPlot(GraphicsBlock):
 
     def __init__(
         self,
-        model,
-        scale=None,
-        flapscale=1,
-        projection="ortho",
-        **blockargs,
-    ):
+        model: Any,
+        scale: Any = None,
+        flapscale: float = 1,
+        projection: str = "ortho",
+        **blockargs: Any,
+    ) -> None:
         """
         :param model: A dictionary of vehicle geometric and inertial properties
         :type model: dict
         :param scale: dimensions of workspace: xmin, xmax, ymin, ymax, zmin, zmax, defaults to [-2,2,-2,2,10]
         :type scale: array_like, optional
-        :param flapscale: exagerate flapping angle by this factor, defaults to 1
+        :param flapscale: exaggerate flapping angle by this factor, defaults to 1
         :type flapscale: float
         :param projection: 3D projection, one of: 'ortho' [default], 'perspective'
         :type projection: str
@@ -694,7 +702,7 @@ class MultiRotorPlot(GraphicsBlock):
         self.projection = projection
         self.flapscale = flapscale
 
-    def start(self, simstate):
+    def start(self, simstate: Any) -> None:
         super().start(simstate)
 
         if not self._enabled:
@@ -702,7 +710,7 @@ class MultiRotorPlot(GraphicsBlock):
 
         quad = self.model
 
-        # vehicle dimensons
+        # vehicle dimensions
         d = quad["d"]
         # Hub displacement from COG
         r = quad["r"]
@@ -775,12 +783,12 @@ class MultiRotorPlot(GraphicsBlock):
         # plt.draw()
         # plt.show(block=False)
 
-    def step(self, t, inports):
+    def step(self, t: Any, inports: Any) -> None:
 
         if not self._enabled:
             return
 
-        def plot3(h, x, y, z):
+        def plot3(h: Any, x: Any, y: Any, z: Any) -> None:
             h.set_data_3d(x, y, z)
             # h.set_data(x, y)
             # h.set_3d_properties(np.r_[z])
@@ -797,7 +805,7 @@ class MultiRotorPlot(GraphicsBlock):
 
         quad = self.model
 
-        # vehicle dimensons
+        # vehicle dimensions
         d = quad["d"]  # Hub displacement from COG
         r = quad["r"]  # Rotor radius
 
@@ -827,7 +835,7 @@ class MultiRotorPlot(GraphicsBlock):
         # Q1 = [1 0 0;0 cos(phi) -sin(phi);0 sin(phi) cos(phi)];
         # R = Q3*Q2*Q1;    %Rotation matrix
 
-        # CALCULATE FLYER TIP POSITONS USING COORDINATE FRAME ROTATION
+        # CALCULATE FLYER TIP POSITIONS USING COORDINATE FRAME ROTATION
         F = np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]])
 
         # Draw flyer rotors
@@ -916,7 +924,7 @@ if __name__ == "__main__":
 
     m = MultiRotor(model=quadrotor)
 
-    def show(w):
+    def show(w: Any) -> None:
         print()
         print(w[0] ** 2 + w[2] ** 2 - w[1] ** 2 - w[3] ** 2)
         print(w)

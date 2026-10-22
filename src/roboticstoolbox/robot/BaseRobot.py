@@ -6,7 +6,9 @@
 """
 
 from __future__ import annotations
+
 # import sys
+import inspect
 import io
 from abc import ABC
 from copy import deepcopy
@@ -20,35 +22,33 @@ from typing import (
     TypeVar,
     cast,
 )
-
-from typing_extensions import Literal as L
+from warnings import warn
 
 import numpy as np
-
-from spatialmath import SE3
-from spatialmath.base.argcheck import (
-    getvector,
-    getmatrix,
-    getunit,
-)
-
 from ansitable import ANSITable, Column
 from spatialgeometry import SceneNode
-from roboticstoolbox.backends.Connector import Connector
+from spatialmath import SE3
+from spatialmath.base.argcheck import (
+    getmatrix,
+    getunit,
+    getvector,
+)
+from typing_extensions import Literal as L
 
-from roboticstoolbox.ets.fknm import Robot_link_T
 import roboticstoolbox as rtb
-from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.Link import BaseLink, Link
-from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.ets.ET import ET
+from roboticstoolbox.ets.ETS import ETS
+from roboticstoolbox.ets.fknm import Robot_link_T
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-from roboticstoolbox.tools.params import rtb_get_param
+from roboticstoolbox.robot.Gripper import Gripper
+from roboticstoolbox.robot.Link import BaseLink, Link, _dyn_version
 from roboticstoolbox.robot.RobotPlottingMPL import RobotPlottingMPLMixin
+from roboticstoolbox.tools.params import rtb_get_param
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:
-    from matplotlib.cm import Color  # pragma nocover
+    from matplotlib.typing import ColorType as Color  # pragma nocover
 else:
     Color = None
 
@@ -75,7 +75,18 @@ def _is_symbolic(value: Any) -> bool:
     return np.asarray(value).dtype == object
 
 
+# the modules of the robot classes themselves, as distinct from models built from them
+_FRAMEWORK_MODULES = ("roboticstoolbox.robot.", "roboticstoolbox.models.URDF.URDFRobot")
+
+
 class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[LinkType]):
+    # set when the links are processed in the constructor
+    _base_link: LinkType
+
+    #: default graphical backend for every robot of this class, used when the
+    #: robot has not been given its own, see :meth:`set_default_backend`
+    _class_default_backend: Any = None
+
     def __init__(
         self,
         links: list[LinkType],
@@ -90,7 +101,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         symbolic: bool = False,
         configs: dict[str, NDArray] | None = None,
         check_jindex: bool = True,
-    ):
+    ) -> None:
         # Initialise the scene node
         SceneNode.__init__(self)
 
@@ -140,8 +151,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self.manufacturer = manufacturer
         self.comment = comment
         self._symbolic = symbolic
-        self._reach = None
-        self._hasdynamics = False
+        self._reach: float | None = None
+        self._dyn_cache: tuple[int, bool] | None = None
         self._hasgeometry = False
         self._hascollision = False
         self._urdf_string = ""
@@ -153,16 +164,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             # Add link back to robot object
             link._robot = self
 
-            if link.hasdynamics:
-                self._hasdynamics = True
-            if link.geometry:
-                self._hasgeometry = []
+            if len(link.geometry) > 0:
+                self._hasgeometry = True
             if link.collision:
                 self._hascollision = True
-
-            if isinstance(link, Link):
-                if len(link.geometry) > 0:
-                    self._hasgeometry = True
 
             # Detect symbolic (e.g. SymPy) model parameters regardless of
             # whether the caller remembered to pass symbolic=True -- see
@@ -179,7 +184,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         self._symbolic = self._symbolic or auto_symbolic
 
-        # Current joint configuraiton, velocity, acceleration
+        # Current joint configuration, velocity, acceleration
         self.q = np.zeros(self.n)
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
@@ -211,10 +216,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 self._valid_qlim = True
 
         # SceneNode, set a reference to the first link
-        self.scene_children = [self.links[0]]  # type: ignore
+        self.scene_children = [self.links[0]]
 
         self._default_backend = None
-        self._active_plot_env = None
+        self._active_plot_env: Any = None
 
     # --------------------------------------------------------------------- #
     # --------- Private Methods ------------------------------------------- #
@@ -225,7 +230,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         links: list[LinkType],
         gripper_links: LinkType | list[LinkType] | None,
         check_jindex: bool,
-    ):
+    ) -> None:
         """
         This method does several things for setting up the links of a robot
 
@@ -362,7 +367,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             # No joints have an index
             jindex = [0]  # "mutable integer" hack
 
-            def visit_link(link, jindex):
+            def visit_link(link: Any, jindex: Any) -> None:
                 # if it's a joint, assign it a jindex and increment it
                 if link.isjoint and link in links:
                     link.jindex = jindex[0]
@@ -384,10 +389,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             # Jindex set on all, check they are unique and contiguous
             if check_jindex:
                 jset = set(range(n))
+                jindices = {link.jindex for link in links if link.isjoint}
                 for link in links:
                     if link.isjoint and link.jindex not in jset:
+                        hint = ""
+                        if jindices == set(range(1, n + 1)):
+                            hint = (
+                                f"; joint indices count from zero, but these are"
+                                f" 1 to {n}.  Joint names that count from one,"
+                                " such as 'A1', need a trailing underscore,"
+                                " 'A1_', to be numbered from zero"
+                            )
                         raise ValueError(
-                            f"joint index {link.jindex} was repeated or out of range"
+                            f"joint index {link.jindex} was repeated or out of"
+                            f" range{hint}"
                         )
                     jset -= set([link.jindex])
                 if len(jset) > 0:  # pragma nocover  # is impossible
@@ -405,28 +420,24 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # ---------
         self._links = orlinks
 
-    def dynchanged(self, what: str | None = None):
+    def dynchanged(self, what: str | None = None) -> None:
         """
         Dynamic parameters have changed
 
         Called from a property setter to inform the robot that the cache of
         dynamic parameters is invalid.
 
-        See Also
-        --------
-        :func:`roboticstoolbox.Link._dirties_frne`
+        .. seealso:: :func:`roboticstoolbox.Link._dirties_frne`
 
         """
 
         self._frne_stale = True
-        if what != "gravity":
-            self._hasdynamics = True
 
     # --------------------------------------------------------------------- #
     # --------- Magic Methods --------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    def __iter__(self):
+    def __iter__(self) -> Any:
         self._iter = 0
         return self
 
@@ -448,8 +459,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param i: link number or name
         :returns: i'th link or named link
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -514,7 +524,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             if link.isjoint:
                 jname = link.jindex
             else:
-                jname = ""
+                jname = ""  # type: ignore[assignment]
             table.row(
                 # link.jindex,
                 k,
@@ -524,9 +534,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 f"{s}",
             )
 
-        classname = "ERobot"
-
-        s = f"{classname}: {self.name}"
+        s = f"{self._class_label()}: {self.name}"
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
@@ -551,6 +559,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def __repr__(self) -> str:
         return str(self)
+
+    def _class_label(self) -> str:
+        """
+        The class of this robot, for the first line of its display
+
+        ``Robot``, ``Robot2``, ``DHRobot`` or ``URDFRobot`` for an instance of the class
+        itself, and ``X.Y`` for an instance of a subclass ``Y`` of one of them, for
+        example ``DHRobot.Puma560`` or ``URDFRobot.Panda``: the kind of robot, then the
+        model.
+        """
+        cls = type(self)
+        if cls.__module__.startswith(_FRAMEWORK_MODULES):
+            return cls.__name__
+        return f"{cls.__mro__[1].__name__}.{cls.__name__}"
 
     # --------------------------------------------------------------------- #
     # --------- Properties ------------------------------------------------ #
@@ -611,8 +633,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Number of joints
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -620,17 +641,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.n
 
-        See Also
-        --------
-        :func:`nlinks`
-        :func:`nbranches`
+        .. seealso:: :func:`nlinks` :func:`nbranches`
 
         """
 
         return self._n
 
     @property
-    def nlinks(self):
+    def nlinks(self) -> Any:
         """
         Number of links
 
@@ -639,8 +657,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Number of links
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -648,10 +665,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.nlinks
 
-        See Also
-        --------
-        :func:`n`
-        :func:`nbranches`
+        .. seealso:: :func:`n` :func:`nbranches`
 
         """
 
@@ -667,8 +681,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: number of branches in the robot's kinematic tree
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -676,10 +689,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.ETS.Panda()
             >>> robot.nbranches
 
-        See Also
-        --------
-        :func:`n`
-        :func:`nlinks`
+        .. seealso:: :func:`n` :func:`nlinks`
         """
 
         return sum([link.nchildren == 0 for link in self.links]) + len(self.grippers)
@@ -700,7 +710,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._name
 
     @name.setter
-    def name(self, name_new: str):
+    def name(self, name_new: str) -> None:
         self._name = name_new
 
     @property
@@ -717,11 +727,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._comment
 
     @comment.setter
-    def comment(self, comment_new: str):
+    def comment(self, comment_new: str) -> None:
         self._comment = comment_new
 
     @property
-    def manufacturer(self):
+    def manufacturer(self) -> Any:
         """
         Get/set robot manufacturer's name
 
@@ -733,15 +743,26 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._manufacturer
 
     @manufacturer.setter
-    def manufacturer(self, manufacturer_new):
+    def manufacturer(self, manufacturer_new: Any) -> None:
         self._manufacturer = manufacturer_new
 
     @property
     def configs(self) -> dict[str, NDArray]:
+        """
+        Named joint configurations
+
+        :returns: dictionary of joint configurations, such as ``qr`` and ``qz``,
+            indexed by name
+        """
         return self._configs
 
     @property
     def keywords(self) -> list[str]:
+        """
+        Keywords that describe the robot
+
+        :returns: the keywords, which the model catalog can filter on
+        """
         return self._keywords
 
     @property
@@ -749,15 +770,35 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._symbolic
 
     @property
-    def hasdynamics(self):
+    def hasdynamics(self) -> bool:
         """
         Robot has dynamic parameters
 
-        :returns: Robot has dynamic parameters
-        :returns: At least one link has associated dynamic parameters.
+        :returns: True if at least one link has a non-zero mass or motor inertia
 
-        Examples
-        --------
+        These are the parameters that the inertial dynamics need.  It is false for
+        a model of the kinematics only, such as the default ``rtb.models.Panda``,
+        and the dynamics methods ``gravload``, ``inertia``, ``coriolis``,
+        ``accel``, ``fdyn``, ``itorque`` and ``rne`` raise ``ValueError`` for
+        such a model, rather than return zeros or a confusing error.  It is *any*
+        link and not all, since the first link of the DH Puma560 has a mass of
+        zero.
+
+        The answer is cached, and recomputed only when the mass or motor inertia
+        of a link has been changed, so it costs nothing to ask.
+
+        .. versionchanged:: 1.5.0
+            This was true if any dynamic parameter had been assigned, even to
+            zero, and was not reset when the parameters were set back to zero.
+            A robot made from DH links with no masses reported True.  The
+            dynamics methods now raise ``ValueError`` if it is False, where they
+            returned zeros or raised ``LinAlgError``.
+
+        .. warning:: **Behaviour change.**  Scripts that call the dynamics
+            methods on a kinematics-only model, and accept the zeros, now get a
+            ``ValueError``.
+
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -767,10 +808,21 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
-        return self._hasdynamics
+        version = _dyn_version()
+        cache = self._dyn_cache
+        if cache is None or cache[0] != version:
+            # the mass or motor inertia of some link has changed since the last time
+            cache = (version, any(link.hasdynamics for link in self.links))
+            self._dyn_cache = cache
+        return cache[1]
 
     @property
-    def hasgeometry(self):
+    def _hasdynamics(self) -> bool:
+        # the name that the display and the catalog use
+        return self.hasdynamics
+
+    @property
+    def hasgeometry(self) -> Any:
         """
         Robot has geometry model
 
@@ -778,8 +830,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Robot has geometry model
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -787,24 +838,21 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.hasgeometry
 
-        See Also
-        --------
-        :func:`hascollision`
+        .. seealso:: :func:`hascollision`
 
         """
 
         return self._hasgeometry
 
     @property
-    def hascollision(self):
+    def hascollision(self) -> Any:
         """
         Robot has collision model
 
         :returns: Robot has collision model
         :returns: At least one link has associated collision model.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -812,37 +860,55 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.hascollision
 
-        See Also
-        --------
-        :func:`hasgeometry`
+        .. seealso:: :func:`hasgeometry`
 
         """
 
         return self._hascollision
 
     @property
-    def default_backend(self):
+    def default_backend(self) -> Any:
         """
         Get default graphical backend
 
         - ``robot.default_backend`` Get the default graphical backend, used when
-            no explicit backend is passed to ``Robot.plot``.
+            no explicit backend is passed to ``Robot.plot``.  This is the value set
+            for the robot, otherwise the value set for all robots by
+            :meth:`set_default_backend`, otherwise ``None``.
         - ``robot.default_backend = ...`` Set the default graphical backend, used when
             no explicit backend is passed to ``Robot.plot``.  The default set here will
             be overridden if the particular ``Robot`` subclass cannot support it.
 
         :returns: backend name
         """
-        return self._default_backend
+        if self._default_backend is not None:
+            return self._default_backend
+        return self._class_default_backend
 
     @default_backend.setter
-    def default_backend(self, be):
+    def default_backend(self, be: Any) -> None:
         self._default_backend = be
+
+    @classmethod
+    def set_default_backend(cls, be: Any) -> None:
+        """
+        Set the default graphical backend for all robots
+
+        :param be: backend name, for example ``"swift"``, or ``None`` to clear
+
+        ``Robot.set_default_backend("swift")`` sets the backend used by
+        :meth:`plot` for every robot, existing or created later, that has not
+        been given one of its own by ``robot.default_backend = ...``.  The robot's
+        own value takes precedence.
+
+        .. seealso:: :attr:`default_backend`
+        """
+        cls._class_default_backend = be
 
     @property
     def gravity(self) -> NDArray:
         """
-        Get/set default gravitational acceleration (Robot superclass)
+        Get/set default gravitational acceleration
 
         - ``robot.gravity`` is the default gravitational acceleration
         - ``robot.gravity = ...`` checks and sets default gravitational
@@ -858,7 +924,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._gravity
 
     @gravity.setter
-    def gravity(self, gravity_new: ArrayLike):
+    def gravity(self, gravity_new: ArrayLike) -> None:
         self._gravity = np.array(getvector(gravity_new, 3))
         self.dynchanged()
 
@@ -879,7 +945,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._q
 
     @q.setter
-    def q(self, q_new: ArrayLike):
+    def q(self, q_new: ArrayLike) -> None:
         self._q = np.array(getvector(q_new, self.n))
 
     @property
@@ -896,7 +962,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._qd
 
     @qd.setter
-    def qd(self, qd_new: ArrayLike):
+    def qd(self, qd_new: ArrayLike) -> None:
         self._qd = np.array(getvector(qd_new, self.n))
 
     @property
@@ -912,7 +978,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._qdd
 
     @qdd.setter
-    def qdd(self, qdd_new: ArrayLike):
+    def qdd(self, qdd_new: ArrayLike) -> None:
         self._qdd = np.array(getvector(qdd_new, self.n))
 
     @property
@@ -930,8 +996,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :raises ValueError: unset limits for a prismatic joint
         :returns: Array of joint limit values
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -943,17 +1008,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         limits = np.zeros((2, self.n))
         j = 0
+        v: ArrayLike
 
         for link in self.links:
             if link.isrevolute:
-                if (
-                    link.qlim is None
-                    or link.qlim[0] is None
-                    or np.any(np.isnan(link.qlim))
-                ):
+                # a symbolic model holds SymPy numbers, which np.isnan rejects
+                qlim = None if link.qlim is None else np.asarray(link.qlim, dtype=float)
+                if qlim is None or np.any(np.isnan(qlim)):
                     v = [-np.pi, np.pi]
                 else:
-                    v = link.qlim
+                    v = qlim
             elif link.isprismatic:
                 if link.qlim is None:
                     raise ValueError("Undefined prismatic joint limit")
@@ -969,7 +1033,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return limits
 
     @qlim.setter
-    def qlim(self, new_qlim: ArrayLike):
+    def qlim(self, new_qlim: ArrayLike) -> None:
         new_qlim = np.array(new_qlim)
 
         if new_qlim.shape != (2, self.n):
@@ -991,8 +1055,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: joint configuration string
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1023,12 +1086,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     @property
     def prismaticjoints(self) -> list[bool]:
         """
-        Revolute joints as bool array
+        Prismatic joints as bool array
 
         :returns: array of joint type, True if prismatic
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1043,10 +1105,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Fixed joints, that maintain a constant link relative pose,
         are not included.
 
-        See Also
-        --------
-        :func:`Link.isprismatic`
-        :func:`revolutejoints`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link.isprismatic` :func:`revolutejoints`
 
         """
 
@@ -1059,8 +1118,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: array of joint type, True if revolute
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1075,10 +1133,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Fixed joints, that maintain a constant link relative pose,
         are not included.
 
-        See Also
-        --------
-        :func:`Link.isrevolute`
-        :func:`prismaticjoints`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link.isrevolute` :func:`prismaticjoints`
 
         """
 
@@ -1099,7 +1154,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._control_mode
 
     @control_mode.setter
-    def control_mode(self, cn: str):
+    def control_mode(self, cn: str) -> None:
         if cn == "p" or cn == "v" or cn == "a":
             self._control_mode = cn
         else:
@@ -1132,7 +1187,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T: SE3 | NDArray):
+    def tool(self, T: SE3 | NDArray) -> None:
         if isinstance(T, SE3):
             if len(T) != 1:
                 raise ValueError("tool must be a single SE3, not a batch")
@@ -1160,7 +1215,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return SE3(self._T, check=False)
 
     @base.setter
-    def base(self, T: NDArray | SE3):
+    def base(self, T: NDArray | SE3) -> None:
         if isinstance(self, rtb.Robot):
             # All 3D robots
             # Set the SceneNode T
@@ -1191,10 +1246,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
 
         def search(
-            start,
-            end,
-            explored: set[LinkType | Link],
-            path: list[LinkType | Link],
+            start: Any, end: Any, explored: set[LinkType | Link], path: list[LinkType | Link]
         ) -> list[LinkType | Link] | None:
             link = self._getlink(start, self.base_link)
             end = self._getlink(end, self.ee_links[0])
@@ -1237,6 +1289,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                     if p is not None and len(p) > 0:
                         return p
 
+            return None
+
         end, start, tool = self._get_limit_links(end=end, start=start)
 
         path = search(start, end, set(), [])
@@ -1249,7 +1303,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         if tool is None:
             tool = SE3()
 
-        return path, len(path), tool  # type: ignore
+        return path, len(path), tool
 
     @lru_cache(maxsize=32)
     def _getlink(
@@ -1301,7 +1355,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             raise TypeError("unknown argument")
 
-    def _find_ets(self, start, end, explored, path) -> ETS | None:
+    def _find_ets(self, start: Any, end: Any, explored: Any, path: Any) -> ETS | None:
         """
         Privade method which will recursively find the ETS of a path
         see ets()
@@ -1343,6 +1397,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                     p = self._find_ets(parent, end, explored, path * link.ets.inv())
                 if p is not None:
                     return p
+
+        return None
 
     def _gripper_ets(self, gripper: Gripper) -> ETS:
         """
@@ -1421,7 +1477,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             start_ret = self._getlink(start)
 
         # because Gripper returns Link not LinkType
-        return end_ret, start_ret, tool  # type: ignore
+        return end_ret, start_ret, tool
 
     @lru_cache(maxsize=32)
     def ets(
@@ -1447,8 +1503,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :raises TypeError: a bad link argument
         :returns: elementary transform sequence
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1458,7 +1513,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
-        # ets to stand and end incase of grippers
+        # ets to stand and end in case of grippers
         ets_init = None
         ets_end = None
 
@@ -1488,13 +1543,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             if isinstance(end, Gripper):
                 ets_end = self._gripper_ets(end)
-                end_link = end.links[0].parent  # type: ignore
+                end_link = end.links[0].parent
                 if end_link is None:  # pragma nocover
                     raise ValueError("Invalid robot link configuration")
             else:
                 end_link = self._getlink(end, self.ee_links[0])
 
-        explored = set()
+        explored: set[Any] = set()
 
         if link is end_link:
             ets = link.ets
@@ -1514,10 +1569,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         return ets
 
-    def copy(self):
+    def copy(self) -> Any:
+        """
+        Make a copy of the robot
+
+        :returns: a deep copy, which shares no state with the original
+        """
         return deepcopy(self)
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> Any:
         # All links share one memo so parent references point to the same copies.
         links = [deepcopy(link, memo) for link in self.links]
         gripper_links = []
@@ -1525,6 +1585,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             gripper_links.append(deepcopy(gripper.links[0], memo))
             links.extend(deepcopy(link, memo) for link in gripper.links)
 
+        cls: type[BaseRobot[Any]]
         if isinstance(self, rtb.Robot2):
             cls = rtb.Robot2
         else:
@@ -1571,7 +1632,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     # --------------------------------------------------------------------- #
 
-    def todegrees(self, q) -> NDArray:
+    def todegrees(self, q: Any) -> NDArray:
         """
         Convert joint angles to degrees
 
@@ -1583,8 +1644,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :returns: If ``q`` is a matrix, with one column per joint, the conversion is
         :returns: performed columnwise.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1606,7 +1666,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             return q
 
-    def toradians(self, q) -> NDArray:
+    def toradians(self, q: Any) -> NDArray:
         """
         Convert joint angles to radians
 
@@ -1620,8 +1680,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param q: The joint configuration of the robot
         :returns: a vector of joint coordinates in radians and metres
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1642,14 +1701,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             return q
 
-    def isrevolute(self, j) -> bool:
+    def isrevolute(self, j: Any) -> bool:
         """
         Check if joint is revolute
 
         :returns: True if revolute
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1659,22 +1717,18 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.isrevolute(1)
 
-        See Also
-        --------
-        :func:`Link.isrevolute`
-        :func:`revolutejoints`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link.isrevolute` :func:`revolutejoints`
 
         """
         return self.revolutejoints[j]
 
-    def isprismatic(self, j) -> bool:
+    def isprismatic(self, j: Any) -> bool:
         """
         Check if joint is prismatic
 
         :returns: True if prismatic
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1684,10 +1738,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.isprismatic(1)
 
-        See Also
-        --------
-        :func:`Link.isprismatic`
-        :func:`prismaticjoints`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link.isprismatic` :func:`prismaticjoints`
 
         """
 
@@ -1698,7 +1749,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     def dfs_links(
         self,
         start: LinkType,
-        func: Callable[[LinkType | None, Any]] = None,
+        func: Callable[[LinkType | None], Any] | None = None,
     ) -> list[LinkType]:
         """
         A link search method
@@ -1713,7 +1764,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         visited = []
 
-        def vis_children(link):
+        def vis_children(link: Any) -> None:
             visited.append(link)
             if func is not None:
                 func(link)
@@ -1726,15 +1777,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         return visited
 
-    def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
+    def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad") -> None:
         """
         Add a named joint configuration as an attribute
 
         :param name: Name of the joint configuration
         :param q: Joint configuration
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1752,9 +1802,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - Configuration is also added to the robot instance's dictionary of
             named configurations.
 
-        See Also
-        --------
-        :meth:`addconfiguration`
+        .. seealso:: :meth:`addconfiguration`
 
         """
 
@@ -1762,7 +1810,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         self._configs[name] = v
         setattr(self, name, v)
 
-    def addconfiguration(self, name: str, q: ArrayLike):
+    def addconfiguration(self, name: str, q: ArrayLike) -> None:
         """
         Add a named joint configuration
 
@@ -1772,8 +1820,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param name: Name of the joint configuration
         :param q: Joint configuration
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1782,19 +1829,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
             >>> robot.configs["mypos"]
 
-        See Also
-        --------
-        :meth:`addconfiguration`
+        .. seealso:: :meth:`addconfiguration`
 
         """
 
         self._configs[name] = np.array(getvector(q, self.n))
 
-    def configurations_str(self, border="thin"):
+    def configurations_str(self, border: str = "thin") -> Any:
         deg = 180 / np.pi
 
         # TODO: factor this out of DHRobot
-        def angle(theta, fmt=None):
+        def angle(theta: Any, fmt: Any = None) -> Any:
             if fmt is not None:
                 try:
                     return fmt.format(theta * deg) + "\u00b0"
@@ -1827,7 +1872,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:  # pragma nocover
             return ""
 
-    def random_q(self):
+    def random_q(self) -> Any:
         """
         Return a random joint configuration
 
@@ -1840,10 +1885,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Random joint configuration :rtype: ndarray(n)
 
-        See Also
-        --------
-        :func:`Robot.qlim`
-        :func:`Link.qlim`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.qlim` :meth:`~roboticstoolbox.robot.Link.Link.qlim`
 
         """
 
@@ -1854,14 +1896,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def hierarchy(self) -> None:
         """
-        Pretty print the robot link hierachy
+        Pretty print the robot link hierarchy
 
         :returns: Pretty print of the robot model
 
-        Examples
-        --------
+        .. rubric:: Examples
 
-        Makes a robot and prints the heirachy
+        Makes a robot and prints the hierarchy
 
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
@@ -1870,7 +1911,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         """
 
-        def recurse(link, indent=0):
+        def recurse(link: Any, indent: int = 0) -> None:
             print(" " * indent * 2, link.name)
             if link.children is not None:
                 for child in link.children:
@@ -1906,46 +1947,48 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             segments
         """
 
-        def recurse(link: Link):
+        def recurse(link: Link) -> Any:
             segs = [link.parent]
             while True:
                 segs.append(link)
-                if link.nchildren == 0:
+                children = link.children or []
+                if len(children) == 0:
                     return [segs]
-                elif link.nchildren == 1:
-                    link = link.children[0]  # type: ignore
+                elif len(children) == 1:
+                    link = children[0]
                     continue
-                elif link.nchildren > 1:
-                    segs = [segs]
+                elif len(children) > 1:
+                    segs = [segs]  # type: ignore[list-item]
 
-                    for child in link.children:  # type: ignore
+                    for child in children:
                         segs.extend(recurse(child))
 
                     return segs
 
-        return recurse(self.links[0])  # type: ignore
+        return recurse(self.links[0])
 
     # --------------------------------------------------------------------- #
     # Scene Graph section
     # --------------------------------------------------------------------- #
 
-    def _update_link_tf(self, q: ArrayLike | None = None):
+    def _update_link_tf(self, q: ArrayLike | None = None) -> None:
         """
         This private method updates the local transform of each link within
         this robot according to q (or self.q if q is none)
         """
 
         @lru_cache(maxsize=2)
-        def get_link_ets():
+        def get_link_ets() -> Any:
             return [link.ets._fknm for link in self.links]
 
         @lru_cache(maxsize=2)
-        def get_link_scene_node():
+        def get_link_scene_node() -> Any:
             return [link._T_reference for link in self.links]
 
         Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
 
-        [gripper._update_link_tf() for gripper in self.grippers]
+        for gripper in self.grippers:
+            gripper._update_link_tf()
 
     # --------------------------------------------------------------------- #
     # --------- PyPlot Methods -------------------------------------------- #
@@ -1956,6 +1999,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         backend: L["swift", "pyplot", "pyplot2"] | None = None,
     ) -> Connector:
         import sys
+
         from roboticstoolbox.backends import load_backend
 
         # Resolve which backend name to use
@@ -2005,14 +2049,18 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         q: ArrayLike,
         backend: L["swift", "pyplot", "pyplot2"] | None = None,
         block: bool = False,
-        dt: float = 0.050,
+        dt: float = 0.05,
         limits: ArrayLike | None = None,
         vellipse: bool = False,
         fellipse: bool = False,
         fig: str | None = None,
         movie: str | None = None,
         loop: bool = False,
-        **kwargs,
+        notebook: bool | None = None,
+        ax: Any = None,
+        env: Connector | None = None,
+        view: str | None = None,
+        **kwargs: Any,
     ) -> Connector:
         """
         Graphical display and animation
@@ -2028,23 +2076,67 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param q: The joint configuration of the robot.
         :param backend: The graphical backend to use, currently 'swift' and 'pyplot' are implemented. Defaults to 'swift' of a ``Robot`` and 'pyplot` for a ``DHRobot``
-        :param block: Block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to False
         :param dt: if q is a trajectory, this describes the delay in seconds between frames
         :param limits: Custom view limits for the plot. If not supplied will autoscale, [x1, x2, y1, y2, z1, z2] (this option is for 'pyplot' only)
         :param vellipse: (Plot Option) Plot the velocity ellipse at the end-effector (this option is for 'pyplot' only)
         :param fellipse: (Plot Option) Plot the force ellipse at the end-effector (this option is for 'pyplot' only)
         :param fig: (Plot Option) The figure label to plot in (this option is for 'pyplot' only)
+        :param ax: (Plot Option) Existing Matplotlib 3D axes to draw the scene on, instead of making a figure (this option is for 'pyplot' only)
+        :param env: The scene returned by an earlier ``plot``, to add this robot to, instead of making a new scene; see *Several configurations* below.  The backend of the scene is used, so ``backend`` is ignored, and the options that are set when a scene is made (``limits``, ``fig``, ``ax``, ``render_mode``, ``inline_*``, ``notebook`` and ``browser``) cannot be given
+        :param color: (Plot Option) The color of the robot's line, any Matplotlib color (this option is for 'pyplot' only)
+        :param view: (Plot Option) ``"xy"``, ``"xz"`` or ``"yz"`` to start with a flat view of that plane, the first axis to the right and the second up, or ``None`` (default) for the usual three-dimensional view.  The view is not locked, the plot can be rotated as usual.  With ``env`` it changes the view of that scene (this option is for 'pyplot' only)
         :param movie: (Plot Option) The filename to save the movie to (this option is for 'pyplot' only)
         :param loop: (Plot Option) Loop the movie (this option is for 'pyplot' only)
+        :param notebook: (Plot Option, Swift only) ``True`` shows Swift in a frame of the current notebook cell, ``False`` opens it in a browser window, and ``None`` (default) chooses the frame in a notebook, unless a ``browser`` is named, and a window otherwise, so the same call works in a script and in a notebook.  The browser showing the notebook must be on the machine running the kernel, since the frame points at ``localhost``
+        :param browser: (Plot Option, Swift only) the browser for the window, or ``None`` (default) for the system's.  This is a name known to Python's ``webbrowser`` module, which depends on the operating system, for example ``"chrome"``, ``"firefox"`` or ``"safari"`` on macOS and ``"google-chrome"`` or ``"chromium"`` on Linux, or a command line with ``%s`` where the URL goes, for any other browser; ``webbrowser.get(name)`` tells you whether a name works.  Naming a browser means a window, not the notebook frame.  ``browser="notebook"`` is deprecated, use ``notebook=True``.  See :py:meth:`swift.Swift.Swift.launch`
+        :param realtime: (Plot Option) Pace the steps of a trajectory in real time, one each ``dt``, defaults to True for a trajectory (this option is for 'swift' only)
         :param jointaxes: (Plot Option) Plot an arrow indicating the axes in which the joint revolves around(revolute joint) or translates along (prosmatic joint) (this option is for 'pyplot' only)
         :param eeframe: (Plot Option) Plot the end-effector coordinate frame at the location of the end-effector. Uses three arrows, red, green and blue to indicate the x, y, and z-axes. (this option is for 'pyplot' only)
         :param shadow: (Plot Option) Plot a shadow of the robot in the x-y plane. (this option is for 'pyplot' only)
         :param name: (Plot Option) Plot the name of the robot near its base (this option is for 'pyplot' only)
-        :param render_mode: (Plot Option) Rendering mode for matplotlib backends: ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``. If omitted, an environment-appropriate mode is selected.
+        :param render_mode: (Plot Option) Rendering mode for matplotlib backends: ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``. If omitted, a mode is chosen from the environment, so the same call works for any ``%matplotlib`` setting: for the interactive ``ipympl`` backend a single pose is a widget that can be rotated, but a trajectory uses ``'notebook-inline'``, since a widget cannot update while the cell is running.
         :param inline_every_n: (Plot Option) In notebook-inline mode, push one rendered frame every N simulation steps. Larger N reduces output load.
         :param inline_format: (Plot Option) In notebook-inline mode, frame format: ``'svg'`` (default) or ``'png'``.
         :param inline_dpi: (Plot Option) DPI for PNG inline frames only; ignored when ``inline_format='svg'``.
         :returns: A reference to the environment object which controls the figure
+
+        .. note::
+
+            Python's ``webbrowser`` module cannot tell whether a browser is installed, so
+            a browser that cannot be opened is not reported as such.  On macOS the names
+            ``"chrome"``, ``"firefox"`` and ``"safari"`` are always accepted, whether or
+            not the app is installed.  If it is not, no window opens and there is no
+            error: Swift waits about 10 seconds for the page to connect and then reports
+            ``Could not connect to the Swift simulator``.  If you see that, check that
+            the browser named by ``browser`` is installed, or leave it as ``None`` to use
+            the system's default browser.  See :py:meth:`swift.Swift.Swift.launch`.
+
+        .. rubric:: Several configurations
+
+        ``plot`` returns the scene it made, and passing that as ``env`` to another
+        ``plot`` adds a robot to it instead of making a new scene.  The robot is the
+        same model, and each plot of it holds the pose it was given, so the robot is
+        shown in two configurations at once, here the initial and the final.  Give each
+        a ``color``, and turn off what would be drawn twice.
+
+        .. plot::
+            :include-source:
+
+            import roboticstoolbox as rtb
+
+            puma = rtb.models.DH.Puma560()
+            env = puma.plot(puma.qr, color="gray", block=False)
+            puma.plot(puma.qn, env=env, color="red", name=False, block=False)
+
+        The scene can be given a pose to draw directly, ``handle = env.add(puma, q=q)``,
+        and ``handle.q = q`` moves only that drawing.  A robot that is added without a
+        ``q`` follows ``puma.q``, as it always has.  A trajectory can be plotted on top
+        of an earlier plot in the same way; the earlier plot stays where it was.  In a
+        notebook, an animation needs the scene to have been made with
+        ``render_mode="notebook-inline"``.
 
         .. rubric:: Notes
 
@@ -2052,32 +2144,107 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             To avoid this set ``block=False``.
         - For PyPlot, the polyline joins the origins of the link frames,
             but for some Denavit-Hartenberg models those frames may not
-            actually be on the robot, ie. the lines to not neccessarily
+            actually be on the robot, ie. the lines to not necessarily
             represent the links of the robot.
 
-        See Also
-        --------
-        :func:`teach`
+        .. seealso:: :func:`teach`
 
         """
 
-        env = None
-
-        env = self._get_graphical_backend(backend)
+        # a scene to add to, or a new one
+        adding = env is not None
+        if env is None:
+            env = self._get_graphical_backend(backend)
+        elif ax is not None:
+            raise ValueError("ax and env cannot both be given: the scene has axes")
 
         if movie is not None:
             from roboticstoolbox.backends.PyPlot import PyPlot
 
-        launch_kwargs = {}
-        for key in ("render_mode", "inline_every_n", "inline_format", "inline_dpi"):
+        launch_kwargs: dict[str, Any] = {}
+        for key in (
+            "render_mode",
+            "inline_every_n",
+            "inline_format",
+            "inline_dpi",
+            "browser",
+            "realtime",
+        ):
             if key in kwargs:
                 launch_kwargs[key] = kwargs.pop(key)
+
+        if view is not None:
+            from roboticstoolbox.tools.plot import plane_view
+
+            plane_view(view)  # a bad name raises before a scene is made
+            if "view" not in inspect.signature(env.launch).parameters:
+                raise ValueError(f"the {type(env).__name__} backend cannot set a view")
+            if not adding:
+                launch_kwargs["view"] = view
+
+        if adding:
+            # these are fixed when a scene is made
+            fixed = [k for k in launch_kwargs if k != "realtime"]
+            if limits is not None:
+                fixed.append("limits")
+            if fig is not None:
+                fixed.append("fig")
+            if notebook is not None:
+                fixed.append("notebook")
+            if fixed:
+                raise ValueError(
+                    f"{', '.join(fixed)} cannot be used with env, they are set when "
+                    "the scene is made"
+                )
+        if ax is not None:
+            if "ax" not in inspect.signature(env.launch).parameters:
+                raise ValueError(f"the {type(env).__name__} backend cannot plot on ax")
+            launch_kwargs["ax"] = ax
 
         q = np.array(getmatrix(q, (None, self.n)))
         self.q = q[0, :]
 
+        # a trajectory is an animation, which the PyPlot backends render differently
+        # in a notebook (the other backends have no render mode)
+        if q.shape[0] > 1 and hasattr(env, "render_mode") and not adding:
+            launch_kwargs.setdefault("animation", True)
+
+        # Swift is a web page, served by this process.  In a notebook it is shown in a
+        # frame of the cell, not in a browser window of its own.  An animation is paced
+        # in real time, one step to each dt: unpaced, Swift draws at most 60 frames
+        # per second and skips the steps that come sooner, so the whole trajectory runs
+        # in a few milliseconds and only its first frame is ever drawn.
+        is_swift = type(env).__name__ == "Swift"
+        if is_swift and not adding:
+            from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook
+
+            if launch_kwargs.get("browser") == "notebook":
+                warn(
+                    'plot(browser="notebook") is deprecated, use plot(notebook=True)',
+                    FutureWarning,
+                    stacklevel=2,
+                )
+                del launch_kwargs["browser"]
+                notebook = True
+            if notebook is None:
+                notebook = launch_kwargs.get("browser") is None and _isnotebook()
+            if notebook:
+                if launch_kwargs.get("browser") is not None:
+                    raise ValueError(
+                        f"browser={launch_kwargs['browser']!r} cannot be used with "
+                        "notebook=True: the page is shown in the cell, not in a window"
+                    )
+                # Swift 2.1 has notebook=, before that it was browser="notebook"
+                if "notebook" in inspect.signature(env.launch).parameters:
+                    launch_kwargs["notebook"] = True
+                else:
+                    launch_kwargs["browser"] = "notebook"
+            launch_kwargs.setdefault("realtime", q.shape[0] > 1)
+
         # Add the self to the figure in readonly mode
-        if q.shape[0] == 1:
+        if adding:
+            pass  # the scene was launched by the plot that made it
+        elif q.shape[0] == 1:
             env.launch(
                 name=self.name + " Plot", limits=limits, fig=fig, **launch_kwargs
             )
@@ -2089,7 +2256,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 **launch_kwargs,
             )
 
-        env.add(self, readonly=True, **kwargs)
+        if adding and view is not None:
+            from roboticstoolbox.tools.plot import set_plane_view
+
+            set_plane_view(env.ax, view)  # type: ignore[attr-defined]
+
+        # The drawing of this robot holds the pose it is drawn in, if the backend lets
+        # it, so the same robot can be added to a scene again in another pose.
+        if "q" in inspect.signature(env.add).parameters:
+            kwargs["q"] = q[0]
+        handle = env.add(self, readonly=True, **kwargs)
         self._active_plot_env = env
 
         if vellipse:
@@ -2112,7 +2288,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         while True:
             for qk in q:
-                self.q = qk
+                if hasattr(handle, "q"):
+                    # The drawing keeps the pose of what it shows, as Swift does in the
+                    # handle that add() returned, and the robot is only a model.
+                    # Swift deprecates driving it through robot.q.
+                    handle.q = qk
+                else:
+                    self.q = qk
                 if vell is not None:
                     vell.q = qk
                 if fell is not None:
@@ -2135,6 +2317,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             if not loop:
                 break
 
+        self.q = q[-1]
+
         # Keep the plot open
         if block:  # pragma nocover
             env.hold()
@@ -2149,13 +2333,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         vellipse: bool = False,
         fellipse: bool = False,
         backend: L["swift", "pyplot", "pyplot2"] | None = None,
+        view: str | None = None,
     ) -> Connector:
         """
         Graphical teach pendant
 
         ``robot.teach(q)`` opens a graphical view (PyPlot or Swift --
         see ``backend``) which allows the user to "drive" a graphical
-        robot using a graphical slider panel. The robot's inital joint
+        robot using a graphical slider panel. The robot's initial joint
         configuration is ``q``.
 
         ``robot.teach()`` as above except the robot's stored value of ``q``
@@ -2163,7 +2348,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :param block: Block operation of the code and keep the figure open
+        :param block: ``True`` waits until the window is closed; the PyPlot backend has
+            already shown the figure, so ``False`` and ``None`` return at once,
+            defaults to True
         :param limits: Custom view limits for the plot. If not supplied will
             autoscale, [x1, x2, y1, y2, z1, z2] (this option is for
             'pyplot'/'pyplot2' only)
@@ -2174,6 +2361,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param backend: The graphical backend to use -- 'swift', 'pyplot',
             or 'pyplot2'. Defaults to whatever :meth:`plot` would pick for
             this robot (see its own ``backend`` for the resolution rule).
+        :param view: ``"xy"``, ``"xz"`` or ``"yz"`` to start with a flat view of
+            that plane, the first axis to the right and the second up, or ``None``
+            (default) for the usual three-dimensional view.  The view is not
+            locked, the plot can be rotated as usual (this option is for 'pyplot'
+            only)
 
         :returns: A reference to the environment object which controls
             the figure/view
@@ -2215,7 +2407,15 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             )
 
         # Add the self to the figure in readonly mode
-        env.launch(name="Teach " + self.name, limits=limits)
+        launch_kwargs: dict[str, Any] = {}
+        if view is not None:
+            from roboticstoolbox.tools.plot import plane_view
+
+            plane_view(view)  # a bad name raises before a scene is made
+            if "view" not in inspect.signature(env.launch).parameters:
+                raise ValueError(f"the {type(env).__name__} backend cannot set a view")
+            launch_kwargs["view"] = view
+        env.launch(name="Teach " + self.name, limits=limits, **launch_kwargs)
         handle = env.add(
             self,
             readonly=True,
@@ -2236,12 +2436,14 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         if vellipse:
             vell = self.vellipse(q, centre="ee", add=False)
-            env._teach_vellipse = vell
+            # the ellipsoid shown by the teach pendant, read back by the
+            # backend; not part of the backend interface
+            setattr(env, "_teach_vellipse", vell)
             env.add(vell)
 
         if fellipse:
             fell = self.fellipse(q, centre="ee", add=False)
-            env._teach_fellipse = fell
+            setattr(env, "_teach_fellipse", fell)
             env.add(fell)
 
         # Keep the plot open -- skipped if the backend already blocked
@@ -2261,7 +2463,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     # --------- Utility Methods ------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    def showgraph(self, display_graph: bool = True, **kwargs) -> str | None:
+    def showgraph(self, display_graph: bool = True, **kwargs: Any) -> str | None:
         """
         Display a link transform graph in browser
 
@@ -2275,10 +2477,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             - ETS transforms are indicated by rounded boxes
 
         The edges are:
-            - an arrow if `jtype` is False or the joint is fixed
-            - an arrow with a round head if `jtype` is True and the joint is
+            - an arrow if ``jtype`` is False or the joint is fixed
+            - an arrow with a round head if ``jtype`` is True and the joint is
               revolute
-            - an arrow with a box head if `jtype` is True and the joint is
+            - an arrow with a box head if ``jtype`` is True and the joint is
               prismatic
 
         Edge labels or nodes in blue have a fixed transformation to the
@@ -2289,8 +2491,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param jtype: Arrowhead to node indicates revolute or prismatic type
         :param static: Show static joints in blue and bold
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         >>> import roboticstoolbox as rtb
         >>> panda = rtb.models.URDF.Panda()
@@ -2299,15 +2500,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         .. image:: ../figs/panda-graph.svg
             :width: 600
 
-        See Also
-        --------
-        :func:`dotfile` :func:`graph`
+        .. seealso:: :func:`dotfile` :func:`graph`
 
         """
 
         # Lazy import
-        import tempfile
         import subprocess
+        import tempfile
         import webbrowser
 
         # create the temporary dotfile
@@ -2325,6 +2524,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         else:
             return pdffile.name
 
+        return None
+
     def dotfile(
         self,
         filename: str | IO[str],
@@ -2332,7 +2533,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         ets: L["full", "brief"] = "full",
         jtype: bool = False,
         static: bool = True,
-    ):
+    ) -> None:
         """
         Write a link transform graph as a GraphViz dot file
 
@@ -2349,10 +2550,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         The edges are:
 
-        - an arrow if `jtype` is False or the joint is fixed
-        - an arrow with a round head if `jtype` is True and the joint is
+        - an arrow if ``jtype`` is False or the joint is fixed
+        - an arrow with a round head if ``jtype`` is True and the joint is
           revolute
-        - an arrow with a box head if `jtype` is True and the joint is
+        - an arrow with a box head if ``jtype`` is True and the joint is
           prismatic
 
         Edge labels or nodes in blue have a fixed transformation to the
@@ -2369,12 +2570,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param jtype: Arrowhead to node indicates revolute or prismatic type
         :param static: Show static joints in blue and bold
 
-        See Also
-        --------
-        :func:`showgraph` :func:`graph`
+        .. seealso:: :func:`showgraph` :func:`graph`
 
         """
 
+        file: IO[str]
         if isinstance(filename, str):
             file = open(filename, "w", encoding="utf-8")
         else:
@@ -2384,7 +2584,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 graph [rankdir=LR];
 """
 
-        def draw_edge(link, etsbox, jtype, static):
+        def draw_edge(link: Any, etsbox: Any, jtype: Any, static: Any) -> None:
             # draw the edge
             if jtype:
                 if link.isprismatic:
@@ -2427,9 +2627,9 @@ graph [rankdir=LR];
                         )
                     )
 
-                file.write("  {} -> {}_ets;\n".format(parent, link.name))
+                file.write(f"  {parent} -> {link.name}_ets;\n")
                 file.write(
-                    "  {}_ets -> {} [{}];\n".format(link.name, link.name, edge_options)
+                    f"  {link.name}_ets -> {link.name} [{edge_options}];\n"
                 )
             else:
                 # put the ets fragment as an edge label
@@ -2446,12 +2646,7 @@ graph [rankdir=LR];
                     return
                 try:
                     file.write(
-                        '  {} -> {} [label="{}", {}];\n'.format(
-                            parent,
-                            link.name,
-                            estr,
-                            edge_options,
-                        )
+                        f'  {parent} -> {link.name} [label="{estr}", {edge_options}];\n'
                     )
                 except UnicodeEncodeError:  # pragma nocover
                     file.write(
@@ -2477,13 +2672,13 @@ graph [rankdir=LR];
             else:
                 node_options = 'shape="circle"'
 
-            file.write("  {} [{}];\n".format(link.name, node_options))
+            file.write(f"  {link.name} [{node_options}];\n")
 
             draw_edge(link, etsbox, jtype, static)
 
         for gripper in self.grippers:
             for link in gripper.links:
-                file.write("  {} [shape=cds];\n".format(link.name))
+                file.write(f"  {link.name} [shape=cds];\n")
                 draw_edge(link, etsbox, jtype, static)
 
         file.write("}\n")
@@ -2495,7 +2690,7 @@ graph [rankdir=LR];
         self,
         format: L["dot", "mermaid", "mermaid_fenced"] = "dot",
         filename: str | IO[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> str:
         """
         Render a link transform graph as text
@@ -2531,7 +2726,7 @@ graph [rankdir=LR];
             from IPython.display import Markdown, display
             display(Markdown(robot.graph(format="mermaid_fenced")))
 
-        :seealso: :meth:`dotfile` :meth:`showgraph`
+        .. seealso:: :meth:`dotfile` :meth:`showgraph`
         """
         graph_format = format.lower().replace("-", "_")
 
@@ -2544,7 +2739,7 @@ graph [rankdir=LR];
             lines = ["flowchart LR"]
             node_ids: dict[Any, str] = {}
 
-            def node_id(link) -> str:
+            def node_id(link: Any) -> str:
                 return node_ids.setdefault(link, f"n{len(node_ids)}")
 
             lines.append('    BASE["BASE"]')
@@ -2560,7 +2755,7 @@ graph [rankdir=LR];
                 for link in gripper.links:
                     lines.append(f'    {node_id(link)}{{{{"{link.name}"}}}}')
 
-            def edge_label(link) -> str:
+            def edge_label(link: Any) -> str:
                 if not link.isjoint:
                     return ""
                 kind = "P" if link.isprismatic else "R"

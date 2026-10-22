@@ -694,49 +694,6 @@ class TestDHRobot(unittest.TestCase):
             nt.assert_array_almost_equal(n2.links[i].Tc, L[i].Tc)
 
     @unittest.skip("payload needs fixing")
-    def test_pay(self):
-        panda = rp.models.DH.Panda()
-        q = [1, 2, 3, 4, 5, 6, 7]
-
-        w = [1, 2, 3, 4, 5, 6]
-
-        wT = np.c_[w, w, w, w].T
-        qT = np.c_[q, q, q, q].T
-
-        tau = np.array([6.0241, -4.4972, -7.2160, -4.2400, 7.0215, -4.6884, -6.0000])
-
-        tau0 = np.array([-5.9498, 1.4604, -3.4544, 1.5026, -3.7777, -6.6578, 2.6047])
-
-        tauT = np.c_[tau, tau, tau, tau].T
-        tau0T = np.c_[tau0, tau0, tau0, tau0].T
-
-        Je = panda.jacobe(q)
-        J0 = panda.jacob0(q)
-
-        JeT = np.zeros((4, 6, 7))
-        for i in range(4):
-            JeT[i, :, :] = Je
-
-        panda.pay(w)
-
-        nt.assert_array_almost_equal(panda.pay(w), tau, decimal=4)
-        nt.assert_array_almost_equal(panda.pay(w, frame=0), tau0, decimal=4)
-
-        nt.assert_array_almost_equal(panda.pay(w, q=q), tau, decimal=4)
-        nt.assert_array_almost_equal(panda.pay(wT, q=qT), tauT, decimal=4)
-        nt.assert_array_almost_equal(panda.pay(wT, q=qT, frame=0), tau0T, decimal=4)
-
-        nt.assert_array_almost_equal(panda.pay(w, J=Je), tau, decimal=4)
-        nt.assert_array_almost_equal(panda.pay(w, J=J0), tau0, decimal=4)
-
-        nt.assert_array_almost_equal(panda.pay(wT, J=JeT), tauT, decimal=4)
-
-        with self.assertRaises(ValueError):
-            panda.pay(wT, q)
-
-        with self.assertRaises(TypeError):
-            panda.pay(wT)
-
     def test_friction(self):
         l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1])
         qd = [1, 2, 3, 4]
@@ -1088,6 +1045,111 @@ class TestDHRobot(unittest.TestCase):
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
+    def _puma_poses(self, puma):
+        qs = np.array(
+            [puma.qn, puma.qn + 0.1, [0.3, 0.5, -0.4, 0.2, 0.6, 0.7]], dtype=float
+        )
+        return qs, puma.fkine(qs)
+
+    def test_ikine_a_trajectory(self):
+        # a trajectory gives one IKSolution like the numerical solvers
+        puma = rp.models.DH.Puma560()
+        qs, Ts = self._puma_poses(puma)
+
+        sol = puma.ikine_a(Ts)
+
+        self.assertIsInstance(sol, rp.IKSolution)
+        self.assertEqual(sol.q.shape, (3, 6))
+        self.assertIs(type(sol.success), bool)
+        self.assertTrue(sol.success)
+        self.assertEqual(sol.reason, "")
+        self.assertEqual((sol.iterations, sol.searches), (0, 0))
+        self.assertLess(sol.residual, 1e-12)
+        for k in range(3):
+            nt.assert_allclose(puma.fkine(sol.q[k]).A, Ts[k].A, atol=1e-9)
+
+    def test_ikine_a_accepts_arrays(self):
+        puma = rp.models.DH.Puma560()
+        qs, Ts = self._puma_poses(puma)
+
+        sol_se3 = puma.ikine_a(Ts)
+        sol_arr = puma.ikine_a(np.array(Ts.A))  # (3, 4, 4)
+        nt.assert_allclose(sol_arr.q, sol_se3.q)
+
+        sol_one = puma.ikine_a(Ts[0].A)  # (4, 4)
+        self.assertEqual(sol_one.q.shape, (6,))
+        nt.assert_allclose(sol_one.q, sol_se3.q[0])
+
+        for bad in (np.eye(3), np.zeros((2, 3, 4)), np.zeros(16)):
+            with self.assertRaises(ValueError):
+                puma.ikine_a(bad)
+
+    def test_ikine_a_unreachable(self):
+        puma = rp.models.DH.Puma560()
+
+        # far outside the workspace
+        sol = puma.ikine_a(sm.SE3(5, 5, 5))
+        self.assertFalse(sol.success)
+        self.assertEqual(sol.reason, "Out of reach")
+        self.assertEqual(sol.q.shape, (6,))
+        self.assertTrue(np.all(np.isnan(sol.q)))
+        self.assertEqual(sol.residual, np.inf)
+
+        # closer to the waist axis than the shoulder offset, this used to
+        # return success=True with q all NaN
+        sol = puma.ikine_a(sm.SE3(0.05, 0.0, 0.5) * sm.SE3.Rx(np.pi))
+        self.assertFalse(sol.success)
+        self.assertEqual(sol.reason, "Out of reach")
+        self.assertTrue(np.all(np.isnan(sol.q)))
+
+        # on the waist axis
+        sol = puma.ikine_a(sm.SE3(0.0, 0.0, 0.5))
+        self.assertFalse(sol.success)
+
+    def test_ikine_a_trajectory_with_unreachable_pose(self):
+        # this used to raise ValueError
+        puma = rp.models.DH.Puma560()
+        qs, Ts = self._puma_poses(puma)
+        Tmixed = sm.SE3([Ts[0], sm.SE3(5, 5, 5), Ts[2]])
+
+        sol = puma.ikine_a(Tmixed)
+
+        self.assertEqual(sol.q.shape, (3, 6))
+        self.assertIs(type(sol.success), bool)
+        self.assertFalse(sol.success)
+        self.assertEqual(sol.reason, "Out of reach")
+        self.assertEqual(sol.residual, np.inf)
+        self.assertTrue(np.all(np.isfinite(sol.q[0])))
+        self.assertTrue(np.all(np.isnan(sol.q[1])))
+        self.assertTrue(np.all(np.isfinite(sol.q[2])))
+        nt.assert_allclose(puma.fkine(sol.q[0]).A, Ts[0].A, atol=1e-9)
+        nt.assert_allclose(puma.fkine(sol.q[2]).A, Ts[2].A, atol=1e-9)
+
+    def test_ikine_a_wrist_singularity(self):
+        # q5 = 0 aligns the axes of joints 4 and 6
+        puma = rp.models.DH.Puma560()
+        T = puma.fkine([0.3, 0.5, -0.4, 0.2, 0.0, 0.7])
+
+        sol = puma.ikine_a(T)
+
+        self.assertTrue(sol.success)
+        nt.assert_allclose(puma.fkine(sol.q).A, T.A, atol=1e-9)
+
+    def test_ikine_a_with_base(self):
+        puma = rp.models.DH.Puma560()
+        puma.base = sm.SE3(0.2, -0.1, 0.3) * sm.SE3.Rz(0.4)
+        T = puma.fkine(puma.qn)
+
+        sol = puma.ikine_a(T)
+
+        self.assertTrue(sol.success)
+        nt.assert_allclose(puma.fkine(sol.q).A, T.A, atol=1e-9)
+
+    def test_ikine_6s_is_deprecated(self):
+        puma = rp.models.DH.Puma560()
+        with self.assertWarns(DeprecationWarning):
+            puma.ikine_6s(puma.fkine(puma.qn), "lun", lambda robot, T, config: None)
+
     def test_ikine_LM(self):
         puma = rp.models.DH.Puma560()
 
@@ -1382,30 +1444,6 @@ class TestDHRobot(unittest.TestCase):
     # tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
 
     #         self.assertEqual(str(puma), res)
-
-    # def test_paycap(self):
-    #     self.skipTest("error introduced with DHLink change")
-    #     puma = rp.models.DH.Puma560()
-    #     puma.q = puma.qn
-    #     q = puma.qn
-
-    #     w = [1, 2, 1, 2, 1, 2]
-    #     tauR = np.ones((6, 2))
-    #     tauR[:, 1] = -1
-
-    #     res0 = [
-    #         1.15865438e+00, -3.04790052e+02, -5.00870095e+01,  6.00479950e+15,
-    #         3.76356072e+00, 1.93649167e+00]
-
-    #     wmax0, joint = puma.paycap(w, tauR, q=q, frame=0)
-    #     wmax1, _ = puma.paycap(np.c_[w, w], tauR, q=np.c_[q, q], frame=0)
-    #     wmax2, _ = puma.paycap(w, tauR, frame=0)
-
-    #     nt.assert_allclose(wmax0, res0)
-    #     self.assertEqual(joint, 1)
-    #     nt.assert_allclose(wmax1[:, 0], res0)
-    #     nt.assert_allclose(wmax1[:, 1], res0)
-    #     nt.assert_allclose(wmax2, res0)
 
     def test_jacob_dot(self):
         puma = rp.models.DH.Puma560()

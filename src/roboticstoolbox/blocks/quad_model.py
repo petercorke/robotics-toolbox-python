@@ -1,7 +1,7 @@
 # MDL_QUADCOPTER Dynamic parameters for a quadrotor.
 #
 # MDL_QUADCOPTER is a script creates the workspace variable quad which
-# describes the dynamic characterstics of a quadrotor flying robot.
+# describes the dynamic characteristics of a quadrotor flying robot.
 #
 # Properties::
 #
@@ -46,10 +46,12 @@
 # - This is a heavy lift quadrotor
 #
 
-import numpy as np
-from math import pi, sqrt, inf
+from math import inf, pi, sqrt
+from typing import Any
 
-quadrotor = {}
+import numpy as np
+
+quadrotor: dict[str, Any] = {}
 quadrotor["nrotors"] = 4  # 4 rotors
 quadrotor["g"] = 9.81  # g     Gravity
 quadrotor["rho"] = 1.184  # rho   Density of air

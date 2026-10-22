@@ -4,13 +4,18 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
 import sys
-import swift
 from math import pi
-import roboticstoolbox as rtb
-from spatialgeometry import Mesh
-from spatialmath import SO3, SE3
+from typing import Any
+
 import numpy as np
+import swift
+from spatialgeometry import Mesh
+from spatialmath import SE3, SO3
+
+import roboticstoolbox as rtb
 
 path = rtb.rtb_path_to_datafile("data")
 
@@ -48,11 +53,11 @@ plane = Mesh(
 )
 
 
-def update_gimbals(theta, ring):
+def update_gimbals(theta: Any, ring: Any) -> None:
     global R1, R2, R3
 
     # update the relevant transform, depending on which ring's slider moved
-    def Rxyz(theta, which):
+    def Rxyz(theta: Any, which: Any) -> Any:
         theta = np.radians(theta)
         if which == "X":
             return SO3.Rx(theta)
@@ -70,7 +75,7 @@ def update_gimbals(theta, ring):
 
     # figure the transforms for each gimbal and the plane, and update their
     # pose
-    def convert(R):
+    def convert(R: Any) -> Any:
         return BASE * SE3.Rt(R, t=[0, 0, 0])
 
     g3.T = convert(R1 * SO3.Ry(pi / 2))
@@ -79,7 +84,7 @@ def update_gimbals(theta, ring):
     plane.T = convert(R1 * R2 * R3 * SO3.Ry(pi / 2) * SO3.Rz(pi / 2))
 
 
-def demo(test: bool = False):
+def demo(test: bool = False) -> None:
     # TODO
     #  rotate the rings according to the rotation axis, so that the axles
     #  point the right way
@@ -98,13 +103,13 @@ def demo(test: bool = False):
     print("Gimbal models by Peter Corke using OpenSCAD")
 
     # slider call backs, invoke the central handler
-    def set_one(x):
+    def set_one(x: Any) -> None:
         update_gimbals(float(x), 1)
 
-    def set_two(x):
+    def set_two(x: Any) -> None:
         update_gimbals(float(x), 2)
 
-    def set_three(x):
+    def set_three(x: Any) -> None:
         update_gimbals(float(x), 3)
 
     r_one = swift.Slider(
@@ -141,7 +146,7 @@ def demo(test: bool = False):
     swift.Button(lambda x: set("ZYX"), label="Set to Zero")
 
     # button to reset joint angles
-    def reset(e):
+    def reset(e: Any) -> None:
         r_one.value = 0
         r_two.value = 0
         r_three.value = 0
@@ -149,12 +154,12 @@ def demo(test: bool = False):
 
     zero_button = swift.Button(reset, label="Set to Zero")
 
-    def update_all_sliders():
+    def update_all_sliders() -> None:
         update_gimbals(float(r_one.value), 1)
         update_gimbals(float(r_two.value), 2)
         update_gimbals(float(r_three.value), 3)
 
-    def change_sequence(new):
+    def change_sequence(new: Any) -> None:
         global sequence
 
         xyz = "XYZ"
@@ -168,7 +173,7 @@ def demo(test: bool = False):
         update_all_sliders()
 
     # handle radio button on angle slider
-    def angle(index, ring):
+    def angle(index: Any, ring: Any) -> None:
         global sequence
 
         # print('angle', index, ring)
@@ -231,7 +236,7 @@ def demo(test: bool = False):
     env.run(duration=0.5 if test else None)
 
 
-def main():
+def main() -> None:
     demo(test="--test" in sys.argv[1:])
 
 

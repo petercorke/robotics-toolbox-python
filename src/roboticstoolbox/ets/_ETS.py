@@ -12,77 +12,80 @@ without a cycle).
 """
 
 from __future__ import annotations
-from collections.abc import MutableSequence
-from functools import wraps, cached_property
+
+from collections.abc import Iterable, MutableSequence
+from copy import deepcopy
+from functools import cached_property, wraps
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast, overload
+
 import numpy as np
 from numpy.random import uniform
-from numpy.linalg import inv, det, cond, svd
-from spatialmath import SE3, SE2
 from spatialmath.base import (
+    getmatrix,
     getvector,
     issymbol,
-    tr2jac,
-    verifymatrix,
-    tr2jac2,
-    t2r,
-    rotvelxform,
-    simplify,
-    getmatrix,
 )
-from roboticstoolbox.tools.params import rtb_get_param
+from typing_extensions import Self
 
+from roboticstoolbox.ets._ET import BaseET, _is_nothing, _offset_suffix
 from roboticstoolbox.ets.fknm import (
     ETS_init,
-    ETS_fkine,
-    ETS_jacob0,
-    ETS_jacobe,
-    ETS_hessian0,
-    ETS_hessiane,
-    IK_NR_c,
-    IK_GN_c,
-    IK_LM_c,
 )
-from copy import deepcopy
-from roboticstoolbox.ets._ET import BaseET
-from typing import overload, TypeVar
-from typing import Literal as L
+from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
-T = TypeVar("T", bound="BaseETS")
+if TYPE_CHECKING:  # pragma: nocover
+    pass
+
+#: the element type of an ETS: ``ET`` for ``ETS``, ``ET2`` for ``ETS2``
+ETT = TypeVar("ETT", bound=BaseET)
+_F = TypeVar("_F", bound=Callable[..., Any])
 
 
-def _dirties_fknm(func):
+def _dirties_fknm(func: _F) -> _F:
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         result = func(self, *args, **kwargs)
         self._fknm_stale = True
         return result
-    return wrapper
+
+    return wrapper  # type: ignore[return-value]
 
 
-class BaseETS(MutableSequence):
-    def __init__(self):
-        self._data: list = []
+class BaseETS(MutableSequence[ETT]):
+    def __init__(self) -> None:
+        self._data: list[ETT] = []
         self._fknm_stale = True
-        self._BaseETS__fknm = None
+        self._BaseETS__fknm: Any = None
 
     # ------------------------------------------------------------------
     # MutableSequence abstract methods
     # ------------------------------------------------------------------
 
+    def _new(self, data: Iterable[ETT]) -> Self:
+        """A new ETS of the same concrete type as ``self`` from elements"""
+        # the concrete subclasses, ETS and ETS2, take the list of elements
+        return self.__class__(data)  # type: ignore[call-arg]
+
     def __len__(self) -> int:
         return len(self._data)
 
+    @overload
+    def __setitem__(self, i: int, value: ETT) -> None: ...
+
+    @overload
+    def __setitem__(self, i: slice, value: Iterable[ETT]) -> None: ...
+
     @_dirties_fknm
-    def __setitem__(self, i, value):
+    def __setitem__(self, i: Any, value: Any) -> None:
         self._data[i] = value
 
     @_dirties_fknm
-    def __delitem__(self, i):
+    def __delitem__(self, i: int | slice) -> None:
         del self._data[i]
 
     @_dirties_fknm
-    def insert(self, index: int, value) -> None:
+    def insert(self, index: int, value: ETT) -> None:
         self._data.insert(index, value)
 
     def __repr__(self) -> str:
@@ -95,7 +98,7 @@ class BaseETS(MutableSequence):
 
     __hash__ = None  # type: ignore[assignment]
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> Any:
         # lets sum() work without an explicit start value, since its
         # default start is the int 0, which has no idea how to compose
         # with an ETS/ETS2
@@ -108,20 +111,20 @@ class BaseETS(MutableSequence):
     # ------------------------------------------------------------------
 
     @property
-    def _fknm(self):
+    def _fknm(self) -> Any:
         if self._fknm_stale:
             self._copy_to_cpp()
         return self._BaseETS__fknm
 
-    def _copy_to_cpp(self):
+    def _copy_to_cpp(self) -> None:
         self._BaseETS__fknm = ETS_init(
-            [et.fknm for et in self._data],
+            [et.fknm for et in self._data],  # type: ignore[attr-defined]
             self.n,
             self.m,
         )
         self._fknm_stale = False
 
-    def __str__(self, q: str | None = None):
+    def __str__(self, q: str | None = None) -> str:
         """
         Pretty prints the ETS
 
@@ -142,8 +145,7 @@ class BaseETS(MutableSequence):
         :returns: Pretty printed ETS
         :rtype: str
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -174,7 +176,7 @@ class BaseETS(MutableSequence):
         es = []
         j = 0
         c = 0
-        s = None
+        s = ""
         unicode = rtb_get_param("unicode")
 
         # An empty SE3
@@ -196,7 +198,8 @@ class BaseETS(MutableSequence):
                 # takes over the whole "q0"/"-q0" formatting below rather
                 # than combining with it.
                 if et._joint_name is not None:
-                    s = f"{et.kind}({et._joint_name})"
+                    suffix = _offset_suffix(et.offset, et.isrotation)
+                    s = f"{et.kind}({et._joint_name}{suffix})"
                     j += 1
                     es.append(s)
                     continue
@@ -213,16 +216,15 @@ class BaseETS(MutableSequence):
                 #     qvar = ""
 
                 if et.isflip:
-                    s = f"{et.kind}(-{qvar})"
-                else:
-                    s = f"{et.kind}({qvar})"
+                    qvar = f"-{qvar}"
+                s = f"{et.kind}({qvar}{_offset_suffix(et.offset, et.isrotation)})"
                 j += 1
 
             elif et.isrotation:
                 if issymbol(et.param):
                     s = f"{et.kind}({et.param})"
                 else:
-                    s = f"{et.kind}({et.param * 180 / np.pi:.4g}°)"
+                    s = f"{et.kind}({cast(float, et.param) * 180 / np.pi:.4g}°)"
 
             elif et.istranslation:
                 try:
@@ -241,7 +243,7 @@ class BaseETS(MutableSequence):
         else:  # pragma: nocover
             return " * ".join(es)
 
-    def _repr_pretty_(self, p, cycle):
+    def _repr_pretty_(self, p: Any, cycle: bool) -> None:
         """
         Pretty string for IPython
 
@@ -251,8 +253,7 @@ class BaseETS(MutableSequence):
         :param p: pretty printer handle (ignored)
         :param cycle: pretty printer flag (ignored)
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         In [1]: e
         Out [1]: R(q0) ⊕ tx(1) ⊕ R(q1) ⊕ tx(1)
@@ -261,15 +262,14 @@ class BaseETS(MutableSequence):
 
         print(self.__str__())  # pragma: nocover
 
-    def joint_idx(self) -> list[int]:
+    def joint_idx(self) -> NDArray:
         """
         Get index of joint transforms
 
         :returns: indices of transforms that are joints
         :rtype: ndarray
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -279,17 +279,16 @@ class BaseETS(MutableSequence):
 
         """
 
-        return np.where([e.isjoint for e in self])[0]  # type: ignore
+        return np.where([e.isjoint for e in self])[0]
 
-    def joints(self) -> list[BaseET]:
+    def joints(self) -> list[ETT]:
         """
         Get a list of the variable ETs with this ETS
 
         :returns: list of ETs that are joints
         :rtype: list[BaseET]
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -301,7 +300,7 @@ class BaseETS(MutableSequence):
 
         return [e for e in self if e.isjoint]
 
-    def split(self, method: str = "last") -> list["BaseETS"]:
+    def split(self, method: str = "last") -> list[Self]:
         """
         Split ETS into link segments
 
@@ -323,15 +322,16 @@ class BaseETS(MutableSequence):
           There are no base ET, they are included in the first link segment.
 
         .. runblock:: pycon
-            >>> from roboticstoolbox.ets.ETS import *
-            >>> e = tz(1) * Rx("q1") * tx(2) * Ry("q2") * ty(3) * Rz("q3") * tz(4)
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tz(1) * ET.Rx("q1") * ET.tx(2) * ET.Ry("q2") * ET.ty(3) * ET.Rz("q3") * ET.tz(4)
             >>> base, *segments, gripper = e.split("first")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
             >>> base, *segments, gripper = e.split("last")
             >>> print("|".join(str(_) for _ in segments), f"+ base={str(base)}, gripper={str(gripper)}")
         """
 
-        segments = []
+        segments: list[Self] = []
         joint_idx = self.joint_idx()
         head = self[0:0]
         tail = self[0:0]
@@ -344,19 +344,19 @@ class BaseETS(MutableSequence):
                 for k in joint_idx[1:]:
                     ets_j = self[start: k]
                     start = k
-                    segments.append(self.__class__(ets_j))
-                segments.append(self.__class__(self[joint_idx[-1]:]))
+                    segments.append(self._new(ets_j))
+                segments.append(self._new(self[joint_idx[-1]:]))
             case "last":
                 start = 0
                 for k in joint_idx:
                     ets_j = self[start : k + 1]
                     start = k + 1
-                    segments.append(self.__class__(ets_j))
+                    segments.append(self._new(ets_j))
                 tail = self[start:]
             case _:
                 raise ValueError(f"unknown split method '{method}'")
 
-        return [head] + segments + [tail]  # type: ignore
+        return [head] + segments + [tail]
 
     def jindex_set(self) -> set[int]:  #
         """
@@ -365,8 +365,7 @@ class BaseETS(MutableSequence):
         :returns: set of unique joint indices
         :rtype: set[int]
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -376,7 +375,7 @@ class BaseETS(MutableSequence):
 
         """
 
-        return set([self[j].jindex for j in self.joint_idx()])  # type: ignore
+        return set([self[j].jindex for j in self.joint_idx()])
 
     @cached_property
     def jindices(self) -> NDArray:
@@ -386,8 +385,7 @@ class BaseETS(MutableSequence):
         :returns: array of unique joint indices
         :rtype: ndarray
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -397,7 +395,7 @@ class BaseETS(MutableSequence):
 
         """
 
-        return np.array([j.jindex for j in self.joints()])  # type: ignore
+        return np.array([j.jindex for j in self.joints()])
 
     def _resolve_q(self, q: ArrayLike, allow_trajectory: bool = False) -> NDArray:
         """
@@ -435,7 +433,9 @@ class BaseETS(MutableSequence):
         n = self.n
         jindices = self.jindices
 
-        q = getmatrix(q, (None, None)) if allow_trajectory else getvector(q, None)
+        q = np.asarray(
+            getmatrix(q, (None, None)) if allow_trajectory else getvector(q, None)
+        )
 
         if n == 0 or jindices.dtype == object:
             # no joints, or at least one joint has no jindex assigned yet
@@ -472,7 +472,7 @@ class BaseETS(MutableSequence):
         )
 
     @property
-    def qlim(self):
+    def qlim(self) -> NDArray:
         r"""
         Get/Set Joint limits
 
@@ -488,8 +488,7 @@ class BaseETS(MutableSequence):
         :rtype: ndarray(2,n)
         :raises ValueError: unset limits for a prismatic joint
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -501,6 +500,7 @@ class BaseETS(MutableSequence):
 
         limits = np.zeros((2, self.n))
 
+        v: ArrayLike
         for i, et in enumerate(self.joints()):
             if et.isrotation:
                 if et.qlim is None:
@@ -519,7 +519,7 @@ class BaseETS(MutableSequence):
         return limits
 
     @qlim.setter
-    def qlim(self, new_qlim: ArrayLike):
+    def qlim(self, new_qlim: ArrayLike) -> None:
         new_qlim = np.array(new_qlim)
 
         if new_qlim.shape == (2,) and self.n == 1:
@@ -544,8 +544,7 @@ class BaseETS(MutableSequence):
         :returns: a string indicating the joint types
         :rtype: str
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -569,8 +568,7 @@ class BaseETS(MutableSequence):
 
         Counts the number of joints in the ETS.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -578,9 +576,7 @@ class BaseETS(MutableSequence):
             >>> e = ET.Rx() * ET.tx(1) * ET.tz()
             >>> e.n
 
-        See Also
-        --------
-        :func:`joints`
+        .. seealso:: :func:`joints`
 
         """
 
@@ -596,8 +592,7 @@ class BaseETS(MutableSequence):
 
         Counts the number of transforms in the ETS.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -609,30 +604,16 @@ class BaseETS(MutableSequence):
 
         return len(self._data)
 
-    @overload
-    def data(self: "ETS") -> list[ET]: ...  # pragma: nocover
-
-    @overload
-    def data(self: "ETS2") -> list[ET2]: ...  # pragma: nocover
-
     @property
-    def data(self):
+    def data(self) -> list[ETT]:
         return self._data
 
     @data.setter
-    @overload
-    def data(self: "ETS", new_data: list[ET]): ...  # pragma: nocover
-
-    @data.setter
-    @overload
-    def data(self: "ETS", new_data: list[ET2]): ...  # pragma: nocover
-
-    @data.setter
-    def data(self, new_data):
+    def data(self, new_data: list[ETT]) -> None:
         self._data = new_data
         self._fknm_stale = True
 
-    def inv(self: T) -> T:
+    def inv(self) -> Self:
         r"""
         Inverse of ETS
 
@@ -645,8 +626,7 @@ class BaseETS(MutableSequence):
 
         :returns: Inverse of the ETS
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -662,24 +642,15 @@ class BaseETS(MutableSequence):
 
         """
 
-        return self.__class__([et.inv() for et in reversed(self._data)])  # type: ignore[call-arg]
+        return self._new([et.inv() for et in reversed(self._data)])
 
     @overload
-    def __getitem__(self: "BaseETS", i: int) -> BaseET: ...
+    def __getitem__(self, i: int) -> ETT: ...
 
     @overload
-    def __getitem__(self: "ETS", i: int) -> ET: ...
+    def __getitem__(self, i: slice) -> Self: ...
 
-    @overload
-    def __getitem__(self: "ETS", i: slice) -> "ETS": ...
-
-    @overload
-    def __getitem__(self: "ETS2", i: int) -> ET2: ...
-
-    @overload
-    def __getitem__(self: "ETS2", i: slice) -> "ETS2": ...
-
-    def __getitem__(self, i):
+    def __getitem__(self, i: int | slice) -> ETT | Self:
         """
         Index or slice an ETS
 
@@ -688,8 +659,7 @@ class BaseETS(MutableSequence):
             of the same concrete type as ``self`` (a slice of an ETS is
             still an ETS)
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -701,25 +671,31 @@ class BaseETS(MutableSequence):
 
         """
         if isinstance(i, slice):
-            return self.__class__(self._data[i])
+            return self._new(self._data[i])
         return self._data[i]
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: dict[int, Any]) -> Self:
         new_data = []
 
         for data in self:
             new_data.append(deepcopy(data))
 
-        cls = self.__class__
-        result = cls(new_data)
+        result = self._new(new_data)
         memo[id(self)] = result
         return result
 
-    def plot(self, *args, **kwargs):
-        from roboticstoolbox.robot.Robot import Robot, Robot2
+    def plot(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Plot the sequence as a robot
+
+        The sequence is wrapped in a :class:`~roboticstoolbox.robot.Robot.Robot`
+        (:class:`~roboticstoolbox.robot.Robot.Robot2` for a planar sequence) and
+        its ``plot`` method is called, which see for the arguments.
+        """
         # Deferred (like Robot/Robot2 above): BaseETS can't import the
         # concrete ETS without a cycle (ETS.py imports BaseETS from here).
         from roboticstoolbox.ets.ETS import ETS
+        from roboticstoolbox.robot.Robot import Robot, Robot2
 
         if isinstance(self, ETS):
             robot = Robot(self)
@@ -728,9 +704,16 @@ class BaseETS(MutableSequence):
 
         robot.plot(*args, **kwargs)
 
-    def teach(self, *args, **kwargs):
-        from roboticstoolbox.robot.Robot import Robot, Robot2
+    def teach(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Interactively explore the sequence as a robot
+
+        The sequence is wrapped in a :class:`~roboticstoolbox.robot.Robot.Robot`
+        (:class:`~roboticstoolbox.robot.Robot.Robot2` for a planar sequence) and
+        its ``teach`` method is called, which see for the arguments.
+        """
         from roboticstoolbox.ets.ETS import ETS
+        from roboticstoolbox.robot.Robot import Robot, Robot2
 
         if isinstance(self, ETS):
             robot = Robot(self)
@@ -750,8 +733,7 @@ class BaseETS(MutableSequence):
         Generates a random q vector within the joint limits defined by
         ``self.qlim``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -779,48 +761,286 @@ class BaseETS(MutableSequence):
         return q
 
     def swap(self, i: int) -> None:
-        """
-        Swap two transforms in the ETS
+        r"""
+        Swap two adjacent transforms, in place
 
-        :param i: index of first transform
+        :param i: index of the first transform
+        :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
+        :raises ValueError: if the two transforms cannot be swapped
 
-        Swaps the two transforms at indices ``i`` and ``i+1``.  This is useful for
-        changing the order of commutative transforms in an ETS.
+        Swaps the transforms at indices ``i`` and ``i+1`` without changing what the
+        sequence means.  This **changes the sequence it is called on** and returns
+        ``None``; use :meth:`swapped` to get a modified copy and leave the original
+        alone.
 
-        Examples
-        --------
+        There are two ways the transforms can swap.
+
+        **They commute**, so they trade places unchanged.  Two transforms commute
+        if they are
+
+        - of the same kind, for example two translations along x
+        - both translations, along any axes
+        - a rotation and a translation along the axis of that rotation, for
+          example ``Rz`` and ``tz``
+
+        **One is a constant quarter or half turn**, a rotation :math:`R` of
+        :math:`\pm 90^\circ` or :math:`180^\circ`.  The other transform :math:`B`
+        is carried across it by being turned with it, since
+        :math:`R B = (R B R^{-1}) R`.  The rotation is unchanged, and the other
+        transform moves to the other side of it and changes axis, and its sign if
+        the axis comes out reversed.  For example ``Rx(90°) ⊕ ty(d)`` is
+        ``tz(d) ⊕ Rx(90°)``, and ``Rx(90°) ⊕ Ry(q)`` is ``Rz(q) ⊕ Rx(90°)``.  The
+        other transform may be a translation or a rotation, a joint or a constant.
+        A joint keeps its ``jindex`` and ``qlim``; if its axis comes out reversed
+        it is flipped, and its offset changes sign.
+
+        A rotation is a quarter turn if it is a whole number of quarter turns of a
+        symbolic angle, such as ``pi/2`` or ``3*pi/2`` with ``pi`` from SymPy, or a
+        float that is within :math:`10^{-9}` of one, which a model loaded from a file
+        will have.  The new transform takes its parameter from the old one by a
+        change of sign only, so it is as exact as the old one.
+
+        Anything else, such as a rotation that is not a quarter turn and a
+        translation along a different axis, does not swap and raises
+        ``ValueError``, as do two quarter turns about different axes, since either
+        could be the one that is carried across.
+
+        .. note:: Joints may be swapped.  Each joint keeps its ``jindex``, so the
+            order of the elements of ``q`` is unchanged even though the joints now
+            appear in the opposite order in the sequence.
+
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rx() * ET.Rz(1)
+            >>> e = ET.Rz() * ET.tx(1) * ET.ty(2) * ET.Rz(1)
             >>> print(e)
             >>> e.swap(1)
             >>> print(e)
+            >>> e = ET.Rz() * ET.tz(1) * ET.Rx() * ET.Rz(1)
+            >>> e.swap(0)
+            >>> print(e)
 
+        A quarter turn carries the other transform with it:
+
+        .. runblock:: pycon
+
+            >>> from math import pi
+            >>> e = ET.Rx(pi / 2) * ET.ty(1) * ET.tx(2)
+            >>> print(e)
+            >>> e.swap(0)
+            >>> print(e)
+            >>> e = ET.Rx(pi / 2) * ET.Ry()
+            >>> e.swap(0)
+            >>> print(e)
+            >>> e = ET.Rx(-pi / 2) * ET.Ry()
+            >>> e.swap(0)
+            >>> print(e)
+
+        .. versionchanged:: 1.5.0
+            A transform can be swapped across a constant quarter or half turn.
+
+        .. seealso:: :meth:`swapped` :meth:`merge`
         """
-        if i < 0 or i >= len(self._data) - 1:
-            raise IndexError("Index out of range")  # pragma: nocover
-        
-        e1 = self._data[i]
-        e2 = self._data[i + 1]
-        if e1.kind == e2.kind:
-            self._data[i], self._data[i + 1] = self._data[i + 1], self._data[i]
-            self._fknm_stale = True
+        e1, e2 = self._adjacent(i)
+
+        if self._commute(e1, e2):
+            self._data[i], self._data[i + 1] = e2, e1
         else:
-            raise ValueError("Transforms are not commutative")  # pragma: nocover
-        
+            k1, k2 = self._quarter_turns(e1), self._quarter_turns(e2)
+            if k1 is not None and k2 is None and e2.iselementary:
+                # R B = (R B R^-1) R
+                self._data[i], self._data[i + 1] = self._conjugate(e2, cast(str, e1.ax), k1), e1
+            elif k2 is not None and k1 is None and e1.iselementary:
+                # B R = R (R^-1 B R)
+                self._data[i], self._data[i + 1] = e2, self._conjugate(e1, cast(str, e2.ax), -k2)
+            elif k1 is not None and k2 is not None:
+                raise ValueError(
+                    f"transforms {e1.kind} and {e2.kind} are both quarter turns about "
+                    "different axes, so it is not clear which to carry across the other"
+                )
+            else:
+                raise ValueError(
+                    f"transforms {e1.kind} and {e2.kind} do not commute, so they "
+                    "cannot be swapped"
+                )
+        self._changed()
+
+    def swapped(self, i: int) -> Self:
+        """
+        Swap two adjacent transforms, returning a copy
+
+        :param i: index of the first transform
+        :return: a copy of the sequence with transforms ``i`` and ``i+1`` swapped
+        :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
+        :raises ValueError: if the two transforms do not commute
+
+        The sequence it is called on is not changed.  See :meth:`swap` for which
+        transforms can be swapped.
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.ty(2) * ET.Rz(1)
+            >>> print(e.swapped(1))
+            >>> print(e)
+
+        .. versionadded:: 1.5.0
+
+        .. seealso:: :meth:`swap` :meth:`merged`
+        """
+        new = deepcopy(self)
+        new.swap(i)
+        return new
+
+    def _adjacent(self, i: int) -> tuple[ETT, ETT]:
+        """The transforms at ``i`` and ``i+1``, with the index checked."""
+        if i < 0 or i >= len(self._data) - 1:
+            raise IndexError(
+                f"index {i} out of range, the sequence has {len(self._data)} transforms"
+            )
+        return self._data[i], self._data[i + 1]
+
+    def _changed(self) -> None:
+        """Forget what depends on the order and kind of the transforms."""
+        self._fknm_stale = True
+        self.__dict__.pop("jindices", None)  # invalidate cached_property
+
+    @staticmethod
+    def _commute(e1: Any, e2: Any) -> bool:
+        """Do the two elementary transforms commute, in either order?"""
+        if not (e1.iselementary and e2.iselementary):
+            return False
+        if e1.kind == e2.kind:
+            return True
+        if e1.istranslation and e2.istranslation:
+            return True
+        # a rotation and a translation along the axis of the rotation, there is no
+        # such axis for a rotation in the plane, which is about z, out of the plane
+        return e1.ax is not None and e1.ax == e2.ax
+
+    @staticmethod
+    def _quarter_turns(e: Any) -> int | None:
+        """
+        The number of quarter turns, modulo four, of a constant rotation
+
+        None if ``e`` is not a constant rotation about an axis, or is not a whole
+        number of quarter turns.  A symbolic angle must be exactly so; a float
+        is within 1e-9 of it.
+        """
+        if not (e.isrotation and e.iselementary and not e.isjoint) or e.ax is None:
+            return None
+        angle = e.param
+        if issymbol(angle):
+            import sympy
+
+            turns = sympy.simplify(angle / (sympy.pi / 2))
+            return int(turns) % 4 if turns.is_integer else None
+        turns = float(angle) / (np.pi / 2)
+        whole = round(turns)
+        return whole % 4 if abs(turns - whole) * (np.pi / 2) < 1e-9 else None
+
+    @staticmethod
+    def _axis_image(axis: str, quarters: int, target: str) -> tuple[str, int]:
+        """
+        Where a rotation sends an axis
+
+        :param axis: the axis of the rotation, ``"x"``, ``"y"`` or ``"z"``
+        :param quarters: the angle of the rotation in quarter turns, may be negative
+        :param target: the axis, ``"x"``, ``"y"`` or ``"z"``, that is rotated
+        :returns: the axis that ``target`` is turned onto, and ``+1`` if it points
+            along that axis or ``-1`` if the opposite way
+
+        For the unit vectors this is exact, with no trigonometry.
+        """
+        letters = "xyz"
+        k = quarters % 4
+        c, s = (1, 0, -1, 0)[k], (0, 1, 0, -1)[k]  # cosine, sine, exactly
+        i = letters.index(axis)
+        a, b = (i + 1) % 3, (i + 2) % 3
+        t = letters.index(target)
+        if t == i:
+            return target, 1
+        if t == a:  # e_a -> c e_a + s e_b
+            return (letters[a], c) if c else (letters[b], s)
+        return (letters[b], c) if c else (letters[a], -s)  # e_b -> -s e_a + c e_b
+
+    @staticmethod
+    def _conjugate(e: Any, axis: str, quarters: int) -> Any:
+        """
+        The transform ``R e R^-1``, for a rotation R of quarter turns about an axis
+
+        :param e: an elementary transform, a translation or rotation, a joint or a
+            constant
+        :param axis: the axis of R, ``"x"``, ``"y"`` or ``"z"``
+        :param quarters: the angle of R in quarter turns, which may be negative
+        :returns: a new transform, of the other kind if the axis of ``e`` is turned
+
+        Turning a transform about an axis is turning its own axis, so the result
+        is the same kind of transform on the new axis.  If the new axis is the
+        opposite direction the parameter has its sign changed, and a joint is
+        flipped and its offset negated.  Everything else about a joint, its
+        ``jindex`` and ``qlim``, is kept.
+        """
+        from roboticstoolbox.ets.ET import ET
+
+        new_axis, sign = BaseETS._axis_image(axis, quarters, cast(str, e.ax))
+
+        make = getattr(ET, e.kind[0] + new_axis)
+        if e.isjoint:
+            new = make(
+                flip=bool(e.isflip) != (sign < 0), qlim=e.qlim, jindex=e.jindex
+            )
+            if e.offset != 0:
+                new.offset = sign * e.offset
+            if sign > 0 and e._joint_name is not None:
+                new._joint_name = e._joint_name
+            return new
+        return make(sign * e.param)
+
     def merge(self, i: int) -> None:
         """
-        Merge two transforms in the ETS
+        Merge two adjacent transforms into one, in place
 
-        :param i: index of first transform
+        :param i: index of the first transform
+        :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
+        :raises ValueError: if the transforms are not of the same kind, or both
+            are joints
 
-        Merges the two transforms at indices ``i`` and ``i+1``.  This is useful for
-        reducing the number of transforms in an ETS.
+        Replaces the transforms at indices ``i`` and ``i+1`` with a single
+        transform.  This **changes the sequence it is called on** and returns
+        ``None``; use :meth:`merged` to get a modified copy and leave the original
+        alone.
 
-        Examples
-        --------
+        The two transforms must be of the same kind, for example two ``tx`` or two
+        ``Rz``.  There are two cases:
+
+        - Two constants become a constant whose parameter is the sum of the two.
+        - A joint and a constant become the same joint, with the constant added to
+          its :attr:`~roboticstoolbox.ets.ET.ET.offset`, so ``Rz(q) * Rz(a)`` is
+          ``Rz(q + a)``.  The joint keeps its ``jindex``, ``flip`` and ``qlim``.
+
+        Two joints cannot be merged, since they are two variables.
+
+        The parameters and offsets may be numeric or symbolic, or one of each.  If
+        two constants add up to nothing the transform is removed altogether, rather
+        than being left as a transform that does nothing.  An offset that adds up
+        to nothing is zero but the joint stays.  The sum is nothing if it is
+
+        - exactly zero, for example ``tx(x) * tx(-x)`` with ``x`` a SymPy symbol, or
+          ``Rx(5) * Rx(-5)``
+        - for a rotation, a whole number of turns of a symbolic angle, for example
+          ``Rz(pi/2) * Rz(3*pi/2)`` with ``pi`` from SymPy.  A floating point sum
+          such as ``Rz(pi/2) * Rz(3*pi/2)`` using :obj:`math.pi` is not exactly
+          zero, so the rotation is kept.
+
+        Merging does not look at the neighbours of the result, so if removing a
+        transform leaves two mergeable ones adjacent, call :meth:`merge` again.
+
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -830,24 +1050,96 @@ class BaseETS(MutableSequence):
             >>> print(e)
             >>> e.merge(1)
             >>> print(e)
-            >>> e = ET.tx(1) * ET.Rx() * ET.Rx(pi/2) * ET.tx(2)
+            >>> e = ET.tx(1) * ET.Rx(0.1) * ET.Rx(pi/2) * ET.tx(2)
             >>> print(e)
             >>> e.merge(1)
             >>> print(e)
+            >>> e = ET.tx(1) * ET.Rx(0.5) * ET.Rx(-0.5) * ET.tx(2)
+            >>> e.merge(1)
+            >>> print(e)
 
+        A constant merged into a joint becomes its offset, which may be symbolic:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> from spatialmath.base import symbol
+            >>> a = symbol("a")
+            >>> e = ET.tx(1) * ET.Rz() * ET.Rz(a) * ET.tx(2)
+            >>> e.merge(1)
+            >>> print(e)
+            >>> e = ET.Rz(-a) * ET.Rz() * ET.Rz(a)
+            >>> e.merge(1)
+            >>> print(e)
+            >>> e.merge(0)
+            >>> print(e)
+
+        .. versionchanged:: 1.5.0
+            A joint can be merged with a constant, and a transform that adds up to
+            nothing is removed.
+
+        .. seealso:: :meth:`merged` :meth:`swap`
         """
-        if i < 0 or i >= len(self._data) - 1:
-            raise IndexError("Index out of range")  # pragma: nocover
-        e1 = self._data[i]
-        e2 = self._data[i + 1]
+        e1, e2 = self._adjacent(i)
         if e1.kind != e2.kind:
-            raise ValueError("Transforms are not the same type")  # pragma: nocover
+            raise ValueError(
+                f"transforms {e1.kind} and {e2.kind} are not the same kind, so they "
+                "cannot be merged"
+            )
+        if e1.isjoint and e2.isjoint:
+            raise ValueError("both transforms are joints, they cannot be merged")
 
-        elif  (e1.isjoint + e2.isjoint) == 2:
-            raise ValueError("Transforms are both joints")  # pragma: nocover
-
+        if e1.isjoint or e2.isjoint:
+            joint, const = (e1, e2) if e1.isjoint else (e2, e1)
+            if const.param is None:
+                raise ValueError(
+                    "transforms are not elementary, they cannot be merged"
+                )
+            merged = deepcopy(joint)
+            merged.offset = joint.offset + const.param
+            self._data[i : i + 2] = [merged]
         else:
-            self._data[i].param = e1.param + e2.param
-            del self._data[i + 1]
-            self._fknm_stale = True
+            if e1.param is None or e2.param is None:
+                raise ValueError(
+                    "transforms are not elementary, they cannot be merged"
+                )
+            total = e1.param + e2.param
+            if _is_nothing(total, e1.isrotation):
+                del self._data[i : i + 2]
+            else:
+                # a new transform, not a change to e1, which other sequences may
+                # share
+                merged = deepcopy(e1)
+                merged.param = total
+                self._data[i : i + 2] = [merged]
+        self._changed()
 
+    def merged(self, i: int) -> Self:
+        """
+        Merge two adjacent transforms, returning a copy
+
+        :param i: index of the first transform
+        :return: a copy of the sequence with transforms ``i`` and ``i+1`` merged
+        :raises IndexError: if ``i`` and ``i+1`` are not both in the sequence
+        :raises ValueError: if the transforms are not of the same kind, or both
+            are joints
+
+        The sequence it is called on is not changed.  See :meth:`merge` for which
+        transforms can be merged and when the result is removed.
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.tx(2) * ET.Rz(1)
+            >>> print(e.merged(1))
+            >>> print(e)
+
+        .. versionadded:: 1.5.0
+
+        .. seealso:: :meth:`merge` :meth:`swapped`
+        """
+        new = deepcopy(self)
+        new.merge(i)
+        return new

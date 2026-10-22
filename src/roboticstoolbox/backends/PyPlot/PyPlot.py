@@ -3,26 +3,32 @@
 @author Jesse Haviland
 """
 
-import time
+from __future__ import annotations
+
 import io
 import sys
-import roboticstoolbox as rp
-import numpy as np
-from roboticstoolbox.backends.Connector import Connector
+import time
+from typing import Any
 
-from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
-from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
-from spatialmath.base.argcheck import getvector
+import numpy as np
 from spatialgeometry import Shape
+from spatialmath.base.argcheck import getvector
+
+import roboticstoolbox as rp
+from roboticstoolbox.backends.Connector import Connector
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
+from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
+from roboticstoolbox.tools.plot import plane_view, set_window_title
+from roboticstoolbox.tools.types import ArrayLike
 
 # from roboticstoolbox.tools import Ticker
 
 _mpl = False
-_pil = None
-_ipy_display = None
-_ipy_image = None
-_ipy_svg = None
-_ipy_clear_output = None
+_pil: Any = None
+_ipy_display: Any = None
+_ipy_image: Any = None
+_ipy_svg: Any = None
+_ipy_clear_output: Any = None
 
 try:
     import matplotlib
@@ -45,10 +51,10 @@ except ImportError:  # pragma nocover
     pass
 
 try:
-    from IPython.display import display as _ipy_display
-    from IPython.display import Image as _ipy_image
     from IPython.display import SVG as _ipy_svg
+    from IPython.display import Image as _ipy_image
     from IPython.display import clear_output as _ipy_clear_output
+    from IPython.display import display as _ipy_display
 except ImportError:  # pragma nocover
     pass
 
@@ -81,18 +87,24 @@ class PyPlot(Connector):
 
     supports_ellipse: bool = True
 
-    def __init__(self):
+    ax: Any  # the 3D Matplotlib axes, set by launch()
+    fig: Any  # the Matplotlib figure, set by launch()
+    timer: Any  # time display, set by launch()
+    limits: ArrayLike | None
+
+    def __init__(self) -> None:
 
         super(PyPlot, self).__init__()
-        self.robots = []
-        self.ellipses = []
-        self.shapes = []
+        self.sim_time: float = 0
+        self.robots: list[RobotPlot] = []
+        self.ellipses: list[EllipsePlot] = []
+        self.shapes: list[ShapePlot] = []
         self.render_mode = "window"
         self.inline_every_n = 1
         self.inline_format = "svg"
-        self.inline_dpi = None
+        self.inline_dpi: float | None = None
         self._inline_step_count = 0
-        self._inline_display_handle = None
+        self._inline_display_handle: Any = None
         self._inline_is_jl = False
 
         if not _mpl:  # pragma nocover
@@ -101,7 +113,7 @@ class PyPlot(Connector):
                 "pip install matplotlib\n\n"
             )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         s = ""
         for robot in self.robots:
             s += f"  robot: {robot.name}\n"
@@ -115,12 +127,27 @@ class PyPlot(Connector):
         else:
             return f"PyPlot3D backend, t = {self.sim_time}, scene:\n" + s
 
-    def launch(self, name=None, fig=None, ax=None, limits=None, **kwargs):
+    def launch(
+        self,
+        name: str | None = None,
+        fig: Any = None,
+        ax: Any = None,
+        limits: ArrayLike | None = None,
+        view: str | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Launch a graphical interface
 
         ```env = launch()``` creates a blank 3D matplotlib figure and returns
         a reference to the backend.
+
+        :param view: ``"xy"``, ``"xz"`` or ``"yz"`` to start with a flat,
+            axis-aligned view of that plane, see
+            :func:`~roboticstoolbox.tools.plot.plane_view`, or None for the usual
+            three-dimensional view.  The view is not locked, the plot can be rotated
+            as usual.
+        :raises ValueError: if ``view`` is not one of those
 
         Optional keyword arguments
         --------------------------
@@ -128,6 +155,12 @@ class PyPlot(Connector):
             Existing Matplotlib 3D axes to render into.
         render_mode
             One of ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``.
+            If omitted it is chosen from the environment, see
+            :func:`_resolve_render_mode`.
+        animation
+            True if frames will be stepped through in a single running cell.  In a
+            notebook with the ``ipympl`` backend this selects the inline mode, since
+            an ``ipympl`` figure cannot update while the cell is running.
         inline_every_n
             Push one inline frame every N simulation steps (inline mode only).
         inline_format
@@ -136,9 +169,13 @@ class PyPlot(Connector):
             DPI for PNG inline frames only. Ignored for SVG.
         """
 
-        super().launch()
 
-        self.render_mode = _resolve_render_mode(kwargs.get("render_mode"))
+        # checked first, so that a bad name does not leave a figure behind
+        view_init = plane_view(view) if view is not None else None
+
+        self.render_mode = _resolve_render_mode(
+            kwargs.get("render_mode"), bool(kwargs.get("animation", False))
+        )
         self.inline_every_n = max(1, int(kwargs.get("inline_every_n", 1)))
         self.inline_format = kwargs.get("inline_format", "svg")
         if self.inline_format not in ["png", "svg"]:
@@ -175,9 +212,7 @@ class PyPlot(Connector):
                 self.fig = plt.figure(name)
             else:
                 self.fig = fig
-                manager = getattr(self.fig.canvas, "manager", None)
-                if manager is not None and hasattr(manager, "set_window_title"):
-                    manager.set_window_title(name)
+                set_window_title(self.fig, name)
 
             # Create a 3D axes
             self.ax = self.fig.add_subplot(111, projection="3d", proj_type=projection)
@@ -189,11 +224,10 @@ class PyPlot(Connector):
             self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
 
         self.ax.set_facecolor("white")
-        manager = getattr(self.ax.figure.canvas, "manager", None)
-        if manager is not None and hasattr(manager, "set_window_title"):
-            manager.set_window_title(
-                f"Robotics Toolbox for Python (Figure {self.ax.figure.number})"
-            )
+        set_window_title(
+            self.ax.figure,
+            f"Robotics Toolbox for Python (Figure {self.ax.figure.number})",
+        )
 
         self.ax.set_xbound(-0.5, 0.5)
         self.ax.set_ybound(-0.5, 0.5)
@@ -209,6 +243,9 @@ class PyPlot(Connector):
             self.ax.set_zlim3d([limits[4], limits[5]])
 
         self.limits = limits
+
+        if view_init is not None:
+            self.ax.view_init(**view_init)
 
         # disable the display of value under cursor
         # self.ax.format_coord = lambda x, y: ''
@@ -240,12 +277,14 @@ class PyPlot(Connector):
         # signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
         # TODO still need to finish this, and get Jupyter animation working
 
-    def step(self, dt=0.05):
+    def step(self, dt: float = 0.05) -> None:
         """
         Update the graphical scene
 
         :param dt: time step in seconds, defaults to 50 (0.05 s)
         :type dt: int, optional
+        :raises ValueError: if ``dt`` is not greater than zero in a window, where the
+            plot pauses for ``dt``
 
         ``env.step(args)`` triggers an update of the 3D scene in the matplotlib
         window referenced by ``env``.
@@ -258,11 +297,20 @@ class PyPlot(Connector):
               updated in the internal state of the robot object.
             - The control type is defined by the robot object, and not all
               robot objects support all control types.
-            - Execution is blocked for the specified interval
+            - In a window the execution is blocked for the specified interval, which
+              must be greater than zero: Matplotlib's ``pause(0)`` does not return,
+              since a timeout of zero means to wait until the event loop is stopped.
+              In a notebook there is no pause and ``dt`` of zero is fine.
 
+        .. versionchanged:: 1.5.0
+            In a window, ``dt`` of zero or less raises ``ValueError``, it used to wait
+            for ever.
         """
-
-        super().step()
+        if dt <= 0 and self.render_mode == "window":
+            raise ValueError(
+                f"dt is {dt}, it must be greater than zero: a pause of zero seconds "
+                "does not return"
+            )
 
         # update the robot's state
         for rpl in self.robots:
@@ -316,7 +364,7 @@ class PyPlot(Connector):
             self._inline_step_count += 1
             time.sleep(dt)
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset the graphical scene
 
@@ -326,9 +374,9 @@ class PyPlot(Connector):
         """
         # TODO what does this actually do for matplotlib??
 
-        super().reset()
+        pass
 
-    def restart(self):
+    def restart(self) -> None:
         """
         Restart the graphics display
 
@@ -339,16 +387,15 @@ class PyPlot(Connector):
         """
         # TODO what does this actually do for matplotlib??
 
-        super().restart()
+        pass
 
-    def close(self):
+    def close(self) -> None:
         """
         ``env.close()`` gracefully closes the matplotlib window
         referenced by ``env``.
         """
         # TODO what does this actually do for matplotlib??
 
-        super().close()
 
         # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.close(self.fig)
@@ -359,16 +406,18 @@ class PyPlot(Connector):
 
     def add(
         self,
-        ob,
-        readonly=False,
-        display=True,
-        jointaxes=True,
-        jointlabels=False,
-        eeframe=True,
-        shadow=True,
-        name=True,
-        options=None,
-    ):
+        ob: Any,
+        readonly: bool = False,
+        display: bool = True,
+        jointaxes: bool = True,
+        jointlabels: bool = False,
+        eeframe: bool = True,
+        shadow: bool = True,
+        name: bool = True,
+        options: Any = None,
+        q: ArrayLike | None = None,
+        color: Any = None,
+    ) -> Any:
         """
         Add a robot to the graphical scene
 
@@ -390,9 +439,26 @@ class PyPlot(Connector):
         :type shadow: bool, optional
         :param name: Display the name of the robot, defaults to True
         :type name: bool, optional
+        :param options: colors and line widths, a dict of dicts that is merged over the
+            defaults, for example ``{"robot": {"color": "r", "linewidth": 3}}``
+        :param q: the joint coordinates to draw, by default those of the robot
+        :param color: the color of the robot's line, shorthand for
+            ``options["robot"]["color"]`` which it overrides
+        :returns: for a robot, its :class:`~roboticstoolbox.backends.PyPlot.RobotPlot.RobotPlot`
+            handle, for anything else an integer id
 
-        ``id = env.add(robot)`` adds the ``robot`` to the graphical
+        ``handle = env.add(robot)`` adds the ``robot`` to the graphical
             environment.
+
+        The handle is the drawing of the robot in this scene, and its ``q`` is the pose
+        that it draws.  If ``q`` is given the drawing is pinned to that pose, and the
+        same robot can be added again in another pose, each drawn where it was put;
+        ``handle.q = q`` moves only that drawing.  If ``q`` is not given the drawing
+        follows ``robot.q``, as it has always done.
+
+        .. versionchanged:: 1.5.0
+            Added ``q`` and ``color``, and a robot now returns its plot handle, not an
+            integer id, which nothing could use.
 
         .. note::
 
@@ -402,7 +468,11 @@ class PyPlot(Connector):
 
         """
 
-        super().add()
+
+        handle: Any
+        if color is not None:
+            options = dict(options or {})
+            options["robot"] = {**options.get("robot", {}), "color": color}
 
         if (
             isinstance(ob, rp.DHRobot)
@@ -421,22 +491,23 @@ class PyPlot(Connector):
                     shadow,
                     name,
                     options,
+                    q,
                 )
             )
             self.robots[-1].draw()
-            id = len(self.robots)
+            handle = self.robots[-1]
 
         elif isinstance(ob, EllipsePlot):
             ob.ax = self.ax
             self.ellipses.append(ob)
             self.ellipses[-1].draw()
-            id = len(self.ellipses)
+            handle = len(self.ellipses)
 
         elif isinstance(ob, Shape):
             # recreate the shape using matplotlib
             self.shapes.append(ShapePlot(ob))
             self.shapes[-1].draw(ax=self.ax)
-            id = len(self.shapes)
+            handle = len(self.shapes)
 
         self._set_axes_equal()
 
@@ -448,9 +519,9 @@ class PyPlot(Connector):
             plt.draw()  # matplotlib refresh
             plt.show(block=False)
 
-        return id
+        return handle
 
-    def remove(self, id):
+    def remove(self, id: int) -> None:
         """
         Remove a robot or shape from the graphical scene
 
@@ -470,9 +541,9 @@ class PyPlot(Connector):
         """
         # TODO should be an id to remove?
 
-        super().remove()
+        pass
 
-    def hold(self):  # pragma: no cover
+    def hold(self) -> None:  # pragma: no cover
         """
         hold() keeps the plot open i.e. stops the plot from closing once
         the main script has finished.
@@ -488,7 +559,7 @@ class PyPlot(Connector):
                 break
             self.step()
 
-    def getframe(self):
+    def getframe(self) -> Any:
         global _pil
 
         if _pil is None:
@@ -515,7 +586,7 @@ class PyPlot(Connector):
         image = _pil("RGBA", canvas.get_width_height(), bytes(canvas.buffer_rgba()))
         return image.convert("RGB")
 
-    def _push_inline_frame(self):
+    def _push_inline_frame(self) -> None:
         # Push a snapshot into notebook output for inline animation.
         if _ipy_display is None:
             return
@@ -554,7 +625,7 @@ class PyPlot(Connector):
     #     except(AttributeError):
     #         pass
 
-    def _set_axes_equal(self):
+    def _set_axes_equal(self) -> None:
         """
         Make axes of 3D plot have equal scale so that spheres appear as
         spheres, cubes as cubes, etc..  This is one possible solution to
@@ -572,6 +643,25 @@ class PyPlot(Connector):
         y_limits = self.ax.get_ylim3d()
         z_limits = self.ax.get_zlim3d()
 
+        # Matplotlib knows the data a 3D line was created with but not the data it
+        # was moved to, which is how every robot is drawn.  Take in the points of
+        # every robot in the scene, with the margin that autoscale leaves, so that
+        # the view shows all of them and not only the last.
+        points = [
+            np.c_[line.get_data_3d()]
+            for rpl in self.robots
+            if rpl.drawn and rpl.links is not None
+            for line in rpl.links
+        ]
+        if points:
+            pts = np.vstack([p.reshape(-1, 3) for p in points])
+            lo, hi = pts.min(axis=0), pts.max(axis=0)
+            pad = 0.05 * np.maximum(hi - lo, 1e-9)
+            lo, hi = lo - pad, hi + pad
+            x_limits = (min(x_limits[0], lo[0]), max(x_limits[1], hi[0]))
+            y_limits = (min(y_limits[0], lo[1]), max(y_limits[1], hi[1]))
+            z_limits = (min(z_limits[0], lo[2]), max(z_limits[1], hi[2]))
+
         x_range = abs(x_limits[1] - x_limits[0])
         x_middle = np.mean(x_limits)
         y_range = abs(y_limits[1] - y_limits[0])
@@ -587,7 +677,9 @@ class PyPlot(Connector):
         self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         self.ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
-    def _add_teach_panel(self, robot, q, handle=None, block=True):
+    def _add_teach_panel(
+        self, robot: Any, q: ArrayLike, handle: Any = None, block: bool = True
+    ) -> None:
         # handle, block: unused here -- PyPlot has no AssemblyHandle
         # concept (it drives the panel by mutating robot.q directly
         # below), and matplotlib's own GUI mainloop (entered via this
@@ -602,19 +694,19 @@ class PyPlot(Connector):
         fig = self.fig
 
         # Add text to the plots
-        def text_trans(text, q):  # pragma: no cover
+        def text_trans(text: list[Any], q: ArrayLike) -> None:  # pragma: no cover
             T = robot.fkine(q)
             t = np.round(T.t, 3)
             r = np.round(T.rpy("deg"), 3)
-            text[0].set_text("x: {0}".format(t[0]))
-            text[1].set_text("y: {0}".format(t[1]))
-            text[2].set_text("z: {0}".format(t[2]))
-            text[3].set_text("r: {0}".format(r[0]))
-            text[4].set_text("p: {0}".format(r[1]))
-            text[5].set_text("y: {0}".format(r[2]))
+            text[0].set_text(f"x: {t[0]}")
+            text[1].set_text(f"y: {t[1]}")
+            text[2].set_text(f"z: {t[2]}")
+            text[3].set_text(f"r: {r[0]}")
+            text[4].set_text(f"p: {r[1]}")
+            text[5].set_text(f"y: {r[2]}")
 
         # Update the self state in mpl and the text
-        def update(val, text, robot):  # pragma: no cover
+        def update(val: float, text: list[Any], robot: Any) -> None:  # pragma: no cover
             for j in range(robot.n):
                 if robot.isrevolute(j):
                     robot.q[j] = np.radians(self.sjoint[j].val)
@@ -663,32 +755,32 @@ class PyPlot(Connector):
         )
         text.append(
             fig.text(
-                0.03, 1 - ym + 0.20, "x: {0}".format(t[0]), fontsize=9, color="#2b2b2b"
+                0.03, 1 - ym + 0.20, f"x: {t[0]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.03, 1 - ym + 0.16, "y: {0}".format(t[1]), fontsize=9, color="#2b2b2b"
+                0.03, 1 - ym + 0.16, f"y: {t[1]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.03, 1 - ym + 0.12, "z: {0}".format(t[2]), fontsize=9, color="#2b2b2b"
+                0.03, 1 - ym + 0.12, f"z: {t[2]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.15, 1 - ym + 0.20, "r: {0}".format(r[0]), fontsize=9, color="#2b2b2b"
+                0.15, 1 - ym + 0.20, f"r: {r[0]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.15, 1 - ym + 0.16, "p: {0}".format(r[1]), fontsize=9, color="#2b2b2b"
+                0.15, 1 - ym + 0.16, f"p: {r[1]}", fontsize=9, color="#2b2b2b"
             )
         )
         text.append(
             fig.text(
-                0.15, 1 - ym + 0.12, "y: {0}".format(r[2]), fontsize=9, color="#2b2b2b"
+                0.15, 1 - ym + 0.12, f"y: {r[2]}", fontsize=9, color="#2b2b2b"
             )
         )
         fig.text(
@@ -730,7 +822,7 @@ class PyPlot(Connector):
         self.step()
 
 
-def _isnotebook():
+def _isnotebook() -> bool:
     """
     Determine if code is being run from a Jupyter notebook or JupyterLite
 
@@ -749,7 +841,7 @@ def _isnotebook():
 
     # Fall back to checking IPython shell type
     try:
-        shell = get_ipython().__class__.__name__
+        shell = get_ipython().__class__.__name__  # type: ignore[name-defined]
         if shell == "ZMQInteractiveShell":
             return True  # Jupyter notebook or qtconsole
         elif shell == "TerminalInteractiveShell":
@@ -760,7 +852,30 @@ def _isnotebook():
         return False  # Probably standard Python interpreter
 
 
-def _resolve_render_mode(render_mode=None):
+def _resolve_render_mode(
+    render_mode: str | None = None, animation: bool = False
+) -> str:
+    """
+    Choose how a figure is rendered, from the environment
+
+    :param render_mode: an explicit choice, ``'window'``, ``'notebook-widget'`` or
+        ``'notebook-inline'``, which is used as it is
+    :param animation: True if the caller is going to animate by stepping through
+        frames inside a single running cell
+    :returns: the render mode
+
+    In a notebook the choice follows the matplotlib backend, so the same call works
+    whether the notebook says ``%matplotlib ipympl`` or ``%matplotlib inline``:
+
+    - ``'window'`` outside a notebook,
+    - ``'notebook-widget'`` for ``ipympl``, an interactive figure that can be rotated,
+    - ``'notebook-inline'`` otherwise, static images pushed into the cell output.
+
+    An ``ipympl`` figure updates only when the kernel handles a message from the
+    browser, which it cannot do while a cell is running.  So an animation with
+    ``animation=True`` would show the first and the last frame only, and the inline
+    mode, which does not depend on the browser, is chosen for it instead.
+    """
     if render_mode is not None:
         if render_mode not in ["window", "notebook-widget", "notebook-inline"]:
             raise ValueError(
@@ -774,6 +889,6 @@ def _resolve_render_mode(render_mode=None):
 
     backend = matplotlib.get_backend().lower()
     if "ipympl" in backend or "widget" in backend or "nbagg" in backend:
-        return "notebook-widget"
+        return "notebook-inline" if animation else "notebook-widget"
 
     return "notebook-inline"

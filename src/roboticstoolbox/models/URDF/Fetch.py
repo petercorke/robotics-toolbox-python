@@ -1,8 +1,11 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import re
 
 import numpy as np
+
 from roboticstoolbox.models.URDF.URDFRobot import URDFRobot
 
 # from spatialmath import SE3
@@ -65,7 +68,7 @@ class Fetch(URDFRobot):
     .. sectionauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "fetch",
             manufacturer="Fetch",

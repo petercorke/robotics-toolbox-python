@@ -1,6 +1,8 @@
-import numpy as np
-from scipy.linalg import lu
+from __future__ import annotations
 
+from typing import Any
+
+import numpy as np
 
 # def jsingu(J):
 
@@ -16,9 +18,14 @@ from scipy.linalg import lu
 #                     [str(i) for i in range(j) if all(U[:, j] == U[:, i])]))
 
 
-def jsingu(J):
+def jsingu(J: Any) -> None:
+    """Print dependencies using the original Jacobian column indices.
+
+    :param J: Jacobian matrix to analyse
+    """
 
     indep_columns = np.empty((J.shape[0], 0))
+    indep_indices: list[int] = []
     rank = 0
     for j in range(J.shape[1]):
         temp = np.column_stack((indep_columns, J[:, j]))
@@ -27,6 +34,7 @@ def jsingu(J):
             # this column is independent
             rank = temp_rank
             indep_columns = temp
+            indep_indices.append(j)
 
         else:
             s = f"column {j} ="
@@ -37,7 +45,7 @@ def jsingu(J):
                         s += " - "
                     elif i > 0:
                         s += " + "
-                    s += f"{abs(ci):.3g} column_{i}"
+                    s += f"{abs(ci):.3g} column_{indep_indices[i]}"
             print(s)
 
 
@@ -45,7 +53,7 @@ if __name__ == "__main__":  # pragma nocover
     import roboticstoolbox as rtb
 
     # robot = rtb.models.DH.Puma560()
-    robot = rtb.models.URDF.UR5()
+    robot = rtb.models.URDF.UR5()  # type: ignore[operator]  # class, not module
     J = robot.jacob0(robot.qr)
 
     jsingu(J)

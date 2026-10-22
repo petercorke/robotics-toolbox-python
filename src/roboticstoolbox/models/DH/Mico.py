@@ -1,9 +1,12 @@
-#!/usr/bin/env python
 
-from math import pi, sin, cos
+from __future__ import annotations
+
+#!/usr/bin/env python
+from math import cos, sin
+
 import numpy as np
+
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class Mico(DHRobot):
@@ -36,10 +39,10 @@ class Mico(DHRobot):
     :references:
         - "DH Parameters of Mico" Version 1.0.8, July 25, 2013.
 
-    :seealso: :func:`Mico`
+    .. seealso:: :func:`Mico`
     """
 
-    def __init__(self, symbolic=False):
+    def __init__(self, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym

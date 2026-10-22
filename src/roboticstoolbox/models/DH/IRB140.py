@@ -3,9 +3,13 @@
 @author: Samuel Drew
 """
 
-from roboticstoolbox import DHRobot, RevoluteDH
+from __future__ import annotations
+
 from math import pi
+
 import numpy as np
+
+from roboticstoolbox import DHRobot, RevoluteDH
 
 
 class IRB140(DHRobot):
@@ -38,9 +42,9 @@ class IRB140(DHRobot):
         - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
 
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
-    def __init__(self):
+    def __init__(self) -> None:
         deg = pi / 180
 
         # robot length values (metres)

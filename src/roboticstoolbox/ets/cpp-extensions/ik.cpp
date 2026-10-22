@@ -11,6 +11,7 @@
 #include <iostream>
 #include <functional>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <nanobind/nanobind.h>
 
 namespace nb = nanobind;
@@ -308,21 +309,10 @@ extern "C"
         R_tr = R.trace();
         if (li_norm < 1e-6)
         {
-            // diagonal matrix case
-            // if np.trace(R) > 0
-            if (R_tr > 0)
-            {
-                // (1,1,1) case
-                // a = np.zeros((3, ));
-                e.block<3, 1>(3, 0) << 0, 0, 0;
-            }
-            else
-            {
-                // a = np.pi / 2 * (np.diag(R) + 1);
-                e(3) = PI_2 * (R(0, 0) + 1);
-                e(4) = PI_2 * (R(1, 1) + 1);
-                e(5) = PI_2 * (R(2, 2) + 1);
-            }
+            // The skew part vanishes near both zero and pi.  A half-turn
+            // need not have a diagonal rotation matrix.
+            const Eigen::AngleAxisd rotation(R);
+            e.block<3, 1>(3, 0) = rotation.angle() * rotation.axis();
         }
         else
         {

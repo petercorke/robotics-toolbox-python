@@ -4,40 +4,42 @@
 """
 
 from __future__ import annotations
-from collections import namedtuple
-from email import message
-from roboticstoolbox.tools.data import rtb_path_to_datafile
-import warnings
-import copy
-import numpy as np
-from roboticstoolbox.robot.Robot import Robot  # DHLink
-from roboticstoolbox.robot.BaseRobot import _is_symbolic
-from roboticstoolbox.ets.ETS import ETS, ET
-from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox.tools.params import rtb_set_param
-from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
-# from spatialmath import base
-from spatialmath.base import (
-    tr2jac,
-    tr2eul,
-    tr2rpy,
-    t2r,
-    trlog,
-    rotvelxform,
-)
-from spatialmath import SE3, Twist3
+import copy
+import warnings
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
 import spatialmath.base.symbolic as sym
 
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
-from scipy.linalg import block_diag
-from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox.tools.params import rtb_get_param
-from roboticstoolbox.robot.frne import init, frne, delete
 from numpy import any
-from numpy.typing import ArrayLike, NDArray
+from roboticstoolbox.tools.types import ArrayLike, NDArray
+from spatialmath import SE3, Twist3
+
+# from spatialmath import base
+from spatialmath.base import (
+    rotvelxform,
+    t2r,
+    tr2eul,
+    tr2jac,
+    tr2rpy,
+    trlog,
+)
+from spatialmath.base.argcheck import getmatrix, getvector, isscalar, verifymatrix
+
+from roboticstoolbox.ets.ETS import ET, ETS
+from roboticstoolbox.robot.BaseRobot import _is_symbolic
+from roboticstoolbox.robot.DHLink import DHLink
+from roboticstoolbox.robot.frne import delete, frne, init
 from roboticstoolbox.robot.IK import IKSolution
+from roboticstoolbox.robot.Robot import Robot  # DHLink
+from roboticstoolbox.tools.data import rtb_path_to_datafile
+from roboticstoolbox.tools.params import rtb_get_param
+
+if TYPE_CHECKING:
+    from roboticstoolbox.robot.symbolic_ik_rr import AnalyticIK
 
 # iksol = namedtuple("IKsolution", "q, success, reason")
 
@@ -77,7 +79,11 @@ class DHRobot(Robot):
 
     """
 
-    def __init__(self, links, meshdir=None, **kwargs):
+    # -------------------------------------------------------------------------- #
+    # Construction, copying and display
+    # -------------------------------------------------------------------------- #
+
+    def __init__(self, links: Any, meshdir: Any = None, **kwargs: Any) -> None:
         # Verify L
         if not isinstance(links, list):
             raise TypeError("The links must be stored in a list.")
@@ -135,7 +141,7 @@ class DHRobot(Robot):
             self.meshdir = rtb_path_to_datafile(meshdir)
             self.basemesh = self.meshdir / "link0.stl"
             for j, link in enumerate(self._links, start=1):
-                link.mesh = self.meshdir / "link{:d}.stl".format(j)
+                link.mesh = self.meshdir / f"link{j:d}.stl"
             self._hasgeometry = True
         else:
             self.basemesh = None
@@ -143,178 +149,7 @@ class DHRobot(Robot):
         # frne parameters
         self._frne = None
 
-    @property
-    def links(self) -> list[DHLink]:  # type: ignore[override]
-        return self._links  # type: ignore[return-value]
-
-    def __str__(self):
-        """
-        Pretty prints the DH Model of the robot. Will output angles in degrees
-
-        :return: Pretty print of the robot model
-        :rtype: str
-        """
-
-        if np.array_equal(self.base.A, np.eye(4)):
-            base = None
-        else:
-            base = self.base
-
-        if np.array_equal(self.tool.A, np.eye(4)):
-            tool = None
-        else:
-            tool = self.tool
-
-        unicode = rtb_get_param("unicode")
-        border = "thin" if unicode else "ascii"
-        s = f"DHRobot: {self.name}"
-
-        if self.manufacturer is not None and len(self.manufacturer) > 0:
-            s += f" (by {self.manufacturer})"
-        s += f", {self.n} joints ({self.structure})"
-
-        deg = 180 / np.pi
-
-        if self._hasdynamics:
-            s += ", dynamics"
-        if any([link.mesh is not None for link in self.links]):
-            s += ", geometry"
-
-        if self.mdh:
-            dh = "modified"
-        else:
-            dh = "standard"
-        s += f", {dh} DH parameters\n"
-
-        def qstr(j, link):
-            j += 1
-            if link.isflip:
-                s = f"-q{j:d}"
-            else:
-                s = f" q{j:d}"
-
-            if L.offset != 0:
-                sign = "+" if L.offset > 0 else "-"
-                offset = abs(L.offset)
-                if link.isprismatic:
-                    s += f" {sign} {offset:}"
-                else:
-                    s += f" {sign} {offset * deg:.3g}\u00b0"
-            return s
-
-        def angle(theta, fmt=None):
-            if sym.issymbol(theta):  # pragma nocover
-                return "<<red>>" + str(theta)
-            else:
-                if fmt is not None:
-                    return fmt.format(theta * deg) + "\u00b0"
-                else:
-                    return str(theta * deg) + "\u00b0"
-
-        def format_attr(attr) -> str:
-            if isinstance(attr, float):
-                return f"{attr:.4g}"
-            else:
-                return str(attr)
-
-        has_qlim = any([link.qlim is not None for link in self])
-        if has_qlim:
-            qlim_columns = [
-                Column("q⁻", headalign="^"),
-                Column("q⁺", headalign="^"),
-            ]
-            qlim = self.qlim
-
-        else:
-            qlim = np.array([])  # satisfy type checker
-            qlim_columns = []
-
-        if self.mdh:
-            # MDH format
-            table = ANSITable(
-                Column("aⱼ₋₁", headalign="^"),
-                Column("⍺ⱼ₋₁", headalign="^"),
-                Column("θⱼ", headalign="^"),
-                Column("dⱼ", headalign="^"),
-                *qlim_columns,
-                border=border,
-            )
-            for j, L in enumerate(self):
-                if has_qlim:
-                    if L.isprismatic:
-                        ql = [qlim[0, j], qlim[1, j]]
-                    else:
-                        ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
-                else:
-                    ql = []
-                if L.isprismatic:
-                    table.row(L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
-                else:
-                    table.row(L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
-        else:
-            # DH format
-            table = ANSITable(
-                Column("θⱼ", headalign="^", colalign="<"),
-                Column("dⱼ", headalign="^"),
-                Column("aⱼ", headalign="^"),
-                Column("⍺ⱼ", headalign="^"),
-                *qlim_columns,
-                border=border,
-            )
-
-            for j, L in enumerate(self):
-                if has_qlim:
-                    if L.isprismatic:
-                        ql = [qlim[0, j], qlim[1, j]]
-                    else:
-                        ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
-                else:
-                    ql = []
-                if L.isprismatic:
-                    table.row(
-                        angle(L.theta),
-                        qstr(j, L),
-                        format_attr(L.a),
-                        angle(L.alpha),
-                        *ql,
-                    )
-                else:
-                    table.row(
-                        qstr(j, L),
-                        format_attr(L.d),
-                        format_attr(L.a),
-                        angle(L.alpha),
-                        *ql,
-                    )
-
-        s += str(table)
-
-        # show tool and base
-        if tool is not None or base is not None:
-            table = ANSITable(
-                Column("", colalign=">"),
-                Column("", colalign="<"),
-                border=border,
-                header=False,
-            )
-            if base is not None:
-                table.row(
-                    "base",
-                    base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
-                )
-            if tool is not None:
-                table.row(
-                    "tool",
-                    tool.strline(orient="rpy/xyz", fmt="{:.2g}"),
-                )
-            s += "\n" + str(table)
-
-        # show named configurations
-        s += self.configurations_str(border=border)
-
-        return s
-
-    def __add__(self, L):
+    def __add__(self, L: Any) -> Any:
         nlinks = []
 
         # TODO - Should I do a deep copy here a physically copy the DHLinks
@@ -340,7 +175,7 @@ class DHRobot(Robot):
             gravity=self.gravity,
         )
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> Any:
         links = []
 
         for link in self.links:
@@ -417,9 +252,8 @@ class DHRobot(Robot):
 
     #     return new
 
-    # --------------------------------------------------------------------- #
 
-    def _set_link_fk(self, q):
+    def _set_link_fk(self, q: Any) -> None:
         """
         robot._set_link_fk(q) evaluates fkine for each link within a
         robot and stores that pose in a private variable within the link.
@@ -449,10 +283,183 @@ class DHRobot(Robot):
             for gi in link.geometry:
                 gi.wT = tall[i]
 
-    # --------------------------------------------------------------------- #
+    def __str__(self) -> str:
+        """
+        Pretty prints the DH Model of the robot. Will output angles in degrees
+
+        :return: Pretty print of the robot model
+        :rtype: str
+        """
+
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.array_equal(self.tool.A, np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
+        unicode = rtb_get_param("unicode")
+        border = "thin" if unicode else "ascii"
+        s = f"{self._class_label()}: {self.name}"
+
+        if self.manufacturer is not None and len(self.manufacturer) > 0:
+            s += f" (by {self.manufacturer})"
+        s += f", {self.n} joints ({self.structure})"
+
+        deg = 180 / np.pi
+
+        if self._hasdynamics:
+            s += ", dynamics"
+        if any([link.mesh is not None for link in self.links]):
+            s += ", geometry"
+
+        if self.mdh:
+            dh = "modified"
+        else:
+            dh = "standard"
+        s += f", {dh} DH parameters\n"
+
+        def qstr(j: Any, link: Any) -> Any:
+            j += 1
+            if link.isflip:
+                s = f"-q{j:d}"
+            else:
+                s = f" q{j:d}"
+
+            if L.offset != 0:
+                sign = "+" if L.offset > 0 else "-"
+                offset = abs(L.offset)
+                if link.isprismatic:
+                    s += f" {sign} {offset:}"
+                else:
+                    s += f" {sign} {offset * deg:.3g}\u00b0"
+            return s
+
+        def angle(theta: Any, fmt: Any = None) -> Any:
+            if sym.issymbol(theta):  # pragma nocover
+                return "<<red>>" + str(theta)
+            else:
+                if fmt is not None:
+                    return fmt.format(theta * deg) + "\u00b0"
+                else:
+                    return str(theta * deg) + "\u00b0"
+
+        def format_attr(attr: Any) -> str:
+            if isinstance(attr, float):
+                return f"{attr:.4g}"
+            else:
+                return str(attr)
+
+        has_qlim = any([link.qlim is not None for link in self])
+        if has_qlim:
+            qlim_columns = [
+                Column("q⁻", headalign="^"),
+                Column("q⁺", headalign="^"),
+            ]
+            qlim = self.qlim
+
+        else:
+            qlim = np.array([])  # satisfy type checker
+            qlim_columns = []
+
+        if self.mdh:
+            # MDH format
+            table = ANSITable(
+                Column("aⱼ₋₁", headalign="^"),
+                Column("⍺ⱼ₋₁", headalign="^"),
+                Column("θⱼ", headalign="^"),
+                Column("dⱼ", headalign="^"),
+                *qlim_columns,
+                border=border,
+            )
+            for j, L in enumerate(self):
+                if has_qlim:
+                    if L.isprismatic:
+                        ql = [format_attr(qlim[k, j]) for k in [0, 1]]
+                    else:
+                        ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
+                else:
+                    ql = []
+                if L.isprismatic:
+                    table.row(L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
+                else:
+                    table.row(L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
+        else:
+            # DH format
+            table = ANSITable(
+                Column("θⱼ", headalign="^", colalign="<"),
+                Column("dⱼ", headalign="^"),
+                Column("aⱼ", headalign="^"),
+                Column("⍺ⱼ", headalign="^"),
+                *qlim_columns,
+                border=border,
+            )
+
+            for j, L in enumerate(self):
+                if has_qlim:
+                    if L.isprismatic:
+                        ql = [format_attr(qlim[k, j]) for k in [0, 1]]
+                    else:
+                        ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
+                else:
+                    ql = []
+                if L.isprismatic:
+                    table.row(
+                        angle(L.theta),
+                        qstr(j, L),
+                        format_attr(L.a),
+                        angle(L.alpha),
+                        *ql,
+                    )
+                else:
+                    table.row(
+                        qstr(j, L),
+                        format_attr(L.d),
+                        format_attr(L.a),
+                        angle(L.alpha),
+                        *ql,
+                    )
+
+        s += str(table)
+
+        # show tool and base
+        if tool is not None or base is not None:
+            table = ANSITable(
+                Column("", colalign=">"),
+                Column("", colalign="<"),
+                border=border,
+                header=False,
+            )
+            if base is not None:
+                table.row(
+                    "base",
+                    base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                )
+            if tool is not None:
+                table.row(
+                    "tool",
+                    tool.strline(orient="rpy/xyz", fmt="{:.2g}"),
+                )
+            s += "\n" + str(table)
+
+        # show named configurations
+        s += self.configurations_str(border=border)
+
+        return s
+
+    # -------------------------------------------------------------------------- #
+    # Properties of the links
+    # -------------------------------------------------------------------------- #
 
     @property
-    def mdh(self):
+    def links(self) -> list[DHLink]:
+        return self._links
+
+    @property
+    def mdh(self) -> Any:
         """
         Modified Denavit-Hartenberg status
 
@@ -474,7 +481,7 @@ class DHRobot(Robot):
         return self._mdh
 
     @property
-    def d(self):
+    def d(self) -> Any:
         r"""
         Link offset values
 
@@ -500,7 +507,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def a(self):
+    def a(self) -> Any:
         r"""
         Link length values
 
@@ -526,7 +533,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def theta(self):
+    def theta(self) -> Any:
         r"""
         Joint angle values
 
@@ -552,7 +559,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def alpha(self):
+    def alpha(self) -> Any:
         r"""
         Link twist values
 
@@ -578,7 +585,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def r(self):
+    def r(self) -> Any:
         r"""
         Link centre of mass values
 
@@ -600,7 +607,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def offset(self):
+    def offset(self) -> Any:
         r"""
         Joint offset values
 
@@ -621,7 +628,7 @@ class DHRobot(Robot):
         return v
 
     @property
-    def reach(self):
+    def reach(self) -> Any:
         r"""
         Reach of the robot
 
@@ -653,7 +660,7 @@ class DHRobot(Robot):
         return self._reach
 
     @property
-    def nbranches(self):
+    def nbranches(self) -> Any:
         """
         Number of branches
 
@@ -670,11 +677,231 @@ class DHRobot(Robot):
             >>> robot = rtb.models.DH.Panda()
             >>> robot.nbranches
 
-        :seealso: :func:`n`, :func:`nlinks`
+        .. seealso:: :func:`n`, :func:`nlinks`
         """
         return 1
 
-    def A(self, j, q=None):
+    # -------------------------------------------------------------------------- #
+    # Information about the robot
+    # -------------------------------------------------------------------------- #
+
+    def islimit(self, q: Any = None) -> Any:
+        """
+        Joint limit test
+
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values)
+        :type q: ndarray(n
+        :return v: is a vector of boolean values, one per joint, False if
+            ``q[j]`` is within the joint limits, else True
+        :rtype v: bool list
+
+        - ``robot.islimit(q)`` is a list of boolean values indicating if the
+          joint configuration ``q`` is in violation of the joint limits.
+
+        - ``robot.jointlimit()`` as above except uses the stored q value of the
+          robot object.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.islimit([0, 0, -4, 4, 0, 0])
+
+        """
+        if q is None:
+            q = self.q
+
+        return [link.islimit(qk) for (link, qk) in zip(self, q)]
+
+    def isspherical(self) -> Any:
+        """
+        Test for spherical wrist
+
+        :return: True if spherical wrist
+        :rtype: bool
+
+        Tests if the robot has a spherical wrist, that is, the last 3 axes are
+        revolute and their axes intersect at a point.
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.isspherical()
+
+        """
+        if self.n < 3:
+            return False
+
+        L = self.links[self.n - 3 : self.n]
+
+        alpha = [-np.pi / 2, np.pi / 2]
+
+        return (
+            L[0].a == 0
+            and L[1].a == 0
+            and L[1].d == 0
+            and (
+                (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
+                or (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
+            )
+            and L[0].sigma == 0
+            and L[1].sigma == 0
+            and L[2].sigma == 0
+        )
+
+    def dhunique(self) -> None:
+        """
+        Print the unique DH parameters
+
+        Print a table showing all the non-zero DH parameters, and their
+        values.  This is the minimum set of kinematic parameters required
+        to describe the robot.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.dhunique()
+        """
+
+        table = ANSITable(
+            Column("param"),
+            Column("value", headalign="^", colalign="<", fmt="{:.4g}"),
+            border="thin",
+        )
+        for j, link in enumerate(self):
+            if link.isprismatic:
+                if link.theta != 0:
+                    table.row(f"θ{j}", link.theta)
+            elif link.isrevolute:
+                if link.d != 0:
+                    table.row(f"d{j}", link.d)
+            if link.a != 0:
+                table.row(f"a{j}", link.a)
+            if link.alpha != 0:
+                table.row(f"⍺{j}", link.alpha)
+        table.print()
+
+    def twists(self, q: Any = None) -> Any:
+        """
+        Joint axes as  twists
+
+        :param q: The joint configuration of the robot, defaults to zero
+        :return: a vector of joint axis twists
+        :rtype: Twist3 instance
+        :return: Pose of the tool
+        :rtype: SE3 instance
+
+        - ``tw, T0 = twists(q)`` calculates a vector of Twist objects (n) that
+          represent the axes of the joints for the robot with joint coordinates
+          ``q`` (n). Also returns T0 which is an SE3 object representing the
+          pose of the tool.
+
+        - ``tw, T0 = twists()`` as above but the joint coordinates are taken
+          to be zero.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> tw, T0 = robot.twists()
+            >>> tw
+            >>> T0
+
+        """
+
+        if q is None:
+            q = np.zeros((self.n,))
+
+        T = self.fkine_all(q)[1:]  # don't use first transform which is base
+        tw = Twist3.Alloc(self.n)
+        if self.mdh:
+            # MDH case
+            for j, link in enumerate(self):
+                if link.sigma == 0:
+                    tw[j] = Twist3.UnitRevolute(T[j].a, T[j].t)
+                else:
+                    tw[j] = Twist3.UnitPrismatic(T[j].a)
+        else:
+            # DH case
+            for j, link in enumerate(self):
+                if j == 0:
+                    # first link case
+                    if link.sigma == 0:
+                        # revolute
+                        tw[j] = Twist3.UnitRevolute([0, 0, 1], [0, 0, 0])
+                    else:
+                        tw[j] = Twist3.UnitPrismatic([0, 0, 1])  # prismatic
+                else:
+                    # subsequent links
+                    if link.sigma == 0:
+                        tw[j] = Twist3.UnitRevolute(T[j - 1].a, T[j - 1].t)  # revolute
+                    else:
+                        tw[j] = Twist3.UnitPrismatic(T[j - 1].a)  # prismatic
+
+        return tw, T[-1]
+
+    def segments(self) -> Any:
+        segments: list[Any] = [None]
+        segments.extend(self.links)
+        return [segments]
+
+    def ets(self, *args: Any, **kwargs: Any) -> ETS:  # type: ignore[override]
+        """
+        Robot kinematics as an elemenary transform sequence
+
+        :return: elementary transform sequence
+        :rtype: ETS
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.ets()
+        """
+
+        # optionally start with the base transform
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base.A
+
+        if np.array_equal(self.tool.A, np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool.A
+
+        ets: Any
+        if base is None:
+            ets = ETS()
+        else:
+            ets = ET.SE3(base)
+
+        # add the links
+        for link in self:
+            ets *= link.ets
+
+        # optionally add the base transform
+        if tool is not None:
+            ets *= ET.SE3(tool)
+
+        return ets
+
+    # -------------------------------------------------------------------------- #
+    # Forward kinematics
+    # -------------------------------------------------------------------------- #
+
+    def A(self, j: Any, q: Any = None) -> Any:
         """
         Link forward kinematics
 
@@ -717,213 +944,7 @@ class DHRobot(Robot):
 
         return T
 
-    def islimit(self, q=None):
-        """
-        Joint limit test
-
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: ndarray(n
-        :return v: is a vector of boolean values, one per joint, False if
-            ``q[j]`` is within the joint limits, else True
-        :rtype v: bool list
-
-        - ``robot.islimit(q)`` is a list of boolean values indicating if the
-          joint configuration ``q`` is in violation of the joint limits.
-
-        - ``robot.jointlimit()`` as above except uses the stored q value of the
-          robot object.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.islimit([0, 0, -4, 4, 0, 0])
-
-        """
-        if q is None:
-            q = self.q
-
-        return [link.islimit(qk) for (link, qk) in zip(self, q)]
-
-    def isspherical(self):
-        """
-        Test for spherical wrist
-
-        :return: True if spherical wrist
-        :rtype: bool
-
-        Tests if the robot has a spherical wrist, that is, the last 3 axes are
-        revolute and their axes intersect at a point.
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.isspherical()
-
-        """
-        if self.n < 3:
-            return False
-
-        L = self.links[self.n - 3 : self.n]
-
-        alpha = [-np.pi / 2, np.pi / 2]
-
-        return (
-            L[0].a == 0
-            and L[1].a == 0
-            and L[1].d == 0
-            and (
-                (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
-                or (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
-            )
-            and L[0].sigma == 0
-            and L[1].sigma == 0
-            and L[2].sigma == 0
-        )
-
-    def dhunique(self):
-        """
-        Print the unique DH parameters
-
-        Print a table showing all the non-zero DH parameters, and their
-        values.  This is the minimum set of kinematic parameters required
-        to describe the robot.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.dhunique()
-        """
-
-        table = ANSITable(
-            Column("param"),
-            Column("value", headalign="^", colalign="<", fmt="{:.4g}"),
-            border="thin",
-        )
-        for j, link in enumerate(self):
-            if link.isprismatic:
-                if link.theta != 0:
-                    table.row(f"θ{j}", link.theta)
-            elif link.isrevolute:
-                if link.d != 0:
-                    table.row(f"d{j}", link.d)
-            if link.a != 0:
-                table.row(f"a{j}", link.a)
-            if link.alpha != 0:
-                table.row(f"⍺{j}", link.alpha)
-        table.print()
-
-    def twists(self, q=None):
-        """
-        Joint axes as  twists
-
-        :param q: The joint configuration of the robot, defaults to zero
-        :return: a vector of joint axis twists
-        :rtype: Twist3 instance
-        :return: Pose of the tool
-        :rtype: SE3 instance
-
-        - ``tw, T0 = twists(q)`` calculates a vector of Twist objects (n) that
-          represent the axes of the joints for the robot with joint coordinates
-          ``q`` (n). Also returns T0 which is an SE3 object representing the
-          pose of the tool.
-
-        - ``tw, T0 = twists()`` as above but the joint coordinates are taken
-          to be zero.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> tw, T0 = robot.twists()
-            >>> tw
-            >>> T0
-
-        """
-
-        if q is None:
-            q = np.zeros((self.n,))
-
-        T = self.fkine_all(q)[1:]  # don't use first transform which is base
-        tw = Twist3.Alloc(self.n)
-        if self.mdh:
-            # MDH case
-            for j, link in enumerate(self):
-                if link.sigma == 0:
-                    tw[j] = Twist3.UnitRevolute(T[j].a, T[j].t)  # type: ignore[union-attr]
-                else:
-                    tw[j] = Twist3.UnitPrismatic(T[j].a)  # type: ignore[union-attr]
-        else:
-            # DH case
-            for j, link in enumerate(self):
-                if j == 0:
-                    # first link case
-                    if link.sigma == 0:
-                        # revolute
-                        tw[j] = Twist3.UnitRevolute([0, 0, 1], [0, 0, 0])
-                    else:
-                        tw[j] = Twist3.UnitPrismatic([0, 0, 1])  # prismatic
-                else:
-                    # subsequent links
-                    if link.sigma == 0:
-                        tw[j] = Twist3.UnitRevolute(T[j - 1].a, T[j - 1].t)  # type: ignore[union-attr]  # revolute
-                    else:
-                        tw[j] = Twist3.UnitPrismatic(T[j - 1].a)  # prismatic
-
-        return tw, T[-1]
-
-    def ets(self, *args, **kwargs) -> ETS:
-        """
-        Robot kinematics as an elemenary transform sequence
-
-        :return: elementary transform sequence
-        :rtype: ETS
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.ets()
-        """
-
-        # optionally start with the base transform
-        if np.array_equal(self.base.A, np.eye(4)):
-            base = None
-        else:
-            base = self.base.A
-
-        if np.array_equal(self.tool.A, np.eye(4)):
-            tool = None
-        else:
-            tool = self.tool.A
-
-        if base is None:
-            ets = ETS()
-        else:
-            ets = ET.SE3(base)
-
-        # add the links
-        for link in self:
-            ets *= link.ets
-
-        # optionally add the base transform
-        if tool is not None:
-            ets *= ET.SE3(tool)
-
-        return ets
-
-    def fkine(self, q, **kwargs):
+    def fkine(self, q: Any, **kwargs: Any) -> Any:  # type: ignore[override]
         """
         Forward kinematics
 
@@ -974,17 +995,17 @@ class DHRobot(Robot):
                     Tr = L.A(q)
                     first = False
                 else:
-                    Tr *= L.A(q)  # type: ignore
+                    Tr *= L.A(q)
 
             if base is not None:
-                Tr = base * Tr  # type: ignore
+                Tr = base * Tr
             if tool is not None:
-                Tr = Tr * tool  # type: ignore
-            T.append(Tr)  # type: ignore
+                Tr = Tr * tool
+            T.append(Tr)
 
         return T
 
-    def fkine_path(self, q, old=None):
+    def fkine_path(self, q: Any, old: Any = None) -> Any:
         """
         Compute the pose of every link frame
 
@@ -1016,12 +1037,7 @@ class DHRobot(Robot):
 
         return T
 
-    def segments(self):
-        segments = [None]
-        segments.extend(self.links)
-        return [segments]
-
-    def fkine_all(self, q=None, old=True):
+    def fkine_all(self, q: Any = None, old: bool = True) -> Any:
         """
         Forward kinematics for all link frames
 
@@ -1069,7 +1085,258 @@ class DHRobot(Robot):
             Tall.append(Tj)
         return Tall
 
-    def jacobe(self, q, half=None, **kwargs):
+    # -------------------------------------------------------------------------- #
+    # Inverse kinematics
+    # -------------------------------------------------------------------------- #
+
+    def analytic_ik(self) -> AnalyticIK:
+        """
+        Analytic inverse kinematics solver for this robot
+
+        :returns: a solver, which solves for one pose with
+            :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.solve` or
+            :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.ikine`, and
+            writes source code with
+            :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.generate`
+        :raises ImportError: if SymPy is not installed
+        :raises NotImplementedError: if the arm needs the general 6R method but has
+            a prismatic joint
+        :raises ValueError: if no analytic solution is found for this arm
+
+        The equations are derived symbolically, which takes seconds, and the solver
+        is kept, so the cost is paid once for each robot.  An arm with a spherical
+        wrist or three parallel axes has a closed form solution, any other 6R arm
+        is solved by the method of Raghavan and Roth.  The robot must have six
+        joints and standard DH links.
+
+        .. note:: This needs SymPy, which is not installed with the Toolbox by
+            default: ``pip install roboticstoolbox-python[ik]``.  The extra also
+            installs ``python-flint``, which makes the derivation much faster.
+
+        .. versionadded:: 1.5.0
+        """
+        key = tuple(
+            (link.isrevolute, link.a, link.d, link.alpha, link.theta, link.offset)
+            for link in self.links
+        )
+        cached = getattr(self, "_analytic_ik", None)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+
+        try:
+            from roboticstoolbox.robot.symbolic_ik_rr import make_solver
+        except ModuleNotFoundError as err:
+            if err.name is not None and err.name.split(".")[0] == "sympy":
+                raise ImportError(
+                    "analytic inverse kinematics needs SymPy, install it with "
+                    "'pip install roboticstoolbox-python[ik]'"
+                ) from err
+            raise
+
+        solver = make_solver(self)
+        self._analytic_ik = (key, solver)
+        return solver
+
+    def ikine_analytic(
+        self,
+        T: SE3 | NDArray,
+        q0: ArrayLike | None = None,
+        joint_limits: bool = True,
+        weights: ArrayLike | None = None,
+    ) -> IKSolution:
+        """
+        Analytic inverse kinematics
+
+        :param T: end-effector pose, or a trajectory of poses
+        :param q0: configuration to be near, default zeros
+        :param joint_limits: reject solutions that violate the joint limits
+        :param weights: weight of each joint in the distance from ``q0``
+        :returns: the solution, nearest to ``q0``, see
+            :meth:`~roboticstoolbox.robot.symbolic_ik_rr.AnalyticIK.ikine`
+
+        This is ``self.analytic_ik().ikine(...)``.  The first call for a robot
+        derives the equations, see :meth:`analytic_ik`, and the solver is kept for
+        the calls that follow.
+
+        .. versionadded:: 1.5.0
+        """
+        return self.analytic_ik().ikine(T, q0, joint_limits, weights)
+
+    def ikine_LM(  # type: ignore[override]
+        self, Tep: np.ndarray | SE3, q0: ArrayLike | None = None, **ikargs: Any
+    ) -> Any:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization
+
+        :param Tep: The desired end-effector pose or pose trajectory, see
+            :meth:`~roboticstoolbox.ETS.ikine_LM` for how a trajectory is handled
+        :param q0: The initial joint coordinates, a vector (n,), or a matrix (m, n)
+            whose rows are the starting points of the first m searches (any
+            further searches start from random valid coordinates)
+        :param ikargs: |ikargs|
+        :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
+        :rtype: IKSolution
+
+        This is a thin wrapper around :meth:`~roboticstoolbox.ETS.ikine_LM` -- see that
+        method for the full description of the Levenberg-Marquadt solver
+        and its ``method``/``kq``/``km`` variants.
+
+        .. seealso:: :meth:`ikine_LM` (:class:`~roboticstoolbox.ETS`)
+        """
+        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)
+
+    def ikine_6s(self, T: Any, config: Any, ikfunc: Any) -> Any:
+        """
+        Analytic inverse kinematics for a robot with a spherical wrist
+
+        .. deprecated:: 1.5.0
+            This came from the MATLAB Toolbox and is not general.  It only handles
+            the wrist, the user supplied ``ikfunc`` must solve the first three
+            joints, and that is specific to one robot geometry.  It also
+            mishandles trajectories and unreachable poses.  It is no longer used by
+            ``ikine_a``, which is self-contained.  A hand-written
+            solution belongs in the class of the robot it is written for.
+
+        :param T: end-effector pose
+        :param config: arm configuration string
+        :param ikfunc: function ``ikfunc(robot, T, config)`` which returns the
+            joint angles of the first three joints
+        :returns: an IKSolution
+        """
+        warnings.warn(
+            "ikine_6s is deprecated and will be removed in a future release, "
+            "write a hand-written solution for your robot, as Puma560.ikine_a does",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        # Undo base and tool transformations, but if they are not
+        # set, skip the operation.  Nicer for symbolics
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.array_equal(self.tool.A, np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
+        if base is not None:
+            T = base.inv() * T
+        if tool is not None:
+            T = T * tool.inv()
+
+        # q = np.zeros((6,))
+        solutions = []
+
+        for k, Tk in enumerate(T):
+            # get model specific solution for first 3 joints
+            theta = ikfunc(self, Tk, config)
+
+            if isinstance(theta, np.ndarray):
+                # Solve for the wrist rotation
+                # We need to account for some random translations between the
+                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
+                # final frame.
+
+                # Transform of first 3 joints
+                T13 = self.A([0, 2], theta)
+
+                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
+                Td4 = SE3(0, 0, self.links[3].d)  # Tz(d4)
+
+                # Tz(d6) Tx(a5) Rx(alpha6)
+                Tt = SE3(self.links[5].a, 0, self.links[5].d) * SE3.Rx(
+                    self.links[5].alpha
+                )
+
+                R = Td4.inv() * T13.inv() * Tk * Tt.inv()
+
+                # The spherical wrist implements Euler angles
+                if "f" in config:
+                    eul = R.eul(flip=True)
+                else:
+                    eul = R.eul()
+                theta = np.r_[theta, eul]
+                if self.links[3].alpha > 0:
+                    theta[4] = -theta[4]
+
+                # Remove the link offset angles
+                theta = theta - self.offset
+
+                # solution = iksol(theta, True, "")
+                solution = IKSolution(q=theta, success=True)
+
+            else:
+                # ikfunc can return None or a str reason
+                if theta is None:
+                    solution = IKSolution(q=None, success=False)  # type: ignore[arg-type]
+                else:
+                    solution = IKSolution(q=None, success=False, reason=theta)  # type: ignore[arg-type]
+
+            solutions.append(solution)
+
+        if len(T) == 1:
+            return solutions[0]
+        else:
+            # the 2nd and 3rd positional arguments are not what IKSolution
+            # takes (success, iterations): see findings
+            return IKSolution(
+                np.vstack([sol.q for sol in solutions]),
+                np.array([sol.success for sol in solutions]),  # type: ignore[arg-type]
+                [sol.reason for sol in solutions],  # type: ignore[arg-type]
+            )
+
+    def config_validate(self, config: Any, allowables: Any) -> Any:
+        """
+        Validate a configuration string
+
+        :param config: a configuration string
+        :type config: str
+        :param allowable: [description]
+        :type allowable: tuple of str
+        :raises ValueError: bad character in configuration string
+        :return: configuration string
+        :rtype: str
+
+        For analytic inverse kinematics the Toolbox uses a string whose
+        letters indicate particular solutions, eg. for the Puma 560
+
+            =========  ===================
+            Character  Meaning
+            =========  ===================
+            'l'        lefty
+            'r'        righty
+            'u'        elbow up
+            'd'        elbow down
+            'n'        wrist not flipped
+            'f'        wrist flipped
+            =========  ===================
+
+        This method checks that the configuration string is valid and adds
+        default values for missing characters.  For example:
+
+            config = self.config_validate(config, ('lr', 'ud', 'nf'))
+
+        indicates the valid characters, and the first character in each
+        string is the default, ie. if neither 'l' or 'r' is given then
+        'l' will be added to the string.
+
+        """
+        for c in config:
+            if not any([c in allowable for allowable in allowables]):
+                raise ValueError(f"bad config specifier <{c}>")
+        for allowable in allowables:
+            if all([a not in config for a in allowable]):
+                config += allowable[0]
+        return config
+
+    # -------------------------------------------------------------------------- #
+    # Jacobians and Hessian
+    # -------------------------------------------------------------------------- #
+
+    def jacobe(self, q: Any, half: Any = None, **kwargs: Any) -> Any:  # type: ignore[override]
         r"""
         Manipulator Jacobian in end-effector frame
 
@@ -1104,14 +1371,14 @@ class DHRobot(Robot):
 
         n = self.n
         L = self.links
-        J = np.zeros((6, self.n), dtype=q.dtype)  # type: ignore
+        J = np.zeros((6, self.n), dtype=q.dtype)
 
         U: NDArray = np.asarray(self.tool.A)
 
         for j in range(n - 1, -1, -1):
             if self.mdh == 0:
                 # standard DH convention
-                U = L[j].A(q[j]).A @ U  # type: ignore
+                U = L[j].A(q[j]).A @ U
 
             if not L[j].sigma:
                 # revolute axis
@@ -1130,9 +1397,13 @@ class DHRobot(Robot):
 
             J[:, j] = np.r_[d, delta]
 
+            if L[j].isflip:
+                # the joint variable is -q, so the velocity is reversed
+                J[:, j] = -J[:, j]
+
             if self.mdh != 0:
                 # modified DH convention
-                U = L[j].A(q[j]).A @ U  # type: ignore
+                U = L[j].A(q[j]).A @ U
 
         # return top or bottom half if asked
         if half is not None:
@@ -1145,7 +1416,14 @@ class DHRobot(Robot):
 
         return J
 
-    def jacob0(self, q=None, T=None, half=None, start=None, end=None):
+    def jacob0(  # type: ignore[override]
+        self,
+        q: Any = None,
+        T: Any = None,
+        half: Any = None,
+        start: Any = None,
+        end: Any = None,
+    ) -> Any:
         r"""
         Manipulator Jacobian in world frame
 
@@ -1203,7 +1481,7 @@ class DHRobot(Robot):
                 raise ValueError("bad half specified")
         return J0
 
-    def jacob0_analytical(self, q, representation=None, T=None):
+    def jacob0_analytical(self, q: Any, representation: Any = None, T: Any = None) -> Any:  # type: ignore[override]
         r"""
         Manipulator Jacobian in world frame
 
@@ -1280,7 +1558,9 @@ class DHRobot(Robot):
         A = rotvelxform(gamma, representation=representation, inverse=True, full=True)
         return A @ J0
 
-    def hessian0(self, q=None, J0=None, start=None, end=None):
+    def hessian0(  # type: ignore[override]
+        self, q: Any = None, J0: Any = None, start: Any = None, end: Any = None
+    ) -> Any:
         r"""
         Manipulator Hessian in base frame
 
@@ -1331,19 +1611,21 @@ class DHRobot(Robot):
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
 
-        :seealso: :func:`jacob0`, :func:`jacob_dot`
+        .. seealso:: :func:`jacob0`, ``jacob_dot``
         """
 
         return self.ets().hessian0(q, J0)
 
-    def _get_limit_links(self, end=None, start=None):
+    def _get_limit_links(self, end: Any = None, start: Any = None) -> Any:  # type: ignore[override]
         # For compatibility with ERobot
 
         return None, None, None
 
     # -------------------------------------------------------------------------- #
+    # Dynamics
+    # -------------------------------------------------------------------------- #
 
-    def _copy_to_cpp(self):
+    def _copy_to_cpp(self) -> None:
         # Compress link data into a 1D array
         L = np.zeros(24 * self.n)
 
@@ -1368,7 +1650,7 @@ class DHRobot(Robot):
         self._frne = init(self.n, self.mdh, L)
         self._frne_stale = False
 
-    def delete_rne(self):
+    def delete_rne(self) -> None:
         """
         Frees the memory holding the robot object in C if it has been
         initialised.  Not normally needed — the destructor handles this
@@ -1379,7 +1661,15 @@ class DHRobot(Robot):
             self._frne = None
             self._frne_stale = True
 
-    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None, base_wrench=False):
+    def rne(  # type: ignore[override]
+        self,
+        q: Any,
+        qd: Any = None,
+        qdd: Any = None,
+        gravity: Any = None,
+        fext: Any = None,
+        base_wrench: bool = False,
+    ) -> Any:
         r"""
         Inverse dynamics
 
@@ -1413,8 +1703,9 @@ class DHRobot(Robot):
               inertia and joint friction.
             - If a model has no dynamic parameters set the result is zero.
 
-        :seealso: :func:`rne_python`
+        .. seealso:: :func:`rne_python`
         """
+        self._require_dynamics()
 
         # Symbolic-aware dispatch (rne.md issues 1/2/4): the C extension
         # requires float64 link/state data throughout, so route straight to
@@ -1513,14 +1804,14 @@ class DHRobot(Robot):
 
     def rne_python(
         self,
-        Q,
-        QD=None,
-        QDD=None,
-        gravity=None,
-        fext=None,
-        debug=False,
-        base_wrench=False,
-    ):
+        Q: Any,
+        QD: Any = None,
+        QDD: Any = None,
+        gravity: Any = None,
+        fext: Any = None,
+        debug: bool = False,
+        base_wrench: bool = False,
+    ) -> Any:
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
 
@@ -1559,15 +1850,16 @@ class DHRobot(Robot):
             - This version supports symbolic model parameters
             - Verified against MATLAB code
 
-        :seealso: :func:`rne`
+        .. seealso:: :func:`rne`
         """
+        self._require_dynamics()
 
         if np.array_equal(self.base.A, np.eye(4)):
             base = None
         else:
             base = self.base.A
 
-        def removesmall(x):
+        def removesmall(x: Any) -> Any:
             return x
 
         n = self.n
@@ -1656,7 +1948,7 @@ class DHRobot(Robot):
             w = np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
             wd = np.zeros((3,), dtype=dtype)
-            vd = -gravity  # type: ignore
+            vd = -gravity
 
             if base is not None:
                 Rb = t2r(base).T
@@ -1679,8 +1971,8 @@ class DHRobot(Robot):
                     d = link.d
                 else:
                     # prismatic
-                    Tj = link.A(link.theta).A
-                    d = q_k[j]
+                    Tj = link.A(q_k[j]).A
+                    d = q_k[j] + link.offset
 
                 # compute pstar:
                 #   O_{j-1} to O_j in {j}, negative inverse of link xform
@@ -1871,164 +2163,16 @@ class DHRobot(Robot):
             else:
                 return tau
 
-    # -------------------------------------------------------------------------- #
-
-    def ikine_6s(self, T, config, ikfunc):
-        # Undo base and tool transformations, but if they are not
-        # set, skip the operation.  Nicer for symbolics
-        if np.array_equal(self.base.A, np.eye(4)):
-            base = None
-        else:
-            base = self.base
-
-        if np.array_equal(self.tool.A, np.eye(4)):
-            tool = None
-        else:
-            tool = self.tool
-
-        if base is not None:
-            T = base.inv() * T
-        if tool is not None:
-            T = T * tool.inv()
-
-        # q = np.zeros((6,))
-        solutions = []
-
-        for k, Tk in enumerate(T):
-            # get model specific solution for first 3 joints
-            theta = ikfunc(self, Tk, config)
-
-            if isinstance(theta, np.ndarray):
-                # Solve for the wrist rotation
-                # We need to account for some random translations between the
-                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
-                # final frame.
-
-                # Transform of first 3 joints
-                T13 = self.A([0, 2], theta)
-
-                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
-                Td4 = SE3(0, 0, self.links[3].d)  # Tz(d4)
-
-                # Tz(d6) Tx(a5) Rx(alpha6)
-                Tt = SE3(self.links[5].a, 0, self.links[5].d) * SE3.Rx(
-                    self.links[5].alpha
-                )
-
-                R = Td4.inv() * T13.inv() * Tk * Tt.inv()  # type: ignore[union-attr]
-
-                # The spherical wrist implements Euler angles
-                if "f" in config:
-                    eul = R.eul(flip=True)
-                else:
-                    eul = R.eul()
-                theta = np.r_[theta, eul]
-                if self.links[3].alpha > 0:
-                    theta[4] = -theta[4]
-
-                # Remove the link offset angles
-                theta = theta - self.offset
-
-                # solution = iksol(theta, True, "")
-                solution = IKSolution(q=theta, success=True)
-
-            else:
-                # ikfunc can return None or a str reason
-                if theta is None:
-                    solution = IKSolution(q=None, success=False)
-                else:
-                    solution = IKSolution(q=None, success=False, reason=theta)
-
-            solutions.append(solution)
-
-        if len(T) == 1:
-            return solutions[0]
-        else:
-            return IKSolution(
-                np.vstack([sol.q for sol in solutions]),
-                np.array([sol.success for sol in solutions]),
-                [sol.reason for sol in solutions],
-            )
-
-    def config_validate(self, config, allowables):
-        """
-        Validate a configuration string
-
-        :param config: a configuration string
-        :type config: str
-        :param allowable: [description]
-        :type allowable: tuple of str
-        :raises ValueError: bad character in configuration string
-        :return: configuration string
-        :rtype: str
-
-        For analytic inverse kinematics the Toolbox uses a string whose
-        letters indicate particular solutions, eg. for the Puma 560
-
-            =========  ===================
-            Character  Meaning
-            =========  ===================
-            'l'        lefty
-            'r'        righty
-            'u'        elbow up
-            'd'        elbow down
-            'n'        wrist not flipped
-            'f'        wrist flipped
-            =========  ===================
-
-        This method checks that the configuration string is valid and adds
-        default values for missing characters.  For example:
-
-            config = self.config_validate(config, ('lr', 'ud', 'nf'))
-
-        indicates the valid characters, and the first character in each
-        string is the default, ie. if neither 'l' or 'r' is given then
-        'l' will be added to the string.
-
-        """
-        for c in config:
-            if not any([c in allowable for allowable in allowables]):
-                raise ValueError(f"bad config specifier <{c}>")
-        for allowable in allowables:
-            if all([a not in config for a in allowable]):
-                config += allowable[0]
-        return config
-
-    # -------------------------------------------------------------------------- #
-
-    def ikine_LM(
-        self,
-        Tep: np.ndarray | SE3,
-        q0: ArrayLike | None = None,
-        **ikargs,
-    ):
-        """
-        Numerical inverse kinematics by Levenberg-Marquadt optimization
-
-        :param Tep: The desired end-effector pose
-        :param q0: The initial joint coordinate vector
-        :param ikargs: |ikargs|
-        :returns: An IKSolution containing joint coordinates ``q``, ``success`` flag, ``iterations``, ``searches``, ``residual`` error value, and ``reason`` string if applicable
-        :rtype: IKSolution
-
-        This is a thin wrapper around :meth:`ETS.ikine_LM` -- see that
-        method for the full description of the Levenberg-Marquadt solver
-        and its ``method``/``kq``/``km`` variants.
-
-        .. seealso:: :meth:`ikine_LM` (:class:`~roboticstoolbox.ETS`)
-        """
-        return self.ets().ikine_LM(Tep=Tep, q0=q0, **ikargs)
-
 
 class SerialLink(DHRobot):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         warnings.warn(
             "SerialLink is deprecated, use DHRobot instead", DeprecationWarning
         )
         super().__init__(*args, **kwargs)
 
 
-def _cross(a, b):
+def _cross(a: Any, b: Any) -> Any:
     return np.r_[
         a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]
     ]

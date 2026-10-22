@@ -1,7 +1,10 @@
-#!/usr/bin/env python
 
+from __future__ import annotations
+
+#!/usr/bin/env python
 import numpy as np
-from spatialmath.base import trotz, transl
+from spatialmath.base import transl, trotz
+
 from roboticstoolbox import DHRobot, RevoluteMDH
 
 
@@ -30,7 +33,7 @@ class Panda(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # deg = np.pi/180
         mm = 1e-3

@@ -7,30 +7,32 @@
 # Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
 # Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 
-import math
-from collections import namedtuple
-from roboticstoolbox.mobile.OccGrid import PolygonMap
+from __future__ import annotations
+
+from typing import Any, NamedTuple
+
+import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 
 # import rvcprint
-from roboticstoolbox import *
 import numpy as np
-import matplotlib.pyplot as plt
+from pgraph import DGraph
+from spatialmath import Polygon2
 
-from spatialmath import Polygon2, SE2, base
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from spatialmath.base.types import ArrayLike3
 from roboticstoolbox.mobile.DubinsPlanner import DubinsPlanner
+from roboticstoolbox.mobile.OccGrid import PolygonMap
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.Vehicle import VehicleBase
+from roboticstoolbox.tools.types import NDArray
 
-# from roboticstoolbox.mobile.OccupancyGrid import OccupancyGrid
-try:
-    from pgraph import DGraph
-except ImportError:
 
-    class DGraph:  # pragma: no cover
-        def __init__(self, *args, **kwargs):
-            raise ImportError(
-                "RRTPlanner requires optional dependency 'pgraph'. "
-                "Install it with: pip install pgraph-python"
-            )
+class RRTStatus(NamedTuple):
+    """Length, distance of the start from the tree, and vertices of the path"""
+
+    length: float
+    initial_d: float
+    vertices: list[Any]
 
 
 class RRTPlanner(PlannerBase):
@@ -42,11 +44,8 @@ class RRTPlanner(PlannerBase):
     :param vehicle: vehicle kinematic model
     :type vehicle: :class:`VehicleBase` subclass
     :param curvature: maximum path curvature, defaults to 1.0
-    :type curvature: float, optional
     :param stepsize: spacing between points on the path, defaults to 0.2
-    :type stepsize: float, optional
     :param npoints: number of vertices in random tree, defaults to 50
-    :type npoints: int, optional
 
     ==================   ========================
     Feature              Capability
@@ -100,19 +99,19 @@ class RRTPlanner(PlannerBase):
         print(status)
 
 
-    :seealso: :class:`DubinsPlanner` :class:`Vehicle` :class:`PlannerBase`
+    .. seealso:: :class:`DubinsPlanner` :class:`Vehicle` :class:`PlannerBase`
     """
 
     def __init__(
         self,
-        map,
-        vehicle,
-        curvature=1.0,
-        stepsize=0.2,
-        npoints=50,
-        **kwargs,
-    ):
-        super().__init__(ndims=2, **kwargs)
+        map: PolygonMap,
+        vehicle: VehicleBase | None,
+        curvature: float | None = 1.0,
+        stepsize: float = 0.2,
+        npoints: int = 50,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(ndims=3, **kwargs)
 
         self.npoints = npoints
         self.map = map
@@ -122,7 +121,8 @@ class RRTPlanner(PlannerBase):
         self.vehicle = vehicle
         if curvature is None:
             if vehicle is not None:
-                curvature = vehicle.curvature_max
+                # only the Bicycle model provides this
+                curvature = vehicle.curvature_max  # type: ignore[attr-defined]
             else:
                 curvature = 1
 
@@ -132,18 +132,30 @@ class RRTPlanner(PlannerBase):
         # self.goal_yaw_th = np.deg2rad(1.0)
         # self.goal_xy_th = 0.5
 
-    def plan(self, goal, showsamples=True, showvalid=True, animate=False, block=None):
+    def plan(
+        self,
+        goal: ArrayLike3,
+        showsamples: bool = True,
+        showvalid: bool = True,
+        animate: bool | None = None,
+        block: bool | None = None,
+        movie: str | tuple[str, float] | None = None,
+    ) -> None:
         r"""
         Plan paths to goal using RRT
 
         :param goal: goal pose :math:`(x, y, \theta)`, defaults to previously set value
-        :type goal: array_like(3), optional
         :param showsamples: display position part of configurations overlaid on the map, defaults to True
-        :type showsamples: bool, optional
         :param showvalid: display valid configurations as vehicle polygons overlaid on the map, defaults to False
-        :type showvalid: bool, optional
-        :param animate: update the display as configurations are tested, defaults to False
-        :type animate: bool, optional
+        :param animate: update the display as configurations are tested,
+            defaults to the planner's :attr:`animate`
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed (only when not animating); ignored by notebook backends,
+            defaults to None
+        :param movie: save the animation as a movie file, filename or tuple
+            (filename, frame interval), defaults to the planner's :attr:`movie`.
+            Implies ``animate``.
 
         Compute a rapidly exploring random tree with its root at the ``goal``.
         The tree will have ``npoints`` vertices spread uniformly randomly over
@@ -158,9 +170,13 @@ class RRTPlanner(PlannerBase):
         is True.  If ``animate`` is True these points are displayed during the search
         process, otherwise a single figure is displayed at the end.
 
-        :seealso: :meth:`query`
+        .. seealso:: :meth:`query`
         """
         # TODO use validate
+        vehicle = self.vehicle
+        if vehicle is None:
+            raise ValueError("RRTPlanner needs a vehicle model")
+
         self.goal = np.r_[goal]
         # self.goal = np.r_[goal]
         self.random_init()
@@ -168,8 +184,9 @@ class RRTPlanner(PlannerBase):
         v = self.g.add_vertex(coord=goal)
         v.path = None
 
-        if showsamples or showvalid:
-            self.map.plot()
+        animating = self.animation_start(
+            animate, movie, draw=self.map.plot if (showsamples or showvalid) else None
+        )
 
         self.progress_start(self.npoints)
         count = 0
@@ -178,8 +195,8 @@ class RRTPlanner(PlannerBase):
 
             if showsamples:
                 plt.plot(random_point[0], random_point[1], "ok", markersize=2)
-                if animate:
-                    plt.pause(0.02)
+                if animating:
+                    self.animation_frame(0.02)
 
             vnearest, d = self.g.closest(random_point)
 
@@ -189,17 +206,18 @@ class RRTPlanner(PlannerBase):
             if path is None:
                 continue
 
+            # Reject overlong connections before transforming the vehicle at
+            # every path sample and testing its polygon against the map.
+            if pstatus.length > 6:
+                continue
+
             collision = False
             for config in path:
-                if self.map.iscollision(self.vehicle.polygon(config)):
+                if self.map.iscollision(vehicle.polygon(config)):
                     collision = True
                     break
             if collision:
                 # print('collision')
-                continue
-
-            if pstatus.length > 6:
-                # print('too long')
                 continue
 
             # we have a valid configuration to add to the graph
@@ -212,22 +230,22 @@ class RRTPlanner(PlannerBase):
             vnew.path = path
 
             if showvalid:
-                self.vehicle.polygon(random_point).plot(color="b", alpha=0.1)
-                if animate:
-                    plt.pause(0.02)
+                vehicle.polygon(random_point).plot(color="b", alpha=0.1)
+                if animating:
+                    self.animation_frame(0.02)
 
-        if (showvalid or showsamples) and not animate:
-            if block is not None:
-                plt.show(block=block)
+        self.animation_end()
+
+        if (showvalid or showsamples) and not animating:
+            apply_block(block)
 
         self.progress_end()
 
-    def query(self, start):
+    def query(self, start: ArrayLike3) -> tuple[NDArray, RRTStatus]:
         r"""
         Find a path from start configuration
 
         :param start: start configuration :math:`(x, y, \theta)`
-        :type start: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
@@ -246,21 +264,19 @@ class RRTPlanner(PlannerBase):
         +---------------+---------------------------------------------------+
 
         """
-        self._start = start
-        vstart, d = self.g.closest(start)
+        self.validate_start_goal(start)
+        assert self.start is not None
+        vstart, d = self.g.closest(self.start)
 
         vpath, cost, _ = self.g.path_UCS(vstart, self.g[0])
 
-        print(vpath)
         # stack the Dubins path segments
         path = np.empty((0, 3))
         for vertex in vpath:
             if vertex.path is not None:
                 path = np.vstack((path, vertex.path))
 
-        status = namedtuple("RRTStatus", ["length", "initial_d", "vertices"])(
-            cost, d, vpath
-        )
+        status = RRTStatus(cost, d, vpath)
 
         return path, status
 
@@ -280,7 +296,7 @@ class RRTPlanner(PlannerBase):
     #     dy = y - self.end.y
     #     return math.hypot(dx, dy)
 
-    def qrandom(self):
+    def qrandom(self) -> NDArray:
         r"""
         Random configuration
 
@@ -290,14 +306,16 @@ class RRTPlanner(PlannerBase):
         Returns a random configuration where position :math:`(x, y)`
         lies within the bounds of the ``map`` associated with this planner.
 
-        :seealso: :meth:`qrandom_free`
+        .. seealso:: :meth:`qrandom_free`
         """
+        workspace = self.map.workspace
+        assert workspace is not None
         return self.random.uniform(
-            low=(self.map.workspace[0], self.map.workspace[2], -np.pi),
-            high=(self.map.workspace[1], self.map.workspace[3], np.pi),
+            low=(workspace[0], workspace[2], -np.pi),
+            high=(workspace[1], workspace[3], np.pi),
         )
 
-    def qrandom_free(self):
+    def qrandom_free(self) -> NDArray:
         r"""
         Random obstacle free configuration
 
@@ -308,7 +326,7 @@ class RRTPlanner(PlannerBase):
         y)` lies within the bounds of the ``map`` associated with this planner.
         Iterates on :meth:`qrandom`
 
-        :seealso: :meth:`qrandom` :meth:`iscollision`
+        .. seealso:: :meth:`qrandom` :meth:`iscollision`
         """
         # iterate for a random freespace configuration
         while True:
@@ -316,18 +334,18 @@ class RRTPlanner(PlannerBase):
             if not self.iscollision(q):
                 return q
 
-    def iscollision(self, q):
+    def iscollision(self, q: ArrayLike3) -> bool:
         r"""
         Test if configuration is collision
 
         :param q: vehicle configuration :math:`(x, y, \theta)`
-        :type q: array_like(3)
         :return: collision status
-        :rtype: bool
 
         Transforms the vehicle polygon and tests for intersection against
         the polygonal obstacle map.
         """
+        if self.vehicle is None:
+            raise ValueError("RRTPlanner needs a vehicle model")
         return self.map.iscollision(self.vehicle.polygon(q))
 
 

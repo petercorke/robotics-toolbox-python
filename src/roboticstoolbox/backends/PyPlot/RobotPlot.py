@@ -3,25 +3,33 @@
 @author Jesse Haviland
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
-import roboticstoolbox as rp
 from spatialmath import SE3
+from spatialmath.base import getvector
+
+import roboticstoolbox as rp
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class RobotPlot:
     def __init__(
         self,
-        robot,
-        env,
-        readonly,
-        display=True,
-        jointaxes=True,
-        jointlabels=False,
-        eeframe=True,
-        shadow=True,
-        name=True,
-        options=None,
-    ):
+        robot: Any,
+        env: Any,
+        readonly: Any,
+        display: bool = True,
+        jointaxes: bool = True,
+        jointlabels: bool = False,
+        eeframe: bool = True,
+        shadow: bool = True,
+        name: bool = True,
+        options: Any = None,
+        q: ArrayLike | None = None,
+    ) -> None:
         super(RobotPlot, self).__init__()
 
         # Readonly - True for this robot is for displaying only
@@ -33,22 +41,31 @@ class RobotPlot:
 
         self.robot = robot
         self.env = env
+
+        # The pose drawn.  None means the pose of the robot, whatever it is at the
+        # time, which is how a robot has always been drawn.  Setting it, here or by
+        # the property, makes this plot hold a pose of its own, so that one robot can
+        # be drawn in several poses at once and only the plot that is told moves.
+        self._q: NDArray | None = None
+        if q is not None:
+            self.q = q
         self.ax = env.ax
 
         # Line plot of robot links
-        self.links = None
+        self.links: Any = None
 
         # Z-axis Coordinate frame (quiver) of joints
-        self.joints = []
+        self.joints: list[Any] = []
 
         # Text of the robots name
         self.name = None
 
         # Shadow of the the line plot on the x-y axis
-        self.sh_links = None
+        self.sh_links: Any = None
 
         # Coordinate frame of the ee (three quivers)
-        self.ee_axes = []
+        self.ee_axes: list[Any] = []
+        self.eeframes: list[Any] = []
 
         # Robot has been drawn
         self.drawn = False
@@ -60,7 +77,7 @@ class RobotPlot:
         self.shadow = shadow
         self.showname = name
 
-        defaults = {
+        defaults: dict[str, Any] = {
             "robot": {"color": "#E16F6D", "linewidth": 5},
             "shadow": {"color": "lightgrey", "linewidth": 3},
             "jointaxes": {"color": "#8FC1E2", "linewidth": 2},
@@ -85,7 +102,28 @@ class RobotPlot:
                     defaults[key] = value
         self.options = defaults
 
-    def draw(self):
+    @property
+    def q(self) -> NDArray:
+        """
+        The joint coordinates that this plot draws
+
+        :returns: the pose of the plot if it has been given one, otherwise the
+            current pose of the robot
+
+        The robot is a model, and a plot of it can hold a pose of its own.  Setting
+        ``q`` pins this plot to that pose: the robot can then move, or be plotted
+        in another pose, without moving this plot.  This is how the same robot is
+        shown in two configurations in one scene, see
+        :meth:`~roboticstoolbox.robot.BaseRobot.BaseRobot.plot`.  Until it is set the plot
+        follows ``robot.q``.
+        """
+        return self.robot.q if self._q is None else self._q
+
+    @q.setter
+    def q(self, q: ArrayLike) -> None:
+        self._q = np.array(getvector(q, self.robot.n))
+
+    def draw(self) -> None:
         if not self.display:
             return
 
@@ -96,7 +134,7 @@ class RobotPlot:
         ## Update the robot links
 
         # compute all link frames
-        T = self.robot.fkine_all(self.robot.q)
+        T = self.robot.fkine_all(self.q)
 
         # draw all the line segments for the noodle plot
         for i, segment in enumerate(self.segments):
@@ -188,7 +226,7 @@ class RobotPlot:
                     arrow = self._plot_quiver2(Tj.t, direction, link.jindex)
                     self.joints.extend(arrow)
 
-    def init(self):
+    def init(self) -> None:
         self.drawn = True
 
         if self.env.limits is None:
@@ -225,13 +263,13 @@ class RobotPlot:
         self.eeframes = []
         self.joints = []
 
-    def _plot_quiver(self, p0, p1, options):
+    def _plot_quiver(self, p0: Any, p1: Any, options: Any) -> Any:
         qv = self.ax.quiver(
             p0[0], p0[1], p0[2], p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2], **options
         )
         return qv
 
-    def _plot_quiver2(self, p0, dir, j):
+    def _plot_quiver2(self, p0: Any, dir: Any, j: Any) -> Any:
         vec = dir * self.options["jointaxislength"]
         start = p0 - vec / 2
         qv = self.ax.quiver(

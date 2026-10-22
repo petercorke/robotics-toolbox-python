@@ -8,6 +8,7 @@ Planner                                                     Plans in            
 :class:`~roboticstoolbox.mobile.Bug2`                       :math:`\mathbb{R}^2`   discrete              yes
 :class:`~roboticstoolbox.mobile.DistanceTransformPlanner`   :math:`\mathbb{R}^2`   discrete              yes
 :class:`~roboticstoolbox.mobile.DstarPlanner`               :math:`\mathbb{R}^2`   discrete              yes
+:class:`~roboticstoolbox.mobile.LatticePlanner`             :math:`\SE{2}`         discrete              yes
 =========================================================   ====================   ===================   ===================
 
 

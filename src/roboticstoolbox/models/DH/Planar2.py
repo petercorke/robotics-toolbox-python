@@ -4,8 +4,11 @@
 @author: Samuel Drew
 """
 
-from roboticstoolbox import DHRobot, RevoluteDH
+from __future__ import annotations
+
 import numpy as np
+
+from roboticstoolbox import DHRobot, RevoluteDH
 
 
 class Planar2(DHRobot):
@@ -35,14 +38,14 @@ class Planar2(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self, symbolic=False):
+    def __init__(self, symbolic: bool = False) -> None:
 
         if symbolic:
             import spatialmath.base.symbolic as sym
 
             zero = sym.zero()
             pi = sym.pi()
-            a1, a2 = sym.symbol("a1 a2")  # type: ignore
+            a1, a2 = sym.symbol("a1 a2")
         else:
             from math import pi
 

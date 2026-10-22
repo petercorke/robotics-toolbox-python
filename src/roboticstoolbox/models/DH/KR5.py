@@ -5,9 +5,13 @@
 @author: Samuel Drew
 """
 
-from roboticstoolbox import DHRobot, RevoluteDH
+from __future__ import annotations
+
 from math import pi
+
 import numpy as np
+
+from roboticstoolbox import DHRobot, RevoluteDH
 
 
 class KR5(DHRobot):
@@ -40,9 +44,9 @@ class KR5(DHRobot):
     .. codeauthor:: Gautam Sinha, Indian Institute of Technology, Kanpur (original MATLAB version)
     .. codeauthor:: Samuel Drew
     .. codeauthor:: Peter Corke
-    """  # noqa
+    """
 
-    def __init__(self):
+    def __init__(self) -> None:
         deg = pi / 180
 
         # Updated values form ARTE git. Old values left as comments
