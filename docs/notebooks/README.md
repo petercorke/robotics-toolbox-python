@@ -18,8 +18,10 @@ found by that line, not by its position) and is folded by default.
 * In the browser the cell installs `spatialmath-python` without its dependencies first,
   because release 1.1.18 lists `pre-commit` as a runtime dependency, which conflicts
   with the `packaging` built into Pyodide (rai-opensource/spatialmath-python#250).
-  Then it installs the toolbox with its dependencies, from the wheel bundled with the
-  JupyterLite site if there is one, or else from PyPI.
+  Then it installs the toolbox with its dependencies.  In JupyterLite this goes through
+  `piplite`, which looks in the site's own package index first, so the toolbox is the
+  wheel that was built with the site and not the last release from PyPI (a plain
+  `micropip.install` cannot see that index).  `docs/lite/browser_check/` checks it.
 
 ## The first cell
 

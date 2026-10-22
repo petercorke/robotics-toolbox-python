@@ -175,7 +175,7 @@ If ``Tep`` is a trajectory of N poses, each pose is solved independently, starti
 * ``residual`` is the maximum over all poses, the worst case
 * ``reason`` is the reason given by the last pose that failed, if any
 
-.. versionchanged:: 1.4.5
+.. versionchanged:: 1.5.0
     For a trajectory, ``residual`` is the maximum over the poses, it was the minimum.
 
 .. rubric:: The Implemented IK Solvers
@@ -200,7 +200,7 @@ Class               Method                        Notes
     ik_gn
     ik_nr
 
-.. rubric:: Example 
+.. rubric:: Examples
 
 In the following example, we create an IK Solver class and pass an :py:class:`~roboticstoolbox.ets.ETS.ETS` to it to solve the problem. This style may be preferable to experiments where you wish to compare the same solver on different robots.
 
@@ -241,7 +241,7 @@ Additionally, these class-based solvers have been implemented as methods within 
     ~roboticstoolbox.robot.Robot.Robot.ikine_NR
 
 
-.. rubric:: Example 
+.. rubric:: Examples
 
 In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and use one of the IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class. This style is far more convenient than the above example.
 

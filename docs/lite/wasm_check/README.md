@@ -14,29 +14,28 @@ needs `packaging>=26.3` where Pyodide has 24.2; the bootstrap installs it with
 `deps=False` for that reason. This check exists so that class of bug fails CI instead
 of shipping: it runs the real `ensure_installed()` from
 `docs/notebooks/_rtb_nb_bootstrap.py` against the pure wheel, installs the
-dependencies for real, and confirms `import roboticstoolbox` works and a forward
-kinematics call returns.
+dependencies for real, and confirms `import roboticstoolbox` works, a forward kinematics call
+returns, the analytic inverse kinematics of a Puma 560 and a Kinova Jaco work (with SymPy
+only), and that a trajectory plotted under the `ipympl` backend is pushed as a
+different inline image for every step.
 
 It reuses that function unmodified rather than re-listing the install steps here —
 a second copy of that list would just be a second place for it to drift.
 
 ## What this deliberately does NOT catch
 
-Whether the *real* notebook's relative-URL wheel-install path (`pypi/<wheel>`)
-resolves correctly inside a real browser's Pyodide Web Worker. Node has no
-equivalent of a Worker's base URL, and faking one convincingly requires already
-knowing the right answer — that question needs a real browser, and was already
-answered that way (build the site locally with `jupyter lite build` +
-`jupyter lite serve`, open it in an actual browser tab — see
-`docs/notebooks/README.md`). This check sidesteps that entirely: it mounts the
-wheel directly into Pyodide's own virtual filesystem and installs from there
-(`emfs:/<wheel>`, a micropip scheme that reads straight from Pyodide's filesystem,
-no HTTP involved) via a narrow, clearly-commented monkeypatch in
-`check_pyodide_install.mjs`. Deliberate, not a shortcut — see that file's own
-docstring for the reasoning.
+Whether the site's own package index really serves the wheel, and so whether the
+notebook installs the wheel built with the site and not the last release from PyPI.
+In JupyterLite the bootstrap installs through `piplite`, which looks in the site's
+index first; there is no site or `piplite` under Node.  This check stands in for it with
+a small fake `piplite` module that installs the wheel, mounted in Pyodide's own virtual
+filesystem (`emfs:/<wheel>`, a micropip scheme that reads straight from Pyodide's
+filesystem), and passes every other package on to micropip, see
+`check_pyodide_install.mjs`.  Everything else in the bootstrap runs unmodified.
 
-If you ever suspect the relative-URL path itself is broken, this check will not
-tell you — go build and serve the real site and check it in a real browser instead.
+`../browser_check/` covers that, in a real browser, and also draws a widget, a figure and
+an animation.  It would have caught the time the bootstrap installed from PyPI whatever
+the site contained.
 
 ## Usage
 

@@ -37,7 +37,7 @@ def _check_rne(func: Any) -> Any:
     If this is the case, then the parameters are re-serialized prior to
     invoking inverse dynamics.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Link.Link._listen_dyn`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link._listen_dyn`
     """
 
     @wraps(func)
@@ -515,7 +515,8 @@ class DHLink(Link):
 
         :returns: joint type
         :rtype: int
-        :seealso: :func:`isrevolute`, :func:`isprismatic`
+
+        .. seealso:: :func:`isrevolute`, :func:`isprismatic`
 
         - ``link.sigma`` is the joint type
         - ``link.sigma = ...`` checks and sets the joint type
@@ -615,7 +616,7 @@ class DHLink(Link):
             - The computation is different for standard and modified
               Denavit-Hartenberg parameters.
 
-        :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`,
+        .. seealso:: :class:`RevoluteDH`, :class:`PrismaticDH`,
             :class:`RevoluteMDH`, :class:`PrismaticMDH`
         """
 
@@ -669,7 +670,7 @@ class DHLink(Link):
         :return: True if revolute
         :rtype: bool
 
-        :seealso: :func:`sigma`
+        .. seealso:: :func:`sigma`
         """
 
         if not self.sigma:
@@ -685,7 +686,7 @@ class DHLink(Link):
         :return: True if prismatic
         :rtype: bool
 
-        :seealso: :func:`sigma`
+        .. seealso:: :func:`sigma`
         """
 
         if self.sigma:
@@ -734,7 +735,7 @@ class RevoluteDH(DHLink):
     :references:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
-    :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
+    .. seealso:: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
     """
 
     def __init__(
@@ -803,7 +804,7 @@ class PrismaticDH(DHLink):
     :references:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
-    :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
+    .. seealso:: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
     """
 
     def __init__(
@@ -875,7 +876,7 @@ class RevoluteMDH(DHLink):
     :references:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
-    :seealso: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`
+    .. seealso:: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`
     """
 
     def __init__(
@@ -947,7 +948,7 @@ class PrismaticMDH(DHLink):
     :references:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
-    :seealso: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`
+    .. seealso:: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`
     """
 
     def __init__(
