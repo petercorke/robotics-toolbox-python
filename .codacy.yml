@@ -1,4 +1,10 @@
 ---
+# Not analysed at all: sketches for hardware, with no tests, that nobody maintains.
+# They are also excluded from mypy (see pyproject.toml).
+exclude_paths:
+  - "src/roboticstoolbox/backends/Dynamixel/**"
+  - "src/roboticstoolbox/backends/ROS/**"
+
 engines:
   bandit:
     exclude_paths:
