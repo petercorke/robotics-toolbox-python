@@ -625,6 +625,26 @@ class TestBaseRobot(unittest.TestCase):
         nt.assert_allclose(frictionless.rne(q, qd, qdd), expected_tau)
         nt.assert_allclose(clone.coriolis(q, qd), robot.coriolis(q, qd))
 
+    def test_copy_preserves_gripper_links_and_fkine(self):
+        robot = rtb.models.Panda()
+        self.assertGreater(len(robot.grippers), 0)
+        gripper = robot.grippers[0]
+        gripper.q = np.full(gripper.n, 0.01)
+        gripper.tool = SE3(0, 0, 0.12)
+
+        copied = robot.copy()
+        self.assertEqual(len(copied.grippers), len(robot.grippers))
+        self.assertEqual(copied.grippers[0].name, gripper.name)
+        self.assertIsNot(copied.grippers[0], gripper)
+        self.assertIsNot(copied.grippers[0].links[0], gripper.links[0])
+        self.assertIs(copied.grippers[0].links[0].parent, copied.ee_links[0])
+        nt.assert_allclose(copied.grippers[0].q, gripper.q)
+        nt.assert_allclose(copied.grippers[0].tool.A, gripper.tool.A)
+        nt.assert_allclose(copied.fkine(robot.qr).A, robot.fkine(robot.qr).A)
+
+        copied.grippers[0].q[:] = 0
+        self.assertTrue(np.all(gripper.q == 0.01))
+
     def test_toradians(self):
         r = rtb.models.Panda()
 

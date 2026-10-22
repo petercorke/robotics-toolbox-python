@@ -1518,24 +1518,17 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return deepcopy(self)
 
     def __deepcopy__(self, memo):
-        links = []
+        # All links share one memo so parent references point to the same copies.
+        links = [deepcopy(link, memo) for link in self.links]
+        gripper_links = []
+        for gripper in self.grippers:
+            gripper_links.append(deepcopy(gripper.links[0], memo))
+            links.extend(deepcopy(link, memo) for link in gripper.links)
 
-        # if isinstance(self, rtb.DHRobot):
-        #     cls = rtb.DHRobot
         if isinstance(self, rtb.Robot2):
             cls = rtb.Robot2
         else:
             cls = rtb.Robot
-
-        for link in self.links:
-            cloned = deepcopy(link)
-            # Rebuild parent/child references within the copied robot, rather
-            # than retaining links from the source robot.
-            cloned._children = []
-            if cloned.parent is not None:
-                cloned._parent_name = cloned.parent.name
-                cloned._parent = None
-            links.append(cloned)
 
         name = deepcopy(self.name)
         manufacturer = deepcopy(self.manufacturer)
@@ -1549,6 +1542,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         result = cls(
             links,
+            gripper_links=gripper_links,
             name=name,
             manufacturer=manufacturer,
             comment=comment,
@@ -1559,6 +1553,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             symbolic=symbolic,
             configs=configs,
         )
+
+        # Gripper constructor recreates joint indices and defaults; restore
+        # its original tool and configuration without sharing mutable state.
+        for original, cloned in zip(self.grippers, result.grippers):
+            cloned.tool = deepcopy(original.tool, memo)
+            cloned.q = deepcopy(original.q, memo)
 
         # if a configuration was an attribute of original robot, make it an
         # attribute of the deep copy
