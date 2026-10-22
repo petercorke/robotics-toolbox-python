@@ -9,16 +9,24 @@ Based on code by Paul Newman, Oxford University,
 http://www.robots.ox.ac.uk/~pnewman
 """
 
-from collections import namedtuple
+from __future__ import annotations
+
+from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
-from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy as sp
 import spatialmath.base as smb
 from matplotlib import animation
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
 
-from roboticstoolbox.mobile.workspace import resolve_workspace
+from roboticstoolbox.mobile import VehicleBase
+from roboticstoolbox.mobile.landmarkmap import LandmarkMap
+from roboticstoolbox.mobile.sensors import RangeBearingSensor
+from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
+from roboticstoolbox.tools.plot import apply_block
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 """
 Monte-carlo based localisation for estimating vehicle pose based on
@@ -28,6 +36,16 @@ odometry and observations of known landmarks.
 # TODO: refactor this and EKF, RNG, history, common plots, animation, movie
 
 
+class PFlog(NamedTuple):
+    """One step of the history of a :class:`ParticleFilter`"""
+
+    t: float
+    odo: NDArray
+    xest: NDArray
+    std: NDArray
+    weights: NDArray
+
+
 class ParticleFilter:
     """
     Particle filter for vehicle localization
@@ -35,18 +53,18 @@ class ParticleFilter:
 
     def __init__(
         self,
-        robot,
-        sensor,
-        R,
-        L,
-        nparticles=500,
-        seed=0,
-        x0=None,
-        verbose=False,
-        animate=False,
-        history=True,
-        workspace=None,
-    ):
+        robot: VehicleBase,
+        sensor: RangeBearingSensor,
+        R: NDArray,
+        L: NDArray,
+        nparticles: int = 500,
+        seed: int | None = 0,
+        x0: ArrayLike | None = None,
+        verbose: bool = False,
+        animate: bool = False,
+        history: bool = True,
+        workspace: WorkspaceLike | None = None,
+    ) -> None:
         """
         Particle filter
 
@@ -127,18 +145,21 @@ class ParticleFilter:
         self._animate = animate
 
         # self.dim = sensor.map.dim
-        self._history = []
-        self.x = ()
-        self.weight = ()
+        self._history: list[PFlog] = []
+        self.x: NDArray = np.empty((0, 3))
+        self.weight: NDArray = np.empty((0,))
         self.w0 = 0.05
         self._x0 = x0
+        self._verbose = verbose
+        self._t: float = 0
+        self.h: Line2D
 
         # create a private random number stream if required
         self._random = np.random.default_rng(seed)
         self._seed = seed
 
         self._keep_history = history  #  keep history
-        self._htuple = namedtuple("PFlog", "t odo xest std weights")
+        self._htuple = PFlog
 
         # the workspace, in order of precedence: the explicit argument, the
         # sensor's map, the vehicle
@@ -148,7 +169,7 @@ class ParticleFilter:
         self._dim = self._workspace
         # self._init()
 
-    def __str__(self):
+    def __str__(self) -> str:
         # ParticleFilter.char Convert to string
         #
         # PF.char() is a string representing the state of the ParticleFilter
@@ -156,7 +177,7 @@ class ParticleFilter:
         #
         # See also ParticleFilter.display.
 
-        def indent(s, n=2):
+        def indent(s: str, n: int = 2) -> str:
             spaces = " " * n
             return s.replace("\n", "\n" + spaces)
 
@@ -171,7 +192,7 @@ class ParticleFilter:
         return s
 
     @property
-    def robot(self):
+    def robot(self) -> VehicleBase:
         """
         Get robot object
 
@@ -181,7 +202,7 @@ class ParticleFilter:
         return self._robot
 
     @property
-    def sensor(self):
+    def sensor(self) -> RangeBearingSensor:
         """
         Get sensor object
 
@@ -191,17 +212,17 @@ class ParticleFilter:
         return self._sensor
 
     @property
-    def map(self):
+    def map(self) -> LandmarkMap:
         """
         Get map object
 
         :return: map used in simulation
         :rtype: :class:`LandmarkMap` subclass
         """
-        return self._map
+        return self.sensor.map
 
     @property
-    def verbose(self):
+    def verbose(self) -> bool:
         """
         Get verbosity state
 
@@ -211,7 +232,7 @@ class ParticleFilter:
         return self._verbose
 
     @property
-    def history(self):
+    def history(self) -> list[PFlog]:
         """
         Get EKF simulation history
 
@@ -228,7 +249,7 @@ class ParticleFilter:
         return self._history
 
     @property
-    def workspace(self):
+    def workspace(self) -> NDArray | None:
         """
         Size of robot workspace
 
@@ -241,7 +262,7 @@ class ParticleFilter:
         return self._workspace
 
     @property
-    def random(self):
+    def random(self) -> np.random.Generator:
         """
         Get private random number generator
 
@@ -262,7 +283,12 @@ class ParticleFilter:
         """
         return self._random
 
-    def _init(self, x0=None, animate=False, ax=None):
+    def _init(
+        self,
+        x0: ArrayLike | None = None,
+        animate: bool = False,
+        ax: Axes | None = None,
+    ) -> None:
         # ParticleFilter.init Initialize the particle filter
         #
         # PF.init() initializes the particle distribution and clears the
@@ -291,16 +317,20 @@ class ParticleFilter:
         if x0 is None:
             # create initial particle distribution as uniformly randomly distributed
             # over the map workspace and heading angles
-            x = self.random.uniform(
-                self.workspace[0], self.workspace[1], size=(self.nparticles,)
-            )
-            y = self.random.uniform(
-                self.workspace[2], self.workspace[3], size=(self.nparticles,)
-            )
+            workspace = self.workspace
+            if workspace is None:
+                raise ValueError(
+                    "no workspace: give the workspace argument, or use a sensor "
+                    "with a map or a robot that has one"
+                )
+            x = self.random.uniform(workspace[0], workspace[1], size=(self.nparticles,))
+            y = self.random.uniform(workspace[2], workspace[3], size=(self.nparticles,))
             t = self.random.uniform(-np.pi, np.pi, size=(self.nparticles,))
             self.x = np.c_[x, y, t]
 
         if animate:
+            if ax is None:
+                ax = plt.gca()
             # display the initial particles
             (self.h,) = ax.plot(
                 self.x[:, 0],
@@ -315,7 +345,7 @@ class ParticleFilter:
 
         self.weight = np.ones((self.nparticles,))
 
-    def run(self, T=10, x0=None):
+    def run(self, T: float = 10, x0: ArrayLike | None = None) -> None:
         """
         Run the particle filter simulation
 
@@ -370,7 +400,13 @@ class ParticleFilter:
             # anim.add()
         # anim.close()
 
-    def run_animation(self, T=10, x0=None, format=None, file=None):
+    def run_animation(
+        self,
+        T: float = 10,
+        x0: ArrayLike | None = None,
+        format: str | None = None,
+        file: str | None = None,
+    ) -> Any:
         """
         Run the particle filter simulation
 
@@ -441,17 +477,17 @@ class ParticleFilter:
             ret = anim.to_html5_video()  # convert to embeddable HTML5 animation
         elif format == "jshtml":
             ret = anim.to_jshtml()  # convert to embeddable Javascript/HTML animation
-        elif format == "gif":
-            anim.save(
-                file, writer=animation.PillowWriter(fps=1 / self.dt)
-            )  # convert to GIF
+        elif format in ("gif", "mp4"):
+            if file is None:
+                raise ValueError(f"format {format!r} needs a file name")
+            fps = round(1 / self.robot.dt)
+            if format == "gif":
+                writer: animation.AbstractMovieWriter = animation.PillowWriter(fps=fps)
+            else:
+                writer = animation.FFMpegWriter(fps=fps)  # mp4/H264
+            anim.save(file, writer=writer)
             ret = None
-        elif format == "mp4":
-            anim.save(
-                file, writer=animation.FFMpegWriter(fps=1 / self.dt)
-            )  # convert to mp4/H264
-            ret = None
-        elif format == None:
+        elif format is None:
             # return the anim object
             return anim
         else:
@@ -545,7 +581,7 @@ class ParticleFilter:
             )
             self._history.append(hist)
 
-    def plot_pdf(self):
+    def plot_pdf(self) -> None:
         """
         Plot particle PDF
 
@@ -568,7 +604,7 @@ class ParticleFilter:
         ax.set_zlabel("particle weight")
         ax.view_init(29, 59)
 
-    def _predict(self, odo):
+    def _predict(self, odo: NDArray) -> None:
         # step 2
         # update the particle state based on odometry and a random perturbation
 
@@ -586,7 +622,7 @@ class ParticleFilter:
         )
         self.x[:, 2] = smb.angdiff(self.x[:, 2])
 
-    def _observe(self, z, lm_id):
+    def _observe(self, z: NDArray, lm_id: int | None) -> None:
         # step 3
         # predict observation and score the particles
 
@@ -623,7 +659,7 @@ class ParticleFilter:
         )
         self.weight = np.exp(e) + self.w0
 
-    def _select(self):
+    def _select(self) -> None:
         # step 4
         # select particles based on their weights
         #
@@ -648,7 +684,7 @@ class ParticleFilter:
         # copy selected particles for next generation..
         self.x = self.x[inextgen, :]
 
-    def get_t(self):
+    def get_t(self) -> NDArray:
         """
         Get time from simulation
 
@@ -660,7 +696,7 @@ class ParticleFilter:
         """
         return np.array([h.t for h in self._history])
 
-    def get_xyt(self):
+    def get_xyt(self) -> NDArray:
         r"""
         Get estimated vehicle trajectory
 
@@ -676,7 +712,7 @@ class ParticleFilter:
         """
         return np.array([h.xest[:3] for h in self._history])
 
-    def get_std(self) -> np.ndarray:
+    def get_std(self) -> NDArray:
         r"""
         Get standard deviation of particles
 
@@ -693,7 +729,7 @@ class ParticleFilter:
         """
         return np.array([h.std for h in self._history])
 
-    def plot_xy(self, block=None, **kwargs):
+    def plot_xy(self, block: bool | None = None, **kwargs: Any) -> None:
         r"""
         Plot estimated vehicle position
 
