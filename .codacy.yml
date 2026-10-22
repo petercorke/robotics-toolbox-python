@@ -1,0 +1,14 @@
+---
+# Not analysed at all: sketches for hardware, with no tests, that nobody maintains.
+# They are also excluded from mypy (see pyproject.toml).
+exclude_paths:
+  - "src/roboticstoolbox/backends/Dynamixel/**"
+  - "src/roboticstoolbox/backends/ROS/**"
+
+engines:
+  bandit:
+    exclude_paths:
+      # Plain `assert` is the idiomatic way to check something in a test.  What
+      # Bandit_B101 warns about is an assert that validates input in library code,
+      # which `python -O` removes.  That check still applies to the code in src/.
+      - "tests/**"

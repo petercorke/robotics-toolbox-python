@@ -74,8 +74,8 @@ description and ask first.
 - State in the PR description whether the change alters numerical results or public behaviour.
 
 - Read `.github/CONTRIBUTING.md`, in particular "What the checks mean". Codacy is advisory:
-  it reports `assert` in tests as high-severity security issues, and you should not rewrite
-  tests or code to satisfy it. The required checks are `All tests passed` and the PR title.
+  Bandit is not run on `tests/` (see `.codacy.yml`), and you should not rewrite code only to
+  satisfy it. The required checks are `All tests passed` and the PR title.
 - Do not add files at the repository root. Documentation goes under `docs/source/` and the
   design principles are in `desiderata.md`.
 - A file name mentioned in an Issue or comment may be a maintainer's private working file that
