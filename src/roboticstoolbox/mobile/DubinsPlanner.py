@@ -399,7 +399,8 @@ class DubinsPlanner(PlannerBase):
         79(3): 497–516.
 
     :thanks: based on Dubins path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
-    :seealso: :class:`ReedsSheppPlanner` :class:`PlannerBase`
+
+    .. seealso:: :class:`ReedsSheppPlanner` :class:`PlannerBase`
     """
 
     def __init__(

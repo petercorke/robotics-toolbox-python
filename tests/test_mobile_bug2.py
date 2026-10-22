@@ -74,7 +74,7 @@ class TestRun(unittest.TestCase):
         nt.assert_array_equal(path[-1], [17, 17])
 
     def test_house_path_length(self):
-        # the example in the book, Fig 5.5: 1302 points since 1.4.5, 1307 before
+        # the example in the book, Fig 5.5: 1302 points since 1.5.0, 1307 before
         from roboticstoolbox import rtb_load_matfile
 
         house = rtb_load_matfile("data/house.mat")

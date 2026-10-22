@@ -15,7 +15,7 @@ The same solution can be written out as source code in Python, C, C++ or Rust, f
 
     The ``ik`` extra also installs ``python-flint``, which makes the derivation much faster.  Without it a warning is issued and SymPy is used instead, which gives the same results.  It is not part of the ``all`` extra.
 
-.. versionadded:: 1.6.0
+.. versionadded:: 1.5.0
 
 The notebook `ik-symbolic.ipynb <https://github.com/petercorke/robotics-toolbox-python/blob/main/docs/notebooks/ik-symbolic.ipynb>`_ works through the examples on this page, and more.
 

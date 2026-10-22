@@ -105,6 +105,7 @@ Information
    ~roboticstoolbox.ET.param
    ~roboticstoolbox.ET.isjoint
    ~roboticstoolbox.ET.isflip
+   ~roboticstoolbox.ET.offset
    ~roboticstoolbox.ET.isrotation
    ~roboticstoolbox.ET.istranslation
    ~roboticstoolbox.ET.iselementary
@@ -185,7 +186,7 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ET
-   :members: Rx, Ry, Rz, tx, ty, tz, SE3, kind, axis, ax, param, eta, isjoint, isflip, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
+   :members: Rx, Ry, Rz, tx, ty, tz, SE3, kind, axis, ax, param, eta, isjoint, isflip, offset, isrotation, istranslation, iselementary, jindex, qlim, A, inv, s
    :member-order: bysource
 
 ETS: Elementary Transform Sequence
@@ -223,7 +224,11 @@ Modification
    ~roboticstoolbox.ETS.fixjoint
    ~roboticstoolbox.ETS.split
    ~roboticstoolbox.ETS.swap
+   ~roboticstoolbox.ETS.swapped
    ~roboticstoolbox.ETS.merge
+   ~roboticstoolbox.ETS.merged
+   ~roboticstoolbox.ETS.replace
+   ~roboticstoolbox.ETS.replaced
    ~roboticstoolbox.ETS.compile
 
 List operations
@@ -290,7 +295,7 @@ the same methods, which call them on its own sequence.
        :meth:`~roboticstoolbox.ETS.ik_NR`,
        :meth:`~roboticstoolbox.ETS.ik_GN`
      - one
-     - fast, written in C++, not easy to extend
+     - fast, written in C++, not easy to extend; they need the compiled extension, so not in the browser, and no SymPy parameters or joint offsets, see :ref:`ik-cpp-limits`
    * - :meth:`~roboticstoolbox.ETS.ikine_LM`,
        :meth:`~roboticstoolbox.ETS.ikine_NR`,
        :meth:`~roboticstoolbox.ETS.ikine_GN`,
@@ -322,5 +327,5 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ETS
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, merge, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, swapped, merge, merged, replace, replaced, compile, fkine, eval, jacob0, jacobe, jacob0_analytical, hessian0, hessiane, partial_fkine0, manipulability, jacobm, ik_LM, ik_NR, ik_GN, ikine_LM, ikine_NR, ikine_GN, ikine_QP, plot, teach
    :member-order: bysource

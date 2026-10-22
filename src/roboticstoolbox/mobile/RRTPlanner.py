@@ -99,7 +99,7 @@ class RRTPlanner(PlannerBase):
         print(status)
 
 
-    :seealso: :class:`DubinsPlanner` :class:`Vehicle` :class:`PlannerBase`
+    .. seealso:: :class:`DubinsPlanner` :class:`Vehicle` :class:`PlannerBase`
     """
 
     def __init__(
@@ -170,7 +170,7 @@ class RRTPlanner(PlannerBase):
         is True.  If ``animate`` is True these points are displayed during the search
         process, otherwise a single figure is displayed at the end.
 
-        :seealso: :meth:`query`
+        .. seealso:: :meth:`query`
         """
         # TODO use validate
         vehicle = self.vehicle
@@ -206,6 +206,11 @@ class RRTPlanner(PlannerBase):
             if path is None:
                 continue
 
+            # Reject overlong connections before transforming the vehicle at
+            # every path sample and testing its polygon against the map.
+            if pstatus.length > 6:
+                continue
+
             collision = False
             for config in path:
                 if self.map.iscollision(vehicle.polygon(config)):
@@ -213,10 +218,6 @@ class RRTPlanner(PlannerBase):
                     break
             if collision:
                 # print('collision')
-                continue
-
-            if pstatus.length > 6:
-                # print('too long')
                 continue
 
             # we have a valid configuration to add to the graph
@@ -305,7 +306,7 @@ class RRTPlanner(PlannerBase):
         Returns a random configuration where position :math:`(x, y)`
         lies within the bounds of the ``map`` associated with this planner.
 
-        :seealso: :meth:`qrandom_free`
+        .. seealso:: :meth:`qrandom_free`
         """
         workspace = self.map.workspace
         assert workspace is not None
@@ -325,7 +326,7 @@ class RRTPlanner(PlannerBase):
         y)` lies within the bounds of the ``map`` associated with this planner.
         Iterates on :meth:`qrandom`
 
-        :seealso: :meth:`qrandom` :meth:`iscollision`
+        .. seealso:: :meth:`qrandom` :meth:`iscollision`
         """
         # iterate for a random freespace configuration
         while True:

@@ -189,6 +189,7 @@ intersphinx_mapping = {
     "pgraph": ("https://petercorke.github.io/pgraph-python/", None),
     "sympy": ("https://docs.sympy.org/latest/", None),
     "spatialgeometry": ("https://jhavl.github.io/spatialgeometry/", None),
+    "swift": ("https://jhavl.github.io/swift/", None),
 }
 
 # -------- Nitpicky cross-reference checking ---------------------------------------#

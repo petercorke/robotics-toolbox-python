@@ -95,7 +95,7 @@ class MultiRotor(ContinuousBlock):
           Australian National University, 2007.
         - Robotics, Vision & Control by Peter Corke, sec 4.2 in all editions
 
-    :seealso: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
+    .. seealso:: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
     """
 
     nin = 1
@@ -517,7 +517,7 @@ class MultiRotorMixer(FunctionBlock):
 
     .. note:: Based on MATLAB code developed by Pauline Pounds 2004.
 
-    :seealso: :class:`MultiRotor` :class:`MultiRotorPlot`
+    .. seealso:: :class:`MultiRotor` :class:`MultiRotorPlot`
     """
 
     nin = 4
@@ -638,7 +638,7 @@ class MultiRotorPlot(GraphicsBlock):
 
     .. note:: Based on MATLAB code developed by Pauline Pounds 2004.
 
-    :seealso: :class:`MultiRotor` :class:`MultiRotorMixer`
+    .. seealso:: :class:`MultiRotor` :class:`MultiRotorMixer`
     """
 
     nin = 1

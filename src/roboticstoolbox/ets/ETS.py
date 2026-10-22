@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 from typing import Literal as L
 
 import numpy as np
@@ -16,6 +16,7 @@ from numpy.linalg import cond, det, inv, svd
 from spatialmath import SE3
 from spatialmath.base import (
     getmatrix,
+    issymbol,
     rotvelxform,
     simplify,
     t2r,
@@ -53,8 +54,7 @@ class ETS(BaseETS[ET]):
 
     :param arg: list of ETs or a single ET to initialise the ETS
 
-    Examples
-    --------
+    .. rubric:: Examples
 
     .. runblock:: pycon
 
@@ -74,14 +74,7 @@ class ETS(BaseETS[ET]):
       Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
 
-    See Also
-    --------
-    ``rx``
-    ``ry``
-    ``rz``
-    ``tx``
-    ``ty``
-    ``tz``
+    .. seealso:: ``rx`` ``ry`` ``rz`` ``tx`` ``ty`` ``tz``
 
     """
 
@@ -173,8 +166,30 @@ class ETS(BaseETS[ET]):
         :param unit: angular unit for rotational joints, "rad" [default] or "deg"
         :returns: ETS with one fewer joint
         :raises ValueError: for an invalid joint position or angular unit
+
+        A flipped joint can be fixed in degrees, without modifying the original
+        sequence. This also works on the kinematics of a robot:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET, models
+            >>> ets = ET.Rz(flip=True) * ET.tx(1) * ET.Ry()
+            >>> fixed = ets.fixjoint(0, 90, unit="deg")
+            >>> fixed.n, ets.n
+            (1, 2)
+            >>> robot = models.ETS.Panda()
+            >>> reduced = robot.ets().fixjoint(2, 0)
+            >>> reduced.n == robot.n - 1
+            True
+
+        .. versionadded:: 1.5.0
         """
-        if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
+        # bool subclasses int, but must not select joint 0 or 1.
+        if (
+            isinstance(j, bool)
+            or not isinstance(j, (int, np.integer))
+            or not 0 <= j < self.n
+        ):
             raise ValueError(f"joint index {j} out of range for {self.n} joints")
         if unit not in ("rad", "deg"):
             raise ValueError("unit must be 'rad' or 'deg'")
@@ -190,21 +205,147 @@ class ETS(BaseETS[ET]):
             if joint_index == j:
                 fixed = -value if et.isflip else value
                 if et.isrotation:
-                    parts.append(constructor(fixed, unit=unit))
+                    new = constructor(fixed, unit=unit)
                 else:
                     if unit != "rad":
                         raise ValueError("unit='deg' is only valid for rotational joints")
-                    parts.append(constructor(fixed))
+                    new = constructor(fixed)
+                if et.offset != 0:
+                    # the joint transforms by +-q + offset
+                    new.param = new.param + et.offset
             else:
                 if self._auto_jindex:
-                    parts.append(constructor(flip=et.isflip, qlim=et.qlim))
+                    new = constructor(flip=et.isflip, qlim=et.qlim)
                 else:
-                    parts.append(
-                        constructor(flip=et.isflip, qlim=et.qlim, jindex=et.jindex)
-                    )
+                    new = constructor(flip=et.isflip, qlim=et.qlim, jindex=et.jindex)
+                if et.offset != 0:
+                    new.offset = et.offset
+            parts.append(new)
             joint_index += 1
 
         return ETS(parts)
+
+    def replace(self, i: int, axis: str) -> None:
+        r"""
+        Replace a transform by an equivalent one on another axis, in place
+
+        :param i: index of the transform
+        :param axis: the new axis, ``"x"``, ``"y"`` or ``"z"``
+        :raises IndexError: if ``i`` is not in the sequence
+        :raises ValueError: if ``axis`` is not ``"x"``, ``"y"`` or ``"z"``, or the
+            transform has no axis, such as an arbitrary ``SE3``
+
+        The transform at index ``i`` becomes three, which together mean the same
+        thing: a constant quarter turn :math:`R`, the transform moved to the new
+        axis, and the inverse of :math:`R`.  This **changes the sequence it is
+        called on** and returns ``None``; use :meth:`replaced` to get a modified
+        copy and leave the original alone.  If the transform is already on the
+        axis nothing is changed.
+
+        The quarter turn is the one that carries the new axis onto the old, and it
+        is about the third axis, so there is only one choice, and the transform
+        keeps its sign: a joint is not flipped and its offset is unchanged.  These
+        are the substitutions of Corke's method for assigning Denavit-Hartenberg
+        parameters, for example
+
+        - ``Rx(q) = Ry(90°) ⊕ Rz(q) ⊕ Ry(-90°)``
+        - ``Ry(q) = Rx(-90°) ⊕ Rz(q) ⊕ Rx(90°)``
+        - ``tx(d) = Ry(90°) ⊕ tz(d) ⊕ Ry(-90°)``
+
+        The transform may be a translation or a rotation, a joint or a constant.  A
+        joint keeps its ``jindex``, ``qlim`` and offset.  The quarter turns are
+        exact, ``pi/2`` from SymPy, if the transform has a symbolic parameter or
+        offset, and floating point otherwise.
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1) * ET.Ry() * ET.tx(2)
+            >>> print(e)
+            >>> e.replace(1, "z")
+            >>> print(e)
+            >>> e = ET.tx(1) * ET.ty(2) * ET.tx(3)
+            >>> e.replace(1, "z")
+            >>> print(e)
+
+        With symbolic values:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> from spatialmath.base import symbol
+            >>> L = symbol("L")
+            >>> e = ET.Rz() * ET.tx(L) * ET.Rx()
+            >>> e.replace(1, "z")
+            >>> print(e)
+
+        .. versionadded:: 1.5.0
+
+        .. seealso:: :meth:`replaced` :meth:`swap`
+        """
+        if axis not in ("x", "y", "z"):
+            raise ValueError(f"axis is {axis!r}, must be 'x', 'y' or 'z'")
+        if not 0 <= i < len(self._data):
+            raise IndexError(
+                f"index {i} out of range, the sequence has {len(self._data)} transforms"
+            )
+        e = self._data[i]
+        if not e.iselementary:
+            raise ValueError(f"transform {e.kind} has no axis, it cannot be replaced")
+        old = cast(str, e.ax)
+        if old == axis:
+            return
+
+        # the quarter turn about the third axis that carries the new axis onto the
+        # old one, which is +90 or -90 degrees and only one of them is right
+        third = next(a for a in "xyz" if a not in (old, axis))
+        k = 1 if self._axis_image(third, 1, axis) == (old, 1) else -1
+        symbolic = issymbol(e.param) or issymbol(e.offset)
+        if symbolic:
+            import sympy
+
+            quarter: Any = sympy.pi / 2
+        else:
+            quarter = np.pi / 2
+
+        make = getattr(ET, "R" + third)
+        turn, back = make(k * quarter), make(-k * quarter)
+        moved = self._conjugate(e, third, -k)  # R^-1 e R
+        self._data[i : i + 1] = [turn, moved, back]
+        self._changed()
+
+    def replaced(self, i: int, axis: str) -> ETS:
+        """
+        Replace a transform by an equivalent one on another axis, returning a copy
+
+        :param i: index of the transform
+        :param axis: the new axis, ``"x"``, ``"y"`` or ``"z"``
+        :return: a copy of the sequence with the transform at ``i`` replaced
+        :raises IndexError: if ``i`` is not in the sequence
+        :raises ValueError: if ``axis`` is not ``"x"``, ``"y"`` or ``"z"``, or the
+            transform has no axis, such as an arbitrary ``SE3``
+
+        The sequence it is called on is not changed.  See :meth:`replace` for what
+        the transform is replaced by.
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx(1) * ET.Ry() * ET.tx(2)
+            >>> print(e.replaced(1, "z"))
+            >>> print(e)
+
+        .. versionadded:: 1.5.0
+
+        .. seealso:: :meth:`replace` :meth:`swapped`
+        """
+        new = deepcopy(self)
+        new.replace(i, axis)
+        return new
 
     def compile(self) -> ETS:
         """
@@ -217,8 +358,7 @@ class ETS(BaseETS[ET]):
         ETs are compounded, leading to a constant ET which is denoted by
         ``SE3`` when displayed.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -228,9 +368,7 @@ class ETS(BaseETS[ET]):
             >>> ets
             >>> ets.compile()
 
-        See Also
-        --------
-        ``isconstant``
+        .. seealso:: ``isconstant``
         """
         const = None
         ets = ETS()
@@ -271,8 +409,7 @@ class ETS(BaseETS[ET]):
         Inserts an ET or ETS into the ET sequence.  The inserted ET is at position
         ``index``; an ETS is expanded and inserted element by element.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -315,8 +452,7 @@ class ETS(BaseETS[ET]):
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``panda`` robot object, gets the ets, and
         solves for the forward kinematics at the listed configuration.
@@ -384,8 +520,7 @@ class ETS(BaseETS[ET]):
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is a 3d array with ``m`` planes.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -431,8 +566,7 @@ class ETS(BaseETS[ET]):
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Puma560`` robot object, and solves for the
         base-frame Jacobian at the zero joint angle configuration
@@ -479,8 +613,7 @@ class ETS(BaseETS[ET]):
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Puma560`` robot object, and solves for the
         end-effector frame Jacobian at the zero joint angle configuration
@@ -554,8 +687,7 @@ class ETS(BaseETS[ET]):
 
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Panda`` robot object, and solves for the
         base frame Hessian at the given joint angle configuration
@@ -625,8 +757,7 @@ class ETS(BaseETS[ET]):
 
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Panda`` robot object, and solves for the
         end-effector frame Hessian at the given joint angle configuration
@@ -678,8 +809,7 @@ class ETS(BaseETS[ET]):
         ``'exp'``           exponential coordinate rates
         ==================  ====================================
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         Makes a robot object and computes the analytic Jacobian for the given
         joint configuration
@@ -881,8 +1011,7 @@ class ETS(BaseETS[ET]):
         where the Jacobian is the first partial derivative and the Hessian is the
         second.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Panda`` robot object, and solves for the
         base-effector frame 4th derivative of the forward kinematics at the given
@@ -1082,10 +1211,13 @@ class ETS(BaseETS[ET]):
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_LM` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_LM`, which
+            has none of these limits.
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levenberg-Marquardt method. This is a fast solver implemented in C++.
@@ -1151,8 +1283,7 @@ class ETS(BaseETS[ET]):
 
         Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1236,10 +1367,13 @@ class ETS(BaseETS[ET]):
 
         .. warning::
 
-            This method requires the compiled C++ extension. It raises
-            ``RuntimeError`` if that extension is unavailable, e.g. in a
-            pure-Python build/wheel or under Pyodide/JupyterLite. Use
-            :meth:`ikine_NR` instead in those environments.
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_NR`, which
+            has none of these limits.
 
         ``sol = ets.ik_NR(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
@@ -1261,8 +1395,7 @@ class ETS(BaseETS[ET]):
 
             \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1343,6 +1476,16 @@ class ETS(BaseETS[ET]):
             reason string, unlike :meth:`ikine_GN`)
         :rtype: IKSolution
 
+        .. warning::
+
+            This method needs the compiled C++ extension.  It raises ``RuntimeError``
+            if the extension is unavailable, for example in a pure-Python wheel or
+            under Pyodide/JupyterLite, and if the sequence has a SymPy parameter, even
+            a numeric one such as ``sympy.pi/2``, or a joint with an
+            :attr:`~roboticstoolbox.ets.ET.ET.offset`, which the compiled code
+            cannot use.  In all of these cases use :meth:`ikine_GN`, which
+            has none of these limits.
+
         ``sol = ets.ik_GN(Tep)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
         This method can be used for robots with any number of degrees of freedom. This
@@ -1378,8 +1521,7 @@ class ETS(BaseETS[ET]):
         the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
         is singular, the above can not be computed and the GN solution is infeasible.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1478,7 +1620,7 @@ class ETS(BaseETS[ET]):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1546,8 +1688,7 @@ class ETS(BaseETS[ET]):
 
         Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1652,7 +1793,7 @@ class ETS(BaseETS[ET]):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1670,8 +1811,7 @@ class ETS(BaseETS[ET]):
 
             \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1771,7 +1911,7 @@ class ETS(BaseETS[ET]):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1804,8 +1944,7 @@ class ETS(BaseETS[ET]):
         the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
         is singular, the above can not be computed and the GN solution is infeasible.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1907,7 +2046,7 @@ class ETS(BaseETS[ET]):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1985,8 +2124,7 @@ class ETS(BaseETS[ET]):
         :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and
         :math:`\dvec{\delta}^{-,+}` are the minimum and maximum slack velocities.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose

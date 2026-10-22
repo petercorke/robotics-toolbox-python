@@ -29,7 +29,7 @@ Member           Meaning
 
 An ``IKSolution`` is a sequence of the rows of ``q``, so ``len(sol)`` is the number of poses and ``for q in sol`` visits them, and ``bool(sol)`` is ``success``.
 
-.. versionchanged:: 1.4.5
+.. versionchanged:: 1.5.0
     Iterating over the six members was removed, use the attributes or ``sol.astuple()``.
 
 The Toolbox has *three ways* to find a solution, shown in the figure.  **Numerical** solvers start from a guess for :math:`\vec{q}` and iterate until the pose is reached.  They work for any robot, and are written in Python, or in C++ for speed.  **Analytic** solvers (see :doc:`analytic`) derive the equations of the inverse kinematics once, symbolically, and then solve them directly for any pose, with no guess and no iteration, giving all the solutions.  They work for six-axis arms, and can write the solution out as source code with no dependency on the Toolbox.
@@ -87,8 +87,16 @@ For a **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
       - ``ik``, see :ref:`analytic-ik`
       - none
       - none
+    * - In the browser (JupyterLite)
+      - yes
+      - yes
+      - no, it needs the compiled extension
+    * - SymPy parameters, joint offsets
+      - not applicable
+      - yes, if every parameter has a numeric value
+      - no, see :ref:`ik-cpp-limits`
 
-The times are indicative, for a six-axis arm on a recent laptop (an Apple M4).  The script ``examples/benchmark_ik.py`` in the repository measures the numerical solvers on your own machine.  Where an analytic solution exists it is the right choice: it is exact, finds every configuration, and can be generated as code for a controller.  Otherwise use a numerical solver, and the C++ one if you only need a single pose quickly.
+The times are indicative, for a six-axis arm on a recent laptop (an Apple M4).  The script ``examples/benchmark_ik.py`` in the repository measures the numerical solvers on your own machine.  Where an analytic solution exists it is the right choice: it is exact, finds every configuration, and can be generated as code for a controller.  Otherwise use a numerical solver, and the C++ one if you only need a single pose quickly and its :ref:`limits <ik-cpp-limits>` do not matter to you.
 
 .. rubric:: Analytic
 
@@ -96,7 +104,7 @@ The analytic solvers are methods of a :py:class:`~roboticstoolbox.robot.DHRobot.
 
 .. rubric:: Numerical
 
-The numerical solvers start from a guess and iterate.  They work for any robot and are written in C++ and in Python.  See :doc:`numerical` for the arguments that they share, and for the C++ and Python solvers, the classes that implement them and examples.
+The numerical solvers start from a guess and iterate.  They work for any robot and are written in C++ and in Python, but the C++ ones need the compiled extension and have :ref:`limits <ik-cpp-limits>`.  See :doc:`numerical` for the arguments that they share, and for the C++ and Python solvers, the classes that implement them and examples.
 
 .. toctree::
     :maxdepth: 1

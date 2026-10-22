@@ -3,7 +3,7 @@
 Numerical inverse kinematics
 ============================
 
-The numerical solvers are methods of the :py:class:`~roboticstoolbox.ets.ETS.ETS` class, and a :py:class:`~roboticstoolbox.robot.Robot.Robot` has methods of the same names that call the ``ETS`` of the robot.  The ``ikine_XX`` methods are written in Python and the ``ik_XX`` methods in C++, where ``XX`` is the algorithm, for example ``LM``.  Each solver adds arguments of its own, so check its documentation for the complete list.
+The numerical solvers are methods of the :py:class:`~roboticstoolbox.ets.ETS.ETS` class, and a :py:class:`~roboticstoolbox.robot.Robot.Robot` has methods of the same names that call the ``ETS`` of the robot.  The ``ikine_XX`` methods are written in Python and the ``ik_XX`` methods in C++, where ``XX`` is the algorithm, for example ``LM``.  The C++ methods have :ref:`limits <ik-cpp-limits>` that the Python ones do not.  Each solver adds arguments of its own, so check its documentation for the complete list.
 
 Common arguments
 ----------------
@@ -80,12 +80,24 @@ this rejection; it does not change a prismatic distance into an angle.
 There are other arguments which may be unique to the solver, so check the documentation of the solver you wish to use for a complete list and explanation of arguments.
 
 
+.. _ik-cpp-limits:
+
 C++ Solvers
 -----------
 
 The ``ik_XX`` methods are written in high performance C++ and wrapped in Python.  They are extraordinarily fast, typically about 10 µs, but are hard to extend or modify.  There are ``ik_LM``, ``ik_GN`` and ``ik_NR``, but no ``ik_QP``.
 
 These methods have been written purely for speed so they do not contain the niceties of the Python alternative.  They handle a single pose only, ``Tep`` must not be a trajectory, and they give no failure ``reason``, which is always empty.  The lengths of ``q0`` (``n``) and of ``mask`` (6) are checked, and a wrong length raises ``ValueError``, but the other arguments are passed to the C++ code as they are, so it is important that you understand each of the parameters and that they are of the correct type.  To solve for a trajectory use the Python solvers.
+
+.. rubric:: When the C++ solvers cannot be used
+
+The ``ik_XX`` methods need the compiled C++ extension and raise ``RuntimeError`` if it cannot be used.  This is so:
+
+- in the pure-Python wheel and in the browser under Pyodide/JupyterLite, which have no compiled code
+- if the sequence has a **SymPy parameter**, a symbol or expression as the parameter of a transform, even one with a numeric value such as ``sympy.pi/2``
+- if the sequence has a joint with a nonzero :attr:`~roboticstoolbox.ets.ET.ET.offset`, which is what merging a constant into a joint produces
+
+Everything else in the Toolbox, such as ``fkine`` and ``jacob0``, falls back to Python in these cases, but the C++ solvers do not.  Use the ``ikine_XX`` methods, which work in all of them as long as every parameter has a numeric value, are not much harder to call, and take the same arguments with the exceptions noted in their documentation.
 
 .. rubric:: ETS C++ IK Methods
 
@@ -163,7 +175,7 @@ If ``Tep`` is a trajectory of N poses, each pose is solved independently, starti
 * ``residual`` is the maximum over all poses, the worst case
 * ``reason`` is the reason given by the last pose that failed, if any
 
-.. versionchanged:: 1.4.5
+.. versionchanged:: 1.5.0
     For a trajectory, ``residual`` is the maximum over the poses, it was the minimum.
 
 .. rubric:: The Implemented IK Solvers
@@ -188,7 +200,7 @@ Class               Method                        Notes
     ik_gn
     ik_nr
 
-.. rubric:: Example 
+.. rubric:: Examples
 
 In the following example, we create an IK Solver class and pass an :py:class:`~roboticstoolbox.ets.ETS.ETS` to it to solve the problem. This style may be preferable to experiments where you wish to compare the same solver on different robots.
 
@@ -229,7 +241,7 @@ Additionally, these class-based solvers have been implemented as methods within 
     ~roboticstoolbox.robot.Robot.Robot.ikine_NR
 
 
-.. rubric:: Example 
+.. rubric:: Examples
 
 In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and use one of the IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class. This style is far more convenient than the above example.
 

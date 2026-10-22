@@ -33,6 +33,52 @@ except ImportError:  # pragma: no cover
         return False
 
 
+#: the view of each plane, for ``view_init``, which is exact: in each the first named
+#: axis points to the right and the second up, in an orthographic projection
+_PLANE_VIEWS: dict[str, dict[str, float]] = {
+    # looking down on the plane from +Z: x to the right, y up
+    "xy": {"elev": 90, "azim": -90},
+    # looking from -Y: x to the right, z up
+    "xz": {"elev": 0, "azim": -90},
+    # looking from +X: y to the right, z up
+    "yz": {"elev": 0, "azim": 0},
+}
+
+
+def plane_view(plane: str) -> dict[str, float]:
+    """
+    The elevation and azimuth of an axis-aligned view of a 3D plot
+
+    :param plane: ``"xy"``, ``"xz"`` or ``"yz"``, in any case
+    :returns: the arguments for ``Axes3D.view_init``
+    :raises ValueError: if ``plane`` is not one of those
+
+    The first axis named is horizontal, increasing to the right, and the second is
+    vertical, increasing upwards.  With an orthographic projection, which is what the
+    robot plots use, the view is a flat plot of that plane.
+    """
+    key = plane.lower() if isinstance(plane, str) else plane
+    if key not in _PLANE_VIEWS:
+        raise ValueError(
+            f"unknown view {plane!r}, choose from: {', '.join(_PLANE_VIEWS)}"
+        )
+    return dict(_PLANE_VIEWS[key])
+
+
+def set_plane_view(ax: Any, plane: str) -> None:
+    """
+    Set an axis-aligned view of the plane of a 3D plot
+
+    :param ax: Matplotlib 3D axes
+    :param plane: ``"xy"``, ``"xz"`` or ``"yz"``, see :func:`plane_view`
+    :raises ValueError: if ``plane`` is not one of those
+
+    This sets the starting view, which is not locked: the plot can be rotated
+    interactively as usual afterwards.
+    """
+    ax.view_init(**plane_view(plane))
+
+
 def apply_block(block: bool | None) -> None:
     """
     Apply the ``block`` argument of a plot method: whether to show the figure and wait
@@ -123,7 +169,7 @@ def xplot(
         t = np.linspace(0, 2, 50)  # with a time vector
         rtb.xplot(t, tg.q)
 
-    :seealso: :func:`~roboticstoolbox.tools.trajectory.jtraj`, :func:`numpy.unwrap`
+    .. seealso:: :func:`~roboticstoolbox.tools.trajectory.jtraj`, :func:`numpy.unwrap`
 
     .. versionchanged:: 1.5.0
         ``block=None`` does not call ``plt.show``, as documented. It used to call

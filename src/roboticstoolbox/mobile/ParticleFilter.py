@@ -9,16 +9,24 @@ Based on code by Paul Newman, Oxford University,
 http://www.robots.ox.ac.uk/~pnewman
 """
 
-from collections import namedtuple
+from __future__ import annotations
+
+from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
-from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy as sp
 import spatialmath.base as smb
 from matplotlib import animation
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
 
-from roboticstoolbox.mobile.workspace import resolve_workspace
+from roboticstoolbox.mobile import VehicleBase
+from roboticstoolbox.mobile.landmarkmap import LandmarkMap
+from roboticstoolbox.mobile.sensors import RangeBearingSensor
+from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
+from roboticstoolbox.tools.plot import apply_block
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 """
 Monte-carlo based localisation for estimating vehicle pose based on
@@ -28,6 +36,16 @@ odometry and observations of known landmarks.
 # TODO: refactor this and EKF, RNG, history, common plots, animation, movie
 
 
+class PFlog(NamedTuple):
+    """One step of the history of a :class:`ParticleFilter`"""
+
+    t: float
+    odo: NDArray
+    xest: NDArray
+    std: NDArray
+    weights: NDArray
+
+
 class ParticleFilter:
     """
     Particle filter for vehicle localization
@@ -35,19 +53,19 @@ class ParticleFilter:
 
     def __init__(
         self,
-        robot,
-        sensor,
-        R,
-        L,
-        nparticles=500,
-        seed=0,
-        x0=None,
-        verbose=False,
-        animate=False,
-        history=True,
-        workspace=None,
-    ):
-        """
+        robot: VehicleBase,
+        sensor: RangeBearingSensor,
+        R: NDArray,
+        L: NDArray,
+        nparticles: int = 500,
+        seed: int | None = 0,
+        x0: ArrayLike | None = None,
+        verbose: bool = False,
+        animate: bool = False,
+        history: bool = True,
+        workspace: WorkspaceLike | None = None,
+    ) -> None:
+        r"""
         Particle filter
 
         :param robot: robot motion model
@@ -62,9 +80,10 @@ class ParticleFilter:
         :type nparticles: int, optional
         :param seed: random number seed, defaults to 0
         :type seed: int, optional
-        :param x0: initial particle state, defaults to None which means the
-            particles are distributed uniformly randomly over the workspace
-        :type x0: array_like(3), optional
+        :param x0: initial particle states, defaults to None which means the
+            particles are distributed uniformly randomly over the workspace, with
+            random headings
+        :type x0: array_like(3) or ndarray(nparticles,3), optional
         :param verbose: display extra debug information, defaults to False
         :type verbose: bool, optional
         :param history: retain step-by-step history, defaults to True
@@ -90,7 +109,20 @@ class ParticleFilter:
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
 
-        Particles are initially distributed uniform randomly over this area.
+        Particles are initially distributed uniform randomly over this area, unless
+        ``x0`` is given:
+
+        =========================  =============================================
+        ``x0``                     initial particles
+        =========================  =============================================
+        ``None``                   uniformly random over the workspace
+        :math:`(x, y, \theta)`     all particles at this state
+        ndarray(nparticles, 3)     a row :math:`(x, y, \theta)` for each particle
+        =========================  =============================================
+
+        Particles that start at the same state are spread apart by the noise ``R``
+        added at each step.  The array is copied, it is not changed by the filter.
+        This is the default for the ``x0`` argument of :meth:`run`.
 
         Example::
 
@@ -117,7 +149,7 @@ class ParticleFilter:
 
         .. note:: Set ``seed=None`` to get different behaviour from run to run.
 
-        :seealso: :meth:`run`
+        .. seealso:: :meth:`run`
         """
         self._robot = robot
         self._sensor = sensor
@@ -127,18 +159,21 @@ class ParticleFilter:
         self._animate = animate
 
         # self.dim = sensor.map.dim
-        self._history = []
-        self.x = ()
-        self.weight = ()
+        self._history: list[PFlog] = []
+        self.x: NDArray = np.empty((0, 3))
+        self.weight: NDArray = np.empty((0,))
         self.w0 = 0.05
         self._x0 = x0
+        self._verbose = verbose
+        self._t: float = 0
+        self.h: Line2D
 
         # create a private random number stream if required
         self._random = np.random.default_rng(seed)
         self._seed = seed
 
         self._keep_history = history  #  keep history
-        self._htuple = namedtuple("PFlog", "t odo xest std weights")
+        self._htuple = PFlog
 
         # the workspace, in order of precedence: the explicit argument, the
         # sensor's map, the vehicle
@@ -148,7 +183,7 @@ class ParticleFilter:
         self._dim = self._workspace
         # self._init()
 
-    def __str__(self):
+    def __str__(self) -> str:
         # ParticleFilter.char Convert to string
         #
         # PF.char() is a string representing the state of the ParticleFilter
@@ -156,7 +191,7 @@ class ParticleFilter:
         #
         # See also ParticleFilter.display.
 
-        def indent(s, n=2):
+        def indent(s: str, n: int = 2) -> str:
             spaces = " " * n
             return s.replace("\n", "\n" + spaces)
 
@@ -171,7 +206,7 @@ class ParticleFilter:
         return s
 
     @property
-    def robot(self):
+    def robot(self) -> VehicleBase:
         """
         Get robot object
 
@@ -181,7 +216,7 @@ class ParticleFilter:
         return self._robot
 
     @property
-    def sensor(self):
+    def sensor(self) -> RangeBearingSensor:
         """
         Get sensor object
 
@@ -191,17 +226,17 @@ class ParticleFilter:
         return self._sensor
 
     @property
-    def map(self):
+    def map(self) -> LandmarkMap:
         """
         Get map object
 
         :return: map used in simulation
         :rtype: :class:`LandmarkMap` subclass
         """
-        return self._map
+        return self.sensor.map
 
     @property
-    def verbose(self):
+    def verbose(self) -> bool:
         """
         Get verbosity state
 
@@ -211,7 +246,7 @@ class ParticleFilter:
         return self._verbose
 
     @property
-    def history(self):
+    def history(self) -> list[PFlog]:
         """
         Get EKF simulation history
 
@@ -222,13 +257,13 @@ class ParticleFilter:
         list.  It contains, for that time step, estimated state and covariance,
         and sensor observation.
 
-        :seealso: :meth:`get_t` :meth:`get_xyt` :meth:`get_std`
+        .. seealso:: :meth:`get_t` :meth:`get_xyt` :meth:`get_std`
             :meth:`get_Pnorm`
         """
         return self._history
 
     @property
-    def workspace(self):
+    def workspace(self) -> NDArray | None:
         """
         Size of robot workspace
 
@@ -241,7 +276,7 @@ class ParticleFilter:
         return self._workspace
 
     @property
-    def random(self):
+    def random(self) -> np.random.Generator:
         """
         Get private random number generator
 
@@ -262,16 +297,22 @@ class ParticleFilter:
         """
         return self._random
 
-    def _init(self, x0=None, animate=False, ax=None):
-        # ParticleFilter.init Initialize the particle filter
+    def _init(
+        self,
+        x0: ArrayLike | None = None,
+        animate: bool = False,
+        ax: Axes | None = None,
+    ) -> None:
+        # Initialize the particle filter: the vehicle and sensor, the history and
+        # the particle states.
         #
-        # PF.init() initializes the particle distribution and clears the
-        # history.
+        # The initial states are, in order of precedence, the x0 argument, the x0
+        # given to the constructor, or a uniformly random distribution over the
+        # workspace.  A vector gives every particle that state, a matrix has a
+        # row for each particle.  The array is copied, since the particles are
+        # updated in place.
         #
-        # Notes::
-        # - If initial particle states were given to the constructor the states are
-        #   set to this value, else a random distribution over the map is used.
-        # - Invoked by the run() method.
+        # Invoked by run() and run_animation().
 
         self.robot.init()
         self.sensor.init()
@@ -291,16 +332,32 @@ class ParticleFilter:
         if x0 is None:
             # create initial particle distribution as uniformly randomly distributed
             # over the map workspace and heading angles
-            x = self.random.uniform(
-                self.workspace[0], self.workspace[1], size=(self.nparticles,)
-            )
-            y = self.random.uniform(
-                self.workspace[2], self.workspace[3], size=(self.nparticles,)
-            )
+            workspace = self.workspace
+            if workspace is None:
+                raise ValueError(
+                    "no workspace: give the workspace argument, or use a sensor "
+                    "with a map or a robot that has one"
+                )
+            x = self.random.uniform(workspace[0], workspace[1], size=(self.nparticles,))
+            y = self.random.uniform(workspace[2], workspace[3], size=(self.nparticles,))
             t = self.random.uniform(-np.pi, np.pi, size=(self.nparticles,))
             self.x = np.c_[x, y, t]
+        else:
+            # a copy, since the particles are updated in place and the caller's
+            # array must not change
+            x0 = np.array(x0, dtype=float)
+            if x0.shape == (3,):
+                self.x = np.tile(x0, (self.nparticles, 1))
+            elif x0.shape == (self.nparticles, 3):
+                self.x = x0
+            else:
+                raise ValueError(
+                    f"x0 must have shape (3,) or ({self.nparticles}, 3), got {x0.shape}"
+                )
 
         if animate:
+            if ax is None:
+                ax = plt.gca()
             # display the initial particles
             (self.h,) = ax.plot(
                 self.x[:, 0],
@@ -315,15 +372,17 @@ class ParticleFilter:
 
         self.weight = np.ones((self.nparticles,))
 
-    def run(self, T=10, x0=None):
+    def run(self, T: float = 10, x0: ArrayLike | None = None) -> None:
         """
         Run the particle filter simulation
 
         :param T: maximum simulation time in seconds
         :type T: float
-        :param x0: Initial particle state, defaults to the value given to the
-            constructor
-        :type x0: array_like(3) or array_like(2)
+        :param x0: initial particle states for this run, in the forms that the
+            constructor accepts.  Defaults to the ``x0`` given to the constructor,
+            and if that was None the particles are uniformly random over the
+            workspace.
+        :type x0: array_like(3) or ndarray(nparticles,3), optional
 
         Simulates the motion of a vehicle (under the control of a driving agent)
         and the particle-filter estimator.  The steps are:
@@ -336,7 +395,7 @@ class ParticleFilter:
             - execute the particle filter
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
+        .. seealso:: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
             :meth:`plot_xy`
         """
 
@@ -370,15 +429,23 @@ class ParticleFilter:
             # anim.add()
         # anim.close()
 
-    def run_animation(self, T=10, x0=None, format=None, file=None):
+    def run_animation(
+        self,
+        T: float = 10,
+        x0: ArrayLike | None = None,
+        format: str | None = None,
+        file: str | None = None,
+    ) -> Any:
         """
         Run the particle filter simulation
 
         :param T: maximum simulation time in seconds
         :type T: float
-        :param x0: Initial particle state, defaults to the value given to the
-            constructor
-        :type x0: array_like(3) or array_like(2)
+        :param x0: initial particle states for this run, in the forms that the
+            constructor accepts.  Defaults to the ``x0`` given to the constructor,
+            and if that was None the particles are uniformly random over the
+            workspace.
+        :type x0: array_like(3) or ndarray(nparticles,3), optional
         :param format: Output format
         :type format: str, optional
         :param file: File name
@@ -416,7 +483,7 @@ class ParticleFilter:
             - execute the particle filter
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
+        .. seealso:: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
             :meth:`plot_xy`
         """
 
@@ -428,7 +495,7 @@ class ParticleFilter:
             # func=lambda i: self._step(animate=True, pause=False),
             # init_func=lambda: self._init(animate=True),
             func=lambda i: self._step(),
-            init_func=lambda: self._init(ax=ax, animate=True),
+            init_func=lambda: self._init(x0=x0, ax=ax, animate=True),
             frames=nframes,
             interval=self.robot.dt * 1000,
             blit=False,
@@ -441,17 +508,17 @@ class ParticleFilter:
             ret = anim.to_html5_video()  # convert to embeddable HTML5 animation
         elif format == "jshtml":
             ret = anim.to_jshtml()  # convert to embeddable Javascript/HTML animation
-        elif format == "gif":
-            anim.save(
-                file, writer=animation.PillowWriter(fps=1 / self.dt)
-            )  # convert to GIF
+        elif format in ("gif", "mp4"):
+            if file is None:
+                raise ValueError(f"format {format!r} needs a file name")
+            fps = round(1 / self.robot.dt)
+            if format == "gif":
+                writer: animation.AbstractMovieWriter = animation.PillowWriter(fps=fps)
+            else:
+                writer = animation.FFMpegWriter(fps=fps)  # mp4/H264
+            anim.save(file, writer=writer)
             ret = None
-        elif format == "mp4":
-            anim.save(
-                file, writer=animation.FFMpegWriter(fps=1 / self.dt)
-            )  # convert to mp4/H264
-            ret = None
-        elif format == None:
+        elif format is None:
             # return the anim object
             return anim
         else:
@@ -495,7 +562,16 @@ class ParticleFilter:
         #     # anim.add()
         # # anim.close()
 
-    def _step(self):
+    def _step(self) -> None:
+        """Advance the simulation and estimate the current particle cloud.
+
+        Heading uses the circular mean and circular standard deviation.
+        The moments describe the equally weighted cloud after resampling,
+        when an observation is available.  A zero mean resultant does not
+        define a unique heading; SpatialMath's angular mean then selects a
+        representative.
+        Heading dispersion is unbounded as the mean resultant tends to zero.
+        """
 
         # fprintf('---- step\n')
         odo = self.robot.step(animate=self._animate)  # move the robot
@@ -512,14 +588,13 @@ class ParticleFilter:
 
             self._select()
 
-        # our estimate is simply the mean of the particles
-        x_est = self.x.mean(axis=0)
-        std_est = self.x.std(axis=0)
-
-        # std is more complex for angles, need to account for 2pi wrap
-        std_est[2] = np.sqrt(np.sum(smb.angdiff(self.x[:, 2], x_est[2]) ** 2)) / (
-            self.nparticles - 1
-        )
+        # Cartesian moments are linear; heading moments are circular.
+        x_est = np.r_[self.x[:, :2].mean(axis=0), smb.angle_mean(self.x[:, 2])]
+        # Centre headings before computing their spread to reduce roundoff.
+        std_est = np.r_[
+            self.x[:, :2].std(axis=0),
+            smb.angle_std(smb.angdiff(self.x[:, 2], x_est[2])),
+        ]
 
         # display the updated particles
         # set(self.h, 'Xdata', self.x(:,1), 'Ydata', self.x(:,2), 'Zdata', self.x(:,3))
@@ -537,7 +612,7 @@ class ParticleFilter:
             )
             self._history.append(hist)
 
-    def plot_pdf(self):
+    def plot_pdf(self) -> None:
         """
         Plot particle PDF
 
@@ -560,7 +635,7 @@ class ParticleFilter:
         ax.set_zlabel("particle weight")
         ax.view_init(29, 59)
 
-    def _predict(self, odo):
+    def _predict(self, odo: NDArray) -> None:
         # step 2
         # update the particle state based on odometry and a random perturbation
 
@@ -578,7 +653,7 @@ class ParticleFilter:
         )
         self.x[:, 2] = smb.angdiff(self.x[:, 2])
 
-    def _observe(self, z, lm_id):
+    def _observe(self, z: NDArray, lm_id: int | None) -> None:
         # step 3
         # predict observation and score the particles
 
@@ -615,7 +690,7 @@ class ParticleFilter:
         )
         self.weight = np.exp(e) + self.w0
 
-    def _select(self):
+    def _select(self) -> None:
         # step 4
         # select particles based on their weights
         #
@@ -640,7 +715,7 @@ class ParticleFilter:
         # copy selected particles for next generation..
         self.x = self.x[inextgen, :]
 
-    def get_t(self):
+    def get_t(self) -> NDArray:
         """
         Get time from simulation
 
@@ -652,37 +727,40 @@ class ParticleFilter:
         """
         return np.array([h.t for h in self._history])
 
-    def get_xyt(self):
+    def get_xyt(self) -> NDArray:
         r"""
         Get estimated vehicle trajectory
 
         :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`
         :rtype: ndarray(n,3)
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             Returns the heading as well as the position, as documented and as
             :meth:`EKF.get_xyt` does.  Previously the result had only the
             :math:`(x, y)` columns, ``xyt[:, :2]`` is that.
 
-        :seealso: :meth:`plot_xy` :meth:`run` :meth:`history`
+        .. seealso:: :meth:`plot_xy` :meth:`run` :meth:`history`
         """
         return np.array([h.xest[:3] for h in self._history])
 
-    def get_std(self):
+    def get_std(self) -> NDArray:
         r"""
         Get standard deviation of particles
 
-        :return: standard deviation of vehicle position estimate
-        :rtype: ndarray(n,2)
+        :return: dispersion of position and heading estimates, shape (n, 3)
+        :rtype: ndarray(n,3)
 
-        Return the standard deviation :math:`(\sigma_x, \sigma_y)` of the
-        particle cloud at each time step.
+        Return the population standard deviation of position and circular
+        standard deviation of heading
+        :math:`(\sigma_x, \sigma_y, \sigma_\theta)` of the equally weighted
+        particle cloud at each time step.  Heading dispersion is in radians
+        and is unbounded as the mean resultant tends to zero.
 
-        :seealso: :meth:`get_xyt`
+        .. seealso:: :meth:`get_xyt`
         """
         return np.array([h.std for h in self._history])
 
-    def plot_xy(self, block=None, **kwargs):
+    def plot_xy(self, block: bool | None = None, **kwargs: Any) -> None:
         r"""
         Plot estimated vehicle position
 
@@ -695,7 +773,7 @@ class ParticleFilter:
 
         Plot the estimated vehicle path in the xy-plane.
 
-        :seealso: :meth:`get_xyt`
+        .. seealso:: :meth:`get_xyt`
         """
         xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)

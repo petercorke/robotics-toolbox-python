@@ -273,7 +273,7 @@ class QuinticPolyPlanner(PlannerBase):
 
     :thanks: based on quintic polynomial planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
 
-    :seealso: :class:`PlannerBase` :class:`CurvaturePolyPlanner`
+    .. seealso:: :class:`PlannerBase` :class:`CurvaturePolyPlanner`
     """
 
     def __init__(

@@ -223,7 +223,7 @@ import roboticstoolbox as rtb
 robot = rtb.models.Panda()
 print(robot)
 
-	ERobot: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision
+	URDFRobot.Panda: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision
 	┌─────┬──────────────┬───────┬─────────────┬────────────────────────────────────────────────┐
 	│link │     link     │ joint │   parent    │              ETS: parent to link               │
 	├─────┼──────────────┼───────┼─────────────┼────────────────────────────────────────────────┤
@@ -268,7 +268,7 @@ orientation parallel to y-axis (O=+Y)).
 from spatialmath import SE3
 
 Tep = SE3.Trans(0.6, -0.3, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ik_LM(Tep)         # solve IK
+sol = robot.ik_LM(Tep)         # solve IK, with the fast C++ solver (ikine_LM is the Python one)
 print(sol)
 
 	IKSolution: q=[-2.709, -1.176, 1.961, -1.642, 1.173, 1.958, 2.876], success=True, iterations=6, searches=1, residual=1.06e-07

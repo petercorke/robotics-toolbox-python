@@ -152,7 +152,7 @@ Inverse kinematics
 The other very common kinematics operation is inverse kinematics (IK) and there
 are several options.
 
-Using C++ solvers, fast but not extensible, and won't easily work in a pyodide environment
+Using C++ solvers, fast but not extensible.  They need the compiled extension, so they do not work in the browser (Pyodide/JupyterLite), and they cannot be used for a sequence with SymPy parameters or joint offsets, see :ref:`ik-cpp-limits`
 
 .. runblock:: pycon
    :linenos:
@@ -164,7 +164,7 @@ Using C++ solvers, fast but not extensible, and won't easily work in a pyodide e
 
 The return value is an :class:`~roboticstoolbox.robot.IK.IKSolution` object, which contains the solution, the number of iterations, and a success flag.  The solution can be evaluated with the ``fkine`` method to check that it is correct.
 
-Using Python solvers, based on NumPy, slower but extensible, and will work in a pyodide environment
+Using Python solvers, based on NumPy, slower but extensible, and they work everywhere, including the browser
 
 .. runblock:: pycon
    :linenos:
