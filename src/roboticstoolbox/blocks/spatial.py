@@ -40,7 +40,7 @@ class Tr2Delta(FunctionBlock):
 
     Difference between :math:`\mathbf{T}_1` and :math:`\mathbf{T}_2` as a 6-vector
 
-    :seealso: :class:`Delta2Tr` :func:`~spatialmath.base.transforms3d.tr2delta`
+    .. seealso:: :class:`Delta2Tr` :func:`~spatialmath.base.transforms3d.tr2delta`
     """
 
     nin = 2
@@ -93,7 +93,7 @@ class Delta2Tr(FunctionBlock):
 
     6-vector spatial displacement to transform.
 
-    :seealso: :class:`Tr2Delta` :func:`~spatialmath.base.transforms3d.delta2tr`
+    .. seealso:: :class:`Tr2Delta` :func:`~spatialmath.base.transforms3d.delta2tr`
     """
 
     nin = 1
@@ -209,7 +209,7 @@ class TR2T(FunctionBlock):
             - float
             - :math:`z` component of translation.
 
-    :seealso: :func:`~spatialmath.base.transforms3d.transl`
+    .. seealso:: :func:`~spatialmath.base.transforms3d.transl`
     """
 
     nin = 1

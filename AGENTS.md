@@ -10,6 +10,22 @@ Part of the RVC ecosystem. **Read [rvc-ecosystem/AGENTS.md](https://github.com/p
 | Default branch | `main` |
 | Contribution model | Branch → PR; direct push to `main` at Peter's discretion |
 
+## What the Toolbox is for
+
+The Toolbox has three goals, in this order: **pedagogy** (code that is clear and easy to
+read, and that follows the explanations in *Robotics, Vision & Control*), **functionality**
+(the range of what it covers), and **performance** (speed and memory).
+
+A faster implementation is welcome alongside a readable one (as with the C++ `ik_XX` and the
+Python `ikine_XX` solvers), not instead of it. A change that gains speed by making the code
+harder to understand will not be accepted. Nor will a change to an algorithm that the book
+explains if the results differ from the book; a restructured implementation that gives the
+same results is fine, with a comment pointing to the book section. New algorithms beyond the
+book are welcome.
+
+If your change trades clarity for speed, or changes what an algorithm does, say so in the PR
+description and ask first.
+
 ## Notes specific to this repo
 
 - Compiles `nanobind` C++ extensions via `scikit-build-core`, not Hatch — this is the
@@ -33,6 +49,12 @@ Part of the RVC ecosystem. **Read [rvc-ecosystem/AGENTS.md](https://github.com/p
   `NDArray` for returned arrays. The shape goes in the docstring (`:type q: array_like(n)`,
   `:rtype: ndarray(6,n)`) where it adds information, not in the annotation. One definition means
   one place to change what "array-like" means.
+- Docstring sections are reST, not NumPy style: a heading is ``.. rubric:: Examples`` (always
+  plural), ``.. rubric:: Notes`` or ``.. rubric:: References``, never an underlined title, and
+  cross-references are ``.. seealso:: :meth:`other```, never ``:seealso:`` (which Sphinx
+  does not know: it renders as one more field after the parameters). A ``.. versionadded::``,
+  ``.. versionchanged::`` or ``.. deprecated::`` names the release it ships in; the next
+  release is the one after the version in ``pyproject.toml``.
 - New code uses modern annotation syntax: `X | Y`, `X | None`, `list[X]`, `dict[K, V]`, not
   `Union`, `Optional`, `List` or `Dict`.
 - Type checking: `mypy` (config in `pyproject.toml`, run it from the repo root with no arguments).

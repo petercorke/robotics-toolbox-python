@@ -9,8 +9,10 @@ from typing import Any
 
 import numpy as np
 from spatialmath import SE3
+from spatialmath.base import getvector
 
 import roboticstoolbox as rp
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class RobotPlot:
@@ -26,6 +28,7 @@ class RobotPlot:
         shadow: bool = True,
         name: bool = True,
         options: Any = None,
+        q: ArrayLike | None = None,
     ) -> None:
         super(RobotPlot, self).__init__()
 
@@ -38,6 +41,14 @@ class RobotPlot:
 
         self.robot = robot
         self.env = env
+
+        # The pose drawn.  None means the pose of the robot, whatever it is at the
+        # time, which is how a robot has always been drawn.  Setting it, here or by
+        # the property, makes this plot hold a pose of its own, so that one robot can
+        # be drawn in several poses at once and only the plot that is told moves.
+        self._q: NDArray | None = None
+        if q is not None:
+            self.q = q
         self.ax = env.ax
 
         # Line plot of robot links
@@ -91,6 +102,27 @@ class RobotPlot:
                     defaults[key] = value
         self.options = defaults
 
+    @property
+    def q(self) -> NDArray:
+        """
+        The joint coordinates that this plot draws
+
+        :returns: the pose of the plot if it has been given one, otherwise the
+            current pose of the robot
+
+        The robot is a model, and a plot of it can hold a pose of its own.  Setting
+        ``q`` pins this plot to that pose: the robot can then move, or be plotted
+        in another pose, without moving this plot.  This is how the same robot is
+        shown in two configurations in one scene, see
+        :meth:`~roboticstoolbox.robot.BaseRobot.BaseRobot.plot`.  Until it is set the plot
+        follows ``robot.q``.
+        """
+        return self.robot.q if self._q is None else self._q
+
+    @q.setter
+    def q(self, q: ArrayLike) -> None:
+        self._q = np.array(getvector(q, self.robot.n))
+
     def draw(self) -> None:
         if not self.display:
             return
@@ -102,7 +134,7 @@ class RobotPlot:
         ## Update the robot links
 
         # compute all link frames
-        T = self.robot.fkine_all(self.robot.q)
+        T = self.robot.fkine_all(self.q)
 
         # draw all the line segments for the noodle plot
         for i, segment in enumerate(self.segments):

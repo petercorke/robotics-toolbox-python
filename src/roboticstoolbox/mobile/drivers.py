@@ -42,7 +42,7 @@ class VehicleDriverBase(ABC):
 
     Abstract class for an agent that can drive a mobile robot.
 
-    :seealso: :class:`RandomPath` :class:`PurePursuit`
+    .. seealso:: :class:`RandomPath` :class:`PurePursuit`
     """
 
     def __init__(
@@ -69,7 +69,7 @@ class VehicleDriverBase(ABC):
         :param verbose: display debug information, defaults to False
         :param goalmarkerstyle: deprecated, use ``goal_style``
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``goalmarkerstyle`` is deprecated, use ``goal_style`` instead.
 
         The workspace of the robot is a rectangular region defined by ``workspace``
@@ -271,7 +271,7 @@ class RandomPath(VehicleDriverBase):
               ``seed=None`` to have it randomly initialized from the operating
               system.
 
-        :seealso: ``Bicycle`` ``Unicycle`` :func:`~spatialmath.base.graphics.plotvol2`
+        .. seealso:: ``Bicycle`` ``Unicycle`` :func:`~spatialmath.base.graphics.plotvol2`
         """
 
         # TODO options to specify region, maybe accept a Map object?
@@ -352,7 +352,7 @@ class RandomPath(VehicleDriverBase):
         larger workspace dimension of the waypoint, a new random waypoint is
         chosen.
 
-        :seealso: ``VehicleBase``
+        .. seealso:: ``VehicleBase``
         """
 
         if self._goal is None:
@@ -438,7 +438,7 @@ class PurePursuit(VehicleDriverBase):
         and the current goal point, which changes at every time step, is shown
         using ``goal_style``.
 
-        :seealso: :class:`RandomPath` ``VehicleBase``
+        .. seealso:: :class:`RandomPath` ``VehicleBase``
         """
         super().__init__(**kwargs)
 

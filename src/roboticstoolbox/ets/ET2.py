@@ -76,9 +76,7 @@ class ET2(BaseET):
         - In the 2D case this is rotation around the normal to the
             xy-plane.
 
-        See Also
-        --------
-        :func:`ET2`, :func:`isrotation`
+        .. seealso:: :func:`ET2`, :func:`isrotation`
 
         """
         param = _resolve_param(param, eta)
@@ -110,10 +108,7 @@ class ET2(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET2`
-        :func:`istranslation`
+        .. seealso:: :func:`ET2` :func:`istranslation`
 
         """
         param = _resolve_param(param, eta)
@@ -143,9 +138,7 @@ class ET2(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET2`
+        .. seealso:: :func:`ET2`
 
         """
         param = _resolve_param(param, eta)
@@ -160,10 +153,7 @@ class ET2(BaseET):
         :returns: An elementary transform
         :rtype: ET2
 
-        See Also
-        --------
-        :func:`ET2`
-        :func:`istranslation`
+        .. seealso:: :func:`ET2` :func:`istranslation`
 
         :SymPy: supported
         """

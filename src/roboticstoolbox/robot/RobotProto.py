@@ -1,4 +1,5 @@
-from typing import Callable, Literal
+from collections.abc import Callable
+from typing import Literal
 
 from spatialmath import SE3
 from typing_extensions import Protocol, Self
@@ -147,14 +148,6 @@ class RobotProto(Protocol):
         qd: ArrayLike,
         torque: ArrayLike,
         gravity: ArrayLike | None = None,
-    ) -> NDArray: ...
-
-    def pay(
-        self,
-        W: ArrayLike,
-        q: NDArray | None = None,
-        J: NDArray | None = None,
-        frame: int = 1,
     ) -> NDArray: ...
 
     def nofriction(self, coulomb: bool = True, viscous: bool = False) -> Self: ...

@@ -62,7 +62,15 @@ class ET(BaseET):
         """
         Build the compiled struct that holds this ET's data, from the
         current (final) Python-side state.
+
+        A joint with an offset has no compiled struct, which the compiled code
+        does not know about.  The handle is ``None``, and every evaluation falls
+        back to the Python code, which does add the offset.
         """
+        if self._offset != 0:
+            self.__fknm = None
+            return
+
         if self.jindex is None:
             jindex = 0
         else:
@@ -132,8 +140,7 @@ class ET(BaseET):
         :returns: The SE(3) matrix value of the ET
         :rtype: ndarray
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -201,10 +208,7 @@ class ET(BaseET):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`isrotation`
+        .. seealso:: :func:`ET` :func:`isrotation`
 
         :SymPy: supported
         """
@@ -236,10 +240,7 @@ class ET(BaseET):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`isrotation`
+        .. seealso:: :func:`ET` :func:`isrotation`
 
         :SymPy: supported
         """
@@ -271,10 +272,7 @@ class ET(BaseET):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`isrotation`
+        .. seealso:: :func:`ET` :func:`isrotation`
 
         :SymPy: supported
         """
@@ -304,10 +302,7 @@ class ET(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`istranslation`
+        .. seealso:: :func:`ET` :func:`istranslation`
 
         :SymPy: supported
         """
@@ -349,10 +344,7 @@ class ET(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`istranslation`
+        .. seealso:: :func:`ET` :func:`istranslation`
 
         :SymPy: supported
         """
@@ -393,10 +385,7 @@ class ET(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`istranslation`
+        .. seealso:: :func:`ET` :func:`istranslation`
 
         :SymPy: supported
         """
@@ -423,10 +412,7 @@ class ET(BaseET):
         :returns: An elementary transform
         :rtype: ET
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`istranslation`
+        .. seealso:: :func:`ET` :func:`istranslation`
 
         :SymPy: supported
         """

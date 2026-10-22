@@ -230,6 +230,23 @@ class TestETS2(unittest.TestCase):
             ets.fixjoint(0, 90, unit="grad")
         nt.assert_allclose(ets.eval(q), expected)
 
+    def test_fixjoint_boolean_and_integer_indices(self):
+        ets = R() * tx()
+        q = np.array([0.2, 0.3])
+        expected = ets.eval(q)
+
+        # Both 0 and 1 are valid positions, so rejection must be based on type.
+        for index in (False, True, np.bool_(False), np.bool_(True)):
+            with self.subTest(index=index), self.assertRaises(ValueError):
+                ets.fixjoint(index, 0.2)
+
+        for index in (0, 1, np.int64(0), np.int64(1)):
+            with self.subTest(index=index):
+                fixed = ets.fixjoint(index, q[index])
+                nt.assert_allclose(fixed.eval(np.delete(q, index)), expected)
+        self.assertEqual(ets.n, 2)
+        nt.assert_allclose(ets.eval(q), expected)
+
     def test_fixjoint_single_joint_and_bad_indices(self):
         ets = rtb.ETS2(R())
         fixed = ets.fixjoint(0, 0.3)
@@ -568,9 +585,13 @@ class TestETS2(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "do not commute"):
             e.swap(0)
 
+        # a constant merged into a joint is the offset of the joint
         e = ET2.tx(1) * ET2.tx()
+        e.merge(0)
+        self.assertEqual(len(e), 1)
+        nt.assert_almost_equal(e[0].offset, 1)
         with self.assertRaisesRegex(ValueError, "joint"):
-            e.merge(0)
+            (ET2.tx() * ET2.tx()).merge(0)
 
     def test_motion_subspace(self):
         nt.assert_array_equal(ET2.R().s, [0, 0, 1])

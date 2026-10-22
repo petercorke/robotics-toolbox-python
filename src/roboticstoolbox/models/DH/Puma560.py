@@ -251,7 +251,7 @@ class Puma560(DHRobot):
         a zero first link length and a lateral shoulder offset :math:`d_3`.  It
         does not apply to other robots.  Joint limits are not considered.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             Accepts an array as well as an :class:`SE3`, returns a single
             ``IKSolution`` for a trajectory like the numerical solvers (it
             was garbled, and failed for an unreachable pose), reports a pose

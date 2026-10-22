@@ -127,7 +127,7 @@ class IKSolution:
         ``ik_GN`` (which now also return ``IKSolution``, see :meth:`~roboticstoolbox.ETS.ik_LM`)
         remain compatible with code that indexed the old bare tuple return
 
-    .. versionchanged:: 1.4.5
+    .. versionchanged:: 1.5.0
         An ``IKSolution`` is now a sequence of the rows of ``q``, one per pose:
         ``len(sol)`` is the number of poses (1 for a single pose), and
         ``for q in sol`` and ``sol[i]`` give the joint vector of each pose.  This
@@ -210,7 +210,7 @@ class IKSolution:
 
         :returns: ``(q, success, iterations, searches, residual, reason)``
 
-        This is what iterating over an ``IKSolution`` gave before 1.4.5.
+        This is what iterating over an ``IKSolution`` gave before 1.5.0.
         """
         return (
             self.q,
@@ -383,7 +383,7 @@ class IKSolver(ABC):
         - ``residual`` the *maximum* residual over all poses, the worst case
         - ``reason`` the reason given by the last pose that failed, if any
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is now the maximum over the poses,
             previously it was the minimum, which hid poses that were solved badly.
         """

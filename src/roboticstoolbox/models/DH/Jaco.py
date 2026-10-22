@@ -41,7 +41,7 @@ class Jaco(DHRobot):
     :references:
         - "DH Parameters of Jaco" Version 1.0.8, July 25, 2013.
 
-    :seealso: :func:`Mico`
+    .. seealso:: :func:`Mico`
     """
 
     def __init__(self, symbolic: bool = False) -> None:

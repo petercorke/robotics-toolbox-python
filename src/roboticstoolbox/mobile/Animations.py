@@ -88,7 +88,7 @@ class VehicleAnimationBase(ABC):
 
         The animation is not displayed until :meth:`update` is called.
 
-        :seealso: :meth:`update`
+        .. seealso:: :meth:`update`
         """
         if ax is None:
             self._ax = plt.gca()
@@ -106,7 +106,7 @@ class VehicleAnimationBase(ABC):
 
         The graphical depiction of the vehicle position or configuration is updated.
 
-        :seealso: :meth:`add`
+        .. seealso:: :meth:`add`
         """
         self._update(q)
 
@@ -159,7 +159,7 @@ class VehicleMarker(VehicleAnimationBase):
 
         .. note:: A marker can only indicate vehicle position, not orientation.
 
-        :seealso: :class:`VehicleBase`
+        .. seealso:: :class:`VehicleBase`
         """
         super().__init__()
         if len(kwargs) == 0:
@@ -229,7 +229,7 @@ class VehiclePolygon(VehicleAnimationBase):
         The polygon is scaled to an image with a length of ``scale`` in the
         vehicle x-direction, in the units of the plot.
 
-        :seealso: :class:`VehicleBase` :class:`matplotlib.patches.Polygon`
+        .. seealso:: :class:`VehicleBase` :class:`matplotlib.patches.Polygon`
         """
         super().__init__()
         if isinstance(shape, str):
@@ -371,7 +371,7 @@ class VehicleIcon(VehicleAnimationBase):
 
         .. note:: The standard icons are provided in the package ``rtb-data``
 
-        :seealso: :class:`Vehicle`
+        .. seealso:: :class:`Vehicle`
         """
         super().__init__()
         if "." not in filename:

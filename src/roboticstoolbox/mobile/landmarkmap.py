@@ -59,7 +59,7 @@ class LandmarkMap:
         Peter Corke,
         Springer 2023
 
-    :seealso: :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF.EKF`
+    .. seealso:: :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF.EKF`
     """
 
     def __init__(
@@ -84,7 +84,7 @@ class LandmarkMap:
         :raises ValueError: ``landmarks`` is not given, or is not a 2xN array or
             an integer
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``verbose`` has no effect and ``map`` is renamed ``landmarks``.
         """
         if map is not None:
