@@ -16,7 +16,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-_TIMEOUT = 15
+# Starting rtbtool imports RTB and IPython, which takes over 15 s on a loaded Windows
+# runner (this failed in CI twice in one day).  The CI limit for a test is 50 s.
+_TIMEOUT = 40
 
 
 def _run(args: list[str], **kwargs) -> subprocess.CompletedProcess:
