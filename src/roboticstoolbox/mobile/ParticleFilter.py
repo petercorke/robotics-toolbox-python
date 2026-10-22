@@ -80,10 +80,9 @@ class ParticleFilter:
         :type nparticles: int, optional
         :param seed: random number seed, defaults to 0
         :type seed: int, optional
-        :param x0: initial particle state, defaults to None which means the
-            particles are distributed uniformly randomly over the workspace.  A
-            vector :math:`(x, y, \theta)` puts every particle there, a matrix with
-            a row for each particle gives each its own state.
+        :param x0: initial particle states, defaults to None which means the
+            particles are distributed uniformly randomly over the workspace, with
+            random headings
         :type x0: array_like(3) or ndarray(nparticles,3), optional
         :param verbose: display extra debug information, defaults to False
         :type verbose: bool, optional
@@ -110,7 +109,20 @@ class ParticleFilter:
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
 
-        Particles are initially distributed uniform randomly over this area.
+        Particles are initially distributed uniform randomly over this area, unless
+        ``x0`` is given:
+
+        =========================  =============================================
+        ``x0``                     initial particles
+        =========================  =============================================
+        ``None``                   uniformly random over the workspace
+        :math:`(x, y, \theta)`     all particles at this state
+        ndarray(nparticles, 3)     a row :math:`(x, y, \theta)` for each particle
+        =========================  =============================================
+
+        Particles that start at the same state are spread apart by the noise ``R``
+        added at each step.  The array is copied, it is not changed by the filter.
+        This is the default for the ``x0`` argument of :meth:`run`.
 
         Example::
 
@@ -291,15 +303,16 @@ class ParticleFilter:
         animate: bool = False,
         ax: Axes | None = None,
     ) -> None:
-        # ParticleFilter.init Initialize the particle filter
+        # Initialize the particle filter: the vehicle and sensor, the history and
+        # the particle states.
         #
-        # PF.init() initializes the particle distribution and clears the
-        # history.
+        # The initial states are, in order of precedence, the x0 argument, the x0
+        # given to the constructor, or a uniformly random distribution over the
+        # workspace.  A vector gives every particle that state, a matrix has a
+        # row for each particle.  The array is copied, since the particles are
+        # updated in place.
         #
-        # Notes::
-        # - If initial particle states were given to the constructor the states are
-        #   set to this value, else a random distribution over the map is used.
-        # - Invoked by the run() method.
+        # Invoked by run() and run_animation().
 
         self.robot.init()
         self.sensor.init()
@@ -365,8 +378,10 @@ class ParticleFilter:
 
         :param T: maximum simulation time in seconds
         :type T: float
-        :param x0: Initial particle state, defaults to the value given to the
-            constructor, see :class:`ParticleFilter`
+        :param x0: initial particle states for this run, in the forms that the
+            constructor accepts.  Defaults to the ``x0`` given to the constructor,
+            and if that was None the particles are uniformly random over the
+            workspace.
         :type x0: array_like(3) or ndarray(nparticles,3), optional
 
         Simulates the motion of a vehicle (under the control of a driving agent)
@@ -426,8 +441,10 @@ class ParticleFilter:
 
         :param T: maximum simulation time in seconds
         :type T: float
-        :param x0: Initial particle state, defaults to the value given to the
-            constructor, see :class:`ParticleFilter`
+        :param x0: initial particle states for this run, in the forms that the
+            constructor accepts.  Defaults to the ``x0`` given to the constructor,
+            and if that was None the particles are uniformly random over the
+            workspace.
         :type x0: array_like(3) or ndarray(nparticles,3), optional
         :param format: Output format
         :type format: str, optional
@@ -478,7 +495,7 @@ class ParticleFilter:
             # func=lambda i: self._step(animate=True, pause=False),
             # init_func=lambda: self._init(animate=True),
             func=lambda i: self._step(),
-            init_func=lambda: self._init(ax=ax, animate=True),
+            init_func=lambda: self._init(x0=x0, ax=ax, animate=True),
             frames=nframes,
             interval=self.robot.dt * 1000,
             blit=False,

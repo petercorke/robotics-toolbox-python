@@ -113,3 +113,10 @@ def test_run_from_a_given_x0() -> None:
     pf = _filter()
     pf.run(T=0.5, x0=[0, 0, 0])
     assert len(pf.history) == 5
+
+
+def test_run_animation_starts_from_x0() -> None:
+    pf = _filter()
+    anim = pf.run_animation(T=0.2, x0=[1.0, 2.0, 0.0])
+    anim._init_draw()
+    assert np.all(pf.x == [1.0, 2.0, 0.0])
