@@ -150,14 +150,6 @@ class RobotProto(Protocol):
         gravity: ArrayLike | None = None,
     ) -> NDArray: ...
 
-    def pay(
-        self,
-        W: ArrayLike,
-        q: NDArray | None = None,
-        J: NDArray | None = None,
-        frame: int = 1,
-    ) -> NDArray: ...
-
     def nofriction(self, coulomb: bool = True, viscous: bool = False) -> Self: ...
 
     def copy(self) -> Self: ...
