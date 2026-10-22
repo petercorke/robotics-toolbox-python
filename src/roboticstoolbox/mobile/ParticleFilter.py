@@ -12,6 +12,7 @@ http://www.robots.ox.ac.uk/~pnewman
 from collections import namedtuple
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy as sp
 import spatialmath.base as smb
@@ -28,6 +29,10 @@ odometry and observations of known landmarks.
 
 
 class ParticleFilter:
+    """
+    Particle filter for vehicle localization
+    """
+
     def __init__(
         self,
         robot,
@@ -112,7 +117,7 @@ class ParticleFilter:
 
         .. note:: Set ``seed=None`` to get different behaviour from run to run.
 
-        :seealso: :meth:`run`
+        .. seealso:: :meth:`run`
         """
         self._robot = robot
         self._sensor = sensor
@@ -217,7 +222,7 @@ class ParticleFilter:
         list.  It contains, for that time step, estimated state and covariance,
         and sensor observation.
 
-        :seealso: :meth:`get_t` :meth:`get_xyt` :meth:`get_std`
+        .. seealso:: :meth:`get_t` :meth:`get_xyt` :meth:`get_std`
             :meth:`get_Pnorm`
         """
         return self._history
@@ -331,7 +336,7 @@ class ParticleFilter:
             - execute the particle filter
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
+        .. seealso:: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
             :meth:`plot_xy`
         """
 
@@ -411,7 +416,7 @@ class ParticleFilter:
             - execute the particle filter
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
+        .. seealso:: :meth:`history` :meth:`get_xyt` :meth:`get_t` :meth:`get_std`
             :meth:`plot_xy`
         """
 
@@ -654,12 +659,12 @@ class ParticleFilter:
         :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`
         :rtype: ndarray(n,3)
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             Returns the heading as well as the position, as documented and as
             :meth:`EKF.get_xyt` does.  Previously the result had only the
             :math:`(x, y)` columns, ``xyt[:, :2]`` is that.
 
-        :seealso: :meth:`plot_xy` :meth:`run` :meth:`history`
+        .. seealso:: :meth:`plot_xy` :meth:`run` :meth:`history`
         """
         return np.array([h.xest[:3] for h in self._history])
 
@@ -673,7 +678,7 @@ class ParticleFilter:
         Return the standard deviation :math:`(\sigma_x, \sigma_y)` of the
         particle cloud at each time step.
 
-        :seealso: :meth:`get_xyt`
+        .. seealso:: :meth:`get_xyt`
         """
         return np.array([h.std for h in self._history])
 
@@ -683,17 +688,18 @@ class ParticleFilter:
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to None
-        :type block: bool, optional
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         Plot the estimated vehicle path in the xy-plane.
 
-        :seealso: :meth:`get_xyt`
+        .. seealso:: :meth:`get_xyt`
         """
         xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
 
 if __name__ == "__main__":

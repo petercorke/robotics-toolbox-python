@@ -37,6 +37,10 @@ See also RangeBearingSensor, EKF, Vehicle, Landmarkself.
 
 
 class SensorBase(ABC):
+    """
+    Superclass for sensors
+    """
+
     # TODO, pose option, wrt vehicle
 
     # robot
@@ -138,7 +142,7 @@ class SensorBase(ABC):
         Landmark map associated with sensor (superclass)
 
         :return: robot
-        :rtype: :class:`LandmarkMap`
+        :rtype: ``LandmarkMap``
         """
         return self._map
 
@@ -161,7 +165,7 @@ class SensorBase(ABC):
         The generator is initialized with the seed provided at constructor
         time every time :meth:`init` is called.
 
-        :seealso: :meth:`init`
+        .. seealso:: :meth:`init`
         """
         return self._random
 
@@ -219,6 +223,10 @@ class SensorBase(ABC):
 # covar can be 2x2 or (2,)
 # .W property
 class RangeBearingSensor(SensorBase):
+    """
+    Range and bearing angle sensor
+    """
+
     def __init__(
         self,
         robot: Any,
@@ -238,7 +246,7 @@ class RangeBearingSensor(SensorBase):
         :param robot: model of robot carrying the sensor
         :type robot: :class:`VehicleBase` subclass
         :param map: map of landmarks
-        :type map: :class:`LandmarkMap` instance
+        :type map: ``LandmarkMap`` instance
         :param line_style: style of the line to the observed landmark, defaults to None
         :type line_style: dict, optional
         :param poly_style: style for the sensing region polygon, defaults to None
@@ -280,7 +288,7 @@ class RangeBearingSensor(SensorBase):
             >>> sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)
             >>> print(sensor)
 
-        :seealso: :class:`~roboticstoolbox.mobile.LandmarkMap` :class:`~roboticstoolbox.mobile.EKF`
+        .. seealso:: ``LandmarkMap`` :class:`~roboticstoolbox.mobile.EKF`
 
         .. deprecated:: 1.4.0
             The ``animate`` keyword, use ``plot`` instead.
@@ -350,9 +358,9 @@ class RangeBearingSensor(SensorBase):
         - reseed the random number generator
         - reset the counter for handling the ``every`` and ``fail`` options
         - reset the landmark log
-        - initalize plots
+        - initialize plots
 
-        :seealso: :meth:`SensorBase.init`
+        .. seealso:: :meth:`SensorBase.init`
         """
         super().init()
         self._landmarklog = []
@@ -411,7 +419,7 @@ class RangeBearingSensor(SensorBase):
             - If ``animate`` option set and the angular and distance limits
               are set then display the sensor field of view as a polygon.
 
-        :seealso: :meth:`h`
+        .. seealso:: :meth:`h`
         """
 
         # TODO probably should return K=0 to indicated invalid
@@ -501,7 +509,7 @@ class RangeBearingSensor(SensorBase):
         lies with the sensing range and field of view of the sensor at the
         robot's current configuration.
 
-        :seealso: :meth:`isvisible` :meth:`h`
+        .. seealso:: :meth:`isvisible` :meth:`h`
         """
         # get range/bearing to all landmarks
         z = self.h(self.robot.x)
@@ -530,7 +538,7 @@ class RangeBearingSensor(SensorBase):
         The landmark ``id`` is visible if it lies with the sensing range and
         field of view of the sensor at the robot's current configuration.
 
-        :seealso: :meth:`visible` :meth:`h`
+        .. seealso:: :meth:`visible` :meth:`h`
         """
         z = self.h(self.robot.x, id)
 
@@ -549,7 +557,7 @@ class RangeBearingSensor(SensorBase):
         :type x: array_like(3), array_like(N,3)
         :param landmark: landmark id or position, defaults to None
         :type landmark: int or array_like(2), optional
-        :return: range and bearing angle to landmark math:`(r,\beta)`
+        :return: range and bearing angle to landmark :math:`(r,\beta)`
         :rtype: ndarray(2) or ndarray(N,2)
 
         Return the range and bearing to a landmark:
@@ -579,7 +587,7 @@ class RangeBearingSensor(SensorBase):
             - The landmark is assumed to be visible, field of view and range limits are not
               applied.
 
-        :seealso: :meth:`reading` :meth:`Hx` :meth:`Hw` :meth:`Hp`
+        .. seealso:: :meth:`reading` :meth:`Hx` :meth:`Hw` :meth:`Hp`
         """
         # get the landmarks, one per row
 
@@ -637,7 +645,7 @@ class RangeBearingSensor(SensorBase):
         - ``sensor.Hx(q, id)`` is Jacobian for landmark ``id``
         - ``sensor.h(q, p)`` is Jacobian for landmark with coordinates ``p``
 
-        :seealso: :meth:`h` :meth:`Hp` :meth:`Hw`
+        .. seealso:: :meth:`h` :meth:`Hp` :meth:`Hw`
         """
 
         if base.isinteger(landmark):
@@ -673,7 +681,7 @@ class RangeBearingSensor(SensorBase):
         - ``sensor.Hp(x, id)`` is Jacobian for landmark ``id``
         - ``sensor.Hp(x, p)`` is Jacobian for landmark with coordinates ``p``
 
-        :seealso: :meth:`h` :meth:`Hx` :meth:`Hw`
+        .. seealso:: :meth:`h` :meth:`Hx` :meth:`Hw`
         """
         if base.isinteger(landmark):
             xf = self.map.landmark(landmark)
@@ -709,7 +717,7 @@ class RangeBearingSensor(SensorBase):
 
         .. note:: ``x`` and ``landmark`` are not used to compute this.
 
-        :seealso: :meth:`h` :meth:`Hx` :meth:`Hp`
+        .. seealso:: :meth:`h` :meth:`Hx` :meth:`Hp`
         """
         return np.eye(2)
 
@@ -727,7 +735,7 @@ class RangeBearingSensor(SensorBase):
         Compute the world coordinate  of a landmark given
         the observation ``z`` from a vehicle state with ``x``.
 
-        :seealso: :meth:`h` :meth:`Gx` :meth:`Gz`
+        .. seealso:: :meth:`h` :meth:`Gx` :meth:`Gz`
         """
 
         range = z[0]
@@ -754,7 +762,7 @@ class RangeBearingSensor(SensorBase):
         Compute the Jacobian of the landmark position function with respect
         to landmark position :math:`\partial g/\partial x`
 
-        :seealso: :meth:`g`
+        .. seealso:: :meth:`g`
         """
         theta = x[2]
         r, bearing = z
@@ -780,7 +788,7 @@ class RangeBearingSensor(SensorBase):
         Compute the Jacobian of the landmark position function with respect
         to sensor observation :math:`\partial g/\partial z`
 
-        :seealso: :meth:`g`
+        .. seealso:: :meth:`g`
         """
         theta = x[2]
         r, bearing = z

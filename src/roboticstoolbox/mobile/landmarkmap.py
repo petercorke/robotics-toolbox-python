@@ -5,6 +5,7 @@ import warnings
 from typing import Any
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from spatialmath import base
 from spatialmath.base.types import R2, R4, Points2
@@ -58,7 +59,7 @@ class LandmarkMap:
         Peter Corke,
         Springer 2023
 
-    :seealso: :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF.EKF`
+    .. seealso:: :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF.EKF`
     """
 
     def __init__(
@@ -83,7 +84,7 @@ class LandmarkMap:
         :raises ValueError: ``landmarks`` is not given, or is not a 2xN array or
             an integer
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``verbose`` has no effect and ``map`` is renamed ``landmarks``.
         """
         if map is not None:
@@ -188,7 +189,10 @@ class LandmarkMap:
         Plot landmark map
 
         :param labels: number the points on the plot, defaults to False
-        :param block: block until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param kwargs: :meth:`~matplotlib.axes.Axes.plot` options, merged over
             :data:`LANDMARK_STYLE`
 
@@ -207,5 +211,4 @@ class LandmarkMap:
         text = "#{}" if labels else None
         base.plot_point(self._map, text=text, **kwargs)
         plt.grid(True)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)

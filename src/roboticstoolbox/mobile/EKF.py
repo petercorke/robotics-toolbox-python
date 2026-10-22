@@ -10,6 +10,7 @@ import warnings
 from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from matplotlib import animation
 from scipy.linalg import block_diag
@@ -39,6 +40,10 @@ class EKFLog(NamedTuple):
 
 
 class EKF:
+    """
+    Extended Kalman filter for vehicle localization, map estimation and SLAM
+    """
+
     def __init__(
         self,
         robot: tuple[VehicleBase, NDArray | None],
@@ -61,7 +66,7 @@ class EKF:
         :param sensor: vehicle mounted sensor model, defaults to None
         :type sensor: 2-tuple, optional
         :param map: landmark map, defaults to None
-        :type map: :class:`LandmarkMap`, optional
+        :type map: ``LandmarkMap``, optional
         :param P0: initial covariance matrix, defaults to None
         :type P0: ndarray(n,n), optional
         :param x_est: initial state estimate, defaults to None
@@ -254,7 +259,7 @@ class EKF:
             pn = ekf.get_Pnorm()
             plt.plot(t, pn);
 
-        :seealso: :meth:`run`
+        .. seealso:: :meth:`run`
         """
 
         if robot is not None:
@@ -488,7 +493,7 @@ class EKF:
         Get map object
 
         :return: map used in simulation
-        :rtype: :class:`LandmarkMap` subclass
+        :rtype: ``LandmarkMap`` subclass
         """
         return self._ekf_map
 
@@ -514,7 +519,7 @@ class EKF:
         list.  It contains, for that time step, estimated state and covariance,
         and sensor observation.
 
-        :seealso: :meth:`get_t` :meth:`get_xyt` :meth:`get_map` :meth:`get_P`
+        .. seealso:: :meth:`get_t` :meth:`get_xyt` :meth:`get_map` :meth:`get_P`
             :meth:`get_Pnorm`
         """
         return self._history
@@ -548,7 +553,7 @@ class EKF:
         The order in which the landmark was first seen.  The first observed
         landmark has order 0 and so on.
 
-        :seealso: :meth:`landmark`
+        .. seealso:: :meth:`landmark`
         """
         return self._landmarks
 
@@ -562,7 +567,7 @@ class EKF:
 
         The first observed landmark has order 0 and so on.
 
-        :seealso: :meth:`landmarks` :meth:`landmark_index` :meth:`landmark_mindex`
+        .. seealso:: :meth:`landmarks` :meth:`landmark_index` :meth:`landmark_mindex`
         """
         try:
             l = self._landmarks[id]
@@ -581,7 +586,7 @@ class EKF:
         The return value ``j`` is the index of the x-coordinate of the landmark
         in the EKF state vector, and ``j+1`` is the index of the y-coordinate.
 
-        :seealso: :meth:`landmark`
+        .. seealso:: :meth:`landmark`
         """
         try:
             jx = self._landmarks[id][0] * 2
@@ -602,7 +607,7 @@ class EKF:
         The return value ``j`` is the index of the x-coordinate of the landmark
         in the map vector, and ``j+1`` is the index of the y-coordinate.
 
-        :seealso: :meth:`landmark`
+        .. seealso:: :meth:`landmark`
         """
         try:
             return self._landmarks[id][0] * 2
@@ -674,7 +679,7 @@ class EKF:
             - execute the EKF
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`
+        .. seealso:: :meth:`history` :meth:`landmark` :meth:`landmarks`
             :meth:`get_xyt` :meth:`get_t` :meth:`get_map` :meth:`get_P` :meth:`get_Pnorm`
             :meth:`plot_xy` :meth:`plot_ellipse` :meth:`plot_error` :meth:`plot_map`
             :meth:`run_animation`
@@ -736,7 +741,7 @@ class EKF:
             - execute the EKF
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`
+        .. seealso:: :meth:`history` :meth:`landmark` :meth:`landmarks`
             :meth:`get_xyt` :meth:`get_t` :meth:`get_map` :meth:`get_P` :meth:`get_Pnorm`
             :meth:`plot_xy` :meth:`plot_ellipse` :meth:`plot_error` :meth:`plot_map`
             :meth:`run_animation`
@@ -1032,7 +1037,7 @@ class EKF:
     def _isseenbefore(self, lm_id: int) -> bool:
 
         # _landmarks[0, id] is the order in which seen
-        # _landmarks[1, id] is the occurence count
+        # _landmarks[1, id] is the occurrence count
 
         return lm_id in self._landmarks
 
@@ -1101,7 +1106,7 @@ class EKF:
         Return simulation time vector, starts at zero.  The timestep is an
         attribute of the ``robot`` object.
 
-        :seealso: :meth:`run` :meth:`history`
+        .. seealso:: :meth:`run` :meth:`history`
         """
         return np.array([h.t for h in self._history])
 
@@ -1112,7 +1117,7 @@ class EKF:
         :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`
         :rtype: ndarray(n,3)
 
-        :seealso: :meth:`plot_xy` :meth:`run` :meth:`history`
+        .. seealso:: :meth:`plot_xy` :meth:`run` :meth:`history`
         """
         if self._est_vehicle:
             xyt = np.array([h.xest[:3] for h in self._history])
@@ -1126,19 +1131,21 @@ class EKF:
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         Plot the estimated vehicle path in the xy-plane.
 
-        :seealso: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` :meth:`plot_P`
+        .. seealso:: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` ``plot_P``
             :meth:`run` :meth:`history`
         """
         xyt = self.get_xyt()
         if xyt is None:
             raise ValueError("the vehicle pose is not part of the estimated state")
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_ellipse(
         self,
@@ -1152,12 +1159,15 @@ class EKF:
 
         :param confidence: ellipse confidence interval, defaults to 0.95
         :param N: number of ellipses to plot, defaults to 10
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param kwargs: arguments passed to :meth:`spatialmath.base.graphics.plot_ellipse`
 
         Plot ``N`` uncertainty ellipses spaced evenly along the trajectory.
 
-        :seealso: :meth:`get_P` :meth:`run` :meth:`history`
+        .. seealso:: :meth:`get_P` :meth:`run` :meth:`history`
         """
         nhist = len(self._history)
 
@@ -1187,8 +1197,7 @@ class EKF:
                     inverted=True,
                     **kwargs,
                 )
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def plot_error(
         self,
@@ -1206,7 +1215,10 @@ class EKF:
         :param ax: axes to plot into, one for each of :math:`(x, y, \theta)`,
             defaults to a new figure with three stacked axes
         :type ax: array_like(3) of Axes, optional
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :raises ValueError: if the vehicle pose is not part of the estimated state
 
         Plot the error between actual and estimated vehicle
@@ -1221,7 +1233,7 @@ class EKF:
 
         .. note:: Observations will decrease the uncertainty while periods of dead-reckoning increase it.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             - The ``confidence`` bounds are the interval that contains that
               fraction of a one-dimensional Gaussian, :math:`\pm 1.96\sigma`
               for 0.95.  Earlier versions used the radius of a
@@ -1235,7 +1247,7 @@ class EKF:
             - Works for SLAM, where the state also holds the landmarks, and
               raises ``ValueError`` if the vehicle pose is not estimated.
 
-        :seealso: :meth:`get_P` :meth:`run` :meth:`history`
+        .. seealso:: :meth:`get_P` :meth:`run` :meth:`history`
         """
         if not self._est_vehicle:
             raise ValueError("the vehicle pose is not part of the estimated state")
@@ -1287,8 +1299,7 @@ class EKF:
             ax.set_ylabel(labels[k] + " error")
             ax.set_xlim(0, t[-1])
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def get_map(self) -> NDArray:
         """
@@ -1299,7 +1310,7 @@ class EKF:
 
         Landmarks are returned in the order they were first observed.
 
-        :seealso: :meth:`landmarks`  :meth:`run` :meth:`history`
+        .. seealso:: :meth:`landmarks`  :meth:`run` :meth:`history`
 
         """
         xy = [self.landmark_x(lm_id) for lm_id in self._landmarks]
@@ -1324,24 +1335,27 @@ class EKF:
             :func:`~spatialmath.base.graphics.plot_ellipse`, ellipses are drawn
             only if this is given
         :param confidence: ellipse confidence interval, defaults to 0.95
-        :param block: hold plot until figure is closed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param marker: deprecated, use ``marker_style``
         :param ellipse: deprecated, use ``ellipse_style``
 
         Plot a marker and, if ``ellipse_style`` is given, a covariance ellipse
         for each estimated landmark.
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``marker`` and ``ellipse`` are deprecated, use ``marker_style`` and
             ``ellipse_style``.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             Each ellipse is now drawn with the covariance of its own landmark.
             Previously the covariance was taken from the wrong place in the
             state covariance matrix, so that the ellipses after the first were
             wrong, and in SLAM were not landmark covariances at all.
 
-        :seealso: :meth:`get_map` :meth:`run` :meth:`history`
+        .. seealso:: :meth:`get_map` :meth:`run` :meth:`history`
         """
         for old, new, value in (
             ("marker", "marker_style", marker),
@@ -1394,8 +1408,7 @@ class EKF:
                     **ellipse_style,
                 )
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def get_P(self, k: int | None = None) -> NDArray | list[NDArray]:
         """
@@ -1408,7 +1421,7 @@ class EKF:
         If ``k`` is given return covariance from simulation timestep ``k``, else
         return a list of all covariance matrices.
 
-        :seealso: :meth:`get_Pnorm` :meth:`run` :meth:`history`
+        .. seealso:: :meth:`get_Pnorm` :meth:`run` :meth:`history`
         """
         if k is not None:
             return self._history[k].P
@@ -1426,7 +1439,7 @@ class EKF:
         If ``k`` is given return covariance norm from simulation timestep ``k``, else
         return all covariance norms as a 1D NumPy array.
 
-        :seealso: :meth:`get_P` :meth:`run` :meth:`history`
+        .. seealso:: :meth:`get_P` :meth:`run` :meth:`history`
         """
         if k is not None:
             return np.sqrt(np.linalg.det(self._history[k].P))
@@ -1444,12 +1457,12 @@ class EKF:
         :type: bool or dict
 
         Plot the elements of the covariance matrix as an image. If ``colorbar``
-        is True add a color bar, if `colorbar` is a dict add a color bar with
+        is True add a color bar, if ``colorbar`` is a dict add a color bar with
         these options passed to colorbar.
 
         .. note:: A log scale is used.
 
-        :seealso: :meth:`~matplotlib.axes.Axes.imshow` :func:`matplotlib.pyplot.colorbar`
+        .. seealso:: :meth:`~matplotlib.axes.Axes.imshow` :func:`matplotlib.pyplot.colorbar`
         """
 
         z = np.log10(abs(P))
@@ -1469,7 +1482,7 @@ class EKF:
         Transformation from estimated map to true map frame
 
         :param map: known landmark positions
-        :type map: :class:`LandmarkMap`
+        :type map: ``LandmarkMap``
         :return: transform from ``map`` to estimated map frame
         :rtype: SE2 instance
 
@@ -1477,7 +1490,7 @@ class EKF:
         landmark is world frame and the estimated landmarks in the SLAM
         reference frame.
 
-        :seealso: :func:`~spatialmath.base.transforms2d.points2tr2`
+        .. seealso:: :func:`~spatialmath.base.transforms2d.points2tr2`
         """
         p = []
         q = []

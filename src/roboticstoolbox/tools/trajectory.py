@@ -5,6 +5,7 @@ from collections.abc import Callable
 from typing import Any, Literal, overload
 
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import (
@@ -182,7 +183,10 @@ class Trajectory:
         """
         Plot trajectory
 
-        :param block: wait till plot is dismissed
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to False
         :param plotargs: Matplotlib options for the plotted lines
         :param textargs: Matplotlib options for the axis labels
 
@@ -193,7 +197,11 @@ class Trajectory:
         - ``trapezoidal`` color code the different motion phases
         - ``jtraj`` general m-axis trajectory, show legend
 
-        :seealso: :func:`~quintic`, :func:`~trapezoidal`
+        .. seealso:: :func:`~quintic`, :func:`~trapezoidal`
+
+        .. versionchanged:: 1.5.0
+            ``block=None`` does not call ``plt.show``, as documented. It used to call
+            ``plt.show(block=None)``, which waits in a script. The default, ``False``, is unchanged.
         """
 
         plotopts: dict[str, Any] = {"marker": "o", "markersize": 3}
@@ -285,17 +293,17 @@ class Trajectory:
                 ax.set_ylabel("$d^2q/dk^2$", **textopts)
                 ax.set_xlabel("k (step)")
 
-        plt.show(block=block)
+        apply_block(block)
 
     def qplot(self, **kwargs: Any) -> None:
-        """
+        r"""
         Plot multi-axis trajectory
 
-        :param \*\*kwargs: optional arguments passed to :func:`~roboticstoolbox.tools.plot.xplot`
+        :param \*\*kwargs: optional arguments passed to ``xplot``
 
         Plots a multi-axis trajectory, held within the object, as position against time.
 
-        :seealso: :func:`~roboticstoolbox.tools.plot.xplot`
+        .. seealso:: ``xplot``
         """
         # deferred, the plot module is imported after this one by the package
         from roboticstoolbox.tools.plot import xplot
@@ -353,7 +361,6 @@ def quintic(
         >>> tg
         >>> len(tg)
         >>> tg.q
-        >>> tg.plot()
 
     .. plot::
 
@@ -376,7 +383,7 @@ def quintic(
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
 
-    :seealso: :func:`trapezoidal`, :func:`mtraj`.
+    .. seealso:: :func:`trapezoidal`, :func:`mtraj`.
     """
     tv: NDArray
     if isinstance(t, int):
@@ -481,7 +488,7 @@ def quintic_func(
         ``method``.  A zero or non-finite ``T`` raises ``ValueError``, where it
         previously gave a degenerate result.
 
-    :seealso: :func:`quintic` :func:`trapezoidal_func`
+    .. seealso:: :func:`quintic` :func:`trapezoidal_func`
     """
     if method not in ("lstsq", "hermite"):
         raise ValueError(f"unknown method {method!r}, must be 'lstsq' or 'hermite'")
@@ -649,7 +656,7 @@ def trapezoidal(
 
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`quintic`, :func:`trapezoidal_func` :func:`mtraj`.
+    .. seealso:: :func:`quintic`, :func:`trapezoidal_func` :func:`mtraj`.
     """
 
     tv: NDArray
@@ -856,7 +863,7 @@ def mtraj(
     :References:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`quintic`, :func:`trapezoidal`
+    .. seealso:: :func:`quintic`, :func:`trapezoidal`
     """
 
     if not callable(tfunc):
@@ -925,7 +932,7 @@ def jtraj(
 
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
+    .. seealso:: :func:`ctraj`, ``xplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
     # print(f"  --- jtraj: {q0} --> {q1} in {tv}")
     if isinstance(t, int):
@@ -1033,8 +1040,8 @@ def ctraj(
     :References:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`~roboticstoolbox.trajectory.trapezoidal`,
-        :func:`~spatialmath.unitquaternion.interp`
+    .. seealso:: ``trapezoidal``,
+        ``interp``
     """
 
     if isinstance(t, int):
@@ -1157,7 +1164,7 @@ def mstraj(
     :References:
         - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
-    :seealso: :func:`trapezoidal`, :func:`ctraj`, :func:`mtraj`
+    .. seealso:: :func:`trapezoidal`, :func:`ctraj`, :func:`mtraj`
     """
 
     # q0 is overwritten below by the last point of the linear motion, as it

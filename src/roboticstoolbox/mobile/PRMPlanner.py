@@ -81,7 +81,8 @@ class PRMPlanner(PlannerBase):
         >>> print(path.T)
 
     :author: Peter Corke
-    :seealso: :class:`PlannerBase`
+
+    .. seealso:: :class:`PlannerBase`
     """
 
     def __init__(
@@ -155,7 +156,7 @@ class PRMPlanner(PlannerBase):
         Roadmap graph
 
         :return: roadmap as an undirected graph
-        :rtype: :class:`pgraph.UGraph` instance
+        :rtype: ``UGraph`` instance
         """
         return self._graph
 
@@ -251,12 +252,12 @@ class PRMPlanner(PlannerBase):
         created between points if the distance between them is less than
         ``dist_thresh``.
 
-        The roadmap is a :class:`pgraph.UGraph`.
+        The roadmap is a ``UGraph``.
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``animate`` was accepted but had no effect.
 
-        :seealso: :meth:`query` :meth:`graph`
+        .. seealso:: :meth:`query` :meth:`graph`
         """
         if animate:
             warnings.warn(
@@ -351,11 +352,11 @@ class PRMPlanner(PlannerBase):
         - the roadmap graph
         - the path
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``vertex`` and ``edge`` are deprecated, use ``vertex_style`` and
             ``edge_style``.
 
-        :seealso: :meth:`PlannerBase.plot` :meth:`UGraph.plot`
+        .. seealso:: :meth:`PlannerBase.plot` ``plot``
         """
         for old, new, value in (
             ("vertex", "vertex_style", vertex),

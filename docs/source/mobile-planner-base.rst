@@ -10,6 +10,8 @@ Planner superclass
    :show-inheritance:
 
 
+.. autoexception:: roboticstoolbox.mobile.PlannerBase.NoPathError
+
 Occupancy grid base classes
 ---------------------------
 

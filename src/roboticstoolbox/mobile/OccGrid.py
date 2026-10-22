@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy.ndimage as sp
 import spatialmath.base as smb
@@ -170,7 +171,7 @@ class BaseOccupancyGrid(BaseMap):
         :return: binary occupancy grid
         :rtype: ndarray(N,M) of bool
 
-        If :meth:`inflate` has been called, this will return the inflated
+        If ``inflate`` has been called, this will return the inflated
         occupancy grid.
         """
         return self._grid
@@ -349,7 +350,10 @@ class BaseOccupancyGrid(BaseMap):
             size as the occupancy grid, defaults to None
         :type map: ndarray(N,M)
         :param ax: Matplotlib axes to plot into, defaults to None (the current axes)
-        :param block: block until plot is dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
         :param field: optional scalar field, with the same shape as the grid;
             obstacles are drawn over it, defaults to None
         :param colorbar: show a colorbar for the field, defaults to True
@@ -377,7 +381,7 @@ class BaseOccupancyGrid(BaseMap):
         half a cell beyond the outer centres. ``labels`` shows the edge cells
         whole. The field and supplied style dictionaries are not modified.
 
-        :seealso: :meth:`world_to_grid` :meth:`grid_to_world`
+        .. seealso:: :meth:`world_to_grid` :meth:`grid_to_world`
         """
 
         if map is not None and field is not None:
@@ -474,8 +478,7 @@ class BaseOccupancyGrid(BaseMap):
         ax.set_ylim(bounds[2:])
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def _label_values(
         self, ax: Axes, field: NDArray, label_style: dict[str, Any] | None
@@ -519,7 +522,7 @@ class BaseOccupancyGrid(BaseMap):
 
         ``line_w`` is a shorthand for this method.
 
-        :seealso: :meth:`ravel` :meth:`world_to_grid`
+        .. seealso:: :meth:`ravel` :meth:`world_to_grid`
         """
 
         gp1 = self.world_to_grid(p1)
@@ -546,6 +549,10 @@ class BaseOccupancyGrid(BaseMap):
 
 
 class BinaryOccupancyGrid(BaseOccupancyGrid):
+    """
+    Binary occupancy grid
+    """
+
     def __init__(
         self,
         grid: NDArray | BinaryOccupancyGrid | None = None,
@@ -589,7 +596,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
             >>> og = BinaryOccupancyGrid(workspace=[-5,5], cellsize=0.1, value=0)
             >>> print(og)
 
-        :seealso: :class:`OccupancyGrid`
+        .. seealso:: :class:`OccupancyGrid`
         """
 
         if grid is not None:
@@ -633,7 +640,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         value.  If the coordinate is outside the bounds of the occupancy grid
         it is considered to be occupied.
 
-        :seealso: :meth:`w2g`
+        .. seealso:: :meth:`w2g`
         """
         c, r = self.w2g(p)
         # NumPy accepts negative indices by wrapping around to the opposite edge.
@@ -655,7 +662,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
 
         Successive calls to ``inflate`` will compound the inflation.
 
-        :seealso: :func:`scipy.ndimage.binary_dilation`
+        .. seealso:: :func:`scipy.ndimage.binary_dilation`
         """
         # Generate a circular structuring element
         r = round(radius / self._cellsize)
@@ -686,7 +693,7 @@ class OccupancyGrid(BaseOccupancyGrid):
         >>> og = OccupancyGrid(workspace=[-5,5], cellsize=0.1, value=0.5)
         >>> print(og)
 
-    :seealso: :class:`BinaryOccupancyGrid`
+    .. seealso:: :class:`BinaryOccupancyGrid`
     """
 
     def __str__(self) -> str:
@@ -703,6 +710,10 @@ class OccupancyGrid(BaseOccupancyGrid):
 
 
 class PolygonMap(BaseMap):
+    """
+    Polygonal obstacle map
+    """
+
     def __init__(
         self,
         workspace: WorkspaceLike | None = None,
@@ -761,7 +772,7 @@ class PolygonMap(BaseMap):
         The ``polygon`` is tested against polygons in the map, and returns True
         on the first collision.
 
-        :seealso: :meth:`add` :class:`~spatialmath.geom2d.Polygon2`
+        .. seealso:: :meth:`add` :class:`~spatialmath.geom2d.Polygon2`
         """
         if not isinstance(polygon, Polygon2):
             polygon = Polygon2(polygon)
@@ -771,7 +782,10 @@ class PolygonMap(BaseMap):
         """
         Plot the polygonal obstacles
 
-        :param block: block until plot is dismissed, defaults to None
+        :param block: ``None`` leaves showing the figure to the environment (no
+            ``plt.show`` call), ``False`` shows it and returns at once, ``True`` shows
+            it and waits until it is closed; ignored by notebook backends,
+            defaults to None
 
         The obstacles are plotted in red, in axes that have the limits of the
         workspace.
@@ -781,8 +795,7 @@ class PolygonMap(BaseMap):
         for polygon in self.polygons:
             polygon.plot(color="r")
 
-        if block is not None:
-            plt.show(block=block)
+        apply_block(block)
 
     def isoccupied(self, p: ArrayLike2) -> bool:
         """

@@ -35,14 +35,17 @@ class ET2(BaseET):
 
     @property
     def s(self) -> ndarray:  # pragma: nocover
+        """
+        Motion subspace of the joint
+
+        :returns: the 3-vector :math:`(v_x, v_y, \\omega)` that is the unit twist of
+            the transform: a unit translation along x or y, or a unit rotation
+        """
         if self.kind[0] == "R":
-            return array([0, 0, 0, 1])
+            return array([0, 0, 1])
         if self.kind[1] == "x":
-            return array([1, 0, 0, 0])
-        elif self.kind[1] == "y":
-            return array([0, 1, 0, 0])
-        else:
-            return array([0, 0, 1, 0])
+            return array([1, 0, 0])
+        return array([0, 1, 0])
 
     @classmethod
     def R(
@@ -56,7 +59,7 @@ class ET2(BaseET):
         """
         Pure rotation
 
-        :param param: rotation angle
+        :param param: rotation angle, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param unit: angular unit, "rad" [default] or "deg"
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
@@ -73,9 +76,7 @@ class ET2(BaseET):
         - In the 2D case this is rotation around the normal to the
             xy-plane.
 
-        See Also
-        --------
-        :func:`ET2`, :func:`isrotation`
+        .. seealso:: :func:`ET2`, :func:`isrotation`
 
         """
         param = _resolve_param(param, eta)
@@ -95,7 +96,7 @@ class ET2(BaseET):
         """
         Pure translation along the x-axis
 
-        :param param: translation distance along the x-axis
+        :param param: translation distance along the x-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
@@ -107,10 +108,7 @@ class ET2(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET2`
-        :func:`istranslation`
+        .. seealso:: :func:`ET2` :func:`istranslation`
 
         """
         param = _resolve_param(param, eta)
@@ -128,7 +126,7 @@ class ET2(BaseET):
         """
         Pure translation along the y-axis
 
-        :param param: translation distance along the y-axis
+        :param param: translation distance along the y-axis, or a joint name such as ``"q2"``, see :ref:`ets-descriptors`
         :param j: Explicit joint number within the robot
         :param flip: Joint moves in opposite direction
         :returns: An elementary transform
@@ -140,9 +138,7 @@ class ET2(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET2`
+        .. seealso:: :func:`ET2`
 
         """
         param = _resolve_param(param, eta)
@@ -157,10 +153,7 @@ class ET2(BaseET):
         :returns: An elementary transform
         :rtype: ET2
 
-        See Also
-        --------
-        :func:`ET2`
-        :func:`istranslation`
+        .. seealso:: :func:`ET2` :func:`istranslation`
 
         :SymPy: supported
         """

@@ -1,0 +1,59 @@
+digraph IK {
+    rankdir=TB;
+    graph [fontname="Helvetica", fontsize=11, nodesep=0.3, ranksep=0.4, newrank=true, ordering=out];
+    node  [fontname="Helvetica", fontsize=10, style="filled", color="#444444", penwidth=1.0];
+    edge  [fontname="Helvetica", fontsize=9, color="#444444", arrowsize=0.7];
+
+    // fills (Okabe-Ito, lightened): analytic #E9C6DB, numeric Python #BFE0F5, numeric C++ #F7DC9C
+
+    robot [label="Robot", shape=box, fillcolor="#FFFFFF", penwidth=1.6];
+
+    subgraph cluster_an {
+        label="analytic (extra: ik = SymPy + python-flint)"; labeljust=l; style="rounded,dashed"; color="#999999";
+        an_m  [label=<<FONT FACE="Menlo">robot.ikine_analytic(T, q0)</FONT><BR/>→ <FONT FACE="Menlo">IKSolution</FONT>>, shape=box, style="rounded,filled", fillcolor="#E9C6DB"];
+        an_o  [label=<<FONT FACE="Menlo">robot.analytic_ik()</FONT>>, shape=box, style="rounded,filled", fillcolor="#E9C6DB"];
+        an_s  [label=<<FONT FACE="Menlo">ClosedFormIK</FONT><BR/>or <FONT FACE="Menlo">General6RIK</FONT>>, shape=ellipse, fillcolor="#E9C6DB"];
+        an_sol1 [label=<<FONT FACE="Menlo">.solve(T)</FONT><BR/>→ <FONT FACE="Menlo">IKSolution</FONT>, all solutions>, shape=box, fillcolor="#FFFFFF"];
+        an_sol2 [label=<<FONT FACE="Menlo">.ikine(T, q0)</FONT><BR/>→ <FONT FACE="Menlo">IKSolution</FONT>, nearest to <FONT FACE="Menlo">q0</FONT>>, shape=box, fillcolor="#FFFFFF"];
+        an_gp [label=<<FONT FACE="Menlo">.generate("python")</FONT>>, shape=note, fillcolor="#E9C6DB"];
+        an_gc [label=<<FONT FACE="Menlo">.generate("c", "c++", "rust")</FONT>>, shape=note, fillcolor="#E9C6DB"];
+        an_cc [label=<compile>, shape=invhouse, fillcolor="#E9C6DB"];
+        an_f  [label=<<FONT FACE="Menlo">q = func(T)</FONT><BR/>no Toolbox needed>, shape=box, fillcolor="#FFFFFF"];
+        an_g  [label=<<FONT FACE="Menlo">q = func(T)</FONT><BR/>no Toolbox needed>, shape=box, fillcolor="#FFFFFF"];
+        {rank=same; an_sol1 -> an_sol2 -> an_gp -> an_gc [style=invis];}
+    }
+
+    subgraph cluster_py {
+        label="numeric, Python"; labeljust=l; style="rounded,dashed"; color="#999999";
+        py_m  [label=<<FONT FACE="Menlo">robot.ikine_XX(T)</FONT><BR/>→ <FONT FACE="Menlo">IKSolution</FONT>>, shape=box, style="rounded,filled", fillcolor="#BFE0F5"];
+        py_o  [label=<<FONT FACE="Menlo">IK_XX(...)</FONT>>, shape=ellipse, fillcolor="#BFE0F5"];
+        py_s  [label=<<FONT FACE="Menlo">.solve(ets, T)</FONT><BR/>→ <FONT FACE="Menlo">IKSolution</FONT>>, shape=box, fillcolor="#FFFFFF"];
+    }
+
+    subgraph cluster_cpp {
+        label="numeric, C++"; labeljust=l; style="rounded,dashed"; color="#999999";
+        cp_m  [label=<<FONT FACE="Menlo">robot.ik_XX(T)</FONT><BR/>→ <FONT FACE="Menlo">IKSolution</FONT>, one pose>, shape=box, style="rounded,filled", fillcolor="#F7DC9C"];
+        cp_o  [label=<no solver object>, shape=ellipse, style="dashed", fillcolor="#FFFFFF", fontcolor="#777777", color="#999999"];
+    }
+
+    robot -> an_m; robot -> an_o; robot -> py_m; robot -> py_o; robot -> cp_m;
+    an_o -> an_s;
+    an_s -> an_sol1; an_s -> an_sol2; an_s -> an_gp; an_s -> an_gc;
+    an_gp -> an_f; an_gc -> an_cc -> an_g;
+    py_m -> py_o [style=dashed, label=" uses", constraint=false];
+    py_o -> py_s;
+    cp_m -> cp_o [style=dashed, arrowhead=none];
+
+    // key, laid out across the bottom
+    subgraph cluster_key {
+        label="key"; labeljust=l; style="rounded"; color="#BBBBBB"; fontcolor="#555555"; fontsize=8;
+        node [fontsize=8, margin="0.08,0.03", height=0.25];
+        k1 [label=<method of a robot>, shape=box, style="rounded,filled", fillcolor="#FFFFFF"];
+        k2 [label=<solver object>, shape=ellipse, fillcolor="#FFFFFF"];
+        k3 [label=<call on a solver object>, shape=box, fillcolor="#FFFFFF"];
+        k4 [label=<generated code>, shape=note, fillcolor="#FFFFFF"];
+        k5 [label=<compile step>, shape=invhouse, fillcolor="#FFFFFF"];
+        {rank=same; k1 -> k2 -> k3 -> k4 -> k5 [style=invis];}
+    }
+    an_f -> k1 [style=invis]; an_g -> k1 [style=invis]; py_s -> k1 [style=invis]; cp_o -> k1 [style=invis];
+}

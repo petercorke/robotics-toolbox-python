@@ -130,7 +130,7 @@ class LatticePlanner(PlannerBase):
     to reach it from the root.  This means, that any configuration, ie.
     :math:`(x, y, \theta)` can be reached by multiple paths and potentially have
     multiple names.  The first name assigned to a vertex is permanent and is not
-    overriden.
+    overridden.
 
     If an occupancy grid exists and the configuration is an obstacle, then
     the vertex is not added.
@@ -150,7 +150,7 @@ class LatticePlanner(PlannerBase):
         >>> print(path.T)
         >>> print(status)
 
-    :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`
+    .. seealso:: :meth:`plan` :meth:`query` :class:`PlannerBase`
     """
 
     def __init__(
@@ -201,7 +201,7 @@ class LatticePlanner(PlannerBase):
         If an occupancy grid exists the if ``iterations`` is None the area of the
         grid will be completely filled.
 
-        :seealso: :meth:`query`
+        .. seealso:: :meth:`query`
         """
         if iterations is None and self.occgrid is None:
             raise ValueError(
@@ -305,7 +305,7 @@ class LatticePlanner(PlannerBase):
         |``edges``    | successive edges of the graph ``LatticeEdge`` type  |
         +-------------+-----------------------------------------------------+
 
-        :seealso: :meth:`plan`
+        .. seealso:: :meth:`plan`
         """
 
         vs, ds = self.graph.closest(start)

@@ -3,12 +3,12 @@ Path planning
 
 A set of path planners for robots operating in planar environments with
 configuration :math:`\vec{q} \in \mathbb{R}^2` or :math:`\vec{q} \in \mathbb{R}^2 \times S^1 \sim \SE{2}`.
-All inherit from :class:`PlannerBase`.
+All inherit from :class:`~roboticstoolbox.mobile.PlannerBase`.
 
 Some planners are based on code from the PathPlanning category of
 `PythonRobotics <https://github.com/AtsushiSakai/PythonRobotics>`_ by Atsushi Sakai.
 
-.. inheritance-diagram:: roboticstoolbox.mobile.DistanceTransformPlanner roboticstoolbox.mobile.DstarPlanner roboticstoolbox.mobile.DubinsPlanner roboticstoolbox.mobile.ReedsSheppPlanner roboticstoolbox.mobile.QuinticPolyPlanner roboticstoolbox.mobile.CurvaturePolyPlanner roboticstoolbox.mobile.RRTPlanner
+.. inheritance-diagram:: roboticstoolbox.mobile.Bug2.Bug2 roboticstoolbox.mobile.DistanceTransformPlanner.DistanceTransformPlanner roboticstoolbox.mobile.DstarPlanner.DstarPlanner roboticstoolbox.mobile.PRMPlanner.PRMPlanner roboticstoolbox.mobile.LatticePlanner.LatticePlanner roboticstoolbox.mobile.DubinsPlanner.DubinsPlanner roboticstoolbox.mobile.ReedsSheppPlanner.ReedsSheppPlanner roboticstoolbox.mobile.CurvaturePolyPlanner.CurvaturePolyPlanner roboticstoolbox.mobile.QuinticPolyPlanner.QuinticPolyPlanner roboticstoolbox.mobile.RRTPlanner.RRTPlanner
     :parts: 1
 
 =========================================================   ====================   ===================   ===================
