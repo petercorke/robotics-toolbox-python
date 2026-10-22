@@ -100,6 +100,8 @@ def _refresh_animation_frame(
             except Exception:
                 pass
 
+    if dt <= 0:
+        raise ValueError("animation pause duration must be greater than zero")
     plt.pause(dt)
 
 

@@ -2,6 +2,8 @@
 A time step of zero used to hang: ``plt.pause(0)`` waits until the event loop is stopped.
 """
 
+from unittest.mock import Mock, patch
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -12,6 +14,8 @@ import pytest  # noqa: E402
 import roboticstoolbox as rtb  # noqa: E402
 from roboticstoolbox import ET2  # noqa: E402
 from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2  # noqa: E402
+from roboticstoolbox.mobile.PoseGraph import PoseGraph  # noqa: E402
+from roboticstoolbox.mobile.Vehicle import _refresh_animation_frame  # noqa: E402
 
 pytestmark = pytest.mark.timeout(20)
 
@@ -80,3 +84,48 @@ def test_plot_with_a_zero_dt_raises_and_does_not_hang():
     puma = rtb.models.DH.Puma560()
     with pytest.raises(ValueError, match="greater than zero"):
         puma.plot(puma.qr, backend="pyplot", dt=0, block=False)
+
+
+
+@pytest.mark.parametrize("pause", [0, 0.0, -0.1])
+def test_plot_scan_rejects_non_positive_pause(pause):
+    graph = Mock()
+    graph.scanxy.return_value = ([0.0, 1.0], [0.0, 1.0])
+    with patch.object(plt, "pause") as paused:
+        with pytest.raises(ValueError, match="greater than zero"):
+            PoseGraph.plot_scan(graph, 0, pause=pause)
+        paused.assert_not_called()
+
+
+def test_plot_scan_positive_pause():
+    graph = Mock()
+    graph.scanxy.return_value = ([0.0, 1.0], [0.0, 1.0])
+    with patch.object(plt, "pause") as paused:
+        PoseGraph.plot_scan(graph, 0, pause=0.01)
+        paused.assert_called_once_with(0.01)
+
+
+@pytest.mark.parametrize("dt", [0, 0.0, -0.1])
+def test_vehicle_animation_rejects_non_positive_pause(dt):
+    fig = plt.figure()
+    with patch("roboticstoolbox.mobile.Vehicle._isnotebook", return_value=False):
+        with patch.object(plt, "pause") as paused:
+            with pytest.raises(ValueError, match="greater than zero"):
+                _refresh_animation_frame(fig, dt, pause=True)
+            paused.assert_not_called()
+
+
+@pytest.mark.parametrize("dt", [0, 0.0, -0.1])
+def test_vehicle_nonblocking_animation_skips_pause(dt):
+    fig = plt.figure()
+    with patch.object(plt, "pause") as paused:
+        _refresh_animation_frame(fig, dt, pause=False)
+        paused.assert_not_called()
+
+
+def test_vehicle_animation_positive_pause():
+    fig = plt.figure()
+    with patch("roboticstoolbox.mobile.Vehicle._isnotebook", return_value=False):
+        with patch.object(plt, "pause") as paused:
+            _refresh_animation_frame(fig, 0.01, pause=True)
+            paused.assert_called_once_with(0.01)
