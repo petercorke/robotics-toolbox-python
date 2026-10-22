@@ -65,7 +65,7 @@ class ParticleFilter:
         history: bool = True,
         workspace: WorkspaceLike | None = None,
     ) -> None:
-        """
+        r"""
         Particle filter
 
         :param robot: robot motion model
@@ -81,8 +81,10 @@ class ParticleFilter:
         :param seed: random number seed, defaults to 0
         :type seed: int, optional
         :param x0: initial particle state, defaults to None which means the
-            particles are distributed uniformly randomly over the workspace
-        :type x0: array_like(3), optional
+            particles are distributed uniformly randomly over the workspace.  A
+            vector :math:`(x, y, \theta)` puts every particle there, a matrix with
+            a row for each particle gives each its own state.
+        :type x0: array_like(3) or ndarray(nparticles,3), optional
         :param verbose: display extra debug information, defaults to False
         :type verbose: bool, optional
         :param history: retain step-by-step history, defaults to True
@@ -327,6 +329,18 @@ class ParticleFilter:
             y = self.random.uniform(workspace[2], workspace[3], size=(self.nparticles,))
             t = self.random.uniform(-np.pi, np.pi, size=(self.nparticles,))
             self.x = np.c_[x, y, t]
+        else:
+            # a copy, since the particles are updated in place and the caller's
+            # array must not change
+            x0 = np.array(x0, dtype=float)
+            if x0.shape == (3,):
+                self.x = np.tile(x0, (self.nparticles, 1))
+            elif x0.shape == (self.nparticles, 3):
+                self.x = x0
+            else:
+                raise ValueError(
+                    f"x0 must have shape (3,) or ({self.nparticles}, 3), got {x0.shape}"
+                )
 
         if animate:
             if ax is None:
@@ -352,8 +366,8 @@ class ParticleFilter:
         :param T: maximum simulation time in seconds
         :type T: float
         :param x0: Initial particle state, defaults to the value given to the
-            constructor
-        :type x0: array_like(3) or array_like(2)
+            constructor, see :class:`ParticleFilter`
+        :type x0: array_like(3) or ndarray(nparticles,3), optional
 
         Simulates the motion of a vehicle (under the control of a driving agent)
         and the particle-filter estimator.  The steps are:
@@ -413,8 +427,8 @@ class ParticleFilter:
         :param T: maximum simulation time in seconds
         :type T: float
         :param x0: Initial particle state, defaults to the value given to the
-            constructor
-        :type x0: array_like(3) or array_like(2)
+            constructor, see :class:`ParticleFilter`
+        :type x0: array_like(3) or ndarray(nparticles,3), optional
         :param format: Output format
         :type format: str, optional
         :param file: File name
