@@ -414,8 +414,8 @@ class ArmPlot(GraphicsBlock):
         if not self._enabled:
             return
 
-        assert self.fig is not None
-        assert self.ax is not None
+        assert self.fig is not None  # nosec B101: narrows the type for mypy
+        assert self.ax is not None  # nosec B101: narrows the type for mypy
         self.env = self.robot.plot(
             self.q0,
             backend=self.backend,
@@ -765,7 +765,8 @@ class CirclePath(SourceBlock):
             raise ValueError("bad units: rps or rad")
 
         self.radius = radius
-        assert len(centre) == 3, "centre must be a 3 vector"
+        if len(centre) != 3:
+            raise ValueError("centre must be a 3 vector")
         self.centre = centre
         self.pose = pose
         self.omega = omega
@@ -963,7 +964,8 @@ class Traj(FunctionBlock):
 
         y0v = smb.getvector(y0)
         yfv = smb.getvector(yf)
-        assert len(y0v) == len(yfv), "y0 and yf must have same length"
+        if len(y0v) != len(yfv):
+            raise ValueError("y0 and yf must have same length")
 
         self.y0 = y0v
         self.yf = yfv
@@ -1005,8 +1007,10 @@ class Traj(FunctionBlock):
         if not self.time:
             t = inports[0]
 
-        assert t >= 0, "interpolation not defined for x<0"
-        assert t <= self.xmax, "interpolation not defined for x>" + str(self.xmax)
+        if t < 0:
+            raise ValueError("interpolation not defined for x<0")
+        if t > self.xmax:
+            raise ValueError("interpolation not defined for x>" + str(self.xmax))
 
         out = []
         for i in range(len(self.y0)):
@@ -1473,7 +1477,8 @@ class FDyn(ContinuousBlock):
         # return [qd qdd]
         Q = inports[0]
         n = self.robot.n
-        assert len(Q) == n, "torque vector wrong size"
+        if len(Q) != n:
+            raise ValueError("torque vector wrong size")
 
         q = x[:n]
         qd = x[n:]
@@ -1617,7 +1622,8 @@ class FDyn_X(ContinuousBlock):
 
         # compute joint forces
         w = inports[0]
-        assert len(w) == 6, "wrench vector wrong size"
+        if len(w) != 6:
+            raise ValueError("wrench vector wrong size")
         Q = self.robot.jacob0_analytical(q, representation=self.representation).T @ w
 
         if self.gravcomp or self.velcomp:
