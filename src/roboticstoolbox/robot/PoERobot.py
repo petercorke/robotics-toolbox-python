@@ -20,7 +20,7 @@ class PoELink(Link):
 
     This is a subclass of the base Link class.
 
-    :seealso: :class:`Link`
+    .. seealso:: :class:`Link`
     """
 
     def __init__(self, twist: Any, name: str | None = None) -> None:
@@ -143,7 +143,7 @@ class PoERevolute(PoELink):
 
         Construct a link and revolute joint for a PoE Robot.
 
-        :seealso: :class:`Link` :class:`Robot`
+        .. seealso:: :class:`Link` :class:`Robot`
         """
 
         super().__init__(Twist3.UnitRevolute(axis, point), **kwargs)
@@ -159,7 +159,7 @@ class PoEPrismatic(PoELink):
 
         Construct a link and prismatic joint for a PoE Robot.
 
-        :seealso: :class:`Link` :class:`Robot`
+        .. seealso:: :class:`Link` :class:`Robot`
         """
         super().__init__(Twist3.UnitPrismatic(axis), **kwargs)
 
@@ -177,7 +177,7 @@ class PoERobot(Robot):
         This is a subclass of the abstract base Robot class that provides
         only forward kinematics and world-frame Jacobian.
 
-        :seealso: :class:`PoEPrismatic` :class:`PoERevolute`
+        .. seealso:: :class:`PoEPrismatic` :class:`PoERevolute`
         """
 
         # add base link and end-effector link

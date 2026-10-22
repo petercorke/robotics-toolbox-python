@@ -60,7 +60,7 @@ def resolve_workspace(*sources: WorkspaceLike | None | Any) -> R4 | None:
 
         workspace = resolve_workspace(workspace, map, vehicle)
 
-    :seealso: :func:`~spatialmath.base.graphics.expand_dims`
+    .. seealso:: :func:`~spatialmath.base.graphics.expand_dims`
     """
     for source in sources:
         if source is None:

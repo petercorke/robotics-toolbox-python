@@ -54,8 +54,7 @@ class ETS(BaseETS[ET]):
 
     :param arg: list of ETs or a single ET to initialise the ETS
 
-    Examples
-    --------
+    .. rubric:: Examples
 
     .. runblock:: pycon
 
@@ -75,14 +74,7 @@ class ETS(BaseETS[ET]):
       Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
 
-    See Also
-    --------
-    ``rx``
-    ``ry``
-    ``rz``
-    ``tx``
-    ``ty``
-    ``tz``
+    .. seealso:: ``rx`` ``ry`` ``rz`` ``tx`` ``ty`` ``tz``
 
     """
 
@@ -192,7 +184,12 @@ class ETS(BaseETS[ET]):
 
         .. versionadded:: 1.5.0
         """
-        if not isinstance(j, (int, np.integer)) or not 0 <= j < self.n:
+        # bool subclasses int, but must not select joint 0 or 1.
+        if (
+            isinstance(j, bool)
+            or not isinstance(j, (int, np.integer))
+            or not 0 <= j < self.n
+        ):
             raise ValueError(f"joint index {j} out of range for {self.n} joints")
         if unit not in ("rad", "deg"):
             raise ValueError("unit must be 'rad' or 'deg'")
@@ -260,8 +257,7 @@ class ETS(BaseETS[ET]):
         exact, ``pi/2`` from SymPy, if the transform has a symbolic parameter or
         offset, and floating point otherwise.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -278,6 +274,7 @@ class ETS(BaseETS[ET]):
 
         .. runblock:: pycon
 
+            >>> from roboticstoolbox import ET
             >>> from spatialmath.base import symbol
             >>> L = symbol("L")
             >>> e = ET.Rz() * ET.tx(L) * ET.Rx()
@@ -333,8 +330,7 @@ class ETS(BaseETS[ET]):
         The sequence it is called on is not changed.  See :meth:`replace` for what
         the transform is replaced by.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -362,8 +358,7 @@ class ETS(BaseETS[ET]):
         ETs are compounded, leading to a constant ET which is denoted by
         ``SE3`` when displayed.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -373,9 +368,7 @@ class ETS(BaseETS[ET]):
             >>> ets
             >>> ets.compile()
 
-        See Also
-        --------
-        ``isconstant``
+        .. seealso:: ``isconstant``
         """
         const = None
         ets = ETS()
@@ -416,8 +409,7 @@ class ETS(BaseETS[ET]):
         Inserts an ET or ETS into the ET sequence.  The inserted ET is at position
         ``index``; an ETS is expanded and inserted element by element.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -460,8 +452,7 @@ class ETS(BaseETS[ET]):
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``panda`` robot object, gets the ets, and
         solves for the forward kinematics at the listed configuration.
@@ -529,8 +520,7 @@ class ETS(BaseETS[ET]):
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is a 3d array with ``m`` planes.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -576,8 +566,7 @@ class ETS(BaseETS[ET]):
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Puma560`` robot object, and solves for the
         base-frame Jacobian at the zero joint angle configuration
@@ -624,8 +613,7 @@ class ETS(BaseETS[ET]):
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Puma560`` robot object, and solves for the
         end-effector frame Jacobian at the zero joint angle configuration
@@ -699,8 +687,7 @@ class ETS(BaseETS[ET]):
 
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Panda`` robot object, and solves for the
         base frame Hessian at the given joint angle configuration
@@ -770,8 +757,7 @@ class ETS(BaseETS[ET]):
 
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Panda`` robot object, and solves for the
         end-effector frame Hessian at the given joint angle configuration
@@ -823,8 +809,7 @@ class ETS(BaseETS[ET]):
         ``'exp'``           exponential coordinate rates
         ==================  ====================================
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         Makes a robot object and computes the analytic Jacobian for the given
         joint configuration
@@ -1026,8 +1011,7 @@ class ETS(BaseETS[ET]):
         where the Jacobian is the first partial derivative and the Hessian is the
         second.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example makes a ``Panda`` robot object, and solves for the
         base-effector frame 4th derivative of the forward kinematics at the given
@@ -1299,8 +1283,7 @@ class ETS(BaseETS[ET]):
 
         Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1412,8 +1395,7 @@ class ETS(BaseETS[ET]):
 
             \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1539,8 +1521,7 @@ class ETS(BaseETS[ET]):
         the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
         is singular, the above can not be computed and the GN solution is infeasible.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1639,7 +1620,7 @@ class ETS(BaseETS[ET]):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1707,8 +1688,7 @@ class ETS(BaseETS[ET]):
 
         Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the ``k`` kwarg.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1813,7 +1793,7 @@ class ETS(BaseETS[ET]):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1831,8 +1811,7 @@ class ETS(BaseETS[ET]):
 
             \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -1932,7 +1911,7 @@ class ETS(BaseETS[ET]):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -1965,8 +1944,7 @@ class ETS(BaseETS[ET]):
         the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
         is singular, the above can not be computed and the GN solution is infeasible.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose
@@ -2068,7 +2046,7 @@ class ETS(BaseETS[ET]):
         has shape (N, n), ``success`` is True only if every pose succeeded, and
         ``residual`` is the maximum over the poses.  See :meth:`~roboticstoolbox.robot.IK.IKSolver.solve`.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is the maximum over the poses, it was
             the minimum.
 
@@ -2146,8 +2124,7 @@ class ETS(BaseETS[ET]):
         :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and
         :math:`\dvec{\delta}^{-,+}` are the minimum and maximum slack velocities.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
         pose ``Tep``, and then solves for the joint coordinates which result in the pose

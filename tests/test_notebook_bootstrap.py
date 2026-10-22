@@ -345,3 +345,12 @@ def test_install_writes_the_hook_and_leaves_another_alone(tmp_path):
     (hooks / "pre-commit").write_text("#!/bin/sh\necho mine\n", encoding="utf-8")
     assert "left alone" in pre_commit.install(hooks)
     assert "mine" in (hooks / "pre-commit").read_text(encoding="utf-8")
+
+
+def test_the_browser_install_goes_through_piplite():
+    # micropip cannot see a JupyterLite site's own package index, and a /pypi folder
+    # does not exist in the kernel, so the wheel built with the site would never be used
+    template = (NOTEBOOKS_DIR / "_rtb_nb_bootstrap.py").read_text(encoding="utf-8")
+
+    assert "import piplite" in template
+    assert '"/pypi"' not in template

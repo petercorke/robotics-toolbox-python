@@ -150,7 +150,7 @@ class LatticePlanner(PlannerBase):
         >>> print(path.T)
         >>> print(status)
 
-    :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`
+    .. seealso:: :meth:`plan` :meth:`query` :class:`PlannerBase`
     """
 
     def __init__(
@@ -201,7 +201,7 @@ class LatticePlanner(PlannerBase):
         If an occupancy grid exists the if ``iterations`` is None the area of the
         grid will be completely filled.
 
-        :seealso: :meth:`query`
+        .. seealso:: :meth:`query`
         """
         if iterations is None and self.occgrid is None:
             raise ValueError(
@@ -305,7 +305,7 @@ class LatticePlanner(PlannerBase):
         |``edges``    | successive edges of the graph ``LatticeEdge`` type  |
         +-------------+-----------------------------------------------------+
 
-        :seealso: :meth:`plan`
+        .. seealso:: :meth:`plan`
         """
 
         vs, ds = self.graph.closest(start)

@@ -191,8 +191,17 @@ class PyPlot2(Connector):
         by the robot object, and not all robot objects support all control
         types.
 
+        :param dt: time step in seconds, which must be greater than zero in a window,
+            where the plot pauses for ``dt``; in a notebook there is no pause
+        :raises ValueError: if ``dt`` is not greater than zero in a window:
+            Matplotlib's ``pause(0)`` does not return, since a timeout of zero means
+            to wait until the event loop is stopped
         """
-
+        if dt <= 0 and self.render_mode == "window":
+            raise ValueError(
+                f"dt is {dt}, it must be greater than zero: a pause of zero seconds "
+                "does not return"
+            )
 
         self._step_robots(dt)
 

@@ -140,8 +140,7 @@ class ET(BaseET):
         :returns: The SE(3) matrix value of the ET
         :rtype: ndarray
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -209,10 +208,7 @@ class ET(BaseET):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`isrotation`
+        .. seealso:: :func:`ET` :func:`isrotation`
 
         :SymPy: supported
         """
@@ -244,10 +240,7 @@ class ET(BaseET):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`isrotation`
+        .. seealso:: :func:`ET` :func:`isrotation`
 
         :SymPy: supported
         """
@@ -279,10 +272,7 @@ class ET(BaseET):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`isrotation`
+        .. seealso:: :func:`ET` :func:`isrotation`
 
         :SymPy: supported
         """
@@ -312,10 +302,7 @@ class ET(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`istranslation`
+        .. seealso:: :func:`ET` :func:`istranslation`
 
         :SymPy: supported
         """
@@ -357,10 +344,7 @@ class ET(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`istranslation`
+        .. seealso:: :func:`ET` :func:`istranslation`
 
         :SymPy: supported
         """
@@ -401,10 +385,7 @@ class ET(BaseET):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`istranslation`
+        .. seealso:: :func:`ET` :func:`istranslation`
 
         :SymPy: supported
         """
@@ -431,10 +412,7 @@ class ET(BaseET):
         :returns: An elementary transform
         :rtype: ET
 
-        See Also
-        --------
-        :func:`ET`
-        :func:`istranslation`
+        .. seealso:: :func:`ET` :func:`istranslation`
 
         :SymPy: supported
         """

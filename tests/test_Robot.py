@@ -1093,7 +1093,7 @@ class TestRobot(unittest.TestCase):
             r.jtraj(r.qz, r.qr, 5, foo=1)
 
     def test_jtraj_rejects_poses(self):
-        # deprecated in 1.4.5, the message says what to do instead
+        # deprecated in 1.5.0, the message says what to do instead
         for r in (rtb.models.Panda(), rtb.models.DH.Puma560()):
             T = r.fkine(r.qr)
 

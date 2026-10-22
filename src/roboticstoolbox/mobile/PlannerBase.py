@@ -197,7 +197,7 @@ class PlannerBase:
     A planner raises ``ValueError`` for invalid arguments and ``NoPathError``
     when a valid problem has no solution.
 
-    :seealso: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid`
+    .. seealso:: :class:`~roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid`
     """
 
     def __init__(
@@ -288,7 +288,7 @@ class PlannerBase:
 
         The start is either a point :math:`(x, y)` or a configuration :math:`(x, y, \theta)`.
 
-        :seealso: :meth:`goal`
+        .. seealso:: :meth:`goal`
         """
         return self._start
 
@@ -311,7 +311,7 @@ class PlannerBase:
 
         The goal is either a point :math:`(x, y)` or a configuration :math:`(x, y, \theta)`.
 
-        :seealso: :meth:`start`
+        .. seealso:: :meth:`start`
         """
         return self._goal
 
@@ -357,7 +357,7 @@ class PlannerBase:
 
         A movie file given to the constructor also implies animation.
 
-        :seealso: :meth:`animation_start`
+        .. seealso:: :meth:`animation_start`
         """
         return self._animate or self._movie is not None
 
@@ -402,7 +402,7 @@ class PlannerBase:
 
         A ``movie`` implies animation.
 
-        :seealso: :meth:`animation_frame` :meth:`animation_end`
+        .. seealso:: :meth:`animation_frame` :meth:`animation_end`
         """
         if movie is None:
             movie = self._movie
@@ -427,7 +427,7 @@ class PlannerBase:
 
         Updates the display and adds a frame to the movie, if there is one.
 
-        :seealso: :meth:`animation_start`
+        .. seealso:: :meth:`animation_start`
         """
         if pause > 0:
             plt.pause(pause)
@@ -438,7 +438,7 @@ class PlannerBase:
         """
         End an animation, closing the movie file if there is one
 
-        :seealso: :meth:`animation_start`
+        .. seealso:: :meth:`animation_start`
         """
         if self._writer is not None:
             self._writer.done()
@@ -463,7 +463,7 @@ class PlannerBase:
         The generator is initialized with the seed provided at constructor
         time.
 
-        :seealso: :func:`numpy.random.default_rng`
+        .. seealso:: :func:`numpy.random.default_rng`
         """
         return self._private_random
 
@@ -495,7 +495,7 @@ class PlannerBase:
 
         Returns the occupancy grid that was optionally inflated at constructor time.
 
-        :seealso: :meth:`validate_endpoint` :meth:`~roboticstoolbox.mobile.PlannerBase.isoccupied`
+        .. seealso:: :meth:`validate_endpoint` :meth:`~roboticstoolbox.mobile.PlannerBase.isoccupied`
         """
         return self._occgrid
 
@@ -512,7 +512,7 @@ class PlannerBase:
 
         If there is no occupancy grid this function always returns False (free).
 
-        :seealso:  :meth:`occgrid` :meth:`validate_endpoint` ``isoccupied``
+        .. seealso:: :meth:`occgrid` :meth:`validate_endpoint` ``isoccupied``
         """
         if self.occgrid is None:
             return False
@@ -532,7 +532,7 @@ class PlannerBase:
 
         The coordinate is tested to be a free cell in the occupancy grid.
 
-        :seealso: :meth:`~roboticstoolbox.mobile.PlannerBase.isoccupied` :meth:`occgrid`
+        .. seealso:: :meth:`~roboticstoolbox.mobile.PlannerBase.isoccupied` :meth:`occgrid`
         """
         if p is not None:
             pv = getvector(p, self._ndims, dtype=dtype)
@@ -558,7 +558,7 @@ class PlannerBase:
 
         .. warning:: Requires that the ``progress`` package is installed.
 
-        :seealso: :meth:`progress_next` :meth:`progress_end`
+        .. seealso:: :meth:`progress_next` :meth:`progress_end`
         """
         if self._progress:
             self._bar = FillingCirclesBar(
@@ -580,7 +580,7 @@ class PlannerBase:
 
         .. warning:: Requires that the ``progress`` package is installed.
 
-        :seealso: :meth:`progress_start` :meth:`progress_end`
+        .. seealso:: :meth:`progress_start` :meth:`progress_end`
         """
         if self._progress:
             self._bar.next()
@@ -600,7 +600,7 @@ class PlannerBase:
 
         .. warning:: Requires that the ``progress`` package is installed.
 
-        :seealso: :meth:`progress_start` :meth:`progress_next`
+        .. seealso:: :meth:`progress_start` :meth:`progress_next`
         """
         if self._progress:
             self._bar.finish()
@@ -627,7 +627,7 @@ class PlannerBase:
         value of None leaves the existing value unchanged.  If either is invalid
         neither is stored.
 
-        :seealso: :meth:`validate_endpoint` :attr:`start` :attr:`goal`
+        .. seealso:: :meth:`validate_endpoint` :attr:`start` :attr:`goal`
         """
         start_ = self.validate_endpoint(start, dtype=dtype)
         goal_ = self.validate_endpoint(goal, dtype=dtype)
@@ -790,7 +790,7 @@ class PlannerBase:
         plotted on top, giving a line of alternating black and yellow dashes.
         A style given by the caller replaces these layers.
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             The arguments ``line``, ``line_r``, ``path_marker``,
             ``path_marker_reverse``, ``start_marker``, ``goal_marker``,
             ``start_vehicle`` and ``goal_vehicle`` are deprecated, use
@@ -799,13 +799,13 @@ class PlannerBase:
             ``path_marker`` and ``path_marker_reverse`` were accepted but had
             no effect.
 
-        :seealso: :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg` ``plot_poly``
+        .. seealso:: :meth:`~roboticstoolbox.mobile.PlannerBase.plot_bg` ``plot_poly``
 
         .. note:: Unknown keyword arguments are ignored, with a
             ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
             earlier.
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``labelvalues`` is deprecated, use ``labels``.  It is the name used
             in the book, where it had no effect.
 
@@ -1091,7 +1091,7 @@ class PlannerBase:
             white outline (``path_effects``) so that it is legible on any gray.
             The axes are set to show every cell whole.
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             Giving a dict as ``colorbar`` is deprecated, use ``colorbar=True``
             with ``colorbar_style``.
 
@@ -1112,7 +1112,7 @@ class PlannerBase:
             ``DeprecationWarning``, as they were silently by RTB 1.4.4 and
             earlier.
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``labelvalues`` is deprecated, use ``labels``.  It is the name used
             in the book, where it had no effect.
 

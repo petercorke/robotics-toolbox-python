@@ -45,7 +45,8 @@ class Bug2(PlannerBase):
         :class:`PlannerBase`. It can produce very inefficient paths.
 
     :author: Kristian Gibson and Peter Corke, based on MATLAB version by Peter Corke
-    :seealso: :class:`PlannerBase`
+
+    .. seealso:: :class:`PlannerBase`
     """
 
     def __init__(self, **kwargs: Any) -> None:
@@ -112,7 +113,7 @@ class Bug2(PlannerBase):
               cell centres using the occupancy grid's origin and cell size.
               The returned path and hit points use the same world coordinates.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             The robot is considered to have crossed the m-line when it is within
             :math:`\\sqrt{2}/2` cells of it, previously half a cell.  A line at
             45 degrees to the grid passes between two diagonal neighbours at that
@@ -120,7 +121,7 @@ class Bug2(PlannerBase):
             that the robot was reported as trapped.  This shortens the house
             floorplan example, from the bedroom to the kitchen, by one point.
 
-        .. versionchanged:: 1.4.5
+        .. versionchanged:: 1.5.0
             The robot leaves an obstacle only where the next step along the
             m-line is free.  Previously it could leave, find the obstacle in
             the way, and hit it again from the same cell, so that cell appeared
@@ -132,7 +133,7 @@ class Bug2(PlannerBase):
             to the kitchen has 1302 points rather than the 1307 of earlier
             versions.
 
-        :seealso: :meth:`Bug2.plot`
+        .. seealso:: :meth:`Bug2.plot`
         """
 
         # make sure start and goal are set and valid

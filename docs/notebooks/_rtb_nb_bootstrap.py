@@ -11,7 +11,6 @@ sync_bootstrap.py -- see docs/notebooks/README.md for the full explanation.
 
 import subprocess
 import sys
-from pathlib import Path
 
 
 async def ensure_installed(extras: tuple[str, ...] | list[str] = ()) -> bool:
@@ -23,7 +22,18 @@ async def ensure_installed(extras: tuple[str, ...] | list[str] = ()) -> bool:
     :returns: True if running on Google Colab, False otherwise.
     """
     if sys.platform == "emscripten":
-        import micropip
+        # In JupyterLite, piplite looks in this site's own package index first, so the
+        # toolbox it installs is the wheel that was built with the site.  micropip
+        # alone cannot see that index and would install the last release from PyPI.
+        # Outside JupyterLite (for example a test under Node) there is no piplite.
+        try:
+            import piplite
+
+            install = piplite.install
+        except ImportError:
+            import micropip
+
+            install = micropip.install
 
         # spatialmath-python <= 1.1.18 lists pre-commit (a dev tool) as a runtime
         # dependency; its virtualenv requires packaging>=26.3, which conflicts with
@@ -32,24 +42,15 @@ async def ensure_installed(extras: tuple[str, ...] | list[str] = ()) -> bool:
         # toolbox's own dependencies are resolved below.  Remove this line once a
         # spatialmath release without that dependency is out
         # (rai-opensource/spatialmath-python#250).
-        await micropip.install("spatialmath-python", deps=False)
-        await micropip.install("ipympl")
+        await install("spatialmath-python", deps=False)
+        await install("ipympl")
         if "ik" in extras:
             # SymPy is one of Pyodide's own packages.  python-flint is not installed:
             # the one bundled with Pyodide 0.27 is too old for the toolbox, which
             # then uses SymPy for the polynomial steps, about 2x slower for a
             # general 6R arm (10 s to derive a Kinova Jaco).
-            await micropip.install("sympy")
-
-        wheels = sorted(Path("/pypi").glob("roboticstoolbox_python-*.whl"))
-        if wheels:
-            # Prefer the wheel bundled with this JupyterLite site. Relative,
-            # not absolute: a leading slash resolves against the origin, not
-            # this site's own base URL (a GitHub Pages project subpath).
-            await micropip.install(f"pypi/{wheels[-1].name}")
-        else:
-            # Fall back to PyPI when running outside the published site layout.
-            await micropip.install("roboticstoolbox-python")
+            await install("sympy")
+        await install("roboticstoolbox-python")
         where, colab = "in browser", False
     else:
         try:

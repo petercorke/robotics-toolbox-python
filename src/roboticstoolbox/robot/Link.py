@@ -78,7 +78,7 @@ def _dirties_frne(func: Any) -> Any:
         def m(self, m_new):
             self._m = m_new
 
-    :seealso: :func:`DHLink._dyn_changed`
+    .. seealso:: :func:`DHLink._dyn_changed`
     """
 
     @wraps(func)
@@ -298,8 +298,7 @@ class BaseLink(SceneNode, ABC):
         This property returns the constant part.  If no constant part
         is given, this returns an identity matrix.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -477,8 +476,7 @@ class BaseLink(SceneNode, ABC):
         identity) followed by an optional joint variable transform.
         This property returns the latter.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -548,7 +546,7 @@ class BaseLink(SceneNode, ABC):
         - The limits are not widely enforced within the toolbox.
         - If no joint limits are specified the value is ``None``
 
-        :seealso: :func:`~islimit`
+        .. seealso:: :func:`~islimit`
         """
 
         if self.v:
@@ -578,7 +576,7 @@ class BaseLink(SceneNode, ABC):
         - The limits are not widely enforced within the toolbox.
         - If no joint velocity limits are specified the value is ``None``
 
-        :seealso: :func:`~islimit`
+        .. seealso:: :func:`~islimit`
         """
 
         return self._qdlim
@@ -602,7 +600,7 @@ class BaseLink(SceneNode, ABC):
         - The limits are not widely enforced within the toolbox.
         - If no joint torque limits are specified the value is ``None``
 
-        :seealso: :func:`~islimit`
+        .. seealso:: :func:`~islimit`
         """
 
         return self._tlim   
@@ -628,8 +626,7 @@ class BaseLink(SceneNode, ABC):
             with only friction parameters, or one made with ``m=0``, now
             reports False.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -945,7 +942,7 @@ class BaseLink(SceneNode, ABC):
             The default was 0, which silently discarded the motor inertia and
             friction of a link that did not set ``G``.
 
-        :seealso: ``flip``
+        .. seealso:: ``flip``
         """
 
         return self._G
@@ -1022,8 +1019,7 @@ class BaseLink(SceneNode, ABC):
         This property returns the whether the Link contains the
         variable transform.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1096,8 +1092,7 @@ class BaseLink(SceneNode, ABC):
         This is a reference to the links parent in the kinematic
         chain
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1251,8 +1246,7 @@ class BaseLink(SceneNode, ABC):
         the link object in a multi-line format. The properties shown are mass,
         centre of mass, inertia, friction, gear ratio and motor properties.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1261,7 +1255,7 @@ class BaseLink(SceneNode, ABC):
             >>> print(robot.links[2])        # kinematic parameters
             >>> print(robot.links[2].dyn())  # dynamic parameters
 
-        :seealso: ``dyntable``
+        .. seealso:: ``dyntable``
         """
 
         qlim = [0, 0] if self.qlim is None else self.qlim
@@ -1299,7 +1293,7 @@ class BaseLink(SceneNode, ABC):
         properties of the link The properties included are mass, centre of
         mass, inertia, friction, gear ratio and motor properties.
 
-        :seealso: :func:`~dyn`
+        .. seealso:: :func:`~dyn`
         """
 
         ANSITable(
@@ -1413,7 +1407,7 @@ class BaseLink(SceneNode, ABC):
 
         - If no limits are set always return False.
 
-        :seealso: :func:`qlim`
+        .. seealso:: :func:`qlim`
         """
 
         if self.qlim is None:
@@ -1538,7 +1532,7 @@ class Link(BaseLink):
     - ``Ts`` the constant part as a NumPy array, or None
     - ``v`` a pointer to an ETS object representing the joint variable, or None
 
-    :seealso: :class:`Link2`, ``DHLink``
+    .. seealso:: :class:`Link2`, ``DHLink``
     """
 
     def __init__(

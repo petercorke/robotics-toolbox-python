@@ -16,8 +16,9 @@ We can use :class:`~roboticstoolbox.ETS` to describes a planar arm that moves in
    >>> print(e)
    >>> e.fkine([0.3, 0.4])
 
-.. note:: ``ETS2`` has no inverse kinematics, Hessian or manipulability
-   methods yet, see `Issue 824 <https://github.com/petercorke/robotics-toolbox-python/issues/824>`_.
+.. note:: ``ETS2`` has numerical inverse kinematics,
+   :meth:`~roboticstoolbox.ETS2.ikine_LM`, but no Hessian or manipulability
+   methods yet.
 
 ET2: Elementary Transform
 -------------------------
@@ -161,6 +162,7 @@ Kinematics
    ~roboticstoolbox.ETS2.eval
    ~roboticstoolbox.ETS2.jacob0
    ~roboticstoolbox.ETS2.jacobe
+   ~roboticstoolbox.ETS2.ikine_LM
 
 Other
 ^^^^^
@@ -175,5 +177,5 @@ Details
 ^^^^^^^
 
 .. autoclass:: roboticstoolbox.ETS2
-   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, swapped, merge, merged, compile, fkine, eval, jacob0, jacobe, plot, teach
+   :members: n, m, structure, joints, joint_idx, jindices, jindex_set, qlim, random_q, insert, append, extend, remove, reverse, inv, fixjoint, split, swap, swapped, merge, merged, compile, fkine, eval, jacob0, jacobe, ikine_LM, plot, teach
    :member-order: bysource

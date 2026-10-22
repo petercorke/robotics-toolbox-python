@@ -197,7 +197,7 @@ def trchain(
     calls to named functions. Names other than joint variables are supplied by
     ``variables``.
 
-    :seealso: :func:`trchain2`, :class:`roboticstoolbox.ETS`
+    .. seealso:: :func:`trchain2`, :class:`roboticstoolbox.ETS`
     """
     result = _evaluate_chain(chain, q, unit, qvar, variables, _TRANSFORMS_3D, 4)
     return result if return_tokens else result[0]
@@ -226,7 +226,7 @@ def trchain2(
     The chain contains ``R`` (or ``Rz``), ``Tx``, and ``Ty`` tokens.
     Expressions are evaluated as described by :func:`trchain`.
 
-    :seealso: :func:`trchain`, :class:`roboticstoolbox.ETS2`
+    .. seealso:: :func:`trchain`, :class:`roboticstoolbox.ETS2`
     """
     result = _evaluate_chain(chain, q, unit, qvar, variables, _TRANSFORMS_2D, 3)
     return result if return_tokens else result[0]

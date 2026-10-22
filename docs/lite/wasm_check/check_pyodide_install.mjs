@@ -45,11 +45,6 @@ const pyodide = await loadPyodide();
 await pyodide.loadPackage("micropip");
 
 pyodide.FS.writeFile("/" + wheelName, fs.readFileSync(wheelPath));
-// The bootstrap looks for the site's bundled wheel in /pypi, and falls back to
-// installing from PyPI if there is none.  Without this the check would test the
-// last release, not the wheel just built.
-pyodide.FS.mkdirTree("/pypi");
-pyodide.FS.writeFile("/pypi/" + wheelName, fs.readFileSync(wheelPath));
 pyodide.FS.writeFile("/_rtb_nb_bootstrap.py", fs.readFileSync(bootstrapPath));
 
 const driver = `
@@ -59,18 +54,20 @@ sys.path.insert(0, "/")
 import micropip
 import _rtb_nb_bootstrap as bootstrap
 
-# Test-only scaffolding: redirect the one HTTP/relative-URL install call to
-# the wheel already mounted in Pyodide's own virtual filesystem, so this
-# check doesn't need to fake a browser Web Worker's base URL (see this
-# file's module docstring for why that's out of scope here). Everything
-# else -- the install steps, which is what this check actually
-# exists to catch drift in -- runs completely unmodified.
-_real_install = micropip.install
-async def _redirect_wheel_install(requirements, **kwargs):
-    if isinstance(requirements, str) and requirements.startswith("pypi/"):
+# Test-only scaffolding: in JupyterLite the bootstrap installs through piplite, which
+# finds the toolbox in the site's own package index, the wheel built with the site.
+# There is no piplite or site here, so a stand-in installs that wheel, mounted in
+# Pyodide's own virtual filesystem (the \`emfs:\` micropip scheme), and passes every
+# other package on to micropip.  Everything else, the install steps in the
+# bootstrap, which is what this check exists to catch drift in, runs unmodified.
+import types
+_piplite = types.ModuleType("piplite")
+async def _install(requirements, deps=True, **kwargs):
+    if requirements == "roboticstoolbox-python":
         requirements = "emfs:/${wheelName}"
-    return await _real_install(requirements, **kwargs)
-micropip.install = _redirect_wheel_install
+    return await micropip.install(requirements, deps=deps, **kwargs)
+_piplite.install = _install
+sys.modules["piplite"] = _piplite
 
 await bootstrap.ensure_installed(extras=['ik'])
 
@@ -88,6 +85,34 @@ for name in ("Puma560", "Jaco"):
     sol = ik.solve(robot.fkine([0.1] * robot.n))
     assert len(sol.q) > 0, name
     print(f"analytic_ik {name}: {type(ik).__name__}, {time.time() - t:.1f}s")
+
+# Plotting a trajectory in a notebook.  JupyterLite notebooks say %matplotlib ipympl,
+# and an ipympl figure cannot update while a cell runs, so the animation has to be
+# pushed frame by frame as inline images.  What the Toolbox pushes is captured here.
+import matplotlib
+matplotlib.use("agg")  # there is no browser to draw in under Node
+import importlib
+# the package also exports a class called PyPlot, so ask for the module by name
+module = importlib.import_module("roboticstoolbox.backends.PyPlot.PyPlot")
+
+class _Matplotlib:
+    """matplotlib, claiming that the ipympl backend is the one in use."""
+    def __getattr__(self, name):
+        return getattr(matplotlib, name)
+    def get_backend(self):
+        return "module://ipympl.backend_nbagg"
+module.matplotlib = _Matplotlib()
+
+frames = []
+module._ipy_display = lambda frame, display_id=None: frames.append(frame.data)
+module._ipy_clear_output = lambda wait=False: None
+
+robot = rtb.models.DH.Puma560()
+env = robot.plot(rtb.jtraj(robot.qz, robot.qn, 8).q, dt=0.0)
+assert env.render_mode == "notebook-inline", env.render_mode
+assert len(set(frames)) >= 8, f"{len(set(frames))} different frames pushed for 8 steps"
+assert robot.plot(robot.qn).render_mode == "notebook-widget"
+print(f"plot of a trajectory: {env.render_mode}, {len(set(frames))} different frames")
 print("import roboticstoolbox: OK")
 `;
 

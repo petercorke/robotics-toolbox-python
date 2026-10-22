@@ -53,7 +53,7 @@ class FKine(FunctionBlock):
     Compute the end-effector pose as an SE(3) object as a function of the input joint
     configuration.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.fkine`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.fkine`
     """
 
     nin = 1
@@ -124,7 +124,7 @@ class IKine(FunctionBlock):
     :note: The solution may not exist and is not unique.  The solution will depend
         on the initial joint configuration ``q0``.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.ik_LM`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.ik_LM`
     """
 
     nin = 1
@@ -232,7 +232,7 @@ class Jacobian(FunctionBlock):
     Jacobian can be computed in the world or end-effector frame, for spatial or
     analytical velocity, and its inverse, damped inverse or transpose can be returned.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.jacob0`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.jacob0`
         :meth:`~roboticstoolbox.robot.Robot.Robot.jacobe`
         :meth:`~roboticstoolbox.robot.Robot.Robot.jacob0_analytical`
     """
@@ -371,7 +371,7 @@ class ArmPlot(GraphicsBlock):
 
     Create a robot animation using the robot's ``plot`` method.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.plot`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.plot`
     """
 
     nin = 1
@@ -471,7 +471,7 @@ class JTraj(SourceBlock):
     ``qf`` over the course of the simulation. A quintic (5th order) polynomial is used
     with default zero boundary conditions for velocity and acceleration.
 
-    :seealso: :func:`~roboticstoolbox.tools.trajectory.ctraj`
+    .. seealso:: :func:`~roboticstoolbox.tools.trajectory.ctraj`
         ``xplot``
         :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
@@ -632,7 +632,7 @@ class CTraj(SourceBlock):
     to provide initial acceleration and final deceleration.  Otherwise,
     motion is at constant velocity.
 
-    :seealso: :meth:`~spatialmath.pose3d.SE3.interp`
+    .. seealso:: :meth:`~spatialmath.pose3d.SE3.interp`
         :func:`~roboticstoolbox.tools.trajectory.ctraj`
         ``xplot``
         :func:`~roboticstoolbox.tools.trajectory.jtraj`
@@ -825,7 +825,7 @@ class Trapezoidal(SourceBlock):
         element, because ``trapezoidal_func`` returned arrays for a scalar
         time.
 
-    :seealso: ``ctraj``, ``xplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
+    .. seealso:: ``ctraj``, ``xplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
 
     nin = 0
@@ -916,7 +916,7 @@ class Traj(FunctionBlock):
         previously failed with an ``UnboundLocalError`` when the simulation
         started.  The outputs are unchanged.
 
-    :seealso: :func:`spatialmath.base.mtraj`
+    .. seealso:: :func:`spatialmath.base.mtraj`
     """
 
     nin = -1
@@ -1064,7 +1064,7 @@ class IDyn(FunctionBlock):
 
     .. todo:: end-effector wrench input, base wrench output, payload input
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.rne`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.rne`
     """
 
     nin = 3
@@ -1134,7 +1134,7 @@ class Gravload(FunctionBlock):
     Compute generalized joint forces due to gravity for the input joint
     configuration.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.gravload`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.gravload`
     """
 
     nin = 1
@@ -1197,7 +1197,7 @@ class Gravload_X(FunctionBlock):
 
     Compute end-effector wrench due to gravity for the input end-effector pose.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.gravload_x`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.gravload_x`
         :meth:`~roboticstoolbox.robot.Robot.Robot.gravload`
     """
 
@@ -1280,7 +1280,7 @@ class Inertia(FunctionBlock):
 
     Joint-space inertia matrix (mass matrix) as a function of joint configuration.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.inertia`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.inertia`
     """
 
     nin = 1
@@ -1342,7 +1342,7 @@ class Inertia_X(FunctionBlock):
 
     Task-space inertia matrix as a function of end-effector pose.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.inertia_x`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.inertia_x`
     """
 
     nin = 1
@@ -1424,7 +1424,7 @@ class FDyn(ContinuousBlock):
     for the input configuration and applied joint forces.  The acceleration is
     integrated to obtain joint velocity and joint configuration.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.fdyn`
+    .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.fdyn`
     """
 
     nin = 1
@@ -1523,7 +1523,7 @@ class FDyn_X(ContinuousBlock):
     acceleration for the input end-effector pose and applied end-effector wrench.  The
     acceleration is integrated to obtain task-space velocity and task-space pose.
 
-    :seealso: ``fdyn_x``
+    .. seealso:: ``fdyn_x``
     """
 
     nin = 1

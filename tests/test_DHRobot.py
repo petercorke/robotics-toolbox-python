@@ -694,49 +694,6 @@ class TestDHRobot(unittest.TestCase):
             nt.assert_array_almost_equal(n2.links[i].Tc, L[i].Tc)
 
     @unittest.skip("payload needs fixing")
-    def test_pay(self):
-        panda = rp.models.DH.Panda()
-        q = [1, 2, 3, 4, 5, 6, 7]
-
-        w = [1, 2, 3, 4, 5, 6]
-
-        wT = np.c_[w, w, w, w].T
-        qT = np.c_[q, q, q, q].T
-
-        tau = np.array([6.0241, -4.4972, -7.2160, -4.2400, 7.0215, -4.6884, -6.0000])
-
-        tau0 = np.array([-5.9498, 1.4604, -3.4544, 1.5026, -3.7777, -6.6578, 2.6047])
-
-        tauT = np.c_[tau, tau, tau, tau].T
-        tau0T = np.c_[tau0, tau0, tau0, tau0].T
-
-        Je = panda.jacobe(q)
-        J0 = panda.jacob0(q)
-
-        JeT = np.zeros((4, 6, 7))
-        for i in range(4):
-            JeT[i, :, :] = Je
-
-        panda.pay(w)
-
-        nt.assert_array_almost_equal(panda.pay(w), tau, decimal=4)
-        nt.assert_array_almost_equal(panda.pay(w, frame=0), tau0, decimal=4)
-
-        nt.assert_array_almost_equal(panda.pay(w, q=q), tau, decimal=4)
-        nt.assert_array_almost_equal(panda.pay(wT, q=qT), tauT, decimal=4)
-        nt.assert_array_almost_equal(panda.pay(wT, q=qT, frame=0), tau0T, decimal=4)
-
-        nt.assert_array_almost_equal(panda.pay(w, J=Je), tau, decimal=4)
-        nt.assert_array_almost_equal(panda.pay(w, J=J0), tau0, decimal=4)
-
-        nt.assert_array_almost_equal(panda.pay(wT, J=JeT), tauT, decimal=4)
-
-        with self.assertRaises(ValueError):
-            panda.pay(wT, q)
-
-        with self.assertRaises(TypeError):
-            panda.pay(wT)
-
     def test_friction(self):
         l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1])
         qd = [1, 2, 3, 4]
@@ -1487,30 +1444,6 @@ class TestDHRobot(unittest.TestCase):
     # tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
 
     #         self.assertEqual(str(puma), res)
-
-    # def test_paycap(self):
-    #     self.skipTest("error introduced with DHLink change")
-    #     puma = rp.models.DH.Puma560()
-    #     puma.q = puma.qn
-    #     q = puma.qn
-
-    #     w = [1, 2, 1, 2, 1, 2]
-    #     tauR = np.ones((6, 2))
-    #     tauR[:, 1] = -1
-
-    #     res0 = [
-    #         1.15865438e+00, -3.04790052e+02, -5.00870095e+01,  6.00479950e+15,
-    #         3.76356072e+00, 1.93649167e+00]
-
-    #     wmax0, joint = puma.paycap(w, tauR, q=q, frame=0)
-    #     wmax1, _ = puma.paycap(np.c_[w, w], tauR, q=np.c_[q, q], frame=0)
-    #     wmax2, _ = puma.paycap(w, tauR, frame=0)
-
-    #     nt.assert_allclose(wmax0, res0)
-    #     self.assertEqual(joint, 1)
-    #     nt.assert_allclose(wmax1[:, 0], res0)
-    #     nt.assert_allclose(wmax1[:, 1], res0)
-    #     nt.assert_allclose(wmax2, res0)
 
     def test_jacob_dot(self):
         puma = rp.models.DH.Puma560()

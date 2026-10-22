@@ -677,7 +677,7 @@ class DHRobot(Robot):
             >>> robot = rtb.models.DH.Panda()
             >>> robot.nbranches
 
-        :seealso: :func:`n`, :func:`nlinks`
+        .. seealso:: :func:`n`, :func:`nlinks`
         """
         return 1
 
@@ -1113,7 +1113,7 @@ class DHRobot(Robot):
             default: ``pip install roboticstoolbox-python[ik]``.  The extra also
             installs ``python-flint``, which makes the derivation much faster.
 
-        .. versionadded:: 1.6.0
+        .. versionadded:: 1.5.0
         """
         key = tuple(
             (link.isrevolute, link.a, link.d, link.alpha, link.theta, link.offset)
@@ -1158,7 +1158,7 @@ class DHRobot(Robot):
         derives the equations, see :meth:`analytic_ik`, and the solver is kept for
         the calls that follow.
 
-        .. versionadded:: 1.6.0
+        .. versionadded:: 1.5.0
         """
         return self.analytic_ik().ikine(T, q0, joint_limits, weights)
 
@@ -1189,7 +1189,7 @@ class DHRobot(Robot):
         """
         Analytic inverse kinematics for a robot with a spherical wrist
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             This came from the MATLAB Toolbox and is not general.  It only handles
             the wrist, the user supplied ``ikfunc`` must solve the first three
             joints, and that is specific to one robot geometry.  It also
@@ -1611,7 +1611,7 @@ class DHRobot(Robot):
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
 
-        :seealso: :func:`jacob0`, ``jacob_dot``
+        .. seealso:: :func:`jacob0`, ``jacob_dot``
         """
 
         return self.ets().hessian0(q, J0)
@@ -1703,7 +1703,7 @@ class DHRobot(Robot):
               inertia and joint friction.
             - If a model has no dynamic parameters set the result is zero.
 
-        :seealso: :func:`rne_python`
+        .. seealso:: :func:`rne_python`
         """
         self._require_dynamics()
 
@@ -1850,7 +1850,7 @@ class DHRobot(Robot):
             - This version supports symbolic model parameters
             - Verified against MATLAB code
 
-        :seealso: :func:`rne`
+        .. seealso:: :func:`rne`
         """
         self._require_dynamics()
 

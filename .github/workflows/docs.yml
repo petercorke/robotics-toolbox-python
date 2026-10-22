@@ -91,18 +91,13 @@ jobs:
         # Copies *.ipynb plus any local asset directories (e.g.
         # docs/notebooks/figs/, referenced by relative path from markdown
         # cells) -- but not the Makefile-generated *.py script conversions
-        # or other loose files. ik_benchmark.ipynb is excluded deliberately:
-        # it benchmarks numeric IK solver performance and uses the
-        # websocket-based Swift visualizer, neither of which is meaningful
-        # or functional inside the Pyodide sandbox -- it stays Colab-only.
-        # ik-symbolic.ipynb is included: SymPy is one of Pyodide's own packages
+        # or other loose files.  ik-symbolic.ipynb is included: SymPy is one of Pyodide's own packages
         # and the derivation takes 1 to 10 s without python-flint (timed in
         # docs/lite/wasm_check, which checks it on every build).
         run: |
           mkdir -p docs/lite/files
           rsync -a --exclude '.ipynb_checkpoints' --exclude '__pycache__' \
             --exclude 'Untitled*.ipynb' --exclude '*.py' --exclude 'Makefile' --exclude 'README.md' \
-            --exclude 'ik_benchmark.ipynb' \
             docs/notebooks/ docs/lite/files/
 
       - name: Adapt staged notebooks for JupyterLite
@@ -155,6 +150,28 @@ jobs:
         run: |
           pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server ipympl
           cd docs/lite && jupyter lite build --output-dir ../build/html/lite
+
+      - name: Check JupyterLite in a real browser (install, widgets, animation)
+        # Builds a small site with the wheel built above and one notebook, opens it in
+        # Chromium, and checks that the site installs that wheel (not the last release
+        # from PyPI), draws an ipywidgets slider and an ipympl figure, and that a
+        # trajectory animates while its cell is running.  See
+        # docs/lite/browser_check/.  Informational (continue-on-error) until it has
+        # run green on main, then remove that line so that it blocks the deploy.
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+          python docs/lite/browser_check/check_lite_in_browser.py --screenshot lite_check_failed.png
+
+      - name: Keep the screenshot if the browser check failed
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: lite-browser-check
+          path: lite_check_failed.png
+          if-no-files-found: ignore
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
