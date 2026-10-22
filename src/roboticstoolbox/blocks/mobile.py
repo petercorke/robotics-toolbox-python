@@ -59,7 +59,7 @@ class Bicycle(ContinuousBlock):
     * acceleration limit ``accel_max``
     * steering limit ``steer_max``
 
-    :seealso: :class:`~roboticstoolbox.mobile.Vehicle.Bicycle` :class:`Unicycle` :class:`DiffSteer`
+    .. seealso:: :class:`~roboticstoolbox.mobile.Vehicle.Bicycle` :class:`Unicycle` :class:`DiffSteer`
     """
 
     nin = 2
@@ -173,7 +173,7 @@ class Unicycle(ContinuousBlock):
     * acceleration limit ``accel_max``
     * steering limit ``steer_max``
 
-    :seealso: :class:`~roboticstoolbox.mobile.Vehicle.Unicycle` :class:`Bicycle` :class:`DiffSteer`
+    .. seealso:: :class:`~roboticstoolbox.mobile.Vehicle.Unicycle` :class:`Bicycle` :class:`DiffSteer`
 
     """
 
@@ -278,7 +278,7 @@ class DiffSteer(ContinuousBlock):
     .. note:: Wheel velocity is defined such that if both are positive the vehicle
             moves forward.
 
-    :seealso: :class:`~roboticstoolbox.mobile.Vehicle.DiffSteer` :class:`Bicycle` :class:`Unicycle`
+    .. seealso:: :class:`~roboticstoolbox.mobile.Vehicle.DiffSteer` :class:`Bicycle` :class:`Unicycle`
     """
 
     nin = 2
@@ -407,7 +407,7 @@ class VehiclePlot(GraphicsBlock):
         :param blockargs: |GraphicsBlockOptions|
         :raises TypeError: ``animation`` is not a ``VehicleAnimationBase``
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             the arguments ``path``, ``init``, ``scale`` and ``polyargs`` are
             deprecated, use ``path_style``, ``init_func``, ``limits`` and
             ``polygon_style`` instead.

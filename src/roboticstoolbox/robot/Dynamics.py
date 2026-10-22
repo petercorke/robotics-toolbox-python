@@ -72,8 +72,7 @@ class DynamicsMixin:
         The dynamic parameters (inertial and friction) are printed in a table,
         with one row per link.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -155,10 +154,7 @@ class DynamicsMixin:
             ratios are tricky: the Puma560 robot has negative gear ratio for
             joints 1 and 3.
 
-        See Also
-        --------
-        :meth:`~roboticstoolbox.robot.Robot.Robot.nofriction`
-        :meth:`~roboticstoolbox.robot.Link.Link.friction`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.nofriction` :meth:`~roboticstoolbox.robot.Link.Link.friction`
 
         """
 
@@ -184,10 +180,7 @@ class DynamicsMixin:
         a robot with the same link parameters except the Coulomb and/or viscous
         friction parameter are set to zero.
 
-        See Also
-        --------
-        :meth:`~roboticstoolbox.robot.Robot.Robot.friction`
-        :meth:`~roboticstoolbox.robot.Link.Link.nofriction`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.friction` :meth:`~roboticstoolbox.robot.Link.Link.nofriction`
 
         """
 
@@ -257,8 +250,7 @@ class DynamicsMixin:
 
         The function must return a Numpy array (n,) of joint forces/torques.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         To apply zero joint torque to the robot without Coulomb
         friction:
@@ -303,11 +295,7 @@ class DynamicsMixin:
         - Interpolation is performed using
           `SciPy interp1d <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`_
 
-        See Also
-        --------
-        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.accel`
-        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.nofriction`,
-        :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.rne`.
+        .. seealso:: :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.accel` :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.nofriction`, :meth:`~roboticstoolbox.robot.DHRobot.DHRobot.rne`.
 
         """
         self._require_dynamics()
@@ -457,8 +445,7 @@ class DynamicsMixin:
         where each row is the acceleration corresponding to the equivalent rows
         of q, qd, torque.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -792,8 +779,7 @@ class DynamicsMixin:
         vector, and the result is a 3d-matrix (nxnxk) where each plane
         corresponds to the inertia for the corresponding row of q.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -811,9 +797,7 @@ class DynamicsMixin:
         - The diagonal terms include the motor inertia reflected through
             the gear ratio.
 
-        See Also
-        --------
-        :func:`cinertia`
+        .. seealso:: :func:`cinertia`
 
         """
         self._require_dynamics()
@@ -862,8 +846,7 @@ class DynamicsMixin:
         joint configuration, and the result (n,n,m) is a 3d-matrix where
         each plane corresponds to a row of ``q`` and ``qd``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -961,8 +944,7 @@ class DynamicsMixin:
         configuration vector, and the result is a matrix (nxm) each column
         being the corresponding joint torques.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1038,8 +1020,7 @@ class DynamicsMixin:
         corresponds to the Cartesian inertia for the corresponding
         row of ``q``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1054,9 +1035,7 @@ class DynamicsMixin:
 
         .. warning:: Assumes that the operational space has 6 DOF.
 
-        See Also
-        --------
-        :func:`inertia`
+        .. seealso:: :func:`inertia`
 
         """
 
@@ -1159,8 +1138,7 @@ class DynamicsMixin:
         joint configuration, and the result is an array (m,6,6) where
         each matrix corresponds to a row of ``q`` and ``qd``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1178,11 +1156,7 @@ class DynamicsMixin:
 
         .. warning:: Assumes that the operational space has 6 DOF.
 
-        See Also
-        --------
-        :func:`coriolis`
-        :func:`inertia_x`
-        :meth:`~roboticstoolbox.robot.Robot.Robot.hessian0`
+        .. seealso:: :func:`coriolis` :func:`inertia_x` :meth:`~roboticstoolbox.robot.Robot.Robot.hessian0`
 
         """
 
@@ -1272,8 +1246,7 @@ class DynamicsMixin:
         configuration vector, and the result is a matrix (m,6) with one
         gravity wrench per row.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1288,9 +1261,7 @@ class DynamicsMixin:
 
         .. warning:: Assumes that the operational space has 6 DOF.
 
-        See Also
-        --------
-        :func:`gravload`
+        .. seealso:: :func:`gravload`
 
         """
 
@@ -1369,9 +1340,7 @@ class DynamicsMixin:
             numbers of joints.
         - Joint friction is considered.
 
-        See Also
-        --------
-        :func:`accel`
+        .. seealso:: :func:`accel`
 
         """
 
@@ -1440,8 +1409,7 @@ class DynamicsMixin:
         joint configuration, and the result is a matrix (m,n) where each row is
         the corresponding joint torques.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1454,9 +1422,7 @@ class DynamicsMixin:
         - If the robot model contains non-zero motor inertia then this
             will be included in the result.
 
-        See Also
-        --------
-        :func:`inertia`
+        .. seealso:: :func:`inertia`
 
         """
         self._require_dynamics()

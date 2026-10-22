@@ -368,7 +368,8 @@ class DstarPlanner(PlannerBase):
         >>> print(status)
 
     :thanks: based on D* grid planning included from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
-    :seealso: :class:`PlannerBase`
+
+    .. seealso:: :class:`PlannerBase`
     """
 
     def __init__(
@@ -423,7 +424,7 @@ class DstarPlanner(PlannerBase):
         :param progress: deprecated, has no effect
         :param summary: print the number of insertions, defaults to False
 
-        .. deprecated:: 1.4.5
+        .. deprecated:: 1.5.0
             ``animate`` and ``progress`` were accepted but had no effect.
 
         Compute the minimum-cost obstacle-free distance to the goal from all
@@ -509,7 +510,7 @@ class DstarPlanner(PlannerBase):
         replanning.  In this case the value returned by :meth:`nexpand` will
         increase, according to the severity of the replanning.
 
-        :seealso: :meth:`plan`
+        .. seealso:: :meth:`plan`
         """
         self.validate_start_goal(start)
         c, r = self._costgrid.w2g(start)

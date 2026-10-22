@@ -379,8 +379,7 @@ class BaseET:
         :returns: The constant value if set
         :rtype: float or Sym or None
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -475,8 +474,7 @@ class BaseET:
         :returns: The transform type and axis, e.g. ``"Rx"``, ``"tx"``, ``"SE3"``
         :rtype: str
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -518,8 +516,7 @@ class BaseET:
             letter, or a compound/arbitrary ``SE3``/``SE2`` transform)
         :rtype: str or None
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -541,8 +538,7 @@ class BaseET:
         :returns: True if a joint
         :rtype: bool
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -573,8 +569,7 @@ class BaseET:
         The offset may be symbolic.  It is zero if it is exactly zero or, for a
         rotation, a whole number of turns of a symbolic angle.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -615,8 +610,7 @@ class BaseET:
         A flipped joint uses the negative of the joint variable, ie. it rotates
         or moves in the opposite direction.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -638,8 +632,7 @@ class BaseET:
         :returns: True if a rotation
         :rtype: bool
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -661,8 +654,7 @@ class BaseET:
         :returns: True if a translation
         :rtype: bool
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -703,8 +695,7 @@ class BaseET:
 
         Allows an ET to be associated with a numbered joint in a robot.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -739,9 +730,7 @@ class BaseET:
         - ET's may not actually be "elementary", it can be a complex
             mix of rotations and translations.
 
-        See Also
-        --------
-        :func:`compile`
+        .. seealso:: :func:`compile`
 
         """
 
@@ -756,8 +745,7 @@ class BaseET:
 
         The inverse of a given ET.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -792,8 +780,7 @@ class BaseET:
         :returns: The SE(3) or SE(2) matrix value of the ET
         :rtype: ndarray
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 

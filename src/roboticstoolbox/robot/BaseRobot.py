@@ -427,9 +427,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Called from a property setter to inform the robot that the cache of
         dynamic parameters is invalid.
 
-        See Also
-        --------
-        :func:`roboticstoolbox.Link._dirties_frne`
+        .. seealso:: :func:`roboticstoolbox.Link._dirties_frne`
 
         """
 
@@ -461,8 +459,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param i: link number or name
         :returns: i'th link or named link
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -636,8 +633,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Number of joints
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -645,10 +641,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.n
 
-        See Also
-        --------
-        :func:`nlinks`
-        :func:`nbranches`
+        .. seealso:: :func:`nlinks` :func:`nbranches`
 
         """
 
@@ -664,8 +657,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Number of links
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -673,10 +665,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.nlinks
 
-        See Also
-        --------
-        :func:`n`
-        :func:`nbranches`
+        .. seealso:: :func:`n` :func:`nbranches`
 
         """
 
@@ -692,8 +681,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: number of branches in the robot's kinematic tree
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -701,10 +689,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.ETS.Panda()
             >>> robot.nbranches
 
-        See Also
-        --------
-        :func:`n`
-        :func:`nlinks`
+        .. seealso:: :func:`n` :func:`nlinks`
         """
 
         return sum([link.nchildren == 0 for link in self.links]) + len(self.grippers)
@@ -813,8 +798,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             methods on a kinematics-only model, and accept the zeros, now get a
             ``ValueError``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -846,8 +830,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Robot has geometry model
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -855,9 +838,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.hasgeometry
 
-        See Also
-        --------
-        :func:`hascollision`
+        .. seealso:: :func:`hascollision`
 
         """
 
@@ -871,8 +852,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :returns: Robot has collision model
         :returns: At least one link has associated collision model.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -880,9 +860,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.hascollision
 
-        See Also
-        --------
-        :func:`hasgeometry`
+        .. seealso:: :func:`hasgeometry`
 
         """
 
@@ -923,7 +901,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         been given one of its own by ``robot.default_backend = ...``.  The robot's
         own value takes precedence.
 
-        :seealso: :attr:`default_backend`
+        .. seealso:: :attr:`default_backend`
         """
         cls._class_default_backend = be
 
@@ -1018,8 +996,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :raises ValueError: unset limits for a prismatic joint
         :returns: Array of joint limit values
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1078,8 +1055,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: joint configuration string
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1114,8 +1090,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: array of joint type, True if prismatic
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1130,10 +1105,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Fixed joints, that maintain a constant link relative pose,
         are not included.
 
-        See Also
-        --------
-        :meth:`~roboticstoolbox.robot.Link.Link.isprismatic`
-        :func:`revolutejoints`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link.isprismatic` :func:`revolutejoints`
 
         """
 
@@ -1146,8 +1118,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: array of joint type, True if revolute
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1162,10 +1133,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Fixed joints, that maintain a constant link relative pose,
         are not included.
 
-        See Also
-        --------
-        :meth:`~roboticstoolbox.robot.Link.Link.isrevolute`
-        :func:`prismaticjoints`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link.isrevolute` :func:`prismaticjoints`
 
         """
 
@@ -1535,8 +1503,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :raises TypeError: a bad link argument
         :returns: elementary transform sequence
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1670,8 +1637,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :returns: If ``q`` is a matrix, with one column per joint, the conversion is
         :returns: performed columnwise.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1707,8 +1673,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param q: The joint configuration of the robot
         :returns: a vector of joint coordinates in radians and metres
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1735,8 +1700,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: True if revolute
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1746,10 +1710,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.isrevolute(1)
 
-        See Also
-        --------
-        :meth:`~roboticstoolbox.robot.Link.Link.isrevolute`
-        :func:`revolutejoints`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link.isrevolute` :func:`revolutejoints`
 
         """
         return self.revolutejoints[j]
@@ -1760,8 +1721,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: True if prismatic
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1771,10 +1731,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.isprismatic(1)
 
-        See Also
-        --------
-        :meth:`~roboticstoolbox.robot.Link.Link.isprismatic`
-        :func:`prismaticjoints`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Link.Link.isprismatic` :func:`prismaticjoints`
 
         """
 
@@ -1820,8 +1777,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param name: Name of the joint configuration
         :param q: Joint configuration
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1839,9 +1795,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - Configuration is also added to the robot instance's dictionary of
             named configurations.
 
-        See Also
-        --------
-        :meth:`addconfiguration`
+        .. seealso:: :meth:`addconfiguration`
 
         """
 
@@ -1859,8 +1813,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param name: Name of the joint configuration
         :param q: Joint configuration
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1869,9 +1822,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
             >>> robot.configs["mypos"]
 
-        See Also
-        --------
-        :meth:`addconfiguration`
+        .. seealso:: :meth:`addconfiguration`
 
         """
 
@@ -1927,10 +1878,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Random joint configuration :rtype: ndarray(n)
 
-        See Also
-        --------
-        :meth:`~roboticstoolbox.robot.Robot.Robot.qlim`
-        :meth:`~roboticstoolbox.robot.Link.Link.qlim`
+        .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.qlim` :meth:`~roboticstoolbox.robot.Link.Link.qlim`
 
         """
 
@@ -1945,8 +1893,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         :returns: Pretty print of the robot model
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         Makes a robot and prints the hierarchy
 
@@ -2193,9 +2140,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             actually be on the robot, ie. the lines to not necessarily
             represent the links of the robot.
 
-        See Also
-        --------
-        :func:`teach`
+        .. seealso:: :func:`teach`
 
         """
 
@@ -2539,8 +2484,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param jtype: Arrowhead to node indicates revolute or prismatic type
         :param static: Show static joints in blue and bold
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         >>> import roboticstoolbox as rtb
         >>> panda = rtb.models.URDF.Panda()
@@ -2549,9 +2493,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         .. image:: ../figs/panda-graph.svg
             :width: 600
 
-        See Also
-        --------
-        :func:`dotfile` :func:`graph`
+        .. seealso:: :func:`dotfile` :func:`graph`
 
         """
 
@@ -2621,9 +2563,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param jtype: Arrowhead to node indicates revolute or prismatic type
         :param static: Show static joints in blue and bold
 
-        See Also
-        --------
-        :func:`showgraph` :func:`graph`
+        .. seealso:: :func:`showgraph` :func:`graph`
 
         """
 
@@ -2779,7 +2719,7 @@ graph [rankdir=LR];
             from IPython.display import Markdown, display
             display(Markdown(robot.graph(format="mermaid_fenced")))
 
-        :seealso: :meth:`dotfile` :meth:`showgraph`
+        .. seealso:: :meth:`dotfile` :meth:`showgraph`
         """
         graph_format = format.lower().replace("-", "_")
 

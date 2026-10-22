@@ -1248,7 +1248,7 @@ class AnalyticIK(ABC):
     - :meth:`ikine` gives *one* solution for each pose, the nearest to ``q0``, for
       a pose or a trajectory, as :meth:`~roboticstoolbox.robot.Robot.Robot.ikine_LM` does
 
-    .. versionadded:: 1.6.0
+    .. versionadded:: 1.5.0
     """
 
     #: name of the method, for messages

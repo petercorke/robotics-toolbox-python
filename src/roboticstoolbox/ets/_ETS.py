@@ -145,8 +145,7 @@ class BaseETS(MutableSequence[ETT]):
         :returns: Pretty printed ETS
         :rtype: str
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -254,8 +253,7 @@ class BaseETS(MutableSequence[ETT]):
         :param p: pretty printer handle (ignored)
         :param cycle: pretty printer flag (ignored)
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         In [1]: e
         Out [1]: R(q0) ⊕ tx(1) ⊕ R(q1) ⊕ tx(1)
@@ -271,8 +269,7 @@ class BaseETS(MutableSequence[ETT]):
         :returns: indices of transforms that are joints
         :rtype: ndarray
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -291,8 +288,7 @@ class BaseETS(MutableSequence[ETT]):
         :returns: list of ETs that are joints
         :rtype: list[BaseET]
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -369,8 +365,7 @@ class BaseETS(MutableSequence[ETT]):
         :returns: set of unique joint indices
         :rtype: set[int]
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -390,8 +385,7 @@ class BaseETS(MutableSequence[ETT]):
         :returns: array of unique joint indices
         :rtype: ndarray
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -494,8 +488,7 @@ class BaseETS(MutableSequence[ETT]):
         :rtype: ndarray(2,n)
         :raises ValueError: unset limits for a prismatic joint
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -551,8 +544,7 @@ class BaseETS(MutableSequence[ETT]):
         :returns: a string indicating the joint types
         :rtype: str
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -576,8 +568,7 @@ class BaseETS(MutableSequence[ETT]):
 
         Counts the number of joints in the ETS.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -585,9 +576,7 @@ class BaseETS(MutableSequence[ETT]):
             >>> e = ET.Rx() * ET.tx(1) * ET.tz()
             >>> e.n
 
-        See Also
-        --------
-        :func:`joints`
+        .. seealso:: :func:`joints`
 
         """
 
@@ -603,8 +592,7 @@ class BaseETS(MutableSequence[ETT]):
 
         Counts the number of transforms in the ETS.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -638,8 +626,7 @@ class BaseETS(MutableSequence[ETT]):
 
         :returns: Inverse of the ETS
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -672,8 +659,7 @@ class BaseETS(MutableSequence[ETT]):
             of the same concrete type as ``self`` (a slice of an ETS is
             still an ETS)
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -747,8 +733,7 @@ class BaseETS(MutableSequence[ETT]):
         Generates a random q vector within the joint limits defined by
         ``self.qlim``.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -824,8 +809,7 @@ class BaseETS(MutableSequence[ETT]):
             order of the elements of ``q`` is unchanged even though the joints now
             appear in the opposite order in the sequence.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -895,8 +879,7 @@ class BaseETS(MutableSequence[ETT]):
         The sequence it is called on is not changed.  See :meth:`swap` for which
         transforms can be swapped.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1057,8 +1040,7 @@ class BaseETS(MutableSequence[ETT]):
         Merging does not look at the neighbours of the result, so if removing a
         transform leaves two mergeable ones adjacent, call :meth:`merge` again.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 
@@ -1145,8 +1127,7 @@ class BaseETS(MutableSequence[ETT]):
         The sequence it is called on is not changed.  See :meth:`merge` for which
         transforms can be merged and when the result is removed.
 
-        Examples
-        --------
+        .. rubric:: Examples
 
         .. runblock:: pycon
 

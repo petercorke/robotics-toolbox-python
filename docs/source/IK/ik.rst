@@ -29,7 +29,7 @@ Member           Meaning
 
 An ``IKSolution`` is a sequence of the rows of ``q``, so ``len(sol)`` is the number of poses and ``for q in sol`` visits them, and ``bool(sol)`` is ``success``.
 
-.. versionchanged:: 1.4.5
+.. versionchanged:: 1.5.0
     Iterating over the six members was removed, use the attributes or ``sol.astuple()``.
 
 The Toolbox has *three ways* to find a solution, shown in the figure.  **Numerical** solvers start from a guess for :math:`\vec{q}` and iterate until the pose is reached.  They work for any robot, and are written in Python, or in C++ for speed.  **Analytic** solvers (see :doc:`analytic`) derive the equations of the inverse kinematics once, symbolically, and then solve them directly for any pose, with no guess and no iteration, giving all the solutions.  They work for six-axis arms, and can write the solution out as source code with no dependency on the Toolbox.

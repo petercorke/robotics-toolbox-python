@@ -202,7 +202,7 @@ class VehicleBase(ABC):
         .. note:: Set ``seed=None`` to have it randomly initialized from the
             operating system.
 
-        :seealso: :class:`Bicycle` :class:`Unicycle` :class:`VehicleAnimationBase`
+        .. seealso:: :class:`Bicycle` :class:`Unicycle` :class:`VehicleAnimationBase`
         """
 
         self._V = covar
@@ -288,7 +288,7 @@ class VehicleBase(ABC):
 
         .. note:: This is the state update equation used for EKF localization.
 
-        :seealso: :meth:`deriv` :meth:`Fx` :meth:`Fv`
+        .. seealso:: :meth:`deriv` :meth:`Fx` :meth:`Fv`
         """
         odo = base.getvector(odo, 2)
 
@@ -332,7 +332,7 @@ class VehicleBase(ABC):
         Returns the Jacobian matrix :math:`\frac{\partial \vec{f}}{\partial \vec{x}}` for
         the given state and odometry.
 
-        :seealso: :meth:`f` :meth:`deriv` :meth:`Fv`
+        .. seealso:: :meth:`f` :meth:`deriv` :meth:`Fv`
         """
         dd, dth = odo
         theta = x[2]
@@ -360,7 +360,7 @@ class VehicleBase(ABC):
         Returns the Jacobian matrix :math:`\frac{\partial \vec{f}}{\partial \vec{v}}` for
         the given state and odometry.
 
-        :seealso:  :meth:`f` :meth:`deriv` :meth:`Fx`
+        .. seealso:: :meth:`f` :meth:`deriv` :meth:`Fx`
         """
         dd, dth = odo
         theta = x[2]
@@ -400,7 +400,7 @@ class VehicleBase(ABC):
             >>> bike.control = RandomPath(workspace=10)
             >>> print(bike)
 
-        :seealso: :meth:`run` :meth:`eval_control` :obj:`scipy.interpolate.interp1d` :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
+        .. seealso:: :meth:`run` :meth:`eval_control` :obj:`scipy.interpolate.interp1d` :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
         """
         return self._control
 
@@ -434,7 +434,7 @@ class VehicleBase(ABC):
         Vehicle steering, speed and acceleration limits are applied to the
         result before being input to the vehicle model.
 
-        :seealso: :meth:`run` :meth:`control` :func:`scipy.interpolate.interp1d`
+        .. seealso:: :meth:`run` :meth:`control` :func:`scipy.interpolate.interp1d`
         """
         u: ArrayLike
         if base.isvector(control, 2):
@@ -506,7 +506,7 @@ class VehicleBase(ABC):
         ``q``.  Can be used for collision checking using the :meth:`~spatialmath.geom2d.Polygon2.intersects`
         method.
 
-        :seealso: :class:`~spatialmath.geom2d.Polygon2`
+        .. seealso:: :class:`~spatialmath.geom2d.Polygon2`
         """
         if self._polygon is None:
             raise ValueError("vehicle has no bounding polygon")
@@ -534,7 +534,7 @@ class VehicleBase(ABC):
 
         .. warning:: Deprecated.  Use ``vehicle.control = driver`` instead.
 
-        :seealso: :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase` :meth:`control`
+        .. seealso:: :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase` :meth:`control`
         """
 
         warnings.warn("add_driver is deprecated, use veh.control=driver instead")
@@ -584,7 +584,7 @@ class VehicleBase(ABC):
               attribute set by the constructor.
             * integration uses rectangular integration.
 
-        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
+        .. seealso:: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
         """
 
         self.init(control=control, animate=animate, x0=x0)
@@ -663,7 +663,7 @@ class VehicleBase(ABC):
               attribute set by the constructor.
             * integration uses rectangular integration.
 
-        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run`
+        .. seealso:: :meth:`init` :meth:`step` :meth:`control` :meth:`run`
         """
 
         fig, ax = plt.subplots()
@@ -739,7 +739,7 @@ class VehicleBase(ABC):
         If animation is enabled by constructor and no animation object is given,
         use a default ``VehiclePolygon("car")``
 
-        :seealso: :class:`VehicleAnimationBase` :meth:`run`
+        .. seealso:: :class:`VehicleAnimationBase` :meth:`run`
         """
         if x0 is not None:
             self._x = base.getvector(x0, 3)
@@ -822,7 +822,7 @@ class VehicleBase(ABC):
 
         .. note:: Vehicle control input limits are applied.
 
-        :seealso: :func:`control`, ``update``, :func:`run`
+        .. seealso:: :func:`control`, ``update``, :func:`run`
         """
         # determine vehicle control
         if u is not None:
@@ -898,7 +898,7 @@ class VehicleBase(ABC):
         :return: Vehicle state :math:`(x, y, \theta)`
         :rtype: ndarray(3)
 
-        :seealso: :meth:`q`
+        .. seealso:: :meth:`q`
         """
         return self._x
 
@@ -910,7 +910,7 @@ class VehicleBase(ABC):
         :return: Vehicle state :math:`(x, y, \theta)`
         :rtype: ndarray(3)
 
-        :seealso: :meth:`x`
+        .. seealso:: :meth:`x`
         """
         return self._x
 
@@ -925,7 +925,7 @@ class VehicleBase(ABC):
         Set by :class:`VehicleBase` subclass constructor.  The state is set to this value
         at the beginning of each simulation run.
 
-        :seealso: :meth:`run`
+        .. seealso:: :meth:`run`
         """
         return self._x0
 
@@ -940,7 +940,7 @@ class VehicleBase(ABC):
         The state is set to this value at the beginning of each simulation
         run.  Overrides the value set by :class:`VehicleBase` subclass constructor.
 
-        :seealso: :func:`run`
+        .. seealso:: :func:`run`
         """
         self._x0 = base.getvector(x0, 3)
 
@@ -963,7 +963,7 @@ class VehicleBase(ABC):
         The generator is initialized with the seed provided at constructor
         time every time :meth:`init` is called.
 
-        :seealso: :meth:`init` :func:`numpy.random.default_rng`
+        .. seealso:: :meth:`init` :func:`numpy.random.default_rng`
         """
         return self._random
 
@@ -978,7 +978,7 @@ class VehicleBase(ABC):
         The state :math:`(x, y, \theta)` at each time step resulting from a
         simulation run, one row per timestep.
 
-        :seealso: :meth:`run`
+        .. seealso:: :meth:`run`
         """
         return np.array(self._x_hist)
 
@@ -992,7 +992,7 @@ class VehicleBase(ABC):
 
         Set by :meth:`VehicleBase` subclass constructor.
 
-        :seealso: :meth:`accel_max` ``steer_max`` :meth:`u_limited`
+        .. seealso:: :meth:`accel_max` ``steer_max`` :meth:`u_limited`
         """
         return self._speed_max
 
@@ -1006,7 +1006,7 @@ class VehicleBase(ABC):
 
         Set by :meth:`VehicleBase` subclass constructor.
 
-        :seealso: :meth:`speed_max` ``steer_max`` :meth:`u_limited`
+        .. seealso:: :meth:`speed_max` ``steer_max`` :meth:`u_limited`
         """
         return self._accel_max
 
@@ -1021,7 +1021,7 @@ class VehicleBase(ABC):
         Set by :meth:`VehicleBase` subclass constructor.  Used by
         :meth:`step` to update state.
 
-        :seealso: :meth:`run`
+        .. seealso:: :meth:`run`
         """
         return self._dt
 
@@ -1056,7 +1056,7 @@ class VehicleBase(ABC):
         A control function can stop the simulation initiated by the ``run``
         method.
 
-        :seealso: :meth:`run`
+        .. seealso:: :meth:`run`
         """
         self._stopsim = True
 
@@ -1074,7 +1074,7 @@ class VehicleBase(ABC):
         The :math:`(x,y)` trajectory from the simulation history is plotted as
         :math:`x` vs :math:`y`.
 
-        :seealso: :meth:`run` :meth:`plot_xyt`
+        .. seealso:: :meth:`run` :meth:`plot_xyt`
         """
         xyt = self.x_hist
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
@@ -1093,7 +1093,7 @@ class VehicleBase(ABC):
         The :math:`(x,y, \theta)` trajectory from the simulation history is plotted
         against time.
 
-        :seealso: :meth:`run` :meth:`plot_xy`
+        .. seealso:: :meth:`run` :meth:`plot_xy`
         """
         xyt = self.x_hist
         t = np.arange(xyt.shape[0]) * self._dt
@@ -1135,7 +1135,7 @@ class Bicycle(VehicleBase):
         where :math:`v` is the velocity in body frame x-direction, and 
         :math:`\gamma` is the angle of the steered wheel.
 
-        :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`VehicleBase`
+        .. seealso:: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`VehicleBase`
         """
         super().__init__(**kwargs)
 
@@ -1174,7 +1174,7 @@ class Bicycle(VehicleBase):
         .. math::
             \frac{l}{\tan \gamma_{max}}
 
-        :seealso: :meth:`curvature_max`
+        .. seealso:: :meth:`curvature_max`
         """
         return self.l / np.tan(self.steer_max)
 
@@ -1191,7 +1191,7 @@ class Bicycle(VehicleBase):
         .. math::
             \frac{\tan \gamma_{max}}{l}
 
-        :seealso: :meth:`radius_min`
+        .. seealso:: :meth:`radius_min`
         """
         return 1.0 / self.radius_min
 
@@ -1229,7 +1229,7 @@ class Bicycle(VehicleBase):
         If ``limits`` is True then speed, acceleration and steer-angle limits are
         applied to ``u``.
 
-        :seealso: :meth:`f`
+        .. seealso:: :meth:`f`
         """
 
         # unpack some variables
@@ -1292,7 +1292,7 @@ class Unicycle(VehicleBase):
         where :math:`v` is the velocity in body frame x-direction, and 
         :math:`\omega` is the turn rate.
 
-        :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
+        .. seealso:: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
         """
         super().__init__(**kwargs)
         self._W = W
@@ -1337,7 +1337,7 @@ class Unicycle(VehicleBase):
         of the vehicle width ``W``. If ``limits`` is True then speed, acceleration
         and turn-rate limits are applied to ``u``.
 
-        :seealso: :meth:`f`
+        .. seealso:: :meth:`f`
         """
         if limits:
             u = self.u_limited(u)
@@ -1397,7 +1397,7 @@ class DiffSteer(Unicycle):
         where :math:`v = (v_R + v_L)/2` is the velocity in body frame x-direction, and 
         :math:`\omega = (v_R - v_L)/W` is the turn rate.
 
-        :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
+        .. seealso:: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
         """
         super().__init__(**kwargs)
         self._W = W
@@ -1467,7 +1467,7 @@ class DiffSteer(Unicycle):
         If ``limits`` is True then speed and acceleration limits are applied to the
         wheel speeds ``u``.
 
-        :seealso: :meth:`f`
+        .. seealso:: :meth:`f`
         """
         if limits:
             u = self.u_limited(u)
@@ -1521,7 +1521,7 @@ class DiffSteerTrailer(Unicycle):
         :math:`\omega = (v_R - v_L)/W` is the turn rate, and :math:`\delta` is the
         hitch angle.
 
-        :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
+        .. seealso:: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
         """
         super().__init__(**kwargs)
         self._x0 = np.r_[x0]
@@ -1592,7 +1592,7 @@ class DiffSteerTrailer(Unicycle):
         If ``limits`` is True then speed and acceleration limits are applied to the
         wheel speeds ``u``.
 
-        :seealso: :meth:`f`
+        .. seealso:: :meth:`f`
         """
         if limits:
             u = self.u_limited(u)
@@ -1652,7 +1652,7 @@ class VehicleTrailer(VehicleBase):
         :math:`(x,y)` is the position of the centre of vehicle, :math:`\theta` is the
         heading angle, and :math:`\delta_i` is the hitch angle for the `i`-th trailer.
 
-        :seealso: :class:`VehicleBase` :class:`Trailer`
+        .. seealso:: :class:`VehicleBase` :class:`Trailer`
         """
         self.vehicle = vehicle
         self.trailers: list[Trailer]
@@ -1689,7 +1689,7 @@ class VehicleTrailer(VehicleBase):
         ``q``.  Can be used for collision checking using the :meth:`~spatialmath.geom2d.Polygon2.intersects`
         method.
 
-        :seealso: :class:`~spatialmath.geom2d.Polygon2`
+        .. seealso:: :class:`~spatialmath.geom2d.Polygon2`
         """
         assert self.vehicle._polygon is not None
         polygons = [self.vehicle._polygon.transformed(SE2(q))]
@@ -1764,7 +1764,7 @@ class VehicleTrailer(VehicleBase):
               attribute set by the constructor.
             * integration uses rectangular integration.
 
-        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
+        .. seealso:: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
         """
 
         self.init(control=control, animate=animate, x0=x0)
@@ -1805,7 +1805,7 @@ class VehicleTrailer(VehicleBase):
 
         .. note:: Vehicle control input limits are applied.
 
-        :seealso: :func:`control`, ``update``, :func:`run`
+        .. seealso:: :func:`control`, ``update``, :func:`run`
         """
         # determine vehicle control
         if u is not None:
@@ -1909,7 +1909,7 @@ class VehicleTrailer(VehicleBase):
         If ``limits`` is True then speed and acceleration limits are applied to the
         wheel speeds ``u``.
 
-        :seealso: :meth:`VehicleBas.f`
+        .. seealso:: :meth:`VehicleBas.f`
         """
         dx = self.vehicle.deriv(x[:3], u, limits)
 

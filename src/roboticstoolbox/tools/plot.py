@@ -169,7 +169,7 @@ def xplot(
         t = np.linspace(0, 2, 50)  # with a time vector
         rtb.xplot(t, tg.q)
 
-    :seealso: :func:`~roboticstoolbox.tools.trajectory.jtraj`, :func:`numpy.unwrap`
+    .. seealso:: :func:`~roboticstoolbox.tools.trajectory.jtraj`, :func:`numpy.unwrap`
 
     .. versionchanged:: 1.5.0
         ``block=None`` does not call ``plt.show``, as documented. It used to call

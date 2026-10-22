@@ -46,7 +46,7 @@ class Hyper(DHRobot):
         calculation of rigid body dynamics, Part 2",
         Int. J. Robotics Research, 18(9), pp 876-892.
 
-    :seealso: :func:`Coil`, :func:`Ball`
+    .. seealso:: :func:`Coil`, :func:`Ball`
 
     .. codeauthor:: Peter Corke
     """

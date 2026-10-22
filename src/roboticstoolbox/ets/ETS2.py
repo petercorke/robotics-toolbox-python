@@ -58,7 +58,7 @@ class ETS2(BaseETS[ET2]):
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
 
-    :seealso: ``r``, ``tx``, ``ty``
+    .. seealso:: ``r``, ``tx``, ``ty``
     """
 
     def __init__(
@@ -199,7 +199,7 @@ class ETS2(BaseETS[ET2]):
         ETs are compounded, leading to a constant ET which is denoted by
         ``SE3`` when displayed.
 
-        :seealso: ``isconstant``
+        .. seealso:: ``isconstant``
         """
         const = None
         ets = ETS2()
@@ -485,7 +485,7 @@ class ETS2(BaseETS[ET2]):
         End-effector spatial velocity :math:`\nu = (v_x, v_y, \omega)^T`
         is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
 
-        :seealso: :func:`jacob0`, ``hessian0``
+        .. seealso:: :func:`jacob0`, ``hessian0``
         """
 
         T = self.fkine(q, include_base=False).A
