@@ -522,21 +522,20 @@ class JTraj(SourceBlock):
         if qd0 is None:
             qd0 = np.zeros(q0.shape)
         else:
-            # `getvector` is not imported here: NameError, see findings
-            qd0 = getvector(qd0)  # type: ignore[name-defined]
+            qd0 = smb.getvector(qd0)
             if not len(qd0) == len(q0):
                 raise ValueError("qd0 has wrong size")
         if qdf is None:
             qdf = np.zeros(q0.shape)
         else:
-            qd1 = getvector(qdf)  # type: ignore[name-defined]
-            if not len(qd1) == len(q0):
-                raise ValueError("qd1 has wrong size")
+            qdf = smb.getvector(qdf)
+            if not len(qdf) == len(q0):
+                raise ValueError("qdf has wrong size")
 
         self.q0 = q0
         self.qf = qf
         self.qd0 = qd0
-        self.qdf = qf
+        self.qdf = qdf
 
         self.coeffs: Any = None  # indicate that coefficients have not been computed yet
 
