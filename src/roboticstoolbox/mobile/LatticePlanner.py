@@ -201,6 +201,14 @@ class LatticePlanner(PlannerBase):
         If an occupancy grid exists the if ``iterations`` is None the area of the
         grid will be completely filled.
 
+        .. note:: A spatial index can only be built after the last iteration:
+            adding a vertex invalidates it. Automatic indexing is deferred
+            because pgraph 1.0.0 can reject lattice angles just below zero:
+            wrapping them rounds to the upper boundary of its periodic k-d
+            tree. The unindexed nearest-vertex search remains valid. See
+            ``examples/benchmark_roadmap.py`` for a comparison on completed
+            roadmaps, including index-construction failures.
+
         .. seealso:: :meth:`query`
         """
         if iterations is None and self.occgrid is None:
