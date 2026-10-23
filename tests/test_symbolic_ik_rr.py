@@ -288,6 +288,7 @@ def _numbers(a: np.ndarray) -> str:
     return " ".join(repr(float(x)) for x in np.asarray(a).ravel())
 
 
+@pytest.mark.slow
 def test_c_kernel_eigenvalues():
     import shutil
 
@@ -327,6 +328,7 @@ def test_c_kernel_eigenvalues():
                 assert np.abs(ours - z).min() < 1e-7 * scale, (n, z)
 
 
+@pytest.mark.slow
 def test_c_kernel_linear_algebra():
     rng = np.random.default_rng(1)
     # SVD of square matrices, including a singular one
