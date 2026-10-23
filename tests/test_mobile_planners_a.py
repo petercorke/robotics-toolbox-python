@@ -6,7 +6,6 @@ import collections
 import contextlib
 import io
 import unittest
-import warnings
 
 import matplotlib
 

@@ -20,7 +20,6 @@ comparison on a robot where all three genuinely apply, see benchmark_rne.py
 import timeit
 
 import numpy as np
-import numpy.testing as nt
 
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.Robot import Robot as RobotBase

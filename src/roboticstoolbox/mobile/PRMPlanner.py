@@ -218,15 +218,15 @@ class PRMPlanner(PlannerBase):
         if npoints is None:
             length = float(np.linalg.norm(direction))
             if self._collision_step is None:
-                assert self.occgrid is not None
+                assert self.occgrid is not None  # nosec B101: narrows the type for mypy
                 npoints = round(length / self.occgrid.cellsize)
             else:
-                assert self.occgrid is not None
+                assert self.occgrid is not None  # nosec B101: narrows the type for mypy
                 step = self._collision_step * self.occgrid.cellsize
                 npoints = max(2, math.ceil(length / step) + 1)
 
         # test each point along the line from v1 to v2
-        assert self.occgrid is not None
+        assert self.occgrid is not None  # nosec B101: narrows the type for mypy
         for s in np.linspace(0, 1, npoints):
             if self.occgrid.isoccupied(v1.coord + s * direction):
                 return False
