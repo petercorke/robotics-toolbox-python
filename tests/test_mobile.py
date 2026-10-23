@@ -6,12 +6,10 @@ Created on 28 December 2020
 import numpy.testing as nt
 import roboticstoolbox as rtb
 import numpy as np
-import spatialmath.base as sm
 import unittest
 import pytest
 
 # from roboticstoolbox import Bug2, DistanceTransformPlanner, rtb_loadmat
-from roboticstoolbox import Bug2
 from roboticstoolbox.mobile.Bug2 import edgelist
 from roboticstoolbox.mobile.landmarkmap import *
 from roboticstoolbox.mobile.drivers import *

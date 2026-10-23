@@ -550,7 +550,7 @@ class ReedsSheppPlanner(PlannerBase):
         """
         self.validate_start_goal(start, goal)
 
-        assert self.start is not None and self.goal is not None
+        assert self.start is not None and self.goal is not None  # nosec B101: narrows the type for mypy
         bpath = reeds_shepp_path_planning(
             start=self.start,
             goal=self.goal,

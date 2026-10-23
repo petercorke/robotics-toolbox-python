@@ -899,7 +899,7 @@ class EKF:
             sensorReading = False
 
         if sensorReading:
-            assert self.sensor is not None and z is not None and lm_id is not None
+            assert self.sensor is not None and z is not None and lm_id is not None  # nosec B101: narrows the type for mypy
             #  here for MBL, MM, SLAM
 
             # compute the innovation
@@ -1060,7 +1060,7 @@ class EKF:
         # M = None
 
         # estimate its position based on observation and vehicle state
-        assert self.sensor is not None
+        assert self.sensor is not None  # nosec B101: narrows the type for mypy
         xf = self.sensor.g(xv, z)
 
         # append this estimate to the state vector

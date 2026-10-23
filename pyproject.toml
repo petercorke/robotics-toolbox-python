@@ -206,6 +206,9 @@ archs = ["AMD64"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+markers = [
+    "slow: takes more than a few seconds; run by the coverage job, not by the others",
+]
 filterwarnings = [
     "ignore:FigureCanvasAgg is non-interactive:UserWarning",
 ]

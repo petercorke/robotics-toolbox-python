@@ -5,7 +5,6 @@ Tests of EKF: its description, state, sensor type, map plot and arguments.
 import importlib
 import unittest
 import unittest.mock as mock
-import warnings
 
 import matplotlib
 

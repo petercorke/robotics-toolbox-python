@@ -451,7 +451,8 @@ class VehiclePlot(GraphicsBlock):
         self.ydata: list[float] = []
         # self.type = "vehicleplot"
         if init_func is not None:
-            assert callable(init_func), "graphics init function must be callable"
+            if not callable(init_func):
+                raise TypeError("graphics init function must be callable")
         self.init_func = init_func
         self.square = square
 
@@ -490,7 +491,7 @@ class VehiclePlot(GraphicsBlock):
         # create the plot
         # super().reset()
         # create the figures
-        assert self.fig is not None and self.ax is not None
+        assert self.fig is not None and self.ax is not None  # nosec B101: narrows the type for mypy
 
         if self.square:
             self.ax.set_aspect("equal")
