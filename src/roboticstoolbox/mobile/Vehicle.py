@@ -1550,8 +1550,8 @@ class DiffSteerTrailer(Unicycle):
             self._animation_trailer.add(ax=self._ax)
 
     def plot(self, x: ArrayLike) -> None:
-        assert self._animation is not None
-        assert self._animation_trailer is not None
+        assert self._animation is not None  # nosec B101: narrows the type for mypy
+        assert self._animation_trailer is not None  # nosec B101: narrows the type for mypy
         self._animation.update(x[:3])  # show robot
 
         theta = x[2]
@@ -1691,11 +1691,11 @@ class VehicleTrailer(VehicleBase):
 
         .. seealso:: :class:`~spatialmath.geom2d.Polygon2`
         """
-        assert self.vehicle._polygon is not None
+        assert self.vehicle._polygon is not None  # nosec B101: narrows the type for mypy
         polygons = [self.vehicle._polygon.transformed(SE2(q))]
 
         for trailer, delta in zip(self.trailers, q[3:]):
-            assert trailer._polygon is not None
+            assert trailer._polygon is not None  # nosec B101: narrows the type for mypy
             polygons.append(trailer._polygon.transformed(SE2(delta)))
 
         return polygons

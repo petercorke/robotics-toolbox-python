@@ -330,7 +330,7 @@ class QuinticPolyPlanner(PlannerBase):
         self.validate_start_goal(start, goal)
         start_ = self.start
         goal_ = self.goal
-        assert start_ is not None and goal_ is not None
+        assert start_ is not None and goal_ is not None  # nosec B101: narrows the type for mypy
 
         time, path, v, a, j = quintic_polynomials_planner(
             start_[0],

@@ -451,7 +451,7 @@ class VehicleIcon(VehicleAnimationBase):
         )
 
     def _update(self, x: ArrayLike) -> None:
-        assert self._ax is not None  # add() has been called
+        assert self._ax is not None  # nosec B101: add() has been called
 
         # center_x = self._width // 2
         # center_y = self._height // 2

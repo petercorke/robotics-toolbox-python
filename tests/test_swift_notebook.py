@@ -10,7 +10,6 @@ JupyterLab and Chromium.  ``test_swift_plot_options.py`` checks that a trajector
 paced.
 """
 
-import os
 import shutil
 
 import pytest
