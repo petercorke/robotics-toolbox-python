@@ -13,8 +13,6 @@ filtering use a small inf_dist intentionally.
 """
 
 import sys
-import importlib
-import builtins
 import pytest
 import numpy as np
 from unittest.mock import patch
@@ -24,7 +22,6 @@ from spatialmath import SE3
 # which shadows the module of the same name.  Fetch the module via sys.modules
 # so we can reach module-level state (_coal, _require_coal).
 import spatialgeometry.geom as gm
-import spatialgeometry.geom.CollisionShape   # ensure loaded
 _mod = sys.modules["spatialgeometry.geom.CollisionShape"]
 
 from spatialgeometry.geom.CollisionShape import Sphere, Cuboid, Cylinder, Box

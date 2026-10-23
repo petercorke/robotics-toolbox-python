@@ -1,6 +1,5 @@
 """PRMPlanner connection test: the optional ``collision_step`` spacing"""
 
-import math
 import unittest
 from types import SimpleNamespace
 

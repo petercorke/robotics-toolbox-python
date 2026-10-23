@@ -5,7 +5,6 @@ from abc import ABC
 from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 from roboticstoolbox.tools.plot import apply_block
 import numpy as np
 import scipy.ndimage as sp

@@ -9,7 +9,6 @@ import unittest
 import os
 import warnings
 import spatialgeometry as sg
-from spatialmath import SE3
 from spatialmath.base import tr2jac
 from tests import skip_no_collision_checking
 
@@ -598,7 +597,6 @@ class TestRobot(unittest.TestCase):
         # Cloning via Robot(other_robot) with no overrides should carry
         # over the source robot's own name/base/tool/etc, not silently
         # reset them to the class defaults.
-        from spatialmath import SE3
 
         r = rtb.models.Panda()
 

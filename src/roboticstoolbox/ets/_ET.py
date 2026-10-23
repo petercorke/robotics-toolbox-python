@@ -239,7 +239,7 @@ class BaseET:
                 if not issymbol(param):
                     param = deg2rad(float(param))
             # a string `param` has been converted to a float, or to None above
-            assert not isinstance(param, str)
+            assert not isinstance(param, str)  # nosec B101: narrows the type for mypy
             # This is a static joint. The `param` setter validates axis_func,
             # computes `_T`, sets `_isstaticsym`/`_joint`, and (for ET)
             # syncs the compiled acceleration struct.

@@ -250,7 +250,7 @@ class DistanceTransformPlanner(PlannerBase):
 
         animating = self.animation_start(animate, movie, draw=self.plot)
 
-        assert self.occgrid is not None
+        assert self.occgrid is not None  # nosec B101: narrows the type for mypy
         robot = self.occgrid.g2w(self.occgrid.w2g(self._start))
         path: list[NDArray] = [robot]
 
@@ -272,7 +272,7 @@ class DistanceTransformPlanner(PlannerBase):
         finally:
             self.animation_end()
 
-        assert self._goal is not None
+        assert self._goal is not None  # nosec B101: narrows the type for mypy
         endpoint = self.occgrid.g2w(self.occgrid.w2g(self._goal))
         if not np.array_equal(path[-1], endpoint):
             path.append(endpoint)
@@ -317,7 +317,7 @@ class DistanceTransformPlanner(PlannerBase):
             dtype=int,
         )
 
-        assert self.occgrid is not None and self._goal is not None
+        assert self.occgrid is not None and self._goal is not None  # nosec B101: narrows the type for mypy
         self.validate_endpoint(position)
         x, y = self.occgrid.w2g(position)
         goal = self.occgrid.w2g(self._goal)
@@ -397,7 +397,7 @@ class DistanceTransformPlanner(PlannerBase):
         distance = self._distancemap
         if distance is None:
             raise ValueError("no distance map computed, you need to plan")
-        assert self.occgrid is not None
+        assert self.occgrid is not None  # nosec B101: narrows the type for mypy
         X, Y = np.meshgrid(
             self.occgrid.xmin + np.arange(distance.shape[1]) * self.occgrid.cellsize,
             self.occgrid.ymin + np.arange(distance.shape[0]) * self.occgrid.cellsize,
