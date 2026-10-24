@@ -11,7 +11,7 @@ representations of pose and orientation used throughout.
 
 A good introduction to the many capabilities of the Toolbox is the notebook
 ``icra2026.ipynb``, the tutorial presented at ICRA 2026.  You can run it in your browser,
-with nothing to install, by `trying it online <https://petercorke.github.io/robotics-toolbox-python/lite/lab?path=icra2026.ipynb>`_, or read it on
+with nothing to install, by `trying it online <https://petercorke.github.io/robotics-toolbox-python/lite/lab?path=index.ipynb>`_, or read it on
 `GitHub <https://github.com/petercorke/robotics-toolbox-python/blob/main/docs/notebooks/icra2026.ipynb>`_.
 
 
