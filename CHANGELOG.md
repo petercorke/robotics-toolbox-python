@@ -42,6 +42,13 @@ Figures regenerated with this version, for example Figure 6.10 in *Robotics,
 Vision & Control* (3rd ed.), have narrower shaded bounds than the printed ones.
 
 
+## [1.5.1](https://github.com/petercorke/robotics-toolbox-python/compare/v1.5.0...v1.5.1) (2026-10-24)
+
+
+### Documentation
+
+* the Try it Now links open the notebook index ([#900](https://github.com/petercorke/robotics-toolbox-python/issues/900)) ([9f282d8](https://github.com/petercorke/robotics-toolbox-python/commit/9f282d8ff952a6ca95d340ae6a62b04e545a302f))
+
 ## [1.5.0](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.4...v1.5.0) (2026-10-23)
 
 
