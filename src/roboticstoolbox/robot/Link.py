@@ -418,20 +418,21 @@ class BaseLink(SceneNode, ABC):
         raise DeprecationWarning("Use copy method of Link class")
 
     def __deepcopy__(self, memo: Any) -> Any:
-        ets = deepcopy(self.ets)
-        name = deepcopy(self.name)
-        parent = self.parent
-        joint_name = deepcopy(self._joint_name)
-        m = deepcopy(self.m)
-        r = deepcopy(self.r)
-        I = deepcopy(self.I)
-        Jm = deepcopy(self.Jm)
-        B = deepcopy(self.B)
-        Tc = deepcopy(self.Tc)
-        G = deepcopy(self.G)
-        qlim = deepcopy(self.qlim)
-        qdlim = deepcopy(self.qdlim)
-        tlim = deepcopy(self.tlim)
+        ets = deepcopy(self.ets, memo)
+        name = deepcopy(self.name, memo)
+        # A detached link can still refer to its parent by name.
+        parent = self._parent_name if self.parent is None else None
+        joint_name = deepcopy(self._joint_name, memo)
+        m = deepcopy(self.m, memo)
+        r = deepcopy(self.r, memo)
+        I = deepcopy(self.I, memo)
+        Jm = deepcopy(self.Jm, memo)
+        B = deepcopy(self.B, memo)
+        Tc = deepcopy(self.Tc, memo)
+        G = deepcopy(self.G, memo)
+        qlim = deepcopy(self.qlim, memo)
+        qdlim = deepcopy(self.qdlim, memo)
+        tlim = deepcopy(self.tlim, memo)
         geometry = _copy_shapes(self._geometry, self.name)
         collision = _copy_shapes(self._collision, self.name)
 
@@ -452,15 +453,14 @@ class BaseLink(SceneNode, ABC):
             qdlim=qdlim,
             tlim=tlim,
             geometry=geometry,
-            collision=collision,
+            collision=collision
         )
 
-        if self._children:
-            result._children = self._children.copy()
-
-        result._robot = self.robot
-
+        # Register first: a link's parent and children form a graph, not a tree.
         memo[id(self)] = result
+        if self.parent is not None:
+            result.parent = deepcopy(self.parent, memo)
+        # Robot construction rebuilds the children and owning robot references.
         return result
 
     # -------------------------------------------------------------------------- #

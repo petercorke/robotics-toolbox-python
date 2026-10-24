@@ -601,6 +601,62 @@ class TestBaseRobot(unittest.TestCase):
 
         self.assertTrue(r2.links[0] != r.links[0])
 
+    def test_copy_preserves_parent_graph_and_dynamics(self):
+        # A fixed link between two joints exercises the parent references
+        # used by both the forward and backward RNE recursions.
+        base = Link(ET.Rz(), name="joint0", m=1.0, r=[0.1, 0, 0], I=[0.02] * 3)
+        fixed = Link(
+            ET.tx(0.25), name="fixed", parent=base,
+            m=0.3, r=[0.05, 0, 0], I=[0.01] * 3,
+        )
+        tip = Link(
+            ET.Ry(), name="joint1", parent=fixed,
+            m=0.6, r=[0.1, 0, 0], I=[0.02] * 3,
+        )
+        robot = Robot([base, fixed, tip])
+        q = np.array([0.2, -0.3])
+        qd = np.array([0.1, 0.2])
+        qdd = np.array([0.3, -0.1])
+
+        expected_tau = robot.rne(q, qd, qdd)
+        clone = robot.copy()
+
+        self.assertIsNot(clone.links[0], robot.links[0])
+        self.assertIsNone(clone.links[0].parent)
+        self.assertIs(clone.links[1].parent, clone.links[0])
+        self.assertIs(clone.links[2].parent, clone.links[1])
+        self.assertEqual(clone.links[0]._children, [clone.links[1]])
+        self.assertEqual(clone.links[1]._children, [clone.links[2]])
+        self.assertEqual(robot.links[0]._children, [robot.links[1]])
+        self.assertEqual(robot.links[1]._children, [robot.links[2]])
+        nt.assert_allclose(clone.rne(q, qd, qdd), expected_tau)
+
+        frictionless = robot.nofriction(coulomb=True, viscous=True)
+        self.assertIs(frictionless.links[1].parent, frictionless.links[0])
+        self.assertIs(frictionless.links[2].parent, frictionless.links[1])
+        nt.assert_allclose(frictionless.rne(q, qd, qdd), expected_tau)
+        nt.assert_allclose(clone.coriolis(q, qd), robot.coriolis(q, qd))
+
+    def test_copy_preserves_gripper_links_and_fkine(self):
+        robot = rtb.models.Panda()
+        self.assertGreater(len(robot.grippers), 0)
+        gripper = robot.grippers[0]
+        gripper.q = np.full(gripper.n, 0.01)
+        gripper.tool = SE3(0, 0, 0.12)
+
+        copied = robot.copy()
+        self.assertEqual(len(copied.grippers), len(robot.grippers))
+        self.assertEqual(copied.grippers[0].name, gripper.name)
+        self.assertIsNot(copied.grippers[0], gripper)
+        self.assertIsNot(copied.grippers[0].links[0], gripper.links[0])
+        self.assertIs(copied.grippers[0].links[0].parent, copied.ee_links[0])
+        nt.assert_allclose(copied.grippers[0].q, gripper.q)
+        nt.assert_allclose(copied.grippers[0].tool.A, gripper.tool.A)
+        nt.assert_allclose(copied.fkine(robot.qr).A, robot.fkine(robot.qr).A)
+
+        copied.grippers[0].q[:] = 0
+        self.assertTrue(np.all(gripper.q == 0.01))
+
     def test_toradians(self):
         r = rtb.models.Panda()
 
