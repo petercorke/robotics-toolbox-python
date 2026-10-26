@@ -887,8 +887,10 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     @default_backend.setter
     def default_backend(self, be: Any) -> None:
+        if be is not None:
+            be = str(be).lower()
         self._default_backend = be
-
+    
     @classmethod
     def set_default_backend(cls, be: Any) -> None:
         """
@@ -903,6 +905,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         .. seealso:: :attr:`default_backend`
         """
+        if be is not None:
+            be = str(be).lower()
+       
         cls._class_default_backend = be
 
     @property
