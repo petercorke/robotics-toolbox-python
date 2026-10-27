@@ -1618,7 +1618,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Convert joint angles to degrees
 
-        :param q: joint configuration of the robot, one row or one row per pose
+        :param q: joint configuration as a vector or matrix (one row per pose)
         :returns: joint coordinates with revolute values converted to degrees
             and prismatic values unchanged, preserving a matrix input's rows
 
