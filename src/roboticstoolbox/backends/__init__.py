@@ -25,8 +25,12 @@ def load_backend(name: str) -> Connector:
     """
     if name == "swift":
         from roboticstoolbox.backends.swift import Swift  # optional dep
+    
+    if name == "isaacsim":
+        from roboticstoolbox.backends.IsaacSim.isaacsim_backend import IsaacSim 
+        
+        return IsaacSim() 
 
-        return Swift()
     elif name == "pyplot":
         from roboticstoolbox.backends.PyPlot import PyPlot
 

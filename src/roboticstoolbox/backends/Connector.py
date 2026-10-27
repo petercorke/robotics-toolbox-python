@@ -11,17 +11,18 @@ from typing import Any, Protocol, runtime_checkable
 
 @runtime_checkable
 class Connector(Protocol):
+    
     """
-    What RTB needs of a graphical backend
+        What RTB needs of a graphical backend
 
-    A backend is any object that has these methods and flags: it does not have to
-    inherit from this class.  Swift does not, since it does not depend on RTB.
-    The PyPlot backends inherit from it explicitly, which supplies the default
-    values of the flags and of :meth:`_add_teach_panel`, and makes a missing
-    method an error at construction.
+        A backend is any object that has these methods and flags: it does not have to
+        inherit from this class.  Swift does not, since it does not depend on RTB.
+        The PyPlot backends inherit from it explicitly, which supplies the default
+        values of the flags and of :meth:`_add_teach_panel`, and makes a missing
+        method an error at construction.
 
-    The methods take different arguments in different backends, so they are
-    declared with ``*args, **kwargs``; see the backend for the details.
+        The methods take different arguments in different backends, so they are
+        declared with ``*args, **kwargs``; see the backend for the details.
     """
 
     #: True if the backend supports the interactive teach pendant.
