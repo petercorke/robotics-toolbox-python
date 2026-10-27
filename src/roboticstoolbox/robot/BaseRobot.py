@@ -849,8 +849,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Robot has collision model
 
-        :returns: Robot has collision model
-        :returns: At least one link has associated collision model.
+        :returns: True if at least one link has associated collision geometry.
 
         .. rubric:: Examples
 
@@ -1240,9 +1239,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param end: end-effector or gripper to compute forward kinematics to
         :param start: name or reference to a base link, defaults to None
         :raises ValueError: link not known or ambiguous
-        :returns: the path from start to end
-        :returns: the number of joints in the path
-        :returns: the tool transform present after end
+        :returns: tuple of the link path, the number of links in that path,
+            and the tool transform present after the end link
         """
 
         def search(
@@ -1419,21 +1417,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         Helper method to find or validate an end-effector and base link
 
-        end
-            end-effector or gripper to compute forward kinematics to
-        start
-            name or reference to a base link, defaults to None
-
-        ValueError
-            link not known or ambiguous
-        ValueError
-            [description]
-        TypeError
-            unknown type provided
-
-        :returns: end-effector link
-        :returns: base link
-        :returns: tool transform of gripper if applicable
+        :param end: end-effector or gripper, defaults to None
+        :param start: name or reference to a base link, defaults to None
+        :raises ValueError: a link is not known or is ambiguous
+        :raises TypeError: an unsupported link argument is supplied
+        :returns: tuple of end-effector link, start link, and gripper tool
+            transform (or None if no gripper transform applies)
         """
 
         tool = None
@@ -1497,8 +1486,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
         from link ``l1`` to link ``l2``.
 
-        :param :param start: start of path, defaults to ``base_link``: 
-        :param :param end: end of path, defaults to end-effector: 
+        :param start: start link of the path, defaults to the base link
+        :param end: end link of the path, defaults to the end-effector
         :raises ValueError: a link does not belong to this ERobot
         :raises TypeError: a bad link argument
         :returns: elementary transform sequence
@@ -1629,13 +1618,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Convert joint angles to degrees
 
-        :param q: The joint configuration of the robot
-        :returns: a vector of joint coordinates in degrees and metres
-        :returns: ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
-        :returns: taking into account whether elements of ``q`` correspond to revolute
-        :returns: or prismatic joints, ie. prismatic joint values are not converted.
-        :returns: If ``q`` is a matrix, with one column per joint, the conversion is
-        :returns: performed columnwise.
+        :param q: joint configuration as a vector or matrix (one row per pose)
+        :returns: joint coordinates with revolute values converted to degrees
+            and prismatic values unchanged, preserving a matrix input's rows
+
+        A vector is converted elementwise. If ``q`` is a matrix, with one
+        column per joint, the conversion is performed columnwise.
 
         .. rubric:: Examples
 
