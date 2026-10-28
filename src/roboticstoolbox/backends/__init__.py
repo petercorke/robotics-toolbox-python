@@ -2,6 +2,7 @@ from roboticstoolbox.backends.Connector import Connector
 
 
 def load_backend(name: str) -> Connector:
+  
     """
     Instantiate a graphical backend by name.
 
@@ -23,6 +24,7 @@ def load_backend(name: str) -> Connector:
     ValueError
         If ``name`` is not a known backend.
     """
+    
     if name == "swift":
         from roboticstoolbox.backends.swift import Swift  # optional dep
 
