@@ -1294,8 +1294,8 @@ class DHRobot(Robot):
 
         :param config: a configuration string
         :type config: str
-        :param allowable: [description]
-        :type allowable: tuple of str
+        :param allowables: one string of valid characters per choice, default first
+        :type allowables: tuple of str
         :raises ValueError: bad character in configuration string
         :return: configuration string
         :rtype: str
