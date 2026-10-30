@@ -2,6 +2,7 @@
 """
 @author Jesse Haviland
 """
+
 from __future__ import annotations
 
 import warnings

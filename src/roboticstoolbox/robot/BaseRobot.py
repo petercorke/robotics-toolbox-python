@@ -890,7 +890,6 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         if be is not None:
             be = str(be).lower()
         self._default_backend = be
-    
     @classmethod
     def set_default_backend(cls, be: Any) -> None:
         """
@@ -909,7 +908,6 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
             be = str(be).lower()
        
         cls._class_default_backend = be
-
     @property
     def gravity(self) -> NDArray:
         """
