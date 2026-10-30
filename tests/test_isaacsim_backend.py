@@ -41,11 +41,13 @@ def test_isaacsim_backend_lifecycle() -> None:
     )
     assert urdf_path.is_file()
 
+    print("Starting Isaac Sim backend")
     backend = load_backend("isaacsim")
     assert isinstance(backend, IsaacSim)
 
     try:
         backend.launch(name="RTB Isaac Sim smoke test")
+        print("Isaac Sim scene created")
 
         assert backend._simulation_app is not None
         assert backend._simulation_app.is_running()
@@ -59,6 +61,7 @@ def test_isaacsim_backend_lifecycle() -> None:
             name="panda",
             prim_path="/World/Panda",
         )
+        print(f"Panda added at {handle.prim_path}")
 
         assert isinstance(handle, IsaacSimRobotHandle)
         assert handle.robot is panda
@@ -68,5 +71,7 @@ def test_isaacsim_backend_lifecycle() -> None:
         assert handle in backend.robot_handles
 
         backend.step(1.0 / 60.0)
+        print("Simulation advanced by one step")
     finally:
+        print("Closing Isaac Sim backend")
         backend.close()
