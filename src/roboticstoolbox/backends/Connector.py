@@ -11,7 +11,6 @@ from typing import Any, Protocol, runtime_checkable
 
 @runtime_checkable
 class Connector(Protocol):
-    
     """
     What RTB needs of a graphical backend
 
