@@ -231,26 +231,28 @@ class Trajectory:
             # coast phase
             k = (elapsed > self.tblend) & (elapsed <= (tf - self.tblend))
             ax.plot(self.t[k], self.s[k], color="green", **plotopts)
-            k = np.where(k)[0][0]
-            ax.plot(
-                self.t[k - 1 : k + 1],
-                self.s[k - 1 : k + 1],
-                color="green",
-                label="linear",
-                **plotopts,
-            )
+            if np.any(k):
+                k = np.where(k)[0][0]
+                ax.plot(
+                    self.t[k - 1 : k + 1],
+                    self.s[k - 1 : k + 1],
+                    color="green",
+                    label="linear",
+                    **plotopts,
+                )
 
             # decel phase
             k = elapsed > (tf - self.tblend)
             ax.plot(self.t[k], self.s[k], color="blue", **plotopts)
-            k = np.where(k)[0][0]
-            ax.plot(
-                self.t[k - 1 : k + 1],
-                self.s[k - 1 : k + 1],
-                color="blue",
-                label="deceleration",
-                **plotopts,
-            )
+            if np.any(k):
+                k = np.where(k)[0][0]
+                ax.plot(
+                    self.t[k - 1 : k + 1],
+                    self.s[k - 1 : k + 1],
+                    color="blue",
+                    label="deceleration",
+                    **plotopts,
+                )
 
             ax.grid(True)
         else:
