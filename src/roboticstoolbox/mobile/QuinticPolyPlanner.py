@@ -131,6 +131,7 @@ def quintic_polynomials_planner(
     :param MAX_T: maximum path time [s]
     :raises NoPathError: no path time in the range meets the acceleration
         and jerk limits
+    :raises ValueError: ``dt`` is not positive and finite
     :return: time, path, velocity, acceleration and jerk
     :rtype: tuple(list, ndarray(N,3), list, list, list)
 
@@ -139,6 +140,9 @@ def quintic_polynomials_planner(
     their limits is used.  The path is :math:`(x, y, \\theta)` for each time
     step.
     """
+
+    if not math.isfinite(dt) or dt <= 0:
+        raise ValueError("dt must be a positive finite number")
 
     vxs = sv * math.cos(syaw)
     vys = sv * math.sin(syaw)
@@ -164,7 +168,8 @@ def quintic_polynomials_planner(
 
         time, rx, ry, ryaw, rv, ra, rj = [], [], [], [], [], [], []
 
-        for t in np.arange(0.0, T + dt, dt):
+        samples = np.arange(0.0, T, dt)
+        for t in np.r_[samples[samples < T], T]:
             time.append(t)
             rx.append(xqp.calc_point(t))
             ry.append(yqp.calc_point(t))
