@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -232,3 +233,36 @@ def xplot(
     apply_block(block)
 
     return fig.get_axes()
+
+
+def isnotebook() -> bool:
+    """
+    Determine if code is being run from a Jupyter notebook or JupyterLite
+
+    ``isnotebook`` is True if running Jupyter notebook, JupyterLite, Google Colab, or
+    similar, else False
+
+    :references:
+
+        - https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-
+        is-executed-in-the-ipython-notebook/39662359#39662359
+    """
+    # Check if running in Pyodide/JupyterLite
+    if sys.platform == "emscripten":
+        return True
+
+    # Colab's shell is google.colab._shell.Shell, not a ZMQInteractiveShell
+    if "google.colab" in sys.modules:
+        return True
+
+    # Fall back to checking IPython shell type
+    try:
+        shell = get_ipython().__class__.__name__  # type: ignore[name-defined]
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False  # Probably standard Python interpreter
