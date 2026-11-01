@@ -168,6 +168,10 @@ jobs:
           key: robot-descriptions-v2-${{ runner.os }}-3.12
 
       - name: Run coverage
+        env:
+          # Python 3.12's lighter tracing core (sys.monitoring). It counts exactly the
+          # same lines as the default core here, in far less time (#898).
+          COVERAGE_CORE: sysmon
         run: pytest tests/ --ignore=tests/test_blocks.py --cov=roboticstoolbox --cov-report=xml:coverage.xml -q
 
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
