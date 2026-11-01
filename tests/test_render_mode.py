@@ -100,3 +100,68 @@ def test_plot_leaves_an_explicit_render_mode_alone():
         except Exception:
             pass
     assert launch.call_args.kwargs["render_mode"] == "notebook-widget"
+
+
+# --- display in a notebook ---------------------------------------------------
+# These run on the Agg backend with the display function replaced, so they check
+# what is asked of IPython and when, not how a real frontend (VS Code, Colab,
+# JupyterLab) draws it.
+
+
+@pytest.fixture
+def displayed(monkeypatch):
+    import matplotlib.pyplot as plt
+
+    shown = []
+    monkeypatch.setattr(pyplot_module, "_ipy_display", shown.append)
+    plt.close("all")
+    yield shown
+    plt.close("all")
+
+
+def test_a_widget_figure_is_displayed_once_when_it_is_drawn(displayed):
+    import matplotlib.pyplot as plt
+
+    robot = rtb.models.DH.Puma560()
+    env = PyPlot()
+    env.launch(render_mode="notebook-widget")
+
+    # created quietly: nothing shown while the figure is empty
+    assert displayed == []
+
+    env.add(robot, q=robot.qn, readonly=True)
+    assert displayed == [env.fig.canvas]
+
+    # a second robot is drawn into the figure already on show
+    env.add(robot, q=robot.qr, readonly=True)
+    assert displayed == [env.fig.canvas]
+    plt.close(env.fig)
+
+
+def test_a_figure_supplied_by_the_caller_is_not_displayed_by_launch(displayed):
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    env = PyPlot()
+    env.launch(fig=fig, render_mode="notebook-widget")
+    env.add(rtb.models.DH.Puma560(), q=[0, 0, 0, 0, 0, 0], readonly=True)
+
+    assert displayed == []
+    plt.close(fig)
+
+
+def test_colab_replaces_inline_frames_like_jupyterlite(monkeypatch, displayed):
+    import types
+
+    monkeypatch.setitem(sys.modules, "google.colab", types.ModuleType("google.colab"))
+    env = PyPlot()
+    env.launch(render_mode="notebook-inline")
+
+    assert env._inline_is_jl is True
+
+
+def test_other_environments_update_one_inline_display(displayed):
+    env = PyPlot()
+    env.launch(render_mode="notebook-inline")
+
+    assert env._inline_is_jl is False
