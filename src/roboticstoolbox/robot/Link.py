@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from copy import deepcopy
 from functools import wraps
-from typing import Any
+from typing import Any, cast
 from warnings import warn
 
 # from multiprocessing.sharedctypes import Value
@@ -324,7 +324,8 @@ class BaseLink(SceneNode, ABC):
 
         """
 
-        return self._ets  # _ets is ETS|ETS2; ETS for Link subclasses
+        # _ets is ETS | ETS2 because the setter accepts both; a Link holds an ETS
+        return cast(ETS, self._ets)
 
     @ets.setter
     def ets(self, new_ets: ETS | ETS2) -> None:
