@@ -230,3 +230,66 @@ def test_ipython_in_a_terminal_is_not_a_notebook_even_if_ipykernel_is_loaded(
     monkeypatch.setitem(sys.modules, "ipykernel", types.ModuleType("ipykernel"))
 
     assert isnotebook() is False
+
+
+# --- interactive mode ----------------------------------------------------------
+# With the ipympl backend a figure made in a later cell is only displayed if Matplotlib's
+# interactive mode is on.  Launching an inline animation used to switch it off and leave
+# it off.  These check the state, not the display, which needs a real notebook frontend.
+
+
+@pytest.fixture
+def interactive_state():
+    import matplotlib.pyplot as plt
+
+    was = plt.isinteractive()
+    plt.close("all")
+    yield
+    plt.close("all")
+    plt.ion() if was else plt.ioff()
+
+
+@pytest.mark.parametrize("was_interactive", [True, False])
+def test_an_inline_launch_leaves_interactive_mode_as_it_was(
+    interactive_state, was_interactive
+):
+    import matplotlib.pyplot as plt
+
+    plt.ion() if was_interactive else plt.ioff()
+
+    env = PyPlot()
+    env.launch(render_mode="notebook-inline")
+
+    assert plt.isinteractive() is was_interactive
+
+
+def test_an_inline_animation_leaves_interactive_mode_on(interactive_state, monkeypatch):
+    import matplotlib.pyplot as plt
+
+    # the inline frames go to IPython's display, which is not wanted here
+    monkeypatch.setattr(
+        pyplot_module, "_ipy_display", lambda frame, display_id=None: None
+    )
+    monkeypatch.setattr(pyplot_module, "_ipy_clear_output", lambda wait=False: None)
+    plt.ion()
+    robot = rtb.models.DH.Puma560()
+    env = PyPlot()
+    env.launch(render_mode="notebook-inline")
+    env.add(robot, q=robot.qn, readonly=True)
+    for q in rtb.jtraj(robot.qz, robot.qn, 4).q:
+        robot.q = q
+        env.step(0.0)
+
+    assert plt.isinteractive() is True
+    # the inline figure is not registered with pyplot, so it cannot be displayed twice
+    assert plt.get_fignums() == []
+
+
+def test_a_widget_launch_still_turns_interactive_mode_on(interactive_state, displayed):
+    import matplotlib.pyplot as plt
+
+    plt.ioff()
+    env = PyPlot()
+    env.launch(render_mode="notebook-widget")
+
+    assert plt.isinteractive() is True
