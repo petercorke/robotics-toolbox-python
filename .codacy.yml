@@ -1,0 +1,28 @@
+---
+exclude_paths:
+  # Not analysed at all.
+  #
+  # Sketches for hardware, with no tests, that nobody maintains.  They are also
+  # excluded from mypy (see pyproject.toml).
+  - "src/roboticstoolbox/backends/Dynamixel/**"
+  - "src/roboticstoolbox/backends/ROS/**"
+  # Eigen, the C++ linear algebra library, copied in as it is.  It is third-party
+  # code that we do not change, and it dominates the complexity and duplication
+  # measures.
+  - "src/roboticstoolbox/ets/cpp-extensions/Eigen/**"
+
+engines:
+  bandit:
+    exclude_paths:
+      # Plain `assert` is the idiomatic way to check something in a test.  What
+      # Bandit_B101 warns about is an assert that validates input in library code,
+      # which `python -O` removes.  That check still applies to the code in src/.
+      - "tests/**"
+  prospector:
+    exclude_paths:
+      # These start with `from roboticstoolbox import *` on purpose, to give the
+      # MATLAB-like environment that the examples and the tests of it show, and
+      # pyflakes then reports every name as "may be undefined" (F405).  The
+      # package itself is still checked.
+      - "tests/**"
+      - "examples/**"

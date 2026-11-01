@@ -6,7 +6,7 @@ import numpy.testing as nt
 import pytest
 import sympy as sp
 
-from roboticstoolbox import ET, ET2, ETS, ETS2
+from roboticstoolbox import ET, ET2, ETS2
 
 a = sp.Symbol("a")
 b = sp.Symbol("b")

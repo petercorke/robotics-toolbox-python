@@ -288,7 +288,7 @@ class _Dstar:
     def modify_cost(self, x: _State, newcost: float) -> float:
         self._Map.costmap[x.y, x.x] = newcost
         if x.t is _Tag.CLOSED:
-            assert x.parent is not None
+            assert x.parent is not None  # nosec B101: narrows the type for mypy
             self.insert(x, x.parent.h + self._Map.cost(x, x.parent))
         if len(self.open_list) == 0:
             return -1
@@ -563,7 +563,7 @@ class DstarPlanner(PlannerBase):
                         # print('open set', len(self._Dstar.open_list))
                     # self._Dstar.showparents()
 
-            assert tmp.parent is not None
+            assert tmp.parent is not None  # nosec B101: narrows the type for mypy
             tmp = tmp.parent
             # print('move to ', tmp)
 

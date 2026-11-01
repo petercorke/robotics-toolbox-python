@@ -5,7 +5,6 @@
 
 import roboticstoolbox as rp
 import unittest
-import numpy.testing as nt
 
 
 # @unittest.skip("BUG in .models()")

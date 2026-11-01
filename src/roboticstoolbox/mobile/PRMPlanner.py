@@ -218,15 +218,15 @@ class PRMPlanner(PlannerBase):
         if npoints is None:
             length = float(np.linalg.norm(direction))
             if self._collision_step is None:
-                assert self.occgrid is not None
+                assert self.occgrid is not None  # nosec B101: narrows the type for mypy
                 npoints = round(length / self.occgrid.cellsize)
             else:
-                assert self.occgrid is not None
+                assert self.occgrid is not None  # nosec B101: narrows the type for mypy
                 step = self._collision_step * self.occgrid.cellsize
                 npoints = max(2, math.ceil(length / step) + 1)
 
         # test each point along the line from v1 to v2
-        assert self.occgrid is not None
+        assert self.occgrid is not None  # nosec B101: narrows the type for mypy
         for s in np.linspace(0, 1, npoints):
             if self.occgrid.isoccupied(v1.coord + s * direction):
                 return False
@@ -252,7 +252,14 @@ class PRMPlanner(PlannerBase):
         created between points if the distance between them is less than
         ``dist_thresh``.
 
-        The roadmap is a ``UGraph``.
+        The roadmap is a ``UGraph``. A k-d tree is built after the roadmap is
+        complete to accelerate the nearest-vertex lookups in :meth:`query`.
+        The index does not accelerate roadmap construction or A* search.
+
+        .. note:: Adding or removing a vertex, or assigning ``vertex.coord``,
+            invalidates the index. Queries then use a linear scan until
+            ``planner.graph.build_kdtree()`` is called again. Coordinate edits
+            in place are not detected: assign the whole coordinate instead.
 
         .. deprecated:: 1.5.0
             ``animate`` was accepted but had no effect.
@@ -279,6 +286,11 @@ class PRMPlanner(PlannerBase):
         self.random_init()  # reset the random number generator
         self._create_roadmap(npoints, dist_thresh)
 
+        # Vertex additions invalidate the index, so build it only once the
+        # roadmap is complete. An empty roadmap has no coordinates to index.
+        if self._graph.n:
+            self._graph.build_kdtree()
+
     def query(
         self,
         start: ArrayLike2 | None = None,
@@ -297,6 +309,10 @@ class PRMPlanner(PlannerBase):
 
         The path is a sparse sequence of waypoints, with variable distance
         between them.
+
+        If several roadmap vertices are exactly equidistant from an endpoint,
+        the spatial index may select a different vertex than a linear scan,
+        and hence a different path.
 
         .. warning:: Waypoints 1 to N-2 are part of the roadmap, while waypoints
             0 and N-1 are the start and goal respectively.  The first and last

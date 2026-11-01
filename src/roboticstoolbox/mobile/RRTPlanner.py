@@ -265,7 +265,7 @@ class RRTPlanner(PlannerBase):
 
         """
         self.validate_start_goal(start)
-        assert self.start is not None
+        assert self.start is not None  # nosec B101: narrows the type for mypy
         vstart, d = self.g.closest(self.start)
 
         vpath, cost, _ = self.g.path_UCS(vstart, self.g[0])
@@ -309,7 +309,7 @@ class RRTPlanner(PlannerBase):
         .. seealso:: :meth:`qrandom_free`
         """
         workspace = self.map.workspace
-        assert workspace is not None
+        assert workspace is not None  # nosec B101: narrows the type for mypy
         return self.random.uniform(
             low=(workspace[0], workspace[2], -np.pi),
             high=(workspace[1], workspace[3], np.pi),

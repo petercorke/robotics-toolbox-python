@@ -183,7 +183,8 @@ class MultiRotor(ContinuousBlock):
             nrotors = model["nrotors"]
         except KeyError:
             raise RuntimeError("vehicle model does not contain nrotors")
-        assert nrotors % 2 == 0, "Must have an even number of rotors"
+        if nrotors % 2 != 0:
+            raise ValueError("Must have an even number of rotors")
 
         self.nstates = 12
         if x0 is None:
@@ -728,8 +729,8 @@ class MultiRotorPlot(GraphicsBlock):
             ]
 
         # draw ground
-        assert self.fig is not None
-        assert self.ax is not None
+        assert self.fig is not None  # nosec B101: narrows the type for mypy
+        assert self.ax is not None  # nosec B101: narrows the type for mypy
         self.ax.set_proj_type(self.projection)
 
         # ax.set_aspect('equal')

@@ -157,7 +157,7 @@ class CurvaturePolyPlanner(PlannerBase):
         """
         self.validate_start_goal(start, goal)
         start_, goal_ = self.start, self.goal
-        assert start_ is not None and goal_ is not None
+        assert start_ is not None and goal_ is not None  # nosec B101: narrows the type for mypy
 
         # initial estimate of path length is Euclidean distance
         d = np.linalg.norm(goal_[:2] - start_[:2])

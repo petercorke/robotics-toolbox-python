@@ -2,8 +2,6 @@
 
 import unittest
 
-from bdsim import BDSim
-from bdsim.block import Block
 
 from spatialmath import SE3
 from spatialmath.base import tr2x
