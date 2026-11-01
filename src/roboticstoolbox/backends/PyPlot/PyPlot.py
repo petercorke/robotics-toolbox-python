@@ -852,7 +852,8 @@ def _isnotebook() -> bool:
     """
     Determine if code is being run from a Jupyter notebook or JupyterLite
 
-    ``_isnotebook`` is True if running Jupyter notebook, JupyterLite, or similar, else False
+    ``_isnotebook`` is True if running Jupyter notebook, JupyterLite, Google Colab, or
+    similar, else False
 
     :references:
 
@@ -863,6 +864,10 @@ def _isnotebook() -> bool:
 
     # Check if running in Pyodide/JupyterLite
     if sys.platform == "emscripten":
+        return True
+
+    # Colab's shell is google.colab._shell.Shell, not a ZMQInteractiveShell
+    if "google.colab" in sys.modules:
         return True
 
     # Fall back to checking IPython shell type

@@ -165,3 +165,24 @@ def test_other_environments_update_one_inline_display(displayed):
     env.launch(render_mode="notebook-inline")
 
     assert env._inline_is_jl is False
+
+
+def test_colab_is_a_notebook(monkeypatch):
+    # Colab's IPython shell is not a ZMQInteractiveShell, so it is recognised by
+    # its module; otherwise it gets a window and the same figure is displayed
+    # several times
+    import types
+
+    monkeypatch.setitem(sys.modules, "google.colab", types.ModuleType("google.colab"))
+
+    assert pyplot_module._isnotebook() is True
+
+
+def test_colab_with_ipympl_is_a_widget_for_a_static_plot(monkeypatch):
+    import types
+
+    monkeypatch.setitem(sys.modules, "google.colab", types.ModuleType("google.colab"))
+    monkeypatch.setattr(matplotlib, "get_backend", lambda: IPYMPL)
+
+    assert _resolve_render_mode(None) == "notebook-widget"
+    assert _resolve_render_mode(None, animation=True) == "notebook-inline"
