@@ -104,14 +104,27 @@ class _Matplotlib:
 module.matplotlib = _Matplotlib()
 
 frames = []
-module._ipy_display = lambda frame, display_id=None: frames.append(frame.data)
+widgets = []
+
+def _display(frame, display_id=None):
+    # an inline frame is an image; a widget figure is displayed as its canvas
+    if hasattr(frame, "data"):
+        frames.append(frame.data)
+    else:
+        widgets.append(frame)
+
+module._ipy_display = _display
 module._ipy_clear_output = lambda wait=False: None
 
 robot = rtb.models.DH.Puma560()
 env = robot.plot(rtb.jtraj(robot.qz, robot.qn, 8).q, dt=0.0)
 assert env.render_mode == "notebook-inline", env.render_mode
 assert len(set(frames)) >= 8, f"{len(set(frames))} different frames pushed for 8 steps"
-assert robot.plot(robot.qn).render_mode == "notebook-widget"
+assert not widgets, "an animation displayed a widget"
+static = robot.plot(robot.qn)
+assert static.render_mode == "notebook-widget"
+# a static plot is one live figure, displayed once and not before it is drawn
+assert widgets == [static.fig.canvas], f"{len(widgets)} widgets displayed"
 print(f"plot of a trajectory: {env.render_mode}, {len(set(frames))} different frames")
 print("import roboticstoolbox: OK")
 `;
