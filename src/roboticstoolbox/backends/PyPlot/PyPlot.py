@@ -188,7 +188,13 @@ class PyPlot(Connector):
         self.inline_dpi = inline_dpi
         self._inline_step_count = 0
         self._inline_display_handle = None
-        self._inline_is_jl = sys.platform == "emscripten"
+        self._widget_owned = False
+        self._widget_pending = False
+        # JupyterLite and Colab do not update a display handle in place, so each
+        # frame must replace the last one by clearing the cell output
+        self._inline_is_jl = (
+            sys.platform == "emscripten" or "google.colab" in sys.modules
+        )
 
         self.limits = limits
         if limits is not None:
@@ -209,7 +215,18 @@ class PyPlot(Connector):
             self.fig = ax.figure
         else:
             if fig is None:
-                self.fig = plt.figure(name)
+                if self.render_mode == "notebook-widget":
+                    # With interactive mode on, ipympl displays the figure as soon as
+                    # it is created, while still empty, and plt.show() displays it
+                    # again; frontends differ in what that does (a blank figure in
+                    # VS Code, three copies in Colab).  Create it quietly and display
+                    # the finished canvas once, in add().
+                    with plt.ioff():
+                        self.fig = plt.figure(name)
+                    self._widget_owned = True
+                    self._widget_pending = True
+                else:
+                    self.fig = plt.figure(name)
             else:
                 self.fig = fig
                 set_window_title(self.fig, name)
@@ -515,6 +532,15 @@ class PyPlot(Connector):
             # In inline/JupyterLite mode, push a frame immediately so static
             # plots (eg. plot_vellipse/plot_fellipse) are visible without step().
             self._push_inline_frame()
+        elif self._widget_owned and _ipy_display is not None:
+            # a widget figure that launch() created: show it once, when first drawn,
+            # and after that only redraw it
+            if self._widget_pending:
+                self.fig.canvas.draw()
+                _ipy_display(self.fig.canvas)
+                self._widget_pending = False
+            else:
+                self.fig.canvas.draw_idle()
         else:
             plt.draw()  # matplotlib refresh
             plt.show(block=False)
@@ -826,7 +852,8 @@ def _isnotebook() -> bool:
     """
     Determine if code is being run from a Jupyter notebook or JupyterLite
 
-    ``_isnotebook`` is True if running Jupyter notebook, JupyterLite, or similar, else False
+    ``_isnotebook`` is True if running Jupyter notebook, JupyterLite, Google Colab, or
+    similar, else False
 
     :references:
 
@@ -837,6 +864,10 @@ def _isnotebook() -> bool:
 
     # Check if running in Pyodide/JupyterLite
     if sys.platform == "emscripten":
+        return True
+
+    # Colab's shell is google.colab._shell.Shell, not a ZMQInteractiveShell
+    if "google.colab" in sys.modules:
         return True
 
     # Fall back to checking IPython shell type
