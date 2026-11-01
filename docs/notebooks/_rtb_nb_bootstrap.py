@@ -70,10 +70,17 @@ async def ensure_installed(extras: tuple[str, ...] | list[str] = ()) -> bool:
             requirement = "roboticstoolbox-python"
             if extras:
                 requirement += "[" + ",".join(extras) + "]"
+            # Colab does not ship ipympl, which the notebooks select with
+            # %matplotlib ipympl; matplotlib rejects the backend if it is missing.
             subprocess.run(
-                [sys.executable, "-m", "pip", "install", "-q", requirement],
+                [sys.executable, "-m", "pip", "install", "-q", requirement, "ipympl"],
                 check=True,
             )
+            # ipympl figures need Colab's custom widget manager, enabled before the
+            # first figure is created.
+            from google.colab import output
+
+            output.enable_custom_widget_manager()
             where, colab = "on Colab", True
 
     import roboticstoolbox
