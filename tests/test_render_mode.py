@@ -186,3 +186,47 @@ def test_colab_with_ipympl_is_a_widget_for_a_static_plot(monkeypatch):
 
     assert _resolve_render_mode(None) == "notebook-widget"
     assert _resolve_render_mode(None, animation=True) == "notebook-inline"
+
+
+# --- one notebook check for the whole package ---------------------------------
+
+
+def test_mobile_uses_the_same_notebook_check():
+    from roboticstoolbox.tools.plot import isnotebook
+
+    # the package also exports a class called Vehicle, so ask for the module
+    vehicle_module = sys.modules["roboticstoolbox.mobile.Vehicle"]
+
+    assert pyplot_module._isnotebook is isnotebook
+    assert vehicle_module._isnotebook is isnotebook
+
+
+def _shell(monkeypatch, name):
+    import builtins
+
+    monkeypatch.delitem(sys.modules, "google.colab", raising=False)
+    monkeypatch.setattr(sys, "platform", "linux")
+    shell = type(name, (), {})()
+    monkeypatch.setattr(builtins, "get_ipython", lambda: shell, raising=False)
+
+
+def test_a_jupyter_kernel_is_a_notebook(monkeypatch):
+    from roboticstoolbox.tools.plot import isnotebook
+
+    _shell(monkeypatch, "ZMQInteractiveShell")
+
+    assert isnotebook() is True
+
+
+def test_ipython_in_a_terminal_is_not_a_notebook_even_if_ipykernel_is_loaded(
+    monkeypatch,
+):
+    # the check the mobile module used to have counted a loaded ipykernel
+    import types
+
+    from roboticstoolbox.tools.plot import isnotebook
+
+    _shell(monkeypatch, "TerminalInteractiveShell")
+    monkeypatch.setitem(sys.modules, "ipykernel", types.ModuleType("ipykernel"))
+
+    assert isnotebook() is False
