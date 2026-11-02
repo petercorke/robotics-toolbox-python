@@ -62,7 +62,7 @@ jobs:
           '
 
       - name: Test (core)
-        run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
+        run: pytest tests/ --ignore=tests/test_blocks.py -m "not slow" --timeout=50 --timeout_method=thread -q
 
   test:
     runs-on: ${{ matrix.os }}
@@ -109,7 +109,7 @@ jobs:
           '
 
       - name: Test
-        run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
+        run: pytest tests/ --ignore=tests/test_blocks.py -m "not slow" --timeout=50 --timeout_method=thread -q
 
   all-tests-passed:
     name: All tests passed
@@ -168,9 +168,9 @@ jobs:
           key: robot-descriptions-v2-${{ runner.os }}-3.12
 
       - name: Run coverage
-        run: pytest tests/ --ignore=tests/test_blocks.py --cov=src/roboticstoolbox --cov-report=xml:coverage.xml -q
+        run: pytest tests/ --ignore=tests/test_blocks.py --cov=roboticstoolbox --cov-report=xml:coverage.xml -q
 
-      - uses: codecov/codecov-action@v7
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
         with:
           files: ./coverage.xml
 

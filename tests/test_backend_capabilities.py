@@ -6,8 +6,6 @@ Tests for Phases B-D of the graphics/backend decoupling refactor:
 """
 
 import unittest
-import importlib
-import sys
 
 
 class TestConnectorCapabilityDefaults(unittest.TestCase):
@@ -128,7 +126,6 @@ class TestMPLMixinOnRobot(unittest.TestCase):
 
     def test_mixin_present_in_mro(self):
         import roboticstoolbox as rtb
-        from roboticstoolbox.robot.RobotPlottingMPL import RobotPlottingMPLMixin
         mro_names = [c.__name__ for c in type(rtb.models.DH.Puma560()).__mro__]
         self.assertIn("RobotPlottingMPLMixin", mro_names)
 

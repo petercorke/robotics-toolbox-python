@@ -22,6 +22,7 @@ import unittest
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, TypeVar
+from unittest.mock import patch
 
 import matplotlib
 
@@ -111,6 +112,45 @@ class TestPRMPlanner(unittest.TestCase):
         b = np.array([v.coord for v in self.planned(seed=2).graph])
         self.assertEqual(a.shape, b.shape)
         self.assertFalse(np.allclose(a, b))
+
+    def test_index_built_once_on_completed_roadmap(self) -> None:
+        sizes = []
+        build_kdtree = pgraph.UGraph.build_kdtree
+
+        def record_build(graph: pgraph.UGraph) -> None:
+            sizes.append(graph.n)
+            build_kdtree(graph)
+
+        with patch.object(pgraph.UGraph, "build_kdtree", record_build):
+            self.planned(npoints=60)
+        self.assertEqual(sizes, [60])
+
+    def test_indexed_queries_match_scan(self) -> None:
+        prm = self.planned()
+        goals = [vertex.coord.copy() for vertex in list(prm.graph)[::5]]
+        indexed = [prm.query(self.START, goal) for goal in goals]
+
+        # The coordinate setter discards the index without changing geometry.
+        vertex = next(iter(prm.graph))
+        vertex.coord = vertex.coord.copy()
+        for goal, expected in zip(goals, indexed):
+            nt.assert_array_equal(prm.query(self.START, goal), expected)
+
+    def test_replan_indexes_new_vertices(self) -> None:
+        prm = self.planned()
+        old_graph = prm.graph
+        quiet(prm.plan, npoints=20)
+        self.assertIsNot(prm.graph, old_graph)
+        self.assertEqual(prm.graph.n, 20)
+        for vertex in prm.graph:
+            closest, distance = prm.graph.closest(vertex.coord)
+            self.assertIs(closest, vertex)
+            self.assertEqual(distance, 0)
+
+    def test_empty_roadmap_is_not_indexed(self) -> None:
+        prm = self.planned(npoints=0)
+        with self.assertRaisesRegex(RuntimeError, "no plan computed"):
+            prm.query(self.START, self.GOAL)
 
     def test_goal_inside_obstacle(self) -> None:
         prm = self.planned()

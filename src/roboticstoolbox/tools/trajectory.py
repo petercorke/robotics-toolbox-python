@@ -11,7 +11,6 @@ from spatialmath import SE3
 from spatialmath.base.argcheck import (
     # assertmatrix,
     getvector,
-    isscalar,
     isvector,
 )
 

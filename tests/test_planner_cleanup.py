@@ -5,7 +5,6 @@ planner's start and goal are validated.
 
 import hashlib
 import unittest
-import warnings
 
 import matplotlib
 

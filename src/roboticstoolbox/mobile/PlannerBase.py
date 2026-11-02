@@ -1133,7 +1133,7 @@ class PlannerBase:
             distance = self.distancemap
 
         # The original map owns the geometry; the planner supplies its overlays.
-        assert self._occgrid0 is not None
+        assert self._occgrid0 is not None  # nosec B101: narrows the type for mypy
         self._occgrid0.plot(
             field=distance,
             inflated=occgrid.grid if self._inflate > 0 and inflated else None,

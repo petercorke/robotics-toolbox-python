@@ -856,7 +856,7 @@ class TestTwoLinkDHMDHEquivalence(unittest.TestCase):
         ERobot/URDF/PoERobot) genuinely cannot handle a standard-DH
         (mdh=False) DHRobot -- the joint isn't the last element of its own
         ETS segment. Rather than silently returning a wrong torque (the
-        old behaviour -- see rne.md), it now asserts. This
+        old behaviour -- see rne.md), it now raises. This
         confirms the guard fires for the one case it must, complementing
         test_robot_rne_on_mdh_variant_matches_standard_dh_rne_python (which
         confirms it does *not* fire, and gives correct results, for the
@@ -864,7 +864,7 @@ class TestTwoLinkDHMDHEquivalence(unittest.TestCase):
         from roboticstoolbox.robot.Robot import Robot as RobotBase
 
         z = np.zeros(2)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             RobotBase.rne(self.std, self.poses[0], z, z)
 
 
