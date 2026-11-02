@@ -88,6 +88,7 @@ class PyPlot(Connector):
     """
 
     supports_ellipse: bool = True
+    supports_movie: bool = True
 
     ax: Any  # the 3D Matplotlib axes, set by launch()
     fig: Any  # the Matplotlib figure, set by launch()

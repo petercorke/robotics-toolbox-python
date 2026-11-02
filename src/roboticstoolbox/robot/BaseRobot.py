@@ -2149,9 +2149,6 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         elif ax is not None:
             raise ValueError("ax and env cannot both be given: the scene has axes")
 
-        if movie is not None:
-            from roboticstoolbox.backends.PyPlot import PyPlot
-
         launch_kwargs: dict[str, Any] = {}
         for key in (
             "render_mode",
@@ -2204,9 +2201,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # frame of the cell, not in a browser window of its own.  An animation is paced
         # in real time, one step to each dt: unpaced, Swift draws at most 60 frames
         # per second and skips the steps that come sooner, so the whole trajectory runs
-        # in a few milliseconds and only its first frame is ever drawn.
-        is_swift = type(env).__name__ == "Swift"
-        if is_swift and not adding:
+        # in a few milliseconds and only its first frame is ever drawn.  A backend that
+        # is a web page says so with embeds_in_notebook.
+        if getattr(env, "embeds_in_notebook", False) and not adding:
             from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook
 
             if launch_kwargs.get("browser") == "notebook":
@@ -2292,8 +2289,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                     fell.q = qk
                 env.step(dt)
 
-                if movie is not None and isinstance(env, PyPlot):  # pragma nocover
-                    images.append(env.getframe())
+                if movie is not None and getattr(
+                    env, "supports_movie", False
+                ):  # pragma nocover
+                    # getframe is not part of the Connector interface (#676)
+                    images.append(env.getframe())  # type: ignore[attr-defined]
 
             if movie is not None:  # pragma nocover
                 # save it as an animated GIF
