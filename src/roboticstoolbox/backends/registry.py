@@ -30,7 +30,7 @@ class _Entry:
 _registry: dict[str, _Entry] = {}
 
 
-def _normalise(name: str) -> str:
+def normalise_backend_name(name: str) -> str:
     """Backend names are not case sensitive, and surrounding spaces do not count."""
     if not isinstance(name, str):
         raise TypeError(f"a backend name is a string, not {type(name).__name__}")
@@ -70,7 +70,7 @@ def register_backend(
 
     .. versionadded:: 1.5.1
     """
-    key = _normalise(name)
+    key = normalise_backend_name(name)
     if not key:
         raise ValueError("a backend needs a name")
 
@@ -124,7 +124,7 @@ def load_backend(name: str) -> Connector:
 
     .. seealso:: :func:`register_backend`
     """
-    key = _normalise(name)
+    key = normalise_backend_name(name)
     try:
         entry = _registry[key]
     except KeyError:
