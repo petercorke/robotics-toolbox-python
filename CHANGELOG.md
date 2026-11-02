@@ -42,6 +42,27 @@ Figures regenerated with this version, for example Figure 6.10 in *Robotics,
 Vision & Control* (3rd ed.), have narrower shaded bounds than the printed ones.
 
 
+## [1.5.1](https://github.com/petercorke/robotics-toolbox-python/compare/v1.5.0...v1.5.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **mobile:** reject blocking non-positive animation pauses ([879fb36](https://github.com/petercorke/robotics-toolbox-python/commit/879fb363580840e19ee70b6b175e8cd3543e2b38))
+* **mobile:** reject non-positive plot and animation pauses ([#896](https://github.com/petercorke/robotics-toolbox-python/issues/896)) ([879fb36](https://github.com/petercorke/robotics-toolbox-python/commit/879fb363580840e19ee70b6b175e8cd3543e2b38))
+* **notebooks:** give the header logo a height, so Colab does not distort it ([#915](https://github.com/petercorke/robotics-toolbox-python/issues/915)) ([fc7c832](https://github.com/petercorke/robotics-toolbox-python/commit/fc7c832e51b97c856a4b073411e5153532684eef))
+* **notebooks:** make matplotlib list its backends again after Colab installs ipympl ([#922](https://github.com/petercorke/robotics-toolbox-python/issues/922)) ([6b3d0e1](https://github.com/petercorke/robotics-toolbox-python/commit/6b3d0e199937b43f007d9be75505c6942b2b9dec))
+* **notebooks:** make the notebooks work on Google Colab ([#911](https://github.com/petercorke/robotics-toolbox-python/issues/911)) ([ccedb57](https://github.com/petercorke/robotics-toolbox-python/commit/ccedb573a9b306a1104ca93c5f35b24fe8cd7e03))
+* **pyplot:** an inline notebook animation leaves matplotlib's interactive mode alone ([#921](https://github.com/petercorke/robotics-toolbox-python/issues/921)) ([e554f45](https://github.com/petercorke/robotics-toolbox-python/commit/e554f45a6506b135733d16780a208aa0b160f9d8))
+* **typing:** the ets getter returns the ETS a Link holds, for mypy 2.4.1 ([#913](https://github.com/petercorke/robotics-toolbox-python/issues/913)) ([581e0e0](https://github.com/petercorke/robotics-toolbox-python/commit/581e0e0f1d4569300ee1625b396f20ccaa60e8ae))
+
+
+### Documentation
+
+* **lite:** explain the sidebar and its volatile files on the index page ([#912](https://github.com/petercorke/robotics-toolbox-python/issues/912)) ([d45d902](https://github.com/petercorke/robotics-toolbox-python/commit/d45d902b4802948071ec21c457e626e70379c6b7))
+* match :param names to the signatures in sensors and DHRobot ([#906](https://github.com/petercorke/robotics-toolbox-python/issues/906)) ([00743ac](https://github.com/petercorke/robotics-toolbox-python/commit/00743acc4b0c0f3295155c9b56feae5caaad939a))
+* **robot:** fix BaseRobot reST return and parameter fields ([#905](https://github.com/petercorke/robotics-toolbox-python/issues/905)) ([454c69e](https://github.com/petercorke/robotics-toolbox-python/commit/454c69ecb80ccd5802da56ca4447a1bc39401075))
+* the Try it Now links open the notebook index ([#900](https://github.com/petercorke/robotics-toolbox-python/issues/900)) ([9f282d8](https://github.com/petercorke/robotics-toolbox-python/commit/9f282d8ff952a6ca95d340ae6a62b04e545a302f))
+
 ## [1.5.0](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.4...v1.5.0) (2026-10-23)
 
 
