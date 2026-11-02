@@ -280,13 +280,13 @@ class PyPlot(Connector):
         if self.render_mode == "window":
             plt.ion()
             plt.show()
-        else:
-            if self.render_mode == "notebook-inline":
-                plt.ioff()
-            else:
-                plt.ion()
-            if self.render_mode != "notebook-inline":
-                self.fig.canvas.draw()
+        elif self.render_mode == "notebook-widget":
+            plt.ion()
+            self.fig.canvas.draw()
+        # "notebook-inline": the figure was detached from pyplot above and is drawn
+        # by _push_inline_frame(), so interactive mode has no effect on it.  It is
+        # left as the user had it: switching it off here meant that a plain figure
+        # made in a later cell was not displayed with the ipympl backend.
 
         self.sim_time = 0
 

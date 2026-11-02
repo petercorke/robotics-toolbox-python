@@ -76,6 +76,24 @@ async def ensure_installed(extras: tuple[str, ...] | list[str] = ()) -> bool:
                 [sys.executable, "-m", "pip", "install", "-q", requirement, "ipympl"],
                 check=True,
             )
+            # matplotlib renames the module://ipympl... backend to "widget", and looks
+            # it up in a list of backends that it builds once, from the installed
+            # packages, the first time it needs it.  Colab imported matplotlib before
+            # ipympl was installed, so %matplotlib ipympl is rejected ("... is not a
+            # valid value for backend") until the session restarts.  Make matplotlib
+            # build the list again.  Clearing the registry is what its own tests do,
+            # and it is needed: only resetting the flag registers the backends that
+            # were already there (matplotlib-inline's) twice, which is an error.
+            # _clear is private, hence the guards.
+            try:
+                from matplotlib.backends import backend_registry
+            except ImportError:
+                pass  # an older matplotlib has no registry to refresh
+            else:
+                clear = getattr(backend_registry, "_clear", None)
+                if clear is not None:
+                    clear()
+
             # ipympl figures need Colab's custom widget manager, enabled before the
             # first figure is created.
             from google.colab import output
