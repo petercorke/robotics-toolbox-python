@@ -18,30 +18,53 @@ import pytest
 from roboticstoolbox import (
     CurvaturePolyPlanner,
     DistanceTransformPlanner,
+    NoPathError,
     PRMPlanner,
     QuinticPolyPlanner,
 )
 from roboticstoolbox.mobile.DistanceTransformPlanner import distancexform
 
 
-@pytest.mark.parametrize("metric", ["manhattan", "cityblock", "MANHATTAN"])
-def test_manhattan_queries_use_four_connected_steps(metric: str) -> None:
-    planner = DistanceTransformPlanner(np.zeros((5, 5)), metric=metric)
+@pytest.mark.parametrize("metric", ["euclidean", "manhattan", "cityblock", "MANHATTAN"])
+def test_four_connected_queries_use_axial_steps(metric: str) -> None:
+    planner = DistanceTransformPlanner(np.zeros((5, 5)), metric=metric, connectivity=4)
     planner.plan((4, 3))
 
     path = planner.query((0, 0))
 
     nt.assert_array_equal(np.abs(np.diff(path, axis=0)).sum(axis=1), 1)
+    nt.assert_equal(len(path) - 1, 7)
     nt.assert_equal(len(path) - 1, planner.distancemap[0, 0])
+    nt.assert_equal(planner.connectivity, 4)
 
 
-def test_euclidean_queries_keep_diagonal_steps() -> None:
-    planner = DistanceTransformPlanner(np.zeros((5, 5)), metric="euclidean")
+@pytest.mark.parametrize("metric", ["euclidean", "manhattan", "cityblock"])
+def test_default_queries_keep_diagonal_steps(metric: str) -> None:
+    planner = DistanceTransformPlanner(np.zeros((5, 5)), metric=metric)
     planner.plan((4, 4))
 
     path = planner.query((0, 0))
 
     nt.assert_array_equal(np.diff(path, axis=0), np.ones((4, 2)))
+    nt.assert_equal(planner.connectivity, 8)
+
+
+@pytest.mark.parametrize("metric", ["euclidean", "manhattan"])
+def test_four_connected_transform_does_not_cross_diagonal_gaps(metric: str) -> None:
+    grid = np.ones((3, 3))
+    np.fill_diagonal(grid, 0)
+    planner = DistanceTransformPlanner(grid, metric=metric, connectivity=4)
+    planner.plan((2, 2))
+
+    nt.assert_equal(planner.distancemap[0, 0], np.inf)
+    with pytest.raises(NoPathError):
+        planner.query((0, 0))
+
+
+@pytest.mark.parametrize("connectivity", [True, 0, 3, 4.0, "4", None])
+def test_invalid_connectivity_is_rejected(connectivity: object) -> None:
+    with pytest.raises(ValueError, match="connectivity"):
+        DistanceTransformPlanner(np.zeros((5, 5)), connectivity=connectivity)
 
 
 def quiet(func, *args, **kwargs):

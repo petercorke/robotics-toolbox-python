@@ -34,9 +34,11 @@ class DistanceTransformPlanner(PlannerBase):
     :param metric: distance metric, one of: "euclidean" [default], "manhattan"
         ("cityblock" is a synonym)
     :param distance: deprecated, use ``metric``
+    :param connectivity: number of path neighbours, 4 or 8, defaults to 8
     :param kwargs: common planner options, see :class:`PlannerBase`
     :raises ValueError: ``metric`` is not recognised, or ``metric`` and
-        ``distance`` are both given and are different
+        ``distance`` are both given and are different, or ``connectivity``
+        is not an integer equal to 4 or 8
 
     .. deprecated:: 1.5.0
         ``distance`` is deprecated, use ``metric``.  It was never an argument
@@ -53,9 +55,11 @@ class DistanceTransformPlanner(PlannerBase):
 
     Creates a planner that finds the path between two points in the 2D grid
     using omnidirectional motion and avoiding occupied cells.  The path
-    comprises a set of 4-way connected points for the Manhattan metric, or
-    8-way connected points for the Euclidean metric.  Also known as the
-    wavefront, grassfire or brushfire planning algorithm.
+    comprises a set of 8-way connected points by default, preserving the
+    paths in the book for both distance metrics.  Set ``connectivity=4`` to
+    restrict both the distance transform and the path to horizontal and
+    vertical moves.  These moves have the same cost for either metric.
+    Also known as the wavefront, grassfire or brushfire planning algorithm.
 
     The map is described by a 2D occupancy ``occgrid`` whose elements are zero
     if traversable or nonzero if untraversable, ie. an obstacle.
@@ -91,6 +95,7 @@ class DistanceTransformPlanner(PlannerBase):
         metric: str = "euclidean",
         *,
         distance: str | None = None,
+        connectivity: int = 8,
         **kwargs: Any,
     ) -> None:
         if distance is not None:
@@ -106,9 +111,15 @@ class DistanceTransformPlanner(PlannerBase):
             metric = distance
         if metric.lower() not in METRICS:
             raise ValueError(f"unknown metric {metric!r}, must be one of {METRICS}")
+        if not isinstance(connectivity, (int, np.integer)) or connectivity not in (
+            4,
+            8,
+        ):
+            raise ValueError("connectivity must be an integer equal to 4 or 8")
 
         super().__init__(occgrid=occgrid, ndims=2, **kwargs)
         self._metric = metric
+        self._connectivity = int(connectivity)
         self._distancemap: NDArray | None = None
 
     @property
@@ -119,6 +130,15 @@ class DistanceTransformPlanner(PlannerBase):
         :return: the metric, either "euclidean" or "manhattan"
         """
         return self._metric
+
+    @property
+    def connectivity(self) -> int:
+        """
+        Get the number of path neighbours
+
+        :return: 4 for axial moves, or 8 to include diagonal moves
+        """
+        return self._connectivity
 
     @property
     def distancemap(self) -> NDArray | None:
@@ -189,7 +209,7 @@ class DistanceTransformPlanner(PlannerBase):
             distancexform(
                 self.occgrid.grid,
                 goal=self.occgrid.w2g(self._goal),
-                metric=self._metric,
+                metric="manhattan" if self._connectivity == 4 else self._metric,
                 animate=animate,
                 summary=summary,
             )
@@ -317,7 +337,7 @@ class DistanceTransformPlanner(PlannerBase):
             ],
             dtype=int,
         )
-        if self.metric.lower() in ("manhattan", "cityblock"):
+        if self._connectivity == 4:
             directions = directions[np.abs(directions).sum(axis=1) == 1]
 
         assert self.occgrid is not None and self._goal is not None  # nosec B101: narrows the type for mypy
