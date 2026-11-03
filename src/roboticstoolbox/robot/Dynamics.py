@@ -1347,6 +1347,8 @@ class DynamicsMixin:
         q = getmatrix(q, (None, self.n))
         xd = getmatrix(xd, (None, 6))
         w = getmatrix(wrench, (None, 6))
+        if q.shape[0] != xd.shape[0] or q.shape[0] != w.shape[0]:
+            raise ValueError("q, xd and wrench must have the same number of rows")
         if q.shape[1] != 6:
             pinv = True
 
