@@ -1,19 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(${SKBUILD_PROJECT_NAME} LANGUAGES C CXX)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Locate Python (interpreter needed to find nanobind cmake dir)
-find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-
-# Locate nanobind via the installed Python package
-execute_process(
-    COMMAND "${Python_EXECUTABLE}" -c "import nanobind; print(nanobind.cmake_dir())"
-    OUTPUT_VARIABLE NB_DIR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-find_package(nanobind CONFIG REQUIRED HINTS "${NB_DIR}")
+project(${SKBUILD_PROJECT_NAME} LANGUAGES NONE)
 
 # Set -DRTB_BUILD_EXTENSIONS=OFF to skip both compiled extensions and build a
 # genuinely pure-Python wheel instead -- both _fknm_c and _frne_c have
@@ -29,6 +15,21 @@ find_package(nanobind CONFIG REQUIRED HINTS "${NB_DIR}")
 option(RTB_BUILD_EXTENSIONS "Build the compiled _fknm_c/_frne_c nanobind extensions" ON)
 
 if(RTB_BUILD_EXTENSIONS)
+    enable_language(C CXX)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+    # Locate Python (interpreter needed to find nanobind cmake dir)
+    find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+
+    # Locate nanobind via the installed Python package
+    execute_process(
+        COMMAND "${Python_EXECUTABLE}" -c "import nanobind; print(nanobind.cmake_dir())"
+        OUTPUT_VARIABLE NB_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    find_package(nanobind CONFIG REQUIRED HINTS "${NB_DIR}")
+
     # -----------------------------------------------------------------------
     # _frne_c — Newton-Euler inverse dynamics
     # ne.c / vmath.c are pure C maths; frne_nb.cpp is the nanobind glue.
