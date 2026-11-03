@@ -285,11 +285,15 @@ class BaseOccupancyGrid(BaseMap):
         :param value: value to set cells to
 
         The cells that contain the corners of the region, and all those between
-        them, are set.
+        them, are set.  Only cells inside the grid are changed; a region
+        entirely outside the grid has no effect.
         """
         bl = self.w2g([region[0], region[2]])
         tr = self.w2g([region[1], region[3]])
-        self.grid[bl[1] : tr[1] + 1, bl[0] : tr[0] + 1] = value
+        bl = np.maximum(bl, 0)
+        tr = np.minimum(tr, np.array(self.grid.shape[::-1]) - 1)
+        if np.all(bl <= tr):
+            self.grid[bl[1] : tr[1] + 1, bl[0] : tr[0] + 1] = value
 
     def grid_to_world(self, p: ArrayLike2) -> R2:
         """
