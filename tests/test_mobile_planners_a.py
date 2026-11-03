@@ -13,6 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.testing as nt
+import pytest
 
 from roboticstoolbox import (
     CurvaturePolyPlanner,
@@ -21,6 +22,26 @@ from roboticstoolbox import (
     QuinticPolyPlanner,
 )
 from roboticstoolbox.mobile.DistanceTransformPlanner import distancexform
+
+
+@pytest.mark.parametrize("metric", ["manhattan", "cityblock", "MANHATTAN"])
+def test_manhattan_queries_use_four_connected_steps(metric: str) -> None:
+    planner = DistanceTransformPlanner(np.zeros((5, 5)), metric=metric)
+    planner.plan((4, 3))
+
+    path = planner.query((0, 0))
+
+    nt.assert_array_equal(np.abs(np.diff(path, axis=0)).sum(axis=1), 1)
+    nt.assert_equal(len(path) - 1, planner.distancemap[0, 0])
+
+
+def test_euclidean_queries_keep_diagonal_steps() -> None:
+    planner = DistanceTransformPlanner(np.zeros((5, 5)), metric="euclidean")
+    planner.plan((4, 4))
+
+    path = planner.query((0, 0))
+
+    nt.assert_array_equal(np.diff(path, axis=0), np.ones((4, 2)))
 
 
 def quiet(func, *args, **kwargs):

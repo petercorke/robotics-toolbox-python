@@ -53,8 +53,9 @@ class DistanceTransformPlanner(PlannerBase):
 
     Creates a planner that finds the path between two points in the 2D grid
     using omnidirectional motion and avoiding occupied cells.  The path
-    comprises a set of 4- or 8-way connected points in adjacent cells.  Also
-    known as the wavefront, grassfire or brushfire planning algorithm.
+    comprises a set of 4-way connected points for the Manhattan metric, or
+    8-way connected points for the Euclidean metric.  Also known as the
+    wavefront, grassfire or brushfire planning algorithm.
 
     The map is described by a 2D occupancy ``occgrid`` whose elements are zero
     if traversable or nonzero if untraversable, ie. an obstacle.
@@ -316,6 +317,8 @@ class DistanceTransformPlanner(PlannerBase):
             ],
             dtype=int,
         )
+        if self.metric.lower() in ("manhattan", "cityblock"):
+            directions = directions[np.abs(directions).sum(axis=1) == 1]
 
         assert self.occgrid is not None and self._goal is not None  # nosec B101: narrows the type for mypy
         self.validate_endpoint(position)
