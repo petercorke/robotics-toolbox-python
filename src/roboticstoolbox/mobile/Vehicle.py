@@ -804,6 +804,9 @@ class VehicleBase(ABC):
 
         .. note:: Vehicle control input limits are applied.
 
+        The distance component of the odometry is signed: reverse motion gives
+        a negative distance.
+
         .. seealso:: :func:`control`, ``update``, :func:`run`
         """
         # determine vehicle control
@@ -814,6 +817,8 @@ class VehicleBase(ABC):
 
         # update state
         xd = self._dt * self.deriv(self._x, u)  # delta state
+        theta = self._x[2]
+        distance = xd[0] * cos(theta) + xd[1] * sin(theta)
 
         # update state vector
         self._x += xd
@@ -822,7 +827,7 @@ class VehicleBase(ABC):
         # print('VEH', u, self.x)
 
         # odometry comes from change in state vector
-        odo = np.r_[np.linalg.norm(xd[0:2]), xd[2]]
+        odo = np.r_[distance, xd[2]]
 
         if self._V is not None:
             odo += self.random.multivariate_normal((0, 0), self._V)
