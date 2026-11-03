@@ -35,7 +35,7 @@ jobs:
 
       - name: Install docs dependencies
         run: |
-          pip install .[docs]
+          pip install .[docs,qp]  # qp for the IK_QP examples
           pip install sympy python-flint  # for the analytic IK examples
           sudo apt-get install -y graphviz
 
