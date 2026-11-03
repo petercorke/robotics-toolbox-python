@@ -2066,7 +2066,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         animation with a pause of ``dt`` seconds between each frame.
 
         :param q: The joint configuration of the robot.
-        :param backend: The graphical backend to use, by name: 'swift', 'pyplot' or 'pyplot2', or one added by :func:`~roboticstoolbox.backends.register_backend`, see :func:`~roboticstoolbox.backends.registered_backends`.  The name is not case sensitive.  Defaults to 'swift' of a ``Robot`` and 'pyplot` for a ``DHRobot``
+        :param backend: The graphical backend to use, by name: 'swift', 'pyplot' or 'pyplot2', or one added by :func:`~roboticstoolbox.backends.registry.register_backend`, see :func:`~roboticstoolbox.backends.registry.registered_backends`.  The name is not case sensitive.  Defaults to 'swift' of a ``Robot`` and 'pyplot` for a ``DHRobot``
         :param block: ``True`` waits until the window is closed; the PyPlot backend has
             already shown the figure, so ``False`` and ``None`` return at once,
             defaults to False
