@@ -72,7 +72,7 @@ The backend holds a *scene*: the robots and other objects that it has been asked
 The contract
 ------------
 
-This is written down as the :py:class:`~roboticstoolbox.backends.Connector.Connector` protocol.  A backend is *any* object that has these methods and flags, and does not have to inherit from it: Swift does not, since it does not depend on the Toolbox.  The PyPlot backends inherit from it, which supplies the default values of the flags and makes a missing method an error when the backend is made.  The arguments differ from one backend to another, so the methods are declared with ``*args, **kwargs``, and the details are in each backend.
+This is written down as the :py:class:`~roboticstoolbox.backends.Connector.Connector` abstract class.  A backend inherits from it, which supplies the default values of the flags and makes a missing method an error when the backend is made.  The arguments differ from one backend to another, so the methods are declared with ``*args, **kwargs``, and the details are in each backend.
 
 .. autosummary::
     :nosignatures:

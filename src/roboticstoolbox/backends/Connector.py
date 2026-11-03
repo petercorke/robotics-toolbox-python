@@ -5,20 +5,18 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
-from typing import Any, Protocol, runtime_checkable
+from abc import ABC, abstractmethod
+from typing import Any
 
 
-@runtime_checkable
-class Connector(Protocol):
+class Connector(ABC):
     """
     What RTB needs of a graphical backend
 
-    A backend is any object that has these methods and flags: it does not have to
-    inherit from this class.  Swift does not, since it does not depend on RTB.
-    The PyPlot backends inherit from it explicitly, which supplies the default
-    values of the flags and of :meth:`_add_teach_panel`, and makes a missing
-    method an error at construction.
+    A backend inherits from this class, which supplies the default values of the
+    flags and of :meth:`_add_teach_panel`, and makes a missing method an error
+    when the backend is made.  A backend from outside the Toolbox inherits from
+    it too.
 
     The methods take different arguments in different backends, so they are
     declared with ``*args, **kwargs``; see the backend for the details.

@@ -82,31 +82,16 @@ class TestVehicleWindow(unittest.TestCase):
         self.assertIn("Robotics Toolbox", title.call_args.args[1])
 
 
-class TestConnectorProtocol(unittest.TestCase):
+class TestConnector(unittest.TestCase):
     def test_backends_are_connectors(self):
         self.assertIsInstance(PyPlot(), Connector)
         self.assertIsInstance(PyPlot2(), Connector)
 
-    def test_a_class_need_not_inherit(self):
-        # Swift does not depend on RTB, so it cannot inherit from Connector
+    def test_a_class_that_does_not_inherit_is_not_a_connector(self):
         class Standalone:
-            supports_teach = False
-            supports_ellipse = False
-
             def launch(self, *a, **k): ...
-            def step(self, *a, **k): ...
-            def reset(self, *a, **k): ...
-            def restart(self, *a, **k): ...
-            def close(self, *a, **k): ...
-            def add(self, *a, **k): ...
-            def remove(self, *a, **k): ...
-            def hold(self, *a, **k): ...
-            def _add_teach_panel(self, *a, **k): ...
 
-        self.assertIsInstance(Standalone(), Connector)
-
-    def test_an_object_without_the_methods_is_not(self):
-        self.assertNotIsInstance(object(), Connector)
+        self.assertNotIsInstance(Standalone(), Connector)
 
     def test_inheriting_gets_the_defaults(self):
         class Minimal(Connector):
@@ -132,23 +117,13 @@ class TestConnectorProtocol(unittest.TestCase):
         with self.assertRaises(TypeError):
             Incomplete()
 
-    def test_swift_satisfies_the_protocol(self):
+    def test_swift_is_a_connector(self):
         swift = __import__("importlib").util.find_spec("swift")
         if swift is None:
             self.skipTest("swift is not installed")
         from roboticstoolbox.backends.swift import Swift
 
-        for name in (
-            "launch",
-            "step",
-            "reset",
-            "restart",
-            "close",
-            "add",
-            "remove",
-            "hold",
-        ):
-            self.assertTrue(callable(getattr(Swift, name, None)), name)
+        self.assertTrue(issubclass(Swift, Connector))
 
 
 class TestShapePlot(unittest.TestCase):

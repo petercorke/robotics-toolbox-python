@@ -15,14 +15,18 @@ from swift.Elements import (
 )
 from swift.Swift import Swift as _SwiftBase
 
+from roboticstoolbox.backends.Connector import Connector
 
-class Swift(_SwiftBase):
+
+class Swift(_SwiftBase, Connector):
     """Swift backend with RTB capability flags."""
 
     supports_teach: bool = True
     supports_ellipse: bool = False
 
-    def _add_teach_panel(self, robot: Any, q: Any, handle: Any, block: Any) -> Any:
+    def _add_teach_panel(
+        self, robot: Any, q: Any, handle: Any = None, block: bool = True
+    ) -> Any:
         """
         Add a joint-slider teach panel plus a live end-effector pose
         readout, and wire the sliders to drive ``handle`` (the
