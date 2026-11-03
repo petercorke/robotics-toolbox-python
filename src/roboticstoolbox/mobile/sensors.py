@@ -689,8 +689,8 @@ class RangeBearingSensor(SensorBase):
 
         :param x: vehicle state :math:`(x, y, \theta)`
         :type x: array_like(3)
-        :param arg: landmark id or coordinate
-        :type arg: int or array_like(2)
+        :param landmark: landmark id or coordinate
+        :type landmark: int or array_like(2)
         :return: Jacobian matrix
         :rtype: ndarray(2,3)
 
@@ -725,8 +725,8 @@ class RangeBearingSensor(SensorBase):
 
         :param x: vehicle state :math:`(x, y, \theta)`
         :type x: array_like(3)
-        :param arg: landmark id or coordinate
-        :type arg: int or array_like(2)
+        :param landmark: landmark id or coordinate
+        :type landmark: int or array_like(2)
         :return: Jacobian matrix
         :rtype: ndarray(2,2)
 
@@ -759,8 +759,8 @@ class RangeBearingSensor(SensorBase):
 
         :param x: vehicle state :math:`(x, y, \theta)`
         :type x: array_like(3)
-        :param arg: landmark id or coordinate
-        :type arg: int or array_like(2)
+        :param landmark: landmark id or coordinate
+        :type landmark: int or array_like(2)
         :return: Jacobian matrix
         :rtype: ndarray(2,2)
 

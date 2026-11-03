@@ -27,6 +27,7 @@ from spatialmath import SE2, Polygon2, base
 from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehiclePolygon
 from roboticstoolbox.mobile.drivers import VehicleDriverBase
 from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
+from roboticstoolbox.tools.plot import isnotebook as _isnotebook
 from roboticstoolbox.tools.plot import set_window_title
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
@@ -34,27 +35,6 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 ControlLike: TypeAlias = (
     ArrayLike | Callable[..., ArrayLike] | interpolate.interp1d | VehicleDriverBase
 )
-
-
-def _isnotebook() -> bool:
-    """
-    Determine if code is being run from a Jupyter notebook or JupyterLite.
-    """
-    if sys.platform == "emscripten":
-        return True
-
-    if "ipykernel" in sys.modules or "google.colab" in sys.modules:
-        return True
-
-    try:
-        get_ipython_fn = globals().get("get_ipython", None)
-        if callable(get_ipython_fn):
-            shell = get_ipython_fn().__class__.__name__
-            if shell == "ZMQInteractiveShell":
-                return True
-        return False
-    except Exception:
-        return False
 
 
 def _refresh_animation_frame(
@@ -100,6 +80,8 @@ def _refresh_animation_frame(
             except Exception:
                 pass
 
+    if dt <= 0:
+        raise ValueError("animation pause duration must be greater than zero")
     plt.pause(dt)
 
 
