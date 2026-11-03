@@ -32,6 +32,24 @@ def test_map_is_the_map_of_the_sensor() -> None:
     assert pf.map is pf.sensor.map
 
 
+@pytest.mark.parametrize("first_weight", [0.2, 0.8])
+def test_resampling_uses_weighted_cdf_intervals(first_weight: float) -> None:
+    pf = _filter()
+    particles = np.column_stack(
+        (np.arange(pf.nparticles), np.zeros((pf.nparticles, 2)))
+    )
+    pf.x = particles.copy()
+    pf.weight = np.zeros(pf.nparticles)
+    pf.weight[[0, -1]] = [first_weight, 1 - first_weight]
+    pf._random = np.random.default_rng(47)
+    draws = np.random.default_rng(47).uniform(0, 1, size=pf.nparticles)
+    expected_indices = np.where(draws < first_weight, 0, pf.nparticles - 1)
+
+    pf._select()
+
+    np.testing.assert_array_equal(pf.x, particles[expected_indices])
+
+
 @pytest.mark.parametrize("verbose", [False, True])
 def test_verbose_is_what_was_asked(verbose: bool) -> None:
     assert _filter(verbose=verbose).verbose is verbose
