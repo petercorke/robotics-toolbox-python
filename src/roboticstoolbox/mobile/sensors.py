@@ -739,7 +739,7 @@ class RangeBearingSensor(SensorBase):
         .. seealso:: :meth:`h` :meth:`Hx` :meth:`Hw`
         """
         if base.isinteger(landmark):
-            xf = self.map.landmark(landmark)
+            xf = self.map[landmark]
         else:
             xf = landmark
         x = base.getvector(x, 3)
