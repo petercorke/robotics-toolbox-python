@@ -87,6 +87,16 @@ class TestTrajectory(unittest.TestCase):
                             getattr(actual, field), getattr(expected, field), atol=1e-12
                         )
 
+    def test_trapezoidal_zero_blend_velocity_boundary(self) -> None:
+        for q0, qf in ((0.0, 1.0), (1.0, 0.0)):
+            with self.subTest(q0=q0, qf=qf):
+                trajectory = tr.trapezoidal(q0, qf, np.array([0.0, 0.5, 1.0]), V=1.0)
+
+                self.assertEqual(trajectory.tblend, 0.0)
+                nt.assert_allclose(trajectory.q, [q0, 0.5, qf])
+                nt.assert_allclose(trajectory.qd, np.full(3, qf - q0))
+                nt.assert_allclose(trajectory.qdd, np.zeros(3))
+
     def test_mtraj_time_origin(self) -> None:
         elapsed = np.linspace(0, 2, 9)
         for generator in (tr.quintic, tr.trapezoidal):

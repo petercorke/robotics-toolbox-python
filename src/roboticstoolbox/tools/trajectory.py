@@ -724,7 +724,7 @@ class TrapezoidalProfile:
             self._a = 0.0
         else:
             self.tb = (q0 - qf + vel * T) / vel
-            self._a = vel / self.tb
+            self._a = 0.0 if self.tb == 0 else vel / self.tb
 
         self.V = vel
         self._q0 = q0
@@ -753,6 +753,10 @@ class TrapezoidalProfile:
         for k, tk in enumerate(times.flat):
             if tk < 0:
                 pk, pdk, pddk = q0, 0.0, 0.0
+            elif tb == 0 and tk <= T:
+                pk = q0 + V * tk
+                pdk = V
+                pddk = 0.0
             elif tk <= tb:
                 # initial blend
                 pk = q0 + a / 2 * tk**2
