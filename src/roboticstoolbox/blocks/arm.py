@@ -1463,13 +1463,13 @@ class FDyn(ContinuousBlock):
         else:
             q0 = smb.getvector(q0, robot.n)
         self._x0 = np.r_[q0, np.zeros((robot.n,))]
-        self._qdd = None
+        self._qdd = np.zeros((robot.n,))  # placeholder until the first deriv()
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         n = self.robot.n
         q = x[:n]
         qd = x[n:]
-        qdd = self._qdd  # from last deriv
+        qdd = self._qdd  # from last deriv(), or the zero placeholder
         return [q, qd, qdd]
 
     def deriv(self, t: Any, inports: Any, x: Any) -> Any:

@@ -128,6 +128,16 @@ class RobotBlockTest(unittest.TestCase):
         nt.assert_equal(block.test_output(tau, x=x)[0], q)
         nt.assert_equal(block.getstate0(), x)
 
+    def test_fdyn_qdd_before_deriv(self):
+        # bdsim records the type of each output when it compiles a diagram, so qdd
+        # must be an array of the right shape even before the first deriv() call
+        robot = rtb.models.DH.Puma560()
+        q = robot.configs["qn"]
+        block = FDyn(robot, q)
+
+        qdd = block.test_output([0] * 6, x=np.r_[q, np.zeros((6,))])[2]
+        self.assertEqual(np.shape(qdd), (6,))
+
     @unittest.skip
     def test_fdyn_x(self):
         robot = rtb.models.DH.Puma560()
