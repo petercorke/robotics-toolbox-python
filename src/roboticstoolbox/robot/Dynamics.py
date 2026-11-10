@@ -191,8 +191,13 @@ class DynamicsMixin:
         nf = self.copy()
         nf.name = "NF/" + self.name
 
-        # add the modified links (copies)
-        nf._links = [link.nofriction(coulomb, viscous) for link in self.links]
+        # Reuse Link.nofriction, but keep the copied robot's link graph intact.
+        for link in nf.links:
+            frictionless = link.nofriction(coulomb, viscous)
+            if viscous:
+                link.B = frictionless.B
+            if coulomb:
+                link.Tc = frictionless.Tc
 
         return nf
 
