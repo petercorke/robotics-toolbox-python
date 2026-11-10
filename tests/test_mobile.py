@@ -846,3 +846,53 @@ class TestRandomPathWorkspace(unittest.TestCase):
 if __name__ == "__main__":  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])
+
+
+@pytest.mark.parametrize("vehicle_type", [rtb.Bicycle, Unicycle, DiffSteer])
+@pytest.mark.parametrize("input_type", [list, tuple, np.array])
+@pytest.mark.parametrize("direction", [-1, 1])
+@pytest.mark.parametrize("limit", ["speed", "acceleration", "steering"])
+def test_vehicle_fractional_limits_from_integer_inputs(
+    vehicle_type: type, input_type: type, direction: int, limit: str
+) -> None:
+    kwargs = {"dt": 0.1}
+    expected = np.array([1.0, 1.0])
+    if limit == "speed":
+        kwargs["speed_max"] = 0.5
+        expected[0] = 0.5
+        if vehicle_type is DiffSteer:
+            expected[1] = 0.5
+    elif limit == "acceleration":
+        kwargs["accel_max"] = 0.5
+        expected[0] = 0.05
+        if vehicle_type is DiffSteer:
+            expected[1] = 0.05
+    else:
+        if vehicle_type is DiffSteer:
+            pytest.skip("DiffSteer limits wheel speeds rather than steering")
+        kwargs["steer_max"] = 0.25
+        expected[1] = 0.25
+
+    command = input_type([direction, direction])
+    result = vehicle_type(**kwargs).u_limited(command)
+    control = vehicle_type(**kwargs).u_limited(np.asarray(command, dtype=float))
+    nt.assert_allclose(result, direction * expected)
+    nt.assert_allclose(result, control)
+    nt.assert_array_equal(command, [direction, direction])
+
+
+@pytest.mark.parametrize("vehicle_type", [rtb.Bicycle, Unicycle, DiffSteer])
+@pytest.mark.parametrize("input_type", [list, tuple, np.array])
+@pytest.mark.parametrize("direction", [-1, 1])
+def test_vehicle_integer_control_callback_preserves_limited_motion(
+    vehicle_type: type, input_type: type, direction: int
+) -> None:
+    steering = direction if vehicle_type is DiffSteer else 0
+    command = input_type([direction, steering])
+    vehicle = vehicle_type(speed_max=0.5, dt=0.1)
+    vehicle.step(lambda vehicle, t, x: command, animate=False)
+    nt.assert_allclose(vehicle.x, [direction * 0.05, 0, 0])
+
+    control = vehicle_type(speed_max=0.5, dt=0.1)
+    control.step(command, animate=False)
+    nt.assert_allclose(vehicle.x, control.x)
