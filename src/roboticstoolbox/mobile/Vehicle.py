@@ -1237,7 +1237,7 @@ class Bicycle(VehicleBase):
         steered wheel angle limits are applied to :math:`\gamma`.
         """
         # limit speed and steer angle
-        ulim = np.array(u)
+        ulim = np.array(u, dtype=float)
         ulim[0] = self.limits_va(u[0], self._v_prev)
         ulim[1] = np.clip(u[1], -self._steer_max, self._steer_max)
 
@@ -1344,7 +1344,7 @@ class Unicycle(VehicleBase):
         """
 
         # limit speed and steer angle
-        ulim = np.array(u)
+        ulim = np.array(u, dtype=float)
         ulim[0] = self.limits_va(u[0], self._v_prev)
         ulim[1] = np.maximum(-self._steer_max, np.minimum(self._steer_max, u[1]))
 
@@ -1415,7 +1415,7 @@ class DiffSteer(Unicycle):
         """
 
         # limit speed and acceleration of each wheel/track
-        ulim = np.array(u)
+        ulim = np.array(u, dtype=float)
         ulim[0] = self.limits_va(u[0], self._v_prev_L)
         ulim[1] = self.limits_va(u[1], self._v_prev_R)
 
