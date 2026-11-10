@@ -4,7 +4,7 @@ name = "roboticstoolbox-python"
 
 description = "A Python library for robotics education and research"
 
-version = "1.4.4"
+version = "1.5.0"
 
 authors = [
     { name = "Jesse Haviland", email = "j.haviland@qut.edu.au" },
@@ -206,6 +206,9 @@ archs = ["AMD64"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+markers = [
+    "slow: takes more than a few seconds; run by the coverage job, not by the others",
+]
 filterwarnings = [
     "ignore:FigureCanvasAgg is non-interactive:UserWarning",
 ]
@@ -376,5 +379,26 @@ module = [
 ]
 ignore_errors = true
 
+# CI installs the package and runs the tests against the installed copy, so coverage
+# measures it by name.  [tool.coverage.paths] maps the installed files back to src/,
+# so that the report, and Codecov, use the paths of the repository.
 [tool.coverage.run]
-omit = ["src/roboticstoolbox/demo/*", "test_*.py"]
+source = ["roboticstoolbox"]
+relative_files = true
+omit = ["src/roboticstoolbox/demo/*", "*/roboticstoolbox/demo/*", "test_*.py"]
+
+[tool.coverage.paths]
+source = ["src/roboticstoolbox", "*/site-packages/roboticstoolbox"]
+
+# Left out of the report, since they have no tests or cannot be measured
+[tool.coverage.report]
+omit = [
+    # sketches for hardware, with no tests, that nobody maintains
+    "*/roboticstoolbox/backends/Dynamixel/*",
+    "*/roboticstoolbox/backends/ROS/*",
+    # the unfinished port of DHFactor, which nothing imports
+    "*/roboticstoolbox/robot/DHFactor.py",
+    "*/roboticstoolbox/tools/DHFactor.py",
+    # the command-line tools run in a subprocess in the tests, which coverage does not trace
+    "*/roboticstoolbox/bin/*",
+]

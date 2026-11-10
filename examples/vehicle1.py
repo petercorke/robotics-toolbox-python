@@ -1,7 +1,6 @@
 # from roboticstoolbox import Bicycle, RandomPath, VehiclePolygon
 from roboticstoolbox import VehicleIcon
 from spatialmath import *  # lgtm [py/polluting-import]
-from math import pi
 
 dim = 10
 

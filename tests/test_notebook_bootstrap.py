@@ -354,3 +354,100 @@ def test_the_browser_install_goes_through_piplite():
 
     assert "import piplite" in template
     assert '"/pypi"' not in template
+
+
+def _colab_bootstrap(monkeypatch):
+    """The bootstrap module with a fake google.colab and no real pip.
+
+    :returns: the module, the pip commands it ran, and the widget-manager calls
+    """
+    import types
+
+    bootstrap = _load_module("_rtb_nb_bootstrap", NOTEBOOKS_DIR / "_rtb_nb_bootstrap.py")
+
+    calls = []
+    enabled = []
+    output = types.SimpleNamespace(
+        enable_custom_widget_manager=lambda: enabled.append(True)
+    )
+    colab = types.ModuleType("google.colab")
+    colab.output = output
+    google = types.ModuleType("google")
+    google.colab = colab
+    monkeypatch.setitem(sys.modules, "google", google)
+    monkeypatch.setitem(sys.modules, "google.colab", colab)
+
+    def fake_run(cmd, **kw):
+        # subprocess.run is global, so anything else that uses it must still work
+        if "pip" in cmd:
+            calls.append(cmd)
+        return types.SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
+
+    monkeypatch.setattr(bootstrap.subprocess, "run", fake_run)
+    monkeypatch.setattr(bootstrap.sys, "platform", "linux")
+    return bootstrap, calls, enabled
+
+
+def test_the_colab_install_includes_ipympl_and_the_widget_manager(monkeypatch):
+    # Colab does not ship ipympl, and matplotlib rejects "%matplotlib ipympl" without
+    # it.  The Colab branch is run here with a fake google.colab and no real pip, so
+    # this checks the command and the widget-manager call, not a real Colab install.
+    import asyncio
+
+    bootstrap, calls, enabled = _colab_bootstrap(monkeypatch)
+
+    assert asyncio.run(bootstrap.ensure_installed(["ik"])) is True
+
+    assert len(calls) == 1
+    assert "roboticstoolbox-python[ik]" in calls[0]
+    assert "ipympl" in calls[0]
+    assert enabled == [True]
+
+
+def test_the_colab_install_makes_matplotlib_list_its_backends_again(monkeypatch):
+    # matplotlib builds its list of backends once.  Colab imports matplotlib before
+    # ipympl is installed, so the list lacks ipympl and %matplotlib ipympl is rejected
+    # until the session restarts.  This checks that the registry is cleared after the
+    # install; the real failure needs a fresh Colab runtime (see the PR for how it
+    # was reproduced in an isolated virtual environment).
+    import asyncio
+
+    from matplotlib.backends import backend_registry
+
+    bootstrap, _, _ = _colab_bootstrap(monkeypatch)
+    backend_registry.list_all()  # builds the list
+    assert backend_registry._loaded_entry_points is True
+
+    asyncio.run(bootstrap.ensure_installed())
+
+    assert backend_registry._loaded_entry_points is False
+    # and it can be built again, which resetting only the flag would not allow
+    backend_registry.list_all()
+
+
+def test_the_colab_install_copes_with_a_matplotlib_that_cannot_be_cleared(monkeypatch):
+    # _clear is private; if a matplotlib release drops it, the bootstrap must still run
+    import asyncio
+
+    from matplotlib.backends import backend_registry
+
+    bootstrap, _, enabled = _colab_bootstrap(monkeypatch)
+    monkeypatch.delattr(type(backend_registry), "_clear")
+
+    assert asyncio.run(bootstrap.ensure_installed()) is True
+    assert enabled == [True]
+
+
+def test_the_colab_install_copes_with_a_matplotlib_without_a_backend_registry(
+    monkeypatch,
+):
+    # matplotlib before 3.9 has no registry
+    import asyncio
+
+    import matplotlib.backends
+
+    bootstrap, _, enabled = _colab_bootstrap(monkeypatch)
+    monkeypatch.delattr(matplotlib.backends, "backend_registry")
+
+    assert asyncio.run(bootstrap.ensure_installed()) is True
+    assert enabled == [True]

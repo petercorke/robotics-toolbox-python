@@ -177,9 +177,9 @@ class Bug2(PlannerBase):
         # iterate using the next() method until we reach the goal
         try:
             while True:
-                assert robot is not None
+                assert robot is not None  # nosec B101: narrows the type for mypy
                 if animating:
-                    assert trail_head is not None and trail_line is not None
+                    assert trail_head is not None and trail_line is not None  # nosec B101: narrows the type for mypy
                     trail_head.set_data([robot[0]], [robot[1]])
                     if trail:
                         x, y = np.atleast_2d(path).T
@@ -241,7 +241,7 @@ class Bug2(PlannerBase):
         :param position: current robot position
         :return: step (dx, dy) in world units, at most one cell along each axis
         """
-        assert self._goal is not None and self._m_line is not None
+        assert self._goal is not None and self._m_line is not None  # nosec B101: narrows the type for mypy
         m_line = self._m_line
         d = self._goal - position
         cellsize = self.occgrid.cellsize if self.occgrid is not None else 1
@@ -299,7 +299,7 @@ class Bug2(PlannerBase):
                 self.message(f"  {position}: change to step 2")
 
                 # get a list of all the points around the obstacle
-                assert self.occgrid is not None
+                assert self.occgrid is not None  # nosec B101: narrows the type for mypy
                 edge, _ = edgelist(self.occgrid.grid == 0, self.occgrid.w2g(position))
                 self._edge = [self.occgrid.g2w(p) for p in edge]
                 # the first point of the edge list is the hit point, where the
@@ -315,7 +315,7 @@ class Bug2(PlannerBase):
             # on the M-line closer than when we started.
 
             self.message(f"{position}: moving around the obstacle (step 2)")
-            assert self._edge is not None and self._k is not None
+            assert self._edge is not None and self._k is not None  # nosec B101: narrows the type for mypy
             if self._k < len(self._edge):
                 n = self._edge[self._k]  # next edge point
             else:
@@ -324,7 +324,7 @@ class Bug2(PlannerBase):
                 raise NoPathError("robot is trapped")
 
             # are we on the M-line now ?
-            assert self.occgrid is not None
+            assert self.occgrid is not None  # nosec B101: narrows the type for mypy
             if (
                 abs(np.inner(np.r_[position, 1], m_line))
                 <= _M_LINE_TOLERANCE * self.occgrid.cellsize

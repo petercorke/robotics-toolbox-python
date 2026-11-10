@@ -53,9 +53,10 @@ Every PR runs a set of automatic checks. Not all of them are equal:
 
 - **Required:** `All tests passed` (the test matrix on Linux, macOS and Windows, the `mypy`
   type check and the docs build) and the PR title check. These need to be green to merge.
-- **Advisory, not required:** the Codacy static analysis. It is known to flag `assert`
-  statements in tests as "high" security issues (bandit B101). Please do not rewrite tests
-  or code to satisfy it, a maintainer will look at anything that matters.
+- **Advisory, not required:** the Codacy static analysis. Bandit is not run on `tests/`
+  (see `.codacy.yml`), where a plain `assert` is correct, but Codacy may still report
+  findings elsewhere. Please do not rewrite code only to satisfy it, a maintainer will look
+  at anything that matters.
 - **First pull request:** checks do not start until a maintainer approves the workflow run,
   which GitHub requires for first-time contributors. A PR with no checks yet is normal, not
   a failure.

@@ -359,7 +359,7 @@ class RandomPath(VehicleDriverBase):
             self._new_goal()
 
         # if nearly at goal point, choose the next one
-        assert self._goal is not None  # set by _new_goal
+        assert self._goal is not None  # nosec B101: set by _new_goal
         d = np.linalg.norm(self._attached_vehicle()._x[0:2] - self._goal)
         if d < self._dthresh or abs(d - self._d_prev) < 1e-3:
             self._new_goal()

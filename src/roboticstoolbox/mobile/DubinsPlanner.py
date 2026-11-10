@@ -457,7 +457,7 @@ class DubinsPlanner(PlannerBase):
         """
         self.validate_start_goal(start, goal)
 
-        assert self.start is not None and self.goal is not None
+        assert self.start is not None and self.goal is not None  # nosec B101: narrows the type for mypy
         path, length, mode, lengths = path_planning(
             start=self.start,
             goal=self.goal,

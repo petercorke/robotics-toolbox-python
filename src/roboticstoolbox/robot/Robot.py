@@ -1968,13 +1968,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         # since their construction (ETS.split(), URDF, PoERobot's
         # _update_ets()) already guarantees joint-last independently of DH
         # conventions.
-        assert getattr(self, "mdh", True), (
-            "Robot.rne() assumes each link's joint is the last element of "
-            "its own ETS segment, which does not hold for a DHRobot built "
-            "with mdh=False (standard DH). Call DHRobot's own "
-            "rne()/rne_python() instead of Robot.rne(dh_instance, ...) "
-            "directly."
-        )
+        if not getattr(self, "mdh", True):
+            raise ValueError(
+                "Robot.rne() assumes each link's joint is the last element of "
+                "its own ETS segment, which does not hold for a DHRobot built "
+                "with mdh=False (standard DH). Call DHRobot's own "
+                "rne()/rne_python() instead of Robot.rne(dh_instance, ...) "
+                "directly."
+            )
 
         n = self.n
         # n = len(self.links)

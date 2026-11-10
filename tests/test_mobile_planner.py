@@ -1,4 +1,3 @@
-from collections import namedtuple
 from contextlib import redirect_stdout
 from io import StringIO
 from math import pi
@@ -7,7 +6,6 @@ from unittest.mock import MagicMock
 import numpy.testing as nt
 import numpy as np
 import unittest
-import spatialmath.base as sm
 
 from roboticstoolbox.mobile import *
 

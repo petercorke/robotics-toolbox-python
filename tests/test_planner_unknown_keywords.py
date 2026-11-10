@@ -15,7 +15,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from roboticstoolbox import Bug2, DistanceTransformPlanner, PRMPlanner
+from roboticstoolbox import DistanceTransformPlanner
 
 
 def grid():
