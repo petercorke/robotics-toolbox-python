@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-
 import pytest
 
 
@@ -62,6 +61,10 @@ def test_isaacsim_backend_lifecycle() -> None:
             prim_path="/World/Panda",
         )
         print(f"Panda added at {handle.prim_path}")
+        from pxr import UsdLux
+
+        light = UsdLux.DistantLight.Define(backend._world.stage, "/World/defaultLight")
+        light.CreateIntensityAttr(1000.0)
 
         assert isinstance(handle, IsaacSimRobotHandle)
         assert handle.robot is panda
@@ -70,8 +73,15 @@ def test_isaacsim_backend_lifecycle() -> None:
         assert handle.urdf_path == urdf_path.resolve()
         assert handle in backend.robot_handles
 
-        backend.step(1.0 / 60.0)
-        print("Simulation advanced by one step")
+        while True:
+
+            backend.step(1.0 / 60.0)
+            print("Simulation advanced by one step")
+
+    except KeyboardInterrupt as error:
+        print(f"Isaac Sim has been stopped using CTRL+C: {error}")
+        raise
+
     except Exception as error:
         print(f"Isaac Sim smoke test failed: {error}")
         raise
