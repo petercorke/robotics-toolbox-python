@@ -72,6 +72,10 @@ def test_isaacsim_backend_lifecycle() -> None:
 
         backend.step(1.0 / 60.0)
         print("Simulation advanced by one step")
+    except Exception as error:
+        print(f"Isaac Sim smoke test failed: {error}")
+        raise
+
     finally:
         print("Closing Isaac Sim backend")
         backend.close()

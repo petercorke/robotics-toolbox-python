@@ -122,7 +122,7 @@ class IsaacSim:
         # "max_bounces": 3,
 
         # Exit immediately instead of shutting extensions down sequentially.
-        # "fast_shutdown": True,
+        "fast_shutdown": False,
 
         # Maximum number of CPU threads used by the application.
         # "limit_cpu_threads": 32,
@@ -277,12 +277,9 @@ class IsaacSim:
             RenderingManager.render()
     
     def simulation_step(self, dt: float = 0.05) -> None:
-    
-        if self._simulation_app.is_running():
+        """Advance the active Isaac Sim world by ``dt`` seconds."""
 
-            self._simulation_app.step()
-
-            self._simulation_app.update()          
+        self.step(dt)
 
     def reset(self) -> None:
         """Rebuild the scene from the cached launch and URDF robot settings."""
@@ -309,10 +306,11 @@ class IsaacSim:
             `SimulationApp.close <https://docs.isaacsim.omniverse.nvidia.com/6.0.0/py/source/extensions/isaacsim.simulation_app/docs/index.html#isaacsim.simulation_app.SimulationApp.close>`_
         """
 
-        if self._simulation_app is not None and not self._simulation_app.is_existing(): 
-            
-            self._simulation_app.close()
+        if self._simulation_app is not None:
+            if not self._simulation_app.is_exiting():
+                self._simulation_app.close()
             self._simulation_app = None
+            self._world = None
 
 
     def _load_runtime_extensions(self) -> None:
@@ -347,10 +345,30 @@ class IsaacSim:
     ) -> IsaacSimRobotHandle:
         return self.robot_importer.create_robot(cached_robot)
 
+    def _urdf_path(self, robot: Any) -> Path:
+        urdf_filepath = getattr(robot, "urdf_filepath", "")
+        if not urdf_filepath:
+            raise ValueError("Isaac Sim requires a URDF-backed robot")
+
+        urdf_path = Path(urdf_filepath).expanduser().resolve()
+        if not urdf_path.is_file():
+            raise FileNotFoundError(f"robot URDF does not exist: {urdf_path}")
+        if urdf_path.suffix.lower() != ".urdf":
+            raise ValueError(
+                "Isaac Sim requires an expanded .urdf file; "
+                f"received {urdf_path.name!r}"
+            )
+
+        return urdf_path
+
+    def _require_launched(self) -> None:
+        if self._simulation_app is None or not self._simulation_app.is_running():
+            raise RuntimeError("Isaac Sim is not running")
+        if self._world is None:
+            raise RuntimeError("launch() must be called before using the backend")
+
     #def hold(self) -> None: ...
-    #def _urdf_path(self, robot: Any) -> Path: ...
     #def _create_joint_mapping(
         #self, robot: Any, articulation: Any
     #) -> tuple[tuple[str, ...], NDArray]: ...
     #def _next_prim_path(self, robot: Any) -> str: ...
-    #def _require_launched(self) -> None: ...
