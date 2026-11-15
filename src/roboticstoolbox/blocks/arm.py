@@ -330,18 +330,18 @@ class Jacobian(FunctionBlock):
         robot = self.robot
         if frame in (0, "0"):
             if representation is None:
-                return robot.jacob0  # type: ignore[no-any-return]
+                return robot.jacob0
             return lambda q: robot.jacob0_analytical(q, representation=representation)
         elif frame == "e":
             if representation is None:
-                return robot.jacobe  # type: ignore[no-any-return]
+                return robot.jacobe
             raise ValueError("cannot compute analytical Jacobian in EE frame")
         raise ValueError("unknown frame")
 
     @property
     def frame(self) -> str:
         """The frame the Jacobian is computed in, ``"0"`` or ``"e"``."""
-        return self._frame  # type: ignore[no-any-return]
+        return self._frame
 
     @frame.setter
     def frame(self, value: str) -> None:
@@ -351,7 +351,7 @@ class Jacobian(FunctionBlock):
     @property
     def representation(self) -> str | None:
         """The representation of the analytical Jacobian, None for the geometric."""
-        return self._representation  # type: ignore[no-any-return]
+        return self._representation
 
     @representation.setter
     def representation(self, value: str | None) -> None:
@@ -361,7 +361,7 @@ class Jacobian(FunctionBlock):
     @property
     def inverse(self) -> bool:
         """Output the inverse of the Jacobian, which must be square."""
-        return self._inverse  # type: ignore[no-any-return]
+        return self._inverse
 
     @inverse.setter
     def inverse(self, value: bool) -> None:
@@ -374,7 +374,7 @@ class Jacobian(FunctionBlock):
     @property
     def pinv(self) -> bool:
         """Output the pseudo-inverse of the Jacobian."""
-        return self._pinv  # type: ignore[no-any-return]
+        return self._pinv
 
     @pinv.setter
     def pinv(self, value: bool) -> None:
@@ -869,7 +869,7 @@ class CirclePath(SourceBlock):
     @property
     def frequency(self) -> float:
         """Frequency of the circle, in the units of ``unit``."""
-        return self._frequency  # type: ignore[no-any-return]
+        return self._frequency
 
     @frequency.setter
     def frequency(self, value: float) -> None:
@@ -879,7 +879,7 @@ class CirclePath(SourceBlock):
     @property
     def phase(self) -> float:
         """Phase of the circle, in the units of ``unit`` (cycles or radians)."""
-        return self._phase  # type: ignore[no-any-return]
+        return self._phase
 
     @phase.setter
     def phase(self, value: float) -> None:
@@ -1621,7 +1621,7 @@ class FDyn(ContinuousBlock):
     @property
     def q0(self) -> NDArray:
         """Initial joint configuration, the first half of the initial state."""
-        return self._x0[: self.robot.n].copy()  # type: ignore[no-any-return]
+        return self._x0[: self.robot.n].copy()
 
     @q0.setter
     def q0(self, value: ArrayLike) -> None:
@@ -1771,7 +1771,7 @@ class FDyn_X(ContinuousBlock):
     @property
     def q0(self) -> NDArray:
         """Initial joint configuration, the first half of the initial state."""
-        return self._x0[: self.robot.n].copy()  # type: ignore[no-any-return]
+        return self._x0[: self.robot.n].copy()
 
     @q0.setter
     def q0(self, value: ArrayLike) -> None:

@@ -233,12 +233,12 @@ class MultiRotor(ContinuousBlock):
             return np.r_[x0[:3], np.zeros((9,))]
         elif len(x0) != 12:
             raise ValueError("x0 is the wrong length")
-        return x0  # type: ignore[no-any-return]
+        return x0
 
     @property
     def x0(self) -> NDArray:
         """Initial state, a full state or the short forms x,y,z / x,y,z,yaw / pose."""
-        return self._x0  # type: ignore[no-any-return]
+        return self._x0
 
     @x0.setter
     def x0(self, value: Any) -> None:

@@ -34,7 +34,7 @@ class _VehicleLimits:
     @property
     def speed_max(self) -> float:
         """Maximum speed."""
-        return self.vehicle.speed_max  # type: ignore[no-any-return]
+        return self.vehicle.speed_max
 
     @speed_max.setter
     def speed_max(self, value: float) -> None:
@@ -43,7 +43,7 @@ class _VehicleLimits:
     @property
     def accel_max(self) -> float:
         """Maximum acceleration."""
-        return self.vehicle.accel_max  # type: ignore[no-any-return]
+        return self.vehicle.accel_max
 
     @accel_max.setter
     def accel_max(self, value: float) -> None:
@@ -52,7 +52,7 @@ class _VehicleLimits:
     @property
     def steer_max(self) -> float | None:
         """Maximum steering angle, or rate for a vehicle that steers by wheel speed."""
-        return self.vehicle.steer_max  # type: ignore[no-any-return]
+        return self.vehicle.steer_max
 
     @steer_max.setter
     def steer_max(self, value: float | None) -> None:
@@ -180,7 +180,7 @@ class Bicycle(_VehicleLimits, ContinuousBlock):
     @property
     def L(self) -> float:
         """Wheelbase of the vehicle."""
-        return self.vehicle.l  # type: ignore[no-any-return]
+        return self.vehicle.l
 
     @L.setter
     def L(self, value: float) -> None:
@@ -196,7 +196,7 @@ class _VehicleWidth(_VehicleLimits):
     @property
     def w(self) -> float:
         """Width of the vehicle, the distance between the wheels."""
-        return self.vehicle._W  # type: ignore[no-any-return]
+        return self.vehicle._W
 
     @w.setter
     def w(self, value: float) -> None:
