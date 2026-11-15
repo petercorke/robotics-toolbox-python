@@ -128,6 +128,44 @@ class RobotBlockTest(unittest.TestCase):
         nt.assert_equal(block.test_output(tau, x=x)[0], q)
         nt.assert_equal(block.getstate0(), x)
 
+    def test_fdyn_qdd_is_always_an_array(self):
+        # bdsim checks that an output keeps its type; qdd used to be None until
+        # the first deriv()
+        robot = rtb.models.DH.Puma560()
+        q = robot.configs["qn"]
+        block = FDyn(robot, q)
+        x = np.r_[q, np.zeros((6,))]
+        tau = [6, 5, 4, 3, 2, 1]
+
+        qdd = block.test_output(tau, x=x)[2]
+        self.assertIsInstance(qdd, np.ndarray)
+        nt.assert_equal(qdd, np.zeros((6,)))
+
+        block.test_deriv(tau, x=x)
+        nt.assert_array_almost_equal(
+            block.test_output(tau, x=x)[2], robot.accel(q, np.zeros((6,)), tau)
+        )
+
+        # a new run starts again from the placeholder
+        block.reset()
+        nt.assert_equal(block.test_output(tau, x=x)[2], np.zeros((6,)))
+
+    def test_fdyn_runs_twice(self):
+        # a diagram with FDyn simulates, twice, with its qdd output watched
+        import bdsim
+
+        robot = rtb.models.DH.Puma560()
+        sim = bdsim.BDSim(graphics=False, animation=False, quiet=True)
+        bd = sim.blockdiagram()
+        tau = bd.CONSTANT([6, 5, 4, 3, 2, 1])
+        fdyn = bd.FDYN(robot, robot.configs["qn"])
+        bd.connect(tau, fdyn)
+        bd.compile()
+
+        first = sim.run(bd, T=0.01, dt=0.001, watch=[fdyn[2]])
+        second = sim.run(bd, T=0.01, dt=0.001, watch=[fdyn[2]])
+        nt.assert_array_almost_equal(first.y, second.y)
+
     @unittest.skip
     def test_fdyn_x(self):
         robot = rtb.models.DH.Puma560()
