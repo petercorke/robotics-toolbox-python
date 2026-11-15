@@ -166,6 +166,16 @@ class Point2Tr(FunctionBlock):
         if T is None:
             T = SE3()
         self.pose = T
+        self.add_param("T", coerce=False)
+
+    @property
+    def T(self) -> SE3:
+        """The pose whose rotation is used for every output."""
+        return self.pose
+
+    @T.setter
+    def T(self, value: SE3) -> None:
+        self.pose = value
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         T = SE3.Rt(self.pose.R, t=inports[0])

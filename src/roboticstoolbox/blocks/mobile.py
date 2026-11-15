@@ -20,7 +20,46 @@ if TYPE_CHECKING:
 
 
 # ------------------------------------------------------------------------ #
-class Bicycle(ContinuousBlock):
+
+
+class _VehicleLimits:
+    """The limits of the vehicle model that the block holds in ``self.vehicle``.
+
+    The model keeps them in private attributes that it only sets when it is created,
+    and the block owns its model, so the block parameters write them directly.
+    """
+
+    vehicle: Any
+
+    @property
+    def speed_max(self) -> float:
+        """Maximum speed."""
+        return self.vehicle.speed_max  # type: ignore[no-any-return]
+
+    @speed_max.setter
+    def speed_max(self, value: float) -> None:
+        self.vehicle._speed_max = value
+
+    @property
+    def accel_max(self) -> float:
+        """Maximum acceleration."""
+        return self.vehicle.accel_max  # type: ignore[no-any-return]
+
+    @accel_max.setter
+    def accel_max(self, value: float) -> None:
+        self.vehicle._accel_max = value
+
+    @property
+    def steer_max(self) -> float | None:
+        """Maximum steering angle, or rate for a vehicle that steers by wheel speed."""
+        return self.vehicle.steer_max  # type: ignore[no-any-return]
+
+    @steer_max.setter
+    def steer_max(self, value: float | None) -> None:
+        self.vehicle._steer_max = value
+
+
+class Bicycle(_VehicleLimits, ContinuousBlock):
     r"""
     :blockname:`BICYCLE`
 
@@ -126,15 +165,45 @@ class Bicycle(ContinuousBlock):
         self.outport_names(("q",))
         self.state_names(("x", "y", r"$\theta$"))
 
+        self.add_param("L")
+        self.add_param("speed_max")
+        self.add_param("accel_max")
+        self.add_param("steer_max", coerce=False)
+        self.add_param("x0", when="setup")
+
     def output(self, t: float, inports: list[Any], x: NDArray) -> list[R3]:
         return [x]  # one output which is ndarray(3)
 
     def deriv(self, t: float, inports: list[Any], x: NDArray) -> NDArray:
         return self.vehicle.deriv(x, inports)
 
+    @property
+    def L(self) -> float:
+        """Wheelbase of the vehicle."""
+        return self.vehicle.l  # type: ignore[no-any-return]
+
+    @L.setter
+    def L(self, value: float) -> None:
+        self.vehicle._l = value
+
 
 # ------------------------------------------------------------------------ #
-class Unicycle(ContinuousBlock):
+
+
+class _VehicleWidth(_VehicleLimits):
+    """The limits, and the width between the wheels, of a vehicle that has no steering."""
+
+    @property
+    def w(self) -> float:
+        """Width of the vehicle, the distance between the wheels."""
+        return self.vehicle._W  # type: ignore[no-any-return]
+
+    @w.setter
+    def w(self, value: float) -> None:
+        self.vehicle._W = value
+
+
+class Unicycle(_VehicleWidth, ContinuousBlock):
     r"""
     :blockname:`UNICYCLE`
 
@@ -213,6 +282,11 @@ class Unicycle(ContinuousBlock):
         self.vehicle = mobile.Unicycle(
             W=w, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
         )
+        self.add_param("speed_max")
+        self.add_param("accel_max")
+        self.add_param("steer_max", coerce=False)
+        self.add_param("w")
+        self.add_param("x0", when="setup")
 
         # TODO, add support for origin shift
         #         If ``a`` is non-zero then the planar velocity of that point $x=a$
@@ -236,7 +310,9 @@ class Unicycle(ContinuousBlock):
 
 
 # ------------------------------------------------------------------------ #
-class DiffSteer(ContinuousBlock):
+
+
+class DiffSteer(_VehicleWidth, ContinuousBlock):
     r"""
     :blockname:`DIFFSTEER`
 
@@ -319,6 +395,12 @@ class DiffSteer(ContinuousBlock):
         self.vehicle = mobile.DiffSteer(
             W=w, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
         )
+        self.add_param("speed_max")
+        self.add_param("accel_max")
+        self.add_param("steer_max", coerce=False)
+        self.add_param("w")
+        self.add_param("R", when="never")  # accepted and ignored
+        self.add_param("x0", when="setup")
 
     def output(self, t: float, inports: list[Any], x: NDArray) -> list[R3]:
         return [x]
@@ -449,6 +531,8 @@ class VehiclePlot(GraphicsBlock):
         super().__init__(**blockargs)
         self.xdata: list[float] = []
         self.ydata: list[float] = []
+        self.size = size
+        self.polygon_style = polygon_style
         # self.type = "vehicleplot"
         if init_func is not None:
             if not callable(init_func):
@@ -481,6 +565,29 @@ class VehiclePlot(GraphicsBlock):
             raise TypeError("animation object must be VehicleAnimationBase subclass")
 
         self.animation = animation
+
+        self.add_param("animation", when="never")  # the animation object is built here
+        # shape cannot be a parameter, since a block already has a shape (its icon)
+        self.add_param(
+            "size", when="never"
+        )  # with polygon_style, builds the default animation
+        self.add_param("polygon_style", when="never")
+        # start() sets up the figure from the rest
+        self.add_param("path_style", when="setup", coerce=False)
+        self.add_param("labels", when="setup")
+        self.add_param("square", when="setup")
+        self.add_param("init_func", when="setup", coerce=False)
+        self.add_param(
+            "limits", when="setup", validate=self._check_limits, coerce=False
+        )
+
+    @staticmethod
+    def _check_limits(value: Any) -> Any:
+        """``"auto"`` or ``[xmin, xmax, ymin, ymax]``; ``[min, max]`` is for both axes."""
+        if isinstance(value, str):
+            return value
+        value = list(value)
+        return value * 2 if len(value) == 2 else value
 
     def start(self, simstate: SimulationState) -> None:
         super().start(simstate)
