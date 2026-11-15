@@ -428,10 +428,25 @@ class ArmPlot(GraphicsBlock):
             return
 
         # update the robot plot
-        self.robot.q = inports[0]
+        self._set_pose(inports[0])
         self.env.step()
 
         super().step(t, inports)
+
+    def _set_pose(self, q: ArrayLike) -> None:
+        """
+        Move the plotted robot to a joint configuration
+
+        :param q: joint configuration
+
+        A plot made with an initial pose, as :meth:`start` does, holds that pose and
+        ignores ``robot.q``, so the plots of the scene are moved as well as the robot.
+        This is the one place that knows how, so that anything that drives this block
+        differently, such as bdsim's notebook support, can call it and not repeat it.
+        """
+        self.robot.q = q
+        for robot_plot in self.env.robots:
+            robot_plot.q = q
 
 
 # ======================================================================== #
