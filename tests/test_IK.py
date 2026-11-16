@@ -653,6 +653,33 @@ class TestIK(unittest.TestCase):
             with self.assertRaises(ValueError):
                 panda.ikine_LM(bad, q0=panda.qr)
 
+    def test_as_se3(self):
+        # the helper behind every Robot.ik_* and Robot.ikine_* method, so a
+        # regression in how SE3 treats an (N, 4, 4) array shows up here
+        from roboticstoolbox.robot.RobotKinematics import _as_se3
+
+        Ts = SE3.Rx([0.1, 0.2, 0.3]) * SE3(1, 2, 3)
+        stack = np.array(Ts.A)
+        self.assertEqual(stack.shape, (3, 4, 4))
+
+        T = _as_se3(stack)
+        self.assertIsInstance(T, SE3)
+        self.assertEqual(len(T), 3)
+        for i in range(3):
+            nt.assert_allclose(T[i].A, Ts[i].A)
+
+        T = _as_se3(Ts[0].A)
+        self.assertEqual(len(T), 1)
+        nt.assert_allclose(T.A, Ts[0].A)
+
+        T = _as_se3(Ts)
+        self.assertEqual(len(T), 3)
+        nt.assert_allclose(T.A, Ts.A)
+
+        for bad in (np.eye(3), np.zeros((2, 3, 4)), np.zeros(16)):
+            with self.assertRaises(ValueError):
+                _as_se3(bad)
+
     def test_ik_nr(self):
 
         tol = 1e-6

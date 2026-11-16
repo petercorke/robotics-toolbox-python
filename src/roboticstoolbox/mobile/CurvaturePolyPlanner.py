@@ -10,6 +10,7 @@ from typing import Any, NamedTuple
 import numpy as np
 import scipy.integrate
 import scipy.optimize
+from spatialmath.base import angdiff
 from spatialmath.base.types import ArrayLike3
 
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
@@ -70,6 +71,8 @@ def costfunc(x: ArrayLike, start: ArrayLike3, goal: ArrayLike3) -> float:
     :param start: start configuration
     :param goal: goal configuration
     :return: distance of the end of the path from ``goal``
+
+    The heading error is the shortest angular difference.
     """
     # p[0:4] is polynomial: k0, a, b, c
     # p[4] is s_f
@@ -79,7 +82,9 @@ def costfunc(x: ArrayLike, start: ArrayLike3, goal: ArrayLike3) -> float:
     path, _ = solvepath(x, q0=start)
 
     # cost is configuration error at end of path
-    e = np.linalg.norm(path[:, -1] - np.r_[goal])
+    error = path[:, -1] - np.r_[goal]
+    error[2] = angdiff(path[2, -1], goal[2])
+    e = np.linalg.norm(error)
 
     return e
 
