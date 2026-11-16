@@ -11,7 +11,7 @@ from bdsim.block_types import ContinuousBlock, FunctionBlock, GraphicsBlock, Sou
 from spatialmath import SE3
 
 from roboticstoolbox import quintic_func, trapezoidal_func
-from roboticstoolbox.tools.types import ArrayLike
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 """
 Robot blocks:
@@ -21,6 +21,11 @@ Robot blocks:
 
 """
 # The constructor of each class ``MyClass`` with a ``@block`` decorator becomes a method ``MYCLASS()`` of the BlockDiagram instance.
+
+
+def _check_gravity(value: Any) -> Any:
+    """Gravity is None, for the robot's own, or a 3-vector, which replaces ``value``."""
+    return None if value is None else smb.getvector(value, 3)
 
 
 # ------------------------------------------------------------------------ #
@@ -80,6 +85,8 @@ class FKine(FunctionBlock):
 
         self.robot = robot
         self.args = args
+        self.add_param("robot", when="never")  # fixes the ports
+        self.add_param("args", coerce=False)
 
         self.inport_names(("q",))
         self.outport_names(("T",))
@@ -172,13 +179,20 @@ class IKine(FunctionBlock):
             ik = robot.ikine_LM
         self.ik = ik
         self.args = args
-        self.seed = 0
+        # the seed argument used to be ignored, which left it at 0
+        self.seed = 0 if seed is None else seed
+        self.add_param("robot", when="never")  # fixes the ports
+        self.add_param("q0", when="setup", coerce=False)  # start() copies it
+        self.add_param("useprevious")
+        self.add_param("ik", coerce=False)
+        self.add_param("args", coerce=False)
+        self.add_param("seed", coerce=False)
 
         self.inport_names(("T",))
         self.outport_names(("q",))
 
-    def start(self) -> None:
-        super().start()
+    def start(self, simstate: Any) -> None:
+        super().start(simstate)
         if self.useprevious:
             self.qprev = self.q0
 
@@ -289,33 +303,84 @@ class Jacobian(FunctionBlock):
 
         self.robot = robot
 
-        if frame in (0, "0"):
-            if representation is None:
-                self.jfunc = robot.jacob0
-            else:
-                self.jfunc = lambda q: robot.jacob0_analytical(
-                    q, representation=representation
-                )
-        elif frame == "e":
-            if representation is None:
-                self.jfunc = robot.jacobe
-            else:
-                raise ValueError("cannot compute analytical Jacobian in EE frame")
-        else:
-            raise ValueError("unknown frame")
+        self._frame = frame
+        self._representation = representation
+        self.jfunc = self._make_jfunc(frame, representation)
 
-        if inverse and robot.n != 6:
-            raise ValueError("cannot invert a non square Jacobian")
-        if inverse and pinv:
-            raise ValueError("can only set one of inverse and pinv")
+        self._inverse = False
+        self._pinv = False
         self.inverse = inverse
         self.pinv = pinv
         self.damping = damping
         self.transpose = transpose
-        self.representation = representation
+
+        self.add_param("robot", when="never")  # fixes the ports
+        self.add_param("frame")
+        self.add_param("representation", coerce=False)
+        self.add_param("inverse")
+        self.add_param("pinv")
+        self.add_param("damping", coerce=False)
+        self.add_param("transpose")
 
         self.inport_names(("q",))
         self.outport_names(("J",))
+
+    def _make_jfunc(self, frame: Any, representation: Any) -> Callable[[Any], Any]:
+        """The function that computes the Jacobian, or ValueError if not possible."""
+        robot = self.robot
+        if frame in (0, "0"):
+            if representation is None:
+                return robot.jacob0
+            return lambda q: robot.jacob0_analytical(q, representation=representation)
+        elif frame == "e":
+            if representation is None:
+                return robot.jacobe
+            raise ValueError("cannot compute analytical Jacobian in EE frame")
+        raise ValueError("unknown frame")
+
+    @property
+    def frame(self) -> str:
+        """The frame the Jacobian is computed in, ``"0"`` or ``"e"``."""
+        return self._frame
+
+    @frame.setter
+    def frame(self, value: str) -> None:
+        self.jfunc = self._make_jfunc(value, self._representation)
+        self._frame = value
+
+    @property
+    def representation(self) -> str | None:
+        """The representation of the analytical Jacobian, None for the geometric."""
+        return self._representation
+
+    @representation.setter
+    def representation(self, value: str | None) -> None:
+        self.jfunc = self._make_jfunc(self._frame, value)
+        self._representation = value
+
+    @property
+    def inverse(self) -> bool:
+        """Output the inverse of the Jacobian, which must be square."""
+        return self._inverse
+
+    @inverse.setter
+    def inverse(self, value: bool) -> None:
+        if value and self.robot.n != 6:
+            raise ValueError("cannot invert a non square Jacobian")
+        if value and self._pinv:
+            raise ValueError("can only set one of inverse and pinv")
+        self._inverse = bool(value)
+
+    @property
+    def pinv(self) -> bool:
+        """Output the pseudo-inverse of the Jacobian."""
+        return self._pinv
+
+    @pinv.setter
+    def pinv(self, value: bool) -> None:
+        if value and self._inverse:
+            raise ValueError("can only set one of inverse and pinv")
+        self._pinv = bool(value)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         q = inports[0]
@@ -404,6 +469,9 @@ class ArmPlot(GraphicsBlock):
         self.backend = backend
         self.q0 = q0
         self.env: Any = None
+        self.add_param("robot", when="never")  # fixes the input size
+        self.add_param("q0", when="setup", coerce=False)  # start() plots it
+        self.add_param("backend", when="setup")
 
     def start(self, simstate: Any) -> None:
         # create the plot
@@ -428,10 +496,25 @@ class ArmPlot(GraphicsBlock):
             return
 
         # update the robot plot
-        self.robot.q = inports[0]
+        self._set_pose(inports[0])
         self.env.step()
 
         super().step(t, inports)
+
+    def _set_pose(self, q: ArrayLike) -> None:
+        """
+        Move the plotted robot to a joint configuration
+
+        :param q: joint configuration
+
+        A plot made with an initial pose, as :meth:`start` does, holds that pose and
+        ignores ``robot.q``, so the plots of the scene are moved as well as the robot.
+        This is the one place that knows how, so that anything that drives this block
+        differently, such as bdsim's notebook support, can call it and not repeat it.
+        """
+        self.robot.q = q
+        for robot_plot in self.env.robots:
+            robot_plot.q = q
 
 
 # ======================================================================== #
@@ -541,12 +624,16 @@ class JTraj(SourceBlock):
 
         self.T = T
 
-    def start(self, simstate: Any) -> None:
-        if self.T is None:
-            # use simulation tmax
-            self.T = simstate.tf
+        # start() computes the coefficients from all of these
+        self.add_param("q0", when="setup")
+        self.add_param("qf", when="setup")
+        self.add_param("qd0", when="setup")
+        self.add_param("qdf", when="setup")
+        self.add_param("T", when="setup", coerce=False)  # None is the run length
 
-        tscal = self.T
+    def start(self, simstate: Any) -> None:
+        # None is the length of the run, which can differ from one run to the next
+        tscal = simstate.tf if self.T is None else self.T
         self.tscal = tscal
 
         q0 = self.q0
@@ -665,19 +752,23 @@ class CTraj(SourceBlock):
         self.T2 = T2
         self.T = T
         self.trapezoidal = trapezoidal
+        self.add_param("T1", coerce=False)
+        self.add_param("T2", coerce=False)
+        self.add_param("T", when="setup", coerce=False)  # None is the run length
+        self.add_param("trapezoidal", when="setup")
 
     def start(self, simstate: Any) -> None:
-        if self.T is None:
-            self.T = simstate.T
+        # None is the length of the run, which can differ from one run to the next
+        self._T_run = simstate.T if self.T is None else self.T
         if self.trapezoidal:
-            self.trapezoidalfunc = trapezoidal_func(0.0, 1.0, self.T)
+            self.trapezoidalfunc = trapezoidal_func(0.0, 1.0, self._T_run)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         s: Any
         if self.trapezoidal:
             s = self.trapezoidalfunc(t)[0]  # get the position from the trapezoidal function
         else:
-            s = min(t / self.T, 1.0)
+            s = min(t / self._T_run, 1.0)
 
         return [self.T1.interp(self.T2, s)]
 
@@ -747,34 +838,56 @@ class CirclePath(SourceBlock):
         """
         if phase is None:
             phase = 0
-
         # TODO
         # flag to rotate the frame rather than just translate it
         super().__init__(**blockargs)
-
-        if unit == "rps":
-            omega = frequency * 2 * pi
-            phase = phase * 2 * pi
-        elif unit == "rad":
-            omega = frequency
-
-            # Redundant assignment, commented for LGTM
-            # phase = phase
-        else:
+        if unit not in ("rps", "rad"):
             raise ValueError("bad units: rps or rad")
-
+        self.unit = unit
         self.radius = radius
         if len(centre) != 3:
             raise ValueError("centre must be a 3 vector")
         self.centre = centre
         self.pose = pose
-        self.omega = omega
+        # frequency and phase are kept in the unit they were given in, and the
+        # angular rate and phase that output() uses are derived from them
+        self.frequency = frequency
         self.phase = phase
-
         self.outport_names(("y",))
+        self.add_param("radius")
+        self.add_param("centre", validate=self._check_centre, coerce=False)
+        self.add_param("pose", coerce=False)
+        self.add_param("frequency")
+        self.add_param("unit", when="never")  # what frequency and phase mean
+        self.add_param("phase")
+
+    @staticmethod
+    def _check_centre(value: Any) -> None:
+        if len(value) != 3:
+            raise ValueError("centre must be a 3 vector")
+
+    @property
+    def frequency(self) -> float:
+        """Frequency of the circle, in the units of ``unit``."""
+        return self._frequency
+
+    @frequency.setter
+    def frequency(self, value: float) -> None:
+        self._frequency = value
+        self.omega = value * 2 * pi if self.unit == "rps" else value
+
+    @property
+    def phase(self) -> float:
+        """Phase of the circle, in the units of ``unit`` (cycles or radians)."""
+        return self._phase
+
+    @phase.setter
+    def phase(self, value: float) -> None:
+        self._phase = value
+        self._phase_rad = value * 2 * pi if self.unit == "rps" else value
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
-        theta = t * self.omega + self.phase
+        theta = t * self.omega + self._phase_rad
         x = self.radius * cos(theta) + self.centre[0]
         y = self.radius * sin(theta) + self.centre[1]
         p = (x, y, self.centre[2])
@@ -856,11 +969,16 @@ class Trapezoidal(SourceBlock):
         self.T = T
         self.q0 = q0
         self.qf = qf
+        # start() builds the trajectory from these
+        self.add_param("q0", when="setup", coerce=False)
+        self.add_param("qf", when="setup", coerce=False)
+        self.add_param("V", when="never")  # accepted and ignored
+        self.add_param("T", when="setup", coerce=False)  # None is the run length
 
     def start(self, simstate: Any) -> None:
-        if self.T is None:
-            self.T = simstate.T
-        self.trapezoidalfunc = trapezoidal_func(self.q0, self.qf, self.T)
+        # None is the length of the run, which can differ from one run to the next
+        T = simstate.T if self.T is None else self.T
+        self.trapezoidalfunc = trapezoidal_func(self.q0, self.qf, T)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         return list(self.trapezoidalfunc(t))
@@ -975,8 +1093,20 @@ class Traj(FunctionBlock):
                 f"unknown traj {traj!r}, must be 'trapezoidal' or 'quintic'"
             )
         self.traj = traj
-
         self.outport_names(("y", "yd", "ydd"))
+        # start() builds the trajectory from these
+        self.add_param("y0", when="setup")
+        self.add_param("yf", when="setup")
+        self.add_param("T", when="setup", coerce=False)  # None is the run length
+        self.add_param("time", when="never")  # source or function block
+        self.add_param("traj", when="setup", validate=self._check_traj)
+
+    @staticmethod
+    def _check_traj(value: str) -> None:
+        if value not in ("trapezoidal", "quintic"):
+            raise ValueError(
+                f"unknown traj {value!r}, must be 'trapezoidal' or 'quintic'"
+            )
 
     def start(self, simstate: Any) -> None:
         # if self.time:
@@ -1094,6 +1224,8 @@ class IDyn(FunctionBlock):
 
         self.robot = robot
         self.gravity = None if gravity is None else smb.getvector(gravity, 3)
+        self.add_param("robot", when="never")  # fixes the ports
+        self.add_param("gravity", validate=_check_gravity, coerce=False)
 
         # state vector is [q qd]
 
@@ -1164,6 +1296,8 @@ class Gravload(FunctionBlock):
 
         self.robot = robot
         self.gravity = None if gravity is None else smb.getvector(gravity, 3)
+        self.add_param("robot", when="never")  # fixes the ports
+        self.add_param("gravity", validate=_check_gravity, coerce=False)
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
 
@@ -1236,9 +1370,12 @@ class Gravload_X(FunctionBlock):
 
         self.robot = robot
         self.gravity = None if gravity is None else smb.getvector(gravity, 3)
+        self.add_param("robot", when="never")  # fixes the ports
+        self.add_param("gravity", validate=_check_gravity, coerce=False)
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
         self.representation = representation
+        self.add_param("representation")
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         q = inports[0]
@@ -1305,6 +1442,7 @@ class Inertia(FunctionBlock):
         # self.type = "inertia"
 
         self.robot = robot
+        self.add_param("robot", when="never")  # fixes the ports
         self.inport_names(("q",))
         self.outport_names(("M",))
 
@@ -1377,6 +1515,9 @@ class Inertia_X(FunctionBlock):
         self.robot = robot
         self.representation = representation
         self.pinv = pinv
+        self.add_param("robot", when="never")  # fixes the ports
+        self.add_param("representation")
+        self.add_param("pinv")
         self.inport_names(("q",))
         self.outport_names(("M",))
 
@@ -1452,6 +1593,8 @@ class FDyn(ContinuousBlock):
 
         self.robot = robot
         self.nstates = robot.n * 2
+        self.add_param("robot", when="never")  # fixes the ports and states
+        self.add_param("q0", when="setup")
 
         # state vector is [q qd]
 
@@ -1463,13 +1606,33 @@ class FDyn(ContinuousBlock):
         else:
             q0 = smb.getvector(q0, robot.n)
         self._x0 = np.r_[q0, np.zeros((robot.n,))]
-        self._qdd = None
+        self.reset()
+
+    def reset(self) -> None:
+        # Joint acceleration cache.  output() cannot compute qdd itself, since
+        # it needs the torque input and bdsim may call output() before that
+        # input is resolved (petercorke/bdsim#81), so it returns the value from
+        # the last deriv().  Until deriv() has run, and at the start of every
+        # run, that is a zero placeholder: it must be an ndarray, never None,
+        # since bdsim checks that an output keeps the same type.
+        super().reset()
+        self._qdd = np.zeros((self.robot.n,))
+
+    @property
+    def q0(self) -> NDArray:
+        """Initial joint configuration, the first half of the initial state."""
+        return self._x0[: self.robot.n].copy()
+
+    @q0.setter
+    def q0(self, value: ArrayLike) -> None:
+        n = self.robot.n
+        self._x0 = np.r_[smb.getvector(value, n), self._x0[n:]]
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         n = self.robot.n
         q = x[:n]
         qd = x[n:]
-        qdd = self._qdd  # from last deriv
+        qdd = self._qdd  # cached from the last deriv(), or the zero placeholder
         return [q, qd, qdd]
 
     def deriv(self, t: Any, inports: Any, x: Any) -> Any:
@@ -1570,6 +1733,11 @@ class FDyn_X(ContinuousBlock):
         self.gravcomp = gravcomp
         self.velcomp = velcomp
         self.representation = representation
+        self.add_param("robot", when="never")  # fixes the ports and states
+        self.add_param("q0", when="setup")
+        self.add_param("gravcomp")
+        self.add_param("velcomp")
+        self.add_param("representation")
 
         # state vector is [q qd]
 
@@ -1592,7 +1760,23 @@ class FDyn_X(ContinuousBlock):
         # doesn't have that problem: the integrator only calls it with a
         # genuinely resolved input. See petercorke/bdsim#81 for the general
         # case (stateful blocks whose output() needs a resolved input).
-        self._qdd = np.zeros((robot.n,))
+        self.reset()
+
+    def reset(self) -> None:
+        # the cache is cleared at the start of every run, so a run never sees
+        # the last acceleration of the previous one
+        super().reset()
+        self._qdd = np.zeros((self.robot.n,))
+
+    @property
+    def q0(self) -> NDArray:
+        """Initial joint configuration, the first half of the initial state."""
+        return self._x0[: self.robot.n].copy()
+
+    @q0.setter
+    def q0(self, value: ArrayLike) -> None:
+        n = self.robot.n
+        self._x0 = np.r_[smb.getvector(value, n), self._x0[n:]]
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         n = self.robot.n

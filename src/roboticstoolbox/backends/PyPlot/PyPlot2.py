@@ -18,7 +18,7 @@ from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook, _resolve_render_mode
 from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
-from roboticstoolbox.tools.plot import set_window_title
+from spatialmath.base import set_window_title
 
 _mpl = False
 _ipy_display: Any = None
