@@ -6,6 +6,8 @@ from typing import Any
 import numpy as np
 from bdsim.block_types import ContinuousBlock, FunctionBlock, GraphicsBlock
 
+from roboticstoolbox.tools.types import NDArray
+
 
 class MultiRotor(ContinuousBlock):
     r"""
@@ -187,23 +189,7 @@ class MultiRotor(ContinuousBlock):
             raise ValueError("Must have an even number of rotors")
 
         self.nstates = 12
-        if x0 is None:
-            x0 = np.zeros((self.nstates,))
-        else:
-            x0 = np.r_[x0]
-            if len(x0) == 6:
-                # assume all derivative are zero
-                x0 = np.r_[x0, np.zeros((6,))]
-            elif len(x0) == 4:
-                # assume x,y,z,yaw
-                x0 = np.r_[x0[:3], 0, 0, x0[3], np.zeros((6,))]
-            elif len(x0) == 3:
-                # assume x,y,z
-                x0 = np.r_[x0[:3], np.zeros((9,))]
-            elif len(x0) != self.nstates:
-                raise ValueError("x0 is the wrong length")
-
-        self._x0 = x0
+        self._x0 = self._initial_state(x0)
 
         self.nrotors = nrotors
         self.model = model
@@ -224,6 +210,39 @@ class MultiRotor(ContinuousBlock):
 
         self.a1s = np.zeros((self.nrotors,))
         self.b1s = np.zeros((self.nrotors,))
+
+        self.add_param("model", when="never")  # fixes the rotors, which fix the input
+        self.add_param("groundcheck")
+        self.add_param("speedcheck")
+        self.add_param("x0", when="setup", coerce=False)  # the setter expands short forms
+
+    @staticmethod
+    def _initial_state(x0: Any) -> NDArray:
+        """The 12-element initial state from a full state, or one of the short forms."""
+        if x0 is None:
+            return np.zeros((12,))
+        x0 = np.r_[x0]
+        if len(x0) == 6:
+            # assume all derivative are zero
+            return np.r_[x0, np.zeros((6,))]
+        elif len(x0) == 4:
+            # assume x,y,z,yaw
+            return np.r_[x0[:3], 0, 0, x0[3], np.zeros((6,))]
+        elif len(x0) == 3:
+            # assume x,y,z
+            return np.r_[x0[:3], np.zeros((9,))]
+        elif len(x0) != 12:
+            raise ValueError("x0 is the wrong length")
+        return x0
+
+    @property
+    def x0(self) -> NDArray:
+        """Initial state, a full state or the short forms x,y,z / x,y,z,yaw / pose."""
+        return self._x0
+
+    @x0.setter
+    def x0(self, value: Any) -> None:
+        self._x0 = self._initial_state(value)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
 
@@ -567,6 +586,28 @@ class MultiRotorMixer(FunctionBlock):
         self.Minv = np.linalg.inv(self.M)
         self.signs = np.array(s)
 
+        self.add_param("model", when="never")  # builds the mixer matrix
+        self.add_param("wmax")
+        self.add_param("wmin")
+
+    @property
+    def wmax(self) -> float:
+        """Maximum rotor speed."""
+        return float(np.sqrt(self.maxw))
+
+    @wmax.setter
+    def wmax(self, value: float) -> None:
+        self.maxw = value**2
+
+    @property
+    def wmin(self) -> float:
+        """Minimum rotor speed."""
+        return float(np.sqrt(self.minw))
+
+    @wmin.setter
+    def wmin(self, value: float) -> None:
+        self.minw = value**2
+
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         tau = inports
 
@@ -702,6 +743,11 @@ class MultiRotorPlot(GraphicsBlock):
         self.nrotors = model["nrotors"]
         self.projection = projection
         self.flapscale = flapscale
+
+        self.add_param("model", when="never")  # fixes the rotors
+        self.add_param("scale", when="setup", coerce=False)  # start() sets the limits
+        self.add_param("flapscale")
+        self.add_param("projection", when="setup")  # start() sets it
 
     def start(self, simstate: Any) -> None:
         super().start(simstate)
