@@ -83,6 +83,10 @@ ik = ["sympy", "python-flint"]
 
 tool = ["ipython", "pygments"]
 
+# the block-diagram blocks in roboticstoolbox.blocks, which are bdsim blocks.  Neither
+# package requires the other: 1.5.0 is the first bdsim with the block parameter registry
+blocks = ["bdsim>=1.5.0"]
+
 all = [
     "swift-sim>=2.0.0",
     "websockets",
@@ -102,7 +106,7 @@ dev = [
     "sympy",
     "qpsolvers",
     "quadprog",
-    "bdsim",
+    "bdsim>=1.5.0",
     "ruff",
     "coal; sys_platform != 'win32'",
     "trimesh",

@@ -17,6 +17,7 @@ it, is a Python ``property``: the setter does the work and the registration is t
 
 import ast
 import unittest
+import unittest.mock as mock
 from pathlib import Path
 
 import bdsim
@@ -269,6 +270,40 @@ class RunsTest(ParamTestCase):
         block = self.bd().ARMPLOT(self.robot)
         block.set_param("q0", self.robot.qn)
         nt.assert_array_equal(block.q0, self.robot.qn)
+
+
+class TestBdsimVersion(unittest.TestCase):
+    """The blocks say so in plain words when bdsim is missing or too old."""
+
+    @staticmethod
+    def check(version):
+        from roboticstoolbox.blocks import _check_bdsim_version
+
+        with mock.patch("importlib.metadata.version", return_value=version):
+            _check_bdsim_version()
+
+    def test_new_enough(self):
+        for version in ("1.5.0", "1.5.1", "1.10.0", "2.0", "1.5.0rc1"):
+            with self.subTest(version=version):
+                self.check(version)
+
+    def test_too_old(self):
+        for version in ("1.4.1", "1.0", "0.9.2"):
+            with self.subTest(version=version):
+                with self.assertRaisesRegex(ImportError, rf"1\.5\.0.*{version}"):
+                    self.check(version)
+
+    def test_not_installed(self):
+        import importlib.metadata
+
+        from roboticstoolbox.blocks import _check_bdsim_version
+
+        with mock.patch(
+            "importlib.metadata.version",
+            side_effect=importlib.metadata.PackageNotFoundError("bdsim"),
+        ):
+            with self.assertRaisesRegex(ImportError, r"\[blocks\]"):
+                _check_bdsim_version()
 
 
 if __name__ == "__main__":
