@@ -145,6 +145,32 @@ class RobotBlockTest(unittest.TestCase):
         nt.assert_equal(block.output()[0], tr2x(robot.fkine(q).A))
         nt.assert_equal(block.getstate0(), x)
 
+    def test_armplot_follows_its_input(self):
+        # the plot made by start() holds the initial pose, so ArmPlot has to
+        # move it, otherwise the arm stays where it started
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import bdsim
+
+        robot = rtb.models.DH.Puma560()
+        q0 = robot.configs["qr"]
+        qf = robot.configs["qz"]
+
+        sim = bdsim.BDSim(graphics=True, animation=False, quiet=True)
+        bd = sim.blockdiagram()
+        traj = bd.JTRAJ(q0, qf, T=1)
+        arm = bd.ARMPLOT(robot, q0=q0)
+        bd.connect(traj[0], arm)
+        bd.compile()
+        sim.run(bd, T=1, dt=0.1)
+
+        # the last link point drawn is where the arm ended up
+        (robot_plot,) = arm.env.robots
+        drawn = np.array(robot_plot.links[-1].get_data_3d())[:, -1]
+        nt.assert_array_almost_equal(drawn, robot.fkine(qf).t, decimal=3)
+        self.assertFalse(np.allclose(drawn, robot.fkine(q0).t))
+
     @unittest.skip("cant test bdsim plot blocks")
     def test_armplot(self):
 
