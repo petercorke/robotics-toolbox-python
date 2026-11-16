@@ -1478,13 +1478,23 @@ class FDyn(ContinuousBlock):
         else:
             q0 = smb.getvector(q0, robot.n)
         self._x0 = np.r_[q0, np.zeros((robot.n,))]
-        self._qdd = None
+        self.reset()
+
+    def reset(self) -> None:
+        # Joint acceleration cache.  output() cannot compute qdd itself, since
+        # it needs the torque input and bdsim may call output() before that
+        # input is resolved (petercorke/bdsim#81), so it returns the value from
+        # the last deriv().  Until deriv() has run, and at the start of every
+        # run, that is a zero placeholder: it must be an ndarray, never None,
+        # since bdsim checks that an output keeps the same type.
+        super().reset()
+        self._qdd = np.zeros((self.robot.n,))
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         n = self.robot.n
         q = x[:n]
         qd = x[n:]
-        qdd = self._qdd  # from last deriv
+        qdd = self._qdd  # cached from the last deriv(), or the zero placeholder
         return [q, qd, qdd]
 
     def deriv(self, t: Any, inports: Any, x: Any) -> Any:
@@ -1607,7 +1617,13 @@ class FDyn_X(ContinuousBlock):
         # doesn't have that problem: the integrator only calls it with a
         # genuinely resolved input. See petercorke/bdsim#81 for the general
         # case (stateful blocks whose output() needs a resolved input).
-        self._qdd = np.zeros((robot.n,))
+        self.reset()
+
+    def reset(self) -> None:
+        # the cache is cleared at the start of every run, so a run never sees
+        # the last acceleration of the previous one
+        super().reset()
+        self._qdd = np.zeros((self.robot.n,))
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         n = self.robot.n
