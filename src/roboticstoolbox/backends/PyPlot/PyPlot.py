@@ -12,6 +12,7 @@ from typing import Any
 
 import numpy as np
 from spatialgeometry import Shape
+from spatialmath.base import set_window_title
 from spatialmath.base.argcheck import getvector
 
 import roboticstoolbox as rp
@@ -19,7 +20,7 @@ from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 from roboticstoolbox.tools.plot import isnotebook as _isnotebook
-from roboticstoolbox.tools.plot import plane_view, set_window_title
+from roboticstoolbox.tools.plot import plane_view
 from roboticstoolbox.tools.types import ArrayLike
 
 # from roboticstoolbox.tools import Ticker
