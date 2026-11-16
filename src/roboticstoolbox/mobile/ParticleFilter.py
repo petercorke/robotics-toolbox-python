@@ -15,7 +15,6 @@ from typing import Any, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
 import spatialmath.base as smb
 from matplotlib import animation
 from matplotlib.axes import Axes
@@ -696,21 +695,15 @@ class ParticleFilter:
         #
         # particles with large weights will occupy a greater percentage of the
         # y axis in a cummulative plot
-        cdf = np.cumsum(self.weight) / self.weight.sum()
+        cdf = np.cumsum(self.weight)
+        cdf = cdf / cdf[-1]
 
         # so randomly (uniform) choosing y values is more likely to correspond to
         # better particles...
         iselect = self.random.uniform(0, 1, size=(self.nparticles,))
 
         # find the particle that corresponds to each y value (just a look up)
-        interpfun = sp.interpolate.interp1d(
-            cdf,
-            np.arange(self.nparticles),
-            assume_sorted=True,
-            kind="nearest",
-            fill_value="extrapolate",
-        )
-        inextgen = interpfun(iselect).astype(int)
+        inextgen = np.searchsorted(cdf, iselect, side="right")
 
         # copy selected particles for next generation..
         self.x = self.x[inextgen, :]
