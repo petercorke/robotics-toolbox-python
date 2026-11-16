@@ -24,20 +24,10 @@ def _as_se3(T: NDArray | SE3) -> SE3:
     :param T: an SE3, a 4x4 array, or an (N, 4, 4) array of N poses
     :raises ValueError: if ``T`` is an array of any other shape
     :returns: an SE3 object holding one or N poses
-
-    .. note:: This is a workaround for a spatialmath (SMTB) limitation.  The
-        ``SE3`` constructor does not accept an (N, 4, 4) array, and with
-        ``check=False`` it silently builds a malformed object from one.  An
-        (N, 4, 4) array is therefore converted to a list of matrices first.
-        Once SMTB accepts such arrays this can go, see
-        https://github.com/rai-opensource/spatialmath-python/issues/236
     """
     if isinstance(T, np.ndarray):
         if T.shape != (4, 4) and not (T.ndim == 3 and T.shape[1:] == (4, 4)):
             raise ValueError("T must be an SE3, a 4x4 array or an (N, 4, 4) array")
-        if T.ndim == 3:
-            # SMTB workaround, see the note above
-            return SE3(list(T), check=False)
     return SE3(T, check=False)
 
 

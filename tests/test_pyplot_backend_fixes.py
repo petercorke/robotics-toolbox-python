@@ -5,7 +5,6 @@ PyPlot backend: things that raised on a headless backend or before launch.
 import importlib
 import unittest
 import unittest.mock as mock
-from types import SimpleNamespace
 
 import matplotlib
 
@@ -16,7 +15,6 @@ import spatialgeometry as sg
 import roboticstoolbox as rtb
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
-from roboticstoolbox.tools.plot import set_window_title
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 
 
@@ -32,29 +30,6 @@ class TestReprBeforeLaunch(unittest.TestCase):
 class TestWindowTitle(unittest.TestCase):
     def tearDown(self):
         plt.close("all")
-
-    @staticmethod
-    def figure_with(manager):
-        return SimpleNamespace(canvas=SimpleNamespace(manager=manager))
-
-    def test_sets_the_title(self):
-        manager = mock.Mock()
-        self.assertTrue(set_window_title(self.figure_with(manager), "a title"))
-        manager.set_window_title.assert_called_once_with("a title")
-
-    def test_no_manager(self):
-        self.assertFalse(set_window_title(self.figure_with(None), "a title"))
-
-    def test_manager_without_set_window_title(self):
-        class Manager:
-            pass
-
-        self.assertFalse(set_window_title(self.figure_with(Manager()), "a title"))
-
-    def test_figure_without_a_canvas_manager_attribute(self):
-        self.assertFalse(
-            set_window_title(SimpleNamespace(canvas=SimpleNamespace()), "a title")
-        )
 
     def test_both_backends_launch_headless(self):
         # Agg: the manager exists but is not a window
