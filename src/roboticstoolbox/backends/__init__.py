@@ -35,5 +35,10 @@ def load_backend(name: str) -> Connector:
         from roboticstoolbox.backends.PyPlot import PyPlot2
 
         return PyPlot2()
+    elif name == "isaacsim":
+        from roboticstoolbox.backends.IsaacSim.isaacsim_backend import IsaacSim 
+
+        return IsaacSim()
+ 
     else:
         raise ValueError(f"Unknown graphical backend: {name!r}")

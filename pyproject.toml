@@ -74,6 +74,7 @@ repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 swift = ["swift-sim>=2.0.0", "websockets"]
 
+isaacsim-backend = ["isaacsim[all,extscache]==6.2.0.0"]
 collision = ["coal; sys_platform != 'win32'", "trimesh"]
 
 qp = ["qpsolvers", "quadprog"]
