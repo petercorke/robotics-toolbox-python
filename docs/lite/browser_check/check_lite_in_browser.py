@@ -22,7 +22,7 @@ frames of its own).
 Usage::
 
     pip install playwright && playwright install chromium
-    pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server ipympl
+    pip install jupyterlite-core "jupyterlite-pyodide-kernel>=0.8.7" jupyter-server ipympl
     RTB_PURE_WHEEL=1 python -m build --wheel --outdir docs/lite/pypi
     python docs/lite/browser_check/check_lite_in_browser.py
 
