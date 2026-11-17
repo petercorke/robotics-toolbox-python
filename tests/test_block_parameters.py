@@ -321,7 +321,12 @@ class TestPortLabels(unittest.TestCase):
         checked = 0
         for module in (blocks.arm, blocks.mobile, blocks.spatial, blocks.uav):
             for name, cls in inspect.getmembers(module, inspect.isclass):
-                if not issubclass(cls, Block) or cls.__module__ != module.__name__:
+                try:
+                    is_block = issubclass(cls, Block)
+                except TypeError:
+                    # Python 3.10 reports a generic alias such as list[str] as a class
+                    continue
+                if not is_block or cls.__module__ != module.__name__:
                     continue
                 for attr in ("inlabels", "outlabels"):
                     labels = getattr(cls, attr, None)
