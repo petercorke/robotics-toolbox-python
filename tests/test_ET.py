@@ -14,6 +14,7 @@ import unittest
 from roboticstoolbox.ets._ET import BaseET
 import sympy
 from copy import copy, deepcopy
+from tests import fknm_compiled, requires_compiled
 
 
 class TestET(unittest.TestCase):
@@ -247,8 +248,10 @@ class TestET(unittest.TestCase):
         nt.assert_array_almost_equal(r2.A(1.0), sm.trotx(-1.0))
         nt.assert_array_almost_equal(r3.A(1.0), sm.trotx(-1.0))
 
-        self.assertEqual(r1.fknm, r2.fknm)
-        self.assertNotEqual(r1.fknm, r3.fknm)
+        if fknm_compiled:
+            # the compiled handle: shared by a shallow copy, not by a deep one
+            self.assertEqual(r1.fknm, r2.fknm)
+            self.assertNotEqual(r1.fknm, r3.fknm)
 
     def test_eq(self):
         r1 = rtb.ET.Rx(2.5)
@@ -375,6 +378,7 @@ class TestET(unittest.TestCase):
         e.qlim = (-1, 1)
         e.jindex = 0
 
+    @requires_compiled
     def test_et_has_compiled_accel(self):
         # Counterpart to test_et2_no_compiled_accel: ET (3D) does build a
         # compiled struct, and it survives deepcopy as a distinct object
