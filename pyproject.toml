@@ -31,7 +31,7 @@ license = { file = "LICENSE" }
 
 readme = "README.md"
 
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 keywords = [
     "python",
@@ -56,7 +56,6 @@ classifiers = [
     # Pick your license as you wish (should match "license" above)
     "License :: OSI Approved :: MIT License",
     # Specify the Python versions you support here.
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -186,7 +185,7 @@ indent-style = "space"
 
 [tool.cibuildwheel]
 
-build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
+build = ["cp311-*", "cp312-*", "cp313-*", "cp314-*"]
 skip = ["*musllinux*"]
 
 [tool.cibuildwheel.macos]
@@ -218,7 +217,7 @@ filterwarnings = [
 ]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 mypy_path = "src"
 files = ["src/roboticstoolbox"]
 check_untyped_defs = true
