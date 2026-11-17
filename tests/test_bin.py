@@ -16,6 +16,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests import requires_compiled
+
 # Starting rtbtool imports RTB and IPython, which takes over 15 s on a loaded Windows
 # runner (this failed in CI twice in one day).  The CI limit for a test is 50 s.
 _TIMEOUT = 40
@@ -56,6 +58,7 @@ class TestRtbtool(unittest.TestCase):
         self.assertEqual(result.returncode, 0, msg=result.stderr.decode())
         self.assertIn(b"SENTINEL_OUTPUT Panda", result.stdout)
 
+    @requires_compiled
     def test_smoke_test_flag(self):
         """--test should run non-interactively and report all checks passing."""
         result = _run(["roboticstoolbox.bin.rtbtool", "--test"])

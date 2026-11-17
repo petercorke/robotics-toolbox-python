@@ -14,7 +14,7 @@ import numpy.testing as nt
 # import sympy
 import pytest
 from spatialmath import SE3
-from tests import skip_no_qp
+from tests import fknm_compiled, requires_compiled, skip_no_qp
 
 test_tol = 1e-5
 
@@ -680,6 +680,7 @@ class TestIK(unittest.TestCase):
             with self.assertRaises(ValueError):
                 _as_se3(bad)
 
+    @requires_compiled
     def test_ik_nr(self):
 
         tol = 1e-6
@@ -706,6 +707,7 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    @requires_compiled
     def test_ik_lm_chan(self):
 
         tol = 1e-6
@@ -732,6 +734,7 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    @requires_compiled
     def test_ik_lm_wampler(self):
 
         tol = 1e-6
@@ -758,6 +761,7 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    @requires_compiled
     def test_ik_lm_sugihara(self):
 
         tol = 1e-6
@@ -784,6 +788,7 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    @requires_compiled
     def test_ik_gn(self):
 
         tol = 1e-6
@@ -1094,6 +1099,7 @@ class TestIK(unittest.TestCase):
         sol = rtb.IKSolution(np.array([1.0, 2.0, 3.0]), success=True)
         self.assertEqual(repr(sol), str(sol))
 
+    @requires_compiled
     def test_ik_LM_returns_iksolution(self):
         panda = rtb.models.Panda().ets()
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
@@ -1102,6 +1108,7 @@ class TestIK(unittest.TestCase):
         self.assertIsInstance(sol, rtb.IKSolution)
         self.assertIsInstance(sol.success, bool)
 
+    @requires_compiled
     def test_ik_NR_returns_iksolution(self):
         panda = rtb.models.Panda().ets()
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
@@ -1110,6 +1117,7 @@ class TestIK(unittest.TestCase):
         self.assertIsInstance(sol, rtb.IKSolution)
         self.assertIsInstance(sol.success, bool)
 
+    @requires_compiled
     def test_ik_GN_returns_iksolution(self):
         panda = rtb.models.Panda().ets()
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
@@ -1156,6 +1164,7 @@ class TestIK(unittest.TestCase):
         self.assertTrue(np.all(np.isfinite(q)))
         self.assertEqual(q.shape, (5, 1))
 
+    @requires_compiled
     def test_ik_lm_c_rejects_non_finite_qlim(self):
         # Same guard, mirrored in the compiled fast-path solver (ets.ik_LM(),
         # backed by ik.cpp's own _rand_q()) -- this is a genuinely separate
@@ -1212,13 +1221,14 @@ class TestIKInitialCoordinates(unittest.TestCase):
 
     def test_right_length_still_works(self):
         q = np.array([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-        for sol in (
-            self.ets.ik_LM(self.Tep, q0=q),
+        sols = [
             self.ets.ikine_LM(self.Tep, q0=q),
             self.ets.ikine_LM(self.Tep, q0=np.array([q, q])),
             self.ets.ikine_LM(self.Tep),
-            self.ets.ik_LM(self.Tep),
-        ):
+        ]
+        if fknm_compiled:
+            sols += [self.ets.ik_LM(self.Tep, q0=q), self.ets.ik_LM(self.Tep)]
+        for sol in sols:
             self.assertTrue(sol.success)
 
 
