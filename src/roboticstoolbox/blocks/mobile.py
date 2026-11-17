@@ -163,7 +163,7 @@ class Bicycle(_VehicleLimits, ContinuousBlock):
 
         self.inport_names(("v", r"$\gamma$"))
         self.outport_names(("q",))
-        self.state_names(("x", "y", r"$\theta$"))
+        self.state_names(["x", "y", r"$\theta$"])
 
         self.add_param("L")
         self.add_param("speed_max")
