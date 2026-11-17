@@ -145,9 +145,18 @@ jobs:
       - name: Type check
         run: mypy
 
+  # Two runs, merged by Codecov.  "compiled" covers the facades that call the
+  # C++ extensions; "pure" builds the pure-Python wheel (as the JupyterLite and
+  # Pyodide builds do) so that the fallbacks, such as DHRobot.rne_python, are
+  # executed rather than bypassed.
   coverage:
+    name: coverage (${{ matrix.variant }})
     needs: [test-core, test]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [compiled, pure]
     steps:
       - uses: actions/checkout@v7
 
@@ -158,6 +167,17 @@ jobs:
 
       - name: Install package
         run: pip install .[dev,swift]
+        env:
+          RTB_PURE_WHEEL: ${{ matrix.variant == 'pure' && '1' || '' }}
+
+      - name: Verify which implementation is under test
+        run: |
+          python -c '
+          from roboticstoolbox.ets.fknm import _C_AVAILABLE as fknm_c
+          from roboticstoolbox.robot.frne import _C_AVAILABLE as frne_c
+          want = "${{ matrix.variant }}" == "compiled"
+          assert fknm_c == want and frne_c == want, f"fknm={fknm_c} frne={frne_c}, wanted compiled={want}"
+          '
 
       # See the "Cache robot_descriptions assets" step in test-core above --
       # same reasoning, this job hits the same lazily-cloned model data.
@@ -177,6 +197,7 @@ jobs:
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
         with:
           files: ./coverage.xml
+          flags: ${{ matrix.variant }}
 
   # Builds the Sphinx docs + JupyterLite site and, on main, deploys them to
   # GitHub Pages. Steps live in docs.yml (a reusable workflow) so this path
