@@ -1260,10 +1260,6 @@ class TestRobotLinkTReference(unittest.TestCase):
             panda._update_link_tf()
             for link in panda.links:
                 with self.subTest(link=link.name, q=q):
-                    if len(link.ets.data) == 0:
-                        # no elementary transforms: the identity
-                        nt.assert_allclose(link._T_reference, np.eye(4))
-                        continue
                     nt.assert_allclose(
                         self._world_pose(link),
                         panda.fkine(q, end=link).A,
@@ -1278,6 +1274,30 @@ class TestRobotLinkTReference(unittest.TestCase):
         self.assertEqual(ur5.grippers[0].n, 0)
         for link in ur5.links:
             self.assertTrue(np.all(np.isfinite(link._T_reference)))
+
+
+class TestEmptyETSReference(unittest.TestCase):
+    """
+    An ETS with no elementary transforms evaluates to the identity.
+
+    Runs on whichever path is active.  The pure-Python path used to raise
+    IndexError, which also broke ``fkine`` to a base link such as panda_link0.
+    """
+
+    def test_identity(self):
+        nt.assert_allclose(rtb.ETS([]).eval(), np.eye(4))
+
+    def test_tool_and_base(self):
+        from spatialmath import SE3
+
+        tool = SE3.Tx(0.5) * SE3.Rz(0.3)
+        base = SE3.Ty(-0.2)
+        nt.assert_allclose(rtb.ETS([]).eval(tool=tool), tool.A)
+        nt.assert_allclose(rtb.ETS([]).eval(base=base), base.A)
+
+    def test_fkine_to_base_link(self):
+        panda = rtb.models.Panda()
+        nt.assert_allclose(panda.fkine(panda.qr, end="panda_link0").A, np.eye(4))
 
 
 if __name__ == "__main__":
