@@ -397,10 +397,38 @@ def Angle_Axis(T: Any, Td: Any) -> Any:
     return _c_Angle_Axis(T, Td)
 
 
-def Robot_link_T(link_ets: Any, link_scene_nodes: Any, q0: Any, q: Any) -> None:
-    """Update per-link scene-node transforms via C; no-op when C absent (visualisation only)."""
+def Robot_link_T(
+    link_ets: Any, link_scene_nodes: Any, q0: Any, q: Any, _data: Any = None
+) -> None:
+    """
+    Update the scene-node transform of every link of a robot
+
+    :param link_ets: the compiled ETS handle of each link, used by the C path
+    :param link_scene_nodes: the scene-node transform (4x4 array) of each link,
+        updated in place
+    :param q0: the robot's joint coordinates, used if ``q`` is None
+    :param q: joint coordinates, or None
+    :param _data: the ``ETS.data`` of each link, used by the Python path
+
+    The scene-node transforms place the collision and visual geometry of the
+    links, so the Python path must update them as well as the C path: leaving
+    them stale makes collision checking and distance queries wrong.
+    """
     if _C_AVAILABLE:
         _c_Robot_link_T(link_ets, link_scene_nodes, q0, q)
+        return
+
+    if _data is None:
+        raise ValueError("_data is required when the compiled extension is absent")
+
+    # one row, which also copes with the empty q of a gripper with no joints
+    q = np.asarray(q0 if q is None else q, dtype=float).reshape(1, -1)
+    for data, T in zip(_data, link_scene_nodes):
+        if len(data) == 0:
+            # a link with no elementary transforms, e.g. a URDF base link
+            T[:] = np.eye(4)
+        else:
+            T[:] = _python_fkine(data, q, None, None, False)
 
 
 def r2q(R: Any) -> Any:

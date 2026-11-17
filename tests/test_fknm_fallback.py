@@ -1235,5 +1235,50 @@ class TestPathTiming(unittest.TestCase):
         self._assert_c_faster(t_c, t_py)
 
 
+class TestRobotLinkTReference(unittest.TestCase):
+    """
+    The scene-node transforms that place a link's geometry follow the joints.
+
+    Runs on whichever path is active.  Without the compiled extension the
+    transforms used to be left at their initial values, so collision checks
+    and distance queries ran against geometry that did not move.
+    """
+
+    @staticmethod
+    def _world_pose(link):
+        # chain the local scene-node transforms up the kinematic tree
+        T = link._T_reference.copy()
+        while link.parent is not None:
+            link = link.parent
+            T = link._T_reference @ T
+        return T
+
+    def test_geometry_follows_joints(self):
+        panda = rtb.models.Panda()
+        for q in (panda.qr, panda.qr + 0.4 * np.arange(1, 8) / 7):
+            panda.q = q
+            panda._update_link_tf()
+            for link in panda.links:
+                with self.subTest(link=link.name, q=q):
+                    if len(link.ets.data) == 0:
+                        # no elementary transforms: the identity
+                        nt.assert_allclose(link._T_reference, np.eye(4))
+                        continue
+                    nt.assert_allclose(
+                        self._world_pose(link),
+                        panda.fkine(q, end=link).A,
+                        atol=1e-9,
+                    )
+
+    def test_gripper_without_joints(self):
+        # an empty joint vector, and a link with no elementary transforms
+        ur5 = rtb.models.UR5()
+        ur5.q = np.zeros(ur5.n)
+        ur5._update_link_tf()
+        self.assertEqual(ur5.grippers[0].n, 0)
+        for link in ur5.links:
+            self.assertTrue(np.all(np.isfinite(link._T_reference)))
+
+
 if __name__ == "__main__":
     unittest.main()
