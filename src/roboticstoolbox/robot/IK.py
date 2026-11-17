@@ -479,6 +479,7 @@ class IKSolver(ABC):
         # Error flags
         found_with_limits = False
         linalg_error = 0
+        diverged = 0
 
         # Initialise variables
         E = np.inf
@@ -547,6 +548,22 @@ class IKSolver(ABC):
                         self._log("Abandoned", E, "numpy.linalg.LinAlgError")
                     break
 
+                except ValueError:
+                    # step() updates q in place, so q shows what went wrong. If
+                    # it is no longer finite the search has diverged, and the
+                    # pure-Python fkine raises where the compiled one returns
+                    # NaN. Anything else is a genuine error.
+                    if np.all(np.isfinite(q[ets.jindices])):
+                        raise
+                    E = np.inf
+
+                if not np.isfinite(E):
+                    # Abandon search and try again, there is no way back from NaN
+                    diverged += 1
+                    if self.verbose:
+                        self._log("Abandoned", E, "search diverged")
+                    break
+
             total_i += i
 
         # If we make it here, then we have failed
@@ -554,6 +571,9 @@ class IKSolver(ABC):
 
         if linalg_error:
             reason += f", {linalg_error} numpy.LinAlgError encountered"
+
+        if diverged:
+            reason += f", {diverged} searches diverged"
 
         if found_with_limits:
             reason += ", solution found but violates joint limits"

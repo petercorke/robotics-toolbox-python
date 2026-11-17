@@ -1966,7 +1966,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         def get_link_scene_node() -> Any:
             return [link._T_reference for link in self.links]
 
-        Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
+        Robot_link_T(
+            get_link_ets(),
+            get_link_scene_node(),
+            self._q,
+            q,
+            _data=[link.ets.data for link in self.links],
+        )
 
         for gripper in self.grippers:
             gripper._update_link_tf()
