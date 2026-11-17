@@ -1441,5 +1441,70 @@ class TestIKVerboseAllSolvers(unittest.TestCase):
                     getattr(obj, name)(Tep, verbose=True)
 
 
+class TestDivergedSearch(unittest.TestCase):
+    """
+    A search whose q diverges to infinity is abandoned and restarted.
+
+    Gauss-Newton and its relatives can diverge from a bad start.  The compiled
+    fkine returns NaN for an infinite joint angle but the pure-Python one
+    raises ValueError, and either used to end the whole solve.
+    """
+
+    def setUp(self):
+        self.ets = rtb.models.Panda().ets()
+        self.Tep = self.ets.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+    def _diverge_first_step(self, solver, raises):
+        step = solver.step
+        calls = []
+
+        def diverging(ets, Tep, q):
+            calls.append(1)
+            if len(calls) == 1:
+                q[ets.jindices] = np.inf
+                if raises:
+                    raise ValueError("math domain error")
+                return np.nan, q[ets.jindices]
+            return step(ets, Tep, q)
+
+        solver.step = diverging
+
+    def test_pure_python_fkine_raises(self):
+        solver = rtb.IK_LM(seed=0)
+        self._diverge_first_step(solver, raises=True)
+        sol = solver.solve(self.ets, self.Tep)
+        self.assertTrue(sol.success)
+        self.assertGreaterEqual(sol.searches, 2)
+
+    def test_compiled_fkine_returns_nan(self):
+        solver = rtb.IK_LM(seed=0)
+        self._diverge_first_step(solver, raises=False)
+        sol = solver.solve(self.ets, self.Tep)
+        self.assertTrue(sol.success)
+        self.assertGreaterEqual(sol.searches, 2)
+
+    def test_failure_says_why(self):
+        solver = rtb.IK_LM(seed=0, slimit=3)
+
+        def diverging(ets, Tep, q):
+            q[ets.jindices] = np.inf
+            raise ValueError("math domain error")
+
+        solver.step = diverging
+        sol = solver.solve(self.ets, self.Tep)
+        self.assertFalse(sol.success)
+        self.assertIn("3 searches diverged", sol.reason)
+
+    def test_other_value_errors_propagate(self):
+        solver = rtb.IK_LM(seed=0)
+
+        def broken(ets, Tep, q):
+            raise ValueError("not a divergence")
+
+        solver.step = broken
+        with self.assertRaisesRegex(ValueError, "not a divergence"):
+            solver.solve(self.ets, self.Tep)
+
+
 if __name__ == "__main__":
     unittest.main()
