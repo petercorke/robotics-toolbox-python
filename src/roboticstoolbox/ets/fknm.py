@@ -84,7 +84,6 @@ def _is_symbolic(q: Any) -> bool:
 def _python_fkine(data: Any, q: Any, base: Any, tool: Any, include_base: Any) -> Any:
     q = getmatrix(q, (None, None))
     l, _ = q.shape
-    end = data[-1]
 
     if isinstance(tool, SE3):
         tool = np.array(tool.A)
@@ -107,9 +106,13 @@ def _python_fkine(data: Any, q: Any, base: Any, tool: Any, include_base: Any) ->
         T = np.zeros((4, 4), dtype=object)
 
     for k, qk in enumerate(q):
-        link = end
-        jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-        Tk = link.A(qk[jindex])
+        if len(data) == 0:
+            # an empty ETS is the identity, as it is in the compiled code
+            Tk = np.eye(4)
+        else:
+            link = data[-1]
+            jindex = 0 if link.jindex is None and link.isjoint else link.jindex
+            Tk = link.A(qk[jindex])
 
         if tools is not None:
             Tk = Tk @ tools
@@ -424,11 +427,7 @@ def Robot_link_T(
     # one row, which also copes with the empty q of a gripper with no joints
     q = np.asarray(q0 if q is None else q, dtype=float).reshape(1, -1)
     for data, T in zip(_data, link_scene_nodes):
-        if len(data) == 0:
-            # a link with no elementary transforms, e.g. a URDF base link
-            T[:] = np.eye(4)
-        else:
-            T[:] = _python_fkine(data, q, None, None, False)
+        T[:] = _python_fkine(data, q, None, None, False)
 
 
 def r2q(R: Any) -> Any:
