@@ -254,9 +254,11 @@ def main() -> int:
                 errors: list[str] = []
                 page.on("pageerror", lambda e: errors.append(str(e)[:200]))
                 try:
+                    # no "&reset": a fresh context has no saved workspace to clear, and
+                    # with JupyterLite 0.8 "reset" stops the notebook from opening
                     page.goto(
                         "http://localhost:8890/lab/index.html"
-                        "?path=browser_check.ipynb&reset",
+                        "?path=browser_check.ipynb",
                         wait_until="load",
                     )
                     passed = run_checks(page, args.timeout, args.min_frames)
