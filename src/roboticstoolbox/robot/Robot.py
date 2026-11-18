@@ -1413,6 +1413,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         world frame which connect the line of length distance between the
         shapes. If the distance is negative then the shapes are collided.
 
+        Includes collision geometry on all grippers, using each gripper's
+        own current joint configuration.
+
         """
 
         if not skip:
@@ -1424,7 +1427,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         p1 = None
         p2 = None
 
-        for link in self.links:
+        links = [*self.links, *(link for g in self.grippers for link in g.links)]
+        for link in links:
             td, tp1, tp2 = link.closest_point(shape, inf_dist, skip=True)
 
             if td is not None and d is not None and td < d:
