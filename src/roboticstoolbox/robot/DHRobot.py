@@ -806,6 +806,12 @@ class DHRobot(Robot):
         - ``tw, T0 = twists()`` as above but the joint coordinates are taken
           to be zero.
 
+        The twists are expressed in the world frame and include the robot's
+        base placement and each joint's flip convention.  ``T0`` includes the
+        tool transform.  For a reference configuration ``q``, multiplying the
+        twist exponentials for a joint displacement by ``T0`` gives the pose
+        at ``q`` plus that displacement.
+
         Example:
 
         .. runblock:: pycon
@@ -821,33 +827,19 @@ class DHRobot(Robot):
         if q is None:
             q = np.zeros((self.n,))
 
-        T = self.fkine_all(q)[1:]  # don't use first transform which is base
+        T = self.fkine_all(q)
         tw = Twist3.Alloc(self.n)
-        if self.mdh:
-            # MDH case
-            for j, link in enumerate(self):
-                if link.sigma == 0:
-                    tw[j] = Twist3.UnitRevolute(T[j].a, T[j].t)
-                else:
-                    tw[j] = Twist3.UnitPrismatic(T[j].a)
-        else:
-            # DH case
-            for j, link in enumerate(self):
-                if j == 0:
-                    # first link case
-                    if link.sigma == 0:
-                        # revolute
-                        tw[j] = Twist3.UnitRevolute([0, 0, 1], [0, 0, 0])
-                    else:
-                        tw[j] = Twist3.UnitPrismatic([0, 0, 1])  # prismatic
-                else:
-                    # subsequent links
-                    if link.sigma == 0:
-                        tw[j] = Twist3.UnitRevolute(T[j - 1].a, T[j - 1].t)  # revolute
-                    else:
-                        tw[j] = Twist3.UnitPrismatic(T[j - 1].a)  # prismatic
+        for j, link in enumerate(self):
+            # Standard DH uses the preceding frame's z axis; modified DH
+            # uses the current frame's z axis.  Both poses include the base.
+            frame = T[j + 1] if self.mdh else T[j]
+            axis = -frame.a if link.isflip else frame.a
+            if link.sigma == 0:
+                tw[j] = Twist3.UnitRevolute(axis, frame.t)
+            else:
+                tw[j] = Twist3.UnitPrismatic(axis)
 
-        return tw, T[-1]
+        return tw, T[-1] * self.tool
 
     def segments(self) -> Any:
         segments: list[Any] = [None]
