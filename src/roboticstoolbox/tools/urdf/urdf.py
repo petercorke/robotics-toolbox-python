@@ -1666,20 +1666,20 @@ class Joint(URDFType):
                 raise TypeError("Expected JointMimic type")
         self._mimic = value
 
-    def is_valid(self, cfg: Any) -> Any:  # pragma nocover
-        """Check if the provided configuration value is valid for this joint.
-        Parameters
-        ----------
-        cfg : float, (2,) float, (6,) float, or (4,4) float
-            The configuration of the joint.
-        Returns
-        -------
-        is_valid : bool
-            True if the configuration is valid, and False otherwise.
+    def is_valid(self, cfg: Any) -> Any:
+        """Check a configuration against the joint's position limits.
+
+        Revolute and prismatic joints use inclusive lower and upper bounds.
+        An unspecified bound is unbounded. Other joint types have no position
+        limits to check.
+
+        :param cfg: configuration of the joint, a scalar for a revolute or
+            prismatic joint
+        :returns: True if the configuration is within the position limits
         """
-        if self.joint_type not in ["fixed", "revolute"]:
+        if self.joint_type not in ["revolute", "prismatic"]:
             return True
-        if self.joint_limit is None:  # type: ignore[attr-defined]
+        if self.limit is None:
             return True
         cfg = float(cfg)
         lower = -np.inf
