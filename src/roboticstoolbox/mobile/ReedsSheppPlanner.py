@@ -149,7 +149,9 @@ def left_right_left(x: float, y: float, phi: float) -> _Segments:
     if u1 <= 4.0:
         u = -2.0 * math.asin(0.25 * u1)
         t = base.wrap_0_2pi(t1 + 0.5 * u + math.pi)
-        v = base.wrap_0_2pi(phi - t + u)
+        # The final curve can be driven backwards. A positive-only wrap
+        # replaces its short reverse arc with an almost complete forward turn.
+        v = base.wrap_mpi_pi(phi - t + u)
 
         if t >= 0.0 >= u:
             return True, t, u, v
