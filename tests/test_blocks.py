@@ -376,7 +376,7 @@ class MobileBlockTest(unittest.TestCase):
         nt.assert_array_almost_equal(block.test_deriv(0, 0, x=x), [0, 0, 0])
 
         nt.assert_array_almost_equal(block.test_output(5, -5, x=x)[0], x)
-        nt.assert_array_almost_equal(block.test_deriv(5, -5, x=x), [0, 0, -10/2])
+        nt.assert_array_almost_equal(block.test_deriv(5, -5, x=x), [0, 0, -5 / np.pi])
 
     def test_default_x0(self):
         # without x0 the initial state is zero, for each of the vehicle blocks

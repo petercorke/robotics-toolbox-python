@@ -354,6 +354,12 @@ class DiffSteer(_VehicleWidth, ContinuousBlock):
     .. note:: Wheel velocity is defined such that if both are positive the vehicle
             moves forward.
 
+    The angular inputs are converted to linear wheel speeds
+    :math:`v_L = R\omega_L` and :math:`v_R = R\omega_R` before applying the
+    vehicle model's speed and acceleration limits. Without limiting, the centre
+    speed is :math:`R(\omega_L + \omega_R)/2` and the turn rate is
+    :math:`R(\omega_R - \omega_L)/w`.
+
     .. seealso:: :class:`~roboticstoolbox.mobile.Vehicle.DiffSteer` :class:`Bicycle` :class:`Unicycle`
     """
 
@@ -399,14 +405,15 @@ class DiffSteer(_VehicleWidth, ContinuousBlock):
         self.add_param("accel_max")
         self.add_param("steer_max", coerce=False)
         self.add_param("w")
-        self.add_param("R", when="never")  # accepted and ignored
+        self.add_param("R", when="never")
         self.add_param("x0", when="setup")
 
     def output(self, t: float, inports: list[Any], x: NDArray) -> list[R3]:
         return [x]
 
     def deriv(self, t: float, inports: list[Any], x: NDArray) -> NDArray:
-        return self.vehicle.deriv(x, inports)
+        wheel_speeds = [self.R * inports[0], self.R * inports[1]]
+        return self.vehicle.deriv(x, wheel_speeds)
 
 
 # ------------------------------------------------------------------------ #
