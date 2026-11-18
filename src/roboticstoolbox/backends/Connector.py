@@ -5,20 +5,18 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
-from typing import Any, Protocol, runtime_checkable
+from abc import ABC, abstractmethod
+from typing import Any
 
 
-@runtime_checkable
-class Connector(Protocol):
+class Connector(ABC):
     """
     What RTB needs of a graphical backend
 
-    A backend is any object that has these methods and flags: it does not have to
-    inherit from this class.  Swift does not, since it does not depend on RTB.
-    The PyPlot backends inherit from it explicitly, which supplies the default
-    values of the flags and of :meth:`_add_teach_panel`, and makes a missing
-    method an error at construction.
+    A backend inherits from this class, which supplies the default values of the
+    flags and of :meth:`_add_teach_panel`, and makes a missing method an error
+    when the backend is made.  A backend from outside the Toolbox inherits from
+    it too.
 
     The methods take different arguments in different backends, so they are
     declared with ``*args, **kwargs``; see the backend for the details.
@@ -29,6 +27,15 @@ class Connector(Protocol):
 
     #: True if the backend can render EllipsePlot objects.
     supports_ellipse: bool = False
+
+    #: True if the backend is a web page that can be shown in the output of a
+    #: notebook cell, as well as in a browser window of its own.  ``plot`` then
+    #: asks for that in a notebook, and paces an animation in real time.
+    embeds_in_notebook: bool = False
+
+    #: True if the backend can give back a picture of the scene as ``getframe()``,
+    #: so that ``plot`` can save an animation as a movie.
+    supports_movie: bool = False
 
     #
     #  Basic methods to do with the state of the external program

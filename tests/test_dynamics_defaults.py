@@ -41,7 +41,9 @@ def test_payload_zero_mass_is_a_no_op():
 
 
 def test_fdyn_without_optional_arguments():
-    puma = rtb.models.DH.Puma560()
+    # Coulomb friction is discontinuous at zero velocity, so an adaptive solver
+    # takes thousands of tiny steps; on the pure-Python RNE that is minutes.
+    puma = rtb.models.DH.Puma560().nofriction()
     for _ in range(2):
         t, q, qd = puma.fdyn(0.1, puma.qn, dt=0.05)
         assert q.shape[1] == 6

@@ -28,7 +28,7 @@ from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehiclePolyg
 from roboticstoolbox.mobile.drivers import VehicleDriverBase
 from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
 from roboticstoolbox.tools.plot import isnotebook as _isnotebook
-from roboticstoolbox.tools.plot import set_window_title
+from spatialmath.base import set_window_title
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 # what can be given as the control for a vehicle, see VehicleBase.control

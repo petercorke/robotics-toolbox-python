@@ -676,7 +676,7 @@ The more general solution, and what is implemented inside ``plot`` in the exampl
 This makes it possible to animate multiple robots in the one graphical window, or the one robot in various environments either graphical
 or real.
 
-The code is implemented in Python, currently supporting versions 3.10 and higher. Type hints, in the modern (PEP 604) syntax, are used throughout the codebase.
+The code is implemented in Python, currently supporting versions 3.11 and higher. Type hints, in the modern (PEP 604) syntax, are used throughout the codebase.
 The code is hosted on GitHub and unit testing for Mac, Linux and Windows over all
 supported Python versions is performed using GitHub Actions. Test coverage, currently over 70%, is uploaded to
 ``codecov.io`` for visualization and trending. The code is documented with reStructuredText
@@ -871,7 +871,7 @@ Summary
 =======
 
 The Robotics Toolbox for Python runs on Mac, Windows and Linux
-using Python 3.10 or better. The code is free and open, and released under the
+using Python 3.11 or better. The code is free and open, and released under the
 MIT licence. It provides many of the essential tools necessary for modelling, simulation and  control of arm and mobile robots, which is essential for robotics
 education  and research. 
 
@@ -919,7 +919,7 @@ The design goals (as of 2021) can be summarised as new functionality:
 
 and improved software engineering:
 
-* Use Python 3 (3.10 and greater)
+* Use Python 3 (3.11 and greater)
 * Utilize WebGL and Javascript graphics technologies
 * Documentation in reStructuredText using Sphinx and delivered via GitHub pages.
 * Hosted on GitHub with continuous integration using GitHub actions

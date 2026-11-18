@@ -22,7 +22,7 @@ passed on `main`.  To run it yourself:
 
 ```bash
 pip install playwright && playwright install chromium
-pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server ipympl
+pip install jupyterlite-core "jupyterlite-pyodide-kernel>=0.8.7" jupyter-server ipympl
 RTB_PURE_WHEEL=1 python -m build --wheel --outdir docs/lite/pypi
 python docs/lite/browser_check/check_lite_in_browser.py
 ```
@@ -31,5 +31,5 @@ python docs/lite/browser_check/check_lite_in_browser.py
 page when a check fails.  The run takes about two minutes: most of it is building the
 site and downloading Pyodide's packages in the browser.
 
-The kernel version is pinned in `docs.yml` (`jupyterlite-pyodide-kernel==0.6.1`) for
-browsers without WebAssembly JSPI; see the comment there before changing it.
+The kernel version is a floor in `docs.yml` (`jupyterlite-pyodide-kernel>=0.8.7`); see the
+comment there for why it is no longer an exact pin.
