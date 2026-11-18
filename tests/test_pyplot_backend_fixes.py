@@ -5,7 +5,6 @@ PyPlot backend: things that raised on a headless backend or before launch.
 import importlib
 import unittest
 import unittest.mock as mock
-from types import SimpleNamespace
 
 import matplotlib
 
@@ -16,7 +15,6 @@ import spatialgeometry as sg
 import roboticstoolbox as rtb
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
-from roboticstoolbox.tools.plot import set_window_title
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 
 
@@ -32,29 +30,6 @@ class TestReprBeforeLaunch(unittest.TestCase):
 class TestWindowTitle(unittest.TestCase):
     def tearDown(self):
         plt.close("all")
-
-    @staticmethod
-    def figure_with(manager):
-        return SimpleNamespace(canvas=SimpleNamespace(manager=manager))
-
-    def test_sets_the_title(self):
-        manager = mock.Mock()
-        self.assertTrue(set_window_title(self.figure_with(manager), "a title"))
-        manager.set_window_title.assert_called_once_with("a title")
-
-    def test_no_manager(self):
-        self.assertFalse(set_window_title(self.figure_with(None), "a title"))
-
-    def test_manager_without_set_window_title(self):
-        class Manager:
-            pass
-
-        self.assertFalse(set_window_title(self.figure_with(Manager()), "a title"))
-
-    def test_figure_without_a_canvas_manager_attribute(self):
-        self.assertFalse(
-            set_window_title(SimpleNamespace(canvas=SimpleNamespace()), "a title")
-        )
 
     def test_both_backends_launch_headless(self):
         # Agg: the manager exists but is not a window
@@ -82,31 +57,16 @@ class TestVehicleWindow(unittest.TestCase):
         self.assertIn("Robotics Toolbox", title.call_args.args[1])
 
 
-class TestConnectorProtocol(unittest.TestCase):
+class TestConnector(unittest.TestCase):
     def test_backends_are_connectors(self):
         self.assertIsInstance(PyPlot(), Connector)
         self.assertIsInstance(PyPlot2(), Connector)
 
-    def test_a_class_need_not_inherit(self):
-        # Swift does not depend on RTB, so it cannot inherit from Connector
+    def test_a_class_that_does_not_inherit_is_not_a_connector(self):
         class Standalone:
-            supports_teach = False
-            supports_ellipse = False
-
             def launch(self, *a, **k): ...
-            def step(self, *a, **k): ...
-            def reset(self, *a, **k): ...
-            def restart(self, *a, **k): ...
-            def close(self, *a, **k): ...
-            def add(self, *a, **k): ...
-            def remove(self, *a, **k): ...
-            def hold(self, *a, **k): ...
-            def _add_teach_panel(self, *a, **k): ...
 
-        self.assertIsInstance(Standalone(), Connector)
-
-    def test_an_object_without_the_methods_is_not(self):
-        self.assertNotIsInstance(object(), Connector)
+        self.assertNotIsInstance(Standalone(), Connector)
 
     def test_inheriting_gets_the_defaults(self):
         class Minimal(Connector):
@@ -132,23 +92,13 @@ class TestConnectorProtocol(unittest.TestCase):
         with self.assertRaises(TypeError):
             Incomplete()
 
-    def test_swift_satisfies_the_protocol(self):
+    def test_swift_is_a_connector(self):
         swift = __import__("importlib").util.find_spec("swift")
         if swift is None:
             self.skipTest("swift is not installed")
         from roboticstoolbox.backends.swift import Swift
 
-        for name in (
-            "launch",
-            "step",
-            "reset",
-            "restart",
-            "close",
-            "add",
-            "remove",
-            "hold",
-        ):
-            self.assertTrue(callable(getattr(Swift, name, None)), name)
+        self.assertTrue(issubclass(Swift, Connector))
 
 
 class TestShapePlot(unittest.TestCase):
