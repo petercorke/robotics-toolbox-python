@@ -98,6 +98,10 @@ class RobotPlottingMPLMixin:
         ``robot.fellipse(q)`` creates a force ellipsoid for the robot at
         pose ``q``. By default the ellipsoid is centered at the end-effector.
 
+        The ellipsoid axes are expressed in world coordinates. Before
+        applying ``scale``, its surface wrenches produce unit-norm joint
+        effort. A singular force ellipsoid is unbounded and is not drawn.
+
         .. rubric:: Notes
 
         - By default the ellipsoid related to translational motion is
@@ -147,6 +151,10 @@ class RobotPlottingMPLMixin:
 
         ``robot.vellipse(q)`` creates a velocity ellipsoid for the robot at
         pose ``q``. By default the ellipsoid is centered at the end-effector.
+
+        The ellipsoid axes are expressed in world coordinates and describe
+        velocities attainable with joint-velocity norm at most one, scaled
+        by ``scale``. Zero singular values flatten the velocity ellipsoid.
 
         .. rubric:: Notes
 

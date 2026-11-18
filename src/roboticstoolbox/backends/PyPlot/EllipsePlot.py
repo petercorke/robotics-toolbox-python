@@ -179,39 +179,33 @@ class EllipsePlot:
             return False
 
         if self.opt == "trans":
-            J = self.robot.jacobe(self.q)[:3, :]
-            A = J @ J.T
+            J = self.robot.jacob0(self.q)[:3, :]
         elif self.opt == "rot":
-            J = self.robot.jacobe(self.q)[3:, :]
-            A = J @ J.T
+            J = self.robot.jacob0(self.q)[3:, :]
 
+        # J maps the unit joint-velocity ball to an ellipsoid in world axes.
+        # Its singular values are the velocity radii, while virtual work
+        # gives their reciprocals for the force ellipsoid.
+        U, s, _ = np.linalg.svd(J, full_matrices=False)
+        radii = np.zeros(3)
+        radii[: len(s)] = s
         if not self.vell:
-            # Do the extra step for the force ellipse
-            try:
-                A = np.linalg.inv(A)
-            except np.linalg.LinAlgError:
+            if len(s) < 3 or s[-1] <= np.finfo(s.dtype).eps * max(J.shape) * s[0]:
                 warnings.warn(
                     "Force ellipsoid is singular at this configuration; skipping ellipse draw.",
                     RuntimeWarning,
                     stacklevel=2,
                 )
                 return False
+            radii = 1.0 / s
+
+        rotation = np.zeros((3, 3))
+        rotation[: len(s)] = U.T
 
         if isinstance(self.centre, str) and self.centre == "ee":
             centre = self.robot.fkine(self.q).t
         else:
             centre = self.centre
-
-        # find the rotation matrix and radii of the axes
-        U, s, rotation = np.linalg.svd(A)
-        if np.any(s <= 0):
-            warnings.warn(
-                "Ellipsoid matrix is not positive definite; skipping ellipse draw.",
-                RuntimeWarning,
-                stacklevel=2,
-            )
-            return False
-        radii = 1.0 / np.sqrt(s)
 
         # points on unit sphere
         u = np.linspace(0.0, 2.0 * np.pi, 50)
