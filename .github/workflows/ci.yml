@@ -132,9 +132,12 @@ jobs:
           pip install build
           RTB_PURE_WHEEL=1 python -m build --wheel
 
+      # Node 26, not the 22 used by docs.yml: the notebook-bootstrap tests call
+      # asyncio.run() inside Pyodide, which needs WebAssembly stack switching
+      # (JSPI), and Node 22 does not have it.
       - uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: "26"
           cache: npm
           cache-dependency-path: docs/lite/wasm_check/package-lock.json
 

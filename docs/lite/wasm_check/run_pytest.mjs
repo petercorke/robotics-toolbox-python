@@ -80,7 +80,7 @@ print(f"Pyodide: {sys.version}; {sys.platform}")
 # fd capture and pytest-timeout rely on OS facilities unavailable in Pyodide.
 int(pytest.main([
     "tests", "-m", "not slow", "--ignore=tests/test_blocks.py", "-q",
-    "-p", "no:cacheprovider", "-p", "no:timeout", "--capture=sys", "-rfE",
+    "-p", "no:cacheprovider", "-p", "no:timeout", "--capture=sys", "-rfEX",
 ]))
 `);
 process.exitCode = exitCode;
