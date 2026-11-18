@@ -249,7 +249,8 @@ class Puma560(DHRobot):
 
         This is a hand-written solution for the Puma 560 geometry, in particular
         a zero first link length and a lateral shoulder offset :math:`d_3`.  It
-        does not apply to other robots.  Joint limits are not considered.
+        does not apply to other robots. Joint offsets are accounted for in the
+        returned coordinates. Joint limits are not considered.
 
         .. versionchanged:: 1.5.0
             Accepts an array as well as an :class:`SE3`, returns a single
@@ -379,8 +380,9 @@ class Puma560(DHRobot):
                 # translations between the first and last 3 joints (d4) and
                 # also d6, a6, alpha6 in the final frame.
 
-                # transform of the first 3 joints
-                T13 = self.A([0, 2], theta)
+                # ik3 returns physical DH angles, but A expects joint
+                # coordinates and adds their offsets when evaluating them.
+                T13 = self.A([0, 2], theta - self.offset[:3])
 
                 # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
                 Td4 = SE3(0, 0, self.links[3].d)  # Tz(d4)
