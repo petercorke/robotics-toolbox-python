@@ -112,14 +112,25 @@ class TestPlanners(unittest.TestCase):
         path, status = rs.query(start, goal)
 
         self.assertIsInstance(path, np.ndarray)
+        self.assertEqual(path.ndim, 2)
+        self.assertEqual(path.shape[1], 3)
+        self.assertGreaterEqual(path.shape[0], 2)
+        self.assertTrue(np.all(np.isfinite(path)))
         # Keep the terminal pose, whose x coordinate is zero in the local frame.
-        self.assertEqual(path.shape, (66, 3))
         nt.assert_allclose(path[0], start, atol=1e-12)
         nt.assert_allclose(path[-1], goal, atol=1e-12)
+        self.assertLessEqual(
+            np.max(np.linalg.norm(np.diff(path[:, :2], axis=0), axis=1)),
+            0.1 + 1e-12,
+        )
+        # RSR lengths [pi/2, 1, -pi/2] reach the same pose: quarter-turn
+        # forwards, one metre straight, then the reverse quarter-turn.
+        self.assertLessEqual(status.length, pi + 1 + 1e-12)
         self.assertEqual(status.__class__.__name__, "ReedsSheppStatus")
         self.assertTrue(hasattr(status, "segments"))
         self.assertTrue(hasattr(status, "length"))
         self.assertTrue(hasattr(status, "direction"))
+        self.assertEqual(len(status.direction), path.shape[0])
 
     # def test_bug2(self):
 
