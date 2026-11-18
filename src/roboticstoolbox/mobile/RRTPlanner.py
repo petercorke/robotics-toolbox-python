@@ -159,7 +159,8 @@ class RRTPlanner(PlannerBase):
 
         Compute a rapidly exploring random tree with its root at the ``goal``.
         The tree will have ``npoints`` vertices spread uniformly randomly over
-        the workspace which is an attribute of the ``map``.
+        the workspace which is an attribute of the ``map``. Each call replaces
+        the previous tree.
 
         For every new point added, a Dubins path is computed to the nearest
         vertex already in the graph.  Each configuration on that path, with
@@ -181,6 +182,7 @@ class RRTPlanner(PlannerBase):
         # self.goal = np.r_[goal]
         self.random_init()
 
+        self.g = DGraph(metric="SE2")
         v = self.g.add_vertex(coord=goal)
         v.path = None
 

@@ -203,6 +203,28 @@ class TestRRTPlanner(unittest.TestCase):
         rrt = self.planned()
         nt.assert_allclose(rrt.g[0].coord, self.GOAL)
 
+    def test_replan_uses_the_new_goal(self) -> None:
+        rrt = self.planned()
+        quiet(rrt.plan, goal=self.START, showsamples=False, showvalid=False)
+        path, status = quiet(rrt.query, self.GOAL)
+
+        nt.assert_allclose(path[-1], self.START, atol=1e-6)
+        nt.assert_allclose(status.vertices[-1].coord, self.START)
+        self.assertEqual(rrt.g.n, rrt.npoints + 1)
+        self.assertEqual(rrt.g.ne, rrt.npoints)
+
+    def test_replan_with_the_same_seed_reproduces_the_tree(self) -> None:
+        rrt = self.planned(seed=7)
+        expected_path, expected_status = quiet(rrt.query, self.START)
+        expected_vertices = np.array([vertex.coord for vertex in rrt.g])
+
+        quiet(rrt.plan, goal=self.GOAL, showsamples=False, showvalid=False)
+        path, status = quiet(rrt.query, self.START)
+
+        nt.assert_array_equal([vertex.coord for vertex in rrt.g], expected_vertices)
+        nt.assert_array_equal(path, expected_path)
+        self.assertEqual(status.length, expected_status.length)
+
     def test_query_reaches_goal(self) -> None:
         rrt = self.planned()
         path, status = quiet(rrt.query, self.START)
