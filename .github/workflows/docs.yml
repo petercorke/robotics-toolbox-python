@@ -155,9 +155,9 @@ jobs:
         # Chromium, and checks that the site installs that wheel (not the last release
         # from PyPI), draws an ipywidgets slider and an ipympl figure, and that a
         # trajectory animates while its cell is running.  See
-        # docs/lite/browser_check/.  Informational (continue-on-error) until it has
-        # run green on main, then remove that line so that it blocks the deploy.
-        continue-on-error: true
+        # docs/lite/browser_check/.  It blocks the deploy: it was informational
+        # (continue-on-error) until it had run green on main, and while it was, a
+        # failure after the kernel was unpinned showed as a green job.
         timeout-minutes: 20
         run: |
           pip install playwright
