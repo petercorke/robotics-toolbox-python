@@ -28,6 +28,15 @@ class Connector(ABC):
     #: True if the backend can render EllipsePlot objects.
     supports_ellipse: bool = False
 
+    #: True if the backend is a web page that can be shown in the output of a
+    #: notebook cell, as well as in a browser window of its own.  ``plot`` then
+    #: asks for that in a notebook, and paces an animation in real time.
+    embeds_in_notebook: bool = False
+
+    #: True if the backend can give back a picture of the scene as ``getframe()``,
+    #: so that ``plot`` can save an animation as a movie.
+    supports_movie: bool = False
+
     #
     #  Basic methods to do with the state of the external program
     #
