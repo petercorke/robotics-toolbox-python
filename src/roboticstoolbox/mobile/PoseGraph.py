@@ -321,28 +321,30 @@ class PoseGraph:
                     # lidar records are associated with the immediately
                     # preceding VERTEX record
                     #
-                    # not quite sure what all the fields are
-                    # 1 ?
+                    # 1 laser type
                     # 2 min scan angle
                     # 3 scan range
                     # 4 angular increment
                     # 5 maximum range possible
-                    # ?
+                    # 6 range accuracy, 7 remission mode
                     # 8 N = number of beams
-                    # 9 to 9+N lidar range data
-                    # ?
-                    # 9+N+12 timestamp (*nix timestamp)
-                    # 9+N+13 lidar type (str)
+                    # 9 to 9+N-1 lidar range data
+                    # 9+N M = number of remission values, followed by M values
+                    # 10+N+M two poses, velocities and safety fields (11 values)
+                    # 21+N+M acquisition timestamp, then host and logger timestamp
 
+                    nbeams = int(tokens[8])
+                    nremissions = int(tokens[9 + nbeams])
                     if firstlidar:
-                        nbeams = int(tokens[8])
                         lidarmeta = tokens[2:6]
+                        first_nbeams = nbeams
                         firstlidar = False
 
                     # add attributes to the most recent vertex created
                     v.theta = np.arange(0, nbeams) * float(tokens[4]) + float(tokens[2])
                     v.range = np.array([float(x) for x in tokens[9 : nbeams + 9]])
-                    v.time = float(tokens[21 + nbeams])
+                    v.maxrange = float(tokens[5])
+                    v.time = float(tokens[21 + nbeams + nremissions])
                     self.vindex[v.index] = v
                     nlidar += 1
                 else:
@@ -368,7 +370,8 @@ class PoseGraph:
                 if verbose:
                     fov = np.degrees([self._angmin, self._angmax])
                     print(
-                        f"  {nlidar} lidar scans: {nbeams} beams, fov {fov[0]:.1f}° to"
+                        f"  {nlidar} lidar scans; first scan: {first_nbeams} beams,"
+                        f" fov {fov[0]:.1f}° to"
                         f" {fov[1]:.1f}°, max range {self._maxrange}"
                     )
 
@@ -416,13 +419,14 @@ class PoseGraph:
         :raises IndexError: there is no such vertex
         :raises ValueError: the vertex has no lidar scan
         :return: points, one per column, NaN for beams that returned no
-            range less than the maximum range of the sensor
+            range less than the sensor's maximum range for that scan
         :rtype: ndarray(2,N)
 
         .. seealso:: :meth:`scan`
         """
-        range, theta = self.scan(i)
-        range = np.where(range < self._maxrange, range, np.nan)
+        vertex = self._scan_vertex(i)
+        range, theta = vertex.range, vertex.theta
+        range = np.where(range < vertex.maxrange, range, np.nan)
         x = range * np.cos(theta)
         y = range * np.sin(theta)
 
