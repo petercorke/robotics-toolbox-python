@@ -46,7 +46,7 @@ def _dirties_fknm(func: _F) -> _F:
     @wraps(func)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         result = func(self, *args, **kwargs)
-        self._fknm_stale = True
+        self._changed()
         return result
 
     return wrapper  # type: ignore[return-value]
@@ -611,7 +611,7 @@ class BaseETS(MutableSequence[ETT]):
     @data.setter
     def data(self, new_data: list[ETT]) -> None:
         self._data = new_data
-        self._fknm_stale = True
+        self._changed()
 
     def inv(self) -> Self:
         r"""

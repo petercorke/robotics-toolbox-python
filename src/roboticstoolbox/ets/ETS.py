@@ -426,7 +426,7 @@ class ETS(BaseETS[ET]):
         elif isinstance(value, ETS):
             for j, et in enumerate(value):
                 self._data.insert(index + j, et)
-        self._fknm_stale = True
+        self._changed()
 
     def fkine(
         self,
