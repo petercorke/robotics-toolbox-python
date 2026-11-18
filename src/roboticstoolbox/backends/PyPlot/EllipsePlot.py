@@ -179,10 +179,11 @@ class EllipsePlot:
             return False
 
         pose = self.robot.fkine(self.q)
+        J = self.robot.jacobe(self.q)
         if self.opt == "trans":
-            J = self.robot.jacobe(self.q)[:3, :]
+            J = J[:3, :]
         elif self.opt == "rot":
-            J = self.robot.jacobe(self.q)[3:, :]
+            J = J[3:, :]
         # jacobe uses the terminal frame for both DHRobot and Robot. Their
         # jacob0 methods differ in whether the robot's world base is included.
         J = pose.R @ J
