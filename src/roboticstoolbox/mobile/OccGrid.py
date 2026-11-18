@@ -655,18 +655,27 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         Inflate obstacles
 
         :param radius: radius of circular structuring element in world units
+        :raises ValueError: ``radius`` is not finite and non-negative
 
         A circular structuring element is created and used to dilate the
-        stored occupancy grid.
+        stored occupancy grid. Cell centres within ``radius`` of an occupied
+        cell centre become occupied, preserving fractional-cell radii.
 
         Successive calls to ``inflate`` will compound the inflation.
 
         .. seealso:: :func:`scipy.ndimage.binary_dilation`
         """
-        # Generate a circular structuring element
-        r = round(radius / self._cellsize)
-        Y, X = np.meshgrid(np.arange(-r, r + 1), np.arange(-r, r + 1))
-        SE = X**2 + Y**2 <= r**2
+        if not np.isfinite(radius) or radius < 0:
+            raise ValueError("radius must be finite and non-negative")
+
+        # Bound the kernel by whole cells, but retain the requested radius.
+        r = radius / self._cellsize
+        extent = int(np.ceil(r))
+        Y, X = np.meshgrid(
+            np.arange(-extent, extent + 1), np.arange(-extent, extent + 1)
+        )
+        # Include boundary cells despite roundoff in ratios such as 0.3 / 0.1.
+        SE = np.hypot(X, Y) <= np.nextafter(r, np.inf)
         SE = SE.astype(int)
 
         # do the inflation using SciPy
