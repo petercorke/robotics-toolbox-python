@@ -94,6 +94,38 @@ class _QuinticPolynomial:
         return xt
 
 
+def _max_derivative_norm(
+    x: _QuinticPolynomial, y: _QuinticPolynomial, duration: float, order: int
+) -> float:
+    """Maximum planar derivative magnitude over the whole time interval."""
+    polynomial = np.polynomial.polynomial
+    components = []
+    for curve in (x, y):
+        derivative = polynomial.polyder(
+            [curve.a0, curve.a1, curve.a2, curve.a3, curve.a4, curve.a5], m=order
+        )
+        # Find roots in normalized time [0, 1], independently of time units.
+        components.append(derivative * duration ** np.arange(derivative.size))
+    dx, dy = components
+    derivative_scale = np.max(np.abs(components))
+    if derivative_scale == 0:
+        return 0.0
+    # Scaling preserves the stationary points and avoids squaring very large
+    # or very small finite coefficients.  Evaluate the norm in its original units.
+    scaled_x, scaled_y = dx / derivative_scale, dy / derivative_scale
+    squared_norm = polynomial.polyadd(
+        polynomial.polymul(scaled_x, scaled_x), polynomial.polymul(scaled_y, scaled_y)
+    )
+    roots = polynomial.polyroots(polynomial.polyder(squared_norm))
+    interior = roots.real[
+        (np.abs(roots.imag) < 1e-10) & (roots.real > 0) & (roots.real < 1)
+    ]
+    times = np.r_[0.0, interior, 1.0]
+    return float(
+        np.max(np.hypot(polynomial.polyval(times, dx), polynomial.polyval(times, dy)))
+    )
+
+
 def quintic_polynomials_planner(
     sx: float,
     sy: float,
@@ -138,7 +170,8 @@ def quintic_polynomials_planner(
     The path time is searched from ``MIN_T`` to ``MAX_T`` in steps of ``MIN_T``
     and the first time for which the maximum acceleration and jerk are within
     their limits is used.  The path is :math:`(x, y, \\theta)` for each time
-    step.
+    step.  Limits apply to the continuous polynomial, including extrema between
+    samples; ``dt`` controls only the returned sampling.
     """
 
     if not math.isfinite(dt) or dt <= 0:
@@ -196,8 +229,8 @@ def quintic_polynomials_planner(
             rj.append(j)
 
         if (
-            max([abs(i) for i in ra]) <= max_accel
-            and max([abs(i) for i in rj]) <= max_jerk
+            _max_derivative_norm(xqp, yqp, T, 2) <= max_accel
+            and _max_derivative_norm(xqp, yqp, T, 3) <= max_jerk
         ):
             break
     else:
@@ -254,7 +287,8 @@ class QuinticPolyPlanner(PlannerBase):
             x(t) &= a_0 + a_1 t + a_2 t^2 + a_3 t^3 + a_4 t^4 + a_5 t^5 \\
             y(t) &= b_0 + b_1 t + b_2 t^2 + b_3 t^3 + b_4 t^4 + b_5 t^5
 
-    that meets the given constraints.  Trajectory time is given as a range.
+    that meets the given constraints throughout the trajectory, including between
+    output samples.  Trajectory time is given as a range.
 
     :reference: "Local Path Planning And Motion Control For AGV In
         Positioning",  Takahashi, T. Hongo, Y. Ninomiya and G.
