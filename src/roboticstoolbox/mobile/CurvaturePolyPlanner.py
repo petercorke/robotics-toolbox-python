@@ -13,7 +13,7 @@ import scipy.optimize
 from spatialmath.base import angdiff
 from spatialmath.base.types import ArrayLike3
 
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
@@ -140,12 +140,20 @@ class CurvaturePolyPlanner(PlannerBase):
 
         :param start: start configuration :math:`(x, y, \theta)`
         :param goal: goal configuration :math:`(x, y, \theta)`
+        :raises NoPathError: optimization does not produce a finite path that
+            reaches the goal
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
         The curvature of the path is a cubic polynomial in the distance along
         the path, whose coefficients and the path length are found by numerical
         optimization.  The path is integrated in steps of at most 0.01.
+
+        The final pose is checked against the goal using the norm of the
+        position error and shortest heading difference, as in :func:`costfunc`.
+        A residual above ``1e-3`` raises :class:`NoPathError`, even if the
+        optimizer reports convergence. The tolerance is absolute, independent
+        of the map's coordinate origin.
 
         The returned status value has elements:
 
@@ -163,6 +171,8 @@ class CurvaturePolyPlanner(PlannerBase):
         self.validate_start_goal(start, goal)
         start_, goal_ = self.start, self.goal
         assert start_ is not None and goal_ is not None  # nosec B101: narrows the type for mypy
+        if not np.all(np.isfinite(start_)) or not np.all(np.isfinite(goal_)):
+            raise ValueError("start and goal must contain finite values")
 
         # initial estimate of path length is Euclidean distance
         d = np.linalg.norm(goal_[:2] - start_[:2])
@@ -181,9 +191,23 @@ class CurvaturePolyPlanner(PlannerBase):
             bounds=[(None, None), (None, None), (None, None), (None, None), (d, None)],
             args=(start_, goal_),
         )
+        if not np.all(np.isfinite(sol.x)):
+            raise NoPathError("optimizer did not produce finite path parameters")
         path, maxcurvature = solvepath(
             sol.x, q0=start_, dense_output=True, max_step=1e-2
         )
+        if not np.all(np.isfinite(path)):
+            raise NoPathError("path integration produced non-finite poses")
+
+        # Check the actual returned trajectory, not the optimizer's coarse
+        # objective or success flag, which can also indicate a local minimum.
+        error = path[:, -1] - goal_
+        error[2] = angdiff(path[2, -1], goal_[2])
+        residual = np.linalg.norm(error)
+        if not np.isfinite(residual) or residual > 1e-3:
+            raise NoPathError(
+                f"optimized path did not reach the goal (pose residual {residual:.3g})"
+            )
 
         status = CurvaturePolyStatus(sol.x[4], maxcurvature, sol.x[:4])
 
