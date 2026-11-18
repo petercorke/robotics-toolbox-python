@@ -184,12 +184,9 @@ class PyPlot2(Connector):
         of defined time updating the state of the environment as defined by
         the robot's actions.
 
-        The will go through each robot in the list and make them act based on
-        their control type (position, velocity, acceleration, or torque). Upon
-        acting, the other three of the four control types will be updated in
-        the internal state of the robot object. The control type is defined
-        by the robot object, and not all robot objects support all control
-        types.
+        Robots in velocity control mode advance by ``robot.qd * dt``. Robots
+        in position control mode and read-only plots retain their configuration.
+        Acceleration control does not integrate the robot state.
 
         :param dt: time step in seconds, which must be greater than zero in a window,
             where the plot pauses for ``dt``; in a notebook there is no pause
@@ -328,20 +325,20 @@ class PyPlot2(Connector):
         for rpl in self.robots:
             robot = rpl.robot
 
-            if rpl.readonly or robot.control_type == "p":
+            if rpl.readonly or robot.control_mode == "p":
                 pass  # pragma: no cover
 
-            elif robot.control_type == "v":
+            elif robot.control_mode == "v":
                 for i in range(robot.n):
-                    robot.q[i] += robot.qd[i] * (dt / 1000)
+                    robot.q[i] += robot.qd[i] * dt
 
-            elif robot.control_type == "a":  # pragma: no cover
+            elif robot.control_mode == "a":  # pragma: no cover
                 pass
 
             else:  # pragma: no cover
                 # Should be impossible to reach
                 raise ValueError(
-                    "Invalid robot.control_type. Must be one of 'p', 'v', or 'a'"
+                    "Invalid robot.control_mode. Must be one of 'p', 'v', or 'a'"
                 )
 
     def _update_robots(self) -> None:
