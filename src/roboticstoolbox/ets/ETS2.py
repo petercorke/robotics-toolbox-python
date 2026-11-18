@@ -377,6 +377,7 @@ class ETS2(BaseETS[ET2]):
         else:  # pragma: nocover
             tools = tool
 
+        T: NDArray
         if l > 1:
             T = np.zeros((l, 3, 3), dtype=object)
         else:
