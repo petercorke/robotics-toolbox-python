@@ -123,6 +123,8 @@ class DynamicsMixin:
 
         ``robot.friction(qd)`` is a vector of joint friction
         forces/torques for the robot moving with joint velocities ``qd``.
+        Velocities and returned forces/torques are ordered by joint index;
+        fixed links do not contribute joint friction.
 
         The friction model includes:
 
@@ -161,8 +163,10 @@ class DynamicsMixin:
         qd = np.array(getvector(qd, self.n))
         tau = np.zeros(self.n)
 
-        for i in range(self.n):
-            tau[i] = self.links[i].friction(qd[i])
+        for link in self.links:
+            j = link.jindex
+            if j is not None:
+                tau[j] = link.friction(qd[j])
 
         return tau
 
