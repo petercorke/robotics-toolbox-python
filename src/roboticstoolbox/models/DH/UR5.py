@@ -13,7 +13,7 @@ class UR5(DHRobot):
     :param symbolic: use symbolic constants
     :type symbolic: bool
 
-    ``UR5()`` is an object which models a Unimation Puma560 robot and
+    ``UR5()`` is an object which models a Universal Robots UR5 robot and
     describes its kinematic and dynamic characteristics using standard DH
     conventions.
 
@@ -30,12 +30,21 @@ class UR5(DHRobot):
 
     .. note::
         - SI units are used.
+        - The model has no link inertia: the manufacturer's reference (below)
+          publishes the mass and centre of mass of each link, but no inertia
+          tensor for the UR5.  Dynamics computed with this model treat each
+          link as a point mass, and the robot's inertia matrix is singular:
+          the last link's centre of mass lies on the joint 6 axis, so the
+          last row and column of ``robot.inertia(q)`` are zero.  The inertia
+          tensors in ROS-Industrial's ``ur_description`` package are
+          estimates that treat each link as a cylinder, so they are not used
+          here.
 
     :References:
 
         - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
 
-    :sealso: ``UR4``, :func:`UR10`
+    :sealso: :func:`UR3`, :func:`UR10`
 
 
     .. codeauthor:: Peter Corke
@@ -58,18 +67,18 @@ class UR5(DHRobot):
 
         # robot length values (metres)
         a = [0, -0.42500, -0.39225, 0, 0, 0]
-        d = [0.089459, 0, 0, 0.10915, 0.09465, 0.0823]
+        d = [0.089159, 0, 0, 0.10915, 0.09465, 0.0823]
 
         alpha = [pi / 2, zero, zero, pi / 2, -pi / 2, zero]
 
         # mass data, no inertia available
-        mass = [3.7000, 8.3930, 2.33, 1.2190, 1.2190, 0.1897]
+        mass = [3.7000, 8.3930, 2.33, 1.2190, 1.2190, 0.1879]
         center_of_mass = [
             [0, -0.02561, 0.00193],
             [0.2125, 0, 0.11336],
             [0.15, 0, 0.0265],
             [0, -0.0018, 0.01634],
-            [0, -0.0018, 0.01634],
+            [0, 0.0018, 0.01634],
             [0, 0, -0.001159],
         ]
         links = []
