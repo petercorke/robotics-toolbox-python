@@ -1712,9 +1712,9 @@ class FDyn_X(ContinuousBlock):
         :type robot: Robot subclass
         :param q0: Initial joint configuration
         :type q0: array_like(n)
-        :param gravcomp: perform gravity compensation
+        :param gravcomp: perform gravity compensation independently of ``velcomp``
         :type gravcomp: bool
-        :param velcomp: perform velocity term compensation
+        :param velcomp: compensate velocity terms independently of ``gravcomp``
         :type velcomp: bool
         :param representation: task-space representation, defaults to "rpy/xyz"
         :type representation: str
@@ -1814,7 +1814,9 @@ class FDyn_X(ContinuousBlock):
                 qd_rne = qd
             else:
                 qd_rne = np.zeros((n,))
-            Q_rne = self.robot.rne(q, qd_rne, np.zeros((n,)))
+            # Velocity compensation must not also cancel gravity unless requested.
+            gravity = None if self.gravcomp else [0, 0, 0]
+            Q_rne = self.robot.rne(q, qd_rne, np.zeros((n,)), gravity=gravity)
             Q += Q_rne
         qdd = self.robot.accel(q, qd, Q)
 
