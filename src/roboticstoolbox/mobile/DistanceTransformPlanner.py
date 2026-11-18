@@ -519,10 +519,10 @@ def distancexform(
 
     # get ready to iterate
     count = 0
-    ninf: float = np.inf  # number of infinities in the map
 
     h = None
     while True:
+        previous = distance
         distance = grassfire_step(distance, D)
         distance[occgrid > 0] = np.nan  # reinsert nans for obstacles
 
@@ -545,15 +545,15 @@ def distancexform(
                 h = plt.imshow(display, cmap=cmap)
             plt.pause(0.001)
 
-        ninfnow = np.isinf(distance).sum()  # current number of Infs
-        if ninfnow == ninf:
-            # stop if the number of Infs left in the map had stopped reducing
-            # it may never get to zero if there are unreachable cells in the map
+        if not np.any(distance < previous):
+            # Finite distances can still improve after every reachable cell
+            # has been visited, since diagonal and axial steps have different
+            # costs.  The zero-cost centre keeps distances from increasing;
+            # NaN obstacles and unchanged infinities do not count as decreases.
             break
 
-        ninf = int(ninfnow)
-
     if summary:
+        ninf = int(np.isinf(distance).sum())
         print(f"{count:d} iterations, {ninf:d} unreachable cells")
     return distance
 
