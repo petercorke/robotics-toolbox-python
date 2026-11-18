@@ -1611,11 +1611,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         """
         Compute the joint velocity damper for QP motion control
 
+        :param q: joint coordinates in joint-index order, defaults to the
+            robot's current configuration
         :param ps: The minimum angle (in radians) in which the joint is
             allowed to approach to its limit
         :param pi: The influence angle (in radians) in which the velocity
             damper becomes active
-        :param n: The number of joints to consider. Defaults to all joints
+        :param n: The number of leading joint coordinates to consider.
+            Defaults to all joints
         :param gain: The gain for the velocity damper
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
@@ -1635,12 +1638,20 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = np.zeros((n, n))
         Bin = np.zeros(n)
 
+        if n == 0:
+            return Ain, Bin
+
+        # qlim follows link order, whereas q and the constraint columns follow
+        # joint indices. These orders can differ in an explicitly indexed robot.
+        jindices = [link.jindex for link in self.links if link.isjoint]
+        qlim = self.qlim[:, np.argsort(jindices)]
+
         for i in range(n):
-            if q[i] - self.qlim[0, i] <= pi:
-                Bin[i] = -gain * (((self.qlim[0, i] - q[i]) + ps) / (pi - ps))
+            if q[i] - qlim[0, i] <= pi:
+                Bin[i] = -gain * (((qlim[0, i] - q[i]) + ps) / (pi - ps))
                 Ain[i, i] = -1
-            if self.qlim[1, i] - q[i] <= pi:
-                Bin[i] = gain * ((self.qlim[1, i] - q[i]) - ps) / (pi - ps)
+            if qlim[1, i] - q[i] <= pi:
+                Bin[i] = gain * ((qlim[1, i] - q[i]) - ps) / (pi - ps)
                 Ain[i, i] = 1
 
         return Ain, Bin
