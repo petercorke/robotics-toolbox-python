@@ -539,13 +539,24 @@ class PoseGraph:
         :param s1: vertex number of the first scan
         :param s2: vertex number of the second scan
         :raises IndexError: there is no such vertex
-        :raises ValueError: a vertex has no lidar scan
+        :raises ValueError: a vertex has no lidar scan or no finite scan points
         :return: relative pose, found by iterative closest point
+
+        Beams without a finite return are omitted from both point clouds before
+        matching. The original scans retain the NaNs returned by :meth:`scanxy`.
 
         .. seealso:: :func:`spatialmath.base.ICP2d`
         """
-        p1 = self.scanxy(s1)
-        p2 = self.scanxy(s2)
+
+        def finite_points(index: int) -> NDArray:
+            points = self.scanxy(index)
+            points = points[:, np.all(np.isfinite(points), axis=0)]
+            if points.shape[1] == 0:
+                raise ValueError(f"scan {index} has no finite points to match")
+            return points
+
+        p1 = finite_points(s1)
+        p2 = finite_points(s2)
         T = smb.ICP2d(p1, p2)
         return SE2(T)
 
