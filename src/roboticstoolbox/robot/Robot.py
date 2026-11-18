@@ -1684,6 +1684,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         make it impossible for the robot to run into a collision. Requires
         See examples/neo.py for use case.
 
+        The contact-point Jacobian and the obstacle's translational velocity
+        are projected onto the separation normal in world coordinates.
+
         """
 
         end, start, _ = self._get_limit_links(start=start, end=end)
@@ -1715,22 +1718,19 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     axis=0,
                 )
 
-                # tool = (self.fkine(q, end=link).inv() * SE3(wTlp)).A[:3, 3]
-
-                # Je = self.jacob0(q, end=link, tool=tool)
-                # Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
-
-                # n_dim = Je.shape[1]
-                # dp = norm_h @ shape.v
-                # l_Ain = zeros((1, self.n))
-
-                Je = self.jacobe(q, start=start, end=link, tool=link_col.T)
-                n_dim = Je.shape[1]
+                # Transform the link-origin body Jacobian to the closest
+                # point in world axes, including the contact's lever arm.
+                # Ignore the robot's end-effector tool for this link pose.
+                wTl = self.fkine(q, end=link, tool=SE3())
+                cTl = SE3(wTlp).inv() * wTl
+                Jlink = self.jacobe(q, start=start, end=link, tool=SE3())
+                Jc = cTl.Ad() @ Jlink
+                n_dim = Jc.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = np.zeros((1, self.n))
 
                 start_jidx = get_link_joint_index(start)
-                l_Ain[0, start_jidx : start_jidx + n_dim] = 1 * norm_h @ Je
+                l_Ain[0, start_jidx : start_jidx + n_dim] = norm_h @ Jc
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
             else:  # pragma nocover
                 l_Ain = None
