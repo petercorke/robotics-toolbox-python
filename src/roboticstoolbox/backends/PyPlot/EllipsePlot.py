@@ -178,10 +178,14 @@ class EllipsePlot:
         if not self._valid_opt:
             return False
 
+        pose = self.robot.fkine(self.q)
         if self.opt == "trans":
-            J = self.robot.jacob0(self.q)[:3, :]
+            J = self.robot.jacobe(self.q)[:3, :]
         elif self.opt == "rot":
-            J = self.robot.jacob0(self.q)[3:, :]
+            J = self.robot.jacobe(self.q)[3:, :]
+        # jacobe uses the terminal frame for both DHRobot and Robot. Their
+        # jacob0 methods differ in whether the robot's world base is included.
+        J = pose.R @ J
 
         # J maps the unit joint-velocity ball to an ellipsoid in world axes.
         # Its singular values are the velocity radii, while virtual work
@@ -203,7 +207,7 @@ class EllipsePlot:
         rotation[: len(s)] = U.T
 
         if isinstance(self.centre, str) and self.centre == "ee":
-            centre = self.robot.fkine(self.q).t
+            centre = pose.t
         else:
             centre = self.centre
 

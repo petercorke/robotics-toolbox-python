@@ -51,7 +51,9 @@ def assert_unit_capability(robot, q, ellipse, centre):
         assert_allclose(np.linalg.norm(jacobian.T @ points, axis=0), 1, atol=2e-7)
 
 
-@pytest.mark.parametrize("model", [rtb.models.DH.Puma560, rtb.models.DH.Panda])
+@pytest.mark.parametrize(
+    "model", [rtb.models.DH.Puma560, rtb.models.DH.Panda, rtb.models.Panda]
+)
 @pytest.mark.parametrize("etype", ["v", "f"])
 @pytest.mark.parametrize("opt", ["trans", "rot"])
 @pytest.mark.parametrize("placed", [False, True])
