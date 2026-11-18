@@ -565,6 +565,10 @@ class ETS2(BaseETS[ET2]):
         that lies outside the joint limits is rejected when ``joint_limits`` is
         True, and the search continues.
 
+        Coordinates follow :meth:`fkine`: when explicit joint indices permute
+        ``0..n-1``, ``q0`` and the returned ``q`` use joint-index order. For a
+        sparse subchain they use compact ET order.
+
         **Trajectory operation**: for a trajectory of N poses the solver is run
         once per pose, each from the same starting points, and the returned
         ``q`` has shape (N, n). ``success`` is True only if every pose was
@@ -622,7 +626,12 @@ class ETS2(BaseETS[ET2]):
                 )
 
         n = self.n
-        qlim = self.qlim
+        # FK interprets a full 0..n-1 vector in joint-index order, whereas
+        # limits, joint types and Jacobian columns are stored in ET order.
+        order = np.arange(n)
+        if np.array_equal(np.sort(self.jindices), order):
+            order = np.argsort(self.jindices)
+        qlim = self.qlim[:, order]
 
         if not np.all(np.isfinite(qlim)):
             bad = np.flatnonzero(~np.all(np.isfinite(qlim), axis=0))
@@ -644,7 +653,7 @@ class ETS2(BaseETS[ET2]):
             rows = min(q0a.shape[0], slimit)
             starts[:rows] = q0a[:rows]
 
-        revolute = np.array([joint.isrotation for joint in self.joints()])
+        revolute = np.array([joint.isrotation for joint in self.joints()])[order]
 
         def solve_one(T: NDArray) -> IKSolution:
             theta_d = np.arctan2(T[1, 0], T[0, 0])
@@ -697,7 +706,7 @@ class ETS2(BaseETS[ET2]):
 
                     i += 1
 
-                    J = self.jacob0(q)
+                    J = self.jacob0(q)[:, order]
                     A = J.T @ We @ J + k * E * np.eye(n)
                     g = J.T @ We @ e
 
