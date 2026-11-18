@@ -1878,7 +1878,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         if np.any(np.isnan(qlim)):
             raise ValueError("some joint limits not defined")  # pragma nocover
         q = np.empty(self.n)
-        indices = [link.jindex for link in self.links if link.isjoint]
+        indices = [link.jindex for link in self.links if link.jindex is not None]
         q[indices] = np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
         return q
 
