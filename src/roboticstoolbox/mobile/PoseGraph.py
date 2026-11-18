@@ -218,6 +218,7 @@ class PoseGraph:
             # all the vertices in order of index
             self._vertices: list[PGVertex] = []
             firstlidar = True
+            first_nbeams = 0
             v: PGVertex | None = None
             for line_number, line in enumerate(f, start=1):
                 # for zip file, we get data as bytes not str
@@ -425,10 +426,10 @@ class PoseGraph:
         .. seealso:: :meth:`scan`
         """
         vertex = self._scan_vertex(i)
-        range, theta = vertex.range, vertex.theta
-        range = np.where(range < vertex.maxrange, range, np.nan)
-        x = range * np.cos(theta)
-        y = range * np.sin(theta)
+        ranges, theta = vertex.range, vertex.theta
+        ranges = np.where(ranges < vertex.maxrange, ranges, np.nan)
+        x = ranges * np.cos(theta)
+        y = ranges * np.sin(theta)
 
         return np.c_[x, y].T
 
