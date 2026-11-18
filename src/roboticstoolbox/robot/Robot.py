@@ -663,7 +663,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :rtype: float
 
         A conservative estimate of the reach of the robot. It is computed as
-        the sum of the translational ETs that define the link transform.
+        the sum of the translation lengths along the longest branch, including
+        compound transforms. Base and tool transforms are not included.
 
         Computed on the first access. If kinematic parameters
         subsequently change this will not be reflected.
@@ -671,9 +672,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         .. rubric:: Notes
 
         - Probably an overestimate of reach
-        - Used by numerical inverse kinematics to scale translational
-          error.
-        - For a prismatic joint, uses ``qlim`` if it is set
+        - For a prismatic joint, bounds the displacement over ``qlim``,
+          including its offset and flip. Without limits, only the fixed
+          offset contributes; unbounded joint travel cannot be estimated.
 
         """
 
@@ -693,12 +694,16 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                                 # joint limits.  They might be set in the ET
                                 # or in the Link depending on how the robot
                                 # was constructed
-                                if link.qlim is not None:
-                                    d += max(link.qlim)
-                                elif et.qlim is not None:  # pragma nocover
-                                    d += max(et.qlim)
+                                qlim = link.qlim if link.qlim is not None else et.qlim
+                                if qlim is not None:
+                                    travel = -qlim if et.isflip else qlim
+                                    d += max(abs(travel + et.offset))
+                                else:
+                                    d += abs(cast(float, et.offset))
                             else:
                                 d += abs(cast(float, et.param))
+                        elif not et.iselementary:
+                            d += float(np.linalg.norm(et.A()[:-1, -1]))
                     link = link.parent  # type: ignore[assignment]
                     if link is None or isinstance(link, str):
                         d_all.append(d)
@@ -2336,7 +2341,8 @@ class Robot2(BaseRobot[Link2]):
         :rtype: float
 
         A conservative estimate of the reach of the robot. It is computed as
-        the sum of the translational ETs that define the link transform.
+        the sum of the translation lengths along the longest branch, including
+        compound transforms. Base and tool transforms are not included.
 
         Computed on the first access. If kinematic parameters
         subsequently change this will not be reflected.
@@ -2344,9 +2350,9 @@ class Robot2(BaseRobot[Link2]):
         .. rubric:: Notes
 
         - Probably an overestimate of reach
-        - Used by numerical inverse kinematics to scale translational
-          error.
-        - For a prismatic joint, uses ``qlim`` if it is set
+        - For a prismatic joint, bounds the displacement over ``qlim``,
+          including its offset and flip. Without limits, only the fixed
+          offset contributes; unbounded joint travel cannot be estimated.
 
         """
 
@@ -2366,12 +2372,16 @@ class Robot2(BaseRobot[Link2]):
                                 # joint limits.  They might be set in the ET
                                 # or in the Link depending on how the robot
                                 # was constructed
-                                if link.qlim is not None:
-                                    d += max(link.qlim)
-                                elif et.qlim is not None:  # pragma nocover
-                                    d += max(et.qlim)
+                                qlim = link.qlim if link.qlim is not None else et.qlim
+                                if qlim is not None:
+                                    travel = -qlim if et.isflip else qlim
+                                    d += max(abs(travel + et.offset))
+                                else:
+                                    d += abs(cast(float, et.offset))
                             else:
                                 d += abs(cast(float, et.param))
+                        elif not et.iselementary:
+                            d += float(np.linalg.norm(et.A()[:-1, -1]))
                     link = link.parent  # type: ignore[assignment]
                     if link is None or isinstance(link, str):
                         d_all.append(d)
