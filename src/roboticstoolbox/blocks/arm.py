@@ -1203,7 +1203,7 @@ class IDyn(FunctionBlock):
     nin = 3
     nout = 1
     inlabels = ("q", "qd", "qdd")
-    outlabels = "τ"
+    outlabels = ("τ",)
 
     def __init__(self, robot: Any, gravity: Any = None, **blockargs: Any) -> None:
         """
@@ -1275,7 +1275,7 @@ class Gravload(FunctionBlock):
     nin = 1
     nout = 1
     inlabels = ("q",)
-    outlabels = "τ"
+    outlabels = ("τ",)
 
     def __init__(self, robot: Any, gravity: Any = None, **blockargs: Any) -> None:
         """
@@ -1341,7 +1341,7 @@ class Gravload_X(FunctionBlock):
     nin = 1
     nout = 1
     inlabels = ("q",)
-    outlabels = "w"
+    outlabels = ("w",)
 
     def __init__(
         self,
@@ -1426,7 +1426,7 @@ class Inertia(FunctionBlock):
     nin = 1
     nout = 1
     inlabels = ("q",)
-    outlabels = "M"
+    outlabels = ("M",)
 
     def __init__(self, robot: Any, **blockargs: Any) -> None:
         """
@@ -1489,7 +1489,7 @@ class Inertia_X(FunctionBlock):
     nin = 1
     nout = 1
     inlabels = ("q",)
-    outlabels = "M"
+    outlabels = ("M",)
 
     def __init__(
         self,
@@ -1574,7 +1574,7 @@ class FDyn(ContinuousBlock):
     nin = 1
     nout = 3
     outlabels = ("q", "qd", "qdd")
-    inlabels = "τ"
+    inlabels = ("τ",)
 
     def __init__(self, robot: Any, q0: Any = None, **blockargs: Any) -> None:
         """
@@ -1696,7 +1696,7 @@ class FDyn_X(ContinuousBlock):
     nin = 1
     nout = 5
     outlabels = ("q", "qd", "x", "xd", "xdd")
-    inlabels = "w"
+    inlabels = ("w",)
 
     def __init__(
         self,

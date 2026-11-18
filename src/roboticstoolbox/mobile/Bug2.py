@@ -452,7 +452,7 @@ def edgelist(
         # now test for directions relative to Q
         for j in neighbours:
             # get index of neighbour's direction in range [0,7]
-            k = (j + kq) % 8
+            k = int((j + kq) % 8)
 
             # compute coordinate of the k'th neighbour
             nk = pos + _dirs[k]
