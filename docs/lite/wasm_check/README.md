@@ -62,12 +62,9 @@ more reliable than the first one.
 
 ## Version pinning
 
-`package.json` pins the `pyodide` npm package to `0.27.6`, matching
-`docs.yml`'s deliberate `jupyterlite-pyodide-kernel==0.6.1` pin (see that
-workflow's own comment for the full reasoning: newer kernel releases bundle a
-JSPI-dependent Pyodide that either crashes or silently races on browsers
-without JSPI support, e.g. Safari as of 2026-08). These two pins have to move
-together — if one changes without the other, this check silently stops
-representing what the real deployed site actually runs, which could let it
-pass while the real site fails, or vice versa. Once that kernel pin is
-revisited, this one needs updating in the same change.
+`package.json` pins the `pyodide` npm package to `314.0.6`, the Pyodide (Python 3.14)
+that `jupyterlite-pyodide-kernel` 0.8.7 bundles; `docs.yml` installs that kernel as a
+floor (`>=0.8.7`).  These two have to move together: if the kernel moves to a newer
+Pyodide and this pin does not, the check silently stops representing what the real
+deployed site runs, and can pass while the site fails, or the reverse.  The kernel's
+`PYODIDE_VERSION` is in `jupyterlite_pyodide_kernel/constants.py`.

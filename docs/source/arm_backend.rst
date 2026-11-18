@@ -30,10 +30,37 @@ A *backend* is what draws a robot, and animates it.  The Toolbox talks to a back
 
 "Teach pendant" in this context means a set of joint configuration sliders that allow you to control the configuration of the displayed robot using the robot's :meth:`~roboticstoolbox.robot.Robot.Robot.teach` method.
 
+What each can do is declared by four flags, see :ref:`backend-contract`:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 16 21 21 21 21
+
+    * - Name
+      - ``supports_teach``
+      - ``supports_ellipse``
+      - ``embeds_in_notebook``
+      - ``supports_movie``
+    * - ``"pyplot"``
+      - yes
+      - yes
+      - no
+      - yes
+    * - ``"pyplot2"``
+      - yes
+      - yes
+      - no
+      - no
+    * - ``"swift"``
+      - yes
+      - no
+      - yes
+      - no
+
 Using a backend
 ---------------
 
-Most of the time you don't use a backend directly: ``robot.plot(q)`` makes one, adds the robot to it and steps it.  Name the backend to choose one, or set the default for a robot or for all robots.
+Most of the time you don't use a backend directly: ``robot.plot(q)`` makes one, adds the robot to it and steps it.  Name the backend to choose one, or set the default for a robot or for all robots.  The name is not case sensitive.
 
 .. code-block:: python
 
@@ -58,6 +85,35 @@ With no explicit choice the robot's own default is used, then the default for al
     backend.step()                        # update the display
     backend.hold()                        # keep the window open
 
+Registering a backend
+---------------------
+
+The backends above are entries in a *registry*, a table of names and of how to make the backend for each.  :func:`~roboticstoolbox.backends.registry.registered_backends` lists the names, and :func:`~roboticstoolbox.backends.registry.register_backend` adds one, so that a backend from anywhere can be chosen by name, as ``robot.plot(q, backend="mysim")`` does.
+
+.. code-block:: python
+
+    from roboticstoolbox.backends import register_backend, registered_backends
+
+    registered_backends()                            # ['pyplot', 'pyplot2', 'swift']
+
+    register_backend("mysim", "my_package.mysim:MySim")
+    robot.plot(q, backend="mysim")                   # my_package is imported now
+
+    register_backend("mysim", MySim, replace=True)   # or give the class itself
+
+The second argument is either a string ``"module:Class"``, which is imported only when the backend is chosen, so registering it costs nothing and the package need not be installed; or a callable, such as a class or a function, that returns a backend.  A name can be registered once, unless ``replace=True`` is given.  The registration lasts for the process, so make it before calling ``plot``.
+
+This is also how a backend can be developed, tested and used outside the Toolbox, and how one that cannot be part of it, because of its licence or because it needs a particular GPU, can be a package of its own.
+
+.. autofunction:: roboticstoolbox.backends.registry.register_backend
+
+.. autofunction:: roboticstoolbox.backends.registry.registered_backends
+
+.. autofunction:: roboticstoolbox.backends.registry.load_backend
+
+.. versionadded:: 1.5.1
+    ``register_backend`` and ``registered_backends``.  The name of a backend is no longer case sensitive.
+
 What a backend does
 -------------------
 
@@ -67,7 +123,14 @@ The backend holds a *scene*: the robots and other objects that it has been asked
 - **The scene.**  ``add(obj)`` puts an object in the scene and returns an identifier, and ``remove(id)`` takes it out.  The object must be of a class that the backend knows how to draw, such as a robot, or an ellipsoid if the backend supports them.
 - **Time.**  ``step(dt)`` advances the scene by ``dt`` seconds, which makes each robot act according to its control type (position, velocity, acceleration or torque) and updates the display.
 - **Waiting.**  ``hold`` keeps the backend running after the script has finished, for as long as the window is open.
-- **Optional features**, which a backend declares with two flags: ``supports_teach`` is true if it can show the interactive teach pendant of :meth:`~roboticstoolbox.robot.Robot.Robot.teach`, and ``supports_ellipse`` is true if it can draw the ellipsoids made by :meth:`~roboticstoolbox.robot.Robot.Robot.plot_ellipse`.
+- **Optional features**, which a backend declares with four flags, all false unless it says otherwise:
+
+  - ``supports_teach`` is true if it can show the interactive teach pendant of :meth:`~roboticstoolbox.robot.Robot.Robot.teach`
+  - ``supports_ellipse`` is true if it can draw the ellipsoids made by :meth:`~roboticstoolbox.robot.Robot.Robot.plot_ellipse`
+  - ``embeds_in_notebook`` is true if it is a web page that can be shown in the output of a notebook cell, as well as in a browser window of its own.  :meth:`~roboticstoolbox.robot.Robot.Robot.plot` then asks for that in a notebook, and animates a trajectory in real time
+  - ``supports_movie`` is true if it has ``getframe()``, which gives a picture of the scene, so that :meth:`~roboticstoolbox.robot.Robot.Robot.plot` can save an animation as a movie
+
+.. _backend-contract:
 
 The contract
 ------------
@@ -87,7 +150,7 @@ This is written down as the :py:class:`~roboticstoolbox.backends.Connector.Conne
     ~roboticstoolbox.backends.Connector.Connector.hold
 
 .. autoclass:: roboticstoolbox.backends.Connector.Connector
-    :members: launch, close, reset, restart, add, remove, step, hold, supports_teach, supports_ellipse
+    :members: launch, close, reset, restart, add, remove, step, hold, supports_teach, supports_ellipse, embeds_in_notebook, supports_movie
     :member-order: bysource
 
 The backends

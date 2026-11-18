@@ -23,6 +23,7 @@ class Swift(_SwiftBase, Connector):
 
     supports_teach: bool = True
     supports_ellipse: bool = False
+    embeds_in_notebook: bool = True
 
     def _add_teach_panel(
         self, robot: Any, q: Any, handle: Any = None, block: bool = True
