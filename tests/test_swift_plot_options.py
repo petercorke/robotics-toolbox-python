@@ -25,6 +25,8 @@ pyplot_module = importlib.import_module("roboticstoolbox.backends.PyPlot.PyPlot"
 class Swift:
     """A stand-in for Swift 2.1, which has launch(notebook=...)."""
 
+    embeds_in_notebook = True
+
     def __init__(self):
         self.launched_with = None
         self.steps = 0
@@ -52,8 +54,6 @@ class OldSwift(Swift):
 def robot(request, monkeypatch):
     robot = rtb.models.DH.Puma560()
     backend = request.param()
-    # the class is named Swift, as plot() recognises the backend by it
-    type(backend).__name__ = "Swift"
     monkeypatch.setattr(
         type(robot), "_get_graphical_backend", lambda self, backend_name=None: backend
     )

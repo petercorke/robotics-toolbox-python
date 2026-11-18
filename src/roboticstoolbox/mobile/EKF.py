@@ -1492,15 +1492,15 @@ class EKF:
 
         .. seealso:: :func:`~spatialmath.base.transforms2d.points2tr2`
         """
-        p = []
-        q = []
+        p_list = []
+        q_list = []
 
         for lm_id in self._landmarks.keys():
-            p.append(map[lm_id])
-            q.append(self.landmark_x(lm_id))
+            p_list.append(map[lm_id])
+            q_list.append(self.landmark_x(lm_id))
 
-        p = np.array(p).T
-        q = np.array(q).T
+        p = np.array(p_list).T
+        q = np.array(q_list).T
 
         T = base.points2tr2(p, q)
         return SE2(T)

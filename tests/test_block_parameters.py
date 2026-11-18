@@ -306,5 +306,38 @@ class TestBdsimVersion(unittest.TestCase):
                 _check_bdsim_version()
 
 
+class TestPortLabels(unittest.TestCase):
+    """bdsim types ``inlabels`` and ``outlabels`` as a list or tuple of names.
+
+    A bare string passes ``len()`` for a one-character name, so it works by accident,
+    and would become one port per letter for a longer one."""
+
+    def test_labels_are_sequences_of_names(self):
+        import inspect
+
+        import roboticstoolbox.blocks as blocks
+        from bdsim.components import Block
+
+        checked = 0
+        for module in (blocks.arm, blocks.mobile, blocks.spatial, blocks.uav):
+            for name, cls in inspect.getmembers(module, inspect.isclass):
+                try:
+                    is_block = issubclass(cls, Block)
+                except TypeError:
+                    # Python 3.10 reports a generic alias such as list[str] as a class
+                    continue
+                if not is_block or cls.__module__ != module.__name__:
+                    continue
+                for attr in ("inlabels", "outlabels"):
+                    labels = getattr(cls, attr, None)
+                    if labels is None:
+                        continue
+                    checked += 1
+                    with self.subTest(block=name, attr=attr):
+                        self.assertIsInstance(labels, (list, tuple))
+                        self.assertTrue(all(isinstance(s, str) for s in labels))
+        self.assertGreater(checked, 20)
+
+
 if __name__ == "__main__":
     unittest.main()
