@@ -228,8 +228,8 @@ class RunsTest(ParamTestCase):
 
     def test_start_resolves_no_T_without_changing_the_parameter(self):
         # a second run, longer than the first, must not keep the first run's length.
-        # The blocks are started by hand: Trapezoidal, CTraj and Traj cannot be
-        # compiled into a diagram, since compile() evaluates outputs before start().
+        # Exercise parameter resolution directly; compilation and complete runs
+        # are covered by test_trajectory_block_compilation.py.
         from types import SimpleNamespace
 
         from spatialmath import SE3

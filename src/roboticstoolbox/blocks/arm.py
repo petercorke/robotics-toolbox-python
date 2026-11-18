@@ -751,6 +751,7 @@ class CTraj(SourceBlock):
         self.T1 = T1
         self.T2 = T2
         self.T = T
+        self._T_run: float | None = None
         self.trapezoidal = trapezoidal
         self.add_param("T1", coerce=False)
         self.add_param("T2", coerce=False)
@@ -764,6 +765,9 @@ class CTraj(SourceBlock):
             self.trapezoidalfunc = trapezoidal_func(0.0, 1.0, self._T_run)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
+        if self._T_run is None:
+            # compile() determines output types before start() resolves the time.
+            return [self.T1.copy()]
         s: Any
         if self.trapezoidal:
             s = self.trapezoidalfunc(t)[0]  # get the position from the trapezoidal function
@@ -969,6 +973,7 @@ class Trapezoidal(SourceBlock):
         self.T = T
         self.q0 = q0
         self.qf = qf
+        self.trapezoidalfunc: Callable[[Any], Any] | None = None
         # start() builds the trajectory from these
         self.add_param("q0", when="setup", coerce=False)
         self.add_param("qf", when="setup", coerce=False)
@@ -981,6 +986,9 @@ class Trapezoidal(SourceBlock):
         self.trapezoidalfunc = trapezoidal_func(self.q0, self.qf, T)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
+        if self.trapezoidalfunc is None:
+            # Same scalar output types as the profile evaluated after start().
+            return [np.float64(self.q0), np.float64(0), np.float64(0)]
         return list(self.trapezoidalfunc(t))
 
 
@@ -1093,6 +1101,7 @@ class Traj(FunctionBlock):
                 f"unknown traj {traj!r}, must be 'trapezoidal' or 'quintic'"
             )
         self.traj = traj
+        self.trajfuncs: list[Callable[[Any], tuple[Any, Any, Any]]] = []
         self.outport_names(("y", "yd", "ydd"))
         # start() builds the trajectory from these
         self.add_param("y0", when="setup")
@@ -1113,7 +1122,7 @@ class Traj(FunctionBlock):
         #     assert self.x[0] <= 0, "interpolation not defined for t=0"
         #     assert self.x[-1] >= simstate.T, "interpolation not defined for t=T"
 
-        self.trajfuncs: list[Callable[[Any], tuple[Any, Any, Any]]] = []
+        self.trajfuncs = []
 
         if self.time:
             # time based
@@ -1133,6 +1142,10 @@ class Traj(FunctionBlock):
                 self.trajfuncs.append(quintic_func(self.y0[i], self.yf[i], xmax))
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
+        if not self.trajfuncs:
+            # compile() needs correctly shaped outputs before start().
+            n = len(self.y0)
+            return [self.y0.copy(), np.zeros(n), np.zeros(n)]
         if not self.time:
             t = inports[0]
 
