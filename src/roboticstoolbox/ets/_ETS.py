@@ -731,7 +731,8 @@ class BaseETS(MutableSequence[ETT]):
         :rtype: ndarray(n,) or ndarray(i,n)
 
         Generates a random q vector within the joint limits defined by
-        ``self.qlim``.
+        ``self.qlim``, in the coordinate order accepted by :meth:`fkine`.
+        A subchain with sparse joint indices returns compact coordinates.
 
         .. rubric:: Examples
 
@@ -745,18 +746,14 @@ class BaseETS(MutableSequence[ETT]):
 
         """
 
-        if i == 1:
-            q = np.zeros(self.n)
+        qlim = self.qlim
+        shape = (self.n,) if i == 1 else (i, self.n)
+        q = uniform(qlim[0], qlim[1], size=shape)
 
-            for i in range(self.n):
-                q[i] = uniform(self.qlim[0, i], self.qlim[1, i])
-
-        else:
-            q = np.zeros((i, self.n))
-
-            for j in range(i):
-                for i in range(self.n):
-                    q[j, i] = uniform(self.qlim[0, i], self.qlim[1, i])
+        # A full chain consumes global coordinates, even when its joints occur
+        # in a different order. Sparse subchains consume compact coordinates.
+        if self.n and np.array_equal(np.sort(self.jindices), np.arange(self.n)):
+            q[..., self.jindices] = q.copy()
 
         return q
 
