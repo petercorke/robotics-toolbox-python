@@ -268,7 +268,7 @@ class ETS2(BaseETS[ET2]):
         elif isinstance(arg, ETS2):
             for j, et in enumerate(arg):
                 self._data.insert(i + j, et)
-        self._fknm_stale = True
+        self._changed()
 
     def fkine(
         self,
