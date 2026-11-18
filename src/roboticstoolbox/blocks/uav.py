@@ -388,9 +388,9 @@ class MultiRotor(ContinuousBlock):
         #       cos(the) sin(psi)*sin(the) cos(psi)*sin(the)] / cos(the);
 
         # ROTOR MODEL
-        T = np.zeros((3, 4))
-        Q = np.zeros((3, 4))
-        tau = np.zeros((3, 4))
+        T = np.zeros((3, self.nrotors))
+        Q = np.zeros((3, self.nrotors))
+        tau = np.zeros((3, self.nrotors))
 
         a1s = self.a1s
         b1s = self.b1s
