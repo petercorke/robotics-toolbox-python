@@ -32,6 +32,8 @@ def null(A: Any, atol: float = 1e-13, rtol: float = 0) -> Any:
           the maximum of the two; that is:
           tol = max(atol, rtol * smax)
         - Singular values smaller than ``tol`` are considered to be zero.
+        - Exact zero singular values never contribute to the rank, including
+          when both tolerances are zero.
 
     Return value
     ------------
@@ -46,7 +48,7 @@ def null(A: Any, atol: float = 1e-13, rtol: float = 0) -> Any:
 
     A = np.atleast_2d(A)
     u, s, vh = np.linalg.svd(A)
-    tol = max(atol, rtol * s[0])
-    nnz = (s >= tol).sum()
+    tol = max(atol, rtol * (s[0] if s.size else 0.0))
+    nnz = ((s >= tol) & (s > 0)).sum()
     ns = vh[nnz:].conj().T
     return ns
