@@ -171,8 +171,9 @@ class MultiRotor(ContinuousBlock):
         :type groundcheck: bool
         :param speedcheck: Check for non-positive rotor speed, defaults to True
         :type speedcheck: bool
-        :param x0: Initial state, defaults to None
-        :type x0: array_like(6) or array_like(12), optional
+        :param x0: Initial state, defaults to None. A four-value state is
+            ``[x, y, z, yaw]`` with zero pitch, roll and velocities.
+        :type x0: array_like(3), array_like(4), array_like(6) or array_like(12), optional
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
@@ -227,7 +228,7 @@ class MultiRotor(ContinuousBlock):
             return np.r_[x0, np.zeros((6,))]
         elif len(x0) == 4:
             # assume x,y,z,yaw
-            return np.r_[x0[:3], 0, 0, x0[3], np.zeros((6,))]
+            return np.r_[x0[:3], x0[3], 0, 0, np.zeros((6,))]
         elif len(x0) == 3:
             # assume x,y,z
             return np.r_[x0[:3], np.zeros((9,))]
