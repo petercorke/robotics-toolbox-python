@@ -1825,6 +1825,29 @@ class TestRobot(unittest.TestCase):
         q = np.zeros(puma.n)
         self.assertEqual(puma.gravload(q).shape, (puma.n,))
 
+    def test_table(self):
+        from ansitable import ANSITable
+
+        # the link table is the one that print(robot) shows
+        for robot in [rtb.models.ETS.Panda(), rtb.models.ETS.Puma560()]:
+            table = robot.table()
+            self.assertIsInstance(table, ANSITable)
+            self.assertIn(str(table), str(robot))
+
+            s = str(robot.table(border="ascii"))
+            self.assertFalse(any("\u2500" <= c <= "\u257f" for c in s))
+            for line in s.splitlines():
+                if line.startswith("+"):
+                    self.assertTrue(set(line) <= {"+", "-"})
+                elif line:
+                    self.assertEqual(line[0], "|")
+
+            md = table.markdown()
+            lines = [line for line in md.splitlines() if line.strip()]
+            # header row, separator row, then one row per link
+            self.assertEqual(len(lines), len(robot.links) + 2)
+            self.assertTrue(all(line.startswith("|") for line in lines))
+
 
 if __name__ == "__main__":  # pragma nocover
     unittest.main()
