@@ -1659,8 +1659,8 @@ class FDyn_X(ContinuousBlock):
     Task-space robot arm forward dynamics.
 
     :inputs: 1
-    :outputs: 3
-    :states: 12
+    :outputs: 5
+    :states: 2n
 
     .. list-table::
         :header-rows: 1
@@ -1675,20 +1675,30 @@ class FDyn_X(ContinuousBlock):
             - :math:`\mathit{\tau}`, end-effector wrench
         *   - Output
             - 0
-            - ndarray(6)
-            - :math:`\mathit{x}`, end-effector pose
+            - ndarray(n)
+            - :math:`q`, joint coordinates
         *   - Output
             - 1
-            - ndarray(6)
-            - :math:`\dot{\mathit{x}}`, end-effector velocity
+            - ndarray(n)
+            - :math:`\dot{q}`, joint velocities
         *   - Output
             - 2
             - ndarray(6)
-            - :math:`\dot{\mathit{x}}``, end-effector acceleration
+            - :math:`\mathit{x}`, end-effector pose
+        *   - Output
+            - 3
+            - ndarray(6)
+            - :math:`\dot{\mathit{x}}`, end-effector velocity
+        *   - Output
+            - 4
+            - ndarray(6)
+            - :math:`\ddot{\mathit{x}}`, end-effector acceleration
 
-    Compute the manipulator arm forward dynamics in task space, the end-effector
-    acceleration for the input end-effector pose and applied end-effector wrench.  The
-    acceleration is integrated to obtain task-space velocity and task-space pose.
+    Integrate joint-space forward dynamics for an applied end-effector wrench.
+    The task-space outputs use the selected ``representation`` consistently for
+    pose, velocity and acceleration. Acceleration uses the joint acceleration
+    cached by the most recent derivative evaluation, or zero before the first
+    derivative evaluation.
 
     .. seealso:: ``fdyn_x``
     """
@@ -1785,12 +1795,12 @@ class FDyn_X(ContinuousBlock):
         qdd = self._qdd  # cached from the last deriv() call, or the zero placeholder
 
         T = self.robot.fkine(q)
-        x = smb.tr2x(T.A)
+        x = smb.tr2x(T.A, representation=self.representation)
 
         Ja = self.robot.jacob0_analytical(q, self.representation)
         xd = Ja @ qd
 
-        Ja_dot = self.robot.jacob0_dot(q, qd, J0=Ja)
+        Ja_dot = self.robot.jacob0_dot(q, qd, representation=self.representation)
         xdd = Ja @ qdd + Ja_dot @ qd
 
         return [q, qd, x, xd, xdd]
