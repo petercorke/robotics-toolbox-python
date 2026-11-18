@@ -111,6 +111,38 @@ jobs:
       - name: Test
         run: pytest tests/ --ignore=tests/test_blocks.py -m "not slow" --timeout=50 --timeout_method=thread -q
 
+  # Advisory while we establish a history of green runs in real Pyodide.
+  # Kept out of all-tests-passed; make it required once it has run green for a while.
+  test-pyodide:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Build pure-Python wheel for Pyodide
+        # Use the same wheel as JupyterLite, with the Python fallbacks for the
+        # compiled extensions.  The tests must import this wheel inside WASM.
+        run: |
+          pip install build
+          RTB_PURE_WHEEL=1 python -m build --wheel
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: docs/lite/wasm_check/package-lock.json
+
+      - name: Test inside real Pyodide
+        run: |
+          npm --prefix docs/lite/wasm_check ci
+          node docs/lite/wasm_check/run_pytest.mjs dist/*.whl
+
   all-tests-passed:
     name: All tests passed
     needs: [test-core, test]

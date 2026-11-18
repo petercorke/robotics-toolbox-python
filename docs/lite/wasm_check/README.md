@@ -51,6 +51,33 @@ dependency of RTB that cannot be installed in Pyodide, needing a workaround in
 `_rtb_nb_bootstrap.py`) and how to fix it,
 followed by the real traceback.
 
+## Test suite in Pyodide
+
+`run_pytest.mjs` runs the non-slow test suite inside real Pyodide under Node,
+against a pure-Python wheel installed through the same notebook bootstrap.  The
+advisory `test-pyodide` job in `ci.yml` runs it on every PR, in parallel with the
+desktop tests.  Run it locally from the repository root:
+
+```bash
+RTB_PURE_WHEEL=1 python -m build --wheel
+npm --prefix docs/lite/wasm_check ci
+node docs/lite/wasm_check/run_pytest.mjs dist/*.whl
+```
+
+The runner copies tests and the source, example and notebook files they inspect
+into Pyodide's filesystem.  Matplotlib uses Agg; pytest uses system capture and
+disables its timeout plugin because subprocesses, file-descriptor capture and
+signal timers are unavailable there.  A failing pytest run exits non-zero.
+
+To skip a test that needs a feature unavailable in the browser, add its node ID
+to the relevant reason group in `_PYODIDE_SKIPS` in `tests/conftest.py`, or add a
+group with a specific reason.  IDs can name a module, class, test or individual
+parameter case; skips remain visible in pytest's report.  Modules that import
+`bdsim` at module scope are skipped by the collection hook before those imports.
+These rules apply only when `sys.platform == "emscripten"`.  Known bugs belong in
+`_PYODIDE_XFAILS` instead: non-strict xfails keep them visible until separate fixes
+land, without changing any desktop expectations.
+
 ## Known flakiness
 
 Each run installs ~35 packages fresh from a CDN (jsdelivr). An occasional network
