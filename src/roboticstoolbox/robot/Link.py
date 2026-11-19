@@ -454,7 +454,7 @@ class BaseLink(SceneNode, ABC):
             qdlim=qdlim,
             tlim=tlim,
             geometry=geometry,
-            collision=collision
+            collision=collision,
         )
 
         # Register first: a link's parent and children form a graph, not a tree.
@@ -1416,16 +1416,20 @@ class BaseLink(SceneNode, ABC):
         else:
             return q < self.qlim[0] or q > self.qlim[1]
 
-    def nofriction(self, coulomb: bool = True, viscous: bool = False) -> Any:
+    def nofriction(
+        self, coulomb: bool = True, viscous: bool = False, *, inplace: bool = False
+    ) -> Any:
         """
-        Clone link without friction
+        Return a link with selected friction terms removed
 
         :param coulomb: if True, will set the Coulomb friction to 0
         :param viscous: if True, will set the viscous friction to 0
+        :param inplace: if True, update this link instead of creating a copy
 
-        ``link.nofriction()`` is a copy of the link instance with the same
-        parameters except, the Coulomb and/or viscous friction parameters are
-        set to zero.
+        By default, ``link.nofriction()`` returns a copy with the specified
+        friction parameters set to zero. With ``inplace=True``, only those
+        parameters are changed on this link, preserving its identity and
+        relationships to other links.
 
         .. rubric:: Notes
 
@@ -1434,8 +1438,7 @@ class BaseLink(SceneNode, ABC):
 
         """
 
-        # Copy the Link
-        link = self.copy()
+        link = self if inplace else self.copy()
 
         if viscous:
             link.B = 0.0
