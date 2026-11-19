@@ -126,39 +126,38 @@ jobs:
           PY
 
       - name: Build JupyterLite site
-        # jupyterlite-pyodide-kernel is pinned deliberately -- NOT just for
-        # wasm-ABI matching with the cp312 wheel fetched above, but because
-        # newer kernel releases bundle Pyodide >=0.27.7, which turned
-        # WebAssembly JSPI ("stack switching") on by default for
-        # run_until_complete(). Browsers without JSPI support (Safari has
-        # none as of 2026-08; Firefox only behind a flag) either crash the
-        # kernel outright or, with the enableRunUntilComplete: false
-        # workaround, turn run_until_complete into a fire-and-forget no-op --
-        # letting a cell's package/import machinery run before an install has
-        # actually finished landing (confirmed live on bdsim: intermittent
-        # ModuleNotFoundError despite a successful-looking install cell).
-        # jupyterlite-pyodide-kernel==0.6.1 bundles Pyodide 0.27.6, genuinely
-        # predating this whole mechanism -- matches MVTB's and bdsim's
-        # existing pins. See the toolbox-maintainer skill's JupyterLite
-        # version-pinning section for the full story before bumping this.
-        # Once Safari (and Firefox out-of-flag) ship JSPI, revisit this pin
-        # across RTB/MVTB/bdsim together.
+        # jupyterlite-pyodide-kernel is a floor, not an exact pin.  It was pinned to
+        # 0.6.1 (Pyodide 0.27.6) while Safari had no WebAssembly JSPI ("stack
+        # switching"), which newer Pyodide's run_until_complete() needs: without it
+        # the kernel crashed, and the workaround (enableRunUntilComplete: false)
+        # made imports fail intermittently.  Safari 27 ships JSPI, and the old
+        # Pyodide then hung there (the kernel never finished starting).  0.8.7
+        # bundles Pyodide 314.0.6 (Python 3.14).  There is no wasm ABI to match:
+        # RTB installs a pure py3-none-any wheel.  A browser without JSPI (Safari
+        # before 27, Firefox before 153) is told so by a banner, which the next
+        # step adds, instead of being supported by a pin.
+        # Keep the pyodide version in docs/lite/wasm_check/package.json equal to the
+        # one this kernel bundles, or that check stops representing the real site.
         # ipympl is installed here, in the build environment, so that the
         # jupyter-matplotlib extension is bundled into the site: the notebooks
         # use %matplotlib ipympl, and without the extension a figure is blank.
         # (The notebooks install ipympl itself into the in-browser kernel.)
         run: |
-          pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server ipympl
+          pip install jupyterlite-core "jupyterlite-pyodide-kernel>=0.8.7" jupyter-server ipympl
           cd docs/lite && jupyter lite build --output-dir ../build/html/lite
+
+      - name: Add the browser capability check to JupyterLite
+        # a banner, before the kernel starts, if the browser has no WebAssembly JSPI
+        run: python docs/lite/inject_jspi_check.py docs/build/html/lite
 
       - name: Check JupyterLite in a real browser (install, widgets, animation)
         # Builds a small site with the wheel built above and one notebook, opens it in
         # Chromium, and checks that the site installs that wheel (not the last release
         # from PyPI), draws an ipywidgets slider and an ipympl figure, and that a
         # trajectory animates while its cell is running.  See
-        # docs/lite/browser_check/.  Informational (continue-on-error) until it has
-        # run green on main, then remove that line so that it blocks the deploy.
-        continue-on-error: true
+        # docs/lite/browser_check/.  It blocks the deploy: it was informational
+        # (continue-on-error) until it had run green on main, and while it was, a
+        # failure after the kernel was unpinned showed as a green job.
         timeout-minutes: 20
         run: |
           pip install playwright

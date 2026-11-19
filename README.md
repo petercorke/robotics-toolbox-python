@@ -102,7 +102,7 @@ provide support for data types such as SO(n) and SE(n) matrices, quaternions, tw
 
 ## Getting going
 
-You will need Python >= 3.10
+You will need Python >= 3.11
 
 ### Using pip
 

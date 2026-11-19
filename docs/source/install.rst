@@ -2,7 +2,7 @@
 Installation
 ************
 
-You will need Python >= 3.10.
+You will need Python >= 3.11.
 
 Using pip
 =========
