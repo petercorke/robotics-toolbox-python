@@ -22,7 +22,7 @@ frames of its own).
 Usage::
 
     pip install playwright && playwright install chromium
-    pip install jupyterlite-core "jupyterlite-pyodide-kernel==0.6.1" jupyter-server ipympl
+    pip install jupyterlite-core "jupyterlite-pyodide-kernel>=0.8.7" jupyter-server ipympl
     RTB_PURE_WHEEL=1 python -m build --wheel --outdir docs/lite/pypi
     python docs/lite/browser_check/check_lite_in_browser.py
 
@@ -254,9 +254,11 @@ def main() -> int:
                 errors: list[str] = []
                 page.on("pageerror", lambda e: errors.append(str(e)[:200]))
                 try:
+                    # no "&reset": a fresh context has no saved workspace to clear, and
+                    # with JupyterLite 0.8 "reset" stops the notebook from opening
                     page.goto(
                         "http://localhost:8890/lab/index.html"
-                        "?path=browser_check.ipynb&reset",
+                        "?path=browser_check.ipynb",
                         wait_until="load",
                     )
                     passed = run_checks(page, args.timeout, args.min_frames)
