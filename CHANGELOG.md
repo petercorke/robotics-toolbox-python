@@ -42,6 +42,55 @@ Figures regenerated with this version, for example Figure 6.10 in *Robotics,
 Vision & Control* (3rd ed.), have narrower shaded bounds than the printed ones.
 
 
+## [1.6.0](https://github.com/petercorke/robotics-toolbox-python/compare/v1.5.0...v1.6.0) (2026-11-19)
+
+
+### Features
+
+* **backends:** a registry of backends by name ([#953](https://github.com/petercorke/robotics-toolbox-python/issues/953)) ([089de1c](https://github.com/petercorke/robotics-toolbox-python/commit/089de1cd8bb27b213d186ae3f1884e60da204ad1))
+* **blocks:** register the parameters of every block, so set_param, parameters() and --set work ([#940](https://github.com/petercorke/robotics-toolbox-python/issues/940)) ([9cde6b6](https://github.com/petercorke/robotics-toolbox-python/commit/9cde6b63102415bba9355d0af192f91604d14e49))
+
+
+### Bug Fixes
+
+* **blocks:** ARMPLOT moves the robot plot, which [#873](https://github.com/petercorke/robotics-toolbox-python/issues/873) left pinned to the initial pose ([#939](https://github.com/petercorke/robotics-toolbox-python/issues/939)) ([ebe7e2a](https://github.com/petercorke/robotics-toolbox-python/commit/ebe7e2ad43f55512e6efda1c6b7b4c0adbbda90a))
+* **blocks:** FDyn qdd output is an array from the first evaluation, and reset each run ([2768616](https://github.com/petercorke/robotics-toolbox-python/commit/2768616788380951e82955442edcf0ce4136a0e0))
+* **blocks:** use tuples for port labels and state names, as bdsim types them ([#950](https://github.com/petercorke/robotics-toolbox-python/issues/950)) ([ef65fba](https://github.com/petercorke/robotics-toolbox-python/commit/ef65fba36b0a41c3cbdf3ba1338586f4cf176700))
+* **build:** allow pure wheels without a compiler ([#925](https://github.com/petercorke/robotics-toolbox-python/issues/925)) ([f307d7b](https://github.com/petercorke/robotics-toolbox-python/commit/f307d7b3209c2249f00b87c8e17f203824fdce9f))
+* **deps:** require spatialmath-python 1.1.19 and use what it now provides ([#942](https://github.com/petercorke/robotics-toolbox-python/issues/942)) ([cee0023](https://github.com/petercorke/robotics-toolbox-python/commit/cee0023535988e4ae9490c81d639a46f2311b8fd))
+* **ets:** evaluate an empty ETS as the identity without the compiled extension ([#949](https://github.com/petercorke/robotics-toolbox-python/issues/949)) ([b539743](https://github.com/petercorke/robotics-toolbox-python/commit/b53974345598f978d6e5040c46a25aa2788ea1da))
+* FDyn qdd output is an array from the first evaluation, and reset each run ([#938](https://github.com/petercorke/robotics-toolbox-python/issues/938)) ([2768616](https://github.com/petercorke/robotics-toolbox-python/commit/2768616788380951e82955442edcf0ce4136a0e0))
+* handle zero-blend trapezoidal velocity boundary ([#934](https://github.com/petercorke/robotics-toolbox-python/issues/934)) ([9e814ae](https://github.com/petercorke/robotics-toolbox-python/commit/9e814ae8fceb0f387edbb4e4c2e86e6d3f11a669))
+* **ik:** abandon a search whose joint angles diverge, and restart it ([#948](https://github.com/petercorke/robotics-toolbox-python/issues/948)) ([ea35e42](https://github.com/petercorke/robotics-toolbox-python/commit/ea35e42a520964f3aebff14c2a9ae1d24d988b7c))
+* **mobile:** add opt-in four-connected path queries ([#930](https://github.com/petercorke/robotics-toolbox-python/issues/930)) ([054801c](https://github.com/petercorke/robotics-toolbox-python/commit/054801c143ce635decbc58a1ee5f7701107711d4))
+* **mobile:** clip occupancy updates to grid bounds ([#928](https://github.com/petercorke/robotics-toolbox-python/issues/928)) ([f3ddf92](https://github.com/petercorke/robotics-toolbox-python/commit/f3ddf9237559d76869eeacb5d095ba337d7bd65d))
+* **mobile:** preserve fractional limits for integer controls ([#937](https://github.com/petercorke/robotics-toolbox-python/issues/937)) ([46923e4](https://github.com/petercorke/robotics-toolbox-python/commit/46923e41db40c9916b40a027a6a1fb878756507d))
+* **mobile:** reject blocking non-positive animation pauses ([879fb36](https://github.com/petercorke/robotics-toolbox-python/commit/879fb363580840e19ee70b6b175e8cd3543e2b38))
+* **mobile:** reject non-positive plot and animation pauses ([#896](https://github.com/petercorke/robotics-toolbox-python/issues/896)) ([879fb36](https://github.com/petercorke/robotics-toolbox-python/commit/879fb363580840e19ee70b6b175e8cd3543e2b38))
+* **mobile:** reject PRM maps with no free cells ([#931](https://github.com/petercorke/robotics-toolbox-python/issues/931)) ([bceb42c](https://github.com/petercorke/robotics-toolbox-python/commit/bceb42c18877840280037539dac036f21d4fefe5))
+* **mobile:** resolve landmark indices in sensor Jacobians ([#927](https://github.com/petercorke/robotics-toolbox-python/issues/927)) ([f11e339](https://github.com/petercorke/robotics-toolbox-python/commit/f11e339a2993adc89e650258bc00ce6eb9001dad))
+* **mobile:** retain reverse motion in vehicle odometry ([#929](https://github.com/petercorke/robotics-toolbox-python/issues/929)) ([c7015a3](https://github.com/petercorke/robotics-toolbox-python/commit/c7015a36e3d01d033da346afa518c9a94610cac7))
+* **mobile:** sample particles from weighted CDF intervals ([#926](https://github.com/petercorke/robotics-toolbox-python/issues/926)) ([4b072cb](https://github.com/petercorke/robotics-toolbox-python/commit/4b072cb1b211dbb2e0f46fbd645ae218b5037da4))
+* **mobile:** wrap curvature planner heading residuals ([#932](https://github.com/petercorke/robotics-toolbox-python/issues/932)) ([7b45fd8](https://github.com/petercorke/robotics-toolbox-python/commit/7b45fd8f31564c412293464425f0d44c3592b050))
+* **notebooks:** give the header logo a height, so Colab does not distort it ([#915](https://github.com/petercorke/robotics-toolbox-python/issues/915)) ([fc7c832](https://github.com/petercorke/robotics-toolbox-python/commit/fc7c832e51b97c856a4b073411e5153532684eef))
+* **notebooks:** make matplotlib list its backends again after Colab installs ipympl ([#922](https://github.com/petercorke/robotics-toolbox-python/issues/922)) ([6b3d0e1](https://github.com/petercorke/robotics-toolbox-python/commit/6b3d0e199937b43f007d9be75505c6942b2b9dec))
+* **notebooks:** make the notebooks work on Google Colab ([#911](https://github.com/petercorke/robotics-toolbox-python/issues/911)) ([ccedb57](https://github.com/petercorke/robotics-toolbox-python/commit/ccedb573a9b306a1104ca93c5f35b24fe8cd7e03))
+* plot trapezoidal trajectories with empty motion phases ([#910](https://github.com/petercorke/robotics-toolbox-python/issues/910)) ([b15f9a1](https://github.com/petercorke/robotics-toolbox-python/commit/b15f9a1406c4e917ac1218046d4e019dfa99c5b9))
+* **pyplot:** an inline notebook animation leaves matplotlib's interactive mode alone ([#921](https://github.com/petercorke/robotics-toolbox-python/issues/921)) ([e554f45](https://github.com/petercorke/robotics-toolbox-python/commit/e554f45a6506b135733d16780a208aa0b160f9d8))
+* reject mismatched operational acceleration trajectories ([#908](https://github.com/petercorke/robotics-toolbox-python/issues/908)) ([c41b4ee](https://github.com/petercorke/robotics-toolbox-python/commit/c41b4eeec6bd9a6dd8cebca98889b450be056c3f))
+* **robot:** update link scene-node transforms without the compiled extension ([#947](https://github.com/petercorke/robotics-toolbox-python/issues/947)) ([b107ad2](https://github.com/petercorke/robotics-toolbox-python/commit/b107ad25ba7fad145c0382510e18772ee6370de7))
+* stop quintic paths at their terminal time ([#909](https://github.com/petercorke/robotics-toolbox-python/issues/909)) ([92f7619](https://github.com/petercorke/robotics-toolbox-python/commit/92f76190e542461103af9b766cc05b4e20667532))
+* **typing:** the ets getter returns the ETS a Link holds, for mypy 2.4.1 ([#913](https://github.com/petercorke/robotics-toolbox-python/issues/913)) ([581e0e0](https://github.com/petercorke/robotics-toolbox-python/commit/581e0e0f1d4569300ee1625b396f20ccaa60e8ae))
+
+
+### Documentation
+
+* **ik:** demonstrate inverse kinematics with a locked joint ([#933](https://github.com/petercorke/robotics-toolbox-python/issues/933)) ([8a7549c](https://github.com/petercorke/robotics-toolbox-python/commit/8a7549c25c3bf91fac26b0cfc5b96d2ae50ff5b0))
+* **lite:** explain the sidebar and its volatile files on the index page ([#912](https://github.com/petercorke/robotics-toolbox-python/issues/912)) ([d45d902](https://github.com/petercorke/robotics-toolbox-python/commit/d45d902b4802948071ec21c457e626e70379c6b7))
+* match :param names to the signatures in sensors and DHRobot ([#906](https://github.com/petercorke/robotics-toolbox-python/issues/906)) ([00743ac](https://github.com/petercorke/robotics-toolbox-python/commit/00743acc4b0c0f3295155c9b56feae5caaad939a))
+* **robot:** fix BaseRobot reST return and parameter fields ([#905](https://github.com/petercorke/robotics-toolbox-python/issues/905)) ([454c69e](https://github.com/petercorke/robotics-toolbox-python/commit/454c69ecb80ccd5802da56ca4447a1bc39401075))
+* the Try it Now links open the notebook index ([#900](https://github.com/petercorke/robotics-toolbox-python/issues/900)) ([9f282d8](https://github.com/petercorke/robotics-toolbox-python/commit/9f282d8ff952a6ca95d340ae6a62b04e545a302f))
+
 ## [1.5.0](https://github.com/petercorke/robotics-toolbox-python/compare/v1.4.4...v1.5.0) (2026-10-23)
 
 
