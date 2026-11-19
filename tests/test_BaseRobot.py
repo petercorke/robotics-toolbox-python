@@ -637,6 +637,23 @@ class TestBaseRobot(unittest.TestCase):
         nt.assert_allclose(frictionless.rne(q, qd, qdd), expected_tau)
         nt.assert_allclose(clone.coriolis(q, qd), robot.coriolis(q, qd))
 
+    def test_nofriction_preserves_link_identity_and_source(self):
+        base = Link(ET.Rz(), name="base", B=0.3, Tc=[1, -1])
+        tip = Link(ET.Ry(), name="tip", parent=base, B=0.2, Tc=[2, -2])
+        robot = Robot([base, tip])
+
+        frictionless = robot.nofriction(coulomb=True, viscous=True)
+
+        self.assertIsNot(frictionless.links[0], robot.links[0])
+        self.assertIsNot(frictionless.links[1], robot.links[1])
+        self.assertIs(frictionless.links[1].parent, frictionless.links[0])
+        self.assertEqual(frictionless.links[0]._children, [frictionless.links[1]])
+        for original, modified in zip(robot.links, frictionless.links):
+            self.assertEqual(modified.B, 0.0)
+            nt.assert_array_equal(modified.Tc, [0.0, 0.0])
+            self.assertNotEqual(original.B, 0.0)
+            self.assertTrue(np.any(original.Tc))
+
     def test_copy_preserves_gripper_links_and_fkine(self):
         robot = rtb.models.Panda()
         self.assertGreater(len(robot.grippers), 0)
