@@ -102,6 +102,19 @@ class TestDHLink(unittest.TestCase):
         nt.assert_array_almost_equal(n2.B, l0.B)
         nt.assert_array_almost_equal(n2.Tc, l0.Tc)
 
+    def test_nofriction_inplace(self):
+        parent = rp.Link(rp.ET.Rz(), name="parent", B=4.0, Tc=[1, -1])
+        child = rp.Link(rp.ET.Rz(), name="child", parent=parent, B=3.0, Tc=[2, -2])
+
+        result = child.nofriction(viscous=True, inplace=True)
+
+        self.assertIs(result, child)
+        self.assertIs(child.parent, parent)
+        nt.assert_array_equal(child.Tc, [0.0, 0.0])
+        self.assertEqual(child.B, 0.0)
+        nt.assert_array_equal(parent.Tc, [1, -1])
+        self.assertEqual(parent.B, 4.0)
+
     def test_add(self):
         l0 = rp.DHLink()
         l1 = rp.DHLink()
