@@ -11,9 +11,40 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.testing as nt
+import pytest
 from spatialmath import Polygon2
 
 from roboticstoolbox import BinaryOccupancyGrid, LandmarkMap, PolygonMap
+
+
+@pytest.mark.parametrize("cellsize, origin", [(1.0, (0.0, 0.0)), (0.5, (10.0, -3.0))])
+@pytest.mark.parametrize(
+    "bounds",
+    [
+        (-2, 2, -1, 1),
+        (4, 8, 2, 5),
+        (-5, -3, 1, 2),
+        (7, 9, 1, 2),
+        (1, 2, -4, -2),
+        (1, 2, 5, 7),
+    ],
+)
+def test_set_region_clips_to_grid(
+    cellsize: float, origin: tuple[float, float], bounds: tuple[int, int, int, int]
+) -> None:
+    grid = BinaryOccupancyGrid(np.zeros((4, 6)), cellsize=cellsize, origin=origin)
+    region = np.array(bounds) * cellsize + np.repeat(origin, 2)
+    columns, rows = np.meshgrid(np.arange(6), np.arange(4))
+    expected = (
+        (columns >= bounds[0])
+        & (columns <= bounds[1])
+        & (rows >= bounds[2])
+        & (rows <= bounds[3])
+    )
+
+    grid.set(region, True)
+
+    nt.assert_array_equal(grid.grid, expected)
 
 
 class TestOccupancyGrid(unittest.TestCase):

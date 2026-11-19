@@ -78,6 +78,26 @@ def test_explicit_landmark_scalar_pose_shape() -> None:
         nt.assert_allclose(observed, expected, atol=1e-12)
 
 
+@pytest.mark.parametrize("landmark_id", [0, np.int64(1)])
+def test_landmark_jacobian_accepts_map_indices(landmark_id: int) -> None:
+    robot = Bicycle(x0=[1.0, -2.0, 0.4])
+    points = np.array([[3.0, 7.0], [4.0, -4.0]])
+    sensor = RangeBearingSensor(robot, LandmarkMap(points))
+    point = points[:, landmark_id]
+    perturbations = np.eye(2) * 1e-6
+    numerical = np.column_stack(
+        [
+            (sensor.h(robot.x, point + step) - sensor.h(robot.x, point - step)) / 2e-6
+            for step in perturbations
+        ]
+    )
+
+    jacobian = sensor.Hp(robot.x, landmark_id)
+
+    nt.assert_allclose(jacobian, numerical, rtol=1e-7, atol=1e-9)
+    nt.assert_allclose(jacobian, sensor.Hp(robot.x, point))
+
+
 @pytest.mark.parametrize("slam", [False, True])
 def test_single_landmark_ekf_observations(slam: bool) -> None:
     start = [1.0, -2.0, 0.4]
