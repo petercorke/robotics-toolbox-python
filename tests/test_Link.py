@@ -104,9 +104,7 @@ class TestDHLink(unittest.TestCase):
 
     def test_nofriction_inplace(self):
         parent = rp.Link(rp.ET.Rz(), name="parent", B=4.0, Tc=[1, -1])
-        child = rp.Link(
-            rp.ET.Rz(), name="child", parent=parent, B=3.0, Tc=[2, -2]
-        )
+        child = rp.Link(rp.ET.Rz(), name="child", parent=parent, B=3.0, Tc=[2, -2])
 
         result = child.nofriction(viscous=True, inplace=True)
 
