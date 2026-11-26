@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.testing as nt
 
-from roboticstoolbox import DistanceTransformPlanner
+from roboticstoolbox import DistanceTransformPlanner, VehicleMarker, VehiclePolygon
 from roboticstoolbox.mobile.PlannerBase import (
     GOAL_STYLE,
     PATH_STYLE,
@@ -171,6 +171,24 @@ class TestPlot(unittest.TestCase):
         self.assertEqual(START_STYLE["marker"], "o")
         self.assertEqual(GOAL_STYLE["markersize"], 16)
         self.assertEqual(PATH_STYLE[0]["linewidth"], 4)
+
+    def test_marker_style_aliases_override_defaults(self) -> None:
+        goal_style = {"ms": 8}
+        self.plot(start_style={"mec": "red"}, goal_style=goal_style)
+        (start,) = lines_with(self.ax, marker="o")
+        (goal,) = lines_with(self.ax, marker="*")
+        self.assertEqual(start.get_markeredgecolor(), "red")
+        self.assertEqual(goal.get_markersize(), 8)
+        self.assertEqual(goal_style, {"ms": 8})
+
+    def test_vehicle_marker_and_polygon_style_aliases(self) -> None:
+        marker = VehicleMarker()
+        marker.add(ax=self.ax, ms=8)
+        self.assertEqual(self.ax.lines[-1].get_markersize(), 8)
+
+        vehicle = VehiclePolygon(lw=2)
+        vehicle.add(ax=self.ax, linewidth=5)
+        self.assertEqual(self.ax.patches[-1].get_linewidth(), 5)
 
     def test_deprecated_names(self):
         cases = [

@@ -13,10 +13,12 @@ from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
-from roboticstoolbox.tools.plot import apply_block
+from matplotlib.lines import Line2D
+from roboticstoolbox.tools.plot import _merge_style, apply_block
 import numpy as np
 from colored import attr, fg
 from matplotlib import animation
+from matplotlib.patches import Polygon
 from spatialmath.base.argcheck import getvector
 from spatialmath.base.graphics import axes_get_scale, axes_logic
 from spatialmath.base.types import R2, R3, ArrayLike2, ArrayLike3
@@ -846,14 +848,18 @@ class PlannerBase:
                 goal_vehicle_style = value  # type: ignore[assignment]
 
         # the caller's styles are merged over the defaults, and are not modified
-        start_marker_style = START_STYLE | (start_style or {})
-        goal_marker_style = GOAL_STYLE | (goal_style or {})
+        start_marker_style = _merge_style(START_STYLE, start_style, Line2D)
+        goal_marker_style = _merge_style(GOAL_STYLE, goal_style, Line2D)
         line_layers = _layers(PATH_STYLE if path_style is None else path_style)
         line_r_layers = _layers(
             PATH_REVERSE_STYLE if path_reverse_style is None else path_reverse_style
         )
-        start_vehicle_options = START_VEHICLE_STYLE | (start_vehicle_style or {})
-        goal_vehicle_options = GOAL_VEHICLE_STYLE | (goal_vehicle_style or {})
+        start_vehicle_options = _merge_style(
+            START_VEHICLE_STYLE, start_vehicle_style, Polygon
+        )
+        goal_vehicle_options = _merge_style(
+            GOAL_VEHICLE_STYLE, goal_vehicle_style, Polygon
+        )
         bgargs = dict(bgargs or {})
         if labelvalues:
             warnings.warn(

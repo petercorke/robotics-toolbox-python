@@ -159,11 +159,13 @@ class TestPRMPlot(unittest.TestCase):
             nt.assert_allclose(p.get_edgecolor()[:3], (0, 0, 0))
 
     def test_style_dicts_are_not_modified(self):
-        vertex = dict(markersize=9)
-        edge = dict(linewidth=2)
-        self.plot(vertex=vertex, edge=edge)
-        self.assertEqual(vertex, dict(markersize=9))
-        self.assertEqual(edge, dict(linewidth=2))
+        vertex = {"ms": 9}
+        edge = {"lw": 2}
+        self.plot(vertex_style=vertex, edge_style=edge)
+        self.assertEqual({line.get_markersize() for line in self.ax.lines}, {9})
+        self.assertEqual({p.get_linewidth() for p in self.ax.patches}, {2})
+        self.assertEqual(vertex, {"ms": 9})
+        self.assertEqual(edge, {"lw": 2})
 
 
 class TestEKFPlot(unittest.TestCase):
