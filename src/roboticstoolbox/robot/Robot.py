@@ -676,6 +676,12 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
           including its offset and flip. Without limits, only the fixed
           offset contributes; unbounded joint travel cannot be estimated.
 
+        .. versionchanged:: 1.5.1
+            Translation lengths are counted by magnitude, and the travel of a prismatic
+            joint accounts for its limits, offset and flip, so the estimate is a safe upper
+            bound.  A negative offset used to reduce it, and only the upper joint limit was
+            used.  The reach is used only to set the limits of robot plots, which may
+            therefore change slightly.
         """
 
         # TODO
@@ -1421,6 +1427,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Includes collision geometry on all grippers, using each gripper's
         own current joint configuration.
 
+        .. versionchanged:: 1.5.1
+            Collision geometry on the grippers is included.  Only the arm links were
+            considered, so the distance could be too large when a gripper was the nearest
+            part of the robot.  :meth:`iscollided` is unchanged.
         """
 
         if not skip:
@@ -1636,6 +1646,11 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         the joint limits of the robot to be specified. See examples/mmc.py
         for use case.
 
+        .. versionchanged:: 1.5.1
+            ``q`` and the rows and columns of the result are in joint-index order, and the
+            joint limits are now taken in the same order.  For a robot whose joint indices
+            are not in link order, the damper used another joint's limits and could leave
+            out the constraint for a joint that was close to its own limit.
         """
 
         if n is None:
@@ -1696,6 +1711,13 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         The contact-point Jacobian and the obstacle's translational velocity
         are projected onto the separation normal in world coordinates.
 
+        .. versionchanged:: 1.5.1
+            The contact-point Jacobian is now evaluated at the closest point and in world
+            axes, including the lever arm from the link origin.  It used to be the Jacobian
+            of the link origin in the link frame, so a constraint matched the true rate of
+            change of the distance only for the first links of a chain, and the error grew
+            with the number of joints before the link.  Constrained motion that uses this
+            damper changes accordingly.
         """
 
         end, start, _ = self._get_limit_links(start=start, end=end)

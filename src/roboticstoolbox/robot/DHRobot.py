@@ -649,6 +649,13 @@ class DHRobot(Robot):
 
         .. warning:: Computed on the first access. If kinematic parameters
               subsequently change this will not be reflected.
+
+        .. versionchanged:: 1.5.1
+            Link lengths are counted by magnitude, and the travel of a prismatic joint
+            accounts for its limits, offset and flip, so the estimate is a safe upper bound.
+            A negative ``d`` used to reduce it, and only the upper joint limit was used.  The
+            reach is used only to set the limits of robot plots, which may therefore change
+            slightly.
         """
         if self._reach is None:
             d = 0
