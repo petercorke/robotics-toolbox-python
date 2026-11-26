@@ -171,8 +171,9 @@ class MultiRotor(ContinuousBlock):
         :type groundcheck: bool
         :param speedcheck: Check for non-positive rotor speed, defaults to True
         :type speedcheck: bool
-        :param x0: Initial state, defaults to None
-        :type x0: array_like(6) or array_like(12), optional
+        :param x0: Initial state, defaults to None. A four-value state is
+            ``[x, y, z, yaw]`` with zero pitch, roll and velocities.
+        :type x0: array_like(3), array_like(4), array_like(6) or array_like(12), optional
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
@@ -227,7 +228,7 @@ class MultiRotor(ContinuousBlock):
             return np.r_[x0, np.zeros((6,))]
         elif len(x0) == 4:
             # assume x,y,z,yaw
-            return np.r_[x0[:3], 0, 0, x0[3], np.zeros((6,))]
+            return np.r_[x0[:3], x0[3], 0, 0, np.zeros((6,))]
         elif len(x0) == 3:
             # assume x,y,z
             return np.r_[x0[:3], np.zeros((9,))]
@@ -333,7 +334,7 @@ class MultiRotor(ContinuousBlock):
         z = x[0:3]  # position in {W}
         n = x[3:6]  # RPY angles {W}
         v = x[6:9]  # velocity in {W}
-        o = x[9:12]  # angular velocity in {W}
+        o = x[9:12]  # angular velocity in {B}
 
         # PREPROCESS ROTATION AND WRONSKIAN MATRICES
         phi = n[0]  # yaw
@@ -388,16 +389,20 @@ class MultiRotor(ContinuousBlock):
         #       cos(the) sin(psi)*sin(the) cos(psi)*sin(the)] / cos(the);
 
         # ROTOR MODEL
-        T = np.zeros((3, 4))
-        Q = np.zeros((3, 4))
-        tau = np.zeros((3, 4))
+        T = np.zeros((3, self.nrotors))
+        Q = np.zeros((3, self.nrotors))
+        tau = np.zeros((3, self.nrotors))
 
         a1s = self.a1s
         b1s = self.b1s
 
+        # Rotor positions and angular velocity use body axes; express the
+        # translational velocity in that same frame before adding them.
+        v_body = R.T @ v
+
         for i in range(0, self.nrotors):  # for each rotor
             # Relative motion
-            Vr = np.cross(o, self.D[:, i]) + v
+            Vr = np.cross(o, self.D[:, i]) + v_body
             mu = sqrt(np.sum(Vr[0:2] ** 2)) / (
                 abs(w[i]) * model["r"]
             )  # Magnitude of mu, planar components
