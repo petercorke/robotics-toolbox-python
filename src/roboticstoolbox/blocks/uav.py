@@ -90,12 +90,32 @@ class MultiRotor(ContinuousBlock):
         - SI units are used.
         - Rotor velocity is defined looking down, clockwise from the front rotor
           which lies on the x-axis.
+        - The state holds the translational velocity in the world frame, whereas the
+          equations of the paper below are written in body axes.  The relative air
+          velocity at rotor :math:`i`, equation (15) of the paper,
+          :math:`V_{ri} = V + \Omega \times D_i`, is therefore evaluated with the world
+          velocity rotated into the body frame, :math:`R^\top v`.
 
     :References:
         - Design, Construction and Control of a Large Quadrotor micro air vehicle.
           P.Pounds, `PhD thesis <https://openresearch-repository.anu.edu.au/handle/1885/146543>`_
           Australian National University, 2007.
+        - Modelling and Control of a Quad-Rotor Robot.
+          P. Pounds, R. Mahony and P. Corke.  Proc. Australasian Conference on Robotics
+          and Automation (ACRA), 2006.  Equation numbers in these notes refer to this
+          paper.
         - Robotics, Vision & Control by Peter Corke, sec 4.2 in all editions
+
+    .. versionchanged:: 1.5.1
+        The relative air velocity at each rotor is now computed with the translational
+        velocity expressed in the body frame, as in equation (15) of the paper.  The
+        world-frame velocity used to be added to body-frame terms unrotated, as in the
+        original MATLAB code, so the result depended on the heading of the vehicle.
+        The simulated motion of a moving, rotated vehicle differs slightly from earlier
+        releases (about 0.05 m/s\ :sup:`2` in a typical example); hover is unchanged.
+        A four-value initial state ``[x, y, z, yaw]`` now sets the yaw, where it used to
+        set the roll, and models with more than four rotors no longer raise an
+        ``IndexError``.
 
     .. seealso:: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
     """
@@ -397,7 +417,9 @@ class MultiRotor(ContinuousBlock):
         b1s = self.b1s
 
         # Rotor positions and angular velocity use body axes; express the
-        # translational velocity in that same frame before adding them.
+        # translational velocity in that same frame before adding them, as in
+        # equation (15) of Pounds, Mahony and Corke, "Modelling and control of a
+        # quad-rotor robot": V_ri = V + Omega x D_i, with V in the body frame.
         v_body = R.T @ v
 
         for i in range(0, self.nrotors):  # for each rotor
