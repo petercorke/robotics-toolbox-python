@@ -261,6 +261,12 @@ class ETS2(BaseETS[ET2]):
             >>> f = ET2.R()
             >>> e.insert(2, f)
             >>> e
+
+        .. versionchanged:: 1.5.1
+            Editing the sequence also refreshes the cached joint indices, as well as the
+            compiled kinematics.  The joint indices used to be kept from before the edit, so a
+            chain edited into a different number of joints could fail in methods that use them,
+            such as inverse kinematics.
         """
 
         if isinstance(arg, ET2):
@@ -350,6 +356,10 @@ class ETS2(BaseETS[ET2]):
         .. rubric:: References
 
         - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
+
+        .. versionchanged:: 1.5.1
+            An empty sequence evaluates to the identity, with the base and tool applied.  It used
+            to raise ``IndexError``.
         """
 
         if q is None:
@@ -595,6 +605,11 @@ class ETS2(BaseETS[ET2]):
         .. seealso:: :meth:`fkine` :meth:`jacob0` :meth:`ETS.ikine_LM`
 
         .. versionadded:: 1.5.0
+
+        .. versionchanged:: 1.5.1
+            ``q0`` and the returned ``q`` are in joint-index order, as for :meth:`eval`.  For a chain
+            whose joint indices are not in link order, the solution used to be in link order and did
+            not reproduce the pose.
         """
         if mask is None:
             We = np.eye(3)

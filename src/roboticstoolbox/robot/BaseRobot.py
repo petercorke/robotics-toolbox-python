@@ -1872,6 +1872,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.qlim` :meth:`~roboticstoolbox.robot.Link.Link.qlim`
 
+        .. versionchanged:: 1.5.1
+            The values are in joint-index order, as accepted by :meth:`fkine`, and each lies within
+            the limits of its own joint.  For a robot whose joint indices are not in link order,
+            values used to be assigned to the wrong joints and often fell outside their limits.
+            Results for other robots, including seeded ones, are unchanged.
         """
 
         qlim = self.qlim

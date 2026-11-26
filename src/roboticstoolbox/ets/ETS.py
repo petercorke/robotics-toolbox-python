@@ -419,6 +419,11 @@ class ETS(BaseETS[ET]):
             >>> e.insert(2, f)
             >>> e
 
+        .. versionchanged:: 1.5.1
+            Editing the sequence also refreshes the cached joint indices, as well as the
+            compiled kinematics.  The joint indices used to be kept from before the edit, so a
+            chain edited into a different number of joints could fail in methods that use them,
+            such as inverse kinematics.
         """
 
         if isinstance(value, ET):
@@ -1035,6 +1040,10 @@ class ETS(BaseETS[ET]):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
+        .. versionchanged:: 1.5.1
+            The derivatives of order 3 and higher were wrong (they differed from finite
+            differences of the Hessian by as much as the derivative itself) and are corrected.
+            Orders 1 and 2 are unchanged.
         """
 
         # Calculate the Jacobian and Hessian
