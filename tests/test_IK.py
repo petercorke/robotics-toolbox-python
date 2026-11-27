@@ -14,7 +14,7 @@ import numpy.testing as nt
 # import sympy
 import pytest
 from spatialmath import SE3
-from tests import skip_no_qp
+from tests import fknm_compiled, requires_compiled, skip_no_qp
 
 test_tol = 1e-5
 
@@ -653,6 +653,34 @@ class TestIK(unittest.TestCase):
             with self.assertRaises(ValueError):
                 panda.ikine_LM(bad, q0=panda.qr)
 
+    def test_as_se3(self):
+        # the helper behind every Robot.ik_* and Robot.ikine_* method, so a
+        # regression in how SE3 treats an (N, 4, 4) array shows up here
+        from roboticstoolbox.robot.RobotKinematics import _as_se3
+
+        Ts = SE3.Rx([0.1, 0.2, 0.3]) * SE3(1, 2, 3)
+        stack = np.array(Ts.A)
+        self.assertEqual(stack.shape, (3, 4, 4))
+
+        T = _as_se3(stack)
+        self.assertIsInstance(T, SE3)
+        self.assertEqual(len(T), 3)
+        for i in range(3):
+            nt.assert_allclose(T[i].A, Ts[i].A)
+
+        T = _as_se3(Ts[0].A)
+        self.assertEqual(len(T), 1)
+        nt.assert_allclose(T.A, Ts[0].A)
+
+        T = _as_se3(Ts)
+        self.assertEqual(len(T), 3)
+        nt.assert_allclose(T.A, Ts.A)
+
+        for bad in (np.eye(3), np.zeros((2, 3, 4)), np.zeros(16)):
+            with self.assertRaises(ValueError):
+                _as_se3(bad)
+
+    @requires_compiled
     def test_ik_nr(self):
 
         tol = 1e-6
@@ -679,6 +707,7 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    @requires_compiled
     def test_ik_lm_chan(self):
 
         tol = 1e-6
@@ -705,6 +734,7 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    @requires_compiled
     def test_ik_lm_wampler(self):
 
         tol = 1e-6
@@ -731,6 +761,7 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    @requires_compiled
     def test_ik_lm_sugihara(self):
 
         tol = 1e-6
@@ -757,6 +788,7 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    @requires_compiled
     def test_ik_gn(self):
 
         tol = 1e-6
@@ -1067,6 +1099,7 @@ class TestIK(unittest.TestCase):
         sol = rtb.IKSolution(np.array([1.0, 2.0, 3.0]), success=True)
         self.assertEqual(repr(sol), str(sol))
 
+    @requires_compiled
     def test_ik_LM_returns_iksolution(self):
         panda = rtb.models.Panda().ets()
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
@@ -1075,6 +1108,7 @@ class TestIK(unittest.TestCase):
         self.assertIsInstance(sol, rtb.IKSolution)
         self.assertIsInstance(sol.success, bool)
 
+    @requires_compiled
     def test_ik_NR_returns_iksolution(self):
         panda = rtb.models.Panda().ets()
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
@@ -1083,6 +1117,7 @@ class TestIK(unittest.TestCase):
         self.assertIsInstance(sol, rtb.IKSolution)
         self.assertIsInstance(sol.success, bool)
 
+    @requires_compiled
     def test_ik_GN_returns_iksolution(self):
         panda = rtb.models.Panda().ets()
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
@@ -1129,6 +1164,7 @@ class TestIK(unittest.TestCase):
         self.assertTrue(np.all(np.isfinite(q)))
         self.assertEqual(q.shape, (5, 1))
 
+    @requires_compiled
     def test_ik_lm_c_rejects_non_finite_qlim(self):
         # Same guard, mirrored in the compiled fast-path solver (ets.ik_LM(),
         # backed by ik.cpp's own _rand_q()) -- this is a genuinely separate
@@ -1185,13 +1221,14 @@ class TestIKInitialCoordinates(unittest.TestCase):
 
     def test_right_length_still_works(self):
         q = np.array([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-        for sol in (
-            self.ets.ik_LM(self.Tep, q0=q),
+        sols = [
             self.ets.ikine_LM(self.Tep, q0=q),
             self.ets.ikine_LM(self.Tep, q0=np.array([q, q])),
             self.ets.ikine_LM(self.Tep),
-            self.ets.ik_LM(self.Tep),
-        ):
+        ]
+        if fknm_compiled:
+            sols += [self.ets.ik_LM(self.Tep, q0=q), self.ets.ik_LM(self.Tep)]
+        for sol in sols:
             self.assertTrue(sol.success)
 
 
@@ -1412,6 +1449,71 @@ class TestIKVerboseAllSolvers(unittest.TestCase):
             for obj in (panda, panda.ets()):
                 with self.assertRaises(TypeError, msg=name):
                     getattr(obj, name)(Tep, verbose=True)
+
+
+class TestDivergedSearch(unittest.TestCase):
+    """
+    A search whose q diverges to infinity is abandoned and restarted.
+
+    Gauss-Newton and its relatives can diverge from a bad start.  The compiled
+    fkine returns NaN for an infinite joint angle but the pure-Python one
+    raises ValueError, and either used to end the whole solve.
+    """
+
+    def setUp(self):
+        self.ets = rtb.models.Panda().ets()
+        self.Tep = self.ets.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+    def _diverge_first_step(self, solver, raises):
+        step = solver.step
+        calls = []
+
+        def diverging(ets, Tep, q):
+            calls.append(1)
+            if len(calls) == 1:
+                q[ets.jindices] = np.inf
+                if raises:
+                    raise ValueError("math domain error")
+                return np.nan, q[ets.jindices]
+            return step(ets, Tep, q)
+
+        solver.step = diverging
+
+    def test_pure_python_fkine_raises(self):
+        solver = rtb.IK_LM(seed=0)
+        self._diverge_first_step(solver, raises=True)
+        sol = solver.solve(self.ets, self.Tep)
+        self.assertTrue(sol.success)
+        self.assertGreaterEqual(sol.searches, 2)
+
+    def test_compiled_fkine_returns_nan(self):
+        solver = rtb.IK_LM(seed=0)
+        self._diverge_first_step(solver, raises=False)
+        sol = solver.solve(self.ets, self.Tep)
+        self.assertTrue(sol.success)
+        self.assertGreaterEqual(sol.searches, 2)
+
+    def test_failure_says_why(self):
+        solver = rtb.IK_LM(seed=0, slimit=3)
+
+        def diverging(ets, Tep, q):
+            q[ets.jindices] = np.inf
+            raise ValueError("math domain error")
+
+        solver.step = diverging
+        sol = solver.solve(self.ets, self.Tep)
+        self.assertFalse(sol.success)
+        self.assertIn("3 searches diverged", sol.reason)
+
+    def test_other_value_errors_propagate(self):
+        solver = rtb.IK_LM(seed=0)
+
+        def broken(ets, Tep, q):
+            raise ValueError("not a divergence")
+
+        solver.step = broken
+        with self.assertRaisesRegex(ValueError, "not a divergence"):
+            solver.solve(self.ets, self.Tep)
 
 
 if __name__ == "__main__":

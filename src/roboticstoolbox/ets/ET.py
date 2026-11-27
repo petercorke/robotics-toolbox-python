@@ -71,10 +71,20 @@ class ET(BaseET):
             self.__fknm = None
             return
 
-        if self.jindex is None:
-            jindex = 0
-        else:
-            jindex = self.jindex
+        self.__fknm = self._accel_struct(
+            0 if self.jindex is None else self.jindex
+        )
+
+    def _accel_struct(self, jindex: int) -> Any:
+        """
+        A compiled struct for this ET, numbered as joint ``jindex``.
+
+        This is the struct ``_accel_init`` builds, but for any joint number, which
+        lets the compiled inverse kinematics number the joints by their position
+        along the chain.  ``None`` for an ET that has no compiled struct.
+        """
+        if self._offset != 0:
+            return None
 
         if self.qlim is None:
             if self.kind[0] == "R":
@@ -84,7 +94,7 @@ class ET(BaseET):
         else:
             qlim = self.qlim
 
-        self.__fknm = ET_init(
+        return ET_init(
             self._isstaticsym,
             self.isjoint,
             self.isflip,

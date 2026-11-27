@@ -22,6 +22,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.testing as nt
+import pytest
 
 from roboticstoolbox import (
     EKF,
@@ -32,6 +33,7 @@ from roboticstoolbox import (
     RandomPath,
     RangeBearingSensor,
     Unicycle,
+    VehicleBase,
 )
 
 T = TypeVar("T")
@@ -53,6 +55,28 @@ def numerical_jacobian(
     """Central-difference Jacobian of ``func`` at ``x``."""
     cols = [(func(x + eps * e) - func(x - eps * e)) / (2 * eps) for e in np.eye(len(x))]
     return np.column_stack(cols)
+
+
+@pytest.mark.parametrize(
+    "model, control",
+    [
+        (Bicycle, (-1.0, 0.2)),
+        (Unicycle, (-1.0, 0.2)),
+        (DiffSteer, (-1.2, -0.8)),
+        (DiffSteer, (0.2, -0.6)),
+    ],
+)
+@pytest.mark.parametrize("direction", [-1, 1])
+def test_step_odometry_reconstructs_forward_and_reverse_motion(
+    model: type[VehicleBase], control: tuple[float, float], direction: int
+) -> None:
+    vehicle = model(x0=[2.0, -3.0, 1.2], dt=0.1)
+    initial = vehicle.x.copy()
+
+    odometry = vehicle.step(np.array(control) * direction, animate=False)
+
+    nt.assert_allclose(vehicle.f(initial, odometry), vehicle.x, atol=1e-14)
+    assert np.sign(odometry[0]) == -direction
 
 
 class TestBicycle(unittest.TestCase):

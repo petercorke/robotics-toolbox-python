@@ -13,7 +13,7 @@ authors = [
 
 dependencies = [
     "numpy",
-    "spatialmath-python>=1.1.18",
+    "spatialmath-python>=1.1.19",
     "spatialgeometry>=1.4.0",
     "pgraph-python>=1.0.0",
     "scipy",
@@ -31,7 +31,7 @@ license = { file = "LICENSE" }
 
 readme = "README.md"
 
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 keywords = [
     "python",
@@ -56,7 +56,6 @@ classifiers = [
     # Pick your license as you wish (should match "license" above)
     "License :: OSI Approved :: MIT License",
     # Specify the Python versions you support here.
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -83,6 +82,10 @@ ik = ["sympy", "python-flint"]
 
 tool = ["ipython", "pygments"]
 
+# the block-diagram blocks in roboticstoolbox.blocks, which are bdsim blocks.  Neither
+# package requires the other: 1.5.0 is the first bdsim with the block parameter registry
+blocks = ["bdsim>=1.5.0"]
+
 all = [
     "swift-sim>=2.0.0",
     "websockets",
@@ -102,7 +105,7 @@ dev = [
     "sympy",
     "qpsolvers",
     "quadprog",
-    "bdsim",
+    "bdsim>=1.5.0",
     "ruff",
     "coal; sys_platform != 'win32'",
     "trimesh",
@@ -182,7 +185,7 @@ indent-style = "space"
 
 [tool.cibuildwheel]
 
-build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
+build = ["cp311-*", "cp312-*", "cp313-*", "cp314-*"]
 skip = ["*musllinux*"]
 
 [tool.cibuildwheel.macos]
@@ -214,7 +217,7 @@ filterwarnings = [
 ]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 mypy_path = "src"
 files = ["src/roboticstoolbox"]
 check_untyped_defs = true
@@ -262,8 +265,6 @@ module = [
     "roboticstoolbox.backends.PyPlot.RobotPlot",
     "roboticstoolbox.backends.PyPlot.RobotPlot2",
     "roboticstoolbox.backends.PyPlot.EllipsePlot",
-    "roboticstoolbox.blocks.arm",
-    "roboticstoolbox.blocks.mobile",
     "roboticstoolbox.blocks.spatial",
     "roboticstoolbox.blocks.uav",
     "roboticstoolbox.blocks.quad_model",

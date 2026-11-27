@@ -440,6 +440,8 @@ class PoseGraph:
 
         .. seealso:: :meth:`scanxy`
         """
+        if pause <= 0:
+            raise ValueError("pause must be greater than zero")
         style = dict(markersize=10) | kwargs
         for i in smb.getvector(n):
             x, y = self.scanxy(int(i))

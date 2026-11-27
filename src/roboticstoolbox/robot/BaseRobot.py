@@ -37,6 +37,7 @@ from typing_extensions import Literal as L
 
 import roboticstoolbox as rtb
 from roboticstoolbox.backends.Connector import Connector
+from roboticstoolbox.backends.registry import normalise_backend_name
 from roboticstoolbox.ets.ET import ET
 from roboticstoolbox.ets.ETS import ETS
 from roboticstoolbox.ets.fknm import Robot_link_T
@@ -85,7 +86,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     #: default graphical backend for every robot of this class, used when the
     #: robot has not been given its own, see :meth:`set_default_backend`
-    _class_default_backend: Any = None
+    _class_default_backend: str | None = None
 
     def __init__(
         self,
@@ -218,7 +219,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # SceneNode, set a reference to the first link
         self.scene_children = [self.links[0]]
 
-        self._default_backend = None
+        self._default_backend: str | None = None
         self._active_plot_env: Any = None
 
     # --------------------------------------------------------------------- #
@@ -849,8 +850,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Robot has collision model
 
-        :returns: Robot has collision model
-        :returns: At least one link has associated collision model.
+        :returns: True if at least one link has associated collision geometry.
 
         .. rubric:: Examples
 
@@ -867,7 +867,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._hascollision
 
     @property
-    def default_backend(self) -> Any:
+    def default_backend(self) -> str | None:
         """
         Get default graphical backend
 
@@ -878,6 +878,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         - ``robot.default_backend = ...`` Set the default graphical backend, used when
             no explicit backend is passed to ``Robot.plot``.  The default set here will
             be overridden if the particular ``Robot`` subclass cannot support it.
+            The name is not case sensitive.
 
         :returns: backend name
         """
@@ -886,15 +887,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         return self._class_default_backend
 
     @default_backend.setter
-    def default_backend(self, be: Any) -> None:
-        self._default_backend = be
+    def default_backend(self, be: str | None) -> None:
+        self._default_backend = None if be is None else normalise_backend_name(be)
 
     @classmethod
-    def set_default_backend(cls, be: Any) -> None:
+    def set_default_backend(cls, be: str | None) -> None:
         """
         Set the default graphical backend for all robots
 
-        :param be: backend name, for example ``"swift"``, or ``None`` to clear
+        :param be: backend name, for example ``"swift"``, which is not case
+            sensitive, or ``None`` to clear
 
         ``Robot.set_default_backend("swift")`` sets the backend used by
         :meth:`plot` for every robot, existing or created later, that has not
@@ -903,7 +905,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         .. seealso:: :attr:`default_backend`
         """
-        cls._class_default_backend = be
+        cls._class_default_backend = None if be is None else normalise_backend_name(be)
 
     @property
     def gravity(self) -> NDArray:
@@ -1240,9 +1242,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param end: end-effector or gripper to compute forward kinematics to
         :param start: name or reference to a base link, defaults to None
         :raises ValueError: link not known or ambiguous
-        :returns: the path from start to end
-        :returns: the number of joints in the path
-        :returns: the tool transform present after end
+        :returns: tuple of the link path, the number of links in that path,
+            and the tool transform present after the end link
         """
 
         def search(
@@ -1419,21 +1420,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         Helper method to find or validate an end-effector and base link
 
-        end
-            end-effector or gripper to compute forward kinematics to
-        start
-            name or reference to a base link, defaults to None
-
-        ValueError
-            link not known or ambiguous
-        ValueError
-            [description]
-        TypeError
-            unknown type provided
-
-        :returns: end-effector link
-        :returns: base link
-        :returns: tool transform of gripper if applicable
+        :param end: end-effector or gripper, defaults to None
+        :param start: name or reference to a base link, defaults to None
+        :raises ValueError: a link is not known or is ambiguous
+        :raises TypeError: an unsupported link argument is supplied
+        :returns: tuple of end-effector link, start link, and gripper tool
+            transform (or None if no gripper transform applies)
         """
 
         tool = None
@@ -1497,8 +1489,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
         from link ``l1`` to link ``l2``.
 
-        :param :param start: start of path, defaults to ``base_link``: 
-        :param :param end: end of path, defaults to end-effector: 
+        :param start: start link of the path, defaults to the base link
+        :param end: end link of the path, defaults to the end-effector
         :raises ValueError: a link does not belong to this ERobot
         :raises TypeError: a bad link argument
         :returns: elementary transform sequence
@@ -1629,13 +1621,12 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         """
         Convert joint angles to degrees
 
-        :param q: The joint configuration of the robot
-        :returns: a vector of joint coordinates in degrees and metres
-        :returns: ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
-        :returns: taking into account whether elements of ``q`` correspond to revolute
-        :returns: or prismatic joints, ie. prismatic joint values are not converted.
-        :returns: If ``q`` is a matrix, with one column per joint, the conversion is
-        :returns: performed columnwise.
+        :param q: joint configuration as a vector or matrix (one row per pose)
+        :returns: joint coordinates with revolute values converted to degrees
+            and prismatic values unchanged, preserving a matrix input's rows
+
+        A vector is converted elementwise. If ``q`` is a matrix, with one
+        column per joint, the conversion is performed columnwise.
 
         .. rubric:: Examples
 
@@ -1870,7 +1861,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Return a random joint configuration
 
         The value for each joint is uniform randomly distributed  between the
-        limits set for the robot.
+        limits set for the robot. Values are addressed by joint index, as in
+        the robot's configuration vector.
 
         .. rubric:: Notes
 
@@ -1880,12 +1872,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.qlim` :meth:`~roboticstoolbox.robot.Link.Link.qlim`
 
+        .. versionchanged:: 1.5.1
+            The values are in joint-index order, as accepted by :meth:`fkine`, and each lies within
+            the limits of its own joint.  For a robot whose joint indices are not in link order,
+            values used to be assigned to the wrong joints and often fell outside their limits.
+            Results for other robots, including seeded ones, are unchanged.
         """
 
         qlim = self.qlim
         if np.any(np.isnan(qlim)):
             raise ValueError("some joint limits not defined")  # pragma nocover
-        return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+        q = np.empty(self.n)
+        indices = [link.jindex for link in self.links if link.jindex is not None]
+        q[indices] = np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+        return q
 
     def hierarchy(self) -> None:
         """
@@ -1978,7 +1978,13 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         def get_link_scene_node() -> Any:
             return [link._T_reference for link in self.links]
 
-        Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
+        Robot_link_T(
+            get_link_ets(),
+            get_link_scene_node(),
+            self._q,
+            q,
+            _data=[link.ets.data for link in self.links],
+        )
 
         for gripper in self.grippers:
             gripper._update_link_tf()
@@ -1989,15 +1995,16 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
     def _get_graphical_backend(
         self,
-        backend: L["swift", "pyplot", "pyplot2"] | None = None,
+        backend: str | None = None,
     ) -> Connector:
         import sys
 
         from roboticstoolbox.backends import load_backend
 
         # Resolve which backend name to use
+        using_backend: str | None
         if backend is not None:
-            using_backend = backend.lower()
+            using_backend = normalise_backend_name(backend)
         else:
             # In JupyterLite/Pyodide, only pyplot/pyplot2 are available
             if sys.platform == "emscripten":
@@ -2040,7 +2047,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
     def plot(
         self,
         q: ArrayLike,
-        backend: L["swift", "pyplot", "pyplot2"] | None = None,
+        backend: str | None = None,
         block: bool = False,
         dt: float = 0.05,
         limits: ArrayLike | None = None,
@@ -2068,7 +2075,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         animation with a pause of ``dt`` seconds between each frame.
 
         :param q: The joint configuration of the robot.
-        :param backend: The graphical backend to use, currently 'swift' and 'pyplot' are implemented. Defaults to 'swift' of a ``Robot`` and 'pyplot` for a ``DHRobot``
+        :param backend: The graphical backend to use, by name: 'swift', 'pyplot' or 'pyplot2', or one added by :func:`~roboticstoolbox.backends.registry.register_backend`, see :func:`~roboticstoolbox.backends.registry.registered_backends`.  The name is not case sensitive.  Defaults to 'swift' of a ``Robot`` and 'pyplot` for a ``DHRobot``
         :param block: ``True`` waits until the window is closed; the PyPlot backend has
             already shown the figure, so ``False`` and ``None`` return at once,
             defaults to False
@@ -2151,9 +2158,6 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         elif ax is not None:
             raise ValueError("ax and env cannot both be given: the scene has axes")
 
-        if movie is not None:
-            from roboticstoolbox.backends.PyPlot import PyPlot
-
         launch_kwargs: dict[str, Any] = {}
         for key in (
             "render_mode",
@@ -2206,9 +2210,9 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         # frame of the cell, not in a browser window of its own.  An animation is paced
         # in real time, one step to each dt: unpaced, Swift draws at most 60 frames
         # per second and skips the steps that come sooner, so the whole trajectory runs
-        # in a few milliseconds and only its first frame is ever drawn.
-        is_swift = type(env).__name__ == "Swift"
-        if is_swift and not adding:
+        # in a few milliseconds and only its first frame is ever drawn.  A backend that
+        # is a web page says so with embeds_in_notebook.
+        if getattr(env, "embeds_in_notebook", False) and not adding:
             from roboticstoolbox.backends.PyPlot.PyPlot import _isnotebook
 
             if launch_kwargs.get("browser") == "notebook":
@@ -2294,8 +2298,11 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                     fell.q = qk
                 env.step(dt)
 
-                if movie is not None and isinstance(env, PyPlot):  # pragma nocover
-                    images.append(env.getframe())
+                if movie is not None and getattr(
+                    env, "supports_movie", False
+                ):  # pragma nocover
+                    # getframe is not part of the Connector interface (#676)
+                    images.append(env.getframe())  # type: ignore[attr-defined]
 
             if movie is not None:  # pragma nocover
                 # save it as an animated GIF
@@ -2325,7 +2332,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         limits: ArrayLike | None = None,
         vellipse: bool = False,
         fellipse: bool = False,
-        backend: L["swift", "pyplot", "pyplot2"] | None = None,
+        backend: str | None = None,
         view: str | None = None,
     ) -> Connector:
         """
@@ -2352,7 +2359,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         :param fellipse: (Plot Option) Plot the force ellipse at the
             end-effector (this option is for 'pyplot' only)
         :param backend: The graphical backend to use -- 'swift', 'pyplot',
-            or 'pyplot2'. Defaults to whatever :meth:`plot` would pick for
+            'pyplot2' or a registered name. Defaults to whatever :meth:`plot` would pick for
             this robot (see its own ``backend`` for the resolution rule).
         :param view: ``"xy"``, ``"xz"`` or ``"yz"`` to start with a flat view of
             that plane, the first axis to the right and the second up, or ``None``
