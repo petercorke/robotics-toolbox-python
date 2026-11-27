@@ -17,9 +17,11 @@ import matplotlib.transforms as mtransforms
 import numpy as np
 from matplotlib import colors, patches
 from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
 from spatialmath import SE2, Polygon2, base
 
 from roboticstoolbox import rtb_load_data
+from roboticstoolbox.tools.plot import _merge_style
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
@@ -178,7 +180,8 @@ class VehicleMarker(VehicleAnimationBase):
     def _add(self, x: ArrayLike | None = None, **kwargs: Any) -> None:
         if x is None:
             x = (0, 0)
-        self._object = plt.plot(x[0], x[1], **{**self._args, **kwargs})[0]
+        style = _merge_style(self._args, kwargs, Line2D)
+        self._object = plt.plot(x[0], x[1], **style)[0]
 
 
 # ========================================================================= #
@@ -283,7 +286,8 @@ class VehiclePolygon(VehicleAnimationBase):
         # color is fillcolor + edgecolor
         # facecolor if None is default
         self._ax = plt.gca()
-        self._object = patches.Polygon(self._coords.T, **{**self._args, **kwargs})
+        style = _merge_style(self._args, kwargs, patches.Polygon)
+        self._object = patches.Polygon(self._coords.T, **style)
         self._ax.add_patch(self._object)
 
     def _update(self, x: ArrayLike) -> None:

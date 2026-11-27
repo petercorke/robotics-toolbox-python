@@ -28,10 +28,22 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Check notebook bootstrap cells and outputs are in sync
+      # a change to the bootstrap is one file; notebooks follow at the next commit
+      # that touches one (docs/notebooks/pre_commit.py), so only the notebooks this PR
+      # changes must be up to date.  The checkout is the merge with the base branch.
+      - name: Check notebook bootstrap cells are in sync, for the notebooks changed
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.base_ref }}
         run: |
-          python docs/notebooks/sync_bootstrap.py --check
-          python docs/notebooks/clear_outputs.py --check
+          git fetch --no-tags --depth=1 origin "$BASE"
+          changed=$(git diff --name-only --diff-filter=ACM "origin/$BASE" HEAD -- 'docs/notebooks/*.ipynb')
+          if [ -n "$changed" ]; then
+            python docs/notebooks/sync_bootstrap.py --check $changed
+          fi
+
+      - name: Check notebook outputs are cleared
+        run: python docs/notebooks/clear_outputs.py --check
 
       - name: Install docs dependencies
         run: |

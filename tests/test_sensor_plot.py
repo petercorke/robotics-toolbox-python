@@ -19,8 +19,8 @@ def test_sensor_beam_and_sector_move_without_duplicate_artists() -> None:
         range=(0.5, 3.0),
         angle=np.pi / 4,
         plot=True,
-        line_style={"color": "blue", "linewidth": 2},
-        poly_style={"facecolor": "green", "alpha": 0.25},
+        line_style={"c": "blue", "lw": 2},
+        poly_style={"fc": "green", "alpha": 0.25},
     )
     try:
         z, idx = sensor.reading()
@@ -33,6 +33,9 @@ def test_sensor_beam_and_sector_move_without_duplicate_artists() -> None:
         assert poly in ax.patches
         assert line.get_color() == "blue"
         assert line.get_linewidth() == 2
+        nt.assert_allclose(
+            poly.get_facecolor(), matplotlib.colors.to_rgba("green", 0.25)
+        )
         assert poly.get_alpha() == 0.25
         original_vertices = poly.get_xy().copy()
         nt.assert_allclose(line.get_xdata(), [0, 2])

@@ -5,7 +5,8 @@ import warnings
 from typing import Any
 
 import matplotlib.pyplot as plt
-from roboticstoolbox.tools.plot import apply_block
+from matplotlib.lines import Line2D
+from roboticstoolbox.tools.plot import _merge_style, apply_block
 import numpy as np
 from spatialmath import base
 from spatialmath.base.types import R2, R4, Points2
@@ -206,7 +207,7 @@ class LandmarkMap:
         ax.set_xlabel("x")
         ax.set_ylabel("y")
 
-        kwargs = {"label": "landmark"} | LANDMARK_STYLE | kwargs
+        kwargs = _merge_style({"label": "landmark"} | LANDMARK_STYLE, kwargs, Line2D)
 
         text = "#{}" if labels else None
         base.plot_point(self._map, text=text, **kwargs)

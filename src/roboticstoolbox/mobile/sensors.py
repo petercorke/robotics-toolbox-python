@@ -13,6 +13,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
 from spatialmath import base
 
+from roboticstoolbox.tools.plot import _merge_style
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 """
@@ -532,7 +533,7 @@ class RangeBearingSensor(SensorBase):
                     "alpha": 0.1,
                     "edgecolor": "none",
                 }
-                poly_style.update(self._poly_style or {})
+                poly_style = _merge_style(poly_style, self._poly_style, Polygon)
                 self._plot_poly = Polygon(vertices, closed=True, **poly_style)
                 ax.add_patch(self._plot_poly)
             else:
@@ -540,7 +541,7 @@ class RangeBearingSensor(SensorBase):
 
         if self._plot_line is None:
             line_style: dict[str, Any] = {"color": "red", "linewidth": 1}
-            line_style.update(self._line_style or {})
+            line_style = _merge_style(line_style, self._line_style, Line2D)
             (self._plot_line,) = ax.plot([], [], **line_style)
 
         if id is None:
@@ -739,7 +740,7 @@ class RangeBearingSensor(SensorBase):
         .. seealso:: :meth:`h` :meth:`Hx` :meth:`Hw`
         """
         if base.isinteger(landmark):
-            xf = self.map.landmark(landmark)
+            xf = self.map[landmark]
         else:
             xf = landmark
         x = base.getvector(x, 3)
