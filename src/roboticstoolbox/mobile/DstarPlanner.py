@@ -431,7 +431,7 @@ class DstarPlanner(PlannerBase):
         Compute the minimum-cost obstacle-free distance to the goal from all
         points in the grid.
 
-        .. versionchanged:: 1.6.0
+        .. versionchanged:: 1.5.1
             Each call starts a fresh plan using the current goal and costmap.
             Previously, a second call retained the old goal's costs and parents.
             The expansion count is reset for the new plan.
@@ -524,7 +524,7 @@ class DstarPlanner(PlannerBase):
         replanning.  In this case the value returned by :meth:`nexpand` will
         increase, according to the severity of the replanning.
 
-        .. versionchanged:: 1.6.0
+        .. versionchanged:: 1.5.1
             The status cost sums the steps actually followed, including detours
             caused by sensor updates.  Previously it reported the initial plan's
             cost.  An unreachable goal raises :class:`NoPathError` instead of
