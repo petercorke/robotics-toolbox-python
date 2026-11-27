@@ -82,9 +82,11 @@ class TestLidar(unittest.TestCase):
 
         with mock.patch.object(plt, "pause"):
             self.pg.plot_scan(0)
-        (line,) = plt.gca().lines
+            self.pg.plot_scan(0, ms=4)
+        line, styled = plt.gca().lines
         self.assertEqual(line.get_markersize(), 10)
         self.assertEqual(line.get_linestyle(), "None")
+        self.assertEqual(styled.get_markersize(), 4)
 
     def test_scanmap_step(self):
         occgrid = BinaryOccupancyGrid(workspace=[-60, 60, -60, 60], cellsize=0.5)
@@ -183,8 +185,8 @@ class TestOptimizeStyles(unittest.TestCase):
                     pg.optimize,
                     iterations=2,
                     animate=True,
-                    vertex_style={"markersize": 2},
-                    edge_style={"linewidth": 3},
+                    vertex_style={"ms": 2},
+                    edge_style={"lw": 3},
                 )
         for call in graph_plot.call_args_list:
             self.assertEqual(call.kwargs["vertex_opt"], {"markersize": 2})
@@ -261,10 +263,10 @@ class TestPlotStyles(unittest.TestCase):
         self.assertEqual(self.passed()["edge_opt"]["linewidth"], 1)
 
     def test_styles_merge_over_defaults(self):
-        self.pg.plot(vertex_style={"markersize": 3}, edge_style={"color": "r"})
+        self.pg.plot(vertex_style={"ms": 3}, edge_style={"lw": 2, "color": "r"})
         self.assertEqual(self.passed()["vertex_opt"]["markersize"], 3)
         self.assertEqual(self.passed()["vertex_opt"]["markerfacecolor"], "blue")
-        self.assertEqual(self.passed()["edge_opt"]["linewidth"], 1)
+        self.assertEqual(self.passed()["edge_opt"]["linewidth"], 2)
         self.assertEqual(self.passed()["edge_opt"]["color"], "r")
 
     def test_style_dicts_are_not_modified(self):

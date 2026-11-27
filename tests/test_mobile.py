@@ -324,12 +324,12 @@ class DriversTest(unittest.TestCase):
         self.assertEqual(rp._goal_style, GOAL_STYLE)
 
         # a user dict is merged over the defaults, and wins
-        rp = rtb.RandomPath(workspace=10, goal_style=dict(marker="s", color="b"))
+        rp = rtb.RandomPath(workspace=10, goal_style=dict(marker="s", c="b"))
         self.assertEqual(rp._goal_style["marker"], "s")
         self.assertEqual(rp._goal_style["color"], "b")
         self.assertEqual(rp._goal_style["markersize"], GOAL_STYLE["markersize"])
 
-        pp = rtb.PurePursuit([[0, 10], [0, 10]], path_style=dict(linewidth=1))
+        pp = rtb.PurePursuit([[0, 10], [0, 10]], path_style=dict(lw=1))
         self.assertEqual(pp._path_style["linewidth"], 1)
         self.assertEqual(pp._path_style["color"], PATH_STYLE["color"])
 

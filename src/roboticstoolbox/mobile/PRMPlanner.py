@@ -12,11 +12,14 @@ import warnings
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
 from pgraph import UGraph
 from spatialmath.base.types import ArrayLike2
 
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
 from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
+from roboticstoolbox.tools.plot import _merge_style
 from roboticstoolbox.tools.types import NDArray
 
 if TYPE_CHECKING:
@@ -403,8 +406,8 @@ class PRMPlanner(PlannerBase):
         # add the roadmap graph
         self._graph.plot(
             labels=False,
-            vertex_opt=VERTEX_STYLE | (vertex_style or {}),
-            edge_opt=EDGE_STYLE | (edge_style or {}),
+            vertex_opt=_merge_style(VERTEX_STYLE, vertex_style, Line2D),
+            edge_opt=_merge_style(EDGE_STYLE, edge_style, FancyArrowPatch),
             ax=ax,
         )
         return ax

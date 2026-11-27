@@ -231,7 +231,7 @@ def test_labels_skip_inflated_cells_and_preserve_inputs():
     field = np.arange(12.0).reshape(3, 4)
     inflated = np.zeros(grid.shape, dtype=bool)
     inflated[1, 2] = True
-    style = {"color": "purple", "fontsize": 12}
+    style = {"color": "purple", "size": 12, "horizontalalignment": "left"}
     colorbar_style = {"label": "Cost"}
     _, ax = plt.subplots()
     grid.plot(
@@ -249,7 +249,9 @@ def test_labels_skip_inflated_cells_and_preserve_inputs():
     assert {text.get_color() for text in ax.texts} == {"purple"}
     nt.assert_array_equal(field, np.arange(12.0).reshape(3, 4))
     assert inflated.sum() == 1
-    assert style == {"color": "purple", "fontsize": 12}
+    assert {text.get_fontsize() for text in ax.texts} == {12}
+    assert {text.get_ha() for text in ax.texts} == {"left"}
+    assert style == {"color": "purple", "size": 12, "horizontalalignment": "left"}
     assert colorbar_style == {"label": "Cost"}
 
 

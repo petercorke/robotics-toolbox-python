@@ -14,11 +14,13 @@ from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 from spatialmath import base
 from spatialmath.base.types import R2, ArrayLike2, Points2
 
 import roboticstoolbox as rtb
 from roboticstoolbox.mobile.workspace import WorkspaceLike, resolve_workspace
+from roboticstoolbox.tools.plot import _merge_style
 from roboticstoolbox.tools.types import NDArray
 
 if TYPE_CHECKING:
@@ -105,7 +107,7 @@ class VehicleDriverBase(ABC):
             if goal_style is None:
                 goal_style = goalmarkerstyle
 
-        self._goal_style: dict[str, Any] = GOAL_STYLE | (goal_style or {})
+        self._goal_style: dict[str, Any] = _merge_style(GOAL_STYLE, goal_style, Line2D)
 
     @abstractmethod
     def demand(self) -> R2:
@@ -451,7 +453,7 @@ class PurePursuit(VehicleDriverBase):
         self._path = path
         self._lookahead = lookahead
 
-        self._path_style: dict[str, Any] = PATH_STYLE | (path_style or {})
+        self._path_style: dict[str, Any] = _merge_style(PATH_STYLE, path_style, Line2D)
 
     def __str__(self) -> str:
         """
