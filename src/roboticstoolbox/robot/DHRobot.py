@@ -309,8 +309,6 @@ class DHRobot(Robot):
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
 
-        deg = 180 / np.pi
-
         if self._hasdynamics:
             s += ", dynamics"
         if any([link.mesh is not None for link in self.links]):
@@ -322,6 +320,71 @@ class DHRobot(Robot):
             dh = "standard"
         s += f", {dh} DH parameters\n"
 
+        s += str(self.table(border))
+
+        # show tool and base
+        if tool is not None or base is not None:
+            table = ANSITable(
+                Column("", colalign=">"),
+                Column("", colalign="<"),
+                border=border,
+                header=False,
+            )
+            if base is not None:
+                table.row(
+                    "base",
+                    base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                )
+            if tool is not None:
+                table.row(
+                    "tool",
+                    tool.strline(orient="rpy/xyz", fmt="{:.2g}"),
+                )
+            s += "\n" + str(table)
+
+        # show named configurations
+        s += self.configurations_str(border=border)
+
+        return s
+
+    def table(self, border: str | None = None) -> ANSITable:
+        """
+        Table of the Denavit-Hartenberg parameters
+
+        :param border: border style of the table, any style known to
+            ``ansitable``, for example ``"ascii"``, ``"thin"`` or ``"thick"``.
+            Defaults to ``"thin"`` if the ``unicode`` parameter is set, else
+            ``"ascii"``, as used by ``print(robot)``.
+        :returns: table of the kinematic parameters, one row per link
+        :rtype: ANSITable
+
+        The table has one row per link, giving the link's kinematic parameters
+        in standard or modified DH form, as shown by ``print(robot)``, with
+        the joint limits if any link has them. Angles are in degrees. Joint
+        variables are shown as ``qj``, preceded by a minus sign if the joint
+        is flipped, and followed by the joint offset if it is not zero.
+
+        The returned object can be printed as a table with a text border, or
+        rendered in a markup format by its methods such as ``markdown()``,
+        ``latex()``, ``html()`` or ``rest()``.
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> print(robot.table())
+            >>> robot.table().markdown()
+
+        .. versionadded:: 1.5.1
+        """
+
+        if border is None:
+            border = "thin" if rtb_get_param("unicode") else "ascii"
+
+        deg = 180 / np.pi
+
         def qstr(j: Any, link: Any) -> Any:
             j += 1
             if link.isflip:
@@ -329,9 +392,9 @@ class DHRobot(Robot):
             else:
                 s = f" q{j:d}"
 
-            if L.offset != 0:
-                sign = "+" if L.offset > 0 else "-"
-                offset = abs(L.offset)
+            if link.offset != 0:
+                sign = "+" if link.offset > 0 else "-"
+                offset = abs(link.offset)
                 if link.isprismatic:
                     s += f" {sign} {offset:}"
                 else:
@@ -384,9 +447,21 @@ class DHRobot(Robot):
                 else:
                     ql = []
                 if L.isprismatic:
-                    table.row(L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
+                    table.row(
+                        format_attr(L.a),
+                        angle(L.alpha),
+                        angle(L.theta),
+                        qstr(j, L),
+                        *ql,
+                    )
                 else:
-                    table.row(L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
+                    table.row(
+                        format_attr(L.a),
+                        angle(L.alpha),
+                        qstr(j, L),
+                        format_attr(L.d),
+                        *ql,
+                    )
         else:
             # DH format
             table = ANSITable(
@@ -423,32 +498,7 @@ class DHRobot(Robot):
                         *ql,
                     )
 
-        s += str(table)
-
-        # show tool and base
-        if tool is not None or base is not None:
-            table = ANSITable(
-                Column("", colalign=">"),
-                Column("", colalign="<"),
-                border=border,
-                header=False,
-            )
-            if base is not None:
-                table.row(
-                    "base",
-                    base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
-                )
-            if tool is not None:
-                table.row(
-                    "tool",
-                    tool.strline(orient="rpy/xyz", fmt="{:.2g}"),
-                )
-            s += "\n" + str(table)
-
-        # show named configurations
-        s += self.configurations_str(border=border)
-
-        return s
+        return table
 
     # -------------------------------------------------------------------------- #
     # Properties of the links

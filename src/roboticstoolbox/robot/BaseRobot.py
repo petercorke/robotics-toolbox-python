@@ -500,6 +500,69 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         unicode = rtb_get_param("unicode")
         border = "thin" if unicode else "ascii"
 
+        s = f"{self._class_label()}: {self.name}"
+        if self.manufacturer is not None and len(self.manufacturer) > 0:
+            s += f" (by {self.manufacturer})"
+        s += f", {self.n} joints ({self.structure})"
+        if len(self.grippers) > 0:
+            s += (
+                f", {len(self.grippers)} gripper{'s' if len(self.grippers) > 1 else ''}"
+            )
+        if self.nbranches > 1:
+            s += f", {self.nbranches} branches"
+        if self._hasdynamics:
+            s += ", dynamics"
+        if any([len(link.geometry) > 0 for link in self.links]):
+            s += ", geometry"
+        if any([len(link.collision) > 0 for link in self.links]):
+            s += ", collision"
+        s += "\n"
+
+        s += str(self.table(border))
+        s += self.configurations_str(border=border)
+
+        return s
+
+    def table(self, border: str | None = None) -> ANSITable:
+        """
+        Table of the links of the robot
+
+        :param border: border style of the table, any style known to
+            ``ansitable``, for example ``"ascii"``, ``"thin"`` or ``"thick"``.
+            Defaults to ``"thin"`` if the ``unicode`` parameter is set, else
+            ``"ascii"``, as used by ``print(robot)``.
+        :returns: table of the links, one row per link
+        :rtype: ANSITable
+
+        The table has one row per link, giving its index, its name, its joint
+        index if it has a joint, the name of its parent link, and the ETS
+        from the parent link to this link, as shown by ``print(robot)``.
+
+        - Constant links are shown in blue.
+        - End-effector links are prefixed with an @
+        - Angles in degrees
+        - The robot base frame is denoted as ``BASE`` and is equal to the
+            robot's ``base`` attribute.
+
+        The returned object can be printed as a table with a text border, or
+        rendered in a markup format by its methods such as ``markdown()``,
+        ``latex()``, ``html()`` or ``rest()``.
+
+        .. rubric:: Examples
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.ETS.Panda()
+            >>> print(robot.table())
+            >>> robot.table().markdown()
+
+        .. versionadded:: 1.5.1
+        """
+
+        if border is None:
+            border = "thin" if rtb_get_param("unicode") else "ascii"
+
         table = ANSITable(
             Column("link", headalign="^", colalign=">"),
             Column("link", headalign="^", colalign="<"),
@@ -535,28 +598,7 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
                 f"{s}",
             )
 
-        s = f"{self._class_label()}: {self.name}"
-        if self.manufacturer is not None and len(self.manufacturer) > 0:
-            s += f" (by {self.manufacturer})"
-        s += f", {self.n} joints ({self.structure})"
-        if len(self.grippers) > 0:
-            s += (
-                f", {len(self.grippers)} gripper{'s' if len(self.grippers) > 1 else ''}"
-            )
-        if self.nbranches > 1:
-            s += f", {self.nbranches} branches"
-        if self._hasdynamics:
-            s += ", dynamics"
-        if any([len(link.geometry) > 0 for link in self.links]):
-            s += ", geometry"
-        if any([len(link.collision) > 0 for link in self.links]):
-            s += ", collision"
-        s += "\n"
-
-        s += str(table)
-        s += self.configurations_str(border=border)
-
-        return s
+        return table
 
     def __repr__(self) -> str:
         return str(self)

@@ -1729,6 +1729,64 @@ class TestDHRobot(unittest.TestCase):
         r5 = rp.DHRobot([l0, l1], base=sm.SE3.Tx(0.1), tool=sm.SE3.Tx(0.1))
         str(r5)
 
+    def test_table(self):
+        from ansitable import ANSITable
+
+        # the DH parameter table is the one that print(robot) shows
+        robots = [
+            rp.models.DH.Puma560(),  # standard DH
+            rp.models.DH.Panda(),  # modified DH
+            rp.models.DH.Stanford(),  # prismatic joint, joint limits
+        ]
+        l0 = rp.PrismaticMDH(offset=1.0, qlim=[-1, 1])
+        l1 = rp.RevoluteMDH(flip=True, offset=1.0, qlim=[-1, 1])
+        robots.append(rp.DHRobot([l0, l1]))  # MDH, prismatic, joint limits
+
+        for robot in robots:
+            table = robot.table()
+            self.assertIsInstance(table, ANSITable)
+            self.assertIn(str(table), str(robot))
+
+    def test_table_border(self):
+        puma = rp.models.DH.Puma560()
+        s = str(puma.table(border="ascii"))
+        lines = [line for line in s.splitlines() if line]
+        # no Unicode box-drawing characters, only ASCII + - |
+        self.assertFalse(any("\u2500" <= c <= "\u257f" for c in s))
+        for line in lines:
+            self.assertIn(line[0], "+|")
+            self.assertIn(line[-1], "+|")
+            if line[0] == "+":
+                # a rule is made only of + and -
+                self.assertTrue(set(line) <= {"+", "-"})
+        # thin border is Unicode box drawing
+        s = str(puma.table(border="thin"))
+        self.assertTrue(any("\u2500" <= c <= "\u257f" for c in s))
+
+    def test_table_markdown(self):
+        for robot in [rp.models.DH.Puma560(), rp.models.DH.Panda()]:
+            md = robot.table().markdown()
+            self.assertIsInstance(md, str)
+            lines = [line for line in md.splitlines() if line.strip()]
+            # header row, separator row, then one row per link
+            self.assertEqual(len(lines), robot.n + 2)
+            for line in lines:
+                self.assertTrue(line.startswith("|"))
+                self.assertTrue(line.rstrip().endswith("|"))
+
+    def test_table_mdh_format(self):
+        # MDH a and d are formatted like the standard DH table: 4 significant
+        # figures, and a zero shown as 0 not 0.0
+        panda = rp.models.DH.Panda()
+        self.assertTrue(panda.mdh)
+        md = panda.table().markdown()
+        rows = [line for line in md.splitlines() if line.strip()][2:]
+        cells = [[cell.strip() for cell in row.strip(" |").split("|")] for row in rows]
+        self.assertEqual(cells[0][0], "0")  # a0
+        self.assertEqual(cells[0][3], "0.333")  # d1
+        self.assertEqual(cells[3][0], "0.0825")  # a3
+        self.assertNotIn("0.0", [cell for row in cells for cell in row])
+
     def test_alpha(self):
         r0 = rp.models.DH.Puma560()
 
