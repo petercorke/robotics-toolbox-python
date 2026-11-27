@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Sequence, cast
+from typing import Any, Callable, Sequence, cast
 from typing import Literal as L
 
 import numpy as np
@@ -1200,6 +1200,25 @@ class ETS(BaseETS[ET]):
 
         return dT[-1]
 
+    def _compiled_ik(self, solver: Callable[..., Any], Tep: Any, q0: Any, *args: Any) -> Any:
+        """
+        Run a compiled solver in the joint order that :meth:`eval` reads
+
+        The compiled solvers work by position along the chain.  When the joint numbers
+        are not ``0..n-1`` in chain order, solve on a handle numbered by position, and
+        convert ``q0`` in and the solution out; see :meth:`_ik_numbering`.
+        """
+        handle, joint_numbers, keep_alive = self._ik_numbering()
+        if joint_numbers is not None and q0 is not None and len(q0) == self.n:
+            q0 = np.asarray(q0)[joint_numbers]
+        q, *rest = solver(handle, Tep, q0, *args)
+        del keep_alive  # the handle points into these, so not before the solve
+        if joint_numbers is not None:
+            q_chain = np.asarray(q)
+            q = np.empty(self.n)
+            q[joint_numbers] = q_chain
+        return (q, *rest)
+
     def ik_LM(
         self,
         Tep: NDArray | SE3,
@@ -1340,13 +1359,20 @@ class ETS(BaseETS[ET]):
         .. versionchanged:: 1.0.4
             Merged the Levenberg-Marquardt IK solvers into the ik_LM method
 
+        .. versionchanged:: 1.5.1
+            ``q0`` and the returned ``q`` are in the joint order that :meth:`eval` reads.
+            When the joint numbers are a permutation of ``0..n-1`` that is joint-number
+            order; the solution used to be in order along the chain, so it did not
+            reproduce the pose.  A sub-chain whose joint numbers are not ``0..n-1``
+            now solves correctly, and uses order along the chain.
+
         """
 
         q0 = check_q0(q0, self.n)
         mask = check_mask(mask)
 
-        q, success, iterations, searches, residual = IK_LM_c(
-            self._fknm, Tep, q0, ilimit, slimit, tol, joint_limits, mask, k, method
+        q, success, iterations, searches, residual = self._compiled_ik(
+            IK_LM_c, Tep, q0, ilimit, slimit, tol, joint_limits, mask, k, method
         )
         return IKSolution(
             q=q,
@@ -1442,13 +1468,20 @@ class ETS(BaseETS[ET]):
 
         .. seealso:: :meth:`ik_LM` :meth:`ik_GN` :meth:`ikine_NR`
 
+        .. versionchanged:: 1.5.1
+            ``q0`` and the returned ``q`` are in the joint order that :meth:`eval` reads.
+            When the joint numbers are a permutation of ``0..n-1`` that is joint-number
+            order; the solution used to be in order along the chain, so it did not
+            reproduce the pose.  A sub-chain whose joint numbers are not ``0..n-1``
+            now solves correctly, and uses order along the chain.
+
         """
 
         q0 = check_q0(q0, self.n)
         mask = check_mask(mask)
 
-        q, success, iterations, searches, residual = IK_NR_c(
-            self._fknm,
+        q, success, iterations, searches, residual = self._compiled_ik(
+            IK_NR_c,
             Tep,
             q0,
             ilimit,
@@ -1568,13 +1601,20 @@ class ETS(BaseETS[ET]):
 
         .. seealso:: :meth:`ik_LM` :meth:`ik_NR` :meth:`ikine_GN`
 
+        .. versionchanged:: 1.5.1
+            ``q0`` and the returned ``q`` are in the joint order that :meth:`eval` reads.
+            When the joint numbers are a permutation of ``0..n-1`` that is joint-number
+            order; the solution used to be in order along the chain, so it did not
+            reproduce the pose.  A sub-chain whose joint numbers are not ``0..n-1``
+            now solves correctly, and uses order along the chain.
+
         """
 
         q0 = check_q0(q0, self.n)
         mask = check_mask(mask)
 
-        q, success, iterations, searches, residual = IK_GN_c(
-            self._fknm,
+        q, success, iterations, searches, residual = self._compiled_ik(
+            IK_GN_c,
             Tep,
             q0,
             ilimit,
