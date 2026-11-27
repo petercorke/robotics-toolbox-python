@@ -35,6 +35,10 @@ async def ensure_installed(extras: tuple[str, ...] | list[str] = ()) -> bool:
 
             install = micropip.install
 
+        print(
+            "Installing roboticstoolbox-python, this takes a short time...", flush=True
+        )
+
         # spatialmath-python <= 1.1.18 lists pre-commit (a dev tool) as a runtime
         # dependency; its virtualenv requires packaging>=26.3, which conflicts with
         # the packaging 24.2 built into Pyodide, so a normal resolve fails.  Install
@@ -66,7 +70,10 @@ async def ensure_installed(extras: tuple[str, ...] | list[str] = ()) -> bool:
                         "pip install 'roboticstoolbox-python[ik]'"
                     )
         else:
-            print("Installing roboticstoolbox-python...")
+            print(
+                "Installing roboticstoolbox-python, this takes a short time...",
+                flush=True,
+            )
             requirement = "roboticstoolbox-python"
             if extras:
                 requirement += "[" + ",".join(extras) + "]"

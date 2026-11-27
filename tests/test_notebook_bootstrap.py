@@ -72,6 +72,7 @@ def test_generated_source_embeds_template_and_call():
     text = "".join(lines)
 
     assert text.startswith(sync_bootstrap.MARKER)
+    assert 'wait for the line "Running ..." below' in lines[0]
     assert "async def ensure_installed():" in text
     assert text.rstrip().endswith("COLAB = await ensure_installed()")
 
@@ -386,6 +387,39 @@ def _colab_bootstrap(monkeypatch):
     monkeypatch.setattr(bootstrap.subprocess, "run", fake_run)
     monkeypatch.setattr(bootstrap.sys, "platform", "linux")
     return bootstrap, calls, enabled
+
+
+@pytest.mark.parametrize("environment", ["JupyterLite", "Colab"])
+def test_install_message_is_flushed_before_installation(monkeypatch, environment):
+    import asyncio
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock, Mock
+
+    bootstrap, _, _ = _colab_bootstrap(monkeypatch)
+    report = Mock()
+    monkeypatch.setattr(bootstrap, "print", report, raising=False)
+    monkeypatch.setitem(
+        sys.modules, "roboticstoolbox", SimpleNamespace(__version__="test")
+    )
+
+    def check_progress(*args, **kwargs):
+        report.assert_called_once_with(
+            "Installing roboticstoolbox-python, this takes a short time...", flush=True
+        )
+
+    if environment == "JupyterLite":
+        monkeypatch.setattr(bootstrap.sys, "platform", "emscripten")
+        installer = AsyncMock(side_effect=check_progress)
+        monkeypatch.setitem(sys.modules, "piplite", SimpleNamespace(install=installer))
+        where = "in browser"
+    else:
+        installer = Mock(side_effect=check_progress)
+        monkeypatch.setattr(bootstrap.subprocess, "run", installer)
+        where = "on Colab"
+
+    asyncio.run(bootstrap.ensure_installed())
+    assert installer.called
+    report.assert_called_with(f"Running {where} using RTB vtest")
 
 
 def test_the_colab_install_includes_ipympl_and_the_widget_manager(monkeypatch):
