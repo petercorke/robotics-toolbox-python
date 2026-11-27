@@ -327,6 +327,20 @@ def test_hook_tidies_a_notebook(tmp_path):
     assert pre_commit.tidy([nb_path]) == []  # nothing left to do
 
 
+def test_hook_brings_the_bootstrap_of_other_notebooks_up_to_date(tmp_path):
+    """A bootstrap change reaches a notebook that is not in the commit."""
+    stale = tmp_path / "stale.ipynb"
+    _write_notebook(stale, [_code_cell(f"{sync_bootstrap.MARKER}\n# stale content\n")])
+    plain = tmp_path / "plain.ipynb"
+    _write_notebook(plain, [_code_cell("print(1)\n")])
+
+    assert pre_commit.sweep_bootstrap([stale, plain]) == [stale]  # no cell, no change
+
+    cell = json.loads(stale.read_text(encoding="utf-8"))["cells"][0]
+    assert "ensure_installed" in "".join(cell["source"])
+    assert pre_commit.sweep_bootstrap([stale, plain]) == []  # and then it is up to date
+
+
 def test_hook_refuses_a_notebook_with_conflict_markers(tmp_path):
     nb_path = tmp_path / "demo.ipynb"
     nb_path.write_text('{\n<<<<<<< HEAD\n}\n=======\n}\n>>>>>>> main\n', encoding="utf-8")
