@@ -1,8 +1,10 @@
 """Random configurations obey the limits of the addressed joint."""
 
 import numpy as np
+import numpy.testing as nt
 import pytest
 
+import roboticstoolbox as rtb
 from roboticstoolbox import ET, ET2, ETS, ETS2, Robot, Robot2
 
 
@@ -42,3 +44,34 @@ def test_robot_random_q_respects_joint_indices(et, robot_type, rotation) -> None
     for link in robot.links:
         if link.isjoint:
             assert link.qlim[0] <= q[link.jindex] <= link.qlim[1]
+
+
+@pytest.mark.parametrize("count", [1, 5])
+def test_seeded_ets_random_q_is_unchanged_for_an_ordinary_robot(count) -> None:
+    # Book scripts seed the generator.  For a robot whose joint indices are in link
+    # order, the vectorised draw must give the numbers that one draw per joint, in
+    # order, always gave.
+    ets = rtb.models.Panda().ets()
+    qlim = ets.qlim
+    np.random.seed(42)
+    q = ets.random_q(count)
+    np.random.seed(42)
+    expected = np.array(
+        [
+            [np.random.uniform(qlim[0, j], qlim[1, j]) for j in range(ets.n)]
+            for _ in range(count)
+        ]
+    )
+    nt.assert_allclose(q, expected[0] if count == 1 else expected, rtol=0, atol=1e-15)
+
+
+def test_seeded_robot_random_q_is_unchanged_for_an_ordinary_robot() -> None:
+    robot = rtb.models.Panda()
+    qlim = robot.qlim
+    np.random.seed(42)
+    q = robot.random_q()
+    np.random.seed(42)
+    expected = np.array(
+        [np.random.uniform(qlim[0, j], qlim[1, j]) for j in range(robot.n)]
+    )
+    nt.assert_allclose(q, expected, rtol=0, atol=1e-15)
