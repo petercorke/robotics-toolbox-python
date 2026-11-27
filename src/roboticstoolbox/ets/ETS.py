@@ -419,6 +419,11 @@ class ETS(BaseETS[ET]):
             >>> e.insert(2, f)
             >>> e
 
+        .. versionchanged:: 1.5.1
+            Editing the sequence also refreshes the cached joint indices, as well as the
+            compiled kinematics.  The joint indices used to be kept from before the edit, so a
+            chain edited into a different number of joints could fail in methods that use them,
+            such as inverse kinematics.
         """
 
         if isinstance(value, ET):
@@ -426,7 +431,7 @@ class ETS(BaseETS[ET]):
         elif isinstance(value, ETS):
             for j, et in enumerate(value):
                 self._data.insert(index + j, et)
-        self._fknm_stale = True
+        self._changed()
 
     def fkine(
         self,
@@ -1011,6 +1016,10 @@ class ETS(BaseETS[ET]):
         where the Jacobian is the first partial derivative and the Hessian is the
         second.
 
+        The result has shape ``(self.n,) * (n - 1) + (6, self.n)``. Each
+        leading axis differentiates with respect to a joint in sequence order;
+        the last two axes have the same ordering as :meth:`jacob0`.
+
         .. rubric:: Examples
 
         The following example makes a ``Panda`` robot object, and solves for the
@@ -1031,6 +1040,10 @@ class ETS(BaseETS[ET]):
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
+        .. versionchanged:: 1.5.1
+            The derivatives of order 3 and higher were wrong (they differed from finite
+            differences of the Hessian by as much as the derivative itself) and are corrected.
+            Orders 1 and 2 are unchanged.
         """
 
         # Calculate the Jacobian and Hessian
@@ -1135,6 +1148,11 @@ class ETS(BaseETS[ET]):
                 rot = np.zeros(3)
                 trn = np.zeros(3)
 
+                # H[k, :3, j] = w[min(j, k)] x v[max(j, k)].
+                # H[k, 3:, j] = w[k] x w[j] only when k precedes j:
+                # a downstream joint cannot change an upstream joint axis.
+                first, last = sorted(count[:2])
+
                 # This loop calculates a single column ([trn, rot])
                 # of the tensor for dT(x)
                 for j in range(len(indices)):
@@ -1158,11 +1176,14 @@ class ETS(BaseETS[ET]):
                     col0_rot = pdr0[tuple(idx0_slices) + (slice(3, 6), idx0_n)]
                     col1_rot = pdr1[tuple(idx1_slices) + (slice(3, 6), idx1_n)]
 
-                    # Use our indices to select the translational column from pdr1
-                    col1_trn = pdr1[tuple(idx1_slices) + (slice(0, 3), idx1_n)]
-
                     # Perform the cross product as described in the maths above
-                    rot += np.cross(col0_rot, col1_rot)
+                    if count[1] < count[0]:
+                        rot += np.cross(col0_rot, col1_rot)
+
+                    # Apply the same product rule to the ordered translational
+                    # Hessian factors, retaining each factor's derivative indices.
+                    col0_rot = pdr0[tuple(idx0_slices) + (slice(3, 6), first)]
+                    col1_trn = pdr1[tuple(idx1_slices) + (slice(0, 3), last)]
                     trn += np.cross(col0_rot, col1_trn)
 
                 pd[tuple(np.flip(count[1:])) + (slice(0, 3), count[0])] = trn

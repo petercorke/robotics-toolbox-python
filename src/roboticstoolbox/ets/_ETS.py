@@ -46,7 +46,7 @@ def _dirties_fknm(func: _F) -> _F:
     @wraps(func)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         result = func(self, *args, **kwargs)
-        self._fknm_stale = True
+        self._changed()
         return result
 
     return wrapper  # type: ignore[return-value]
@@ -611,7 +611,7 @@ class BaseETS(MutableSequence[ETT]):
     @data.setter
     def data(self, new_data: list[ETT]) -> None:
         self._data = new_data
-        self._fknm_stale = True
+        self._changed()
 
     def inv(self) -> Self:
         r"""
@@ -731,7 +731,8 @@ class BaseETS(MutableSequence[ETT]):
         :rtype: ndarray(n,) or ndarray(i,n)
 
         Generates a random q vector within the joint limits defined by
-        ``self.qlim``.
+        ``self.qlim``, in the coordinate order accepted by :meth:`fkine`.
+        A subchain with sparse joint indices returns compact coordinates.
 
         .. rubric:: Examples
 
@@ -743,20 +744,21 @@ class BaseETS(MutableSequence[ETT]):
             >>> q = ets.random_q()
             >>> q
 
+        .. versionchanged:: 1.5.1
+            The values are in joint-index order, as accepted by :meth:`fkine`, and each lies within
+            the limits of its own joint.  For a robot whose joint indices are not in link order,
+            values used to be assigned to the wrong joints and often fell outside their limits.
+            Results for other robots, including seeded ones, are unchanged.
         """
 
-        if i == 1:
-            q = np.zeros(self.n)
+        qlim = self.qlim
+        shape = (self.n,) if i == 1 else (i, self.n)
+        q = uniform(qlim[0], qlim[1], size=shape)
 
-            for i in range(self.n):
-                q[i] = uniform(self.qlim[0, i], self.qlim[1, i])
-
-        else:
-            q = np.zeros((i, self.n))
-
-            for j in range(i):
-                for i in range(self.n):
-                    q[j, i] = uniform(self.qlim[0, i], self.qlim[1, i])
+        # A full chain consumes global coordinates, even when its joints occur
+        # in a different order. Sparse subchains consume compact coordinates.
+        if self.n and np.array_equal(np.sort(self.jindices), np.arange(self.n)):
+            q[..., self.jindices] = q.copy()
 
         return q
 

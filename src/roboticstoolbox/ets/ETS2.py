@@ -261,6 +261,12 @@ class ETS2(BaseETS[ET2]):
             >>> f = ET2.R()
             >>> e.insert(2, f)
             >>> e
+
+        .. versionchanged:: 1.5.1
+            Editing the sequence also refreshes the cached joint indices, as well as the
+            compiled kinematics.  The joint indices used to be kept from before the edit, so a
+            chain edited into a different number of joints could fail in methods that use them,
+            such as inverse kinematics.
         """
 
         if isinstance(arg, ET2):
@@ -268,7 +274,7 @@ class ETS2(BaseETS[ET2]):
         elif isinstance(arg, ETS2):
             for j, et in enumerate(arg):
                 self._data.insert(i + j, et)
-        self._fknm_stale = True
+        self._changed()
 
     def fkine(
         self,
@@ -336,6 +342,7 @@ class ETS2(BaseETS[ET2]):
 
         ``T = ets.eval(q)`` evaluates forward kinematics for the robot at
         joint configuration ``q``, returning the raw ndarray.
+        An empty sequence evaluates to the identity, with base and tool applied.
 
         **Trajectory operation**: If ``q`` has multiple rows (mxn), it is considered a
         trajectory and the result is an ndarray of shape (m,3,3).
@@ -349,6 +356,10 @@ class ETS2(BaseETS[ET2]):
         .. rubric:: References
 
         - Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke
+
+        .. versionchanged:: 1.5.1
+            An empty sequence evaluates to the identity, with the base and tool applied.  It used
+            to raise ``IndexError``.
         """
 
         if q is None:
@@ -356,7 +367,7 @@ class ETS2(BaseETS[ET2]):
 
         q = self._resolve_q(q, allow_trajectory=True)
         l, _ = q.shape
-        end = self[-1]
+        end = self[-1] if self.m else None
 
         if base is None:
             bases = None
@@ -376,16 +387,20 @@ class ETS2(BaseETS[ET2]):
         else:  # pragma: nocover
             tools = tool
 
+        T: NDArray
         if l > 1:
             T = np.zeros((l, 3, 3), dtype=object)
         else:
             T = np.zeros((3, 3), dtype=object)
 
         for k, qk in enumerate(q):
-            link = end  # start with last link
-
-            jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-            Tk = link.A(qk[jindex])
+            if end is None:
+                # Constant folding can leave an empty identity sequence.
+                Tk = np.eye(3)
+            else:
+                link = end  # start with last link
+                jindex = 0 if link.jindex is None and link.isjoint else link.jindex
+                Tk = link.A(qk[jindex])
 
             if tools is not None:
                 Tk = Tk @ tools
@@ -560,6 +575,10 @@ class ETS2(BaseETS[ET2]):
         that lies outside the joint limits is rejected when ``joint_limits`` is
         True, and the search continues.
 
+        Coordinates follow :meth:`fkine`: when explicit joint indices permute
+        ``0..n-1``, ``q0`` and the returned ``q`` use joint-index order. For a
+        sparse subchain they use compact ET order.
+
         **Trajectory operation**: for a trajectory of N poses the solver is run
         once per pose, each from the same starting points, and the returned
         ``q`` has shape (N, n). ``success`` is True only if every pose was
@@ -586,6 +605,11 @@ class ETS2(BaseETS[ET2]):
         .. seealso:: :meth:`fkine` :meth:`jacob0` :meth:`ETS.ikine_LM`
 
         .. versionadded:: 1.5.0
+
+        .. versionchanged:: 1.5.1
+            ``q0`` and the returned ``q`` are in joint-index order, as for :meth:`eval`.  For a chain
+            whose joint indices are not in link order, the solution used to be in link order and did
+            not reproduce the pose.
         """
         if mask is None:
             We = np.eye(3)
@@ -617,7 +641,12 @@ class ETS2(BaseETS[ET2]):
                 )
 
         n = self.n
-        qlim = self.qlim
+        # FK interprets a full 0..n-1 vector in joint-index order, whereas
+        # limits, joint types and Jacobian columns are stored in ET order.
+        order = np.arange(n)
+        if np.array_equal(np.sort(self.jindices), order):
+            order = np.argsort(self.jindices)
+        qlim = self.qlim[:, order]
 
         if not np.all(np.isfinite(qlim)):
             bad = np.flatnonzero(~np.all(np.isfinite(qlim), axis=0))
@@ -639,7 +668,7 @@ class ETS2(BaseETS[ET2]):
             rows = min(q0a.shape[0], slimit)
             starts[:rows] = q0a[:rows]
 
-        revolute = np.array([joint.isrotation for joint in self.joints()])
+        revolute = np.array([joint.isrotation for joint in self.joints()])[order]
 
         def solve_one(T: NDArray) -> IKSolution:
             theta_d = np.arctan2(T[1, 0], T[0, 0])
@@ -692,7 +721,7 @@ class ETS2(BaseETS[ET2]):
 
                     i += 1
 
-                    J = self.jacob0(q)
+                    J = self.jacob0(q)[:, order]
                     A = J.T @ We @ J + k * E * np.eye(n)
                     g = J.T @ We @ e
 
