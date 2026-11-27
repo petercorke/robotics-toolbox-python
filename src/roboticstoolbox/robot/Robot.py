@@ -663,7 +663,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         :rtype: float
 
         A conservative estimate of the reach of the robot. It is computed as
-        the sum of the translational ETs that define the link transform.
+        the sum of the translation lengths along the longest branch, including
+        compound transforms. Base and tool transforms are not included.
 
         Computed on the first access. If kinematic parameters
         subsequently change this will not be reflected.
@@ -671,10 +672,16 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         .. rubric:: Notes
 
         - Probably an overestimate of reach
-        - Used by numerical inverse kinematics to scale translational
-          error.
-        - For a prismatic joint, uses ``qlim`` if it is set
+        - For a prismatic joint, bounds the displacement over ``qlim``,
+          including its offset and flip. Without limits, only the fixed
+          offset contributes; unbounded joint travel cannot be estimated.
 
+        .. versionchanged:: 1.5.1
+            Translation lengths are counted by magnitude, and the travel of a prismatic
+            joint accounts for its limits, offset and flip, so the estimate is a safe upper
+            bound.  A negative offset used to reduce it, and only the upper joint limit was
+            used.  The reach is used only to set the limits of robot plots, which may
+            therefore change slightly.
         """
 
         # TODO
@@ -693,12 +700,16 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                                 # joint limits.  They might be set in the ET
                                 # or in the Link depending on how the robot
                                 # was constructed
-                                if link.qlim is not None:
-                                    d += max(link.qlim)
-                                elif et.qlim is not None:  # pragma nocover
-                                    d += max(et.qlim)
+                                qlim = link.qlim if link.qlim is not None else et.qlim
+                                if qlim is not None:
+                                    travel = -qlim if et.isflip else qlim
+                                    d += max(abs(travel + et.offset))
+                                else:
+                                    d += abs(cast(float, et.offset))
                             else:
                                 d += abs(cast(float, et.param))
+                        elif not et.iselementary:
+                            d += float(np.linalg.norm(et.A()[:-1, -1]))
                     link = link.parent  # type: ignore[assignment]
                     if link is None or isinstance(link, str):
                         d_all.append(d)
@@ -1413,6 +1424,13 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         world frame which connect the line of length distance between the
         shapes. If the distance is negative then the shapes are collided.
 
+        Includes collision geometry on all grippers, using each gripper's
+        own current joint configuration.
+
+        .. versionchanged:: 1.5.1
+            Collision geometry on the grippers is included.  Only the arm links were
+            considered, so the distance could be too large when a gripper was the nearest
+            part of the robot.  :meth:`iscollided` is unchanged.
         """
 
         if not skip:
@@ -1424,7 +1442,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         p1 = None
         p2 = None
 
-        for link in self.links:
+        links = [*self.links, *(link for g in self.grippers for link in g.links)]
+        for link in links:
             td, tp1, tp2 = link.closest_point(shape, inf_dist, skip=True)
 
             if td is not None and d is not None and td < d:
@@ -1611,11 +1630,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         """
         Compute the joint velocity damper for QP motion control
 
+        :param q: joint coordinates in joint-index order, defaults to the
+            robot's current configuration
         :param ps: The minimum angle (in radians) in which the joint is
             allowed to approach to its limit
         :param pi: The influence angle (in radians) in which the velocity
             damper becomes active
-        :param n: The number of joints to consider. Defaults to all joints
+        :param n: The number of leading joint coordinates to consider.
+            Defaults to all joints
         :param gain: The gain for the velocity damper
         :returns: tuple of (Ain, Bin) inequality constraint matrices for an optimiser
 
@@ -1624,6 +1646,11 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         the joint limits of the robot to be specified. See examples/mmc.py
         for use case.
 
+        .. versionchanged:: 1.5.1
+            ``q`` and the rows and columns of the result are in joint-index order, and the
+            joint limits are now taken in the same order.  For a robot whose joint indices
+            are not in link order, the damper used another joint's limits and could leave
+            out the constraint for a joint that was close to its own limit.
         """
 
         if n is None:
@@ -1635,12 +1662,20 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Ain = np.zeros((n, n))
         Bin = np.zeros(n)
 
+        if n == 0:
+            return Ain, Bin
+
+        # qlim follows link order, whereas q and the constraint columns follow
+        # joint indices. These orders can differ in an explicitly indexed robot.
+        jindices = [link.jindex for link in self.links if link.isjoint]
+        qlim = self.qlim[:, np.argsort(jindices)]
+
         for i in range(n):
-            if q[i] - self.qlim[0, i] <= pi:
-                Bin[i] = -gain * (((self.qlim[0, i] - q[i]) + ps) / (pi - ps))
+            if q[i] - qlim[0, i] <= pi:
+                Bin[i] = -gain * (((qlim[0, i] - q[i]) + ps) / (pi - ps))
                 Ain[i, i] = -1
-            if self.qlim[1, i] - q[i] <= pi:
-                Bin[i] = gain * ((self.qlim[1, i] - q[i]) - ps) / (pi - ps)
+            if qlim[1, i] - q[i] <= pi:
+                Bin[i] = gain * ((qlim[1, i] - q[i]) - ps) / (pi - ps)
                 Ain[i, i] = 1
 
         return Ain, Bin
@@ -1673,6 +1708,16 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         make it impossible for the robot to run into a collision. Requires
         See examples/neo.py for use case.
 
+        The contact-point Jacobian and the obstacle's translational velocity
+        are projected onto the separation normal in world coordinates.
+
+        .. versionchanged:: 1.5.1
+            The contact-point Jacobian is now evaluated at the closest point and in world
+            axes, including the lever arm from the link origin.  It used to be the Jacobian
+            of the link origin in the link frame, so a constraint matched the true rate of
+            change of the distance only for the first links of a chain, and the error grew
+            with the number of joints before the link.  Constrained motion that uses this
+            damper changes accordingly.
         """
 
         end, start, _ = self._get_limit_links(start=start, end=end)
@@ -1704,22 +1749,19 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     axis=0,
                 )
 
-                # tool = (self.fkine(q, end=link).inv() * SE3(wTlp)).A[:3, 3]
-
-                # Je = self.jacob0(q, end=link, tool=tool)
-                # Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
-
-                # n_dim = Je.shape[1]
-                # dp = norm_h @ shape.v
-                # l_Ain = zeros((1, self.n))
-
-                Je = self.jacobe(q, start=start, end=link, tool=link_col.T)
-                n_dim = Je.shape[1]
+                # Transform the link-origin body Jacobian to the closest
+                # point in world axes, including the contact's lever arm.
+                # Ignore the robot's end-effector tool for this link pose.
+                wTl = self.fkine(q, end=link, tool=SE3())
+                cTl = SE3(wTlp).inv() * wTl
+                Jlink = self.jacobe(q, start=start, end=link, tool=SE3())
+                Jc = cTl.Ad() @ Jlink
+                n_dim = Jc.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = np.zeros((1, self.n))
 
                 start_jidx = get_link_joint_index(start)
-                l_Ain[0, start_jidx : start_jidx + n_dim] = 1 * norm_h @ Je
+                l_Ain[0, start_jidx : start_jidx + n_dim] = norm_h @ Jc
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
             else:  # pragma nocover
                 l_Ain = None
@@ -2321,7 +2363,8 @@ class Robot2(BaseRobot[Link2]):
         :rtype: float
 
         A conservative estimate of the reach of the robot. It is computed as
-        the sum of the translational ETs that define the link transform.
+        the sum of the translation lengths along the longest branch, including
+        compound transforms. Base and tool transforms are not included.
 
         Computed on the first access. If kinematic parameters
         subsequently change this will not be reflected.
@@ -2329,9 +2372,9 @@ class Robot2(BaseRobot[Link2]):
         .. rubric:: Notes
 
         - Probably an overestimate of reach
-        - Used by numerical inverse kinematics to scale translational
-          error.
-        - For a prismatic joint, uses ``qlim`` if it is set
+        - For a prismatic joint, bounds the displacement over ``qlim``,
+          including its offset and flip. Without limits, only the fixed
+          offset contributes; unbounded joint travel cannot be estimated.
 
         """
 
@@ -2351,12 +2394,16 @@ class Robot2(BaseRobot[Link2]):
                                 # joint limits.  They might be set in the ET
                                 # or in the Link depending on how the robot
                                 # was constructed
-                                if link.qlim is not None:
-                                    d += max(link.qlim)
-                                elif et.qlim is not None:  # pragma nocover
-                                    d += max(et.qlim)
+                                qlim = link.qlim if link.qlim is not None else et.qlim
+                                if qlim is not None:
+                                    travel = -qlim if et.isflip else qlim
+                                    d += max(abs(travel + et.offset))
+                                else:
+                                    d += abs(cast(float, et.offset))
                             else:
                                 d += abs(cast(float, et.param))
+                        elif not et.iselementary:
+                            d += float(np.linalg.norm(et.A()[:-1, -1]))
                     link = link.parent  # type: ignore[assignment]
                     if link is None or isinstance(link, str):
                         d_all.append(d)
