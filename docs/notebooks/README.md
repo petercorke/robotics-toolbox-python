@@ -44,13 +44,16 @@ and every commit that includes a notebook first tidies it: no outputs or executi
 counts, a cell id on every cell, the same kernel and language in the metadata (an editor
 writes the name and version of your Python environment, which is noise in every diff),
 and the file written as Jupyter writes it, so that opening and saving a notebook never
-shows up as a change.  It refuses the commit, with a message, if a notebook still has
+shows up as a change.  It also brings the generated bootstrap cell of every other
+notebook up to date, so a change to `_rtb_nb_bootstrap.py` is committed alone, touches
+no notebook, and reaches them in the next commit that includes any notebook.  It refuses the commit, with a message, if a notebook still has
 merge conflict markers.
 
 Without the hook, run `python docs/notebooks/clear_outputs.py` before committing, and
-`python docs/notebooks/sync_bootstrap.py` after changing `_rtb_nb_bootstrap.py` or a
-notebook's `rtb_bootstrap` metadata.  `docs.yml` runs both with `--check`, so CI tells you
-if you forgot.
+`python docs/notebooks/sync_bootstrap.py` after changing a notebook's `rtb_bootstrap`
+metadata.  `docs.yml` runs both with `--check` on the notebooks that a PR changes, so CI
+tells you if you forgot.  Notebooks a PR leaves alone are not checked: they follow the
+bootstrap at the next commit that touches a notebook.
 
 ## Outputs are not committed
 
