@@ -1861,7 +1861,8 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
         Return a random joint configuration
 
         The value for each joint is uniform randomly distributed  between the
-        limits set for the robot.
+        limits set for the robot. Values are addressed by joint index, as in
+        the robot's configuration vector.
 
         .. rubric:: Notes
 
@@ -1871,12 +1872,20 @@ class BaseRobot(SceneNode, DynamicsMixin, RobotPlottingMPLMixin, ABC, Generic[Li
 
         .. seealso:: :meth:`~roboticstoolbox.robot.Robot.Robot.qlim` :meth:`~roboticstoolbox.robot.Link.Link.qlim`
 
+        .. versionchanged:: 1.5.1
+            The values are in joint-index order, as accepted by :meth:`fkine`, and each lies within
+            the limits of its own joint.  For a robot whose joint indices are not in link order,
+            values used to be assigned to the wrong joints and often fell outside their limits.
+            Results for other robots, including seeded ones, are unchanged.
         """
 
         qlim = self.qlim
         if np.any(np.isnan(qlim)):
             raise ValueError("some joint limits not defined")  # pragma nocover
-        return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+        q = np.empty(self.n)
+        indices = [link.jindex for link in self.links if link.jindex is not None]
+        q[indices] = np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+        return q
 
     def hierarchy(self) -> None:
         """
