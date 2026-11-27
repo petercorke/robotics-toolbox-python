@@ -686,26 +686,39 @@ class DHRobot(Robot):
         :rtype: float
 
         A conservative estimate of the reach of the robot. It is computed as
-        :math:`\sum_j |a_j| + |d_j|` where :math:`d_j` is taken as the maximum
-        joint coordinate (``qlim``) if the joint is primsmatic.
+        :math:`\sum_j |a_j| + |d_j|`. For a prismatic joint, :math:`|d_j|` is
+        the largest displacement over ``qlim``, including the joint offset
+        and flip. Base and tool transforms are not included.
 
         .. note::
 
             - This is the *length sum* referred to in Craig's book
             - Probably an overestimate of the actual reach
-            - Used by numerical inverse kinematics to scale translational
-              error.
-            - For a prismatic joint, uses ``qlim`` if it is set
+            - Without prismatic joint limits, only the fixed offset
+              contributes; unbounded joint travel cannot be estimated.
 
         .. warning:: Computed on the first access. If kinematic parameters
               subsequently change this will not be reflected.
+
+        .. versionchanged:: 1.5.1
+            Link lengths are counted by magnitude, and the travel of a prismatic joint
+            accounts for its limits, offset and flip, so the estimate is a safe upper bound.
+            A negative ``d`` used to reduce it, and only the upper joint limit was used.  The
+            reach is used only to set the limits of robot plots, which may therefore change
+            slightly.
         """
         if self._reach is None:
             d = 0
             for link in self:
-                d += abs(link.a) + (link.d)
-                if link.isprismatic and link.qlim is not None:
-                    d += link.qlim[1]
+                d += abs(link.a)
+                if link.isprismatic:
+                    if link.qlim is not None:
+                        travel = -link.qlim if link.isflip else link.qlim
+                        d += max(abs(travel + link.offset))
+                    else:
+                        d += abs(link.offset)
+                else:
+                    d += abs(link.d)
             self._reach = d
         return self._reach
 

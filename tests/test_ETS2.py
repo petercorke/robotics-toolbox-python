@@ -75,6 +75,33 @@ class TestETS2(unittest.TestCase):
         self.assertEqual(r.n, 0)
         self.assertEqual(r.m, 0)
 
+    def test_empty_evaluation(self) -> None:
+        ets = rtb.ETS2()
+        nt.assert_array_equal(ets.eval(), np.eye(3))
+        nt.assert_array_equal(ets.fkine().A, np.eye(3))
+        nt.assert_array_equal(ets.eval(np.empty((2, 0))), [np.eye(3), np.eye(3)])
+        self.assertEqual(ets.jacob0([]).shape, (3, 0))
+        self.assertEqual(ets.jacobe([]).shape, (3, 0))
+
+    def test_empty_base_and_tool(self) -> None:
+        ets = rtb.ETS2()
+        base = SE2(1, -2, 0.3)
+        tool = SE2(-0.5, 0.7, -0.4)
+        for as_matrix in (False, True):
+            with self.subTest(as_matrix=as_matrix):
+                b, t = (base.A, tool.A) if as_matrix else (base, tool)
+                nt.assert_allclose(ets.eval(base=b, tool=t), (base * tool).A)
+                nt.assert_allclose(
+                    ets.fkine(base=b, tool=t, include_base=False).A, tool.A
+                )
+
+    def test_compile_identity_evaluates(self) -> None:
+        for ets in (rtb.ETS2(R(0)), tx(1) * tx(-1)):
+            with self.subTest(ets=ets):
+                compiled = ets.compile()
+                self.assertEqual(compiled.m, 0)
+                nt.assert_array_equal(compiled.fkine().A, ets.fkine().A)
+
     def test_str(self):
         rx = R(1.543)
         ry = R(1.543)
