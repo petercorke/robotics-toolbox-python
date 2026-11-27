@@ -108,7 +108,7 @@ class TestLandmarkMap(unittest.TestCase):
 
     def test_plot_style_is_merged_over_defaults(self):
         # any keyword used to drop the whole default style
-        LandmarkMap(5, workspace=10).plot(label="mine", color="r")
+        LandmarkMap(5, workspace=10).plot(label="mine", c="r")
         (line,) = plt.gca().lines
         self.assertEqual(line.get_label(), "mine")
         self.assertEqual(line.get_color(), "r")

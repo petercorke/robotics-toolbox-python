@@ -5,11 +5,12 @@ from abc import ABC
 from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
-from roboticstoolbox.tools.plot import apply_block
+from roboticstoolbox.tools.plot import _merge_style, apply_block
 import numpy as np
 import scipy.ndimage as sp
 import spatialmath.base as smb
 from matplotlib import patheffects
+from matplotlib.text import Text
 from spatialmath.base.types import R2, R4, ArrayLike2, ArrayLike4
 from spatialmath.geom2d import Polygon2
 from typing_extensions import Self
@@ -496,14 +497,15 @@ class BaseOccupancyGrid(BaseMap):
         free = np.isfinite(field) & ~self.grid.astype(bool)
         values = field[free]
         integral = bool(np.all(values == np.round(values)))
-        style: dict[str, Any] = {
+        defaults: dict[str, Any] = {
             "ha": "center",
             "va": "center",
             "fontsize": 8,
             "color": "red",
             "path_effects": [patheffects.withStroke(linewidth=2, foreground="white")],
             "zorder": 5,
-        } | (label_style or {})
+        }
+        style = _merge_style(defaults, label_style, Text)
         for r, c in np.argwhere(free):
             x, y = self.g2w((c, r))
             value = field[r, c]

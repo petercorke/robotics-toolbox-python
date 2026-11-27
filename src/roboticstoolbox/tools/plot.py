@@ -5,6 +5,8 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.artist import Artist
+from matplotlib.cbook import normalize_kwargs
 
 
 #: the view of each plane, for ``view_init``, which is exact: in each the first named
@@ -17,6 +19,15 @@ _PLANE_VIEWS: dict[str, dict[str, float]] = {
     # looking from +X: y to the right, z up
     "yz": {"elev": 0, "azim": 0},
 }
+
+
+def _merge_style(
+    defaults: dict[str, Any], overrides: dict[str, Any] | None, artist: type[Artist]
+) -> dict[str, Any]:
+    """Merge plotting options after resolving each dictionary's Matplotlib aliases."""
+    return normalize_kwargs(defaults, artist) | normalize_kwargs(
+        overrides or {}, artist
+    )
 
 
 def plane_view(plane: str) -> dict[str, float]:

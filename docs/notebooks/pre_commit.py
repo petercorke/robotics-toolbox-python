@@ -3,7 +3,9 @@
 
 Notebooks are committed without outputs, with the same kernel and metadata, and written
 as Jupyter writes them (see README.md).  This does that for the notebooks in the commit,
-so that editing a notebook in VS Code and committing it is all there is to do.  CI runs
+so that editing a notebook in VS Code and committing it is all there is to do.  It also
+brings the bootstrap cell of every other notebook up to date, which is how a change to
+``_rtb_nb_bootstrap.py`` reaches them without touching them in the commit that makes it.  CI runs
 the same checks, but never has to complain.
 
 Install it once, in any clone or worktree of the repository:
@@ -70,6 +72,21 @@ def tidy(paths: list[Path]) -> list[Path]:
     return changed
 
 
+def sweep_bootstrap(paths: list[Path]) -> list[Path]:
+    """Bring the bootstrap cell of notebooks that are not being committed up to date.
+
+    A change to ``_rtb_nb_bootstrap.py`` is committed on its own and touches no
+    notebook.  The next commit that includes any notebook carries the new cell into
+    all of them, so a bootstrap change is one file, and the notebooks follow.
+
+    :param paths: the notebooks to bring up to date
+    :returns: the ones that were changed
+    """
+    sync_bootstrap = _load("sync_bootstrap")
+    template = (HERE / "_rtb_nb_bootstrap.py").read_text(encoding="utf-8")
+    return [p for p in paths if sync_bootstrap.process_notebook(p, template, fix=True)]
+
+
 def install(hooks_dir: Path) -> str:
     """Write the hook that runs this script before every commit.
 
@@ -106,6 +123,11 @@ def main() -> int:
         return 0
 
     changed = tidy(paths)
+    others = [p for p in sorted(HERE.glob("*.ipynb")) if p not in paths]
+    swept = sweep_bootstrap(others)
+    changed += swept
+    for path in swept:
+        print(f"brought the bootstrap cell of {path.name} up to date")
     if changed:
         subprocess.run(["git", "add", "--", *map(str, changed)], check=True)
         for path in changed:

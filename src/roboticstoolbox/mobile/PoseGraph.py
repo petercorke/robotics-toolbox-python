@@ -18,11 +18,15 @@ import pgraph
 import scipy.sparse
 import scipy.sparse.linalg
 import spatialmath.base as smb
+from matplotlib.cbook import normalize_kwargs
+from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
 from progress.bar import FillingCirclesBar
 from spatialmath import SE2
 
 import roboticstoolbox as rtb
 from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid
+from roboticstoolbox.tools.plot import _merge_style
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 #: default Matplotlib style of the vertices and edges drawn by :meth:`PoseGraph.plot`,
@@ -442,7 +446,7 @@ class PoseGraph:
         """
         if pause <= 0:
             raise ValueError("pause must be greater than zero")
-        style = dict(markersize=10) | kwargs
+        style = _merge_style({"markersize": 10}, kwargs, Line2D)
         for i in smb.getvector(n):
             x, y = self.scanxy(int(i))
             plt.plot(x, y, ".", **style)
@@ -524,8 +528,8 @@ class PoseGraph:
         self.graph.plot(
             color_components=False,
             force_2d=True,
-            vertex_opt=VERTEX_STYLE | (vertex_style or {}),
-            edge_opt=EDGE_STYLE | (edge_style or {}),
+            vertex_opt=_merge_style(VERTEX_STYLE, vertex_style, Line2D),
+            edge_opt=_merge_style(EDGE_STYLE, edge_style, FancyArrowPatch),
             **kwargs,
         )
         plt.xlabel("x")
@@ -662,10 +666,12 @@ class PoseGraph:
                     edge_style = value
 
         eprev = math.inf
-        eo = edge_style or {}
-
-        if animate and retain:
-            colors = plt.cm.Greys(np.linspace(0.3, 1, iterations))
+        if animate:
+            eo = normalize_kwargs(edge_style or {}, FancyArrowPatch)
+            if vertex_style is not None:
+                kwargs["vertex_opt"] = normalize_kwargs(vertex_style, Line2D)
+            if retain:
+                colors = plt.cm.Greys(np.linspace(0.3, 1, iterations))
 
         for i in range(iterations):
             if animate:
@@ -679,8 +685,6 @@ class PoseGraph:
                     eopt = eo
                 else:
                     eopt = {**eo, **dict(color=tuple(colors[i, :]), label=i)}
-                if vertex_style is not None:
-                    kwargs["vertex_opt"] = vertex_style
                 self.graph.plot(
                     edge_opt=eopt,
                     force_2d=True,
