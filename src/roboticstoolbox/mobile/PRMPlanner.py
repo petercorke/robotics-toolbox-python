@@ -165,6 +165,8 @@ class PRMPlanner(PlannerBase):
         graph = self._graph
         if occgrid is None or graph is None:
             raise ValueError("no occupancy grid or graph")
+        if npoints > 0 and np.all(occgrid.grid):
+            raise NoPathError("occupancy grid has no free cells")
 
         self.progress_start(npoints)
 
@@ -246,6 +248,8 @@ class PRMPlanner(PlannerBase):
         :param dist_thresh: distance threshold, defaults to ``dist_thresh`` given
             to constructor
         :param animate: deprecated, animating the planning is not implemented
+        :raises NoPathError: points were requested but the occupancy grid has
+            no free cells
 
         Create a probabilistic roadmap.  This is a graph connecting points
         randomly selected from the free space of the occupancy grid. Edges are

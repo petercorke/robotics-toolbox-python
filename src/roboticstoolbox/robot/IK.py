@@ -386,6 +386,13 @@ class IKSolver(ABC):
         .. versionchanged:: 1.5.0
             For a trajectory, ``residual`` is now the maximum over the poses,
             previously it was the minimum, which hid poses that were solved badly.
+
+        .. versionchanged:: 1.5.1
+            ``q0`` and the returned ``q`` are in the joint order that
+            :meth:`ETS.eval` reads.  When the joint numbers are a permutation of
+            ``0..n-1`` that is joint-number order; the solution used to be in order
+            along the chain, so it did not reproduce the pose.  A sub-chain whose joint
+            numbers are not ``0..n-1`` is unchanged and uses order along the chain.
         """
         # Get the largest jindex in the ETS. If this is greater than ETS.n
         # then we need to pad the q vector with zeros
@@ -405,12 +412,12 @@ class IKSolver(ABC):
         if q0a is not None and q0a.ndim == 1:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
 
-            q0_method[0, ets.jindices] = q0a
+            q0_method[0, self._user_order(ets)] = q0a
 
         if q0a is not None and q0a.ndim == 2:
             q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
 
-            q0_method[: q0a.shape[0], ets.jindices] = q0a
+            q0_method[: q0a.shape[0], self._user_order(ets)] = q0a
 
         q0 = q0_method
 
@@ -471,6 +478,22 @@ class IKSolver(ABC):
 
         return sol
 
+    @staticmethod
+    def _user_order(ets: ETS) -> NDArray:
+        """
+        Where the joint values that the user gives and receives sit in the solver's vector
+
+        The solver keeps one value per joint number, but updates and limits them in
+        order along the chain.  The user's ``q0`` and the returned ``q`` are in the
+        order that :meth:`ETS.eval` reads a length-n vector: joint-number order if the
+        joint numbers are a permutation of ``0..n-1``, else (a sub-chain such as
+        ``7..13``) order along the chain.
+        """
+        jindices = np.asarray(ets.jindices)
+        if np.array_equal(np.sort(jindices), np.arange(ets.n)):
+            return np.arange(ets.n)
+        return jindices
+
     def _solve(self, ets: ETS, Tep: NDArray, q0: NDArray) -> IKSolution:
         # Iteration count
         i = 0
@@ -479,6 +502,7 @@ class IKSolver(ABC):
         # Error flags
         found_with_limits = False
         linalg_error = 0
+        diverged = 0
 
         # Initialise variables
         E = np.inf
@@ -521,7 +545,7 @@ class IKSolver(ABC):
                         if self.verbose:
                             self._log("Converged", E, "accepted")
                         return IKSolution(
-                            q=q[ets.jindices],
+                            q=q[self._user_order(ets)],
                             success=True,
                             iterations=total_i + i,
                             searches=search + 1,
@@ -547,6 +571,22 @@ class IKSolver(ABC):
                         self._log("Abandoned", E, "numpy.linalg.LinAlgError")
                     break
 
+                except ValueError:
+                    # step() updates q in place, so q shows what went wrong. If
+                    # it is no longer finite the search has diverged, and the
+                    # pure-Python fkine raises where the compiled one returns
+                    # NaN. Anything else is a genuine error.
+                    if np.all(np.isfinite(q[ets.jindices])):
+                        raise
+                    E = np.inf
+
+                if not np.isfinite(E):
+                    # Abandon search and try again, there is no way back from NaN
+                    diverged += 1
+                    if self.verbose:
+                        self._log("Abandoned", E, "search diverged")
+                    break
+
             total_i += i
 
         # If we make it here, then we have failed
@@ -555,11 +595,14 @@ class IKSolver(ABC):
         if linalg_error:
             reason += f", {linalg_error} numpy.LinAlgError encountered"
 
+        if diverged:
+            reason += f", {diverged} searches diverged"
+
         if found_with_limits:
             reason += ", solution found but violates joint limits"
 
         return IKSolution(
-            q=q[ets.jindices],
+            q=q[self._user_order(ets)],
             success=False,
             iterations=total_i,
             searches=self.slimit,

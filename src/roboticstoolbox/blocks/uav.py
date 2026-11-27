@@ -6,6 +6,8 @@ from typing import Any
 import numpy as np
 from bdsim.block_types import ContinuousBlock, FunctionBlock, GraphicsBlock
 
+from roboticstoolbox.tools.types import NDArray
+
 
 class MultiRotor(ContinuousBlock):
     r"""
@@ -88,12 +90,32 @@ class MultiRotor(ContinuousBlock):
         - SI units are used.
         - Rotor velocity is defined looking down, clockwise from the front rotor
           which lies on the x-axis.
+        - The state holds the translational velocity in the world frame, whereas the
+          equations of the paper below are written in body axes.  The relative air
+          velocity at rotor :math:`i`, equation (15) of the paper,
+          :math:`V_{ri} = V + \Omega \times D_i`, is therefore evaluated with the world
+          velocity rotated into the body frame, :math:`R^\top v`.
 
     :References:
         - Design, Construction and Control of a Large Quadrotor micro air vehicle.
           P.Pounds, `PhD thesis <https://openresearch-repository.anu.edu.au/handle/1885/146543>`_
           Australian National University, 2007.
+        - Modelling and Control of a Quad-Rotor Robot.
+          P. Pounds, R. Mahony and P. Corke.  Proc. Australasian Conference on Robotics
+          and Automation (ACRA), 2006.  Equation numbers in these notes refer to this
+          paper.
         - Robotics, Vision & Control by Peter Corke, sec 4.2 in all editions
+
+    .. versionchanged:: 1.5.1
+        The relative air velocity at each rotor is now computed with the translational
+        velocity expressed in the body frame, as in equation (15) of the paper.  The
+        world-frame velocity used to be added to body-frame terms unrotated, as in the
+        original MATLAB code, so the result depended on the heading of the vehicle.
+        The simulated motion of a moving, rotated vehicle differs slightly from earlier
+        releases (about 0.05 m/s\ :sup:`2` in a typical example); hover is unchanged.
+        A four-value initial state ``[x, y, z, yaw]`` now sets the yaw, where it used to
+        set the roll, and models with more than four rotors no longer raise an
+        ``IndexError``.
 
     .. seealso:: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
     """
@@ -169,8 +191,9 @@ class MultiRotor(ContinuousBlock):
         :type groundcheck: bool
         :param speedcheck: Check for non-positive rotor speed, defaults to True
         :type speedcheck: bool
-        :param x0: Initial state, defaults to None
-        :type x0: array_like(6) or array_like(12), optional
+        :param x0: Initial state, defaults to None. A four-value state is
+            ``[x, y, z, yaw]`` with zero pitch, roll and velocities.
+        :type x0: array_like(3), array_like(4), array_like(6) or array_like(12), optional
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
@@ -187,23 +210,7 @@ class MultiRotor(ContinuousBlock):
             raise ValueError("Must have an even number of rotors")
 
         self.nstates = 12
-        if x0 is None:
-            x0 = np.zeros((self.nstates,))
-        else:
-            x0 = np.r_[x0]
-            if len(x0) == 6:
-                # assume all derivative are zero
-                x0 = np.r_[x0, np.zeros((6,))]
-            elif len(x0) == 4:
-                # assume x,y,z,yaw
-                x0 = np.r_[x0[:3], 0, 0, x0[3], np.zeros((6,))]
-            elif len(x0) == 3:
-                # assume x,y,z
-                x0 = np.r_[x0[:3], np.zeros((9,))]
-            elif len(x0) != self.nstates:
-                raise ValueError("x0 is the wrong length")
-
-        self._x0 = x0
+        self._x0 = self._initial_state(x0)
 
         self.nrotors = nrotors
         self.model = model
@@ -224,6 +231,39 @@ class MultiRotor(ContinuousBlock):
 
         self.a1s = np.zeros((self.nrotors,))
         self.b1s = np.zeros((self.nrotors,))
+
+        self.add_param("model", when="never")  # fixes the rotors, which fix the input
+        self.add_param("groundcheck")
+        self.add_param("speedcheck")
+        self.add_param("x0", when="setup", coerce=False)  # the setter expands short forms
+
+    @staticmethod
+    def _initial_state(x0: Any) -> NDArray:
+        """The 12-element initial state from a full state, or one of the short forms."""
+        if x0 is None:
+            return np.zeros((12,))
+        x0 = np.r_[x0]
+        if len(x0) == 6:
+            # assume all derivative are zero
+            return np.r_[x0, np.zeros((6,))]
+        elif len(x0) == 4:
+            # assume x,y,z,yaw
+            return np.r_[x0[:3], x0[3], 0, 0, np.zeros((6,))]
+        elif len(x0) == 3:
+            # assume x,y,z
+            return np.r_[x0[:3], np.zeros((9,))]
+        elif len(x0) != 12:
+            raise ValueError("x0 is the wrong length")
+        return x0
+
+    @property
+    def x0(self) -> NDArray:
+        """Initial state, a full state or the short forms x,y,z / x,y,z,yaw / pose."""
+        return self._x0
+
+    @x0.setter
+    def x0(self, value: Any) -> None:
+        self._x0 = self._initial_state(value)
 
     def output(self, t: Any, inports: Any, x: Any) -> Any:
 
@@ -314,7 +354,7 @@ class MultiRotor(ContinuousBlock):
         z = x[0:3]  # position in {W}
         n = x[3:6]  # RPY angles {W}
         v = x[6:9]  # velocity in {W}
-        o = x[9:12]  # angular velocity in {W}
+        o = x[9:12]  # angular velocity in {B}
 
         # PREPROCESS ROTATION AND WRONSKIAN MATRICES
         phi = n[0]  # yaw
@@ -369,16 +409,22 @@ class MultiRotor(ContinuousBlock):
         #       cos(the) sin(psi)*sin(the) cos(psi)*sin(the)] / cos(the);
 
         # ROTOR MODEL
-        T = np.zeros((3, 4))
-        Q = np.zeros((3, 4))
-        tau = np.zeros((3, 4))
+        T = np.zeros((3, self.nrotors))
+        Q = np.zeros((3, self.nrotors))
+        tau = np.zeros((3, self.nrotors))
 
         a1s = self.a1s
         b1s = self.b1s
 
+        # Rotor positions and angular velocity use body axes; express the
+        # translational velocity in that same frame before adding them, as in
+        # equation (15) of Pounds, Mahony and Corke, "Modelling and control of a
+        # quad-rotor robot": V_ri = V + Omega x D_i, with V in the body frame.
+        v_body = R.T @ v
+
         for i in range(0, self.nrotors):  # for each rotor
             # Relative motion
-            Vr = np.cross(o, self.D[:, i]) + v
+            Vr = np.cross(o, self.D[:, i]) + v_body
             mu = sqrt(np.sum(Vr[0:2] ** 2)) / (
                 abs(w[i]) * model["r"]
             )  # Magnitude of mu, planar components
@@ -567,6 +613,28 @@ class MultiRotorMixer(FunctionBlock):
         self.Minv = np.linalg.inv(self.M)
         self.signs = np.array(s)
 
+        self.add_param("model", when="never")  # builds the mixer matrix
+        self.add_param("wmax")
+        self.add_param("wmin")
+
+    @property
+    def wmax(self) -> float:
+        """Maximum rotor speed."""
+        return float(np.sqrt(self.maxw))
+
+    @wmax.setter
+    def wmax(self, value: float) -> None:
+        self.maxw = value**2
+
+    @property
+    def wmin(self) -> float:
+        """Minimum rotor speed."""
+        return float(np.sqrt(self.minw))
+
+    @wmin.setter
+    def wmin(self, value: float) -> None:
+        self.minw = value**2
+
     def output(self, t: Any, inports: Any, x: Any) -> Any:
         tau = inports
 
@@ -702,6 +770,11 @@ class MultiRotorPlot(GraphicsBlock):
         self.nrotors = model["nrotors"]
         self.projection = projection
         self.flapscale = flapscale
+
+        self.add_param("model", when="never")  # fixes the rotors
+        self.add_param("scale", when="setup", coerce=False)  # start() sets the limits
+        self.add_param("flapscale")
+        self.add_param("projection", when="setup")  # start() sets it
 
     def start(self, simstate: Any) -> None:
         super().start(simstate)

@@ -1235,5 +1235,70 @@ class TestPathTiming(unittest.TestCase):
         self._assert_c_faster(t_c, t_py)
 
 
+class TestRobotLinkTReference(unittest.TestCase):
+    """
+    The scene-node transforms that place a link's geometry follow the joints.
+
+    Runs on whichever path is active.  Without the compiled extension the
+    transforms used to be left at their initial values, so collision checks
+    and distance queries ran against geometry that did not move.
+    """
+
+    @staticmethod
+    def _world_pose(link):
+        # chain the local scene-node transforms up the kinematic tree
+        T = link._T_reference.copy()
+        while link.parent is not None:
+            link = link.parent
+            T = link._T_reference @ T
+        return T
+
+    def test_geometry_follows_joints(self):
+        panda = rtb.models.Panda()
+        for q in (panda.qr, panda.qr + 0.4 * np.arange(1, 8) / 7):
+            panda.q = q
+            panda._update_link_tf()
+            for link in panda.links:
+                with self.subTest(link=link.name, q=q):
+                    nt.assert_allclose(
+                        self._world_pose(link),
+                        panda.fkine(q, end=link).A,
+                        atol=1e-9,
+                    )
+
+    def test_gripper_without_joints(self):
+        # an empty joint vector, and a link with no elementary transforms
+        ur5 = rtb.models.UR5()
+        ur5.q = np.zeros(ur5.n)
+        ur5._update_link_tf()
+        self.assertEqual(ur5.grippers[0].n, 0)
+        for link in ur5.links:
+            self.assertTrue(np.all(np.isfinite(link._T_reference)))
+
+
+class TestEmptyETSReference(unittest.TestCase):
+    """
+    An ETS with no elementary transforms evaluates to the identity.
+
+    Runs on whichever path is active.  The pure-Python path used to raise
+    IndexError, which also broke ``fkine`` to a base link such as panda_link0.
+    """
+
+    def test_identity(self):
+        nt.assert_allclose(rtb.ETS([]).eval(), np.eye(4))
+
+    def test_tool_and_base(self):
+        from spatialmath import SE3
+
+        tool = SE3.Tx(0.5) * SE3.Rz(0.3)
+        base = SE3.Ty(-0.2)
+        nt.assert_allclose(rtb.ETS([]).eval(tool=tool), tool.A)
+        nt.assert_allclose(rtb.ETS([]).eval(base=base), base.A)
+
+    def test_fkine_to_base_link(self):
+        panda = rtb.models.Panda()
+        nt.assert_allclose(panda.fkine(panda.qr, end="panda_link0").A, np.eye(4))
+
+
 if __name__ == "__main__":
     unittest.main()

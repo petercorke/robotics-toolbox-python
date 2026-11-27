@@ -128,6 +128,44 @@ class RobotBlockTest(unittest.TestCase):
         nt.assert_equal(block.test_output(tau, x=x)[0], q)
         nt.assert_equal(block.getstate0(), x)
 
+    def test_fdyn_qdd_is_always_an_array(self):
+        # bdsim checks that an output keeps its type; qdd used to be None until
+        # the first deriv()
+        robot = rtb.models.DH.Puma560()
+        q = robot.configs["qn"]
+        block = FDyn(robot, q)
+        x = np.r_[q, np.zeros((6,))]
+        tau = [6, 5, 4, 3, 2, 1]
+
+        qdd = block.test_output(tau, x=x)[2]
+        self.assertIsInstance(qdd, np.ndarray)
+        nt.assert_equal(qdd, np.zeros((6,)))
+
+        block.test_deriv(tau, x=x)
+        nt.assert_array_almost_equal(
+            block.test_output(tau, x=x)[2], robot.accel(q, np.zeros((6,)), tau)
+        )
+
+        # a new run starts again from the placeholder
+        block.reset()
+        nt.assert_equal(block.test_output(tau, x=x)[2], np.zeros((6,)))
+
+    def test_fdyn_runs_twice(self):
+        # a diagram with FDyn simulates, twice, with its qdd output watched
+        import bdsim
+
+        robot = rtb.models.DH.Puma560()
+        sim = bdsim.BDSim(graphics=False, animation=False, quiet=True)
+        bd = sim.blockdiagram()
+        tau = bd.CONSTANT([6, 5, 4, 3, 2, 1])
+        fdyn = bd.FDYN(robot, robot.configs["qn"])
+        bd.connect(tau, fdyn)
+        bd.compile()
+
+        first = sim.run(bd, T=0.01, dt=0.001, watch=[fdyn[2]])
+        second = sim.run(bd, T=0.01, dt=0.001, watch=[fdyn[2]])
+        nt.assert_array_almost_equal(first.y, second.y)
+
     @unittest.skip
     def test_fdyn_x(self):
         robot = rtb.models.DH.Puma560()
@@ -144,6 +182,32 @@ class RobotBlockTest(unittest.TestCase):
         nt.assert_equal(block.deriv(), xd)
         nt.assert_equal(block.output()[0], tr2x(robot.fkine(q).A))
         nt.assert_equal(block.getstate0(), x)
+
+    def test_armplot_follows_its_input(self):
+        # the plot made by start() holds the initial pose, so ArmPlot has to
+        # move it, otherwise the arm stays where it started
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import bdsim
+
+        robot = rtb.models.DH.Puma560()
+        q0 = robot.configs["qr"]
+        qf = robot.configs["qz"]
+
+        sim = bdsim.BDSim(graphics=True, animation=False, quiet=True)
+        bd = sim.blockdiagram()
+        traj = bd.JTRAJ(q0, qf, T=1)
+        arm = bd.ARMPLOT(robot, q0=q0)
+        bd.connect(traj[0], arm)
+        bd.compile()
+        sim.run(bd, T=1, dt=0.1)
+
+        # the last link point drawn is where the arm ended up
+        (robot_plot,) = arm.env.robots
+        drawn = np.array(robot_plot.links[-1].get_data_3d())[:, -1]
+        nt.assert_array_almost_equal(drawn, robot.fkine(qf).t, decimal=3)
+        self.assertFalse(np.allclose(drawn, robot.fkine(q0).t))
 
     @unittest.skip("cant test bdsim plot blocks")
     def test_armplot(self):

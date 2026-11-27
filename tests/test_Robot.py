@@ -10,7 +10,7 @@ import os
 import warnings
 import spatialgeometry as sg
 from spatialmath.base import tr2jac
-from tests import skip_no_collision_checking
+from tests import fknm_compiled, skip_no_collision_checking
 
 # from spatialmath import SE3
 
@@ -852,12 +852,11 @@ class TestRobot(unittest.TestCase):
         # session, to fail on Panda universally, tool or not: 0/10 random
         # targets converge -- a pre-existing, unrelated solver-robustness
         # gap, not something this fix touches)
-        for method, kwargs in (
-            ("ik_LM", {}),
-            ("ik_NR", {}),
-            ("ik_GN", {}),
-            ("ikine_LM", {"seed": 0}),
-        ):
+        solvers = [("ikine_LM", {"seed": 0})]
+        if fknm_compiled:
+            # the C++ solvers
+            solvers += [("ik_LM", {}), ("ik_NR", {}), ("ik_GN", {})]
+        for method, kwargs in solvers:
             sol = getattr(panda, method)(Tep, tool=tool, **kwargs)
             self.assertTrue(sol.success, msg=method)
             T_check = panda.fkine(sol.q, tool=tool)
