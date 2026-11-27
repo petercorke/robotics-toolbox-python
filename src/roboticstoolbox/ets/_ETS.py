@@ -46,7 +46,7 @@ def _dirties_fknm(func: _F) -> _F:
     @wraps(func)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         result = func(self, *args, **kwargs)
-        self._fknm_stale = True
+        self._changed()
         return result
 
     return wrapper  # type: ignore[return-value]
@@ -123,6 +123,49 @@ class BaseETS(MutableSequence[ETT]):
             self.m,
         )
         self._fknm_stale = False
+
+    def _ik_numbering(self) -> tuple[Any, NDArray | None, list[Any]]:
+        """
+        The compiled handle, and the coordinate mapping, for the compiled solvers
+
+        :returns: ``(handle, joint_numbers, keep_alive)``
+
+        The compiled kinematics read a joint vector by joint number, but the compiled
+        solvers update and limit it by position along the chain.  The two agree only
+        when the joint numbers are ``0..n-1`` in chain order, and then the ordinary
+        handle is returned, with ``joint_numbers`` of None.  Otherwise a handle
+        numbered by position is built, which the solvers can use as they stand, and
+        ``joint_numbers`` says how to convert between the two orders:
+
+        - an array of the joint numbers along the chain, if they are a permutation of
+          ``0..n-1``.  Joint vectors given to ``eval`` are in joint-number order, so
+          ``q0`` is converted to chain order with ``q0[joint_numbers]`` and a solution
+          back with ``q[joint_numbers] = q_chain``.
+        - None, if they are not (a sub-chain such as ``7..13``), where a length-n joint
+          vector is already in chain order.
+
+        The handle is None if any ET has no compiled struct.
+
+        The handle holds pointers to compiled ET structs, not copies of them.  For a
+        handle that was built here those structs belong to ``keep_alive``, which the
+        caller must keep until it has finished with the handle.
+        """
+        jindices = np.asarray(self.jindices)
+        if np.array_equal(jindices, np.arange(self.n)):
+            return self._fknm, None, []
+
+        structs = []
+        position = 0
+        for et in self._data:
+            if et.isjoint:
+                structs.append(et._accel_struct(position))  # type: ignore[attr-defined]
+                position += 1
+            else:
+                structs.append(et.fknm)  # type: ignore[attr-defined]
+        handle = ETS_init(structs, self.n, self.m)
+
+        is_permutation = np.array_equal(np.sort(jindices), np.arange(self.n))
+        return handle, (jindices if is_permutation else None), structs
 
     def __str__(self, q: str | None = None) -> str:
         """
@@ -611,7 +654,7 @@ class BaseETS(MutableSequence[ETT]):
     @data.setter
     def data(self, new_data: list[ETT]) -> None:
         self._data = new_data
-        self._fknm_stale = True
+        self._changed()
 
     def inv(self) -> Self:
         r"""
@@ -731,7 +774,8 @@ class BaseETS(MutableSequence[ETT]):
         :rtype: ndarray(n,) or ndarray(i,n)
 
         Generates a random q vector within the joint limits defined by
-        ``self.qlim``.
+        ``self.qlim``, in the coordinate order accepted by :meth:`fkine`.
+        A subchain with sparse joint indices returns compact coordinates.
 
         .. rubric:: Examples
 
@@ -743,20 +787,21 @@ class BaseETS(MutableSequence[ETT]):
             >>> q = ets.random_q()
             >>> q
 
+        .. versionchanged:: 1.5.1
+            The values are in joint-index order, as accepted by :meth:`fkine`, and each lies within
+            the limits of its own joint.  For a robot whose joint indices are not in link order,
+            values used to be assigned to the wrong joints and often fell outside their limits.
+            Results for other robots, including seeded ones, are unchanged.
         """
 
-        if i == 1:
-            q = np.zeros(self.n)
+        qlim = self.qlim
+        shape = (self.n,) if i == 1 else (i, self.n)
+        q = uniform(qlim[0], qlim[1], size=shape)
 
-            for i in range(self.n):
-                q[i] = uniform(self.qlim[0, i], self.qlim[1, i])
-
-        else:
-            q = np.zeros((i, self.n))
-
-            for j in range(i):
-                for i in range(self.n):
-                    q[j, i] = uniform(self.qlim[0, i], self.qlim[1, i])
+        # A full chain consumes global coordinates, even when its joints occur
+        # in a different order. Sparse subchains consume compact coordinates.
+        if self.n and np.array_equal(np.sort(self.jindices), np.arange(self.n)):
+            q[..., self.jindices] = q.copy()
 
         return q
 
