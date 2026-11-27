@@ -62,7 +62,7 @@ jobs:
           '
 
       - name: Test (core)
-        run: pytest tests/ --ignore=tests/test_blocks.py -m "not slow" --timeout=50 --timeout_method=thread -q
+        run: pytest tests/ -m "not slow" --timeout=50 --timeout_method=thread -q
 
   test:
     runs-on: ${{ matrix.os }}
@@ -109,7 +109,7 @@ jobs:
           '
 
       - name: Test
-        run: pytest tests/ --ignore=tests/test_blocks.py -m "not slow" --timeout=50 --timeout_method=thread -q
+        run: pytest tests/ -m "not slow" --timeout=50 --timeout_method=thread -q
 
   all-tests-passed:
     name: All tests passed
@@ -192,7 +192,7 @@ jobs:
           # Python 3.12's lighter tracing core (sys.monitoring). It counts exactly the
           # same lines as the default core here, in far less time (#898).
           COVERAGE_CORE: sysmon
-        run: pytest tests/ --ignore=tests/test_blocks.py --cov=roboticstoolbox --cov-report=xml:coverage.xml -q
+        run: pytest tests/ --cov=roboticstoolbox --cov-report=xml:coverage.xml -q
 
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
         with:
