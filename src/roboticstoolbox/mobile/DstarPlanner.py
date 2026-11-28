@@ -20,7 +20,7 @@ import numpy as np
 from spatialmath.base.types import ArrayLike2
 
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid
-from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.PlannerBase import NoPathError, PlannerBase
 from roboticstoolbox.tools.types import NDArray
 
 show_animation = True
@@ -265,6 +265,7 @@ class _Dstar:
                 for i, item in enumerate(self.open_list):
                     if item[1] is _State:
                         del self.open_list[i]
+                        heapq.heapify(self.open_list)
                         break
 
             # _State.k = min(_State.k, h_new)
@@ -429,6 +430,11 @@ class DstarPlanner(PlannerBase):
 
         Compute the minimum-cost obstacle-free distance to the goal from all
         points in the grid.
+
+        .. versionchanged:: 1.5.1
+            Each call starts a fresh plan using the current goal and costmap.
+            Previously, a second call retained the old goal's costs and parents.
+            The expansion count is reset for the new plan.
         """
         for name, value in (("animate", animate), ("progress", progress is not True)):
             if value:
@@ -443,6 +449,12 @@ class DstarPlanner(PlannerBase):
 
         if self._goal is None:
             raise ValueError("No goal specified here or in constructor")
+
+        # A new goal (or edited costmap) needs a new shortest-path tree.  The
+        # incremental updates during query() continue to reuse this tree.
+        self._Map = _Map(self.costmap.shape[0], self.costmap.shape[1])
+        self._Map.costmap = self.costmap * self._costgrid.cellsize
+        self._Dstar = _Dstar(self._Map)
 
         c, r = self._costgrid.w2g(self._goal)
         goal_State = self._Map._Map[r][c]
@@ -492,8 +504,10 @@ class DstarPlanner(PlannerBase):
             (filename, frame interval), defaults to the planner's :attr:`movie`.
             Implies ``animate``.
         :param verbose: display detailed diagnostic information about D* operations, defaults to False
-        :return: path from start to goal, one point :math:`(x, y)` per row
-        :rtype: ndarray(N,2)
+        :return: path from start to goal, one point :math:`(x, y)` per row,
+            and its cost in the returned status
+        :rtype: tuple(ndarray(N,2), DstarStatus)
+        :raises NoPathError: the goal is unreachable, including after sensor updates
 
         If ``sensor`` is None then the plan determined by the ``plan`` phase
         is used unaltered.
@@ -510,6 +524,12 @@ class DstarPlanner(PlannerBase):
         replanning.  In this case the value returned by :meth:`nexpand` will
         increase, according to the severity of the replanning.
 
+        .. versionchanged:: 1.5.1
+            The status cost sums the steps actually followed, including detours
+            caused by sensor updates.  Previously it reported the initial plan's
+            cost.  An unreachable goal raises :class:`NoPathError` instead of
+            returning a path through infinite-cost cells.
+
         .. seealso:: :meth:`plan`
         """
         self.validate_start_goal(start)
@@ -520,54 +540,53 @@ class DstarPlanner(PlannerBase):
         if sensor is not None and not callable(sensor):
             raise ValueError("sensor must be callable")
 
-        cost = tmp.h
+        cost = 0.0
         self.goal_State.h = 0
 
         animating = self.animation_start(animate, movie, draw=self.plot)
 
         path = []
-        while True:
-            position = self._costgrid.g2w((tmp.x, tmp.y))
-            path.append(position)
-            if animating:
-                plt.plot(*position, "y.", markersize=12)
-                self.animation_frame()
-            if tmp == self.goal_State:
-                break
+        try:
+            while True:
+                position = self._costgrid.g2w((tmp.x, tmp.y))
+                path.append(position)
+                if animating:
+                    plt.plot(*position, "y.", markersize=12)
+                    self.animation_frame()
+                if tmp == self.goal_State:
+                    break
 
-            # x, y = tmp.parent.x, tmp.parent.y
+                if sensor is not None:
+                    changes = sensor(tuple(position))
+                    if changes is not None:
+                        # make changes to the plan
+                        val = -1.0
+                        for x, y, newcost in changes:
+                            c, r = self._costgrid.w2g((x, y))
+                            if not (
+                                0 <= r < self.costmap.shape[0]
+                                and 0 <= c < self.costmap.shape[1]
+                            ):
+                                raise ValueError("sensor cell is outside the costmap")
+                            X = self._Dstar._Map._Map[r][c]
+                            self.costmap[r, c] = newcost
+                            val = self._Dstar.modify_cost(
+                                X, newcost * self._costgrid.cellsize
+                            )
+                        # propagate the changes to plan
+                        self.message("propagate the cost changes")
+                        while val != -1 and val < tmp.h:
+                            val = self._Dstar.process__State(verbose=verbose)
 
-            if sensor is not None:
-                changes = sensor(tuple(position))
-                if changes is not None:
-                    # make changes to the plan
-                    val = -1.0
-                    for x, y, newcost in changes:
-                        c, r = self._costgrid.w2g((x, y))
-                        if not (
-                            0 <= r < self.costmap.shape[0]
-                            and 0 <= c < self.costmap.shape[1]
-                        ):
-                            raise ValueError("sensor cell is outside the costmap")
-                        X = self._Dstar._Map._Map[r][c]
-                        self.costmap[r, c] = newcost
-                        # print(f"change cost at ({x}, {y}) to {newcost}")
-                        val = self._Dstar.modify_cost(
-                            X, newcost * self._costgrid.cellsize
-                        )
-                    # propagate the changes to plan
-                    self.message("propagate the cost changes")
-                    # self._Dstar.showparents()
-                    while val != -1 and val < tmp.h:
-                        val = self._Dstar.process__State(verbose=verbose)
-                        # print('open set', len(self._Dstar.open_list))
-                    # self._Dstar.showparents()
-
-            assert tmp.parent is not None  # nosec B101: narrows the type for mypy
-            tmp = tmp.parent
-            # print('move to ', tmp)
-
-        self.animation_end()
+                if tmp.parent is None or not math.isfinite(tmp.h):
+                    raise NoPathError("goal is unreachable")
+                step_cost = self._Map.cost(tmp, tmp.parent)
+                if not math.isfinite(step_cost):
+                    raise NoPathError("goal is unreachable")
+                cost += step_cost
+                tmp = tmp.parent
+        finally:
+            self.animation_end()
 
         return np.array(path), DstarStatus(cost)
 

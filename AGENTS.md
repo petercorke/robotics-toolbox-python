@@ -89,5 +89,11 @@ description and ask first.
   the disclosure there as well as in the commits.
 - Branch names are `type/short-description`, using the same types as the commit and PR title
   (`fix/`, `feat/`, `docs/`, `chore/`, `refactor/`, `test/`).
+- **Allow edits from maintainers.** When you open the PR from a fork, enable "Allow edits by
+  maintainers" (`gh pr create` does by default; check with
+  `gh pr view --json maintainerCanModify`, and for an existing PR tick it in the sidebar).
+  The repository requires a branch to be up to date with `main` before it merges, and
+  without this the maintainer cannot update your branch, so your commits have to be
+  re-submitted as a PR of the maintainer's own.
 - Keep the PR to the one Issue or fix, and say in the description what you ran and what you
   could not run.
