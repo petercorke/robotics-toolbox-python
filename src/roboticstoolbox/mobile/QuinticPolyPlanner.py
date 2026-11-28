@@ -256,10 +256,12 @@ class QuinticPolyPlanner(PlannerBase):
 
     that meets the given constraints.  Trajectory time is given as a range.
 
-    :reference: "Local Path Planning And Motion Control For AGV In
-        Positioning",  Takahashi, T. Hongo, Y. Ninomiya and G.
-        Sugimoto; Proceedings. IEEE/RSJ International Workshop on
-        Intelligent Robots and Systems (IROS '89)  doi: 10.1109/IROS.1989.637936
+    .. rubric:: References
+
+    "Local Path Planning And Motion Control For AGV In
+    Positioning",  Takahashi, T. Hongo, Y. Ninomiya and G.
+    Sugimoto; Proceedings. IEEE/RSJ International Workshop on
+    Intelligent Robots and Systems (IROS '89)  doi: 10.1109/IROS.1989.637936
 
     .. note:: The path time is searched in the interval [``min_t``, ``max_t``] in steps
         of ``min_t``.

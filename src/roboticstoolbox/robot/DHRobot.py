@@ -71,11 +71,11 @@ class DHRobot(Robot):
     .. note:: Link subclass elements passed in must be all standard, or all
           modified, DH parameters.
 
-    :reference:
+    .. rubric:: References
 
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7-9.
-        - Robot, Modeling & Control,
-          M.Spong, S. Hutchinson & M. Vidyasagar, Wiley 2006.
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7-9.
+    - Robot, Modeling & Control,
+      M.Spong, S. Hutchinson & M. Vidyasagar, Wiley 2006.
 
     """
 
@@ -1033,9 +1033,10 @@ class DHRobot(Robot):
         - ``T[0]`` is the base transform
         - ``T[i+1]`` is the pose of link whose ``number`` is ``i``
 
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
+        .. rubric:: References
+
+        - Kinematic Derivatives using the Elementary Transform
+          Sequence, J. Haviland and P. Corke
         """
         T = self.base
         q = getvector(q)
@@ -1620,9 +1621,10 @@ class DHRobot(Robot):
 
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
+        .. rubric:: References
+
+        - Kinematic Derivatives using the Elementary Transform
+          Sequence, J. Haviland and P. Corke
 
         .. seealso:: :func:`jacob0`, ``jacob_dot``
         """

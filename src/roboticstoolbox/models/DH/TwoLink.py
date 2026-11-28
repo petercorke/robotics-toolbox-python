@@ -59,7 +59,9 @@ class TwoLink(DHRobot):
         - Link inertias are 0 unless ``inertia`` is True.
         - Viscous and Coulomb friction is 0.
 
-    :Reference: Based on Fig 3-6 (p73) of Spong and Vidyasagar (1st edition).
+    .. rubric:: References
+
+    Based on Fig 3-6 (p73) of Spong and Vidyasagar (1st edition).
 
     .. codeauthor:: Peter Corke
     """

@@ -34,12 +34,13 @@ class IRB140(DHRobot):
 
     .. note:: SI units of metres are used.
 
-    :references:
-        - "IRB 140 data sheet", ABB Robotics.
-        - "Utilizing the Functional Work Space Evaluation Tool for Assessing a
-          System Design and Reconfiguration Alternatives"
-          A. Djuric and R. J. Urbanic
-        - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
+    .. rubric:: References
+
+    - "IRB 140 data sheet", ABB Robotics.
+    - "Utilizing the Functional Work Space Evaluation Tool for Assessing a
+      System Design and Reconfiguration Alternatives"
+      A. Djuric and R. J. Urbanic
+    - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
 
     .. codeauthor:: Peter Corke
     """

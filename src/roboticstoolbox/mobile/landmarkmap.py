@@ -54,11 +54,11 @@ class LandmarkMap:
 
     The object is an iterator that returns consecutive landmark coordinates.
 
-    :Reference:
+    .. rubric:: References
 
-        Robotics, Vision & Control in Python, 3rd edition, Chap 6,
-        Peter Corke,
-        Springer 2023
+    Robotics, Vision & Control in Python, 3rd edition, Chap 6,
+    Peter Corke,
+    Springer 2023
 
     .. seealso:: :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF.EKF`
     """

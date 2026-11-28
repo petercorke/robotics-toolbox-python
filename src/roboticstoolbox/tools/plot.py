@@ -226,10 +226,10 @@ def isnotebook() -> bool:
     ``isnotebook`` is True if running Jupyter notebook, JupyterLite, Google Colab, or
     similar, else False
 
-    :references:
+    .. rubric:: References
 
-        - https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-
-        is-executed-in-the-ipython-notebook/39662359#39662359
+    - https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-
+    is-executed-in-the-ipython-notebook/39662359#39662359
     """
     # Check if running in Pyodide/JupyterLite
     if sys.platform == "emscripten":

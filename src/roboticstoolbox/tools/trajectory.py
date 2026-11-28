@@ -72,9 +72,9 @@ class Trajectory:
 
         .. note:: Data is stored with timesteps as rows and axes as columns.
 
-        :References:
+        .. rubric:: References
 
-            - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
         """
         self.name = name
         self.t = t
@@ -379,9 +379,9 @@ def quintic(
         vector, or an integer, giving fewer than two samples raises
         ``ValueError``; it previously returned the mean of ``q0`` and ``qf``.
 
-    :References:
+    .. rubric:: References
 
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
 
     .. seealso:: :func:`trapezoidal`, :func:`mtraj`.
@@ -653,9 +653,9 @@ def trapezoidal(
           trajectory retains the supplied time vector.
         - ``tg`` has an extra attribute ``tblend`` which is the blend duration.
 
-    :References:
+    .. rubric:: References
 
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
     .. seealso:: :func:`quintic`, :func:`trapezoidal_func` :func:`mtraj`.
     """
@@ -865,8 +865,9 @@ def mtraj(
     .. note:: The time vector, if given, is assumed to be monotonically increasing, and
         time scaling is based on the first and last element.
 
-    :References:
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
+    .. rubric:: References
+
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
     .. seealso:: :func:`quintic`, :func:`trapezoidal`
     """
@@ -933,9 +934,9 @@ def jtraj(
     .. note:: The time vector, if given, scales the velocity and acceleration outputs
         assuming that the time vector starts at zero and increases linearly.
 
-    :References:
+    .. rubric:: References
 
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
     .. seealso:: :func:`ctraj`, ``xplot``, :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
@@ -1042,8 +1043,9 @@ def ctraj(
         - Orientation interpolation is performed using unit-quaternion
           interpolation.
 
-    :References:
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
+    .. rubric:: References
+
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
     .. seealso:: ``trapezoidal``,
         ``interp``
@@ -1166,8 +1168,9 @@ def mstraj(
           the sampled acceleration is zero within each linear segment.
         - The returned trajectory also has ``arrive``, ``info`` and ``via``.
 
-    :References:
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
+    .. rubric:: References
+
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 3.
 
     .. seealso:: :func:`trapezoidal`, :func:`ctraj`, :func:`mtraj`
     """

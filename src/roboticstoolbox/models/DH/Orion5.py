@@ -38,9 +38,10 @@ class Orion5(DHRobot):
       - SI units of metres are used.
       - Robot has only 4 DoF.
 
-    :references:
-        - ``https://rawrobotics.com.au/orion5``
-        - ``https://drive.google.com/file/d/0B6_9_-ZgiRdTNkVqMEkxN2RSc2c/view``
+    .. rubric:: References
+
+    - ``https://rawrobotics.com.au/orion5``
+    - ``https://drive.google.com/file/d/0B6_9_-ZgiRdTNkVqMEkxN2RSc2c/view``
 
     .. codeauthor:: Aditya Dua
     .. codeauthor:: Peter Corke

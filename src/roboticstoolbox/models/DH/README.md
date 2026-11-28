@@ -61,10 +61,11 @@ class MYROBOT(DHRobot):
        .
        .
 
-    :references:
-       .
-       .
-       .     
+    .. rubric:: References
+
+    .
+    .
+    .     
 
     """
 ```

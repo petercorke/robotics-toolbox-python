@@ -163,13 +163,13 @@ class PoseGraph:
         >>> pg = PoseGraph("data/pg1.g2o")
         >>> pg.optimize(iterations=3)
 
-    :references:
+    .. rubric:: References
 
-        - Robotics, Vision & Control for Python, §6.5, P. Corke, Springer 2023.
-        - A Tutorial on Graph-Based SLAM,
-          G. Grisetti, R. Kümmerle, C. Stachniss and W. Burgard,
-          in IEEE Intelligent Transportation Systems Magazine,
-          vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
+    - Robotics, Vision & Control for Python, §6.5, P. Corke, Springer 2023.
+    - A Tutorial on Graph-Based SLAM,
+      G. Grisetti, R. Kümmerle, C. Stachniss and W. Burgard,
+      in IEEE Intelligent Transportation Systems Magazine,
+      vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
 
     .. seealso:: :meth:`optimize` :meth:`plot` :meth:`scanmap`
     """

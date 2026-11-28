@@ -20,9 +20,10 @@ class Panda(Robot):
     ETS taken from [1] based on
     https://frankaemika.github.io/docs/control_parameters.html
 
-    :references:
-        - Kinematic Derivatives using the Elementary Transform
-          Sequence, J. Haviland and P. Corke
+    .. rubric:: References
+
+    - Kinematic Derivatives using the Elementary Transform
+      Sequence, J. Haviland and P. Corke
 
     """
 

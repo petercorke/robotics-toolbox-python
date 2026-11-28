@@ -43,11 +43,11 @@ class Ball(DHRobot):
         - qz, zero joint angles
         - q1, ball shaped configuration
 
-    :references:
+    .. rubric:: References
 
-        - "A divide and conquer articulated-body algorithm for parallel
-          O(log(n)) calculation of rigid body dynamics, Part 2",
-          Int. J. Robotics Research, 18(9), pp 876-892.
+    - "A divide and conquer articulated-body algorithm for parallel
+      O(log(n)) calculation of rigid body dynamics, Part 2",
+      Int. J. Robotics Research, 18(9), pp 876-892.
 
     .. seealso:: :func:`Hyper`, :func:`Ball`
 

@@ -31,9 +31,9 @@ class UR3(DHRobot):
     .. note::
         - SI units are used.
 
-    :References:
+    .. rubric:: References
 
-        - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
+    - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
 
     :sealso: :func:`UR5`, :func:`UR10`
 

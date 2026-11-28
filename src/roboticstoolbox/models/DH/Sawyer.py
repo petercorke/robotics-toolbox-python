@@ -31,9 +31,9 @@ class Sawyer(DHRobot):
 
     - qz, zero joint angle configuration, 'L' shaped configuration
 
-    :references:
+    .. rubric:: References
 
-        -`Layeghi, Daniel. “Dynamic and Kinematic Modelling of the Sawyer Arm ” Google Sites, 20 Nov. 2017 <https://sites.google.com/site/daniellayeghi/daily-work-and-writing/major-project-2>`_
+    -`Layeghi, Daniel. “Dynamic and Kinematic Modelling of the Sawyer Arm ” Google Sites, 20 Nov. 2017 <https://sites.google.com/site/daniellayeghi/daily-work-and-writing/major-project-2>`_
 
     .. note:: SI units of metres are used.
 

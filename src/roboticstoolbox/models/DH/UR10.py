@@ -42,9 +42,9 @@ class UR10(DHRobot):
           package gives 0.0004 for this term, from values it says are
           extracted from URSim.
 
-    :References:
+    .. rubric:: References
 
-        - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
+    - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
 
     :sealso: :func:`UR3`, :func:`UR5`
 

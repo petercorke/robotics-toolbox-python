@@ -21,9 +21,10 @@ class Planar2(Robot2):
     ``Planar_Y()`` creates a planar branched manipulator model.
 
 
-    :references:
-        - Kinematic Derivatives using the Elementary Transform
-          Sequence, J. Haviland and P. Corke
+    .. rubric:: References
+
+    - Kinematic Derivatives using the Elementary Transform
+      Sequence, J. Haviland and P. Corke
 
     """
 

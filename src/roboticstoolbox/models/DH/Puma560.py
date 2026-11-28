@@ -62,15 +62,16 @@ class Puma560(DHRobot):
     .. warning:: Compared to the MATLAB version of the Toolbox this model
         includes the pedestal, making the z-coordinates 26 inches larger.
 
-    :references:
-        - "A search for consensus among model parameters reported for the PUMA
-          560 robot", P. Corke and B. Armstrong-Helouvry,
-          Proc. IEEE Int. Conf. Robotics and Automation, (San Diego),
-          pp. 1608-1613, May 1994. (for kinematic and dynamic parameters)
-        - "A combined optimization method for solving the inverse kinematics
-          problem", Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-.
-          (for joint angle limits)
-        - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
+    .. rubric:: References
+
+    - "A search for consensus among model parameters reported for the PUMA
+      560 robot", P. Corke and B. Armstrong-Helouvry,
+      Proc. IEEE Int. Conf. Robotics and Automation, (San Diego),
+      pp. 1608-1613, May 1994. (for kinematic and dynamic parameters)
+    - "A combined optimization method for solving the inverse kinematics
+      problem", Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-.
+      (for joint angle limits)
+    - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
 
     .. codeauthor:: Peter Corke
     """
@@ -260,11 +261,12 @@ class Puma560(DHRobot):
             the solution by forward kinematics.  It no longer uses
             ``ikine_6s``, which is deprecated.
 
-        :reference:
-            - Inverse kinematics for a PUMA 560,
-              Paul and Zhang,
-              The International Journal of Robotics Research,
-              Vol. 5, No. 2, Summer 1986, p. 32-44
+        .. rubric:: References
+
+        - Inverse kinematics for a PUMA 560,
+          Paul and Zhang,
+          The International Journal of Robotics Research,
+          Vol. 5, No. 2, Summer 1986, p. 32-44
 
         :author: based on MATLAB code by Robert Biro with Gary Von McMurray,
             GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95

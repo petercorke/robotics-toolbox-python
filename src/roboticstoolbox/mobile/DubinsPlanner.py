@@ -393,10 +393,12 @@ class DubinsPlanner(PlannerBase):
         >>> print(path[:5,:])
         >>> print(status)
 
-    :reference: On Curves of Minimal Length with a Constraint on Average
-        Curvature, and with Prescribed Initial and Terminal Positions and
-        Tangents,  Dubins, L.E. (July 1957), American Journal of Mathematics.
-        79(3): 497–516.
+    .. rubric:: References
+
+    On Curves of Minimal Length with a Constraint on Average
+    Curvature, and with Prescribed Initial and Terminal Positions and
+    Tangents,  Dubins, L.E. (July 1957), American Journal of Mathematics.
+    79(3): 497–516.
 
     :thanks: based on Dubins path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
 

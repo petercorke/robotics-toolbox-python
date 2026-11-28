@@ -42,9 +42,10 @@ class Baxter(DHRobot):
         arm will overwrite this, IT DOES NOT CHANGE THE POSE OF BAXTER's base.
         Instead do ``baxter.base = newbase * baxter.base``.
 
-    :References:
-        - "Kinematics Modeling and Experimental Verification of Baxter Robot"
-          Z. Ju, C. Yang, H. Ma, Chinese Control Conf, 2015.
+    .. rubric:: References
+
+    - "Kinematics Modeling and Experimental Verification of Baxter Robot"
+      Z. Ju, C. Yang, H. Ma, Chinese Control Conf, 2015.
 
     .. codeauthor:: Peter Corke
     """

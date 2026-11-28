@@ -36,8 +36,9 @@ class Mico(DHRobot):
     .. note::
         - SI units are used.
 
-    :references:
-        - "DH Parameters of Mico" Version 1.0.8, July 25, 2013.
+    .. rubric:: References
+
+    - "DH Parameters of Mico" Version 1.0.8, July 25, 2013.
 
     .. seealso:: :func:`Mico`
     """

@@ -492,9 +492,11 @@ class ReedsSheppPlanner(PlannerBase):
         >>> print(path[:5,:])
         >>> print(status)
 
-    :reference: Optimal paths for a car that goes both forwards and backwards,
-        Reeds, J.A. and L.A. Shepp, Pacific J. Math., 145 (1990),
-        pp. 367–393.
+    .. rubric:: References
+
+    Optimal paths for a car that goes both forwards and backwards,
+    Reeds, J.A. and L.A. Shepp, Pacific J. Math., 145 (1990),
+    pp. 367–393.
 
     :thanks: based on Reeds-Shepp path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
 

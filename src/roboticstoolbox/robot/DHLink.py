@@ -114,8 +114,9 @@ class DHLink(Link):
     :param G: dynamic - gear ratio
     :type G: float
 
-    :references:
-        - Robotics, Vision & Control, P. Corke, Springer 2023, Chap 7.
+    .. rubric:: References
+
+    - Robotics, Vision & Control, P. Corke, Springer 2023, Chap 7.
 
     """
 
@@ -732,8 +733,9 @@ class RevoluteDH(DHLink):
     :math:`\underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
     where :math:`q_i` is the joint variable.
 
-    :references:
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
+    .. rubric:: References
+
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     .. seealso:: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
     """
@@ -801,8 +803,9 @@ class PrismaticDH(DHLink):
     :math:`\mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
     where :math:`q_i` is the joint variable.
 
-    :references:
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
+    .. rubric:: References
+
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     .. seealso:: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
     """
@@ -873,8 +876,9 @@ class RevoluteMDH(DHLink):
 
     where :math:`q_i` is the joint variable.
 
-    :references:
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
+    .. rubric:: References
+
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     .. seealso:: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`
     """
@@ -945,8 +949,9 @@ class PrismaticMDH(DHLink):
 
     where :math:`q_i` is the joint variable.
 
-    :references:
-        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
+    .. rubric:: References
+
+    - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     .. seealso:: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`
     """
