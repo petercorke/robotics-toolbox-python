@@ -30,11 +30,17 @@ class UR10(DHRobot):
 
     .. note::
         - SI units are used.
-        - The last link's inertia tensor has :math:`I_{xx} = 0` -- that's not
-          a bug in this model, it's what the manufacturer's own reference
-          (below) publishes. It makes the robot's inertia matrix near-singular
-          (``det(robot.inertia(q)) ~ 2e-6``), so dynamics work that needs a
-          well-conditioned inertia matrix should account for this.
+        - The manufacturer's reference (below) gives the mass and centre of
+          mass of each link of the UR10, but inertia tensors only for the
+          UR10e.  The inertia tensors used here are the UR10e ones.
+        - That table rounds to 4 decimal places, so the last link's
+          :math:`I_{xx}`, shown there as 0.0000, is only known to be below
+          0.00005.  With the zero used here the robot's inertia matrix is
+          near-singular (``det(robot.inertia(q)) ~ 2e-6``), so dynamics work
+          that needs a well-conditioned inertia matrix should account for
+          this.  For the UR10 itself, ROS-Industrial's ``ur_description``
+          package gives 0.0004 for this term, from values it says are
+          extracted from URSim.
 
     :References:
 
