@@ -18,6 +18,7 @@ Only the first item below is checked automatically — the rest are a self-check
 - [ ] Added/updated tests for this change, if applicable
 - [ ] New/changed code is type-hinted with modern syntax (`X | Y`, `list[X]`, not `Union`/`Optional`/`List`)
 - [ ] Docstrings updated (reST style: `:param:`, `:returns:`; type hints in the signature cover types now, `:type:`/`:rtype:` are rarely needed)
+- [ ] If this PR is from a fork, **Allow edits by maintainers** is ticked (without it we cannot update your branch from `main`, and have to re-submit your commits as a PR of our own)
 - [ ] PR is as small/focused as practical — if it tackles several unrelated things, consider splitting it so each can be reviewed and accepted independently
 - [ ] I understand that the Codacy check is advisory (it reports `assert` in tests as "high" security), only `All tests passed` and the PR title check are required — see [CONTRIBUTING](CONTRIBUTING.md)
 - [ ] If this change alters numerical results or public behaviour, I have said so in the summary above, even if it is a bug fix
