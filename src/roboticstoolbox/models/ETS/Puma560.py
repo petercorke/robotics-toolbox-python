@@ -25,11 +25,12 @@ class Puma560(Robot):
           - ``qbent`` is the bent configuration, corresponding to
             ``qz`` with ``DH.Puma560()``
 
-    :references:
-        - "A Simple and Systematic Approach to Assigning Denavit–Hartenberg
-          Parameters,", P. I. Corke,  in IEEE Transactions on Robotics, vol. 23,
-          no. 3, pp. 590-594, June 2007, doi: 10.1109/TRO.2007.896765.
-        - https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters
+    .. rubric:: References
+
+    - "A Simple and Systematic Approach to Assigning Denavit–Hartenberg
+      Parameters,", P. I. Corke,  in IEEE Transactions on Robotics, vol. 23,
+      no. 3, pp. 590-594, June 2007, doi: 10.1109/TRO.2007.896765.
+    - https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters
 
     """
 

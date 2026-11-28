@@ -34,9 +34,9 @@ class AL5D(DHRobot):
     .. note::
         - SI units are used.
 
-    :References:
+    .. rubric:: References
 
-        - `Reference of the robot <http://www.lynxmotion.com/c-130-al5d.aspx>`_
+    - `Reference of the robot <http://www.lynxmotion.com/c-130-al5d.aspx>`_
 
     .. codeauthor:: Tassos Natsakis
     """

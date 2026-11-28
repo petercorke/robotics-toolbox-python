@@ -40,9 +40,9 @@ class UR5(DHRobot):
           estimates that treat each link as a cylinder, so they are not used
           here.
 
-    :References:
+    .. rubric:: References
 
-        - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
+    - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
 
     :sealso: :func:`UR3`, :func:`UR10`
 

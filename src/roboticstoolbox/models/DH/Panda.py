@@ -26,8 +26,9 @@ class Panda(DHRobot):
         - SI units of metres are used.
         - The model includes a tool offset.
 
-    :references:
-        - https://frankaemika.github.io/docs/control_parameters.html
+    .. rubric:: References
+
+    - https://frankaemika.github.io/docs/control_parameters.html
 
     .. codeauthor:: Samuel Drew
     .. codeauthor:: Peter Corke

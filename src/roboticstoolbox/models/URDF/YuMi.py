@@ -33,8 +33,9 @@ class YuMi(Robot):
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
 
-    :reference:
-        - `https://github.com/OrebroUniversity/yumi <https://github.com/OrebroUniversity/yumi>`_
+    .. rubric:: References
+
+    - `https://github.com/OrebroUniversity/yumi <https://github.com/OrebroUniversity/yumi>`_
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke

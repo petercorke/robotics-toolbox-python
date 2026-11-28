@@ -38,8 +38,9 @@ class KR5(DHRobot):
       - SI units of metres are used.
       - Includes an 11.5cm tool in the z-direction
 
-    :references:
-      - https://github.com/4rtur1t0/ARTE/blob/master/robots/KUKA/KR5_arc/parameters.m
+    .. rubric:: References
+
+    - https://github.com/4rtur1t0/ARTE/blob/master/robots/KUKA/KR5_arc/parameters.m
 
     .. codeauthor:: Gautam Sinha, Indian Institute of Technology, Kanpur (original MATLAB version)
     .. codeauthor:: Samuel Drew

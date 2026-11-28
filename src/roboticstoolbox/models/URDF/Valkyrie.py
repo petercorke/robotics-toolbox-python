@@ -57,8 +57,9 @@ class Valkyrie(Robot):
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
 
-    :reference:
-        - https://github.com/gkjohnson/nasa-urdf-robots
+    .. rubric:: References
+
+    - https://github.com/gkjohnson/nasa-urdf-robots
 
     .. codeauthor:: Peter Corke
     """

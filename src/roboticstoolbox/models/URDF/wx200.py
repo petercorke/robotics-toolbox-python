@@ -26,8 +26,9 @@ class wx200(URDFRobot):
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
 
-    :reference:
-        - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/wx200.html
+    .. rubric:: References
+
+    - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/wx200.html
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke

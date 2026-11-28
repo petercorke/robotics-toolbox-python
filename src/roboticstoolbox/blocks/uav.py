@@ -96,15 +96,16 @@ class MultiRotor(ContinuousBlock):
           :math:`V_{ri} = V + \Omega \times D_i`, is therefore evaluated with the world
           velocity rotated into the body frame, :math:`R^\top v`.
 
-    :References:
-        - Design, Construction and Control of a Large Quadrotor micro air vehicle.
-          P.Pounds, `PhD thesis <https://openresearch-repository.anu.edu.au/handle/1885/146543>`_
-          Australian National University, 2007.
-        - Modelling and Control of a Quad-Rotor Robot.
-          P. Pounds, R. Mahony and P. Corke.  Proc. Australasian Conference on Robotics
-          and Automation (ACRA), 2006.  Equation numbers in these notes refer to this
-          paper.
-        - Robotics, Vision & Control by Peter Corke, sec 4.2 in all editions
+    .. rubric:: References
+
+    - Design, Construction and Control of a Large Quadrotor micro air vehicle.
+      P.Pounds, `PhD thesis <https://openresearch-repository.anu.edu.au/handle/1885/146543>`_
+      Australian National University, 2007.
+    - Modelling and Control of a Quad-Rotor Robot.
+      P. Pounds, R. Mahony and P. Corke.  Proc. Australasian Conference on Robotics
+      and Automation (ACRA), 2006.  Equation numbers in these notes refer to this
+      paper.
+    - Robotics, Vision & Control by Peter Corke, sec 4.2 in all editions
 
     .. versionchanged:: 1.5.1
         The relative air velocity at each rotor is now computed with the translational

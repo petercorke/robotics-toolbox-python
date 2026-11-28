@@ -37,9 +37,11 @@ class Bug2(PlannerBase):
     Creates an object which simulates an automaton, capable of omnidirectional
     motion, finding a path across an occupancy grid using only a bump sensor.
 
-    :reference: "Path-Planning Strategies for a Point Mobile Automaton Moving
-        Amidst Unknown Obstacles of Arbitrary Shape", Lumelsky and Stepanov,
-        Algorithmica (1987)2, pp.403-430
+    .. rubric:: References
+
+    "Path-Planning Strategies for a Point Mobile Automaton Moving
+    Amidst Unknown Obstacles of Arbitrary Shape", Lumelsky and Stepanov,
+    Algorithmica (1987)2, pp.403-430
 
     .. note:: This class is not a planner, even though it subclasses
         :class:`PlannerBase`. It can produce very inefficient paths.
@@ -414,7 +416,7 @@ def edgelist(
     - 8-direction chain coding can give incorrect results when used with
       blobs founds using 4-way connectivity.
 
-    :Reference:
+    .. rubric:: References
 
     - METHODS TO ESTIMATE AREAS AND PERIMETERS OF BLOB-LIKE OBJECTS: A COMPARISON
       Luren Yang, Fritz Albregtsen, Tor Lønnestad and Per Grøttum

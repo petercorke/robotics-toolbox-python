@@ -28,9 +28,9 @@ class LWR4(DHRobot):
 
     .. note:: SI units are used.
 
-    :references:
+    .. rubric:: References
 
-        - http://www.diag.uniroma1.it/~deluca/rob1_en/09_Exercise_DH_KukaLWR4.pdf
+    - http://www.diag.uniroma1.it/~deluca/rob1_en/09_Exercise_DH_KukaLWR4.pdf
 
     .. codeauthor:: Peter Corke
     """

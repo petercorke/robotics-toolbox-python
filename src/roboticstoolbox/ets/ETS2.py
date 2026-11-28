@@ -54,9 +54,10 @@ class ETS2(BaseETS[ET2]):
             >>> len(e)                      # of length 2
             >>> e[1]                        # an ET2 indexed from the ETS2
 
-    :references:
-        - Kinematic Derivatives using the Elementary Transform Sequence,
-          J. Haviland and P. Corke
+    .. rubric:: References
+
+    - Kinematic Derivatives using the Elementary Transform Sequence,
+      J. Haviland and P. Corke
 
     .. seealso:: ``r``, ``tx``, ``ty``
     """

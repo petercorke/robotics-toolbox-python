@@ -26,8 +26,9 @@ class wx250s(URDFRobot):
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
 
-    :reference:
-        - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/wx250s.html
+    .. rubric:: References
+
+    - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/wx250s.html
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke

@@ -26,8 +26,9 @@ class vx300s(URDFRobot):
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
 
-    :reference:
-        - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html
+    .. rubric:: References
+
+    - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
