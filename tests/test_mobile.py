@@ -843,6 +843,23 @@ class TestRandomPathWorkspace(unittest.TestCase):
         self.assertIsNotNone(driver)
 
 
+@pytest.mark.parametrize("seed", [0, 2, 7])
+@pytest.mark.parametrize("previous_duration", [0.1, 1.0])
+def test_random_path_restarted_run_matches_fresh_vehicle(
+    seed: int, previous_duration: float
+) -> None:
+    def vehicle() -> rtb.Bicycle:
+        return rtb.Bicycle(control=rtb.RandomPath(workspace=10, seed=seed), dt=0.1)
+
+    expected = vehicle().run(5, animate=False)
+    reused = vehicle()
+    reused.run(previous_duration, animate=False)
+
+    # Both the initial pose and the seeded waypoint sequence restart on run().
+    nt.assert_array_equal(reused.run(5, animate=False), expected)
+    nt.assert_array_equal(reused.run(5, animate=False), expected)
+
+
 if __name__ == "__main__":  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])

@@ -341,6 +341,7 @@ class RandomPath(VehicleDriverBase):
             self._random = np.random.default_rng(self._seed)
 
         self._goal = None
+        self._d_prev = np.inf
         self._init_goal_marker(ax, label="random waypoint")
 
     def demand(self) -> R2:
